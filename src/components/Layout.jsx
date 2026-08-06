@@ -7,9 +7,7 @@ import {
   Target, Crown, BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Image } from "@/components/ui/image";
-
-const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/43df068d0_generated_image.png";
+import Logo from "@/components/Logo";
 
 const navItems = [
   { to: "/app", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -56,14 +54,8 @@ export default function Layout() {
         )}
       >
         <div className="h-20 flex items-center justify-between px-5 border-b border-white/10">
-          <Link to="/app" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white shadow-lg overflow-hidden ring-1 ring-white/15">
-              <Image src={LOGO} alt="شعار جدارة" className="w-full h-full" fittingType="fit" />
-            </div>
-            <div className="leading-tight">
-              <div className="font-bold text-base" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
-              <div className="text-[11px] text-white/50 -mt-0.5">لإدارة الموارد البشرية</div>
-            </div>
+          <Link to="/app">
+            <Logo tone="light" size={44} />
           </Link>
           <button className="lg:hidden text-white/60" onClick={() => setOpen(false)}>
             <X size={20} />
@@ -120,13 +112,7 @@ export default function Layout() {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="lg:hidden h-16 bg-[#0b1120] text-white border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-20">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-white overflow-hidden ring-1 ring-white/15">
-              <Image src={LOGO} alt="جدارة" className="w-full h-full" fittingType="fit" />
-            </div>
-            <div className="font-bold leading-tight">
-              جدارة
-              <div className="text-[10px] font-normal text-white/50 -mt-0.5">لإدارة الموارد البشرية</div>
-            </div>
+            <Logo tone="light" size={36} />
           </div>
           <button onClick={() => setOpen(true)} className="text-white/80">
             <Menu size={22} />

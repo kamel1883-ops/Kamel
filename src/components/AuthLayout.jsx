@@ -1,8 +1,6 @@
 import React from "react";
-import { Image } from "@/components/ui/image";
 import { ShieldCheck } from "lucide-react";
-
-const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/43df068d0_generated_image.png";
+import Logo from "@/components/Logo";
 
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
   return (
@@ -11,14 +9,8 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
       <div className="hidden lg:flex w-1/2 bg-[#0b0f19] text-white flex-col justify-between p-12 relative overflow-hidden">
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-violet-600/20 blur-[120px]" />
         <div className="absolute bottom-1/4 -left-24 w-80 h-80 rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="relative flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-white overflow-hidden ring-1 ring-white/20">
-            <Image src={LOGO} alt="جدارة" className="w-full h-full" fittingType="fit" />
-          </div>
-          <div className="leading-tight">
-            <div className="font-bold text-xl" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
-            <div className="text-xs text-white/50">لإدارة الموارد البشرية</div>
-          </div>
+        <div className="relative">
+          <Logo tone="light" size={52} />
         </div>
         <div className="relative">
           <h2 className="text-3xl font-extrabold leading-snug" style={{ fontFamily: "var(--font-display)" }}>
@@ -40,14 +32,8 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
       {/* منطقة النموذج */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-3 justify-center mb-8">
-            <div className="w-11 h-11 rounded-2xl bg-[#0b0f19] overflow-hidden ring-1 ring-white/10">
-              <Image src={LOGO} alt="جدارة" className="w-full h-full" fittingType="fit" />
-            </div>
-            <div className="leading-tight text-foreground">
-              <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
-              <div className="text-[10px] text-muted-foreground">لإدارة الموارد البشرية</div>
-            </div>
+          <div className="lg:hidden flex justify-center mb-8">
+            <Logo tone="dark" size={44} />
           </div>
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#2e2448] mb-4">

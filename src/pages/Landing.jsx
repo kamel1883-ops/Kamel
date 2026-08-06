@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
-import { Image } from "@/components/ui/image";
+import Logo from "@/components/Logo";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
   Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
@@ -11,7 +11,6 @@ import {
   HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown
 } from "lucide-react";
 
-const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/43df068d0_generated_image.png";
 const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "sales@jadara.sa";
 
@@ -104,14 +103,8 @@ export default function Landing() {
       {/* شريط علوي */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white shadow-lg overflow-hidden ring-1 ring-white/20">
-              <Image src={LOGO} alt="شعار جدارة" className="w-full h-full" fittingType="fit" />
-            </div>
-            <div className="leading-tight">
-              <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
-              <div className="text-[10px] text-white/50 -mt-0.5">لإدارة الموارد البشرية</div>
-            </div>
+          <Link to="/">
+            <Logo tone="light" size={44} />
           </Link>
           <nav className="hidden md:flex items-center gap-7 text-sm text-white/70">
             <button onClick={() => scrollTo("features")} className="hover:text-white transition">المميزات</button>
@@ -360,11 +353,8 @@ export default function Landing() {
       <footer className="border-t border-white/10 mt-10">
         <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm text-white/60">
           <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-white overflow-hidden ring-1 ring-white/20">
-                <Image src={LOGO} alt="جدارة" className="w-full h-full" fittingType="fit" />
-              </div>
-              <span className="text-white font-bold text-base" style={{ fontFamily: "var(--font-display)" }}>جدارة لإدارة الموارد البشرية</span>
+            <div className="mb-2">
+              <Logo tone="light" size={36} />
             </div>
             <p>منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.</p>
           </div>
