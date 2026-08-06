@@ -10,7 +10,8 @@ import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/Employees";
 import Attendance from "@/pages/Attendance";
-import LeaveRequests from "@/pages/LeaveRequests";
+import Approvals from "@/pages/Approvals";
+import MyRequests from "@/pages/MyRequests";
 import Payroll from "@/pages/Payroll";
 import SettingsPage from "@/pages/Settings";
 import Fleet from "@/pages/Fleet";
@@ -50,7 +51,8 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />
-        <Route path="/leaves" element={<LeaveRequests />} />
+        <Route path="/approvals" element={<Approvals />} />
+        <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/end-of-service" element={<EndOfService />} />

@@ -16,7 +16,7 @@ import { differenceInDays, parseISO } from "date-fns";
 export default function LeaveRequestForm({ open, onClose, onSaved, employees, currentUserEmployee }) {
   const [form, setForm] = useState({
     employee_id: "", leave_type: "annual",
-    start_date: "", end_date: "", reason: "",
+    start_date: "", end_date: "", reason: "", is_full_clearance: false,
   });
   const [saving, setSaving] = useState(false);
 
@@ -24,7 +24,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
     if (open) {
       setForm({
         employee_id: currentUserEmployee?.id || employees?.[0]?.id || "",
-        leave_type: "annual", start_date: "", end_date: "", reason: "",
+        leave_type: "annual", start_date: "", end_date: "", reason: "", is_full_clearance: false,
       });
     }
   }, [open, currentUserEmployee, employees]);
@@ -42,9 +42,14 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
       const emp = employees?.find((x) => x.id === form.employee_id);
       await base44.entities.LeaveRequest.create({
         ...form,
+        employee_user_id: emp?.user_id || "",
         employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
         days_count: days,
-        status: "pending",
+        is_full_clearance: form.is_full_clearance,
+        status: "pending_manager",
+        manager_status: "pending",
+        hr_status: "pending",
+        finance_status: "pending",
       });
       onSaved?.();
       onClose?.();
@@ -104,6 +109,15 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
             <Label className="text-xs font-medium text-muted-foreground">السبب</Label>
             <Textarea value={form.reason} onChange={(e) => set("reason", e.target.value)} rows={3} />
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.is_full_clearance}
+              onChange={(e) => set("is_full_clearance", e.target.checked)}
+              className="w-4 h-4"
+            />
+            إجازة كاملة (تصفية + تذاكر) — تتطلب تصفية مالية ودفع تعويض التذكرة
+          </label>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>إلغاء</Button>
             <Button type="submit" disabled={saving || days <= 0}>
