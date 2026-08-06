@@ -70,13 +70,13 @@ const AuthenticatedApp = () => {
   // Render the main app (authenticated)
   return (
     <Routes>
+      <Route path="/portal" element={<MyRequests />} />
       <Route element={<Layout />}>
         <Route path="/app" element={<Dashboard />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/import-attendance" element={<ImportAttendance />} />
         <Route path="/approvals" element={<Approvals />} />
-        <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/end-of-service" element={<EndOfService />} />

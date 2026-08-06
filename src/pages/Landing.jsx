@@ -118,6 +118,7 @@ export default function Landing() {
             <button onClick={() => scrollTo("contact")} className="hover:text-white transition">تواصل</button>
           </nav>
           <div className="flex items-center gap-2">
+            <Link to="/portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg">بوابة الموظف</Link>
             <Link to="/login?returnTo=/app" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg">تسجيل الدخول</Link>
             <button onClick={() => scrollTo("trial")} className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition">ابدأ الآن</button>
           </div>
