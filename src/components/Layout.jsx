@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  LayoutDashboard, Users, CalendarCheck, ClipboardCheck, Send, Wallet,
+  LayoutDashboard, Users, CalendarCheck, ClipboardCheck, Send, Wallet, ShieldCheck,
   LogOut, Menu, X, UserCircle, Sparkles, Settings, Car, Calculator,
   Target, Crown, BarChart3
 } from "lucide-react";
@@ -19,6 +19,7 @@ const navItems = [
   { to: "/end-of-service", label: "نهاية الخدمة", icon: Calculator },
   { to: "/performance", label: "الأداء والتطوير", icon: Target },
   { to: "/succession", label: "تخطيط التعاقب", icon: Crown },
+  { to: "/licenses", label: "تراخيص المنشأة", icon: ShieldCheck },
   { to: "/analytics", label: "التحليلات", icon: BarChart3 },
   { to: "/settings", label: "إعدادات المنشأة", icon: Settings },
 ];

@@ -19,6 +19,7 @@ import EndOfService from "@/pages/EndOfService";
 import Performance from "@/pages/Performance";
 import Succession from "@/pages/Succession";
 import Analytics from "@/pages/Analytics";
+import Licenses from "@/pages/Licenses";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
         <Route path="/performance" element={<Performance />} />
         <Route path="/succession" element={<Succession />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/licenses" element={<Licenses />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
