@@ -58,11 +58,6 @@ export default function MyRequests() {
   };
   useEffect(() => { load(); }, []);
 
-  // البوابة خاصة بالموظفين فقط — تُمنع حسابات الإدارة/الموارد البشرية من الدخول
-  useEffect(() => {
-    if (user && user.role === "admin") window.location.href = "/app";
-  }, [user]);
-
   const linkAccount = async (e) => {
     e.preventDefault();
     const id = nationalId.trim();
