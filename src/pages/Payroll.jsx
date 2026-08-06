@@ -103,6 +103,20 @@ export default function Payroll() {
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
 
+  // صلاحية مدير الموارد البشرية: تعديل أيام الغياب (مثلاً كان بإذن فيعاد راتبه)
+  const overrideAbsentDays = async (id, days) => {
+    const rec = payrolls.find((p) => p.id === id);
+    const abs = Math.max(0, Number(days) || 0);
+    const gross = Number(rec.gross_salary) || (Number(rec.base_salary) || 0);
+    const daily = gross / 30;
+    const deductions = Number((daily * abs).toFixed(2));
+    const updated = { ...rec, absent_days: abs, deductions };
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) - deductions - (updated.gosi_employee || 0);
+    updated.net_salary = Number(updated.net_salary.toFixed(2));
+    await base44.entities.Payroll.update(id, updated);
+    setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
+  };
+
   const setStatus = async (rec, status) => {
     const patch = { status };
     if (status === "paid") patch.paid_date = todayISO();
@@ -137,7 +151,7 @@ export default function Payroll() {
       </div>
 
       <div className="mb-4 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
-        <Fingerprint size={14} /> البصمات مربوطة تلقائياً: يتم سحب أيام الغياب من سجلات الحضور وخصمها من الراتب عند توليد الكشف.
+        <Fingerprint size={14} /> البصمات مربوطة تلقائياً: يُسحب الغياب من سجلات الحضور عند التوليد. لمدير الموارد البشرية صلاحية تعديل أيام الغياب يدوياً في الجدول عند وجود إذن (يُعاد راتب اليوم تلقائياً).
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex gap-3 items-end">
@@ -193,7 +207,7 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
                     <td className="px-3 py-2 text-xs tabular-nums text-amber-700">{formatCurrency(p.gosi_employee || 0)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
-                    <td className="px-3 py-2 tabular-nums text-rose-600 font-medium">{p.absent_days || 0}</td>
+                    <td className="px-3 py-2"><EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
                     <td className="px-3 py-2">
                       {p.status === "draft" ? (

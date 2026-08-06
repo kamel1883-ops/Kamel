@@ -109,3 +109,18 @@
     to { opacity: 1; transform: translateY(0); }
   }
 }
+
+@media print {
+  body * { visibility: hidden !important; }
+  .print-settlement, .print-settlement * { visibility: visible !important; }
+  .print-settlement {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+  }
+  .print-settlement .no-print { display: none !important; }
+}

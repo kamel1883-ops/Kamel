@@ -79,6 +79,38 @@ export function computeGOSI({ employee, org }) {
   return { isSaudi: false, gosi_employee: 0, gosi_employer: gross * expatRate, gross };
 }
 
+// مخالصة نهاية الخدمة الكاملة: مكافأة + تصفية رصيد الإجازات + تعويض التذكرة
+export function computeSettlement({ employee, org, lastWorkingDate, reason }) {
+  const basis = org?.eos_basis || "gross";
+  const eos = computeEOS({ employee, lastWorkingDate, reason, basis });
+
+  // تصفية الإجازات المستحقة (الأجر اليومي × عدد الأيام المتبقية)
+  const leaveBalance = Number(employee.leave_balance) || 0;
+  const leaveCash = Number((eos.dailyWage * leaveBalance).toFixed(2));
+
+  // تعويض التذكرة حسب سياسة المنشأة وآخر استخدام
+  const currentYear = new Date().getFullYear();
+  const lastUsed = Number(employee.ticket_last_used_year) || 0;
+  const ticketValue = Number(org?.ticket_value) || 0;
+  let ticketAmount = 0;
+  if (employee.ticket_entitlement !== "none" && ticketValue > 0) {
+    const cycle = employee.ticket_entitlement === "biennial" ? 2 : 1;
+    if (currentYear - lastUsed >= cycle) ticketAmount = ticketValue;
+  }
+
+  const total = Number((eos.amount + leaveCash + ticketAmount).toFixed(2));
+  return {
+    ...eos,
+    basis,
+    leaveBalance,
+    leaveCash,
+    ticketEntitlement: employee.ticket_entitlement,
+    ticketValue,
+    ticketAmount,
+    total_settlement: total,
+  };
+}
+
 // الهوية الوطنية السعودية تبدأ برقم 1 للمواطنين
 export function isSaudiNationalId(id) {
   if (!id) return false;
