@@ -7,6 +7,9 @@ import {
   Target, Crown, BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Image } from "@/components/ui/image";
+
+const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9393b943b_generated_image.png";
 
 const navItems = [
   { to: "/app", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -54,8 +57,8 @@ export default function Layout() {
       >
         <div className="h-20 flex items-center justify-between px-6 border-b border-border">
           <Link to="/app" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center text-white shadow-lg">
-              <Sparkles size={20} />
+            <div className="w-11 h-11 rounded-2xl bg-white border border-border shadow-lg overflow-hidden">
+              <Image src={LOGO} alt="شعار جدارة" className="w-full h-full" fittingType="fit" />
             </div>
             <div className="leading-tight">
               <div className="font-bold text-base text-foreground">جدارة</div>
