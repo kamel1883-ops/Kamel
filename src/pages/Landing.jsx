@@ -8,11 +8,11 @@ import {
   Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
   Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
   GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
-  LineChart, MessageCircle, MapPin, Crown
+  HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown
 } from "lucide-react";
 
-const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9393b943b_generated_image.png";
-const WHATSAPP = "https://wa.me/780278";
+const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/43df068d0_generated_image.png";
+const WHATSAPP = "https://wa.me/962594700782";
 const SALES_EMAIL = "sales@jadara.sa";
 
 const features = [
@@ -32,17 +32,21 @@ const features = [
 
 const licenses = [
   "السجل التجاري", "أمانة/بلدية", "الدفاع المدني",
-  "وزارة الصناعة والثروة المعدنية (مدن MODON)", "الهيئة العامة للغذاء والدواء (SFDA)",
+  "الهيئة السعودية للمدن الصناعية ومناطق التقنية (MODON)", "الهيئة العامة للغذاء والدواء (SFDA)",
   "وزارة الموارد البشرية والتنمية الاجتماعية", "التأمينات الاجتماعية (GOSI)",
   "هيئة النقل", "الهيئة السعودية للسياحة", "الزكاة والضريبة والجمارك",
   "مكتب العمل", "الرخصة الصحية / العيادات",
 ];
 
 const integrations = [
-  { icon: FileSpreadsheet, t: "استيراد البصمات", d: "رفع Excel/CSV وتحليل آلي وربط بالموظفين والرواتب." },
-  { icon: CreditCard, t: "الدفع الإلكتروني", d: "قباك Stripe للفيزا ومدى للاشتراكات السنوية." },
-  { icon: Bell, t: "إشعارات فنية", d: "تنبيه المالك فوراً عند تسجيل عميل تجريبي جديد." },
-  { icon: Globe_Icon, t: "روابط حكومية قادمة", d: "تكاملات مع أبشر ومقيم في الطريق." },
+  { icon: Bell, t: "إشعارات فورية", d: "تنبيهات استباقية لانتهاء التراخيص والإقامات والتأمينات والوثائق وتنبيه المالك فور تسجيل عميل جديد." },
+  { icon: FileSpreadsheet, t: "استيراد البصمات", d: "رفع Excel/CSV وتحليل آلي وربط مباشر بالموظفين والرواتب." },
+  { icon: ShieldCheck, t: "التأمينات الاجتماعية (GOSI)", d: "تكامل لاحتساب المساهمات والشهادات وفق نظام التأمينات الاجتماعية." },
+  { icon: HeartPulse, t: "مجلس الضمان الصحي", d: "ربط بيانات التأمين الصحي والمستفيدين والاعتمادات." },
+  { icon: Stethoscope, t: "التعاملات الطبية", d: "ربط التعاملات الطبية والفحوصات لهويات المقيمين." },
+  { icon: Landmark, t: "أبشر ومقيم (قريباً)", d: "تكاملات قادمة مع أبشر ومقيم لمتابعة انتهاء الإقامات والهويات." },
+  { icon: Car, t: "إدارة المرور", d: "ربط رخص وتأمين وفحوصات المركبات مع إدارة المرور." },
+  { icon: Calculator, t: "أنظمة المحاسبة", d: "تكامل مع أنظمة محاسبية (Hooodo وأنظمة ERP) لترحيل الرواتب والقيود." },
 ];
 
 const planTrial = [
@@ -106,7 +110,7 @@ export default function Landing() {
             </div>
             <div className="leading-tight">
               <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
-              <div className="text-[10px] text-white/50 -mt-0.5">منصة الموارد البشرية</div>
+              <div className="text-[10px] text-white/50 -mt-0.5">لإدارة الموارد البشرية</div>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-7 text-sm text-white/70">
@@ -155,14 +159,18 @@ export default function Landing() {
           <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
             <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="فريق عمل" className="w-full h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0b1120] via-transparent to-transparent" />
-            <div className="absolute bottom-5 right-5 left-5 grid grid-cols-3 gap-3">
-              {[{ i: Users, t: "الموظفون" }, { i: Wallet, t: "الرواتب" }, { i: ShieldCheck, t: "التراخيص" }].map((c) => {
-                const I = c.i; return (
-                  <div key={c.t} className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-3 flex flex-col items-center gap-1.5">
-                    <I size={20} className="text-violet-200" /><span className="text-xs">{c.t}</span>
-                  </div>
-                );
-              })}
+            <div className="absolute bottom-4 right-4 left-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {features.map((f) => {
+                  const I = f.icon;
+                  return (
+                    <div key={f.title} className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-2.5 py-2 flex items-center gap-1.5">
+                      <I size={14} className="text-violet-200 shrink-0" />
+                      <span className="text-[11px] leading-tight text-white/90">{f.title}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -332,7 +340,7 @@ export default function Landing() {
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-400/20 rounded-3xl p-6 text-center transition group">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-300" /></div>
             <div className="font-semibold">واتساب مباشر</div>
-            <div className="text-white/60 text-sm mt-1" dir="ltr">780278</div>
+            <div className="text-white/60 text-sm mt-1" dir="ltr">+962 594700782</div>
           </a>
           <a href={`mailto:${SALES_EMAIL}`} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 text-center transition">
             <div className="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-200" /></div>
@@ -355,13 +363,13 @@ export default function Landing() {
               <div className="w-9 h-9 rounded-xl bg-white overflow-hidden ring-1 ring-white/20">
                 <Image src={LOGO} alt="جدارة" className="w-full h-full" fittingType="fit" />
               </div>
-              <span className="text-white font-bold text-base" style={{ fontFamily: "var(--font-display)" }}>جدارة</span>
+              <span className="text-white font-bold text-base" style={{ fontFamily: "var(--font-display)" }}>جدارة لإدارة الموارد البشرية</span>
             </div>
             <p>منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.</p>
           </div>
           <div className="space-y-1.5">
             <div className="font-medium text-white mb-1">تواصل معنا</div>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><MessageCircle size={14} /> واتساب: 780278</a>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><MessageCircle size={14} /> واتساب: +962 594700782</a>
             <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-white"><Mail size={14} /> {SALES_EMAIL}</a>
           </div>
           <div className="space-y-1.5">

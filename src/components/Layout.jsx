@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Image } from "@/components/ui/image";
 
-const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9393b943b_generated_image.png";
+const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/43df068d0_generated_image.png";
 
 const navItems = [
   { to: "/app", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -62,7 +62,7 @@ export default function Layout() {
             </div>
             <div className="leading-tight">
               <div className="font-bold text-base text-foreground">جدارة</div>
-              <div className="text-xs text-muted-foreground">نظام الموارد البشرية</div>
+              <div className="text-xs text-muted-foreground">لإدارة الموارد البشرية</div>
             </div>
           </Link>
           <button className="lg:hidden" onClick={() => setOpen(false)}>
