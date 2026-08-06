@@ -173,6 +173,29 @@ export default function Landing() {
         </motion.div>
       </section>
 
+      {/* بوابة الموظف الذاتية */}
+      <section className="max-w-7xl mx-auto px-5 py-8">
+        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-blue-600/20 p-8 sm:p-10">
+          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                <Users size={26} className="text-violet-200" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold">بوابة الموظف الذاتية</h3>
+                <p className="text-white/70 mt-2 max-w-2xl leading-relaxed">
+                  دخول خاص بالموظفين فقط لعرض الحضور والرواتب ورصيد الإجازات، ورفع طلبات السلف والإجازات مباشرة. يُربط الحساب برقم الهوية/الإقامة بعد اعتماد الموارد البشرية.
+                </p>
+              </div>
+            </div>
+            <Link to="/portal" className="shrink-0 inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
+              دخول البوابة <ArrowLeft size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* المميزات */}
       <section id="features" className="max-w-7xl mx-auto px-5 py-14">
         <SectionHead tag="كل ما تحتاجه في مكان واحد" title="منصة واحدة، حلول متكاملة" />
