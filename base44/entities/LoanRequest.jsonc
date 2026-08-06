@@ -30,7 +30,7 @@
     "monthly_installment": {
       "type": "number",
       "default": 0,
-      "title": "\u0642\u0633\u0637 \u0627\u0644\u0634\u0647\u0631\u064a"
+      "title": "\u0642\u0633\u0637 \u0627\u0644\u0634\u0647\u0631"
     },
     "manager_status": {
       "type": "string",
@@ -114,6 +114,11 @@
       ],
       "default": "pending_manager",
       "title": "\u0627\u0644\u062d\u0627\u0644\u0629"
+    },
+    "description": {
+      "type": "string",
+      "title": "\u0627\u0644\u0648\u0635\u0641",
+      "maxLength": 1000
     }
   },
   "required": [

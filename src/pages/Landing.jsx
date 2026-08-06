@@ -367,6 +367,8 @@ export default function Landing() {
             <div className="font-medium text-white mb-1">المنصة</div>
             <button onClick={() => scrollTo("features")} className="block hover:text-white">المميزات</button>
             <button onClick={() => scrollTo("pricing")} className="block hover:text-white">الباقات</button>
+            <Link to="/about" className="block hover:text-white">من نحن</Link>
+            <Link to="/contact" className="block hover:text-white">تواصل معنا</Link>
             <Link to="/login?returnTo=/app" className="block hover:text-white">تسجيل الدخول</Link>
           </div>
         </div>
