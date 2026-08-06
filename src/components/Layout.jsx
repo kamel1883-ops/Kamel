@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Users, CalendarCheck, FileSpreadsheet, ClipboardCheck, Send, Wallet, ShieldCheck, Building2,
   LogOut, Menu, X, UserCircle, Settings, Car, Calculator,
-  Target, Crown, BarChart3
+  Target, Crown, BarChart3, Network, ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
@@ -20,7 +20,9 @@ const navItems = [
   { to: "/fleet", label: "إدارة الأسطول", icon: Car },
   { to: "/end-of-service", label: "نهاية الخدمة", icon: Calculator },
   { to: "/performance", label: "الأداء والتطوير", icon: Target },
+  { to: "/org-structure", label: "الهيكل التنظيمي", icon: Network },
   { to: "/succession", label: "تخطيط التعاقب", icon: Crown },
+  { to: "/workforce-planning", label: "تخطيط القوة العاملة", icon: ClipboardList },
   { to: "/licenses", label: "تراخيص المنشأة", icon: ShieldCheck },
   { to: "/analytics", label: "التحليلات", icon: BarChart3 },
   { to: "/owner", label: "إدارة العملاء", icon: Building2 },

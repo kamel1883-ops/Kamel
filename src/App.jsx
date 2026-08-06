@@ -18,6 +18,8 @@ import Fleet from "@/pages/Fleet";
 import EndOfService from "@/pages/EndOfService";
 import Performance from "@/pages/Performance";
 import Succession from "@/pages/Succession";
+import OrgStructure from "@/pages/OrgStructure";
+import WorkforcePlanning from "@/pages/WorkforcePlanning";
 import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import Landing from "@/pages/Landing";
@@ -80,6 +82,8 @@ const AuthenticatedApp = () => {
         <Route path="/end-of-service" element={<EndOfService />} />
         <Route path="/performance" element={<Performance />} />
         <Route path="/succession" element={<Succession />} />
+        <Route path="/org-structure" element={<OrgStructure />} />
+        <Route path="/workforce-planning" element={<WorkforcePlanning />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/owner" element={<OwnerAdmin />} />
