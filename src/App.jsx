@@ -20,6 +20,8 @@ import Performance from "@/pages/Performance";
 import Succession from "@/pages/Succession";
 import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
+import Landing from "@/pages/Landing";
+import OwnerAdmin from "@/pages/OwnerAdmin";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -45,11 +47,14 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Render the main app
+  // Public landing page — accessible without login
+  if (window.location.pathname === "/") return <Landing />;
+
+  // Render the main app (authenticated)
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/app" element={<Dashboard />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/approvals" element={<Approvals />} />
@@ -61,6 +66,7 @@ const AuthenticatedApp = () => {
         <Route path="/succession" element={<Succession />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
+        <Route path="/owner" element={<OwnerAdmin />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />

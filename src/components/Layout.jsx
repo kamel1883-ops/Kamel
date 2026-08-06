@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  LayoutDashboard, Users, CalendarCheck, ClipboardCheck, Send, Wallet, ShieldCheck,
+  LayoutDashboard, Users, CalendarCheck, ClipboardCheck, Send, Wallet, ShieldCheck, Building2,
   LogOut, Menu, X, UserCircle, Sparkles, Settings, Car, Calculator,
   Target, Crown, BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: "/", label: "لوحة التحكم", icon: LayoutDashboard },
+  { to: "/app", label: "لوحة التحكم", icon: LayoutDashboard },
   { to: "/employees", label: "الموظفون", icon: Users },
   { to: "/attendance", label: "الحضور والانصراف", icon: CalendarCheck },
   { to: "/approvals", label: "الموافقات والطلبات", icon: ClipboardCheck },
@@ -21,6 +21,7 @@ const navItems = [
   { to: "/succession", label: "تخطيط التعاقب", icon: Crown },
   { to: "/licenses", label: "تراخيص المنشأة", icon: ShieldCheck },
   { to: "/analytics", label: "التحليلات", icon: BarChart3 },
+  { to: "/owner", label: "إدارة العملاء", icon: Building2 },
   { to: "/settings", label: "إعدادات المنشأة", icon: Settings },
 ];
 
@@ -51,7 +52,7 @@ export default function Layout() {
         )}
       >
         <div className="h-20 flex items-center justify-between px-6 border-b border-border">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/app" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center text-white shadow-lg">
               <Sparkles size={20} />
             </div>
