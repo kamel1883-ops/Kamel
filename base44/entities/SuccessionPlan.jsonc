@@ -1,0 +1,94 @@
+{
+  "name": "SuccessionPlan",
+  "type": "object",
+  "properties": {
+    "position_title": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0633\u0645\u0649 \u0627\u0644\u0648\u0638\u064a\u0641\u064a"
+    },
+    "department": {
+      "type": "string",
+      "title": "\u0627\u0644\u0625\u062f\u0627\u0631\u0629"
+    },
+    "current_holder_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0634\u0627\u063a\u0644 \u0627\u0644\u062d\u0627\u0644\u064a"
+    },
+    "current_holder_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0634\u0627\u063a\u0644 \u0627\u0644\u062d\u0627\u0644\u064a"
+    },
+    "position_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "at_risk",
+        "leaving",
+        "vacant"
+      ],
+      "default": "active",
+      "title": "\u062d\u0627\u0644\u0629 \u0627\u0644\u0645\u0631\u0643\u0632"
+    },
+    "successor_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0631\u0634\u062d \u0627\u0644\u0628\u062f\u064a\u0644"
+    },
+    "successor_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0631\u0634\u062d \u0627\u0644\u0628\u062f\u064a\u0644"
+    },
+    "readiness_level": {
+      "type": "string",
+      "enum": [
+        "ready_now",
+        "ready_1_2_years",
+        "ready_3_5_years",
+        "development_needed"
+      ],
+      "default": "development_needed",
+      "title": "\u0645\u0633\u062a\u0648\u0649 \u0627\u0644\u062c\u0627\u0647\u0632\u064a\u0629"
+    },
+    "development_plan": {
+      "type": "string",
+      "title": "\u062e\u0637\u0629 \u0627\u0644\u062a\u0637\u0648\u064a\u0631"
+    },
+    "development_deadline": {
+      "type": "string",
+      "format": "date",
+      "title": "\u0645\u0648\u0639\u062f \u0627\u0644\u062a\u0637\u0648\u064a\u0631"
+    },
+    "risk_of_loss": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "title": "\u062e\u0637\u0631 \u0627\u0644\u0645\u063a\u0627\u062f\u0631\u0629"
+    },
+    "impact_of_loss": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "title": "\u0623\u062b\u0631 \u0627\u0644\u0645\u063a\u0627\u062f\u0631\u0629"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date",
+      "title": "\u0622\u062e\u0631 \u062a\u062d\u062f\u064a\u062b"
+    },
+    "notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a"
+    }
+  },
+  "required": [
+    "position_title",
+    "position_status"
+  ]
+}

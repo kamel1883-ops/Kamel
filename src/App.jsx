@@ -15,6 +15,9 @@ import Payroll from "@/pages/Payroll";
 import SettingsPage from "@/pages/Settings";
 import Fleet from "@/pages/Fleet";
 import EndOfService from "@/pages/EndOfService";
+import Performance from "@/pages/Performance";
+import Succession from "@/pages/Succession";
+import Analytics from "@/pages/Analytics";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -51,6 +54,9 @@ const AuthenticatedApp = () => {
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/end-of-service" element={<EndOfService />} />
+        <Route path="/performance" element={<Performance />} />
+        <Route path="/succession" element={<Succession />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,0 +1,143 @@
+{
+  "name": "Performance",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "employee_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "department": {
+      "type": "string",
+      "title": "\u0627\u0644\u0625\u062f\u0627\u0631\u0629"
+    },
+    "review_period": {
+      "type": "string",
+      "enum": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "annual",
+        "midyear",
+        "probation"
+      ],
+      "default": "annual",
+      "title": "\u0641\u062a\u0631\u0629 \u0627\u0644\u062a\u0642\u064a\u064a\u0645"
+    },
+    "period_year": {
+      "type": "number",
+      "title": "\u0627\u0644\u0633\u0646\u0629"
+    },
+    "review_type": {
+      "type": "string",
+      "enum": [
+        "annual",
+        "midyear",
+        "probation",
+        "goal_setting"
+      ],
+      "default": "annual",
+      "title": "\u0646\u0648\u0639 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629"
+    },
+    "goals": {
+      "type": "string",
+      "title": "\u0627\u0644\u0623\u0647\u062f\u0627\u0641 \u0648\u0627\u0644\u0645\u062e\u0631\u062c\u0627\u062a"
+    },
+    "goals_rating": {
+      "type": "number",
+      "default": 0,
+      "title": "\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0623\u0647\u062f\u0627\u0641 (1-5)"
+    },
+    "competencies_rating": {
+      "type": "number",
+      "default": 0,
+      "title": "\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0643\u0641\u0627\u0621\u0627\u062a (1-5)"
+    },
+    "values_rating": {
+      "type": "number",
+      "default": 0,
+      "title": "\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0642\u064a\u0645 (1-5)"
+    },
+    "overall_rating": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0643\u0644\u064a (1-5)"
+    },
+    "strengths": {
+      "type": "string",
+      "title": "\u0646\u0642\u0627\u0637 \u0627\u0644\u0642\u0648\u0629"
+    },
+    "improvements": {
+      "type": "string",
+      "title": "\u0641\u0631\u0635 \u0627\u0644\u062a\u062d\u0633\u064a\u0646"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "none",
+        "maintain",
+        "promote",
+        "bonus",
+        "warn",
+        "terminate"
+      ],
+      "default": "none",
+      "title": "\u0627\u0644\u062a\u0648\u0635\u064a\u0629"
+    },
+    "current_grade": {
+      "type": "string",
+      "title": "\u0627\u0644\u062f\u0631\u062c\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629"
+    },
+    "target_grade": {
+      "type": "string",
+      "title": "\u0627\u0644\u062f\u0631\u062c\u0629 \u0627\u0644\u0645\u0633\u062a\u0647\u062f\u0641\u0629"
+    },
+    "promotion_ready": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u062c\u0627\u0647\u0632 \u0644\u0644\u062a\u0631\u0642\u064a\u0629"
+    },
+    "reviewer_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0642\u064a\u0651\u0645"
+    },
+    "reviewer_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0642\u064a\u0651\u0645"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u062a\u0642\u064a\u064a\u0645"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u0627\u0644\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0642\u0627\u062f\u0645"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "acknowledged",
+        "completed"
+      ],
+      "default": "draft",
+      "title": "\u0627\u0644\u062d\u0627\u0644\u0629"
+    },
+    "notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a"
+    }
+  },
+  "required": [
+    "employee_id",
+    "review_period",
+    "period_year",
+    "status"
+  ]
+}

@@ -7,7 +7,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { computeGOSI } from "@/lib/eos";
@@ -38,6 +38,21 @@ export default function Payroll() {
     const existing = new Set(payrolls.map((p) => p.employee_id));
     const orgs = org ? [org] : await base44.entities.Organization.list("-created_date", 1);
     const cfg = orgs[0];
+    // ربط البصمات: جلب سجلات الحضور للشهر وحساب أيام الغياب وخصمها
+    const mm = String(month).padStart(2, "0");
+    const startDate = `${year}-${mm}-01`;
+    const endDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${mm}-${String(endDay).padStart(2, "0")}`;
+    const attRecords = await base44.entities.Attendance.filter(
+      { date: { $gte: startDate, $lte: endDate } }, "-created_date", 2000
+    );
+    const absentByEmp = {};
+    const lateByEmp = {};
+    for (const a of attRecords) {
+      if (!a.employee_id) continue;
+      if (a.status === "absent") absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
+      if (a.status === "late") lateByEmp[a.employee_id] = (lateByEmp[a.employee_id] || 0) + 1;
+    }
     const created = [];
     for (const emp of employees) {
       if (existing.has(emp.id)) continue;
@@ -47,7 +62,10 @@ export default function Payroll() {
       const other = Number(emp.other_allowances) || 0;
       const gross = base + housing + transport + other;
       const gosi = computeGOSI({ employee: emp, org: cfg });
-      const net = gross - gosi.gosi_employee;
+      const absentDays = absentByEmp[emp.id] || 0;
+      const dailyWage = gross / 30;
+      const absentDeduction = Number((dailyWage * absentDays).toFixed(2));
+      const net = gross - gosi.gosi_employee - absentDeduction;
       created.push({
         employee_id: emp.id,
         employee_name: `${emp.employee_number} - ${emp.position}`,
@@ -57,10 +75,11 @@ export default function Payroll() {
         transport_allowance: transport,
         other_allowances: other,
         gross_salary: gross,
-        bonus: 0, deductions: 0,
+        bonus: 0, deductions: absentDeduction,
         gosi_employee: Number(gosi.gosi_employee.toFixed(2)),
         gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
-        overtime_hours: 0, absent_days: 0,
+        overtime_hours: 0,
+        absent_days: absentDays,
         net_salary: net, status: "draft",
       });
     }
@@ -117,6 +136,10 @@ export default function Payroll() {
         <StatCard icon={CheckCircle2} label="رواتب مصروفة" value={paidCount} tint="blue" />
       </div>
 
+      <div className="mb-4 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+        <Fingerprint size={14} /> البصمات مربوطة تلقائياً: يتم سحب أيام الغياب من سجلات الحضور وخصمها من الراتب عند توليد الكشف.
+      </div>
+
       <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex gap-3 items-end">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">الشهر</label>
@@ -154,6 +177,7 @@ export default function Payroll() {
                   <th className="text-right px-3 py-3 font-medium">مواصلات</th>
                   <th className="text-right px-3 py-3 font-medium text-emerald-600">حوافز</th>
                   <th className="text-right px-3 py-3 font-medium text-amber-600">تأمينات (موظف)</th>
+                  <th className="text-right px-3 py-3 font-medium">غياب (يوم)</th>
                   <th className="text-right px-3 py-3 font-medium text-rose-600">خصومات</th>
                   <th className="text-right px-3 py-3 font-medium">الصافي</th>
                   <th className="text-right px-3 py-3 font-medium">الحالة</th>
@@ -169,6 +193,7 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
                     <td className="px-3 py-2 text-xs tabular-nums text-amber-700">{formatCurrency(p.gosi_employee || 0)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
+                    <td className="px-3 py-2 tabular-nums text-rose-600 font-medium">{p.absent_days || 0}</td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
                     <td className="px-3 py-2">
                       {p.status === "draft" ? (
