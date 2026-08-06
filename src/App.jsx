@@ -22,6 +22,7 @@ import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import Landing from "@/pages/Landing";
 import OwnerAdmin from "@/pages/OwnerAdmin";
+import ImportAttendance from "@/pages/ImportAttendance";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
         <Route path="/app" element={<Dashboard />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />
+        <Route path="/import-attendance" element={<ImportAttendance />} />
         <Route path="/approvals" element={<Approvals />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/payroll" element={<Payroll />} />
