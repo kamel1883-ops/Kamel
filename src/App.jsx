@@ -12,6 +12,9 @@ import Employees from "@/pages/Employees";
 import Attendance from "@/pages/Attendance";
 import LeaveRequests from "@/pages/LeaveRequests";
 import Payroll from "@/pages/Payroll";
+import SettingsPage from "@/pages/Settings";
+import Fleet from "@/pages/Fleet";
+import EndOfService from "@/pages/EndOfService";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -46,6 +49,9 @@ const AuthenticatedApp = () => {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/leaves" element={<LeaveRequests />} />
         <Route path="/payroll" element={<Payroll />} />
+        <Route path="/fleet" element={<Fleet />} />
+        <Route path="/end-of-service" element={<EndOfService />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

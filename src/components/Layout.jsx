@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Users, CalendarCheck, ClipboardList, Wallet,
-  LogOut, Menu, X, UserCircle, Sparkles
+  LogOut, Menu, X, UserCircle, Sparkles, Settings, Car, Calculator
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,9 @@ const navItems = [
   { to: "/attendance", label: "الحضور والانصراف", icon: CalendarCheck },
   { to: "/leaves", label: "الإجازات", icon: ClipboardList },
   { to: "/payroll", label: "الرواتب", icon: Wallet },
+  { to: "/fleet", label: "إدارة الأسطول", icon: Car },
+  { to: "/end-of-service", label: "نهاية الخدمة", icon: Calculator },
+  { to: "/settings", label: "إعدادات المنشأة", icon: Settings },
 ];
 
 export default function Layout() {

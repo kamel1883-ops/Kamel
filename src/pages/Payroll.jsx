@@ -7,13 +7,15 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2 } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
+import { computeGOSI } from "@/lib/eos";
 
 export default function Payroll() {
   const [payrolls, setPayrolls] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [org, setOrg] = useState(null);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
@@ -25,6 +27,8 @@ export default function Payroll() {
     setPayrolls(data);
     const emps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
     setEmployees(emps);
+    const orgs = await base44.entities.Organization.list("-created_date", 1);
+    setOrg(orgs[0]);
     setLoading(false);
   };
   useEffect(() => { load(); }, [month, year]);
@@ -32,6 +36,8 @@ export default function Payroll() {
   const generate = async () => {
     setGenerating(true);
     const existing = new Set(payrolls.map((p) => p.employee_id));
+    const orgs = org ? [org] : await base44.entities.Organization.list("-created_date", 1);
+    const cfg = orgs[0];
     const created = [];
     for (const emp of employees) {
       if (existing.has(emp.id)) continue;
@@ -39,7 +45,9 @@ export default function Payroll() {
       const housing = Number(emp.housing_allowance) || 0;
       const transport = Number(emp.transport_allowance) || 0;
       const other = Number(emp.other_allowances) || 0;
-      const net = base + housing + transport + other;
+      const gross = base + housing + transport + other;
+      const gosi = computeGOSI({ employee: emp, org: cfg });
+      const net = gross - gosi.gosi_employee;
       created.push({
         employee_id: emp.id,
         employee_name: `${emp.employee_number} - ${emp.position}`,
@@ -48,7 +56,11 @@ export default function Payroll() {
         housing_allowance: housing,
         transport_allowance: transport,
         other_allowances: other,
-        bonus: 0, deductions: 0, overtime_hours: 0, absent_days: 0,
+        gross_salary: gross,
+        bonus: 0, deductions: 0,
+        gosi_employee: Number(gosi.gosi_employee.toFixed(2)),
+        gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
+        overtime_hours: 0, absent_days: 0,
         net_salary: net, status: "draft",
       });
     }
@@ -62,9 +74,12 @@ export default function Payroll() {
   const updateField = async (id, field, value) => {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
-    updated.net_salary = (updated.base_salary || 0) + (updated.housing_allowance || 0) +
-      (updated.transport_allowance || 0) + (updated.other_allowances || 0) +
-      (updated.bonus || 0) - (updated.deductions || 0);
+    updated.gross_salary =
+      (updated.base_salary || 0) + (updated.housing_allowance || 0) +
+      (updated.transport_allowance || 0) + (updated.other_allowances || 0);
+    updated.net_salary = (updated.gross_salary || 0) +
+      (updated.bonus || 0) - (updated.deductions || 0) -
+      (updated.gosi_employee || 0);
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
@@ -79,6 +94,7 @@ export default function Payroll() {
   const totalNet = payrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
   const totalBonus = payrolls.reduce((s, p) => s + (p.bonus || 0), 0);
   const totalDed = payrolls.reduce((s, p) => s + (p.deductions || 0), 0);
+  const totalGosiEmployee = payrolls.reduce((s, p) => s + (p.gosi_employee || 0), 0);
   const paidCount = payrolls.filter((p) => p.status === "paid").length;
 
   return (
@@ -96,6 +112,7 @@ export default function Payroll() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard icon={Wallet} label="إجمالي الصافي" value={formatCurrency(totalNet)} tint="green" />
         <StatCard icon={TrendingUp} label="إجمالي الحوافز" value={formatCurrency(totalBonus)} tint="violet" />
+        <StatCard icon={Shield} label="تأمينات الموظفين" value={formatCurrency(totalGosiEmployee)} tint="amber" />
         <StatCard icon={Clock} label="إجمالي الخصومات" value={formatCurrency(totalDed)} tint="rose" />
         <StatCard icon={CheckCircle2} label="رواتب مصروفة" value={paidCount} tint="blue" />
       </div>
@@ -136,6 +153,7 @@ export default function Payroll() {
                   <th className="text-right px-3 py-3 font-medium">سكن</th>
                   <th className="text-right px-3 py-3 font-medium">مواصلات</th>
                   <th className="text-right px-3 py-3 font-medium text-emerald-600">حوافز</th>
+                  <th className="text-right px-3 py-3 font-medium text-amber-600">تأمينات (موظف)</th>
                   <th className="text-right px-3 py-3 font-medium text-rose-600">خصومات</th>
                   <th className="text-right px-3 py-3 font-medium">الصافي</th>
                   <th className="text-right px-3 py-3 font-medium">الحالة</th>
@@ -149,6 +167,7 @@ export default function Payroll() {
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.housing_allowance)}</td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.transport_allowance)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
+                    <td className="px-3 py-2 text-xs tabular-nums text-amber-700">{formatCurrency(p.gosi_employee || 0)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
                     <td className="px-3 py-2">

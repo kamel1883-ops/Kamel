@@ -13,12 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
 const empty = {
-  employee_number: "", national_id: "", nationality: "", gender: "male",
+  employee_number: "", national_id: "", nationality: "", gender: "male", is_saudi: false,
   birth_date: "", phone: "", address: "", emergency_contact: "",
   department: "", position: "", job_grade: "", hire_date: "",
   contract_type: "full_time", status: "active",
+  termination_reason: "none", termination_date: "",
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
   avatar_url: "",
+  iqama_expiry: "", passport_number: "", passport_expiry: "",
+  health_insurance_number: "", health_insurance_expiry: "",
+  bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null,
 };
 
 export default function EmployeeForm({ open, onClose, onSaved, employee }) {
@@ -108,6 +112,34 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
           </div>
           <Field label="العنوان"><Input value={form.address} onChange={(e) => set("address", e.target.value)} /></Field>
           <Field label="جهة اتصال الطوارئ"><Input value={form.emergency_contact} onChange={(e) => set("emergency_contact", e.target.value)} /></Field>
+
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
+            <Field label="سعودي؟">
+              <Select value={form.is_saudi ? "true" : "false"} onValueChange={(v) => set("is_saudi", v === "true")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">سعودي</SelectItem>
+                  <SelectItem value="false">مقيم</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="انتهاء الإقامة/الهوية"><Input type="date" value={form.iqama_expiry} onChange={(e) => set("iqama_expiry", e.target.value)} /></Field>
+            <Field label="رقم الجواز"><Input value={form.passport_number} onChange={(e) => set("passport_number", e.target.value)} /></Field>
+            <Field label="انتهاء الجواز"><Input type="date" value={form.passport_expiry} onChange={(e) => set("passport_expiry", e.target.value)} /></Field>
+            <Field label="رقم التأمين الطبي"><Input value={form.health_insurance_number} onChange={(e) => set("health_insurance_number", e.target.value)} /></Field>
+            <Field label="انتهاء التأمين الطبي"><Input type="date" value={form.health_insurance_expiry} onChange={(e) => set("health_insurance_expiry", e.target.value)} /></Field>
+            <Field label="استحقاق التذاكر">
+              <Select value={form.ticket_entitlement} onValueChange={(v) => set("ticket_entitlement", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yearly">سنوي</SelectItem>
+                  <SelectItem value="biennial">كل سنتين</SelectItem>
+                  <SelectItem value="none">بدون</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="الحساب البنكي"><Input value={form.bank_account} onChange={(e) => set("bank_account", e.target.value)} /></Field>
+          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>إلغاء</Button>
