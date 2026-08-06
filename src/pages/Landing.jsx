@@ -184,12 +184,13 @@ export default function Landing() {
             const I = f.icon;
             return (
               <motion.div key={f.title} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 transition-all hover:-translate-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/30 to-indigo-500/20 border border-white/10 flex items-center justify-center mb-4">
-                  <I size={22} className="text-violet-200" />
+                className="group relative bg-[#13161f] hover:bg-[#171b29] border border-white/10 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden">
+                <div className="absolute top-7 left-6 h-8 w-8 rounded-full bg-violet-500/0 group-hover:bg-violet-500/10 blur-xl transition-all" />
+                <div className="relative w-12 h-12 rounded-2xl bg-[#37376c] border border-white/10 flex items-center justify-center mb-4 shadow-lg shadow-indigo-950/50">
+                  <I size={22} className="text-white" />
                 </div>
-                <div className="font-semibold text-lg">{f.title}</div>
-                <div className="text-white/60 text-sm mt-2 leading-relaxed">{f.desc}</div>
+                <div className="relative font-semibold text-lg leading-snug">{f.title}</div>
+                <div className="relative text-white/60 text-sm mt-2 leading-relaxed">{f.desc}</div>
               </motion.div>
             );
           })}

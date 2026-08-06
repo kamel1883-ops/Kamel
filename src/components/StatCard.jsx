@@ -11,7 +11,7 @@ export default function StatCard({ icon: Icon, label, value, tint = "slate" }) {
     violet: "bg-violet-50 text-violet-600",
   };
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-2xl border border-border/70 p-5 shadow-sm flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
       <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", tints[tint])}>
         {Icon && <Icon size={22} />}
       </div>
