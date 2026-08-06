@@ -5,17 +5,36 @@
 // عند الاستقالة (المادة 85): أقل من سنتين لا شيء، 2-5 سنوات الثلث، 5-10 الثلثان، 10 فأكثر كامل.
 // الفصل لأسباب مشروعة (المادة 80): لا شيء.
 
+// أسباب إنهاء الخدمة ومواد نظام العمل السعودي المقابلة
+// category: full = مكافأة كاملة | partial = مكافأة جزئية (مادة 85) | none = لا تستحق
 export const terminationReasons = [
-  { value: "end_of_contract", label: "انتهاء العقد", note: "المادة 84 - مكافأة كاملة" },
-  { value: "employer_termination", label: "إنهاء من صاحب العمل", note: "المادة 84 - مكافأة كاملة" },
-  { value: "resignation", label: "استقالة", note: "المادة 85 - مكافأة جزئية حسب المدة" },
-  { value: "dismissal_for_cause", label: "فصل لأسباب مشروعة", note: "المادة 80 - لا تستحق مكافأة" },
-  { value: "force_majeure", label: "القوة القاهرة", note: "لا تستحق مكافأة" },
+  { value: "end_of_contract", label: "انتهاء العقد محدد المدة", article: "مادة 74", note: "انتهاء مدة العقد المحددة — مكافأة كاملة (مادة 84)", category: "full" },
+  { value: "contract_non_renewal", label: "عدم التجديد / عدم الرغبة بالتمديد", article: "مادة 75", note: "إنهاء العقد من أحد الطرفين بإخطار مسبق — مكافأة كاملة", category: "full" },
+  { value: "employer_termination", label: "إنهاء العقد من صاحب العمل", article: "مادة 84", note: "إنهاء من صاحب العمل — مكافأة كاملة", category: "full" },
+  { value: "unjustified_dismissal", label: "فصل تعسفي / إنهاء مخالف للنظام", article: "مادة 77", note: "الإنهاء المخالف للنظام يُوجب تعويض العامل عن الفصل التعسفي", category: "full" },
+  { value: "resignation", label: "استقالة العامل", article: "مادة 85", note: "مكافأة جزئية حسب مدة الخدمة (أقل من سنتين لا شيء، 2-5 الثلث، 5-10 الثلثان، 10 فأكثر كاملة)", category: "partial" },
+  { value: "dismissal_for_cause", label: "فصل لأسباب مشروعة", article: "مادة 80", note: "الأسباب الواردة في المادة 80 — لا يستحق مكافأة ولا إشعاراً", category: "none" },
+  { value: "employee_leave_with_rights", label: "ترك العامل العمل لأسباب جائزة", article: "مادة 81", note: "ترك العامل العمل لسبب مشروع — يحتفظ بكامل حقوقه ومكافأته", category: "full" },
+  { value: "mutual_consent", label: "إنهاء العقد بالتراضي", article: "مادة 74", note: "اتفاق الطرفين — يُراعى ما تم الاتفاق عليه ضمن العقد", category: "full" },
+  { value: "death", label: "وفاة العامل", article: "مادة 74", note: "تنصرف مكافأة نهاية الخدمة للورثة بالكامل", category: "full" },
+  { value: "incapacity", label: "العجز أو عدم اللياقة الصحية", article: "مادة 74", note: "انتهاء العقد بسبب العجز الصحي — مكافأة مستحقة", category: "full" },
+  { value: "force_majeure", label: "القوة القاهرة", article: "مادة 74", note: "ظرف خارج عن إرادة الطرفين — يُقدّر حسب الحالة", category: "none" },
 ];
 
 export function reasonMeta(reason) {
   return terminationReasons.find((r) => r.value === reason) || { label: reason, note: "" };
 }
+
+// مرجع مواد نظام العمل المستخدمة في حساب نهاية الخدمة
+export const eosArticleReference = [
+  { article: "مادة 74", title: "انتهاء عقد العمل", desc: "حالات انتهاء العقد: انتهاء المدة، التراضي، الوفاة، العجز، القوة القاهرة." },
+  { article: "مادة 75", title: "إنهاء العقد بإرادة منفردة", desc: "جواز إنهاء العقد من أي طرف بشرط الإخطار المسبق المحدد نظاماً." },
+  { article: "مادة 77", title: "الإنهاء المخالف للنظام", desc: "تعويض الطرف المتضرر عن إنهاء العقد بطريقة مخالفة لأحكام النظام." },
+  { article: "مادة 80", title: "الفصل دون مكافأة", desc: "الأسباب التي تخوّل صاحب العمل الفصل دون مكافأة ولا إشعار." },
+  { article: "مادة 81", title: "ترك العامل العمل", desc: "حالات يحق فيها للعامل ترك العمل مع الاحتفاظ بكل حقوقه ومكافأته." },
+  { article: "مادة 84", title: "أساس حساب المكافأة", desc: "نصف شهر عن كل سنة من أول خمس سنوات، وشهر كامل عن كل سنة بعدها." },
+  { article: "مادة 85", title: "مكافأة الاستقالة", desc: "احتساب جزء من المكافأة بحسب مدة الخدمة عند الاستقالة." },
+];
 
 export function computeYearsOfService(hireDate, lastWorkingDate) {
   if (!hireDate || !lastWorkingDate) return 0;
@@ -46,12 +65,13 @@ export function computeEOS({ employee, lastWorkingDate, reason, basis = "gross" 
   }
   const fullEOS = monthlyWage * fullFraction;
 
+  const category = reasonMeta(reason).category || (reason === "resignation" ? "partial" : "none");
   let amount = 0;
   let fractionLabel = "";
-  if (reason === "end_of_contract" || reason === "employer_termination") {
+  if (category === "full") {
     amount = fullEOS;
     fractionLabel = "كاملة (100%)";
-  } else if (reason === "resignation") {
+  } else if (category === "partial") {
     if (years < 2) { amount = 0; fractionLabel = "لا شيء (أقل من سنتين)"; }
     else if (years < 5) { amount = fullEOS * (1 / 3); fractionLabel = "ثلث (1/3)"; }
     else if (years < 10) { amount = fullEOS * (2 / 3); fractionLabel = "ثلثان (2/3)"; }

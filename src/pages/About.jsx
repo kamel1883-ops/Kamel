@@ -6,6 +6,7 @@ import {
   Check, Crown, GraduationCap, Award, ShieldCheck, Users, Target,
   CalendarCheck, Wallet, Landmark, BarChart3, ArrowLeft, Sparkles
 } from "lucide-react";
+import { eosArticleReference } from "@/lib/eos";
 
 const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "sales@jadara.sa";
@@ -69,6 +70,27 @@ export default function About() {
             );
           })}
         </div>
+
+        <section className="mt-12">
+          <div className="flex items-center gap-2 mb-2">
+            <Landmark size={18} className="text-violet-300" />
+            <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>نهاية الخدمة وفق نظام العمل السعودي</h2>
+          </div>
+          <p className="text-white/75 leading-relaxed">
+            تحتسب المنصة مكافأة نهاية الخدمة بدقة وفق أحكام نظام العمل السعودي، مع تصنيف جميع أسباب الإنهاء وربط كل سبب بمادته النظامية المناسبة لضمان امتثال كامل — من انتهاء العقد وعدم التجديد، إلى الفصل المشروع والاستقالة وترك العمل لأسباب جائزة والقوة القاهرة.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3 mt-6">
+            {eosArticleReference.map((a) => (
+              <div key={a.article} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold">{a.title}</span>
+                  <span className="text-[11px] bg-violet-500/20 text-violet-100 rounded-full px-2 py-0.5">{a.article}</span>
+                </div>
+                <div className="text-white/60 text-sm leading-relaxed">{a.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="mt-12 space-y-4 text-white/75 leading-relaxed">
           <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>لمن صُممت جدارة؟</h2>

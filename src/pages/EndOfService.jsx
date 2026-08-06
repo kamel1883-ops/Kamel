@@ -100,7 +100,7 @@ export default function EndOfService() {
 
   return (
     <div>
-      <PageHeader title="نهاية الخدمة" subtitle="حاسبة مكافأة نهاية الخدمة وفق نظام العمل السعودي (المواد 80/84/85) مع تصفية الإجازات والتذاكر" />
+      <PageHeader title="نهاية الخدمة" subtitle="حاسبة مكافأة نهاية الخدمة وفق نظام العمل السعودي (المواد 74 إلى 85) — جميع أسباب الإنهاء ومواد النظام المقابلة مع تصفية الإجازات والتذاكر" />
 
       {/* حاسبة المخالصة */}
       <div className="bg-white rounded-2xl border border-border p-5 mb-5">
@@ -128,11 +128,13 @@ export default function EndOfService() {
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {terminationReasons.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label} <span className="text-muted-foreground">— {r.article}</span>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-xs text-muted-foreground">{reasonMeta(reason).note}</span>
+            <span className="text-xs text-muted-foreground">{reasonMeta(reason).article ? `${reasonMeta(reason).article} — ` : ""}{reasonMeta(reason).note}</span>
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
