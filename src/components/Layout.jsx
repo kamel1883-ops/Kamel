@@ -47,7 +47,7 @@ export default function Layout() {
   const isActive = (path) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--muted))] flex">
+    <div className="min-h-screen bg-background flex">
       {/* Sidebar — بنفس لغة الهبوط الفاخرة */}
       <aside
         className={cn(
@@ -69,7 +69,7 @@ export default function Layout() {
             <X size={20} />
           </button>
         </div>
-        <div className="h-px bg-gradient-to-l from-violet-500/40 via-amber-300/40 to-transparent" />
+        <div className="h-px bg-gradient-to-l from-violet-500/50 to-indigo-500/30" />
 
         <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
@@ -83,11 +83,11 @@ export default function Layout() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all border-r-2",
                   active
-                    ? "bg-gradient-to-l from-violet-500/20 to-indigo-500/10 border-amber-400 text-white"
+                    ? "bg-[#2e2448] border-violet-300 text-white"
                     : "border-transparent text-white/55 hover:text-white hover:bg-white/5"
                 )}
               >
-                <Icon size={19} className={active ? "text-amber-300" : "text-white/50"} />
+                <Icon size={19} className={active ? "text-violet-200" : "text-white/50"} />
                 {item.label}
               </Link>
             );
