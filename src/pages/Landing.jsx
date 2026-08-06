@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 const LOGO = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/43df068d0_generated_image.png";
-const WHATSAPP = "https://wa.me/962594700782";
+const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "sales@jadara.sa";
 
 const features = [
@@ -45,8 +45,8 @@ const integrations = [
   { icon: HeartPulse, t: "مجلس الضمان الصحي", d: "ربط بيانات التأمين الصحي والمستفيدين والاعتمادات." },
   { icon: Stethoscope, t: "التعاملات الطبية", d: "ربط التعاملات الطبية والفحوصات لهويات المقيمين." },
   { icon: Landmark, t: "أبشر ومقيم (قريباً)", d: "تكاملات قادمة مع أبشر ومقيم لمتابعة انتهاء الإقامات والهويات." },
-  { icon: Car, t: "إدارة المرور", d: "ربط رخص وتأمين وفحوصات المركبات مع إدارة المرور." },
-  { icon: Calculator, t: "أنظمة المحاسبة", d: "تكامل مع أنظمة محاسبية (Hooodo وأنظمة ERP) لترحيل الرواتب والقيود." },
+  { icon: Car, t: "إدارة المرور للمركبات", d: "ربط رخص وتأمين وفحوصات المركبات مع إدارة المرور." },
+  { icon: Calculator, t: "أنظمة المحاسبة (Odoo/ERP)", d: "تكامل مع أنظمة محاسبية Odoo وأنظمة ERP لترحيل الرواتب والقيود." },
 ];
 
 const planTrial = [
@@ -340,7 +340,7 @@ export default function Landing() {
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-400/20 rounded-3xl p-6 text-center transition group">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-300" /></div>
             <div className="font-semibold">واتساب مباشر</div>
-            <div className="text-white/60 text-sm mt-1" dir="ltr">+962 594700782</div>
+            <div className="text-white/60 text-sm mt-1" dir="ltr">+966 594700782</div>
           </a>
           <a href={`mailto:${SALES_EMAIL}`} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 text-center transition">
             <div className="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-200" /></div>
@@ -369,7 +369,7 @@ export default function Landing() {
           </div>
           <div className="space-y-1.5">
             <div className="font-medium text-white mb-1">تواصل معنا</div>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><MessageCircle size={14} /> واتساب: +962 594700782</a>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><MessageCircle size={14} /> واتساب: +966 594700782</a>
             <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-white"><Mail size={14} /> {SALES_EMAIL}</a>
           </div>
           <div className="space-y-1.5">
