@@ -135,7 +135,7 @@ function SectionTitle({ title }) { return <h3 className="font-semibold text-fore
 function Section({ title, icon: Icon, children }) {
   return (
     <div className="bg-white rounded-2xl border border-border p-5 space-y-4">
-      <div className="flex items-center gap-2"><span className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">{Icon && <Icon size={18} />}</span><h3 className="font-semibold text-foreground">{title}</h3></div>
+      <div className="flex items-center gap-2"><span className="w-9 h-9 rounded-xl bg-[#2e2448]/10 flex items-center justify-center text-[#2e2448]">{Icon && <Icon size={18} />}</span><h3 className="font-semibold text-foreground">{title}</h3></div>
       {children}
     </div>
   );

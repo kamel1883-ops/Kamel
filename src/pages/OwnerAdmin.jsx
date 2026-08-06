@@ -56,10 +56,10 @@ export default function OwnerAdmin() {
       <PageHeader title="إدارة العملاء والاشتراكات" subtitle="متابعة العملاء، فترات التجربة، الاشتراكات السنوية، والإيرادات" />
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-7">
-        <Stat icon={Building2} label="إجمالي العملاء" value={stats.total} cls="text-blue-600 bg-blue-50" />
-        <Stat icon={Clock} label="تجربة جارية" value={stats.trial} cls="text-amber-600 bg-amber-50" />
-        <Stat icon={BadgeCheck} label="مُشترك فعّال" value={stats.active} cls="text-emerald-600 bg-emerald-50" />
-        <Stat icon={TrendingUp} label="إيرادات سنوية (ر.س)" value={revenue.toLocaleString()} cls="text-violet-600 bg-violet-50" />
+        <Stat icon={Building2} label="إجمالي العملاء" value={stats.total} cls="text-[#2e2448] bg-[#2e2448]/10" />
+        <Stat icon={Clock} label="تجربة جارية" value={stats.trial} cls="text-[#2e2448] bg-[#2e2448]/10" />
+        <Stat icon={BadgeCheck} label="مُشترك فعّال" value={stats.active} cls="text-[#0d6f4d] bg-emerald-50" />
+        <Stat icon={TrendingUp} label="إيرادات سنوية (ر.س)" value={revenue.toLocaleString()} cls="text-[#2e2448] bg-[#2e2448]/10" />
         <Stat icon={AlertTriangle} label="تجارب تنتهي قريباً" value={stats.endingSoon} cls="text-rose-600 bg-rose-50" />
       </div>
 
@@ -171,7 +171,7 @@ function Logo({ t, onUpload }) {
 
 function Stat({ icon: Icon, label, value, cls }) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-4">
+    <div className="bg-card rounded-2xl border border-border/70 p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
       <div className="flex items-center gap-2">
         <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", cls)}><Icon size={16} /></div>
         <div className="text-xs text-muted-foreground">{label}</div>
