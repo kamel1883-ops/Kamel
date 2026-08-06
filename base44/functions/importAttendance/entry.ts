@@ -87,38 +87,41 @@ export default async function (req) {
       if (e.national_id) byNational[String(e.national_id).trim()] = e;
     }
 
+    const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+    const normName = (s) => norm(s).replace(/[ًٌٍَُِّْـ]/g, '');
     const matchEmployee = (r) => {
-      if (r.employee_number) {
-        if (byNumber[r.employee_number]) return byNumber[r.employee_number];
-        if (byNational[r.employee_number]) return byNational[r.employee_number];
+      const num = norm(r.employee_number);
+      if (num) {
+        if (byNumber[num]) return byNumber[num];
+        if (byNational[num]) return byNational[num];
       }
-      const fn = r.employee_name.trim();
+      const fn = normName(r.employee_name);
       if (fn) {
         const found = employees.find((e) => {
-          const full = `${e.employee_number} ${e.position || ''} ${e.department || ''}`.trim();
-          return full.includes(fn) || fn.includes(e.position || '') && e.position;
+          const composite = normName(`${e.employee_number} ${e.position || ''} ${e.department || ''}`);
+          return composite.includes(fn) || (e.position && normName(e.position).includes(fn));
         });
         if (found) return found;
       }
       return null;
     };
 
-    // نطاق التواريخ لجلب الحضور الموجود وتفادي التكرار
-    const dates = records.map((r) => r.date).sort();
+    // جلب الحضور الموجود وتفادي التكرار (لا يعتمد على فلتر نطاق التواريخ)
+    const dates = records.map((r) => r.date);
+    const dateSet = new Set(dates);
     let existing = [];
-    if (dates.length) {
+    if (records.length) {
       try {
-        existing = await base44.asServiceRole.entities.Attendance.filter(
-          { date: { $gte: dates[0], $lte: dates[dates.length - 1] } },
-          '-created_date', 5000
-        );
+        existing = await base44.asServiceRole.entities.Attendance.list('-date', 5000);
       } catch (_e) {
-        existing = [];
+        existing = await base44.asServiceRole.entities.Attendance.list('-created_date', 5000);
       }
     }
     const keyOf = (id, d) => `${id}|${d}`;
     const existingMap = {};
-    for (const a of existing) existingMap[keyOf(a.employee_id, a.date)] = a;
+    for (const a of existing) {
+      if (a.date && dateSet.has(a.date)) existingMap[keyOf(a.employee_id, a.date)] = a;
+    }
 
     let created = 0, updated = 0;
     const unmatched = [];

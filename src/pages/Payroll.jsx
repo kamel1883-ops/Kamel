@@ -75,7 +75,7 @@ export default function Payroll() {
         transport_allowance: transport,
         other_allowances: other,
         gross_salary: gross,
-        bonus: 0, deductions: absentDeduction,
+        bonus: 0, deductions: absentDeduction, loan_installment: 0,
         gosi_employee: Number(gosi.gosi_employee.toFixed(2)),
         gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
         overtime_hours: 0,
@@ -98,7 +98,8 @@ export default function Payroll() {
       (updated.transport_allowance || 0) + (updated.other_allowances || 0);
     updated.net_salary = (updated.gross_salary || 0) +
       (updated.bonus || 0) - (updated.deductions || 0) -
-      (updated.gosi_employee || 0);
+      (updated.gosi_employee || 0) - (updated.loan_installment || 0);
+    updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
@@ -111,7 +112,7 @@ export default function Payroll() {
     const daily = gross / 30;
     const deductions = Number((daily * abs).toFixed(2));
     const updated = { ...rec, absent_days: abs, deductions };
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) - deductions - (updated.gosi_employee || 0);
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) - deductions - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
     updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
@@ -193,6 +194,7 @@ export default function Payroll() {
                   <th className="text-right px-3 py-3 font-medium text-amber-600">تأمينات (موظف)</th>
                   <th className="text-right px-3 py-3 font-medium">غياب (يوم)</th>
                   <th className="text-right px-3 py-3 font-medium text-rose-600">خصومات</th>
+                  <th className="text-right px-3 py-3 font-medium text-violet-600">سلفة</th>
                   <th className="text-right px-3 py-3 font-medium">الصافي</th>
                   <th className="text-right px-3 py-3 font-medium">الحالة</th>
                 </tr>
@@ -202,12 +204,13 @@ export default function Payroll() {
                   <tr key={p.id} className="hover:bg-slate-50">
                     <td className="px-4 py-2 font-medium sticky right-0 bg-white">{p.employee_name}</td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
-                    <td className="px-3 py-2 tabular-nums">{formatCurrency(p.housing_allowance)}</td>
-                    <td className="px-3 py-2 tabular-nums">{formatCurrency(p.transport_allowance)}</td>
+                    <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
+                    <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
                     <td className="px-3 py-2 text-xs tabular-nums text-amber-700">{formatCurrency(p.gosi_employee || 0)}</td>
-                    <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} /></td>
+                    <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
+                    <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
                     <td className="px-3 py-2">
                       {p.status === "draft" ? (
