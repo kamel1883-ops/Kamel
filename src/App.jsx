@@ -6,6 +6,12 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import Layout from "@/components/Layout";
+import Dashboard from "@/pages/Dashboard";
+import Employees from "@/pages/Employees";
+import Attendance from "@/pages/Attendance";
+import LeaveRequests from "@/pages/LeaveRequests";
+import Payroll from "@/pages/Payroll";
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +40,13 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/leaves" element={<LeaveRequests />} />
+        <Route path="/payroll" element={<Payroll />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
