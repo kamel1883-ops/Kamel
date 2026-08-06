@@ -18,7 +18,9 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
     employee_id: "", leave_type: "annual",
     start_date: "", end_date: "", reason: "", is_full_clearance: false,
   });
+  const [medicalFile, setMedicalFile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -26,10 +28,13 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
         employee_id: currentUserEmployee?.id || employees?.[0]?.id || "",
         leave_type: "annual", start_date: "", end_date: "", reason: "", is_full_clearance: false,
       });
+      setMedicalFile(null);
+      setErr("");
     }
   }, [open, currentUserEmployee, employees]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const isSick = form.leave_type === "sick";
 
   const days = form.start_date && form.end_date
     ? differenceInDays(parseISO(form.end_date), parseISO(form.start_date)) + 1 : 0;
@@ -37,15 +42,26 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
   const submit = async (e) => {
     e.preventDefault();
     if (days <= 0) return;
+    if (isSick && !medicalFile) {
+      setErr("إرفاق التقرير الطبي إلزامي للإجازة المرضية.");
+      return;
+    }
+    setErr("");
     setSaving(true);
     try {
       const emp = employees?.find((x) => x.id === form.employee_id);
+      let medical_url = "";
+      if (isSick && medicalFile) {
+        const up = await base44.integrations.Core.UploadFile({ file: medicalFile });
+        medical_url = up.file_url;
+      }
       await base44.entities.LeaveRequest.create({
         ...form,
         employee_user_id: emp?.user_id || "",
         employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
         days_count: days,
         is_full_clearance: form.is_full_clearance,
+        medical_report_url: medical_url,
         status: "pending_manager",
         manager_status: "pending",
         hr_status: "pending",
@@ -53,6 +69,8 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
       });
       onSaved?.();
       onClose?.();
+    } catch (error) {
+      setErr(error?.message || "تعذر تقديم الطلب");
     } finally {
       setSaving(false);
     }
@@ -105,6 +123,23 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
               <Input type="date" value={form.end_date} onChange={(e) => set("end_date", e.target.value)} required />
             </div>
           </div>
+
+          {isSick && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">
+                التقرير الطبي <span className="text-rose-500">*</span>
+                <span className="text-rose-500 text-xs mr-1">(إلزامي)</span>
+              </Label>
+              <Input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setMedicalFile(e.target.files?.[0] || null)}
+                required
+              />
+              <p className="text-xs text-muted-foreground">يجب إرفاق صورة من التقرير الطبي للإجازة المرضية.</p>
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">السبب</Label>
             <Textarea value={form.reason} onChange={(e) => set("reason", e.target.value)} rows={3} />
@@ -118,6 +153,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
             />
             إجازة كاملة (تصفية + تذاكر) — تتطلب تصفية مالية ودفع تعويض التذكرة
           </label>
+          {err && <div className="text-sm text-rose-600 bg-rose-50 rounded-lg p-3">{err}</div>}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>إلغاء</Button>
             <Button type="submit" disabled={saving || days <= 0}>

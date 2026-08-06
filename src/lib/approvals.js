@@ -28,10 +28,11 @@ export function leaveTicketAmount(employee, org) {
   return 0;
 }
 
-// هل الإجازة تتطلب تدخل المالية (تصفية كاملة)
+// أنواع الطلبات التي تتطلب صرفاً مالياً: السلفة + الإجازة السنوية + التصفية الكاملة
+// (المرضية/بدون راتب/الطارئة/الأمومة → موافقة الموارد البشرية فقط ثم مكتملة)
 export function needsFinance(req, employee, org) {
   if (!req) return false;
+  if (!req.leave_type) return true; // سلفة
   if (req.is_full_clearance) return true;
-  const annual = Number(org?.annual_leave_days) || 21;
-  return req.days_count >= annual;
+  return req.leave_type === 'annual';
 }
