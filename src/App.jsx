@@ -11,6 +11,8 @@ import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/Employees";
 import Attendance from "@/pages/Attendance";
 import Approvals from "@/pages/Approvals";
+import Leaves from "@/pages/Leaves";
+import BusinessTrips from "@/pages/BusinessTrips";
 import MyRequests from "@/pages/MyRequests";
 import Payroll from "@/pages/Payroll";
 import SettingsPage from "@/pages/Settings";
@@ -77,6 +79,8 @@ const AuthenticatedApp = () => {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/import-attendance" element={<ImportAttendance />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="/leaves" element={<Leaves />} />
+        <Route path="/business-trips" element={<BusinessTrips />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/end-of-service" element={<EndOfService />} />
