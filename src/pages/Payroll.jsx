@@ -20,6 +20,7 @@ export default function Payroll() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [batching, setBatching] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -118,10 +119,18 @@ export default function Payroll() {
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
 
-  const setStatus = async (rec, status) => {
-    const patch = { status };
-    if (status === "paid") patch.paid_date = todayISO();
-    await base44.entities.Payroll.update(rec.id, patch);
+  const approveAll = async () => {
+    setBatching(true);
+    const updates = payrolls.filter((p) => p.status === "draft").map((p) => ({ id: p.id, status: "approved" }));
+    if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
+    setBatching(false);
+    load();
+  };
+  const payAll = async () => {
+    setBatching(true);
+    const updates = payrolls.filter((p) => p.status === "approved").map((p) => ({ id: p.id, status: "paid", paid_date: todayISO() }));
+    if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
+    setBatching(false);
     load();
   };
 
@@ -130,6 +139,9 @@ export default function Payroll() {
   const totalDed = payrolls.reduce((s, p) => s + (p.deductions || 0), 0);
   const totalGosiEmployee = payrolls.reduce((s, p) => s + (p.gosi_employee || 0), 0);
   const paidCount = payrolls.filter((p) => p.status === "paid").length;
+  const anyDraft = payrolls.some((p) => p.status === "draft");
+  const anyApproved = payrolls.some((p) => p.status === "approved");
+  const monthStatus = payrolls.length && payrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
 
   return (
     <div>
@@ -173,6 +185,28 @@ export default function Payroll() {
         </div>
       </div>
 
+      {payrolls.length > 0 && !loading && (
+        <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">حالة كشف الشهر:</span>
+            <span className={cn("px-3 py-1 rounded-full font-medium text-xs", payrollStatusLabel(monthStatus).cls)}>{payrollStatusLabel(monthStatus).label}</span>
+            <span className="text-xs text-muted-foreground">({payrolls.length} موظف)</span>
+          </div>
+          <div className="flex gap-2">
+            {anyDraft && (
+              <Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2">
+                <FileCheck size={16} /> اعتماد كشف الشهر
+              </Button>
+            )}
+            {anyApproved && (
+              <Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                <FileCheck size={16} /> صرف الكشف
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-border overflow-hidden">
         {loading ? (
           <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>
@@ -213,17 +247,9 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
                     <td className="px-3 py-2">
-                      {p.status === "draft" ? (
-                        <Button size="sm" variant="outline" onClick={() => setStatus(p, "approved")} className="h-7 text-xs">اعتماد</Button>
-                      ) : p.status === "approved" ? (
-                        <Button size="sm" onClick={() => setStatus(p, "paid")} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 gap-1">
-                          <FileCheck size={14} /> صرف
-                        </Button>
-                      ) : (
-                        <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>
-                          {payrollStatusLabel(p.status).label}
-                        </span>
-                      )}
+                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>
+                        {payrollStatusLabel(p.status).label}
+                      </span>
                     </td>
                   </tr>
                 ))}
