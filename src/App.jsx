@@ -37,7 +37,6 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
-import Brochure from "@/pages/Brochure";
 
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/login", "/register", "/forgot-password", "/reset-password"];
 
@@ -69,7 +68,6 @@ const AuthenticatedApp = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/brochure" element={<Brochure />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
