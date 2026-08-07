@@ -4,16 +4,26 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import LeaveRequestForm from "@/components/LeaveRequestForm";
 import LoanRequestForm from "@/components/LoanRequestForm";
+import BusinessTripForm from "@/components/BusinessTripForm";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, LogOut
+  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
+
+const tripStatus = {
+  draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
+  pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
+  approved: { label: "معتمدة", cls: "bg-blue-50 text-blue-600" },
+  in_progress: { label: "قيد التنفيذ", cls: "bg-indigo-50 text-indigo-600" },
+  completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
+  cancelled: { label: "ملغاة", cls: "bg-rose-50 text-rose-600" },
+};
 
 export default function MyRequests() {
   const [user, setUser] = useState(null);
@@ -25,6 +35,8 @@ export default function MyRequests() {
   const [loading, setLoading] = useState(true);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [loanOpen, setLoanOpen] = useState(false);
+  const [tripOpen, setTripOpen] = useState(false);
+  const [trips, setTrips] = useState([]);
 
   // ربط الحساب
   const [nationalId, setNationalId] = useState("");
@@ -44,12 +56,13 @@ export default function MyRequests() {
       setEmployee(emp || null);
       setOrg(orgs[0] || null);
       if (emp) {
-        const [lv, ln, att] = await Promise.all([
+        const [lv, ln, att, tr] = await Promise.all([
           base44.entities.LeaveRequest.filter({ employee_id: emp.id }, "-created_date", 200),
           base44.entities.LoanRequest.filter({ employee_id: emp.id }, "-created_date", 200),
           base44.entities.Attendance.filter({ employee_id: emp.id }, "-date", 10),
+          base44.entities.BusinessTrip.filter({ employee_id: emp.id }, "-created_date", 200),
         ]);
-        setLeaves(lv); setLoans(ln); setAttendance(att);
+        setLeaves(lv); setLoans(ln); setAttendance(att); setTrips(tr);
       }
     } catch {
       setEmployee(null);
@@ -154,7 +167,8 @@ export default function MyRequests() {
           action={
             <div className="flex gap-2">
               <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> طلب إجازة</Button>
-              <Button onClick={() => setLoanOpen(true)} className="gap-2"><Wallet size={18} /> طلب سلفة</Button>
+              <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> طلب سلفة</Button>
+              <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> طلب رحلة/انتداب</Button>
             </div>
           }
         />
@@ -248,8 +262,26 @@ export default function MyRequests() {
           </Section>
         </div>
 
+        <div className="mt-6">
+          <Section title="رحلات العمل والانتداب">
+            {trips.length === 0 ? <Empty text="لا توجد طلبات رحلات" /> : trips.map((r) => {
+              const st = tripStatus[r.status] || tripStatus.pending;
+              return (
+                <Row key={r.id}>
+                  <div>
+                    <div className="font-medium text-sm">{r.trip_type === "external" ? "خارجية" : "داخلية"} — {r.destination || "—"}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {r.days_count} يوم</div>
+                  </div>
+                  <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", st.cls)}>{st.label}</span>
+                </Row>
+              );
+            })}
+          </Section>
+        </div>
+
         <LeaveRequestForm open={leaveOpen} onClose={() => setLeaveOpen(false)} onSaved={load} employees={[employee]} currentUserEmployee={employee} />
         <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={load} employee={employee} />
+        <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={load} employees={[employee]} currentUserEmployee={employee} />
       </div>
     );
   }

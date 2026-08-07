@@ -20,14 +20,14 @@ const empty = {
   other_costs: 0, advance_amount: 0, notes: ""
 };
 
-export default function BusinessTripForm({ open, onClose, onSaved, employees, editing }) {
+export default function BusinessTripForm({ open, onClose, onSaved, employees, editing, currentUserEmployee }) {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
   useEffect(() => {
     if (open) {
-      setForm(editing ? { ...empty, ...editing } : { ...empty, employee_id: employees?.[0]?.id || "" });
+      setForm(editing ? { ...empty, ...editing } : { ...empty, employee_id: currentUserEmployee?.id || employees?.[0]?.id || "" });
       setErr("");
     }
   }, [open, editing, employees]);
@@ -49,6 +49,7 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
       const payload = {
         ...form,
         employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
+        employee_user_id: emp?.user_id || currentUserEmployee?.user_id || "",
         transport_cost: Number(form.transport_cost) || 0,
         accommodation_cost: Number(form.accommodation_cost) || 0,
         per_diem: Number(form.per_diem) || 0,
@@ -79,7 +80,7 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">الموظف</Label>
-              <Select value={form.employee_id} onValueChange={(v) => set("employee_id", v)}>
+              <Select value={form.employee_id} onValueChange={(v) => set("employee_id", v)} disabled={!!currentUserEmployee || !!editing}>
                 <SelectTrigger><SelectValue placeholder="اختر الموظف" /></SelectTrigger>
                 <SelectContent>
                   {(employees || []).map((emp) => (
