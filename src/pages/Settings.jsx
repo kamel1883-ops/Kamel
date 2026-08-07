@@ -8,6 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Loader2, Building2, Save, Crosshair } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 const empty = {
   name: "", commercial_register: "", vat_number: "", city: "", country: "المملكة العربية السعودية",
@@ -21,6 +22,38 @@ const empty = {
 };
 
 export default function SettingsPage() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    title: "إعدادات المنشأة", subtitle: "بيانات المنشأة والسياسات المواردية", loading: "جارٍ التحميل...",
+    secOrg: "بيانات المنشأة", name: "اسم المنشأة", cr: "السجل التجاري", vat: "الرقم الضريبي", city: "المدينة",
+    secLeave: "سياسات الإجازات والتذاكر", annualDays: "أيام الإجازة السنوية", ticketPolicy: "سياسة التذاكر",
+    ticketValue: "قيمة التذكرة (ريال)", yearly: "سنوية", biennial: "كل سنتين", none: "بدون",
+    secEos: "إعدادات نهاية الخدمة والتأمينات", eosBasis: "أساس حساب نهاية الخدمة",
+    gross: "الراتب الإجمالي (أساسي + بدلات)", baseOnly: "الراتب الأساسي فقط",
+    gosiEmp: "نسبة تأمين الموظف السعودي %", gosiErSa: "نسبة تأمين صاحب العمل (سعودي) %", gosiErEx: "نسبة تأمين صاحب العمل (مقيم) %",
+    secAtt: "إعدادات الحضور والدوام", weekHours: "ساعات العمل الأسبوعية", weekDays: "أيام العمل الأسبوعية", grace: "سماح التأخير (دقيقة)",
+    absType: "طريقة خصم الغياب", monthlyDiv: "الراتب الشهري ÷ 30 لليوم", dailyWage: "الأجر اليومي",
+    secLoc: "موقع مقر العمل (للبصمة)", lat: "خط العرض", lng: "خط الطول", radius: "نطاق البصمة (متر)", capture: "تحديد موقعي الحالي",
+    locNote: (r) => `سيُسمح للموظف بالبصمة فقط ضمن ${r || 50} متر من هذا الموقع.`,
+    save: "حفظ الإعدادات",
+    noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك",
+  } : {
+    title: "Organization settings", subtitle: "Organization data and HR policies", loading: "Loading...",
+    secOrg: "Organization data", name: "Organization name", cr: "Commercial register", vat: "VAT number", city: "City",
+    secLeave: "Leave & ticket policies", annualDays: "Annual leave days", ticketPolicy: "Ticket policy",
+    ticketValue: "Ticket value (SAR)", yearly: "Yearly", biennial: "Biennial", none: "None",
+    secEos: "EOS & GOSI settings", eosBasis: "EOS calculation basis",
+    gross: "Gross salary (base + allowances)", baseOnly: "Base salary only",
+    gosiEmp: "Saudi employee GOSI rate %", gosiErSa: "Employer GOSI (Saudi) %", gosiErEx: "Employer GOSI (Expat) %",
+    secAtt: "Attendance & working time", weekHours: "Weekly working hours", weekDays: "Weekly working days", grace: "Late grace (minutes)",
+    absType: "Absence deduction method", monthlyDiv: "Monthly salary ÷ 30 per day", dailyWage: "Daily wage",
+    secLoc: "Workplace location (for check‑in)", lat: "Latitude", lng: "Longitude", radius: "Check‑in radius (m)", capture: "Set my current location",
+    locNote: (r) => `Employees may check in only within ${r || 50} m of this location.`,
+    save: "Save settings",
+    noGeo: "Device does not support geolocation", noAccess: "Could not access your location",
+  };
+
   const [org, setOrg] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -35,13 +68,10 @@ export default function SettingsPage() {
   const set = (k, v) => setOrg((o) => ({ ...o, [k]: v }));
 
   const captureLocation = () => {
-    if (!navigator.geolocation) { alert("الجهاز لا يدعم تحديد الموقع"); return; }
+    if (!navigator.geolocation) { alert(t.noGeo); return; }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        set("workplace_lat", Number(pos.coords.latitude.toFixed(6)));
-        set("workplace_lng", Number(pos.coords.longitude.toFixed(6)));
-      },
-      () => alert("تعذر الوصول إلى موقعك"),
+      (pos) => { set("workplace_lat", Number(pos.coords.latitude.toFixed(6))); set("workplace_lng", Number(pos.coords.longitude.toFixed(6))); },
+      () => alert(t.noAccess),
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
@@ -49,83 +79,76 @@ export default function SettingsPage() {
   const save = async () => {
     setSaving(true);
     try {
-      if (org.id) {
-        await base44.entities.Organization.update(org.id, org);
-      } else {
-        const created = await base44.entities.Organization.create(org);
-        setOrg({ ...org, ...created });
-      }
-    } finally {
-      setSaving(false);
-    }
+      if (org.id) { await base44.entities.Organization.update(org.id, org); }
+      else { const created = await base44.entities.Organization.create(org); setOrg({ ...org, ...created }); }
+    } finally { setSaving(false); }
   };
 
-  if (loading) return <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>;
+  if (loading) return <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
 
   return (
-    <div>
-      <PageHeader title="إعدادات المنشأة" subtitle="بيانات المنشأة والسياسات المواردية" />
-
+    <div dir={isAr ? "rtl" : "ltr"}>
+      <PageHeader title={t.title} subtitle={t.subtitle} />
       <div className="max-w-3xl space-y-6">
-        <Section title="بيانات المنشأة" icon={Building2}>
+        <Section title={t.secOrg} icon={Building2}>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="اسم المنشأة"><Input value={org.name} onChange={(e) => set("name", e.target.value)} /></Field>
-            <Field label="السجل التجاري"><Input value={org.commercial_register} onChange={(e) => set("commercial_register", e.target.value)} /></Field>
-            <Field label="الرقم الضريبي"><Input value={org.vat_number} onChange={(e) => set("vat_number", e.target.value)} /></Field>
-            <Field label="المدينة"><Input value={org.city} onChange={(e) => set("city", e.target.value)} /></Field>
+            <Field label={t.name}><Input value={org.name} onChange={(e) => set("name", e.target.value)} /></Field>
+            <Field label={t.cr}><Input value={org.commercial_register} onChange={(e) => set("commercial_register", e.target.value)} /></Field>
+            <Field label={t.vat}><Input value={org.vat_number} onChange={(e) => set("vat_number", e.target.value)} /></Field>
+            <Field label={t.city}><Input value={org.city} onChange={(e) => set("city", e.target.value)} /></Field>
           </div>
         </Section>
 
         <Card>
-          <SectionTitle title="سياسات الإجازات والتذاكر" />
+          <SectionTitle title={t.secLeave} />
           <div className="grid grid-cols-2 gap-4">
-            <Field label="أيام الإجازة السنوية"><Input type="number" value={org.annual_leave_days} onChange={(e) => set("annual_leave_days", Number(e.target.value))} /></Field>
-            <Field label="سياسة التذاكر">
+            <Field label={t.annualDays}><Input type="number" value={org.annual_leave_days} onChange={(e) => set("annual_leave_days", Number(e.target.value))} /></Field>
+            <Field label={t.ticketPolicy}>
               <Select value={org.ticket_policy} onValueChange={(v) => set("ticket_policy", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="yearly">سنوية</SelectItem>
-                  <SelectItem value="biennial">كل سنتين</SelectItem>
-                  <SelectItem value="none">بدون</SelectItem>
+                  <SelectItem value="yearly">{t.yearly}</SelectItem>
+                  <SelectItem value="biennial">{t.biennial}</SelectItem>
+                  <SelectItem value="none">{t.none}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="قيمة التذكرة (ريال)"><Input type="number" value={org.ticket_value} onChange={(e) => set("ticket_value", Number(e.target.value))} /></Field>
+            <Field label={t.ticketValue}><Input type="number" value={org.ticket_value} onChange={(e) => set("ticket_value", Number(e.target.value))} /></Field>
           </div>
         </Card>
 
         <Card>
-          <SectionTitle title="إعدادات نهاية الخدمة والتأمينات" />
+          <SectionTitle title={t.secEos} />
           <div className="grid grid-cols-2 gap-4">
-            <Field label="أساس حساب نهاية الخدمة">
+            <Field label={t.eosBasis}>
               <Select value={org.eos_basis} onValueChange={(v) => set("eos_basis", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gross">الراتب الإجمالي (أساسي + بدلات)</SelectItem>
-                  <SelectItem value="base_only">الراتب الأساسي فقط</SelectItem>
+                  <SelectItem value="gross">{t.gross}</SelectItem>
+                  <SelectItem value="base_only">{t.baseOnly}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="نسبة تأمين الموظف السعودي %"><Input type="number" step="0.01" value={org.gosi_saudi_employee_rate} onChange={(e) => set("gosi_saudi_employee_rate", Number(e.target.value))} /></Field>
-            <Field label="نسبة تأمين صاحب العمل (سعودي) %"><Input type="number" step="0.01" value={org.gosi_saudi_employer_rate} onChange={(e) => set("gosi_saudi_employer_rate", Number(e.target.value))} /></Field>
-            <Field label="نسبة تأمين صاحب العمل (مقيم) %"><Input type="number" step="0.01" value={org.gosi_expat_employer_rate} onChange={(e) => set("gosi_expat_employer_rate", Number(e.target.value))} /></Field>
+            <Field label={t.gosiEmp}><Input type="number" step="0.01" value={org.gosi_saudi_employee_rate} onChange={(e) => set("gosi_saudi_employee_rate", Number(e.target.value))} /></Field>
+            <Field label={t.gosiErSa}><Input type="number" step="0.01" value={org.gosi_saudi_employer_rate} onChange={(e) => set("gosi_saudi_employer_rate", Number(e.target.value))} /></Field>
+            <Field label={t.gosiErEx}><Input type="number" step="0.01" value={org.gosi_expat_employer_rate} onChange={(e) => set("gosi_expat_employer_rate", Number(e.target.value))} /></Field>
           </div>
         </Card>
 
         <Card>
-          <SectionTitle title="إعدادات الحضور والدوام" />
+          <SectionTitle title={t.secAtt} />
           <div className="grid grid-cols-3 gap-4">
-            <Field label="ساعات العمل الأسبوعية"><Input type="number" value={org.work_week_hours} onChange={(e) => set("work_week_hours", Number(e.target.value))} /></Field>
-            <Field label="أيام العمل الأسبوعية"><Input type="number" value={org.work_week_days} onChange={(e) => set("work_week_days", Number(e.target.value))} /></Field>
-            <Field label="سماح التأخير (دقيقة)"><Input type="number" value={org.late_grace_minutes} onChange={(e) => set("late_grace_minutes", Number(e.target.value))} /></Field>
+            <Field label={t.weekHours}><Input type="number" value={org.work_week_hours} onChange={(e) => set("work_week_hours", Number(e.target.value))} /></Field>
+            <Field label={t.weekDays}><Input type="number" value={org.work_week_days} onChange={(e) => set("work_week_days", Number(e.target.value))} /></Field>
+            <Field label={t.grace}><Input type="number" value={org.late_grace_minutes} onChange={(e) => set("late_grace_minutes", Number(e.target.value))} /></Field>
           </div>
           <div className="grid grid-cols-1 mt-4">
-            <Field label="طريقة خصم الغياب">
+            <Field label={t.absType}>
               <Select value={org.absence_deduction_type} onValueChange={(v) => set("absence_deduction_type", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly_divided">الراتب الشهري ÷ 30 لليوم</SelectItem>
-                  <SelectItem value="daily_wage">الأجر اليومي</SelectItem>
+                  <SelectItem value="monthly_divided">{t.monthlyDiv}</SelectItem>
+                  <SelectItem value="daily_wage">{t.dailyWage}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -133,20 +156,19 @@ export default function SettingsPage() {
         </Card>
 
         <Card>
-          <SectionTitle title="موقع مقر العمل (للبصمة)" />
+          <SectionTitle title={t.secLoc} />
           <div className="grid grid-cols-3 gap-4">
-            <Field label="خط العرض"><Input type="number" step="any" value={org.workplace_lat} onChange={(e) => set("workplace_lat", e.target.value === "" ? "" : Number(e.target.value))} /></Field>
-            <Field label="خط الطول"><Input type="number" step="any" value={org.workplace_lng} onChange={(e) => set("workplace_lng", e.target.value === "" ? "" : Number(e.target.value))} /></Field>
-            <Field label="نطاق البصمة (متر)"><Input type="number" value={org.workplace_radius} onChange={(e) => set("workplace_radius", Number(e.target.value))} /></Field>
+            <Field label={t.lat}><Input type="number" step="any" value={org.workplace_lat} onChange={(e) => set("workplace_lat", e.target.value === "" ? "" : Number(e.target.value))} /></Field>
+            <Field label={t.lng}><Input type="number" step="any" value={org.workplace_lng} onChange={(e) => set("workplace_lng", e.target.value === "" ? "" : Number(e.target.value))} /></Field>
+            <Field label={t.radius}><Input type="number" value={org.workplace_radius} onChange={(e) => set("workplace_radius", Number(e.target.value))} /></Field>
           </div>
-          <Button type="button" variant="outline" onClick={captureLocation} className="gap-2"><Crosshair size={16} /> تحديد موقعي الحالي</Button>
-          <p className="text-xs text-muted-foreground">سيُسمح للموظف بالبصمة فقط ضمن {org.workplace_radius || 50} متر من هذا الموقع.</p>
+          <Button type="button" variant="outline" onClick={captureLocation} className="gap-2"><Crosshair size={16} /> {t.capture}</Button>
+          <p className="text-xs text-muted-foreground">{t.locNote(org.workplace_radius)}</p>
         </Card>
 
         <div className="flex justify-end">
           <Button onClick={save} disabled={saving} className="gap-2">
-            {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-            حفظ الإعدادات
+            {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} {t.save}
           </Button>
         </div>
       </div>
@@ -165,10 +187,5 @@ function Section({ title, icon: Icon, children }) {
   );
 }
 function Field({ label, children }) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-      {children}
-    </div>
-  );
+  return (<div className="space-y-1.5"><Label className="text-xs font-medium text-muted-foreground">{label}</Label>{children}</div>);
 }

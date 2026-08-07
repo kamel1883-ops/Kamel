@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { todayISO } from "@/lib/hr";
+import { useI18n } from "@/lib/i18n";
 
 const empty = {
   position_title: "", department: "", current_holder_id: "", current_holder_name: "",
@@ -20,139 +21,98 @@ const empty = {
 };
 
 export default function SuccessionForm({ open, employees, editing, onClose, onSaved }) {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    edit: "تعديل خطة تعاقب", add: "خطة تعاقب جديدة",
+    title: "المسمى الوظيفي (المنصب الحرج)", dept: "الإدارة", holder: "الشاغل الحالي", chooseEmp: "اختر الموظف",
+    posStatus: "حالة المركز", active: "مستقر", atRisk: "عرضة للمغادرة", leaving: "في طريقه للمغادرة", vacant: "شاغر",
+    successor: "المرشح البديل", chooseSucc: "اختر المرشح",
+    readiness: "مستوى الجاهزية", readyNow: "جاهز الآن", ready12: "جاهز خلال 1-2 سنة", ready35: "جاهز خلال 3-5 سنوات", devNeeded: "يحتاج تطوير",
+    risk: "خطر المغادرة", impact: "أثر المغادرة", low: "منخفض", med: "متوسط", high: "مرتفع",
+    devPlan: "خطة التطوير للمرشح البديل", deadline: "موعد إنجاز التطوير", notes: "ملاحظات",
+    cancel: "إلغاء", save: "حفظ الخطة", saving: "جارٍ الحفظ...",
+  } : {
+    edit: "Edit succession plan", add: "New succession plan",
+    title: "Job title (critical role)", dept: "Department", holder: "Current holder", chooseEmp: "Select employee",
+    posStatus: "Position status", active: "Stable", atRisk: "At risk", leaving: "Leaving", vacant: "Vacant",
+    successor: "Successor", chooseSucc: "Select successor",
+    readiness: "Readiness level", readyNow: "Ready now", ready12: "Ready in 1-2 years", ready35: "Ready in 3-5 years", devNeeded: "Development needed",
+    risk: "Risk of loss", impact: "Impact of loss", low: "Low", med: "Medium", high: "High",
+    devPlan: "Successor development plan", deadline: "Development deadline", notes: "Notes",
+    cancel: "Cancel", save: "Save plan", saving: "Saving...",
+  };
+
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (editing) setForm({ ...empty, ...editing });
-    else setForm({ ...empty });
-  }, [editing, open]);
-
+  useEffect(() => { if (editing) setForm({ ...empty, ...editing }); else setForm({ ...empty }); }, [editing, open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const empName = (id) => {
-    const e = employees.find((x) => x.id === id);
-    return e ? `${e.employee_number} - ${e.position}` : "";
-  };
+  const empName = (id) => { const e = employees.find((x) => x.id === id); return e ? `${e.employee_number} - ${e.position}` : ""; };
 
   const submit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    const payload = {
-      ...form,
-      current_holder_name: empName(form.current_holder_id) || form.current_holder_name,
-      successor_name: empName(form.successor_id) || form.successor_name,
-      last_updated: todayISO(),
-    };
+    e.preventDefault(); setSaving(true);
+    const payload = { ...form, current_holder_name: empName(form.current_holder_id) || form.current_holder_name, successor_name: empName(form.successor_id) || form.successor_name, last_updated: todayISO() };
     try {
-      if (editing?.id) {
-        await base44.entities.SuccessionPlan.update(editing.id, payload);
-      } else {
-        await base44.entities.SuccessionPlan.create(payload);
-      }
-      onSaved();
-      onClose();
-    } finally {
-      setSaving(false);
-    }
+      if (editing?.id) await base44.entities.SuccessionPlan.update(editing.id, payload);
+      else await base44.entities.SuccessionPlan.create(payload);
+      onSaved(); onClose();
+    } finally { setSaving(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editing ? "تعديل خطة تعاقب" : "خطة تعاقب جديدة"}</DialogTitle>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>{editing ? t.edit : t.add}</DialogTitle></DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <Field label="المسمى الوظيفي (المنصب الحرج)">
-              <Input value={form.position_title} onChange={(e) => set("position_title", e.target.value)} required />
-            </Field>
-            <Field label="الإدارة">
-              <Input value={form.department} onChange={(e) => set("department", e.target.value)} />
-            </Field>
-            <Field label="الشاغل الحالي">
+            <Field label={t.title}><Input value={form.position_title} onChange={(e) => set("position_title", e.target.value)} required /></Field>
+            <Field label={t.dept}><Input value={form.department} onChange={(e) => set("department", e.target.value)} /></Field>
+            <Field label={t.holder}>
               <Select value={form.current_holder_id} onValueChange={(v) => set("current_holder_id", v)}>
-                <SelectTrigger><SelectValue placeholder="اختر الموظف" /></SelectTrigger>
-                <SelectContent>
-                  {employees.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectTrigger><SelectValue placeholder={t.chooseEmp} /></SelectTrigger>
+                <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="حالة المركز">
+            <Field label={t.posStatus}>
               <Select value={form.position_status} onValueChange={(v) => set("position_status", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">مستقر</SelectItem>
-                  <SelectItem value="at_rick">عرضة للمغادرة</SelectItem>
-                  <SelectItem value="leaving">في طريقه للمغادرة</SelectItem>
-                  <SelectItem value="vacant">شاغر</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="active">{t.active}</SelectItem><SelectItem value="at_risk">{t.atRisk}</SelectItem><SelectItem value="leaving">{t.leaving}</SelectItem><SelectItem value="vacant">{t.vacant}</SelectItem></SelectContent>
               </Select>
             </Field>
-            <Field label="المرشح البديل">
+            <Field label={t.successor}>
               <Select value={form.successor_id} onValueChange={(v) => set("successor_id", v)}>
-                <SelectTrigger><SelectValue placeholder="اختر المرشح" /></SelectTrigger>
-                <SelectContent>
-                  {employees.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectTrigger><SelectValue placeholder={t.chooseSucc} /></SelectTrigger>
+                <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="مستوى الجاهزية">
+            <Field label={t.readiness}>
               <Select value={form.readiness_level} onValueChange={(v) => set("readiness_level", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ready_now">جاهز الآن</SelectItem>
-                  <SelectItem value="ready_1_2_years">جاهز خلال 1-2 سنة</SelectItem>
-                  <SelectItem value="ready_3_5_years">جاهز خلال 3-5 سنوات</SelectItem>
-                  <SelectItem value="development_needed">يحتاج تطوير</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="ready_now">{t.readyNow}</SelectItem><SelectItem value="ready_1_2_years">{t.ready12}</SelectItem><SelectItem value="ready_3_5_years">{t.ready35}</SelectItem><SelectItem value="development_needed">{t.devNeeded}</SelectItem></SelectContent>
               </Select>
             </Field>
-            <Field label="خطر المغادرة">
+            <Field label={t.risk}>
               <Select value={form.risk_of_loss} onValueChange={(v) => set("risk_of_loss", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">منخفض</SelectItem>
-                  <SelectItem value="medium">متوسط</SelectItem>
-                  <SelectItem value="high">مرتفع</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="low">{t.low}</SelectItem><SelectItem value="medium">{t.med}</SelectItem><SelectItem value="high">{t.high}</SelectItem></SelectContent>
               </Select>
             </Field>
-            <Field label="أثر المغادرة">
+            <Field label={t.impact}>
               <Select value={form.impact_of_loss} onValueChange={(v) => set("impact_of_loss", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">منخفض</SelectItem>
-                  <SelectItem value="medium">متوسط</SelectItem>
-                  <SelectItem value="high">مرتفع</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="low">{t.low}</SelectItem><SelectItem value="medium">{t.med}</SelectItem><SelectItem value="high">{t.high}</SelectItem></SelectContent>
               </Select>
             </Field>
           </div>
-
-          <Field label="خطة التطوير للمرشح البديل">
-            <Textarea value={form.development_plan} onChange={(e) => set("development_plan", e.target.value)} rows={3} />
-          </Field>
-
+          <Field label={t.devPlan}><Textarea value={form.development_plan} onChange={(e) => set("development_plan", e.target.value)} rows={3} /></Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="موعد إنجاز التطوير">
-              <Input type="date" value={form.development_deadline} onChange={(e) => set("development_deadline", e.target.value)} />
-            </Field>
-            <Field label="ملاحظات">
-              <Input value={form.notes} onChange={(e) => set("notes", e.target.value)} />
-            </Field>
+            <Field label={t.deadline}><Input type="date" value={form.development_deadline} onChange={(e) => set("development_deadline", e.target.value)} /></Field>
+            <Field label={t.notes}><Input value={form.notes} onChange={(e) => set("notes", e.target.value)} /></Field>
           </div>
-
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>إلغاء</Button>
-            <Button type="submit" disabled={saving || !form.position_title}>
-              {saving ? "جارٍ الحفظ..." : "حفظ الخطة"}
-            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>{t.cancel}</Button>
+            <Button type="submit" disabled={saving || !form.position_title}>{saving ? t.saving : t.save}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -161,10 +121,5 @@ export default function SuccessionForm({ open, employees, editing, onClose, onSa
 }
 
 function Field({ label, children }) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-      {children}
-    </div>
-  );
+  return (<div className="space-y-1.5"><Label className="text-xs font-medium text-muted-foreground">{label}</Label>{children}</div>);
 }

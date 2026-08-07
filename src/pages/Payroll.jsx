@@ -11,8 +11,33 @@ import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, F
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { computeGOSI } from "@/lib/eos";
+import { useI18n } from "@/lib/i18n";
 
 export default function Payroll() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    title: "الرواتب", subtitle: "معالجة كشوفات الرواتب الشهرية",
+    gen: "توليد كشف الشهر", gening: "جارٍ التوليد...",
+    sNet: "إجمالي الصافي", sBonus: "إجمالي الحوافز", sGosi: "تأمينات الموظفين", sDed: "إجمالي الخصومات", sPaid: "رواتب مصروفة",
+    info: "البصمات مربوطة تلقائياً: يُسحب الغياب من سجلات الحضور عند التوليد. لمدير الموارد البشرية صلاحية تعديل أيام الغياب يدوياً في الجدول عند وجود إذن (يُعاد راتب اليوم تلقائياً).",
+    month: "الشهر", year: "السنة",
+    months: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
+    monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
+    loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
+    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
+  } : {
+    title: "Payroll", subtitle: "Process monthly payroll sheets",
+    gen: "Generate month sheet", gening: "Generating...",
+    sNet: "Total net", sBonus: "Total bonus", sGosi: "Employee GOSI", sDed: "Total deductions", sPaid: "Paid salaries",
+    info: "Attendance is linked automatically: absences are pulled from attendance records on generation. HR may manually adjust absence days in the table when excused (the day's salary is restored automatically).",
+    month: "Month", year: "Year",
+    months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
+    loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
+    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
+  };
+
   const [payrolls, setPayrolls] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [org, setOrg] = useState(null);
@@ -39,20 +64,15 @@ export default function Payroll() {
     const existing = new Set(payrolls.map((p) => p.employee_id));
     const orgs = org ? [org] : await base44.entities.Organization.list("-created_date", 1);
     const cfg = orgs[0];
-    // ربط البصمات: جلب سجلات الحضور للشهر وحساب أيام الغياب وخصمها
     const mm = String(month).padStart(2, "0");
     const startDate = `${year}-${mm}-01`;
     const endDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${mm}-${String(endDay).padStart(2, "0")}`;
-    const attRecords = await base44.entities.Attendance.filter(
-      { date: { $gte: startDate, $lte: endDate } }, "-created_date", 2000
-    );
+    const attRecords = await base44.entities.Attendance.filter({ date: { $gte: startDate, $lte: endDate } }, "-created_date", 2000);
     const absentByEmp = {};
-    const lateByEmp = {};
     for (const a of attRecords) {
       if (!a.employee_id) continue;
       if (a.status === "absent") absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
-      if (a.status === "late") lateByEmp[a.employee_id] = (lateByEmp[a.employee_id] || 0) + 1;
     }
     const created = [];
     for (const emp of employees) {
@@ -68,25 +88,14 @@ export default function Payroll() {
       const absentDeduction = Number((dailyWage * absentDays).toFixed(2));
       const net = gross - gosi.gosi_employee - absentDeduction;
       created.push({
-        employee_id: emp.id,
-        employee_name: `${emp.employee_number} - ${emp.position}`,
-        month, year,
-        base_salary: base,
-        housing_allowance: housing,
-        transport_allowance: transport,
-        other_allowances: other,
-        gross_salary: gross,
-        bonus: 0, deductions: absentDeduction, loan_installment: 0,
-        gosi_employee: Number(gosi.gosi_employee.toFixed(2)),
-        gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
-        overtime_hours: 0,
-        absent_days: absentDays,
-        net_salary: net, status: "draft",
+        employee_id: emp.id, employee_name: `${emp.employee_number} - ${emp.position}`,
+        month, year, base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+        gross_salary: gross, bonus: 0, deductions: absentDeduction, loan_installment: 0,
+        gosi_employee: Number(gosi.gosi_employee.toFixed(2)), gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
+        overtime_hours: 0, absent_days: absentDays, net_salary: net, status: "draft",
       });
     }
-    if (created.length > 0) {
-      await base44.entities.Payroll.bulkCreate(created);
-    }
+    if (created.length > 0) await base44.entities.Payroll.bulkCreate(created);
     setGenerating(false);
     load();
   };
@@ -94,18 +103,13 @@ export default function Payroll() {
   const updateField = async (id, field, value) => {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
-    updated.gross_salary =
-      (updated.base_salary || 0) + (updated.housing_allowance || 0) +
-      (updated.transport_allowance || 0) + (updated.other_allowances || 0);
-    updated.net_salary = (updated.gross_salary || 0) +
-      (updated.bonus || 0) - (updated.deductions || 0) -
-      (updated.gosi_employee || 0) - (updated.loan_installment || 0);
+    updated.gross_salary = (updated.base_salary || 0) + (updated.housing_allowance || 0) + (updated.transport_allowance || 0) + (updated.other_allowances || 0);
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) - (updated.deductions || 0) - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
     updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
 
-  // صلاحية مدير الموارد البشرية: تعديل أيام الغياب (مثلاً كان بإذن فيعاد راتبه)
   const overrideAbsentDays = async (id, days) => {
     const rec = payrolls.find((p) => p.id === id);
     const abs = Math.max(0, Number(days) || 0);
@@ -123,15 +127,13 @@ export default function Payroll() {
     setBatching(true);
     const updates = payrolls.filter((p) => p.status === "draft").map((p) => ({ id: p.id, status: "approved" }));
     if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
-    setBatching(false);
-    load();
+    setBatching(false); load();
   };
   const payAll = async () => {
     setBatching(true);
     const updates = payrolls.filter((p) => p.status === "approved").map((p) => ({ id: p.id, status: "paid", paid_date: todayISO() }));
     if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
-    setBatching(false);
-    load();
+    setBatching(false); load();
   };
 
   const totalNet = payrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
@@ -144,43 +146,41 @@ export default function Payroll() {
   const monthStatus = payrolls.length && payrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
 
   return (
-    <div>
+    <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader
-        title="الرواتب"
-        subtitle="معالجة كشوفات الرواتب الشهرية"
+        title={t.title}
+        subtitle={t.subtitle}
         action={
           <Button onClick={generate} disabled={generating} className="gap-2">
-            <Sparkles size={18} /> {generating ? "جارٍ التوليد..." : "توليد كشف الشهر"}
+            <Sparkles size={18} /> {generating ? t.gening : t.gen}
           </Button>
         }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={Wallet} label="إجمالي الصافي" value={formatCurrency(totalNet)} tint="green" />
-        <StatCard icon={TrendingUp} label="إجمالي الحوافز" value={formatCurrency(totalBonus)} tint="violet" />
-        <StatCard icon={Shield} label="تأمينات الموظفين" value={formatCurrency(totalGosiEmployee)} tint="amber" />
-        <StatCard icon={Clock} label="إجمالي الخصومات" value={formatCurrency(totalDed)} tint="rose" />
-        <StatCard icon={CheckCircle2} label="رواتب مصروفة" value={paidCount} tint="blue" />
+        <StatCard icon={Wallet} label={t.sNet} value={formatCurrency(totalNet)} tint="green" />
+        <StatCard icon={TrendingUp} label={t.sBonus} value={formatCurrency(totalBonus)} tint="violet" />
+        <StatCard icon={Shield} label={t.sGosi} value={formatCurrency(totalGosiEmployee)} tint="amber" />
+        <StatCard icon={Clock} label={t.sDed} value={formatCurrency(totalDed)} tint="rose" />
+        <StatCard icon={CheckCircle2} label={t.sPaid} value={paidCount} tint="blue" />
       </div>
 
       <div className="mb-4 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
-        <Fingerprint size={14} /> البصمات مربوطة تلقائياً: يُسحب الغياب من سجلات الحضور عند التوليد. لمدير الموارد البشرية صلاحية تعديل أيام الغياب يدوياً في الجدول عند وجود إذن (يُعاد راتب اليوم تلقائياً).
+        <Fingerprint size={14} /> {t.info}
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex gap-3 items-end">
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">الشهر</label>
+          <label className="text-xs font-medium text-muted-foreground">{t.month}</label>
           <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"].map((m, i) => (
-                <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
-              ))}
+              {t.months.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">السنة</label>
+          <label className="text-xs font-medium text-muted-foreground">{t.year}</label>
           <Input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} className="w-28" />
         </div>
       </div>
@@ -188,49 +188,41 @@ export default function Payroll() {
       {payrolls.length > 0 && !loading && (
         <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">حالة كشف الشهر:</span>
+            <span className="text-muted-foreground">{t.monthStatus}</span>
             <span className={cn("px-3 py-1 rounded-full font-medium text-xs", payrollStatusLabel(monthStatus).cls)}>{payrollStatusLabel(monthStatus).label}</span>
-            <span className="text-xs text-muted-foreground">({payrolls.length} موظف)</span>
+            <span className="text-xs text-muted-foreground">{t.empCount(payrolls.length)}</span>
           </div>
           <div className="flex gap-2">
-            {anyDraft && (
-              <Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2">
-                <FileCheck size={16} /> اعتماد كشف الشهر
-              </Button>
-            )}
-            {anyApproved && (
-              <Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-                <FileCheck size={16} /> صرف الكشف
-              </Button>
-            )}
+            {anyDraft && (<Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2"><FileCheck size={16} /> {t.approve}</Button>)}
+            {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
           </div>
         </div>
       )}
 
       <div className="bg-white rounded-2xl border border-border overflow-hidden">
         {loading ? (
-          <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+          <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
         ) : payrolls.length === 0 ? (
           <div className="p-14 text-center">
             <Wallet size={40} className="mx-auto text-slate-300 mb-3" />
-            <p className="text-muted-foreground">لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"</p>
+            <p className="text-muted-foreground">{t.empty}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
-                  <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">الموظف</th>
-                  <th className="text-right px-3 py-3 font-medium">أساسي</th>
-                  <th className="text-right px-3 py-3 font-medium">سكن</th>
-                  <th className="text-right px-3 py-3 font-medium">مواصلات</th>
-                  <th className="text-right px-3 py-3 font-medium text-emerald-600">حوافز</th>
-                  <th className="text-right px-3 py-3 font-medium text-amber-600">تأمينات (موظف)</th>
-                  <th className="text-right px-3 py-3 font-medium">غياب (يوم)</th>
-                  <th className="text-right px-3 py-3 font-medium text-rose-600">خصومات</th>
-                  <th className="text-right px-3 py-3 font-medium text-violet-600">سلفة</th>
-                  <th className="text-right px-3 py-3 font-medium">الصافي</th>
-                  <th className="text-right px-3 py-3 font-medium">الحالة</th>
+                  <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">{t.thEmp}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thBase}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thTrans}</th>
+                  <th className="text-right px-3 py-3 font-medium text-emerald-600">{t.thBonus}</th>
+                  <th className="text-right px-3 py-3 font-medium text-amber-600">{t.thGosi}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thAbsent}</th>
+                  <th className="text-right px-3 py-3 font-medium text-rose-600">{t.thDed}</th>
+                  <th className="text-right px-3 py-3 font-medium text-violet-600">{t.thLoan}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thNet}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thStatus}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -246,11 +238,7 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
-                    <td className="px-3 py-2">
-                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>
-                        {payrollStatusLabel(p.status).label}
-                      </span>
-                    </td>
+                    <td className="px-3 py-2"><span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -266,13 +254,8 @@ function EditableCell({ value, onCommit }) {
   const [v, setV] = useState(value || 0);
   useEffect(() => { setV(value || 0); }, [value]);
   return (
-    <input
-      type="number"
-      value={v}
-      onChange={(e) => setV(e.target.value)}
-      onBlur={() => onCommit(v)}
+    <input type="number" value={v} onChange={(e) => setV(e.target.value)} onBlur={() => onCommit(v)}
       onKeyDown={(e) => { if (e.key === "Enter") e.target.blur(); }}
-      className="w-20 px-2 py-1 text-xs tabular-nums border border-transparent rounded-lg hover:border-border focus:border-border focus:outline-none bg-transparent"
-    />
+      className="w-20 px-2 py-1 text-xs tabular-nums border border-transparent rounded-lg hover:border-border focus:border-border focus:outline-none bg-transparent" />
   );
 }
