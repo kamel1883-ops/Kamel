@@ -19,6 +19,17 @@ export default async function(req) {
     }
     const emp = matches[0];
 
+    // حدود الثقة: التحقق من تطابق بريد المستخدم الموثّق مع بريد العمل المسجّل لدى HR لهذا الموظف.
+    // لا يُسمح بالربط إلا إذا كان بريد العمل مضبوطاً ومطابقاً لبريد المستخدم المسجّل (الموثّق عبر OTP) —
+    // هذا يمنع الاستيلاء على حساب موظف بمعرفة رقم هويته فقط.
+    const empEmail = (emp.email || '').trim().toLowerCase();
+    const userEmail = (user.email || '').trim().toLowerCase();
+    if (!empEmail || empEmail !== userEmail) {
+      return Response.json({
+        error: 'تعذّر التحقق من هويتك. لا يمكن ربط الحساب إلا إذا طابق البريد المسجّل في حسابك البريد المعتمد لدى الموارد البشرية لهذا الموظف. تواصل مع الموارد البشرية لضبط بريد العمل.'
+      }, { status: 403 });
+    }
+
     // إن كان السجل مرتبطاً بحساب آخر → رفض
     if (emp.user_id && emp.user_id !== user.id) {
       return Response.json({ error: 'هذا السجل مرتبط بحساب آخر. تواصل مع الموارد البشرية.' }, { status: 409 });

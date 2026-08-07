@@ -15,7 +15,7 @@ import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 
 const empty = {
   full_name: "",
-  employee_number: "", national_id: "", nationality: "", gender: "male", is_saudi: false,
+  employee_number: "", national_id: "", email: "", nationality: "", gender: "male", is_saudi: false,
   birth_date: "", phone: "", address: "", emergency_contact: "",
   department: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
   contract_type: "full_time", status: "active",
@@ -32,7 +32,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   const isAr = lang === "ar";
   const t = isAr ? {
     edit: "تعديل بيانات الموظف", add: "إضافة موظف جديد",
-    fullName: "الاسم الكامل", empNo: "الرقم الوظيفي", natId: "الهوية الوطنية", nationality: "الجنسية", gender: "الجنس", male: "ذكر", female: "أنثى",
+    fullName: "الاسم الكامل", empNo: "الرقم الوظيفي",     natId: "الهوية الوطنية", email: "بريد العمل (لربط الحساب)", nationality: "الجنسية", gender: "الجنس", male: "ذكر", female: "أنثى",
     birth: "تاريخ الميلاد", phone: "رقم الجوال", dept: "الإدارة", position: "المسمى الوظيفي", jobGrade: "الدرجة الوظيفية", hireDate: "تاريخ التعيين",
     contract: "نوع العقد", full: "دوام كامل", part: "دوام جزئي", cont: "عقد",
     status: "الحالة الوظيفية", active: "على رأس العمل", onLeave: "في إجازة", terminated: "منهي", resigned: "مستقيل",
@@ -46,7 +46,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     cancel: "إلغاء", save: "حفظ",
   } : {
     edit: "Edit employee", add: "Add new employee",
-    fullName: "Full name", empNo: "Employee number", natId: "National ID", nationality: "Nationality", gender: "Gender", male: "Male", female: "Female",
+    fullName: "Full name", empNo: "Employee number",     natId: "National ID", email: "Work email (account linking)", nationality: "Nationality", gender: "Gender", male: "Male", female: "Female",
     birth: "Birth date", phone: "Phone", dept: "Department", position: "Job title", jobGrade: "Job grade", hireDate: "Hire date",
     contract: "Contract type", full: "Full-time", part: "Part-time", cont: "Contract",
     status: "Employment status", active: "Active", onLeave: "On leave", terminated: "Terminated", resigned: "Resigned",
@@ -93,6 +93,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             <Field label={t.fullName}><Input value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder={isAr ? "مثال: محمد عبدالله" : "e.g. Mohammed Alharbi"} /></Field>
             <Field label={t.empNo}><Input value={form.employee_number} onChange={(e) => set("employee_number", e.target.value)} required /></Field>
             <Field label={t.natId}><Input value={form.national_id} onChange={(e) => set("national_id", e.target.value)} /></Field>
+            <Field label={t.email}><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder={isAr ? "name@company.sa" : "name@company.sa"} /></Field>
             <Field label={t.nationality}><Input value={form.nationality} onChange={(e) => set("nationality", e.target.value)} /></Field>
             <Field label={t.gender}>
               <Select value={form.gender} onValueChange={(v) => set("gender", v)}>
