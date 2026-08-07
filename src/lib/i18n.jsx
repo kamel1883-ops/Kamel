@@ -1,15 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { setLangStore } from "@/lib/lang";
 
 const LangCtx = createContext(null);
 const STORAGE_KEY = "jadara_lang";
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
+    let l = "ar";
     try {
-      return localStorage.getItem(STORAGE_KEY) || "ar";
-    } catch {
-      return "ar";
-    }
+      l = localStorage.getItem(STORAGE_KEY) || "ar";
+    } catch (e) {}
+    setLangStore(l);
+    return l;
   });
 
   useEffect(() => {
@@ -17,6 +19,7 @@ export function LanguageProvider({ children }) {
       localStorage.setItem(STORAGE_KEY, lang);
       document.documentElement.lang = lang;
     } catch (e) {}
+    setLangStore(lang);
   }, [lang]);
 
   const toggle = () => setLang((l) => (l === "ar" ? "en" : "ar"));

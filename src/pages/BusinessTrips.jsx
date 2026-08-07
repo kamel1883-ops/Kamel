@@ -12,22 +12,50 @@ import {
 } from "@/components/ui/select";
 import { Pencil, Trash2, Plane, MapPin, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const typeLabel = {
-  internal: { label: "داخلية", cls: "bg-blue-50 text-blue-600" },
-  external: { label: "خارجية", cls: "bg-violet-50 text-violet-600" },
-};
-const statusLabel = {
-  draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
-  pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
-  approved: { label: "معتمدة", cls: "bg-blue-50 text-blue-600" },
-  in_progress: { label: "قيد التنفيذ", cls: "bg-indigo-50 text-indigo-600" },
-  completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
-  cancelled: { label: "ملغاة", cls: "bg-rose-50 text-rose-600" },
-};
-const transportLabel = { plane: "طيران", car: "سيارة", bus: "حافلة", train: "قطار", none: "—" };
+import { useI18n } from "@/lib/i18n";
 
 export default function BusinessTrips() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const typeLabel = isAr ? {
+    internal: { label: "داخلية", cls: "bg-blue-50 text-blue-600" },
+    external: { label: "خارجية", cls: "bg-violet-50 text-violet-600" },
+  } : {
+    internal: { label: "Internal", cls: "bg-blue-50 text-blue-600" },
+    external: { label: "External", cls: "bg-violet-50 text-violet-600" },
+  };
+  const statusLabel = isAr ? {
+    draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
+    pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
+    approved: { label: "معتمدة", cls: "bg-blue-50 text-blue-600" },
+    in_progress: { label: "قيد التنفيذ", cls: "bg-indigo-50 text-indigo-600" },
+    completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
+    cancelled: { label: "ملغاة", cls: "bg-rose-50 text-rose-600" },
+  } : {
+    draft: { label: "Draft", cls: "bg-slate-100 text-slate-600" },
+    pending: { label: "Pending", cls: "bg-amber-50 text-amber-600" },
+    approved: { label: "Approved", cls: "bg-blue-50 text-blue-600" },
+    in_progress: { label: "In progress", cls: "bg-indigo-50 text-indigo-600" },
+    completed: { label: "Completed", cls: "bg-emerald-50 text-emerald-600" },
+    cancelled: { label: "Cancelled", cls: "bg-rose-50 text-rose-600" },
+  };
+  const transportLabel = isAr
+    ? { plane: "طيران", car: "سيارة", bus: "حافلة", train: "قطار", none: "—" }
+    : { plane: "Flight", car: "Car", bus: "Bus", train: "Train", none: "—" };
+  const t = isAr ? {
+    title: "رحلات العمل والانتداب", subtitle: "إدارة انتدابات الموظفين الداخلية والخارجية والتكاليف المرتبطة بها",
+    sTotal: "إجمالي الرحلات", sInternal: "داخلية", sExternal: "خارجية", sCost: "إجمالي التكاليف",
+    search: "بحث بالموظف أو الوجهة أو الغرض", type: "نوع الرحلة", allTypes: "كل الأنواع", status: "الحالة", allStatus: "كل الحالات",
+    loading: "جارٍ التحميل...", empty: "لا توجد رحلات عمل بعد — ابدأ بإنشاء رحلة جديدة",
+    thEmp: "الموظف", thType: "النوع", thDest: "الوجهة", thPeriod: "الفترة", thDays: "الأيام", thTransport: "التنقل", thCost: "التكلفة", thStatus: "الحالة",
+  } : {
+    title: "Business Trips & Deputation", subtitle: "Manage internal and external employee trips and related costs",
+    sTotal: "Total trips", sInternal: "Internal", sExternal: "External", sCost: "Total costs",
+    search: "Search by employee, destination or purpose", type: "Trip type", allTypes: "All types", status: "Status", allStatus: "All statuses",
+    loading: "Loading...", empty: "No business trips yet — create a new one",
+    thEmp: "Employee", thType: "Type", thDest: "Destination", thPeriod: "Period", thDays: "Days", thTransport: "Transport", thCost: "Cost", thStatus: "Status",
+  };
+
   const [trips, setTrips] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,117 +67,103 @@ export default function BusinessTrips() {
 
   const load = async () => {
     setLoading(true);
-    const [t, e] = await Promise.all([
+    const [tr, e] = await Promise.all([
       base44.entities.BusinessTrip.list("-created_date", 500),
       base44.entities.Employee.list("-created_date", 500),
     ]);
-    setTrips(t);
-    setEmployees(e);
-    setLoading(false);
+    setTrips(tr); setEmployees(e); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  const remove = async (id) => {
-    await base44.entities.BusinessTrip.delete(id);
-    load();
-  };
+  const remove = async (id) => { await base44.entities.BusinessTrip.delete(id); load(); };
 
-  const filtered = trips.filter((t) => {
-    const emp = employees.find((x) => x.id === t.employee_id);
-    const text = `${t.employee_name || ""} ${emp?.position || ""} ${t.destination || ""} ${t.purpose || ""}`;
+  const filtered = trips.filter((tr) => {
+    const emp = employees.find((x) => x.id === tr.employee_id);
+    const text = `${tr.employee_name || ""} ${emp?.position || ""} ${tr.destination || ""} ${tr.purpose || ""}`;
     if (q && !text.toLowerCase().includes(q.toLowerCase())) return false;
-    if (typeFilter !== "all" && t.trip_type !== typeFilter) return false;
-    if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (typeFilter !== "all" && tr.trip_type !== typeFilter) return false;
+    if (statusFilter !== "all" && tr.status !== statusFilter) return false;
     return true;
   });
 
   const stats = {
     total: trips.length,
-    internal: trips.filter((t) => t.trip_type === "internal").length,
-    external: trips.filter((t) => t.trip_type === "external").length,
-    cost: trips.reduce((s, t) => s + (Number(t.total_cost) || 0), 0),
+    internal: trips.filter((tr) => tr.trip_type === "internal").length,
+    external: trips.filter((tr) => tr.trip_type === "external").length,
+    cost: trips.reduce((s, tr) => s + (Number(tr.total_cost) || 0), 0),
   };
 
   return (
-    <div>
-      <PageHeader
-        title="رحلات العمل والانتداب"
-        subtitle="إدارة انتدابات الموظفين الداخلية والخارجية والتكاليف المرتبطة بها"
-      />
+    <div dir={isAr ? "rtl" : "ltr"}>
+      <PageHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={<Plane size={18} />} label="إجمالي الرحلات" value={stats.total} cls="bg-violet-50 text-violet-600" />
-        <StatCard icon={<MapPin size={18} />} label="داخلية" value={stats.internal} cls="bg-blue-50 text-blue-600" />
-        <StatCard icon={<MapPin size={18} />} label="خارجية" value={stats.external} cls="bg-indigo-50 text-indigo-600" />
-        <StatCard icon={<Wallet size={18} />} label="إجمالي التكاليف" value={stats.cost.toLocaleString()} cls="bg-emerald-50 text-emerald-600" />
+        <StatCard icon={<Plane size={18} />} label={t.sTotal} value={stats.total} cls="bg-violet-50 text-violet-600" />
+        <StatCard icon={<MapPin size={18} />} label={t.sInternal} value={stats.internal} cls="bg-blue-50 text-blue-600" />
+        <StatCard icon={<MapPin size={18} />} label={t.sExternal} value={stats.external} cls="bg-indigo-50 text-indigo-600" />
+        <StatCard icon={<Wallet size={18} />} label={t.sCost} value={stats.cost.toLocaleString()} cls="bg-emerald-50 text-emerald-600" />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <Input placeholder="بحث بالموظف أو الوجهة أو الغرض" value={q} onChange={(e) => setQ(e.target.value)} className="sm:max-w-xs" />
+        <Input placeholder={t.search} value={q} onChange={(e) => setQ(e.target.value)} className="sm:max-w-xs" />
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="sm:w-44"><SelectValue placeholder="نوع الرحلة" /></SelectTrigger>
+          <SelectTrigger className="sm:w-44"><SelectValue placeholder={t.type} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">كل الأنواع</SelectItem>
-            <SelectItem value="internal">داخلية</SelectItem>
-            <SelectItem value="external">خارجية</SelectItem>
+            <SelectItem value="all">{t.allTypes}</SelectItem>
+            <SelectItem value="internal">{typeLabel.internal.label}</SelectItem>
+            <SelectItem value="external">{typeLabel.external.label}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="sm:w-44"><SelectValue placeholder="الحالة" /></SelectTrigger>
+          <SelectTrigger className="sm:w-44"><SelectValue placeholder={t.status} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">كل الحالات</SelectItem>
-            {Object.entries(statusLabel).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v.label}</SelectItem>
-            ))}
+            <SelectItem value="all">{t.allStatus}</SelectItem>
+            {Object.entries(statusLabel).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
       {loading ? (
-        <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+        <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
       ) : filtered.length === 0 ? (
         <div className="p-14 text-center bg-white rounded-2xl border border-border">
           <Plane size={40} className="mx-auto text-slate-300 mb-3" />
-          <p className="text-muted-foreground">لا توجد رحلات عمل بعد — ابدأ بإنشاء رحلة جديدة</p>
+          <p className="text-muted-foreground">{t.empty}</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الموظف</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>الوجهة</TableHead>
-                <TableHead>الفترة</TableHead>
-                <TableHead>الأيام</TableHead>
-                <TableHead>التنقل</TableHead>
-                <TableHead>التكلفة</TableHead>
-                <TableHead>الحالة</TableHead>
+                <TableHead>{t.thEmp}</TableHead>
+                <TableHead>{t.thType}</TableHead>
+                <TableHead>{t.thDest}</TableHead>
+                <TableHead>{t.thPeriod}</TableHead>
+                <TableHead>{t.thDays}</TableHead>
+                <TableHead>{t.thTransport}</TableHead>
+                <TableHead>{t.thCost}</TableHead>
+                <TableHead>{t.thStatus}</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((t) => {
-                const tp = typeLabel[t.trip_type] || typeLabel.internal;
-                const st = statusLabel[t.status] || statusLabel.pending;
+              {filtered.map((tr) => {
+                const tp = typeLabel[tr.trip_type] || typeLabel.internal;
+                const st = statusLabel[tr.status] || statusLabel.pending;
                 return (
-                  <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.employee_name || "—"}</TableCell>
+                  <TableRow key={tr.id}>
+                    <TableCell className="font-medium">{tr.employee_name || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
-                    <TableCell>{t.destination || "—"}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{t.start_date} ← {t.end_date}</TableCell>
-                    <TableCell>{t.days_count || 0}</TableCell>
-                    <TableCell className="text-sm">{transportLabel[t.transport_mode] || "—"}</TableCell>
-                    <TableCell className="font-medium">{(Number(t.total_cost) || 0).toLocaleString()}</TableCell>
+                    <TableCell>{tr.destination || "—"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{tr.start_date} ← {tr.end_date}</TableCell>
+                    <TableCell>{tr.days_count || 0}</TableCell>
+                    <TableCell className="text-sm">{transportLabel[tr.transport_mode] || "—"}</TableCell>
+                    <TableCell className="font-medium">{(Number(tr.total_cost) || 0).toLocaleString()}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <button onClick={() => { setEditing(t); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
-                          <Pencil size={15} />
-                        </button>
-                        <button onClick={() => remove(t.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500">
-                          <Trash2 size={15} />
-                        </button>
+                        <button onClick={() => { setEditing(tr); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>
+                        <button onClick={() => remove(tr.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -160,13 +174,7 @@ export default function BusinessTrips() {
         </div>
       )}
 
-      <BusinessTripForm
-        open={showForm}
-        employees={employees}
-        editing={editing}
-        onClose={() => setShowForm(false)}
-        onSaved={load}
-      />
+      <BusinessTripForm open={showForm} employees={employees} editing={editing} onClose={() => setShowForm(false)} onSaved={load} />
     </div>
   );
 }

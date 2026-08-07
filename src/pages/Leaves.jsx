@@ -10,27 +10,59 @@ import {
 } from "@/components/ui/select";
 import { Trash2, CalendarDays, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const typeLabel = {
-  annual: { label: "سنوية", cls: "bg-blue-50 text-blue-600" },
-  sick: { label: "مرضية", cls: "bg-rose-50 text-rose-600" },
-  emergency: { label: "طارئة", cls: "bg-amber-50 text-amber-600" },
-  unpaid: { label: "بدون راتب", cls: "bg-slate-100 text-slate-600" },
-  maternity: { label: "أمومة", cls: "bg-violet-50 text-violet-600" },
-};
-const statusLabel = {
-  pending_manager: { label: "بانتظار المدير", cls: "bg-amber-50 text-amber-600" },
-  manager_approved: { label: "اعتمد المدير", cls: "bg-blue-50 text-blue-600" },
-  hr_approved: { label: "اعتمدت الموارد", cls: "bg-indigo-50 text-indigo-600" },
-  awaiting_finance: { label: "بانتظار المالية", cls: "bg-violet-50 text-violet-600" },
-  paid: { label: "صُرفت", cls: "bg-emerald-50 text-emerald-600" },
-  completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
-  rejected: { label: "مرفوضة", cls: "bg-rose-50 text-rose-600" },
-  pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-600" },
-  approved: { label: "معتمدة", cls: "bg-emerald-50 text-emerald-600" },
-};
+import { useI18n } from "@/lib/i18n";
 
 export default function Leaves() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const typeLabel = isAr ? {
+    annual: { label: "سنوية", cls: "bg-blue-50 text-blue-600" },
+    sick: { label: "مرضية", cls: "bg-rose-50 text-rose-600" },
+    emergency: { label: "طارئة", cls: "bg-amber-50 text-amber-600" },
+    unpaid: { label: "بدون راتب", cls: "bg-slate-100 text-slate-600" },
+    maternity: { label: "أمومة", cls: "bg-violet-50 text-violet-600" },
+  } : {
+    annual: { label: "Annual", cls: "bg-blue-50 text-blue-600" },
+    sick: { label: "Sick", cls: "bg-rose-50 text-rose-600" },
+    emergency: { label: "Emergency", cls: "bg-amber-50 text-amber-600" },
+    unpaid: { label: "Unpaid", cls: "bg-slate-100 text-slate-600" },
+    maternity: { label: "Maternity", cls: "bg-violet-50 text-violet-600" },
+  };
+  const statusLabel = isAr ? {
+    pending_manager: { label: "بانتظار المدير", cls: "bg-amber-50 text-amber-600" },
+    manager_approved: { label: "اعتمد المدير", cls: "bg-blue-50 text-blue-600" },
+    hr_approved: { label: "اعتمدت الموارد", cls: "bg-indigo-50 text-indigo-600" },
+    awaiting_finance: { label: "بانتظار المالية", cls: "bg-violet-50 text-violet-600" },
+    paid: { label: "صُرفت", cls: "bg-emerald-50 text-emerald-600" },
+    completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
+    rejected: { label: "مرفوضة", cls: "bg-rose-50 text-rose-600" },
+    pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-600" },
+    approved: { label: "معتمدة", cls: "bg-emerald-50 text-emerald-600" },
+  } : {
+    pending_manager: { label: "Awaiting manager", cls: "bg-amber-50 text-amber-600" },
+    manager_approved: { label: "Manager approved", cls: "bg-blue-50 text-blue-600" },
+    hr_approved: { label: "HR approved", cls: "bg-indigo-50 text-indigo-600" },
+    awaiting_finance: { label: "Awaiting finance", cls: "bg-violet-50 text-violet-600" },
+    paid: { label: "Paid", cls: "bg-emerald-50 text-emerald-600" },
+    completed: { label: "Completed", cls: "bg-emerald-50 text-emerald-600" },
+    rejected: { label: "Rejected", cls: "bg-rose-50 text-rose-600" },
+    pending: { label: "Under review", cls: "bg-amber-50 text-amber-600" },
+    approved: { label: "Approved", cls: "bg-emerald-50 text-emerald-600" },
+  };
+  const t = isAr ? {
+    title: "إدارة الإجازات", subtitle: "متابعة طلبات الإجازات وأرصدتها وحالاتها",
+    sTotal: "إجمالي الطلبات", sPending: "قيد المعالجة", sApproved: "معتمدة", sRejected: "مرفوضة",
+    search: "بحث بالموظف أو السبب", type: "نوع الإجازة", allTypes: "كل الأنواع", status: "الحالة", allStatus: "كل الحالات",
+    loading: "جارٍ التحميل...", empty: "لا توجد طلبات إجازات بعد — أنشئ طلباً جديداً",
+    thEmp: "الموظف", thType: "النوع", thFrom: "من", thTo: "إلى", thDays: "الأيام", thReason: "السبب", thStatus: "الحالة",
+  } : {
+    title: "Leaves", subtitle: "Track leave requests, balances and statuses",
+    sTotal: "Total requests", sPending: "In progress", sApproved: "Approved", sRejected: "Rejected",
+    search: "Search by employee or reason", type: "Leave type", allTypes: "All types", status: "Status", allStatus: "All statuses",
+    loading: "Loading...", empty: "No leave requests yet — create a new request",
+    thEmp: "Employee", thType: "Type", thFrom: "From", thTo: "To", thDays: "Days", thReason: "Reason", thStatus: "Status",
+  };
+
   const [requests, setRequests] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,16 +76,11 @@ export default function Leaves() {
       base44.entities.LeaveRequest.list("-created_date", 500),
       base44.entities.Employee.list("-created_date", 500),
     ]);
-    setRequests(r);
-    setEmployees(e);
-    setLoading(false);
+    setRequests(r); setEmployees(e); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  const remove = async (id) => {
-    await base44.entities.LeaveRequest.delete(id);
-    load();
-  };
+  const remove = async (id) => { await base44.entities.LeaveRequest.delete(id); load(); };
 
   const filtered = requests.filter((r) => {
     const text = `${r.employee_name || ""} ${r.reason || ""}`;
@@ -71,60 +98,53 @@ export default function Leaves() {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="إدارة الإجازات"
-        subtitle="متابعة طلبات الإجازات وأرصدتها وحالاتها"
-      />
+    <div dir={isAr ? "rtl" : "ltr"}>
+      <PageHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={<CalendarDays size={18} />} label="إجمالي الطلبات" value={stats.total} cls="bg-violet-50 text-violet-600" />
-        <StatCard icon={<Clock size={18} />} label="قيد المعالجة" value={stats.pending} cls="bg-amber-50 text-amber-600" />
-        <StatCard icon={<CheckCircle2 size={18} />} label="معتمدة" value={stats.approved} cls="bg-emerald-50 text-emerald-600" />
-        <StatCard icon={<XCircle size={18} />} label="مرفوضة" value={stats.rejected} cls="bg-rose-50 text-rose-600" />
+        <StatCard icon={<CalendarDays size={18} />} label={t.sTotal} value={stats.total} cls="bg-violet-50 text-violet-600" />
+        <StatCard icon={<Clock size={18} />} label={t.sPending} value={stats.pending} cls="bg-amber-50 text-amber-600" />
+        <StatCard icon={<CheckCircle2 size={18} />} label={t.sApproved} value={stats.approved} cls="bg-emerald-50 text-emerald-600" />
+        <StatCard icon={<XCircle size={18} />} label={t.sRejected} value={stats.rejected} cls="bg-rose-50 text-rose-600" />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <Input placeholder="بحث بالموظف أو السبب" value={q} onChange={(e) => setQ(e.target.value)} className="sm:max-w-xs" />
+        <Input placeholder={t.search} value={q} onChange={(e) => setQ(e.target.value)} className="sm:max-w-xs" />
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="sm:w-44"><SelectValue placeholder="نوع الإجازة" /></SelectTrigger>
+          <SelectTrigger className="sm:w-44"><SelectValue placeholder={t.type} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">كل الأنواع</SelectItem>
-            {Object.entries(typeLabel).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v.label}</SelectItem>
-            ))}
+            <SelectItem value="all">{t.allTypes}</SelectItem>
+            {Object.entries(typeLabel).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="sm:w-44"><SelectValue placeholder="الحالة" /></SelectTrigger>
+          <SelectTrigger className="sm:w-44"><SelectValue placeholder={t.status} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">كل الحالات</SelectItem>
-            {Object.entries(statusLabel).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v.label}</SelectItem>
-            ))}
+            <SelectItem value="all">{t.allStatus}</SelectItem>
+            {Object.entries(statusLabel).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
       {loading ? (
-        <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+        <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
       ) : filtered.length === 0 ? (
         <div className="p-14 text-center bg-white rounded-2xl border border-border">
           <CalendarDays size={40} className="mx-auto text-slate-300 mb-3" />
-          <p className="text-muted-foreground">لا توجد طلبات إجازات بعد — أنشئ طلباً جديداً</p>
+          <p className="text-muted-foreground">{t.empty}</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الموظف</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>من</TableHead>
-                <TableHead>إلى</TableHead>
-                <TableHead>الأيام</TableHead>
-                <TableHead>السبب</TableHead>
-                <TableHead>الحالة</TableHead>
+                <TableHead>{t.thEmp}</TableHead>
+                <TableHead>{t.thType}</TableHead>
+                <TableHead>{t.thFrom}</TableHead>
+                <TableHead>{t.thTo}</TableHead>
+                <TableHead>{t.thDays}</TableHead>
+                <TableHead>{t.thReason}</TableHead>
+                <TableHead>{t.thStatus}</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -142,9 +162,7 @@ export default function Leaves() {
                     <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate">{r.reason || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
                     <TableCell>
-                      <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500">
-                        <Trash2 size={15} />
-                      </button>
+                      <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
                     </TableCell>
                   </TableRow>
                 );
@@ -153,7 +171,6 @@ export default function Leaves() {
           </Table>
         </div>
       )}
-
     </div>
   );
 }

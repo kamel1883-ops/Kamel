@@ -10,8 +10,23 @@ import {
 import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
+import { useI18n } from "@/lib/i18n";
 
 export default function Employees() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد",
+    search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", loading: "جارٍ التحميل...",
+    empty: "لا يوجد موظفون مطابقون", del: (n) => `حذف الموظف ${n}؟`,
+    thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
+  } : {
+    title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee",
+    search: "Search by number or title...", allDepts: "All departments", loading: "Loading...",
+    empty: "No matching employees", del: (n) => `Delete employee ${n}?`,
+    thNum: "Number", thPos: "Title", thDept: "Department", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
+  };
+
   const [employees, setEmployees] = useState([]);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("all");
@@ -27,7 +42,6 @@ export default function Employees() {
   useEffect(() => { load(); }, [editTarget, formOpen]);
 
   const departments = Array.from(new Set(employees.map((e) => e.department).filter(Boolean)));
-
   const filtered = employees.filter((e) => {
     const q = search.trim();
     const matchQ = !q || e.employee_number?.includes(q) || e.position?.includes(q) || e.department?.includes(q);
@@ -36,52 +50,52 @@ export default function Employees() {
   });
 
   const remove = async (emp) => {
-    if (!confirm(`حذف الموظف ${emp.employee_number}؟`)) return;
+    if (!confirm(t.del(emp.employee_number))) return;
     await base44.entities.Employee.delete(emp.id);
     load();
   };
 
   return (
-    <div>
+    <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader
-        title="الموظفون"
-        subtitle="إدارة بيانات وملفات الموظفين"
-        action={<Button onClick={() => { setEditTarget(null); setFormOpen(true); }} className="gap-2"><Plus size={18} /> موظف جديد</Button>}
+        title={t.title}
+        subtitle={t.subtitle}
+        action={<Button onClick={() => { setEditTarget(null); setFormOpen(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>}
       />
 
       <div className="bg-white rounded-2xl border border-border">
         <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border">
           <div className="relative flex-1">
             <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="بحث بالرقم أو المسمى..." className="pr-10" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.search} className="pr-10" />
           </div>
           <Select value={deptFilter} onValueChange={setDeptFilter}>
-            <SelectTrigger className="sm:w-56"><SelectValue placeholder="كل الإدارات" /></SelectTrigger>
+            <SelectTrigger className="sm:w-56"><SelectValue placeholder={t.allDepts} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الإدارات</SelectItem>
+              <SelectItem value="all">{t.allDepts}</SelectItem>
               {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
 
         {loading ? (
-          <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+          <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
         ) : filtered.length === 0 ? (
           <div className="p-14 text-center">
             <Users size={40} className="mx-auto text-slate-300 mb-3" />
-            <p className="text-muted-foreground">لا يوجد موظفون مطابقون</p>
+            <p className="text-muted-foreground">{t.empty}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
-                  <th className="text-right px-4 py-3 font-medium">الرقم</th>
-                  <th className="text-right px-4 py-3 font-medium">المسمى</th>
-                  <th className="text-right px-4 py-3 font-medium">الإدارة</th>
-                  <th className="text-right px-4 py-3 font-medium">الحالة</th>
-                  <th className="text-right px-4 py-3 font-medium">الراتب</th>
-                  <th className="text-right px-4 py-3 font-medium">إجراءات</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thSalary}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

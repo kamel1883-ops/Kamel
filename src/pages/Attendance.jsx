@@ -9,8 +9,25 @@ import {
 import { CalendarCheck, Plus, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { todayISO, attendanceStatusLabel } from "@/lib/hr";
+import { useI18n } from "@/lib/i18n";
 
 export default function Attendance() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    title: "الحضور والانصراف", subtitle: "متابعة سجل الحضور اليومي للموظفين",
+    date: "التاريخ", status: "الحالة", all: "كل الحالات", present: "حاضر", late: "متأخر", absent: "غائب", leave: "إجازة",
+    newH: "تسجيل حضور جديد", emp: "الموظف", choose: "اختر الموظف", in: "الحضور", out: "الانصراف", record: "تسجيل",
+    loading: "جارٍ التحميل...", empty: "لا توجد سجلات لهذا اليوم", del: "حذف",
+    thEmp: "الموظف", thIn: "الحضور", thOut: "الانصراف", thStatus: "الحالة", thActions: "إجراءات",
+  } : {
+    title: "Attendance", subtitle: "Track daily employee attendance",
+    date: "Date", status: "Status", all: "All statuses", present: "Present", late: "Late", absent: "Absent", leave: "Leave",
+    newH: "New attendance record", emp: "Employee", choose: "Select employee", in: "Check in", out: "Check out", record: "Record",
+    loading: "Loading...", empty: "No records for this day", del: "Delete",
+    thEmp: "Employee", thIn: "Check in", thOut: "Check out", thStatus: "Status", thActions: "Actions",
+  };
+
   const [records, setRecords] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [date, setDate] = useState(todayISO());
@@ -47,82 +64,75 @@ export default function Attendance() {
     load();
   };
 
-  const updateStatus = async (rec, status) => {
-    await base44.entities.Attendance.update(rec.id, { status });
-    load();
-  };
-
-  const remove = async (rec) => {
-    await base44.entities.Attendance.delete(rec.id);
-    load();
-  };
+  const updateStatus = async (rec, status) => { await base44.entities.Attendance.update(rec.id, { status }); load(); };
+  const remove = async (rec) => { await base44.entities.Attendance.delete(rec.id); load(); };
 
   return (
-    <div>
-      <PageHeader title="الحضور والانصراف" subtitle="متابعة سجل الحضور اليومي للموظفين" />
+    <div dir={isAr ? "rtl" : "ltr"}>
+      <PageHeader title={t.title} subtitle={t.subtitle} />
 
       <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">التاريخ</label>
+          <label className="text-xs font-medium text-muted-foreground">{t.date}</label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="sm:w-44" />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">الحالة</label>
+          <label className="text-xs font-medium text-muted-foreground">{t.status}</label>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="sm:w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الحالات</SelectItem>
-              <SelectItem value="present">حاضر</SelectItem>
-              <SelectItem value="late">متأخر</SelectItem>
-              <SelectItem value="absent">غائب</SelectItem>
-              <SelectItem value="leave">إجازة</SelectItem>
+              <SelectItem value="all">{t.all}</SelectItem>
+              <SelectItem value="present">{t.present}</SelectItem>
+              <SelectItem value="late">{t.late}</SelectItem>
+              <SelectItem value="absent">{t.absent}</SelectItem>
+              <SelectItem value="leave">{t.leave}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <form onSubmit={addRecord} className="bg-white rounded-2xl border border-border p-4 mb-5">
-        <h3 className="font-semibold mb-4">تسجيل حضور جديد</h3>
+        <h3 className="font-semibold mb-4">{t.newH}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-xs font-medium text-muted-foreground">الموظف</label>
+            <label className="text-xs font-medium text-muted-foreground">{t.emp}</label>
             <Select value={newRec.employee_id} onValueChange={(v) => setNewRec({ ...newRec, employee_id: v })}>
-              <SelectTrigger><SelectValue placeholder="اختر الموظف" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t.choose} /></SelectTrigger>
               <SelectContent>
                 {employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">الحضور</label>
+            <label className="text-xs font-medium text-muted-foreground">{t.in}</label>
             <Input type="time" value={newRec.check_in} onChange={(e) => setNewRec({ ...newRec, check_in: e.target.value })} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">الانصراف</label>
+            <label className="text-xs font-medium text-muted-foreground">{t.out}</label>
             <Input type="time" value={newRec.check_out} onChange={(e) => setNewRec({ ...newRec, check_out: e.target.value })} />
           </div>
-          <Button type="submit" disabled={creating} className="gap-2"><Plus size={18} /> تسجيل</Button>
+          <Button type="submit" disabled={creating} className="gap-2"><Plus size={18} /> {t.record}</Button>
         </div>
       </form>
 
       <div className="bg-white rounded-2xl border border-border overflow-hidden">
         {loading ? (
-          <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+          <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
         ) : filtered.length === 0 ? (
           <div className="p-14 text-center">
             <CalendarCheck size={40} className="mx-auto text-slate-300 mb-3" />
-            <p className="text-muted-foreground">لا توجد سجلات لهذا اليوم</p>
+            <p className="text-muted-foreground">{t.empty}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
-                  <th className="text-right px-4 py-3 font-medium">الموظف</th>
-                  <th className="text-right px-4 py-3 font-medium">الحضور</th>
-                  <th className="text-right px-4 py-3 font-medium">الانصراف</th>
-                  <th className="text-right px-4 py-3 font-medium">الحالة</th>
-                  <th className="text-right px-4 py-3 font-medium">إجراءات</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thEmp}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thIn}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thOut}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -136,13 +146,13 @@ export default function Attendance() {
                       <Select value={r.status} onValueChange={(v) => updateStatus(r, v)}>
                         <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="present">حاضر</SelectItem>
-                          <SelectItem value="late">متأخر</SelectItem>
-                          <SelectItem value="absent">غائب</SelectItem>
-                          <SelectItem value="leave">إجازة</SelectItem>
+                          <SelectItem value="present">{t.present}</SelectItem>
+                          <SelectItem value="late">{t.late}</SelectItem>
+                          <SelectItem value="absent">{t.absent}</SelectItem>
+                          <SelectItem value="leave">{t.leave}</SelectItem>
                         </SelectContent>
                       </Select>
-                      <button onClick={() => remove(r)} className="text-red-500 text-xs mr-2">حذف</button>
+                      <button onClick={() => remove(r)} className="text-red-500 text-xs mr-2">{t.del}</button>
                     </td>
                   </tr>
                 ))}
