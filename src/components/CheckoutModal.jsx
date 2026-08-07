@@ -23,7 +23,7 @@ export default function CheckoutModal({ open, onClose }) {
         first: "2,500 ريال",
         firstNote: "السنة الأولى (تشمل سنة مجانية)",
         after: "ثم 700 ريال سنوياً من العام الثاني",
-        formHint: "أدخل بيانات المنشأة وبياناتك للتواصل، ثم أُكمل الدفع عبر بطاقة Visa / مدى بأمان عبر Stripe.",
+        formHint: "أدخل بيانات المنشأة وبياناتك للتواصل، ثم أُكمل الدفع بأمان عبر Stripe بإحدى الطرق: مدى، Visa، أو Apple Pay.",
         company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط",
         city: "المدينة", contact: "جهة الاتصال", phone: "الهاتف", email: "البريد الإلكتروني *",
         payBtn: "المتابعة للدفع عبر Stripe",
@@ -36,7 +36,7 @@ export default function CheckoutModal({ open, onClose }) {
         first: "SAR 2,500",
         firstNote: "First year (includes one free year)",
         after: "Then SAR 700 / year from year two",
-        formHint: "Enter your company and contact details, then complete payment securely via Visa / Mada card through Stripe.",
+        formHint: "Enter your company and contact details, then complete payment securely via Stripe using Mada, Visa, or Apple Pay.",
         company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity",
         city: "City", contact: "Contact person", phone: "Phone", email: "Email *",
         payBtn: "Continue to Stripe checkout",
@@ -98,6 +98,15 @@ export default function CheckoutModal({ open, onClose }) {
 
         <form onSubmit={submit} className="space-y-4">
           <p className="text-sm text-muted-foreground leading-relaxed">{t.formHint}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground">{isAr ? "طرق الدفع:" : "Payment methods:"}</span>
+            <span className="px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold tracking-wide">mada</span>
+            <span className="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold italic">VISA</span>
+            <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1">
+              <svg width="11" height="13" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5 4 301.3 9 330 19 380c12.5 58.1 57.7 98.3 102.7 98.3 26.3 0 56.8-18.6 81.6-18.6 24.2 0 47.2 18.6 81.6 18.6 45.5 0 84-50.1 97.2-98.3-21.9-22-46.2-45-46.2-111.4zM265.2 108.5c22.6-26.3 38.5-62.8 34.3-99.3-33.1 1.4-73.2 22.1-96.9 48.5-21.1 23.8-38 61.1-31.4 96.9 37.9 2.9 71.4-19.4 94-45.9z"/></svg>
+              Pay
+            </span>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5 col-span-2">
               <Label>{t.company}</Label>
