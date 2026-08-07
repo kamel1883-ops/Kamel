@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/hr";
@@ -16,6 +16,7 @@ export default function OwnerAdmin() {
   const t = isAr ? {
     title: "إدارة العملاء والاشتراكات", subtitle: "متابعة العملاء، فترات التجربة، الاشتراكات السنوية، والإيرادات",
     sTotal: "إجمالي العملاء", sTrial: "تجربة جارية", sActive: "مُشترك فعّال", sRevenue: "إيرادات سنوية (ر.س)", sEnding: "تجارب تنتهي قريباً",
+    sNew: "عملاء جدد (الشهر)",
     loading: "جارٍ التحميل...",
     thCustomer: "العميل", thCr: "السجل التجاري", thContact: "جهة الاتصال", thStatus: "الحالة", thEnd: "نهاية الفترة", thActions: "إجراءات",
     noCustomers: "لا يوجد عملاء بعد — سجّل العملاء من صفحة الهبوط.",
@@ -24,6 +25,7 @@ export default function OwnerAdmin() {
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trial periods, annual subscriptions and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
+    sNew: "New (this month)",
     loading: "Loading...",
     thCustomer: "Customer", thCr: "Commercial reg.", thContact: "Contact", thStatus: "Status", thEnd: "Period end", thActions: "Actions",
     noCustomers: "No customers yet — register customers from the landing page.",
@@ -50,11 +52,14 @@ export default function OwnerAdmin() {
   };
   useEffect(() => { load(); }, []);
 
+  const nowD = new Date();
+  const monthStart = new Date(nowD.getFullYear(), nowD.getMonth(), 1);
   const stats = {
     total: tenants.length,
     trial: tenants.filter((x) => x.status === "trial").length,
     active: tenants.filter((x) => x.status === "active").length,
     expired: tenants.filter((x) => x.status === "expired").length,
+    newThisMonth: tenants.filter((x) => new Date(x.created_date) >= monthStart).length,
     endingSoon: tenants.filter((x) => x.status === "trial" && daysLeft(x.trial_end) <= 7 && daysLeft(x.trial_end) >= 0).length,
   };
 
@@ -70,12 +75,13 @@ export default function OwnerAdmin() {
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-7">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-7">
         <Stat icon={Building2} label={t.sTotal} value={stats.total} cls="text-[#2e2448] bg-[#2e2448]/10" />
         <Stat icon={Clock} label={t.sTrial} value={stats.trial} cls="text-[#2e2448] bg-[#2e2448]/10" />
         <Stat icon={BadgeCheck} label={t.sActive} value={stats.active} cls="text-[#0d6f4d] bg-emerald-50" />
         <Stat icon={TrendingUp} label={t.sRevenue} value={revenue.toLocaleString()} cls="text-[#2e2448] bg-[#2e2448]/10" />
         <Stat icon={AlertTriangle} label={t.sEnding} value={stats.endingSoon} cls="text-rose-600 bg-rose-50" />
+        <Stat icon={UserPlus} label={t.sNew} value={stats.newThisMonth} cls="text-[#2e2448] bg-[#2e2448]/10" />
       </div>
 
       {loading ? (

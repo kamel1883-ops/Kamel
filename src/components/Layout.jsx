@@ -1,38 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import {
-    LayoutDashboard, Users, CalendarCheck, FileSpreadsheet, ClipboardCheck, Wallet, ShieldCheck, Building2,
-    LogOut, Menu, X, UserCircle, Settings, Car, Calculator,
-    Target, Crown, BarChart3, Network, ClipboardList, CalendarDays, Plane, ClipboardPenLine, DoorOpen, AlertTriangle
-  } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useI18n } from "@/lib/i18n";
 
 const navItems = [
-  { to: "/app", ar: "لوحة التحكم", en: "Dashboard", icon: LayoutDashboard },
-  { to: "/employees", ar: "الموظفون", en: "Employees", icon: Users },
-  { to: "/attendance", ar: "الحضور والانصراف", en: "Attendance", icon: CalendarCheck },
-  { to: "/import-attendance", ar: "استيراد البصمات", en: "Import Punches", icon: FileSpreadsheet },
-  { to: "/approvals", ar: "الموافقات والطلبات", en: "Approvals", icon: ClipboardCheck },
-  { to: "/leaves", ar: "إدارة الإجازات", en: "Leaves", icon: CalendarDays },
-  { to: "/business-trips", ar: "رحلات العمل والانتداب", en: "Business Trips", icon: Plane },
-  { to: "/payroll", ar: "الرواتب", en: "Payroll", icon: Wallet },
-  { to: "/fleet", ar: "إدارة الأسطول", en: "Fleet", icon: Car },
-  { to: "/end-of-service", ar: "نهاية الخدمة", en: "End of Service", icon: Calculator },
-  { to: "/performance", ar: "الأداء والتطوير", en: "Performance", icon: Target },
-  { to: "/org-structure", ar: "الهيكل التنظيمي", en: "Org Structure", icon: Network },
-  { to: "/succession", ar: "تخطيط التعاقب", en: "Succession", icon: Crown },
-  { to: "/workforce-planning", ar: "تخطيط القوة العاملة", en: "Workforce Planning", icon: ClipboardList },
-  { to: "/exit-interviews", ar: "مقابلات المغادرة", en: "Exit Interviews", icon: DoorOpen },
-  { to: "/warnings", ar: "سياسة العمل والإنذارات", en: "Labor Policy & Warnings", icon: AlertTriangle },
-  { to: "/surveys", ar: "استبيانات الموظفين", en: "Surveys", icon: ClipboardPenLine },
-  { to: "/licenses", ar: "تراخيص المنشأة", en: "Licenses", icon: ShieldCheck },
-  { to: "/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
-  { to: "/owner", ar: "إدارة العملاء", en: "Clients", icon: Building2 },
-  { to: "/settings", ar: "إعدادات المنشأة", en: "Settings", icon: Settings },
+  { to: "/owner", ar: "العملاء والاشتراكات", en: "Customers & Subscriptions", icon: Building2 },
+  { to: "/discounts", ar: "كودات الخصم", en: "Discount Codes", icon: TicketPercent },
 ];
 
 export default function Layout() {
@@ -65,7 +42,7 @@ export default function Layout() {
         )}
       >
         <div className="h-20 flex items-center justify-between px-5 border-b border-white/10">
-          <Link to="/app"><Logo tone="light" size={44} /></Link>
+          <Link to="/owner"><Logo tone="light" size={44} /></Link>
           <button className="lg:hidden text-white/60" onClick={() => setOpen(false)}><X size={20} /></button>
         </div>
         <div className="h-px bg-gradient-to-l from-violet-500/50 to-indigo-500/30" />

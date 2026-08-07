@@ -30,6 +30,7 @@ import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import Landing from "@/pages/Landing";
 import OwnerAdmin from "@/pages/OwnerAdmin";
+import Discounts from "@/pages/Discounts";
 import ImportAttendance from "@/pages/ImportAttendance";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -100,6 +101,7 @@ const AuthenticatedApp = () => {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/owner" element={<OwnerAdmin />} />
+        <Route path="/discounts" element={<Discounts />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />

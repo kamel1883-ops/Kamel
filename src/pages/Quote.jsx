@@ -37,7 +37,7 @@ const featuresEn = [
   "Client Trial Portal", "Labor Policy & Smart Warnings", "Employee Self-Service Portal",
 ];
 
-const empty = { name: "", commercial_register: "", industry: "", contact_name: "", contact_email: "", contact_phone: "", city: "" };
+const empty = { name: "", commercial_register: "", industry: "", contact_name: "", contact_email: "", contact_phone: "", city: "", discount_code: "" };
 
 export default function Quote() {
   const { lang } = useI18n();
@@ -62,6 +62,8 @@ export default function Quote() {
     afterNote: "صلاحية هذا العرض 30 يوماً من تاريخ إصداره. يبدأ عملك بالمنصة فور تفعيل الاشتراك، مع فترة تجربة مجانية 30 يوماً قابلة للتشغيل الفوري بانتظار التحويل.",
     sigName: "مدير رأس المال البشري — جدارة",
     stamp: "جدارة لإدارة الموارد البشرية",
+    discCode: "كود الخصم (اختياري)",
+    discBadge: "خصم", discApplied: "بعد تطبيق الكود", firstAfter: "السنة الأولى (بعد الخصم)",
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -81,6 +83,8 @@ export default function Quote() {
     afterNote: "This quotation is valid for 30 days from issue date. You can start a free 30-day trial immediately while the transfer is being processed.",
     sigName: "Head of Human Capital — Jadara",
     stamp: "Jadara HR Management",
+    discCode: "Discount code (optional)",
+    discBadge: "OFF", discApplied: "After discount applied", firstAfter: "First year (after discount)",
   };
 
   const incoming = location.state?.company || null;
@@ -90,6 +94,7 @@ export default function Quote() {
   const [submitting, setSubmitting] = useState(false);
   const [registered, setRegistered] = useState(!!incoming);
   const [copied, setCopied] = useState(false);
+  const [discount, setDiscount] = useState(null);
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
 
@@ -107,7 +112,9 @@ export default function Quote() {
     if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setErr(t.errForm); return; }
     setSubmitting(true);
     try {
-      await base44.functions.invoke("createTrial", form);
+      const res = await base44.functions.invoke("createTrial", { ...form, discount_code: form.discount_code?.trim() || undefined });
+      const pct = Number(res?.discount_percent) || 0;
+      setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setRegistered(true);
       setCompany(form);
     } catch (error) {
@@ -150,6 +157,10 @@ export default function Quote() {
               <Field label={t.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} />
             </div>
             <Field label={t.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
+            <div className="space-y-1.5">
+              <Label>{t.discCode}</Label>
+              <Input value={form.discount_code || ""} onChange={(e) => set("discount_code", e.target.value.toUpperCase())} placeholder="JADARA100" />
+            </div>
             {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
             <Button type="submit" disabled={submitting} className="gap-2 min-w-[180px]">
               {submitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
@@ -226,13 +237,29 @@ export default function Quote() {
           {/* الأسعار */}
           <div className="py-6 border-t border-border">
             <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-5 space-y-3">
-              <div className="flex items-baseline justify-between gap-3">
-                <div>
-                  <div className="font-medium">{t.priceFirst}</div>
-                  <div className="text-xs text-muted-foreground">{t.priceFirstNote}</div>
+              {discount ? (
+                <div className="flex items-baseline justify-between gap-3">
+                  <div>
+                    <div className="font-medium">{t.firstAfter}</div>
+                    <div className="text-xs text-violet-600 font-semibold">
+                      {t.discBadge} {discount.percent}% — {discount.code} — {t.discApplied}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{t.priceFirstNote}</div>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <div className="text-sm text-muted-foreground line-through">{t.priceFirstVal}</div>
+                    <div className="text-2xl font-extrabold text-violet-700">{discount.amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
+                  </div>
                 </div>
-                <div className="text-2xl font-extrabold text-violet-700">{t.priceFirstVal}</div>
-              </div>
+              ) : (
+                <div className="flex items-baseline justify-between gap-3">
+                  <div>
+                    <div className="font-medium">{t.priceFirst}</div>
+                    <div className="text-xs text-muted-foreground">{t.priceFirstNote}</div>
+                  </div>
+                  <div className="text-2xl font-extrabold text-violet-700">{t.priceFirstVal}</div>
+                </div>
+              )}
               <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-violet-200/70">
                 <div className="font-medium">{t.priceRenew}</div>
                 <div className="text-lg font-bold">{t.priceRenewVal}</div>

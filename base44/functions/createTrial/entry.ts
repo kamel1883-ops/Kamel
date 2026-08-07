@@ -1,6 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 
+const ANNUAL_PRICE = 2500;
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -11,6 +13,26 @@ export default async function (req) {
     if (!name) return Response.json({ error: 'اسم المنشأة مطلوب' }, { status: 400 });
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
+
+    // —— كود الخصم (اختياري) — يُتحقق منه خادمياً ويزيد عداد الاستخدام
+    let discount_percent = 0;
+    let discount_code = '';
+    const rawCode = String(body.discount_code || '').trim();
+    if (rawCode) {
+      const normalized = rawCode.toLowerCase();
+      const found = await base44.asServiceRole.entities.DiscountCode.filter({ code: normalized, status: 'active' });
+      const code = found && found[0];
+      if (!code) return Response.json({ error: 'كود الخصم غير صالح' }, { status: 400 });
+      if (code.max_uses && (Number(code.used_count) || 0) >= code.max_uses)
+        return Response.json({ error: 'كود الخصم مستهلك بالكامل' }, { status: 400 });
+      discount_percent = Number(code.discount_percent) || 0;
+      if (discount_percent < 0 || discount_percent > 100) discount_percent = 0;
+      discount_code = code.code;
+      await base44.asServiceRole.entities.DiscountCode.update(code.id, {
+        used_count: (Number(code.used_count) || 0) + 1,
+      });
+    }
+    const quoted_amount = Math.round(ANNUAL_PRICE * (1 - discount_percent / 100));
 
     const today = new Date();
     const trialEnd = new Date(today);
@@ -30,33 +52,42 @@ export default async function (req) {
       status: 'trial',
       trial_start: today.toISOString().slice(0, 10),
       trial_end: trialEnd.toISOString().slice(0, 10),
+      discount_code,
+      discount_percent,
+      quoted_amount,
       notes: String(body.notes || '').trim(),
     });
 
     const ownerEmail = secrets.get('OWNER_EMAIL');
     if (ownerEmail) {
       try {
+        let emailBody =
+          'عميل جديد سجّل الفترة التجريبية عبر الموقع:\n\n' +
+          'المنشأة: ' + name + '\n' +
+          'السجل التجاري: ' + (body.commercial_register || '-') + '\n' +
+          'القطاع: ' + (body.industry || '-') + '\n' +
+          'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
+          'البريد: ' + email + '\n' +
+          'الهاتف: ' + (body.contact_phone || '-') + '\n' +
+          'المدينة: ' + (body.city || '-') + '\n\n' +
+          'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n';
+        if (discount_percent > 0) {
+          emailBody +=
+            'كود الخصم: ' + discount_code + ' — نسبة الخصم: ' + discount_percent + '%\n' +
+            'المبلغ المعروض بعد الخصم: ' + quoted_amount + ' ر.س (بدلاً من 2500 ر.س)\n';
+        }
+        emailBody += '\nيرجى التواصل مع العميل خلال فترة التجربة لإتمام التحويل للاشتراك السنوي.';
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: ownerEmail,
           subject: 'اشتراك تجريبي جديد — ' + name,
-          body:
-            'عميل جديد سجّل الفترة التجريبية عبر الموقع:\n\n' +
-            'المنشأة: ' + name + '\n' +
-            'السجل التجاري: ' + (body.commercial_register || '-') + '\n' +
-            'القطاع: ' + (body.industry || '-') + '\n' +
-            'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
-            'البريد: ' + email + '\n' +
-            'الهاتف: ' + (body.contact_phone || '-') + '\n' +
-            'المدينة: ' + (body.city || '-') + '\n\n' +
-            'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n' +
-            'يرجى التواصل مع العميل خلال فترة التجربة لإتمام التحويل للاشتراك السنوي.',
+          body: emailBody,
         });
       } catch (_e) {
         // رسالة تسجيل الإنشاء لا يجب أن تفشل كل العملية إذا تعطل البريد
       }
     }
 
-    return Response.json({ ok: true, tenant_id: tenant.id });
+    return Response.json({ ok: true, tenant_id: tenant.id, discount_percent, quoted_amount });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
