@@ -61,7 +61,7 @@ export default function Quote() {
     proof: "أرسل إثبات التحويل عبر واتساب أو البريد، وسيتم تفعيل اشتراكك خلال 24 ساعة.",
     afterNote: "صلاحية هذا العرض 30 يوماً من تاريخ إصداره. يبدأ عملك بالمنصة فور تفعيل الاشتراك، مع فترة تجربة مجانية 30 يوماً قابلة للتشغيل الفوري بانتظار التحويل.",
     sigName: "مدير رأس المال البشري — جدارة",
-    stamp: "جدارة للموارد البشرية",
+    stamp: "جدارة لإدارة الموارد البشرية",
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -80,7 +80,7 @@ export default function Quote() {
     proof: "Send the transfer proof via WhatsApp or email; your subscription activates within 24 hours.",
     afterNote: "This quotation is valid for 30 days from issue date. You can start a free 30-day trial immediately while the transfer is being processed.",
     sigName: "Head of Human Capital — Jadara",
-    stamp: "Jadara Human Resources",
+    stamp: "Jadara HR Management",
   };
 
   const incoming = location.state?.company || null;
