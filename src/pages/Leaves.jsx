@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
-import LeaveRequestForm from "@/components/LeaveRequestForm";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell
@@ -10,7 +8,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Plus, Trash2, CalendarDays, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Trash2, CalendarDays, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const typeLabel = {
@@ -36,7 +34,6 @@ export default function Leaves() {
   const [requests, setRequests] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -78,11 +75,6 @@ export default function Leaves() {
       <PageHeader
         title="إدارة الإجازات"
         subtitle="متابعة طلبات الإجازات وأرصدتها وحالاتها"
-        action={
-          <Button onClick={() => setShowForm(true)} className="gap-2">
-            <Plus size={18} /> طلب إجازة
-          </Button>
-        }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -162,13 +154,6 @@ export default function Leaves() {
         </div>
       )}
 
-      <LeaveRequestForm
-        open={showForm}
-        employees={employees}
-        currentUserEmployee={null}
-        onClose={() => setShowForm(false)}
-        onSaved={load}
-      />
     </div>
   );
 }

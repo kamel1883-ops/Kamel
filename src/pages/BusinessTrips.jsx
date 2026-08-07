@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import BusinessTripForm from "@/components/BusinessTripForm";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -11,7 +10,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Plane, MapPin, Wallet } from "lucide-react";
+import { Pencil, Trash2, Plane, MapPin, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const typeLabel = {
@@ -76,11 +75,6 @@ export default function BusinessTrips() {
       <PageHeader
         title="رحلات العمل والانتداب"
         subtitle="إدارة انتدابات الموظفين الداخلية والخارجية والتكاليف المرتبطة بها"
-        action={
-          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="gap-2">
-            <Plus size={18} /> رحلة جديدة
-          </Button>
-        }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
