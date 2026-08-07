@@ -9,7 +9,7 @@ import {
   Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
   GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
-  Network, ClipboardList
+  Network, ClipboardList, Plane, CalendarPlus
 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
@@ -17,7 +17,9 @@ const SALES_EMAIL = "sales@jadara.sa";
 
 const features = [
   { icon: Users, title: "إدارة الموظفين", desc: "ملفات كاملة، وثائق، إقامات، جوازات، تأمين طبي، حسابات بنكية، وتنبيهات انتهاء الوثائق." },
-  { icon: CalendarCheck, title: "الحضور والانصراف", desc: "استيراد بصمات Excel/CSV آلي، مطابقة تلقائية بالموظفين، احتساب الغياب والتأخير وربطه بالرواتب." },
+  { icon: CalendarCheck, title: "الحضور والانصراف", desc: "بصمة ذاتية من البرنامج نفسه — بدون أجهزة بصمة ولا أنظمة قديمة. يبصم الموظف حضوره وانصرافه من جواله داخل بوابة الموظف، ولا تُقبل البصمة إلا ضمن 50 متراً من مقر العمل، وتتدفّق تلقائياً إلى الإدارة والرواتب. وتبقى إمكانية استيراد البصمات من أجهزة البصمة (Excel/CSV) للمنشآت التي تستخدم أجهزتها." },
+  { icon: CalendarPlus, title: "إدارة الإجازات والموافقات", desc: "بوابة الموظف لرفع طلبات الإجازات، ومسار موافقات متعدد المراحل (مدير مباشر ‹ الموارد البشرية ‹ المالية)، خصم آلي من رصيد الإجازات، ومرفقات التقارير الطبية." },
+  { icon: Plane, title: "رحلات العمل والانتداب", desc: "طلب رحلات داخلية وخارجية من بوابة الموظف، حساب التكلفة (تنقل، إقامة، بدل انتداب يومي، سلفة)، اعتماد الإدارة، ومتابعة حالة الرحلة حتى الاكتمال." },
   { icon: Wallet, title: "إدارة الرواتب (Payroll)", desc: "احتساب آلي للراتب، تعديل المستحقات والسلف والخصومات، اعتماد وصرف كشوف، وتقارير شهرية." },
   { icon: ShieldCheck, title: "التأمينات الاجتماعية (GOSI)", desc: "احتساب تلقائي للسعوديين (21% إجمالي) والمقيمين (2% صاحب العمل) وفق النظام." },
   { icon: Calculator, title: "نهاية الخدمة", desc: "حاسبة وفق نظام العمل السعودي — جميع أسباب الإنهاء وموادها النظامية (74، 75، 77، 80، 81، 84، 85)، تصفية رصيد الإجازات وتعويض التذاكر، ومخالصة قابلة للطباعة بشعار منشأتك." },
@@ -136,7 +138,7 @@ export default function Landing() {
             <span className="block bg-gradient-to-l from-violet-300 via-indigo-300 to-blue-300 bg-clip-text text-transparent">خارق ومتكامل</span>
           </h1>
           <p className="text-white/70 text-lg mt-5 max-w-xl leading-relaxed">
-            من «جدارة» — منصة واحدة تجمع: الموظفين، الحضور، الرواتب، نهاية الخدمة، التأمينات، الأداء، التخطيط التعاقبي، التحليلات، الأسطول، والتراخيص الحكومية… مع تكاملات ذكية وتصميم فخم وحسابات وفق الأنظمة السعودية.
+            من «جدارة» — منصة واحدة تجمع: الموظفين، الحضور والبصمة الذاتية، الإجازات، رحلات العمل، الرواتب، نهاية الخدمة، التأمينات، الأداء، التخطيط التعاقبي، التحليلات، الأسطول، والتراخيص الحكومية… مع تكاملات ذكية وتصميم فخم وحسابات وفق الأنظمة السعودية.
           </p>
           <div className="flex flex-wrap gap-3 mt-7">
             <button onClick={() => scrollTo("trial")} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-500/30 flex items-center gap-2 transition">
@@ -185,7 +187,7 @@ export default function Landing() {
               <div>
                 <h3 className="text-2xl font-bold">بوابة الموظف الذاتية</h3>
                 <p className="text-white/70 mt-2 max-w-2xl leading-relaxed">
-                  دخول خاص بالموظفين فقط لعرض الحضور والرواتب ورصيد الإجازات، ورفع طلبات السلف والإجازات مباشرة. يُربط الحساب برقم الهوية/الإقامة بعد اعتماد الموارد البشرية.
+                  دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. يُربط الحساب برقم الهوية/الإقامة بعد اعتماد الموارد البشرية.
                 </p>
               </div>
             </div>
