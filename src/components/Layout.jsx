@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  LayoutDashboard, Users, CalendarCheck, FileSpreadsheet, ClipboardCheck, Wallet, ShieldCheck, Building2,
-  LogOut, Menu, X, UserCircle, Settings, Car, Calculator,
-  Target, Crown, BarChart3, Network, ClipboardList, CalendarDays, Plane
-} from "lucide-react";
+    LayoutDashboard, Users, CalendarCheck, FileSpreadsheet, ClipboardCheck, Wallet, ShieldCheck, Building2,
+    LogOut, Menu, X, UserCircle, Settings, Car, Calculator,
+    Target, Crown, BarChart3, Network, ClipboardList, CalendarDays, Plane, ClipboardPenLine, DoorOpen
+  } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -26,6 +26,8 @@ const navItems = [
   { to: "/org-structure", ar: "الهيكل التنظيمي", en: "Org Structure", icon: Network },
   { to: "/succession", ar: "تخطيط التعاقب", en: "Succession", icon: Crown },
   { to: "/workforce-planning", ar: "تخطيط القوة العاملة", en: "Workforce Planning", icon: ClipboardList },
+  { to: "/exit-interviews", ar: "مقابلات المغادرة", en: "Exit Interviews", icon: DoorOpen },
+  { to: "/surveys", ar: "استبيانات الموظفين", en: "Surveys", icon: ClipboardPenLine },
   { to: "/licenses", ar: "تراخيص المنشأة", en: "Licenses", icon: ShieldCheck },
   { to: "/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
   { to: "/owner", ar: "إدارة العملاء", en: "Clients", icon: Building2 },

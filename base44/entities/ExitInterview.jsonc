@@ -1,0 +1,145 @@
+{
+  "name": "ExitInterview",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "employee_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "department": {
+      "type": "string",
+      "title": "\u0627\u0644\u0625\u062f\u0627\u0631\u0629"
+    },
+    "position": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0633\u0645\u0649"
+    },
+    "exit_type": {
+      "type": "string",
+      "enum": [
+        "resignation",
+        "employer_termination",
+        "end_of_contract",
+        "dismissal_for_cause",
+        "retirement",
+        "other"
+      ],
+      "title": "\u0646\u0648\u0639 \u0627\u0644\u0645\u063a\u0627\u062f\u0631\u0629"
+    },
+    "last_working_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u0622\u062e\u0631 \u064a\u0648\u0645 \u0639\u0645\u0644"
+    },
+    "interview_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0629"
+    },
+    "interviewer_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0642\u0627\u0628\u0644"
+    },
+    "primary_reason": {
+      "type": "string",
+      "enum": [
+        "salary",
+        "benefits",
+        "work_environment",
+        "management",
+        "career_growth",
+        "work_life_balance",
+        "relocation",
+        "personal",
+        "company_culture",
+        "other"
+      ],
+      "title": "\u0627\u0644\u0633\u0628\u0628 \u0627\u0644\u0631\u0626\u064a\u0633\u064a"
+    },
+    "reason_details": {
+      "type": "string",
+      "title": "\u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0623\u0633\u0628\u0627\u0628"
+    },
+    "satisfaction_salary": {
+      "type": "number",
+      "title": "\u0631\u0636\u0627 \u0627\u0644\u0631\u0627\u062a\u0628 (1-5)"
+    },
+    "satisfaction_benefits": {
+      "type": "number",
+      "title": "\u0631\u0636\u0627 \u0627\u0644\u0645\u064a\u0632\u0627\u064a (1-5)"
+    },
+    "satisfaction_environment": {
+      "type": "number",
+      "title": "\u0631\u0636\u0627 \u0628\u064a\u0626\u0629 \u0627\u0644\u0639\u0645\u0644 (1-5)"
+    },
+    "satisfaction_management": {
+      "type": "number",
+      "title": "\u0631\u0636\u0627 \u0645\u0646 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 (1-5)"
+    },
+    "would_recommend": {
+      "type": "number",
+      "title": "\u0647\u0644 \u064a\u0648\u0635\u064a \u0628\u0627\u0644\u0639\u0645\u0644 (1-5)"
+    },
+    "would_rejoin": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "no",
+        "maybe"
+      ],
+      "default": "no",
+      "title": "\u0647\u0644 \u064a\u0639\u0648\u062f \u0644\u0644\u0639\u0645\u0644"
+    },
+    "constructive_feedback": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a \u0644\u0644\u062a\u062d\u0633\u064a\u0646"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "completed",
+        "cancelled"
+      ],
+      "default": "completed",
+      "title": "\u0627\u0644\u062d\u0627\u0644\u0629"
+    },
+    "notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a"
+    }
+  },
+  "required": [
+    "employee_id",
+    "exit_type",
+    "primary_reason",
+    "interview_date",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

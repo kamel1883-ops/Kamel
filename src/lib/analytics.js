@@ -109,3 +109,84 @@ export function avgPerformanceByDept(reviews) {
   }
   return Object.entries(map).map(([name, v]) => ({ name, value: Math.round((v.sum / v.count) * 100) / 100 })).sort((a, b) => b.value - a.value);
 }
+
+// معدل الدوران حسب فترة (شهور): exits خلال النافذة / متوسط القوى العاملة
+export function turnoverWindow(employees, monthsBack) {
+  const now = new Date();
+  const threshold = new Date(now.getFullYear(), now.getMonth() - (monthsBack - 1), 1);
+  let hires = 0, exits = 0;
+  const exitDepts = {};
+  for (const e of employees) {
+    if (e.hire_date && new Date(e.hire_date) >= threshold) hires++;
+    if ((e.status === "terminated" || e.status === "resigned") && e.termination_date && new Date(e.termination_date) >= threshold) {
+      exits++;
+      const d = e.department || "غير محدد";
+      exitDepts[d] = (exitDepts[d] || 0) + 1;
+    }
+  }
+  const activeNow = employees.filter((e) => e.status === "active" || e.status === "on_leave").length;
+  const avgHeadcount = activeNow + exits;
+  const turnoverRate = avgHeadcount ? (exits / avgHeadcount) * 100 : 0;
+  return {
+    hires, exits, activeNow, avgHeadcount,
+    turnoverRate: Math.round(turnoverRate * 10) / 10,
+    retentionRate: avgHeadcount ? Math.round(((avgHeadcount - exits) / avgHeadcount) * 1000) / 10 : 100,
+    byDept: Object.entries(exitDepts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value),
+  };
+}
+
+// أسباب المغادرة من بيانات الموظف + مقابلات المغادرة
+export function exitReasonsBreakdown(employees, exitInterviews) {
+  const map = {};
+  const inc = (k) => { map[k] = (map[k] || 0) + 1; };
+  for (const e of employees) {
+    if (e.status !== "terminated" && e.status !== "resigned") continue;
+    if (e.termination_reason && e.termination_reason !== "none") inc(e.termination_reason);
+  }
+  for (const x of (exitInterviews || [])) {
+    if (x.primary_reason) inc(x.primary_reason);
+  }
+  return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+}
+
+// متوسط مدة الخدمة عند المغادرة (بالأيام)
+export function avgTenureAtExit(employees) {
+  const list = employees.filter((e) => (e.status === "terminated" || e.status === "resigned") && e.hire_date && e.termination_date);
+  if (!list.length) return 0;
+  const total = list.reduce((s, e) => s + (new Date(e.termination_date) - new Date(e.hire_date)), 0);
+  return Math.round(total / list.length / (1000 * 60 * 60 * 24));
+}
+
+// متوسط رضا الموظف المغادر من مقابلات المغادرة
+export function exitSatisfaction(exitInterviews) {
+  const list = (exitInterviews || []).filter((x) => x.satisfaction_salary || x.satisfaction_benefits || x.satisfaction_environment || x.satisfaction_management);
+  if (!list.length) return { salary: 0, benefits: 0, environment: 0, management: 0, overall: 0, recommend: 0 };
+  const avg = (key) => {
+    const arr = list.filter((x) => x[key]).map((x) => Number(x[key]));
+    return arr.length ? Math.round((arr.reduce((s, v) => s + v, 0) / arr.length) * 100) / 100 : 0;
+  };
+  const salary = avg("satisfaction_salary");
+  const benefits = avg("satisfaction_benefits");
+  const environment = avg("satisfaction_environment");
+  const management = avg("satisfaction_management");
+  const recommend = avg("would_recommend");
+  const overall = Math.round(((salary + benefits + environment + management) / 4) * 100) / 100;
+  return { salary, benefits, environment, management, overall, recommend };
+}
+
+// أسباب الدوران حسب الإدارة (للإدارة الأكثر خطراً)
+export function highRiskDepartments(employees, monthsBack = 12) {
+  const now = new Date();
+  const threshold = new Date(now.getFullYear(), now.getMonth() - (monthsBack - 1), 1);
+  const depts = {};
+  for (const e of employees) {
+    const d = e.department || "غير محدد";
+    if (!depts[d]) depts[d] = { headcount: 0, exits: 0 };
+    if (e.status === "active" || e.status === "on_leave") depts[d].headcount++;
+    if ((e.status === "terminated" || e.status === "resigned") && e.termination_date && new Date(e.termination_date) >= threshold) depts[d].exits++;
+  }
+  return Object.entries(depts)
+    .map(([name, v]) => ({ name, ...v, rate: v.headcount + v.exits ? Math.round((v.exits / (v.headcount + v.exits)) * 1000) / 10 : 0 }))
+    .filter((d) => d.exits > 0)
+    .sort((a, b) => b.rate - a.rate);
+}

@@ -15,6 +15,8 @@ import Approvals from "@/pages/Approvals";
 import Leaves from "@/pages/Leaves";
 import BusinessTrips from "@/pages/BusinessTrips";
 import MyRequests from "@/pages/MyRequests";
+import ExitInterviews from "@/pages/ExitInterviews";
+import Surveys from "@/pages/Surveys";
 import Payroll from "@/pages/Payroll";
 import SettingsPage from "@/pages/Settings";
 import Fleet from "@/pages/Fleet";
@@ -89,6 +91,8 @@ const AuthenticatedApp = () => {
         <Route path="/succession" element={<Succession />} />
         <Route path="/org-structure" element={<OrgStructure />} />
         <Route path="/workforce-planning" element={<WorkforcePlanning />} />
+        <Route path="/exit-interviews" element={<ExitInterviews />} />
+        <Route path="/surveys" element={<Surveys />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/owner" element={<OwnerAdmin />} />
