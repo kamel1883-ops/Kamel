@@ -143,15 +143,22 @@ export default function Dashboard() {
 
 function buildAlerts(emps, vehicles, isAr, t) {
   const out = [];
+  const vTitle = (v) => {
+    const plate = isAr ? v.plate_number : (v.plate_number_en || v.plate_number);
+    const brand = isAr ? v.brand : (v.brand_en || v.brand);
+    const model = isAr ? v.model : (v.model_en || v.model);
+    return `${plate || ""} - ${brand || ""} ${model || ""}`.trim();
+  };
   emps.forEach((e) => {
     if (e.iqama_expiry) out.push({ id: e.id + "-iqama", icon: IdCard, title: `${e.employee_number} - ${e.position}`, label: t.iqama, date: e.iqama_expiry });
     if (e.passport_expiry) out.push({ id: e.id + "-pp", icon: IdCard, title: `${e.employee_number} - ${e.position}`, label: t.passp, date: e.passport_expiry });
     if (e.health_insurance_expiry) out.push({ id: e.id + "-hi", icon: Shield, title: `${e.employee_number} - ${e.position}`, label: t.med, date: e.health_insurance_expiry });
   });
   vehicles.forEach((v) => {
-    if (v.insurance_expiry) out.push({ id: v.id + "-ins", icon: Car, title: `${v.plate_number} - ${v.brand || ""} ${v.model || ""}`, label: t.vIns, date: v.insurance_expiry });
-    if (v.license_expiry) out.push({ id: v.id + "-lic", icon: FileText, title: `${v.plate_number} - ${v.brand || ""} ${v.model || ""}`, label: t.vLic, date: v.license_expiry });
-    if (v.inspection_expiry) out.push({ id: v.id + "-fis", icon: Wrench, title: `${v.plate_number} - ${v.brand || ""} ${v.model || ""}`, label: t.vFis, date: v.inspection_expiry });
+    const title = vTitle(v);
+    if (v.insurance_expiry) out.push({ id: v.id + "-ins", icon: Car, title, label: t.vIns, date: v.insurance_expiry });
+    if (v.license_expiry) out.push({ id: v.id + "-lic", icon: FileText, title, label: t.vLic, date: v.license_expiry });
+    if (v.inspection_expiry) out.push({ id: v.id + "-fis", icon: Wrench, title, label: t.vFis, date: v.inspection_expiry });
   });
   return out.filter((a) => { const d = daysUntil(a.date); return d !== null && d <= 90; }).sort((a, b) => daysUntil(a.date) - daysUntil(b.date));
 }

@@ -36,8 +36,13 @@ export default function Fleet() {
     unspec: "Unspecified", daysLabel: (d) => `(${d >= 0 ? "+" : ""}${d} days)`,
   };
   const typeLabel = (v) => isAr ? { sedan: "سيدان", suv: "دفع رباعي", van: "فان", truck: "شاحنة", bus: "حافلة", other: "أخرى" }[v] || v : { sedan: "Sedan", suv: "SUV", van: "Van", truck: "Truck", bus: "Bus", other: "Other" }[v] || v;
+  const vPlate = (v) => (isAr ? v.plate_number : (v.plate_number_en || v.plate_number)) || v.plate_number || v.plate_number_en;
+  const vBrand = (v) => (isAr ? v.brand : (v.brand_en || v.brand)) || v.brand || v.brand_en;
+  const vModel = (v) => (isAr ? v.model : (v.model_en || v.model)) || v.model || v.model_en;
+  const tAr = isAr ? "عربي" : "Arabic";
+  const tEn = isAr ? "إنجليزي" : "English";
 
-  const empty = { plate_number: "", vehicle_type: "sedan", brand: "", model: "", year: new Date().getFullYear(), color: "", assigned_to: "", insurance_number: "", insurance_expiry: "", license_expiry: "", inspection_expiry: "", status: "active", notes: "" };
+  const empty = { plate_number: "", plate_number_en: "", vehicle_type: "sedan", brand: "", brand_en: "", model: "", model_en: "", year: new Date().getFullYear(), color: "", assigned_to: "", insurance_number: "", insurance_expiry: "", license_expiry: "", inspection_expiry: "", status: "active", notes: "" };
 
   const [vehicles, setVehicles] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -65,7 +70,7 @@ export default function Fleet() {
     else await base44.entities.Vehicle.create(form);
     setOpen(false); load();
   };
-  const remove = async (v) => { if (!confirm(t.del(v.plate_number))) return; await base44.entities.Vehicle.delete(v.id); load(); };
+  const remove = async (v) => { if (!confirm(t.del(vPlate(v)))) return; await base44.entities.Vehicle.delete(v.id); load(); };
 
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
@@ -81,7 +86,7 @@ export default function Fleet() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700"><Car size={20} /></div>
-                  <div><div className="font-bold">{v.plate_number}</div><div className="text-xs text-muted-foreground">{v.brand} {v.model} · {v.year}</div></div>
+                  <div><div className="font-bold">{vPlate(v)}</div><div className="text-xs text-muted-foreground">{vBrand(v)} {vModel(v)} · {v.year}</div></div>
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => startEdit(v)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={15} /></button>
@@ -104,15 +109,18 @@ export default function Fleet() {
           <form onClick={(e) => e.stopPropagation()} onSubmit={save} className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 space-y-4">
             <h3 className="font-semibold">{editing ? t.editT : t.addT}</h3>
             <div className="grid grid-cols-2 gap-3">
-              <In label={t.plate}><Input value={form.plate_number} onChange={(e) => set("plate_number", e.target.value)} required /></In>
+              <In label={`${t.plate} · ${tAr}`}><Input value={form.plate_number} onChange={(e) => set("plate_number", e.target.value)} required dir="rtl" /></In>
+              <In label={`${t.plate} · ${tEn}`}><Input value={form.plate_number_en} onChange={(e) => set("plate_number_en", e.target.value)} dir="ltr" /></In>
               <In label={t.type}>
                 <Select value={form.vehicle_type} onValueChange={(v) => set("vehicle_type", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{["sedan","suv","van","truck","bus","other"].map((tt) => <SelectItem key={tt} value={tt}>{typeLabel(tt)}</SelectItem>)}</SelectContent>
                 </Select>
               </In>
-              <In label={t.brand}><Input value={form.brand} onChange={(e) => set("brand", e.target.value)} /></In>
-              <In label={t.model}><Input value={form.model} onChange={(e) => set("model", e.target.value)} /></In>
+              <In label={`${t.brand} · ${tAr}`}><Input value={form.brand} onChange={(e) => set("brand", e.target.value)} dir="rtl" /></In>
+              <In label={`${t.brand} · ${tEn}`}><Input value={form.brand_en} onChange={(e) => set("brand_en", e.target.value)} dir="ltr" /></In>
+              <In label={`${t.model} · ${tAr}`}><Input value={form.model} onChange={(e) => set("model", e.target.value)} dir="rtl" /></In>
+              <In label={`${t.model} · ${tEn}`}><Input value={form.model_en} onChange={(e) => set("model_en", e.target.value)} dir="ltr" /></In>
               <In label={t.year}><Input type="number" value={form.year} onChange={(e) => set("year", Number(e.target.value))} /></In>
               <In label={t.color}><Input value={form.color} onChange={(e) => set("color", e.target.value)} /></In>
               <In label={t.owner}>
