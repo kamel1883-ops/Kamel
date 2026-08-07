@@ -208,10 +208,10 @@ export default function Landing() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const sid = params.get("session_id");
-    if (params.get("paid") === "1" && sid) {
+    const tapId = params.get("tap_id");
+    if (tapId) {
       setPay({ status: "verifying", err: "" });
-      base44.functions.invoke("confirmSubscription", { session_id: sid })
+      base44.functions.invoke("confirmSubscription", { tap_id: tapId })
         .then((res) => {
           if (res?.data?.ok) setPay({ status: "done", err: "" });
           else setPay({ status: "idle", err: res?.data?.error || (isAr ? "تعذّر تأكيد الدفع" : "Could not confirm payment") });
@@ -219,8 +219,7 @@ export default function Landing() {
         .catch((e) => setPay({ status: "idle", err: e?.response?.data?.error || e?.message || (isAr ? "تعذّر تأكيد الدفع" : "Could not confirm payment") }))
         .finally(() => {
           const url = new URL(window.location.href);
-          url.searchParams.delete("paid");
-          url.searchParams.delete("session_id");
+          url.searchParams.delete("tap_id");
           window.history.replaceState({}, "", url.toString());
         });
     }

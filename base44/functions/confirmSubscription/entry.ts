@@ -11,27 +11,27 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    const piId = String(body.payment_intent_id || '').trim();
-    if (!piId) return Response.json({ error: 'رقم العملية مطلوب' }, { status: 400 });
+    const tapId = String(body.tap_id || body.charge_id || body.session_id || '').trim();
+    if (!tapId) return Response.json({ error: 'رقم العملية مطلوب' }, { status: 400 });
 
-    // Dedupe by payment intent id stored in Subscription notes
-    const existing = await base44.asServiceRole.entities.Subscription.filter({ notes: piId });
+    // Dedupe by Tap charge id stored in Subscription notes
+    const existing = await base44.asServiceRole.entities.Subscription.filter({ notes: tapId });
     if (existing && existing.length) {
       return Response.json({ ok: true, already: true, tenant_id: existing[0].tenant_id });
     }
 
-    const key = secrets.get('STRIPE_SECRET_KEY');
-    const res = await fetch('https://api.stripe.com/v1/payment_intents/' + encodeURIComponent(piId), {
+    const key = secrets.get('TAP_SECRET_KEY');
+    const res = await fetch('https://api.tap.company/v2/charges/' + encodeURIComponent(tapId), {
       headers: { 'Authorization': 'Bearer ' + key },
     });
-    const pi = await res.json();
-    if (!res.ok) return Response.json({ error: pi?.error?.message || 'تعذّر التحقق من العملية' }, { status: 502 });
+    const charge = await res.json();
+    if (!res.ok) return Response.json({ error: charge?.errors?.[0]?.description || 'تعذّر التحقق من العملية' }, { status: 502 });
 
-    if (pi.status !== 'succeeded') {
+    if (charge.status !== 'CAPTURED') {
       return Response.json({ error: 'لم يكتمل الدفع بعد' }, { status: 402 });
     }
 
-    const meta = pi.metadata || {};
+    const meta = charge.metadata || {};
     const name = meta.name || '—';
     const email = meta.contact_email || '';
     const phone = meta.contact_phone || '';
@@ -58,7 +58,7 @@ export default async function (req) {
       trial_start: null,
       trial_end: null,
       subscription_end: subEnd.toISOString().slice(0, 10),
-      notes: 'اشتراك سنوي مدفوع عبر Stripe — رقم العملية: ' + piId,
+      notes: 'اشتراك سنوي مدفوع عبر Tap — رقم العملية: ' + tapId,
     });
 
     await base44.asServiceRole.entities.Subscription.create({
@@ -71,7 +71,7 @@ export default async function (req) {
       payment_method: 'online',
       status: 'paid',
       paid_date: todayStr,
-      notes: piId,
+      notes: tapId,
     });
 
     const ownerEmail = secrets.get('OWNER_EMAIL');
@@ -81,7 +81,7 @@ export default async function (req) {
           to: ownerEmail,
           subject: 'اشتراك سنوي جديد مدفوع — ' + name,
           body:
-            'تم اشتراك عميل جديد في الباقة السنوية ودفع 2,500 ريال عبر Stripe:\n\n' +
+            'تم اشتراك عميل جديد في الباقة السنوية ودفع 2,500 ريال عبر Tap (مدى/Visa/Apple Pay):\n\n' +
             'المنشأة: ' + name + '\n' +
             'السجل التجاري: ' + (cr || '-') + '\n' +
             'القطاع: ' + (industry || '-') + '\n' +
@@ -92,7 +92,7 @@ export default async function (req) {
             'تاريخ الاشتراك: ' + todayStr + '\n' +
             'تنتهي السنة الأولى في: ' + subEnd.toISOString().slice(0, 10) + '\n' +
             'تُجدد تلقائياً (تذكير) بـ 700 ريال سنوياً من العام الثاني.\n\n' +
-            'رقم عملية Stripe: ' + piId,
+            'رقم عملية Tap: ' + tapId,
         });
       } catch (_e) {
         // لا تعطّل العملية إن تعطل البريد

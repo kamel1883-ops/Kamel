@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -16,24 +14,6 @@ const empty = {
   contact_name: "", contact_email: "", contact_phone: "", city: "",
 };
 
-const appearance = {
-  theme: "stripe",
-  variables: {
-    colorPrimary: "#5b21b6",
-    colorBackground: "#ffffff",
-    colorText: "#1e293b",
-    colorDanger: "#e11d48",
-    fontFamily: "IBM Plex Sans Arabic, Tajawal, system-ui, sans-serif",
-    borderRadius: "12px",
-  },
-  rules: {
-    ".Input": { border: "1px solid #e2e8f0", boxShadow: "none" },
-    ".Input:focus": { borderColor: "#7c3aed", boxShadow: "0 0 0 2px rgba(124,58,237,.2)" },
-    ".Tab": { border: "1px solid #e2e8f0" },
-    ".Tab--selected": { borderColor: "#7c3aed", boxShadow: "0 0 0 2px rgba(124,58,237,.2)" },
-  },
-};
-
 export default function CheckoutModal({ open, onClose }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
@@ -41,78 +21,50 @@ export default function CheckoutModal({ open, onClose }) {
     ? {
         title: "الاشتراك السنوي — الدفع الآمن",
         step1: "بيانات المنشأة",
-        step2: "بيانات الدفع (بطاقة / Apple Pay)",
+        step2: "صفحة الدفع الآمنة (Tap)",
         first: "2,500 ريال",
         firstNote: "السنة الأولى (تشمل سنة مجانية)",
         after: "ثم 700 ريال سنوياً من العام الثاني",
-        formHint: "أدخل بيانات المنشأة، ثم تُدخل بيانات الدفع مباشرة في نفس النافذة بأمان عبر Stripe.",
+        formHint: "أدخل بيانات المنشأة، ثم تُحوَّل تلقائياً إلى صفحة الدفع الآمنة عبر Tap لدفع 2,500 ريال بمدى / Visa / Mastercard / Apple Pay.",
         company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط",
         city: "المدينة", contact: "جهة الاتصال", phone: "الهاتف", email: "البريد الإلكتروني *",
-        nextBtn: "متابعة للدفع",
-        backBtn: "رجوع",
-        payNowBtn: "ادفع 2,500 ريال الآن",
+        nextBtn: "متابعة للدفع الآمن",
+        redirecting: "جارٍ تجهيز صفحة الدفع وتحويلك إلى Tap…",
         payMethodsLabel: "طرق الدفع المتاحة:",
-        secure: "بيانات البطاقة تُدخل مباشرة إلى Stripe عبر تشفير TLS — لا تُخزّن ولا تصل لخوادمنا.",
+        secure: "تتم عملية الدفع بالكامل على بوابة Tap الآمنة المعتمدة — بيانات بطاقتك لا تمر عبر خوادمنا إطلاقاً.",
         errRequired: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح",
         errGeneric: "تعذّر بدء عملية الدفع، حاول مرة أخرى",
-        errPay: "تعذّر إتمام الدفع، راجع بيانات البطاقة وحاول مرة أخرى",
-        errConfirm: "تم الدفع لكن تعذّر تسجيل الاشتراك، تواصل مع الدعم",
-        doneTitle: "تم الدفع بنجاح!",
-        doneDesc: "تم تفعيل اشتراكك السنوي. ستصلك بيانات الدخول قريباً.",
-        doneBtn: "تسجيل الدخول",
         closeBtn: "إغلاق",
-        processing: "جارٍ معالجة الدفع...",
       }
     : {
         title: "Annual Subscription — Secure Payment",
         step1: "Company details",
-        step2: "Payment (Card / Apple Pay)",
+        step2: "Secure Checkout (Tap)",
         first: "SAR 2,500",
         firstNote: "First year (includes one free year)",
         after: "Then SAR 700 / year from year two",
-        formHint: "Enter company details, then enter payment directly in this dialog securely via Stripe.",
+        formHint: "Enter company details, then you’ll be redirected securely to Tap to pay 2,500 SAR via Mada / Visa / Mastercard / Apple Pay.",
         company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity",
         city: "City", contact: "Contact person", phone: "Phone", email: "Email *",
-        nextBtn: "Continue to payment",
-        backBtn: "Back",
-        payNowBtn: "Pay SAR 2,500 now",
+        nextBtn: "Continue to secure payment",
+        redirecting: "Preparing the payment page and redirecting you to Tap…",
         payMethodsLabel: "Available payment methods:",
-        secure: "Card details go directly to Stripe over TLS — never stored or seen by us.",
+        secure: "Payment is handled entirely on Tap’s secure gateway — your card details never touch our servers.",
         errRequired: "Please enter a company name and a valid email",
         errGeneric: "Could not start checkout, please try again",
-        errPay: "Payment failed, check your card and try again",
-        errConfirm: "Payment succeeded but registering subscription failed, contact support",
-        doneTitle: "Payment successful!",
-        doneDesc: "Your annual subscription is active. Login details will arrive shortly.",
-        doneBtn: "Go to login",
         closeBtn: "Close",
-        processing: "Processing payment...",
       };
 
   const [form, setForm] = useState(empty);
   const [err, setErr] = useState("");
-  // stages: details -> preparing -> pay -> confirming -> done
+  // stages: details -> preparing
   const [stage, setStage] = useState("details");
-  const [stripePromise, setStripePromise] = useState(null);
-  const [clientSecret, setClientSecret] = useState("");
-  const [paymentIntentId, setPaymentIntentId] = useState("");
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const reset = () => {
-    setForm(empty);
-    setErr("");
-    setStage("details");
-    setStripePromise(null);
-    setClientSecret("");
-    setPaymentIntentId("");
-  };
+  const reset = () => { setForm(empty); setErr(""); setStage("details"); };
 
-  const handleClose = () => {
-    if (stage === "confirming") return; // لا تسمح بالإغلاق أثناء المعالجة
-    reset();
-    onClose();
-  };
+  const handleClose = () => { reset(); onClose(); };
 
   const submitDetails = async (e) => {
     e.preventDefault();
@@ -125,17 +77,19 @@ export default function CheckoutModal({ open, onClose }) {
     }
     setStage("preparing");
     try {
-      const res = await base44.functions.invoke("createSubscription", { ...form, locale: isAr ? "ar" : "en" });
+      const res = await base44.functions.invoke("createSubscription", {
+        ...form,
+        return_url: window.location.origin,
+        locale: isAr ? "ar" : "en",
+      });
       const data = res?.data;
-      if (!data?.client_secret || !data?.publishable_key) {
+      if (!data?.redirect_url) {
         setErr(data?.error || t.errGeneric);
         setStage("details");
         return;
       }
-      setClientSecret(data.client_secret);
-      setPaymentIntentId(data.payment_intent_id);
-      setStripePromise(loadStripe(data.publishable_key));
-      setStage("pay");
+      // التحويل لصفحة Tap المُستضافة — يكمل العميل الدفع ويعود تلقائياً للهبةomain
+      window.location.href = data.redirect_url;
     } catch (error) {
       setErr(error?.response?.data?.error || error?.message || t.errGeneric);
       setStage("details");
@@ -149,7 +103,7 @@ export default function CheckoutModal({ open, onClose }) {
   );
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o && stage !== "preparing") handleClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -172,7 +126,7 @@ export default function CheckoutModal({ open, onClose }) {
           </div>
           <div className="flex-1 h-px bg-border" />
           <div className="flex items-center gap-1.5">
-            {renderStepBadge(2, stage === "pay" || stage === "confirming" || stage === "done")}
+            {renderStepBadge(2, stage === "preparing")}
             <span className="text-xs font-medium">{t.step2}</span>
           </div>
         </div>
@@ -211,6 +165,17 @@ export default function CheckoutModal({ open, onClose }) {
               </div>
             </div>
 
+            <div className="flex items-center flex-wrap gap-2 pt-1">
+              <span className="text-xs text-muted-foreground">{t.payMethodsLabel}</span>
+              <span className="px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold tracking-wide">mada</span>
+              <span className="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold italic">VISA</span>
+              <span className="px-2.5 py-1 rounded-md bg-backdrop bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">Mastercard</span>
+              <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1">
+                <svg width="11" height="13" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5 4 301.3 9 330 19 380c12.5 58.1 57.7 98.3 102.7 98.3 26.3 0 56.8-18.6 81.6-18.6 24.2 0 47.2 18.6 81.6 18.6 45.5 0 84-50.1 97.2-98.3-21.9-22-46.2-45-46.2-111.4zM265.2 108.5c22.6-26.3 38.5-62.8 34.3-99.3-33.1 1.4-73.2 22.1-96.9 48.5-21.1 23.8-38 61.1-31.4 96.9 37.9 2.9 71.4-19.4 94-45.9z"/></svg>
+                Apple Pay
+              </span>
+            </div>
+
             {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
 
             <div className="flex items-center justify-between gap-3 pt-1">
@@ -228,122 +193,14 @@ export default function CheckoutModal({ open, onClose }) {
         )}
 
         {stage === "preparing" && (
-          <div className="py-10 flex flex-col items-center gap-3">
-            <Loader2 size={32} className="animate-spin text-violet-600" />
-            <div className="text-sm text-muted-foreground">{t.processing}</div>
-          </div>
-        )}
-
-        {(stage === "pay" || stage === "confirming") && stripePromise && clientSecret && (
-          <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-            <PaymentStep
-              t={t}
-              paymentIntentId={paymentIntentId}
-              onBack={() => setStage("details")}
-              setStage={setStage}
-            />
-          </Elements>
-        )}
-
-        {stage === "done" && (
-          <div className="py-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-              <BadgeCheck size={32} className="text-emerald-600" />
-            </div>
-            <div className="text-xl font-bold">{t.doneTitle}</div>
-            <p className="text-muted-foreground mt-2 text-sm">{t.doneDesc}</p>
-            <div className="flex items-center justify-center gap-3 mt-6">
-              <Button asChild className="gap-2">
-                <a href="/login?returnTo=/app">{t.doneBtn}</a>
-              </Button>
-              <Button type="button" variant="outline" onClick={handleClose}>{t.closeBtn}</Button>
+          <div className="py-12 flex flex-col items-center gap-4">
+            <Loader2 size={36} className="animate-spin text-violet-600" />
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <Lock size={14} /> {t.redirecting}
             </div>
           </div>
         )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-function PaymentStep({ t, paymentIntentId, onBack, setStage }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [paying, setPaying] = useState(false);
-  const [localErr, setLocalErr] = useState("");
-
-  const pay = async () => {
-    if (!stripe || !elements) return;
-    setPaying(true);
-    setLocalErr("");
-    const result = await stripe.confirmPayment({
-      elements,
-      redirect: "if_required",
-      confirmParams: { return_url: window.location.origin },
-    });
-
-    if (result.error) {
-      setLocalErr(result.error.message || t.errPay);
-      setPaying(false);
-      return;
-    }
-
-    const intent = result.paymentIntent || result.intent;
-    if (intent && intent.status === "succeeded") {
-      setStage("confirming");
-      try {
-        const res = await base44.functions.invoke("confirmSubscription", { payment_intent_id: paymentIntentId });
-        if (res?.data?.ok) {
-          setStage("done");
-        } else {
-          setLocalErr(res?.data?.error || t.errConfirm);
-          setStage("pay");
-          setPaying(false);
-        }
-      } catch (e) {
-        setLocalErr(e?.response?.data?.error || e?.message || t.errConfirm);
-        setStage("pay");
-        setPaying(false);
-      }
-    } else {
-      setLocalErr(t.errPay);
-      setStage("pay");
-      setPaying(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs text-muted-foreground">{t.payMethodsLabel}</span>
-        <span className="px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold tracking-wide">mada</span>
-        <span className="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold italic">VISA</span>
-        <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1">
-          <svg width="11" height="13" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5 4 301.3 9 330 19 380c12.5 58.1 57.7 98.3 102.7 98.3 26.3 0 56.8-18.6 81.6-18.6 24.2 0 47.2 18.6 81.6 18.6 45.5 0 84-50.1 97.2-98.3-21.9-22-46.2-45-46.2-111.4zM265.2 108.5c22.6-26.3 38.5-62.8 34.3-99.3-33.1 1.4-73.2 22.1-96.9 48.5-21.1 23.8-38 61.1-31.4 96.9 37.9 2.9 71.4-19.4 94-45.9z"/></svg>
-          Pay
-        </span>
-      </div>
-
-      <div className="border border-border rounded-2xl p-4 bg-white">
-        <PaymentElement options={{ layout: "tabs" }} />
-      </div>
-
-      {localErr && (
-        <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{localErr}</div>
-      )}
-
-      <div className="flex items-center justify-between gap-3">
-        <Button type="button" variant="outline" onClick={onBack} disabled={paying}>
-          {t.backBtn}
-        </Button>
-        <Button type="button" onClick={pay} disabled={!stripe || paying} className="gap-2 min-w-[200px]">
-          {paying ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
-          {paying ? t.processing : t.payNowBtn}
-        </Button>
-      </div>
-
-      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-        <ShieldCheck size={13} /> {t.secure}
-      </p>
-    </div>
   );
 }

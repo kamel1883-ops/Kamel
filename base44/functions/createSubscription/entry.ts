@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 
-const ANNUAL_AMOUNT = 250000; // 2,500 SAR (in halalas)
+const ANNUAL_AMOUNT = 2500; // SAR (Tap expects whole currency units)
 
 export default async function (req) {
   try {
@@ -12,37 +12,56 @@ export default async function (req) {
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
 
-    const params = new URLSearchParams();
-    params.append('amount', String(ANNUAL_AMOUNT));
-    params.append('currency', 'sar');
-    params.append('automatic_payment_methods[enabled]', 'true');
-    params.append('description', 'اشتراك سنوي جدارة — السنة الأولى (2,500 ريال)');
-    params.append('metadata[name]', name);
-    params.append('metadata[commercial_register]', String(body.commercial_register || '').trim());
-    params.append('metadata[industry]', String(body.industry || '').trim());
-    params.append('metadata[contact_name]', String(body.contact_name || '').trim());
-    params.append('metadata[contact_email]', email);
-    params.append('metadata[contact_phone]', String(body.contact_phone || '').trim());
-    params.append('metadata[city]', String(body.city || '').trim());
+    const origin = String(body.return_url || '').trim().replace(/\/$/, '') || 'https://jadara-hr.sa';
 
-    const key = secrets.get('STRIPE_SECRET_KEY');
-    const res = await fetch('https://api.stripe.com/v1/payment_intents', {
+    const contactName = String(body.contact_name || '').trim() || name;
+    const firstSpace = contactName.indexOf(' ');
+    const firstName = firstSpace > 0 ? contactName.slice(0, firstSpace) : contactName.slice(0, 40);
+    const lastName = firstSpace > 0 ? contactName.slice(firstSpace + 1).trim() : name.slice(0, 40) || '—';
+
+    const metadata = {
+      name,
+      commercial_register: String(body.commercial_register || '').trim(),
+      industry: String(body.industry || '').trim(),
+      contact_name: contactName,
+      contact_email: email,
+      contact_phone: String(body.contact_phone || '').trim(),
+      city: String(body.city || '').trim(),
+    };
+
+    const key = secrets.get('TAP_SECRET_KEY');
+    const res = await fetch('https://api.tap.company/v2/charges', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + key,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
+        'lang_code': 'ar',
       },
-      body: params.toString(),
+      body: JSON.stringify({
+        amount: ANNUAL_AMOUNT,
+        currency: 'SAR',
+        threeDSecure: true,
+        save_card: false,
+        description: 'اشتراك سنوي جدارة — السنة الأولى (2,500 ريال)',
+        statement_descriptor: 'JADARA',
+        metadata,
+        customer: { first_name: firstName, last_name: lastName, email },
+        // src_all = Tap hosted checkout (shows Mada, Visa, Mastercard, Apple Pay automatically)
+        source: { id: 'src_all' },
+        post: { url: origin },
+        redirect: { url: origin },
+      }),
     });
+
     const data = await res.json();
-    if (!res.ok || !data.client_secret) {
-      return Response.json({ error: data?.error?.message || 'تعذّر إنشاء نية الدفع' }, { status: 502 });
+    const redirectTarget = data?.transaction?.url || data?.redirect_url || data?.redirect?.url;
+    if (!res.ok || !redirectTarget) {
+      return Response.json({ error: data?.errors?.[0]?.description || data?.error?.message || 'تعذّر إنشاء عملية الدفع' }, { status: 502 });
     }
-    const publishableKey = secrets.get('STRIPE_PUBLISHABLE_KEY');
+
     return Response.json({
-      client_secret: data.client_secret,
-      payment_intent_id: data.id,
-      publishable_key: publishableKey,
+      redirect_url: redirectTarget,
+      charge_id: data.id,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
