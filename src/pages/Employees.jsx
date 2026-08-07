@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import EmployeeForm from "@/components/EmployeeForm";
+import EmployeeImport from "@/components/EmployeeImport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2, Users, Network } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Network, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
@@ -18,12 +19,12 @@ export default function Employees() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
-    title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد",
+    title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد", importBtn: "استيراد من Excel",
     search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", loading: "جارٍ التحميل...",
     empty: "لا يوجد موظفون مطابقون", del: (n) => `حذف الموظف ${n}؟`,
     thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
   } : {
-    title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee",
+    title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee", importBtn: "Import from Excel",
     search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", loading: "Loading...",
     empty: "No matching employees", del: (n) => `Delete employee ${n}?`,
     thNum: "Number", thPos: "Title", thDept: "Department", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
@@ -34,6 +35,7 @@ export default function Employees() {
   const [deptFilter, setDeptFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +66,12 @@ export default function Employees() {
       <PageHeader
         title={t.title}
         subtitle={t.subtitle}
-        action={<Button onClick={() => { setEditTarget(null); setFormOpen(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>}
+        action={(
+          <div className="flex gap-2">
+            <Button onClick={() => { setEditTarget(null); setFormOpen(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>
+            <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2"><Upload size={18} /> {t.importBtn}</Button>
+          </div>
+        )}
       />
 
       <div className="bg-white rounded-2xl border border-border">
@@ -135,6 +142,7 @@ export default function Employees() {
       </div>
 
       <EmployeeForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={load} employee={editTarget} />
+      <EmployeeImport open={importOpen} onClose={() => setImportOpen(false)} onSaved={load} />
     </div>
   );
 }

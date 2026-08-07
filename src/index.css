@@ -138,4 +138,9 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
     padding: 20px;
   }
   .print-settlement .no-print { display: none !important; }
+
+  body * { visibility: hidden !important; }
+  .print-quote, .print-quote * { visibility: visible !important; }
+  .print-quote { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; }
+  .print-quote .no-print { display: none !important; }
 }

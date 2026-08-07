@@ -37,8 +37,9 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import Quote from "@/pages/Quote";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/login", "/register", "/forgot-password", "/reset-password"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password"];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -68,6 +69,7 @@ const AuthenticatedApp = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/quote" element={<Quote />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
