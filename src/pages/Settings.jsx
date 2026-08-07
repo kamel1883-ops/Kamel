@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Loader2, Building2, Save } from "lucide-react";
+import { Loader2, Building2, Save, Crosshair } from "lucide-react";
 
 const empty = {
   name: "", commercial_register: "", vat_number: "", city: "", country: "المملكة العربية السعودية",
@@ -17,6 +17,7 @@ const empty = {
   gosi_saudi_employee_rate: 9.75, gosi_saudi_employer_rate: 9.75, gosi_expat_employer_rate: 2,
   work_week_hours: 48, work_week_days: 6, late_grace_minutes: 15,
   absence_deduction_type: "monthly_divided",
+  workplace_lat: "", workplace_lng: "", workplace_radius: 50,
 };
 
 export default function SettingsPage() {
@@ -32,6 +33,18 @@ export default function SettingsPage() {
   }, []);
 
   const set = (k, v) => setOrg((o) => ({ ...o, [k]: v }));
+
+  const captureLocation = () => {
+    if (!navigator.geolocation) { alert("الجهاز لا يدعم تحديد الموقع"); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        set("workplace_lat", Number(pos.coords.latitude.toFixed(6)));
+        set("workplace_lng", Number(pos.coords.longitude.toFixed(6)));
+      },
+      () => alert("تعذر الوصول إلى موقعك"),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const save = async () => {
     setSaving(true);
@@ -117,6 +130,17 @@ export default function SettingsPage() {
               </Select>
             </Field>
           </div>
+        </Card>
+
+        <Card>
+          <SectionTitle title="موقع مقر العمل (للبصمة)" />
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="خط العرض"><Input type="number" step="any" value={org.workplace_lat} onChange={(e) => set("workplace_lat", e.target.value === "" ? "" : Number(e.target.value))} /></Field>
+            <Field label="خط الطول"><Input type="number" step="any" value={org.workplace_lng} onChange={(e) => set("workplace_lng", e.target.value === "" ? "" : Number(e.target.value))} /></Field>
+            <Field label="نطاق البصمة (متر)"><Input type="number" value={org.workplace_radius} onChange={(e) => set("workplace_radius", Number(e.target.value))} /></Field>
+          </div>
+          <Button type="button" variant="outline" onClick={captureLocation} className="gap-2"><Crosshair size={16} /> تحديد موقعي الحالي</Button>
+          <p className="text-xs text-muted-foreground">سيُسمح للموظف بالبصمة فقط ضمن {org.workplace_radius || 50} متر من هذا الموقع.</p>
         </Card>
 
         <div className="flex justify-end">

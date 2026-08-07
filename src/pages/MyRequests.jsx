@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import LeaveRequestForm from "@/components/LeaveRequestForm";
 import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
+import EmployeeClock from "@/components/EmployeeClock";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,6 +180,8 @@ export default function MyRequests() {
           <InfoCard icon={Banknote} label="الراتب الإجمالي" value={formatCurrency(gross)} sub={`أساسي ${formatCurrency(employee.base_salary || 0)}`} />
           <InfoCard icon={BadgeCheck} label="استحقاق التذكرة" value={employee.ticket_entitlement === "yearly" ? "سنوي" : employee.ticket_entitlement === "biennial" ? "كل سنتين" : "لا يستحق"} sub={employee.is_saudi ? "سعودي" : "مقيم"} />
         </div>
+
+        <EmployeeClock employee={employee} org={org} onChanged={load} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <SideCard title="تفاصيل الخدمة والراتب">
