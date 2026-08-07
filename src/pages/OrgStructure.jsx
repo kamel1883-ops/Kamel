@@ -2,178 +2,198 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Network, Users } from "lucide-react";
+import { Network, Users, Crown, Briefcase, ClipboardList, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { buildOrgTree, orgStats, ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
 
 export default function OrgStructure() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
-  const UNIT_TYPES = isAr ? [
-    { value: "general_management", label: "الإدارة العليا" }, { value: "executive", label: "إدارة تنفيذية" },
-    { value: "department", label: "إدارة" }, { value: "division", label: "قطاع" },
-    { value: "section", label: "قسم" }, { value: "unit", label: "وحدة" },
-    { value: "supervisor", label: "مشرف" }, { value: "role", label: "وظيفة" }, { value: "other", label: "أخرى" },
-  ] : [
-    { value: "general_management", label: "General management" }, { value: "executive", label: "Executive" },
-    { value: "department", label: "Department" }, { value: "division", label: "Division" },
-    { value: "section", label: "Section" }, { value: "unit", label: "Unit" },
-    { value: "supervisor", label: "Supervisor" }, { value: "role", label: "Role" }, { value: "other", label: "Other" },
-  ];
-  const typeLabel = (v) => UNIT_TYPES.find((t) => t.value === v)?.label || v;
   const t = isAr ? {
-    title: "الهيكل التنظيمي", subtitle: "ابنِ هيكل منشأتك بنفسك بعدد مستويات ووحدات غير محدود — من الإدارة العليا إلى الأقسام والمشرفين والعمال.",
-    addRoot: "إضافة وحدة جذرية", sUnits: "إجمالي الوحدات", sPlanned: "العدد المخطط الكلي", sActual: "العدد الفعلي الكلي",
-    loading: "جارٍ التحميل...", empty: "لا توجد وحدات بعد. ابدأ بإضافة وحدة جذرية (مثل الإدارة العليا أو رئيس المنشأة).",
-    sub: "وحدة فرعية", planned: (p, a) => `مخطط: ${p || 0} / فعلي: ${a || 0}`,
-    editT: "تعديل وحدة تنظيمية", newT: "إضافة وحدة تنظيمية", name: "اسم الوحدة *", namePh: "مثال: الإدارة المالية",
-    type: "نوع الوحدة *", parent: "الوحدة الأصل", root: "بدون (وحدة جذرية)", manager: "المسؤول عن الوحدة", managerPh: "اسم المسؤول",
-    plannedH: "العدد المخطط", actualH: "العدد الفعلي", order: "الترتيب", notes: "ملاحظات", cancel: "إلغاء", save: "حفظ التعديلات", addB: "إضافة",
+    title: "الهيكل التنظيمي", subtitle: "يُبنى الهيكل تلقائياً من بيانات الموظفين: المالك ← المدير التنفيذي ← مدراء الإدارات ← المشرفون ← الموظفون والعمال.",
+    loading: "جارٍ تحميل الهيكل...", empty: "لا يوجد موظفون بعد. أضف موظفين من صفحة الموظفين مع تحديد المستوى الوظيفي والمدير المباشر، وسيظهر الهيكل هنا تلقائياً.",
+    sTotal: "إجمالي القوى العاملة", sDepts: "عدد الإدارات", sManagers: "المدراء", sSupervisors: "المشرفون",
+    viewTree: "شجرة الهيكل", viewDepts: "حسب الإدارة",
+    reportsTo: "يرفع تقاريره إلى", deptMgr: "مدير الإدارة", noMgr: "غير محدد",
+    members: "أعضاء", orphans: "بدون مدير مباشر",
+    refresh: "تحديث", legend: "مفتاح المستويات",
+    roleCount: (label, n) => `${label}: ${n}`,
   } : {
-    title: "Organizational structure", subtitle: "Build your org chart yourself with unlimited levels — from top management to sections, supervisors and staff.",
-    addRoot: "Add root unit", sUnits: "Total units", sPlanned: "Total planned", sActual: "Total actual",
-    loading: "Loading...", empty: "No units yet. Add a root unit (e.g. top management or head of org).",
-    sub: "Sub-unit", planned: (p, a) => `Planned: ${p || 0} / Actual: ${a || 0}`,
-    editT: "Edit org unit", newT: "Add org unit", name: "Unit name *", namePh: "e.g. Finance",
-    type: "Unit type *", parent: "Parent unit", root: "None (root unit)", manager: "Unit owner", managerPh: "Owner name",
-    plannedH: "Planned headcount", actualH: "Actual headcount", order: "Order", notes: "Notes", cancel: "Cancel", save: "Save changes", addB: "Add",
+    title: "Organizational structure", subtitle: "Auto-built from employee data: Owner → Executive → Department managers → Supervisors → Staff & workers.",
+    loading: "Loading org tree...", empty: "No employees yet. Add employees from the Employees page with a role level and a direct manager, and the tree will appear here automatically.",
+    sTotal: "Total workforce", sDepts: "Departments", sManagers: "Managers", sSupervisors: "Supervisors",
+    viewTree: "Hierarchy tree", viewDepts: "By department",
+    reportsTo: "Reports to", deptMgr: "Department manager", noMgr: "Not set",
+    members: "members", orphans: "No direct manager",
+    refresh: "Refresh", legend: "Role legend",
+    roleCount: (label, n) => `${label}: ${n}`,
   };
 
-  const empty = { name: "", unit_type: "department", parent_id: "none", manager_name: "", planned_headcount: 0, current_headcount: 0, order: 0, notes: "" };
-  const [units, setUnits] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(empty);
+  const [view, setView] = useState("tree");
 
   const load = async () => {
     setLoading(true);
-    const list = await base44.entities.OrgUnit.list("-created_date", 500);
-    setUnits(list);
+    const list = await base44.entities.Employee.list("-created_date", 1000);
+    setEmployees(list);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  const reset = () => { setEditing(null); setForm(empty); };
-  const openNew = (parentId = "none") => { reset(); setForm((f) => ({ ...f, parent_id: parentId })); setOpen(true); };
-  const openEdit = (u) => {
-    setEditing(u);
-    setForm({ name: u.name || "", unit_type: u.unit_type || "department", parent_id: u.parent_id || "none", manager_name: u.manager_name || "", planned_headcount: u.planned_headcount || 0, current_headcount: u.current_headcount || 0, order: u.order || 0, notes: u.notes || "" });
-    setOpen(true);
+  const tree = buildOrgTree(employees);
+  const stats = orgStats(employees);
+  const employeeName = (e) => e.position || e.employee_number || "—";
+  const employeeSub = (e) => {
+    const parts = [];
+    if (e.department) parts.push(e.department);
+    if (e.employee_number) parts.push(`#${e.employee_number}`);
+    return parts.join(" • ");
   };
-
-  const save = async (e) => {
-    e.preventDefault();
-    const parent = form.parent_id === "none" ? null : units.find((u) => u.id === form.parent_id);
-    const payload = { ...form, parent_id: form.parent_id === "none" ? null : form.parent_id, parent_name: parent ? parent.name : null, planned_headcount: Number(form.planned_headcount) || 0, current_headcount: Number(form.current_headcount) || 0, order: Number(form.order) || 0 };
-    if (editing) await base44.entities.OrgUnit.update(editing.id, payload);
-    else await base44.entities.OrgUnit.create(payload);
-    setOpen(false); reset(); load();
-  };
-  const remove = async (id) => { await base44.entities.OrgUnit.delete(id); await load(); };
-
-  const childrenOf = (parentId) => units.filter((u) => (u.parent_id || null) === parentId).sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+  const managerOf = (e) => employees.find((m) => m.id === e.manager_id);
 
   const renderNode = (node, depth = 0) => {
-    const kids = childrenOf(node.id);
+    const style = ROLE_STYLES[node.role_level] || ROLE_STYLES.employee;
+    const kids = node._children || [];
     return (
       <div key={node.id}>
-        <div className="flex items-center justify-between gap-3 bg-white border border-border rounded-xl px-4 py-3" style={{ marginRight: depth * 22 }}>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0"><Network size={16} className="text-violet-600" /></div>
-            <div className="min-w-0">
-              <div className="font-medium text-sm truncate">{node.name}</div>
-              <div className="text-xs text-muted-foreground">{typeLabel(node.unit_type)}{node.manager_name ? ` • ${node.manager_name}` : ""}{` • ${t.planned(node.planned_headcount, node.current_headcount)}`}</div>
+        <div className="flex items-stretch gap-0">
+          <div className="flex items-center" style={{ width: depth > 0 ? depth * 28 : 0 }} aria-hidden="true">
+            {depth > 0 && <div className="h-full w-px bg-border mr-3" />}
+          </div>
+          <div className="flex-1 flex items-center justify-between gap-3 bg-white border border-border rounded-xl px-4 py-3 my-1">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-9 h-9 rounded-xl ${style.bg} flex items-center justify-center shrink-0 text-lg`}>{style.icon}</div>
+              <div className="min-w-0">
+                <div className="font-medium text-sm truncate flex items-center gap-2">
+                  {employeeName(node)}
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${style.bg} ${style.text}`}>{roleLabel(node.role_level, lang)}</span>
+                </div>
+                <div className="text-xs text-muted-foreground truncate">{employeeSub(node)}</div>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground shrink-0 hidden sm:block">
+              {node.manager_id ? `${t.reportsTo}: ${employeeName(managerOf(node) || {})}` : ""}
             </div>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <Button size="sm" variant="ghost" onClick={() => openNew(node.id)} className="gap-1 h-7 text-xs"><Plus size={14} /> {t.sub}</Button>
-            <Button size="sm" variant="ghost" onClick={() => openEdit(node)} className="h-7"><Pencil size={14} /></Button>
-            <Button size="sm" variant="ghost" onClick={() => remove(node.id)} className="h-7 text-rose-500"><Trash2 size={14} /></Button>
-          </div>
         </div>
-        {kids.length > 0 && <div className="mt-1.5 space-y-1.5">{kids.map((k) => renderNode(k, depth + 1))}</div>}
+        {kids.length > 0 && <div>{kids.map((k) => renderNode(k, depth + 1))}</div>}
       </div>
     );
   };
 
-  const roots = childrenOf(null);
-  const totalPlanned = units.reduce((s, u) => s + (u.planned_headcount || 0), 0);
-  const totalActual = units.reduce((s, u) => s + (u.current_headcount || 0), 0);
+  const orphanNodes = employees.filter((e) => !e.manager_id && e.role_level !== "owner" && e.role_level !== "executive");
 
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
-      <PageHeader title={t.title} subtitle={t.subtitle} action={<Button onClick={() => openNew()} className="gap-2"><Plus size={16} /> {t.addRoot}</Button>} />
+      <PageHeader
+        title={t.title}
+        subtitle={t.subtitle}
+        action={<Button variant="outline" onClick={load} className="gap-2"><RefreshCw size={16} /> {t.refresh}</Button>}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-        <Stat label={t.sUnits} value={units.length} icon={Network} />
-        <Stat label={t.sPlanned} value={totalPlanned} icon={Users} />
-        <Stat label={t.sActual} value={totalActual} icon={Users} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        <Stat label={t.sTotal} value={stats.total} icon={Users} tint="slate" />
+        <Stat label={t.sDepts} value={stats.departments.length} icon={Network} tint="violet" />
+        <Stat label={t.sManagers} value={stats.byLevel.manager + stats.byLevel.executive + stats.byLevel.owner} icon={Crown} tint="amber" />
+        <Stat label={t.sSupervisors} value={stats.byLevel.supervisor} icon={ClipboardList} tint="emerald" />
+      </div>
+
+      {/* مفتاح المستويات */}
+      <div className="bg-white border border-border rounded-2xl p-3 mb-5 flex flex-wrap gap-2">
+        <span className="text-xs text-muted-foreground self-center">{t.legend}:</span>
+        {ROLE_ORDER.map((r) => {
+          const s = ROLE_STYLES[r];
+          return (
+            <span key={r} className={`text-[11px] px-2.5 py-1 rounded-full font-medium ${s.bg} ${s.text}`}>
+              {s.icon} {ROLE_LABELS[lang]?.[r] || r} ({stats.byLevel[r] || 0})
+            </span>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-2 mb-4">
+        <Select value={view} onValueChange={setView}>
+          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="tree">{t.viewTree}</SelectItem>
+            <SelectItem value="depts">{t.viewDepts}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
-      ) : units.length === 0 ? (
+      ) : employees.length === 0 ? (
         <div className="bg-white border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">{t.empty}</div>
+      ) : view === "tree" ? (
+        <div>
+          {/* عرض القمة: المالك والتنفيذيون */}
+          {tree.map((n) => renderNode(n))}
+          {orphanNodes.length > 0 && (
+            <div className="mt-6">
+              <div className="text-sm font-medium text-muted-foreground mb-2">{t.orphans} ({orphanNodes.length})</div>
+              <div className="flex flex-wrap gap-2">
+                {orphanNodes.map((e) => (
+                  <span key={e.id} className="text-xs px-3 py-1.5 rounded-lg bg-slate-50 border border-border">{employeeName(e)}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
-        <div className="space-y-1.5">{roots.map((n) => renderNode(n))}</div>
+        <div className="space-y-4">
+          {stats.deptManagers.map((d) => (
+            <div key={d.department} className="bg-white border border-border rounded-2xl p-4">
+              <div className="flex items-center justify-between gap-3 mb-3 pb-3 border-b border-border">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center"><Briefcase size={18} className="text-blue-600" /></div>
+                  <div>
+                    <div className="font-semibold text-sm">{d.department}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {d.manager ? `${t.deptMgr}: ${employeeName(d.manager)}` : t.noMgr} • {d.count} {t.members}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {employees.filter((e) => e.department === d.department).sort((a, b) => {
+                  const order = ROLE_ORDER;
+                  return order.indexOf(a.role_level) - order.indexOf(b.role_level);
+                }).map((e) => {
+                  const s = ROLE_STYLES[e.role_level] || ROLE_STYLES.employee;
+                  return (
+                    <div key={e.id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+                      <span className={`w-7 h-7 rounded-lg ${s.bg} flex items-center justify-center text-sm shrink-0`}>{s.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">{employeeName(e)}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">{roleLabel(e.role_level, lang)}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editing ? t.editT : t.newT}</DialogTitle></DialogHeader>
-          <form onSubmit={save} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>{t.name}</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder={t.namePh} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>{t.type}</Label>
-                <Select value={form.unit_type} onValueChange={(v) => setForm({ ...form, unit_type: v })}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                  <SelectContent>{UNIT_TYPES.map((tt) => <SelectItem key={tt.value} value={tt.value}>{tt.label}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t.parent}</Label>
-                <Select value={form.parent_id} onValueChange={(v) => setForm({ ...form, parent_id: v })}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t.root}</SelectItem>
-                    {units.filter((u) => u.id !== editing?.id).map((u) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1.5"><Label>{t.manager}</Label><Input value={form.manager_name} onChange={(e) => setForm({ ...form, manager_name: e.target.value })} placeholder={t.managerPh} /></div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-1.5"><Label>{t.plannedH}</Label><Input type="number" min={0} value={form.planned_headcount} onChange={(e) => setForm({ ...form, planned_headcount: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label>{t.actualH}</Label><Input type="number" min={0} value={form.current_headcount} onChange={(e) => setForm({ ...form, current_headcount: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label>{t.order}</Label><Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: e.target.value })} /></div>
-            </div>
-            <div className="space-y-1.5"><Label>{t.notes}</Label><Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>{t.cancel}</Button>
-              <Button type="submit">{editing ? t.save : t.addB}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
-function Stat({ label, value, icon: Icon }) {
+function Stat({ label, value, icon: Icon, tint = "violet" }) {
+  const tints = {
+    slate: "bg-slate-100 text-slate-600",
+    violet: "bg-violet-100 text-violet-600",
+    amber: "bg-amber-100 text-amber-600",
+    emerald: "bg-emerald-100 text-emerald-600",
+  };
   return (
     <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center"><Icon size={20} className="text-violet-600" /></div>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tints[tint]}`}><Icon size={20} /></div>
       <div><div className="text-xl font-bold">{value}</div><div className="text-xs text-muted-foreground">{label}</div></div>
     </div>
   );

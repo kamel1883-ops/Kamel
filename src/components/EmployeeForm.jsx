@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 
 const empty = {
   employee_number: "", national_id: "", nationality: "", gender: "male", is_saudi: false,
   birth_date: "", phone: "", address: "", emergency_contact: "",
-  department: "", position: "", job_grade: "", hire_date: "",
+  department: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
   contract_type: "full_time", status: "active",
-  termination_reason: "none", termination_date: "",
+  termination_reason: "none", termination_date: "", manager_id: "",
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
   avatar_url: "",
   iqama_expiry: "", passport_number: "", passport_expiry: "",
@@ -39,6 +40,8 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     saudi: "سعودي؟", saudiY: "سعودي", saudiN: "مقيم", iqama: "انتهاء الإقامة/الهوية",
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medNo: "رقم التأمين الطبي", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
+    roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
+    deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
     cancel: "إلغاء", save: "حفظ",
   } : {
     edit: "Edit employee", add: "Add new employee",
@@ -51,14 +54,24 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     saudi: "Saudi?", saudiY: "Saudi", saudiN: "Expat", iqama: "Iqama/ID expiry",
     passNo: "Passport number", passExp: "Passport expiry", medNo: "Health insurance no", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
+    roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
+    deptHint: "Pick from existing departments or type a new one",
     cancel: "Cancel", save: "Save",
   };
 
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
+  const [allEmployees, setAllEmployees] = useState([]);
 
   useEffect(() => { setForm(employee ? { ...empty, ...employee } : empty); }, [employee, open]);
+  useEffect(() => {
+    base44.entities.Employee.list("-created_date", 500).then((list) => setAllEmployees(list));
+  }, [open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const departments = Array.from(new Set(allEmployees.map((e) => e.department).filter(Boolean))).sort((a, b) => a.localeCompare(b, "ar"));
+  const managers = managerCandidates(allEmployees, employee?.id);
+  const managerLabel = (m) => `${m.position || m.employee_number}${m.department ? ` — ${m.department}` : ""}${m.role_level ? ` (${ROLE_LABELS[isAr ? "ar" : "en"][m.role_level]})` : ""}`;
 
   const submit = async (e) => {
     e.preventDefault(); setSaving(true);
@@ -87,10 +100,28 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             </Field>
             <Field label={t.birth}><Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} /></Field>
             <Field label={t.phone}><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
-            <Field label={t.dept}><Input value={form.department} onChange={(e) => set("department", e.target.value)} required /></Field>
+            <Field label={t.dept}>
+              <Input value={form.department} onChange={(e) => set("department", e.target.value)} required placeholder={t.deptHint} list="dept-options" />
+              <datalist id="dept-options">{departments.map((d) => <option key={d} value={d} />)}</datalist>
+            </Field>
             <Field label={t.position}><Input value={form.position} onChange={(e) => set("position", e.target.value)} required /></Field>
+            <Field label={t.roleLevel}>
+              <Select value={form.role_level || "employee"} onValueChange={(v) => set("role_level", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{ROLE_ORDER.map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[isAr ? "ar" : "en"][r]}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
+            <Field label={t.directManager}>
+              <Select value={form.manager_id || "none"} onValueChange={(v) => set("manager_id", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t.noManager}</SelectItem>
+                  {managers.map((m) => <SelectItem key={m.id} value={m.id}>{managerLabel(m)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label={t.contract}>
               <Select value={form.contract_type} onValueChange={(v) => set("contract_type", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

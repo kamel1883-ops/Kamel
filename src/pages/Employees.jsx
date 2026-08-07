@@ -7,29 +7,32 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Network } from "lucide-react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
+import { ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
 
 export default function Employees() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد",
-    search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", loading: "جارٍ التحميل...",
+    search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", loading: "جارٍ التحميل...",
     empty: "لا يوجد موظفون مطابقون", del: (n) => `حذف الموظف ${n}؟`,
-    thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
+    thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
   } : {
     title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee",
-    search: "Search by number or title...", allDepts: "All departments", loading: "Loading...",
+    search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", loading: "Loading...",
     empty: "No matching employees", del: (n) => `Delete employee ${n}?`,
-    thNum: "Number", thPos: "Title", thDept: "Department", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
+    thNum: "Number", thPos: "Title", thDept: "Department", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
   };
 
   const [employees, setEmployees] = useState([]);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +49,8 @@ export default function Employees() {
     const q = search.trim();
     const matchQ = !q || e.employee_number?.includes(q) || e.position?.includes(q) || e.department?.includes(q);
     const matchD = deptFilter === "all" || e.department === deptFilter;
-    return matchQ && matchD;
+    const matchR = roleFilter === "all" || e.role_level === roleFilter;
+    return matchQ && matchD && matchR;
   });
 
   const remove = async (emp) => {
@@ -76,6 +80,13 @@ export default function Employees() {
               {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
             </SelectContent>
           </Select>
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="sm:w-48"><SelectValue placeholder={t.allRoles} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t.allRoles}</SelectItem>
+              {ROLE_ORDER.map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[isAr ? "ar" : "en"][r]}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
 
         {loading ? (
@@ -93,6 +104,7 @@ export default function Employees() {
                   <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thRole}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thSalary}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
@@ -104,11 +116,13 @@ export default function Employees() {
                     <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
                     <td className="px-4 py-3">{emp.position}</td>
                     <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
+                    <td className="px-4 py-3"><RoleBadge level={emp.role_level} isAr={isAr} lang={lang} /></td>
                     <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>
                     <td className="px-4 py-3 tabular-nums">{formatCurrency(emp.base_salary)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
+                        <Link to="/org-structure" title={isAr ? "عرض في الهيكل" : "View in org chart"} className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Network size={16} /></Link>
                         <button onClick={() => remove(emp)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
                       </div>
                     </td>
@@ -127,4 +141,9 @@ export default function Employees() {
 
 function StatusBadge({ status }) {
   return <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", statusEmployeeLabel(status).cls)}>{statusEmployeeLabel(status).label}</span>;
+}
+
+function RoleBadge({ level, isAr, lang }) {
+  const s = ROLE_STYLES[level] || ROLE_STYLES.employee;
+  return <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1", s.bg, s.text)}><span>{s.icon}</span>{roleLabel(level, lang)}</span>;
 }
