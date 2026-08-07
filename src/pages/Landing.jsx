@@ -12,11 +12,17 @@ import {
   Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
   GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
-  Network, ClipboardList, Plane, CalendarPlus,
+  Network, ClipboardList, Plane, CalendarPlus, Linkedin, Facebook, Twitter,
 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "sales@jadara.sa";
+// روابط حسابات التواصل — تُحدّث لاحقاً بالروابط الفعلية
+const SOCIAL_LINKS = {
+  linkedin: "https://www.linkedin.com",
+  facebook: "https://www.facebook.com",
+  twitter: "https://twitter.com",
+};
 
 const featuresAr = [
   { icon: Users, title: "إدارة الموظفين", desc: "ملفات كاملة، وثائق، إقامات، جوازات، تأمين طبي، حسابات بنكية، وتنبيهات انتهاء الوثائق." },
@@ -515,6 +521,20 @@ export default function Landing() {
           <div>
             <div className="mb-2"><Logo tone="light" size={36} /></div>
             <p>{t.footerDesc}</p>
+            <div className="flex items-center gap-2 mt-4">
+              <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"
+                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Linkedin size={17} className="text-white/80" />
+              </a>
+              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" aria-label="Facebook"
+                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Facebook size={17} className="text-white/80" />
+              </a>
+              <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noreferrer" aria-label="Twitter"
+                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Twitter size={17} className="text-white/80" />
+              </a>
+            </div>
           </div>
           <div className="space-y-1.5">
             <div className="font-medium text-white mb-1">{t.footContact}</div>
