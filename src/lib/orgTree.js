@@ -38,11 +38,9 @@ export const roleRank = (level) => {
 
 export const roleLabel = (level, lang = "ar") => ROLE_LABELS[lang]?.[level] || level;
 
-// اسم عرض الموظف (المسمى الوظيفي + الاسم أو الرقم)
+// اسم عرض الموظف (الاسم الكامل، أو المسمى الوظيفي، أو الرقم)
 export const employeeDisplayName = (emp) => {
-  const pos = emp.position || "";
-  const num = emp.employee_number || "";
-  const name = pos || `#${num}` || "—";
+  const name = emp.full_name || emp.position || (emp.employee_number ? `#${emp.employee_number}` : "—");
   return name;
 };
 

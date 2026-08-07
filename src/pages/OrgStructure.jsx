@@ -8,6 +8,7 @@ import {
 import { Network, Users, Crown, Briefcase, ClipboardList, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { buildOrgTree, orgStats, ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
+import OrgChart from "@/components/OrgChart";
 
 export default function OrgStructure() {
   const { lang } = useI18n();
@@ -16,7 +17,7 @@ export default function OrgStructure() {
     title: "الهيكل التنظيمي", subtitle: "يُبنى الهيكل تلقائياً من بيانات الموظفين: المالك ← المدير التنفيذي ← مدراء الإدارات ← المشرفون ← الموظفون والعمال.",
     loading: "جارٍ تحميل الهيكل...", empty: "لا يوجد موظفون بعد. أضف موظفين من صفحة الموظفين مع تحديد المستوى الوظيفي والمدير المباشر، وسيظهر الهيكل هنا تلقائياً.",
     sTotal: "إجمالي القوى العاملة", sDepts: "عدد الإدارات", sManagers: "المدراء", sSupervisors: "المشرفون",
-    viewTree: "شجرة الهيكل", viewDepts: "حسب الإدارة",
+    viewChart: "مخطط هرمي", viewTree: "شجرة قائمة", viewDepts: "حسب الإدارة",
     reportsTo: "يرفع تقاريره إلى", deptMgr: "مدير الإدارة", noMgr: "غير محدد",
     members: "أعضاء", orphans: "بدون مدير مباشر",
     refresh: "تحديث", legend: "مفتاح المستويات",
@@ -25,7 +26,7 @@ export default function OrgStructure() {
     title: "Organizational structure", subtitle: "Auto-built from employee data: Owner → Executive → Department managers → Supervisors → Staff & workers.",
     loading: "Loading org tree...", empty: "No employees yet. Add employees from the Employees page with a role level and a direct manager, and the tree will appear here automatically.",
     sTotal: "Total workforce", sDepts: "Departments", sManagers: "Managers", sSupervisors: "Supervisors",
-    viewTree: "Hierarchy tree", viewDepts: "By department",
+    viewChart: "Org chart", viewTree: "Tree list", viewDepts: "By department",
     reportsTo: "Reports to", deptMgr: "Department manager", noMgr: "Not set",
     members: "members", orphans: "No direct manager",
     refresh: "Refresh", legend: "Role legend",
@@ -34,7 +35,7 @@ export default function OrgStructure() {
 
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("tree");
+  const [view, setView] = useState("chart");
 
   const load = async () => {
     setLoading(true);
@@ -46,7 +47,7 @@ export default function OrgStructure() {
 
   const tree = buildOrgTree(employees);
   const stats = orgStats(employees);
-  const employeeName = (e) => e.position || e.employee_number || "—";
+  const employeeName = (e) => e.full_name || e.position || e.employee_number || "—";
   const employeeSub = (e) => {
     const parts = [];
     if (e.department) parts.push(e.department);
@@ -119,6 +120,7 @@ export default function OrgStructure() {
         <Select value={view} onValueChange={setView}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="chart">{t.viewChart}</SelectItem>
             <SelectItem value="tree">{t.viewTree}</SelectItem>
             <SelectItem value="depts">{t.viewDepts}</SelectItem>
           </SelectContent>
@@ -129,6 +131,20 @@ export default function OrgStructure() {
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
       ) : employees.length === 0 ? (
         <div className="bg-white border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">{t.empty}</div>
+      ) : view === "chart" ? (
+        <div className="bg-white border border-border rounded-2xl p-6">
+          <OrgChart roots={tree} lang={lang} dir={isAr ? "rtl" : "ltr"} />
+          {orphanNodes.length > 0 && (
+            <div className="mt-8 pt-4 border-t border-border">
+              <div className="text-sm font-medium text-muted-foreground mb-2">{t.orphans} ({orphanNodes.length})</div>
+              <div className="flex flex-wrap gap-2">
+                {orphanNodes.map((e) => (
+                  <span key={e.id} className="text-xs px-3 py-1.5 rounded-lg bg-slate-50 border border-border">{employeeName(e)}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ) : view === "tree" ? (
         <div>
           {/* عرض القمة: المالك والتنفيذيون */}
