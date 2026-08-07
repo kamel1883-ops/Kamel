@@ -1,11 +1,13 @@
 import React, { useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CreditCard, Lock, ShieldCheck } from "lucide-react";
+import { Loader2, CreditCard, Lock, ShieldCheck, BadgeCheck, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 
@@ -14,44 +16,105 @@ const empty = {
   contact_name: "", contact_email: "", contact_phone: "", city: "",
 };
 
+const appearance = {
+  theme: "stripe",
+  variables: {
+    colorPrimary: "#5b21b6",
+    colorBackground: "#ffffff",
+    colorText: "#1e293b",
+    colorDanger: "#e11d48",
+    fontFamily: "IBM Plex Sans Arabic, Tajawal, system-ui, sans-serif",
+    borderRadius: "12px",
+  },
+  rules: {
+    ".Input": { border: "1px solid #e2e8f0", boxShadow: "none" },
+    ".Input:focus": { borderColor: "#7c3aed", boxShadow: "0 0 0 2px rgba(124,58,237,.2)" },
+    ".Tab": { border: "1px solid #e2e8f0" },
+    ".Tab--selected": { borderColor: "#7c3aed", boxShadow: "0 0 0 2px rgba(124,58,237,.2)" },
+  },
+};
+
 export default function CheckoutModal({ open, onClose }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr
     ? {
-        title: "الاشتراك السنوي — الدفع الآن",
+        title: "الاشتراك السنوي — الدفع الآمن",
+        step1: "بيانات المنشأة",
+        step2: "بيانات الدفع (بطاقة / Apple Pay)",
         first: "2,500 ريال",
         firstNote: "السنة الأولى (تشمل سنة مجانية)",
         after: "ثم 700 ريال سنوياً من العام الثاني",
-        formHint: "أدخل بيانات المنشأة وبياناتك للتواصل، ثم أُكمل الدفع بأمان عبر Stripe بإحدى الطرق: مدى، Visa، أو Apple Pay.",
+        formHint: "أدخل بيانات المنشأة، ثم تُدخل بيانات الدفع مباشرة في نفس النافذة بأمان عبر Stripe.",
         company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط",
         city: "المدينة", contact: "جهة الاتصال", phone: "الهاتف", email: "البريد الإلكتروني *",
-        payBtn: "المتابعة للدفع عبر Stripe",
-        secure: "البيانات مشفّرة وآمنة عبر Stripe — لا نُخزّن تفاصيل البطاقة.",
+        nextBtn: "متابعة للدفع",
+        backBtn: "رجوع",
+        payNowBtn: "ادفع 2,500 ريال الآن",
+        payMethodsLabel: "طرق الدفع المتاحة:",
+        secure: "بيانات البطاقة تُدخل مباشرة إلى Stripe عبر تشفير TLS — لا تُخزّن ولا تصل لخوادمنا.",
         errRequired: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح",
-        errGeneric: "تعذّر إنشاء جلسة الدفع، حاول مرة أخرى",
+        errGeneric: "تعذّر بدء عملية الدفع، حاول مرة أخرى",
+        errPay: "تعذّر إتمام الدفع، راجع بيانات البطاقة وحاول مرة أخرى",
+        errConfirm: "تم الدفع لكن تعذّر تسجيل الاشتراك، تواصل مع الدعم",
+        doneTitle: "تم الدفع بنجاح!",
+        doneDesc: "تم تفعيل اشتراكك السنوي. ستصلك بيانات الدخول قريباً.",
+        doneBtn: "تسجيل الدخول",
+        closeBtn: "إغلاق",
+        processing: "جارٍ معالجة الدفع...",
       }
     : {
-        title: "Annual Subscription — Pay Now",
+        title: "Annual Subscription — Secure Payment",
+        step1: "Company details",
+        step2: "Payment (Card / Apple Pay)",
         first: "SAR 2,500",
         firstNote: "First year (includes one free year)",
         after: "Then SAR 700 / year from year two",
-        formHint: "Enter your company and contact details, then complete payment securely via Stripe using Mada, Visa, or Apple Pay.",
+        formHint: "Enter company details, then enter payment directly in this dialog securely via Stripe.",
         company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity",
         city: "City", contact: "Contact person", phone: "Phone", email: "Email *",
-        payBtn: "Continue to Stripe checkout",
-        secure: "Encrypted and secure through Stripe — we never store card details.",
+        nextBtn: "Continue to payment",
+        backBtn: "Back",
+        payNowBtn: "Pay SAR 2,500 now",
+        payMethodsLabel: "Available payment methods:",
+        secure: "Card details go directly to Stripe over TLS — never stored or seen by us.",
         errRequired: "Please enter a company name and a valid email",
         errGeneric: "Could not start checkout, please try again",
+        errPay: "Payment failed, check your card and try again",
+        errConfirm: "Payment succeeded but registering subscription failed, contact support",
+        doneTitle: "Payment successful!",
+        doneDesc: "Your annual subscription is active. Login details will arrive shortly.",
+        doneBtn: "Go to login",
+        closeBtn: "Close",
+        processing: "Processing payment...",
       };
 
   const [form, setForm] = useState(empty);
-  const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+  // stages: details -> preparing -> pay -> confirming -> done
+  const [stage, setStage] = useState("details");
+  const [stripePromise, setStripePromise] = useState(null);
+  const [clientSecret, setClientSecret] = useState("");
+  const [paymentIntentId, setPaymentIntentId] = useState("");
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const submit = async (e) => {
+  const reset = () => {
+    setForm(empty);
+    setErr("");
+    setStage("details");
+    setStripePromise(null);
+    setClientSecret("");
+    setPaymentIntentId("");
+  };
+
+  const handleClose = () => {
+    if (stage === "confirming") return; // لا تسمح بالإغلاق أثناء المعالجة
+    reset();
+    onClose();
+  };
+
+  const submitDetails = async (e) => {
     e.preventDefault();
     setErr("");
     const name = form.name.trim();
@@ -60,27 +123,33 @@ export default function CheckoutModal({ open, onClose }) {
       setErr(t.errRequired);
       return;
     }
-    setSaving(true);
+    setStage("preparing");
     try {
-      const res = await base44.functions.invoke("createSubscription", {
-        ...form,
-        origin: window.location.origin,
-        locale: isAr ? "ar" : "en",
-      });
-      if (res?.data?.url) {
-        window.location.href = res.data.url;
-      } else {
-        setErr(res?.data?.error || t.errGeneric);
-        setSaving(false);
+      const res = await base44.functions.invoke("createSubscription", { ...form, locale: isAr ? "ar" : "en" });
+      const data = res?.data;
+      if (!data?.client_secret || !data?.publishable_key) {
+        setErr(data?.error || t.errGeneric);
+        setStage("details");
+        return;
       }
+      setClientSecret(data.client_secret);
+      setPaymentIntentId(data.payment_intent_id);
+      setStripePromise(loadStripe(data.publishable_key));
+      setStage("pay");
     } catch (error) {
       setErr(error?.response?.data?.error || error?.message || t.errGeneric);
-      setSaving(false);
+      setStage("details");
     }
   };
 
+  const renderStepBadge = (n, active) => (
+    <div className={`flex items-center gap-1.5 text-xs ${active ? "text-violet-700 font-semibold" : "text-muted-foreground"}`}>
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${active ? "bg-violet-600 text-white" : "bg-slate-200 text-slate-600"}`}>{n}</span>
+    </div>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -88,7 +157,7 @@ export default function CheckoutModal({ open, onClose }) {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-4 mb-2">
+        <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-4 mb-3">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-extrabold text-violet-700">{t.first}</span>
             <span className="text-sm text-muted-foreground">— {t.firstNote}</span>
@@ -96,65 +165,185 @@ export default function CheckoutModal({ open, onClose }) {
           <div className="text-xs text-emerald-700 font-medium mt-1">{t.after}</div>
         </div>
 
-        <form onSubmit={submit} className="space-y-4">
-          <p className="text-sm text-muted-foreground leading-relaxed">{t.formHint}</p>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground">{isAr ? "طرق الدفع:" : "Payment methods:"}</span>
-            <span className="px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold tracking-wide">mada</span>
-            <span className="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold italic">VISA</span>
-            <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1">
-              <svg width="11" height="13" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5 4 301.3 9 330 19 380c12.5 58.1 57.7 98.3 102.7 98.3 26.3 0 56.8-18.6 81.6-18.6 24.2 0 47.2 18.6 81.6 18.6 45.5 0 84-50.1 97.2-98.3-21.9-22-46.2-45-46.2-111.4zM265.2 108.5c22.6-26.3 38.5-62.8 34.3-99.3-33.1 1.4-73.2 22.1-96.9 48.5-21.1 23.8-38 61.1-31.4 96.9 37.9 2.9 71.4-19.4 94-45.9z"/></svg>
-              Pay
-            </span>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-1.5">
+            {renderStepBadge(1, stage === "details" || stage === "preparing")}
+            <span className="text-xs font-medium">{t.step1}</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5 col-span-2">
-              <Label>{t.company}</Label>
-              <Input value={form.name} onChange={(e) => set("name", e.target.value)} required />
+          <div className="flex-1 h-px bg-border" />
+          <div className="flex items-center gap-1.5">
+            {renderStepBadge(2, stage === "pay" || stage === "confirming" || stage === "done")}
+            <span className="text-xs font-medium">{t.step2}</span>
+          </div>
+        </div>
+
+        {stage === "details" && (
+          <form onSubmit={submitDetails} className="space-y-4">
+            <p className="text-sm text-muted-foreground leading-relaxed">{t.formHint}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5 col-span-2">
+                <Label>{t.company}</Label>
+                <Input value={form.name} onChange={(e) => set("name", e.target.value)} required />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.cr}</Label>
+                <Input value={form.commercial_register} onChange={(e) => set("commercial_register", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.industry}</Label>
+                <Input value={form.industry} onChange={(e) => set("industry", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.city}</Label>
+                <Input value={form.city} onChange={(e) => set("city", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.contact}</Label>
+                <Input value={form.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.phone}</Label>
+                <Input value={form.contact_phone} onChange={(e) => set("contact_phone", e.target.value)} />
+              </div>
+              <div className="space-y-1.5 col-span-2">
+                <Label>{t.email}</Label>
+                <Input type="email" value={form.contact_email} onChange={(e) => set("contact_email", e.target.value)} required />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>{t.cr}</Label>
-              <Input value={form.commercial_register} onChange={(e) => set("commercial_register", e.target.value)} />
+
+            {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
+
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <Button type="button" variant="outline" onClick={handleClose}>{t.closeBtn}</Button>
+              <Button type="submit" className="gap-2">
+                {t.nextBtn}
+                <ArrowRight size={16} className="rotate-180" />
+              </Button>
             </div>
-            <div className="space-y-1.5">
-              <Label>{t.industry}</Label>
-              <Input value={form.industry} onChange={(e) => set("industry", e.target.value)} />
+
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <ShieldCheck size={13} /> {t.secure}
+            </p>
+          </form>
+        )}
+
+        {stage === "preparing" && (
+          <div className="py-10 flex flex-col items-center gap-3">
+            <Loader2 size={32} className="animate-spin text-violet-600" />
+            <div className="text-sm text-muted-foreground">{t.processing}</div>
+          </div>
+        )}
+
+        {(stage === "pay" || stage === "confirming") && stripePromise && clientSecret && (
+          <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+            <PaymentStep
+              t={t}
+              paymentIntentId={paymentIntentId}
+              onBack={() => setStage("details")}
+              setStage={setStage}
+            />
+          </Elements>
+        )}
+
+        {stage === "done" && (
+          <div className="py-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <BadgeCheck size={32} className="text-emerald-600" />
             </div>
-            <div className="space-y-1.5">
-              <Label>{t.city}</Label>
-              <Input value={form.city} onChange={(e) => set("city", e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t.contact}</Label>
-              <Input value={form.contact_name} onChange={(e) => set("contact_name", e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t.phone}</Label>
-              <Input value={form.contact_phone} onChange={(e) => set("contact_phone", e.target.value)} />
-            </div>
-            <div className="space-y-1.5 col-span-2">
-              <Label>{t.email}</Label>
-              <Input type="email" value={form.contact_email} onChange={(e) => set("contact_email", e.target.value)} required />
+            <div className="text-xl font-bold">{t.doneTitle}</div>
+            <p className="text-muted-foreground mt-2 text-sm">{t.doneDesc}</p>
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <Button asChild className="gap-2">
+                <a href="/login?returnTo=/app">{t.doneBtn}</a>
+              </Button>
+              <Button type="button" variant="outline" onClick={handleClose}>{t.closeBtn}</Button>
             </div>
           </div>
-
-          {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
-              {isAr ? "إلغاء" : "Cancel"}
-            </Button>
-            <Button type="submit" disabled={saving} className="gap-2">
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
-              {t.payBtn}
-            </Button>
-          </DialogFooter>
-
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <ShieldCheck size={13} /> {t.secure}
-          </p>
-        </form>
+        )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PaymentStep({ t, paymentIntentId, onBack, setStage }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [paying, setPaying] = useState(false);
+  const [localErr, setLocalErr] = useState("");
+
+  const pay = async () => {
+    if (!stripe || !elements) return;
+    setPaying(true);
+    setLocalErr("");
+    const result = await stripe.confirmPayment({
+      elements,
+      redirect: "if_required",
+      confirmParams: { return_url: window.location.origin },
+    });
+
+    if (result.error) {
+      setLocalErr(result.error.message || t.errPay);
+      setPaying(false);
+      return;
+    }
+
+    const intent = result.paymentIntent || result.intent;
+    if (intent && intent.status === "succeeded") {
+      setStage("confirming");
+      try {
+        const res = await base44.functions.invoke("confirmSubscription", { payment_intent_id: paymentIntentId });
+        if (res?.data?.ok) {
+          setStage("done");
+        } else {
+          setLocalErr(res?.data?.error || t.errConfirm);
+          setStage("pay");
+          setPaying(false);
+        }
+      } catch (e) {
+        setLocalErr(e?.response?.data?.error || e?.message || t.errConfirm);
+        setStage("pay");
+        setPaying(false);
+      }
+    } else {
+      setLocalErr(t.errPay);
+      setStage("pay");
+      setPaying(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-muted-foreground">{t.payMethodsLabel}</span>
+        <span className="px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold tracking-wide">mada</span>
+        <span className="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold italic">VISA</span>
+        <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold flex items-center gap-1">
+          <svg width="11" height="13" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5 4 301.3 9 330 19 380c12.5 58.1 57.7 98.3 102.7 98.3 26.3 0 56.8-18.6 81.6-18.6 24.2 0 47.2 18.6 81.6 18.6 45.5 0 84-50.1 97.2-98.3-21.9-22-46.2-45-46.2-111.4zM265.2 108.5c22.6-26.3 38.5-62.8 34.3-99.3-33.1 1.4-73.2 22.1-96.9 48.5-21.1 23.8-38 61.1-31.4 96.9 37.9 2.9 71.4-19.4 94-45.9z"/></svg>
+          Pay
+        </span>
+      </div>
+
+      <div className="border border-border rounded-2xl p-4 bg-white">
+        <PaymentElement options={{ layout: "tabs" }} />
+      </div>
+
+      {localErr && (
+        <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{localErr}</div>
+      )}
+
+      <div className="flex items-center justify-between gap-3">
+        <Button type="button" variant="outline" onClick={onBack} disabled={paying}>
+          {t.backBtn}
+        </Button>
+        <Button type="button" onClick={pay} disabled={!stripe || paying} className="gap-2 min-w-[200px]">
+          {paying ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
+          {paying ? t.processing : t.payNowBtn}
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+        <ShieldCheck size={13} /> {t.secure}
+      </p>
+    </div>
   );
 }

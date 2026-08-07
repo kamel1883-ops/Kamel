@@ -1,8 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 
-const ANNUAL_AMOUNT = 250000; // 2,500 SAR (halalas)
-
 function addYears(date, years) {
   const d = new Date(date);
   d.setFullYear(d.getFullYear() + years);
@@ -13,30 +11,30 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    const sessionId = String(body.session_id || '').trim();
-    if (!sessionId) return Response.json({ error: 'رقم الجلسة مطلوب' }, { status: 400 });
+    const piId = String(body.payment_intent_id || '').trim();
+    if (!piId) return Response.json({ error: 'رقم العملية مطلوب' }, { status: 400 });
 
-    // Dedupe by session id stored in Subscription notes
-    const existing = await base44.asServiceRole.entities.Subscription.filter({ notes: sessionId });
+    // Dedupe by payment intent id stored in Subscription notes
+    const existing = await base44.asServiceRole.entities.Subscription.filter({ notes: piId });
     if (existing && existing.length) {
       return Response.json({ ok: true, already: true, tenant_id: existing[0].tenant_id });
     }
 
     const key = secrets.get('STRIPE_SECRET_KEY');
-    const res = await fetch('https://api.stripe.com/v1/checkout/sessions/' + encodeURIComponent(sessionId), {
+    const res = await fetch('https://api.stripe.com/v1/payment_intents/' + encodeURIComponent(piId), {
       headers: { 'Authorization': 'Bearer ' + key },
     });
-    const session = await res.json();
-    if (!res.ok) return Response.json({ error: session?.error?.message || 'تعذّر التحقق من الجلسة' }, { status: 502 });
+    const pi = await res.json();
+    if (!res.ok) return Response.json({ error: pi?.error?.message || 'تعذّر التحقق من العملية' }, { status: 502 });
 
-    if (session.payment_status !== 'paid') {
+    if (pi.status !== 'succeeded') {
       return Response.json({ error: 'لم يكتمل الدفع بعد' }, { status: 402 });
     }
 
-    const meta = session.metadata || {};
-    const name = meta.name || session.customer_details?.name || '—';
-    const email = meta.contact_email || session.customer_details?.email || '';
-    const phone = meta.contact_phone || session.customer_details?.phone || '';
+    const meta = pi.metadata || {};
+    const name = meta.name || '—';
+    const email = meta.contact_email || '';
+    const phone = meta.contact_phone || '';
     const cr = meta.commercial_register || '';
     const industry = meta.industry || '';
     const city = meta.city || '';
@@ -60,7 +58,7 @@ export default async function (req) {
       trial_start: null,
       trial_end: null,
       subscription_end: subEnd.toISOString().slice(0, 10),
-      notes: 'اشتراك سنوي مدفوع عبر Stripe — رقم الجلسة: ' + sessionId,
+      notes: 'اشتراك سنوي مدفوع عبر Stripe — رقم العملية: ' + piId,
     });
 
     await base44.asServiceRole.entities.Subscription.create({
@@ -73,7 +71,7 @@ export default async function (req) {
       payment_method: 'online',
       status: 'paid',
       paid_date: todayStr,
-      notes: sessionId,
+      notes: piId,
     });
 
     const ownerEmail = secrets.get('OWNER_EMAIL');
@@ -94,7 +92,7 @@ export default async function (req) {
             'تاريخ الاشتراك: ' + todayStr + '\n' +
             'تنتهي السنة الأولى في: ' + subEnd.toISOString().slice(0, 10) + '\n' +
             'تُجدد تلقائياً (تذكير) بـ 700 ريال سنوياً من العام الثاني.\n\n' +
-            'رقم جلسة Stripe: ' + sessionId,
+            'رقم عملية Stripe: ' + piId,
         });
       } catch (_e) {
         // لا تعطّل العملية إن تعطل البريد
