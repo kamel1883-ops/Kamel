@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
-import { BarChart3, Users, TrendingUp, TrendingDown, Clock, Building2, Award, Shield, Puzzle, Briefcase, Wallet, Heart } from "lucide-react";
+import { BarChart3, Users, TrendingUp, TrendingDown, Clock, Building2, Award, Shield, Puzzle, Briefcase, Wallet, Heart, AlertTriangle } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import {
   headcountByDept, saudizationStats, genderSplit, statusSplit,
@@ -31,7 +31,7 @@ export default function Analytics() {
     dept: "توزيع القوى العاملة حسب الإدارة", saudi: "السعودة (سعوديون / مقيمون)", saudiL: "سعوديون", expatL: "مقيمون",
     gender: "التوزيع حسب الجنس", status: "توزيع الحالات الوظيفية", tenure: "توزيع مدة الخدمة",
     salary: "متوسط الراتب حسب الإدارة", perf: "متوسط الأداء حسب الإدارة (من 5)",
-    turnByDept: "معدل الدوران حسب الإدارة (%)", exitReasons: "أسباب المغادرة", exitSat: "متوسط رضا المغادرين عند الخروج",
+    turnByDept: "معدل الدوران حسب الإدارة (%)", retByDept: "معدل الاستبقاء حسب الإدارة (%)", exitReasons: "أسباب المغادرة", exitSat: "متوسط رضا المغادرين عند الخروج",
     stratsH: "توصيات لخفض معدل الدوران", satSal: "الراتب", satBen: "المزايا", satEnv: "البيئة", satMng: "الإدارة", recommend: "توصية بالعمل",
     deepKpis: "مؤشرات قرار متقدمة", avgPerf: "متوسط الأداء", saudiRatio: "نسبة السعودة", payrollCost: "تكلفة الرواتب الشهرية",
   } : {
@@ -43,7 +43,7 @@ export default function Analytics() {
     dept: "Headcount by department", saudi: "Saudization (Saudis / Expats)", saudiL: "Saudis", expatL: "Expats",
     gender: "By gender", status: "Employment status", tenure: "Tenure distribution",
     salary: "Avg salary by department", perf: "Avg performance by department (of 5)",
-    turnByDept: "Turnover rate by department (%)", exitReasons: "Exit reasons", exitSat: "Average exit satisfaction",
+    turnByDept: "Turnover rate by department (%)", retByDept: "Retention rate by department (%)", exitReasons: "Exit reasons", exitSat: "Average exit satisfaction",
     stratsH: "Turnover reduction recommendations", satSal: "Salary", satBen: "Benefits", satEnv: "Environment", satMng: "Management", recommend: "Would recommend",
     deepKpis: "Advanced decision KPIs", avgPerf: "Avg performance", saudiRatio: "Saudization", payrollCost: "Monthly payroll cost",
   };
@@ -126,7 +126,7 @@ export default function Analytics() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         <StatCard icon={Users} label={t.sHeadcount} value={headcount} tint="blue" />
-        <StatCard icon={Building2} label={t.sSaudization} value={`${saudi.rate}%`} tint="green" />
+        <StatCard icon={TrendingUp} label={t.retention} value={`${turn.retentionRate}%`} tint="green" />
         <StatCard icon={TrendingDown} label={t.sTurnover} value={`${turn.turnoverRate}%`} tint="rose" />
         <StatCard icon={Clock} label={t.sAtt} value={`${attRate}%`} tint="amber" />
       </div>
@@ -144,9 +144,9 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        <KPICard icon={Shield} label={t.retention} value={`${turn.retentionRate}%`} />
+        <KPICard icon={Building2} label={t.sSaudiRatio} value={`${saudi.rate}%`} />
         <KPICard icon={Clock} label={t.tenureExit} value={tenureExit} />
-        <KPICard icon={Building2} label={t.riskDept} value={riskDepts.length} />
+        <KPICard icon={AlertTriangle} label={t.riskDept} value={riskDepts.length} />
         <KPICard icon={Wallet} label={t.payrollCost} value={formatCurrency(payrollCost)} />
       </div>
 
@@ -200,6 +200,20 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <ChartCard title={t.retByDept}>
+          {riskDepts.length ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={riskDepts.map((d) => ({ name: d.name, retention: Math.max(0, 100 - d.rate) }))} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={70} interval={0} />
+                <YAxis tick={{ fontSize: 11 }} unit="%" domain={[0, 100]} />
+                <Tooltip formatter={(v) => `${v}%`} />
+                <Bar dataKey="retention" radius={[6, 6, 0, 0]} fill="#10b981" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : <EmptyChart />}
+        </ChartCard>
+
         <ChartCard title={t.dept}>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={deptData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>

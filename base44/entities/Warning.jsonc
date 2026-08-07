@@ -1,0 +1,132 @@
+{
+  "name": "Warning",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "employee_user_id": {
+      "type": "string",
+      "title": "\u062d\u0633\u0627\u0628 \u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "employee_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "department": {
+      "type": "string",
+      "title": "\u0627\u0644\u0625\u062f\u0627\u0631\u0629"
+    },
+    "violation_category": {
+      "type": "string",
+      "enum": [
+        "absence_short",
+        "absence_repeated",
+        "absence_long",
+        "tardiness",
+        "sleeping",
+        "product_damage",
+        "disobedience",
+        "disclosure",
+        "assault",
+        "safety",
+        "other"
+      ],
+      "title": "\u0646\u0648\u0639 \u0627\u0644\u0645\u062e\u0627\u0644\u0641\u0629"
+    },
+    "article_reference": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0631\u062c\u0639 \u0627\u0644\u0646\u0638\u0627\u0645\u064a"
+    },
+    "warning_level": {
+      "type": "string",
+      "enum": [
+        "first",
+        "second",
+        "third",
+        "termination"
+      ],
+      "default": "first",
+      "title": "\u062f\u0631\u062c\u0629 \u0627\u0644\u0625\u0646\u0630\u0627\u0631"
+    },
+    "incident_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0648\u0627\u0642\u0639\u0629"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u062c\u0644\u0633\u0629 \u0627\u0644\u062a\u062d\u0642\u064a\u0642"
+    },
+    "investigation_summary": {
+      "type": "string",
+      "title": "\u0645\u0644\u062e\u0635 \u0627\u0644\u062a\u062d\u0642\u064a\u0642/\u0627\u0644\u062c\u0644\u0633\u0629"
+    },
+    "description": {
+      "type": "string",
+      "title": "\u0646\u0635 \u0627\u0644\u0625\u0646\u0630\u0627\u0631"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "acknowledged"
+      ],
+      "default": "sent",
+      "title": "\u0627\u0644\u062d\u0627\u0644\u0629"
+    },
+    "acknowledged_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0627\u0637\u0644\u0627\u0639"
+    },
+    "notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a"
+    }
+  },
+  "required": [
+    "employee_id",
+    "violation_category",
+    "warning_level",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.employee_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.employee_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@ import LeaveRequestForm from "@/components/LeaveRequestForm";
 import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
+import EmployeeWarnings from "@/components/EmployeeWarnings";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useI18n } from "@/lib/i18n";
@@ -336,6 +337,10 @@ export default function MyRequests() {
         <LeaveRequestForm open={leaveOpen} onClose={() => setLeaveOpen(false)} onSaved={load} employees={[employee]} currentUserEmployee={employee} />
         <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={load} employee={employee} />
         <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={load} employees={[employee]} currentUserEmployee={employee} />
+
+        <div className="mt-6">
+          <EmployeeWarnings employee={employee} />
+        </div>
       </div>
     );
   }

@@ -11,7 +11,7 @@ import {
   Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
   Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
   GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
-  HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
+  Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
   Network, ClipboardList, Plane, CalendarPlus,
 } from "lucide-react";
 
@@ -30,11 +30,12 @@ const featuresAr = [
   { icon: GitBranch, title: "التخطيط التعاقبي", desc: "خطة تعاقب للمناصب الحرجة، تحديد البدلاء، مستوى الجاهزية، ومخاطر الفقد وأثره." },
   { icon: Network, title: "الهيكل التنظيمي", desc: "بناء هيكل تنظيمي مرن تضعه المنشأة بنفسها (إدارة عليا › أقسام › مشرفون › عمال) بعدد مستويات ووحدات غير محدود، مع المسؤولين والأعداد المخططة والفعلية لكل وحدة." },
   { icon: ClipboardList, title: "تخطيط القوة العاملة", desc: "خطط القوة العاملة بأفق سنوي/متعدد السنوات: الأهداف، الأعداد الحالية والمستهدفة، فجوات التوظيف، الميزانية، التدريب، المبادرات ومؤشرات الأداء، وحالة الخطة." },
-  { icon: BarChart3, title: "تحليلات الموارد البشرية", desc: "لوحات معلومات تفاعلية ومؤشرات لحظية: الترميز، الحضور، تكلفة العمالة، والاتجاهات." },
+  { icon: BarChart3, title: "تحليلات الموارد البشرية", desc: "لوحات معلومات تفاعلية ومؤشرات لحظية: معدلات الدوران والاستبقاء (سنوي/نصف سنوي/ربع سنوي)، السعودة، الحضور، تكلفة العمالة، والاتجاهات." },
   { icon: Car, title: "إدارة الأسطول والمركبات", desc: "مركبات، تأمين، رخص، فحوصات فنية دورية، ومسؤولين، مع تنبيهات انتهاء." },
   { icon: Landmark, title: "تراخيص المنشأة الحكومية", desc: "تتبّع كل تراخيص الجهات الحكومية وعقود الصيانة، خيار «لا ينطبق»، ونسخة إلكترونية لكل ترخيص." },
   { icon: Plug, title: "التكاملات الذكية", desc: "تكاملات حكومية: التراخيص، الإقامات (مقيم/أبشر)، التأمينات الاجتماعية، والضمان الصحي — حلول متكاملة كل ما تحتاجه في مكان واحد." },
   { icon: Building2, title: "بوابة تجربة العميل", desc: "نظام اشتراكات ذكي بفترة تجربة مجانية 30 يوماً، وإشعارات فورية للمالك بكل عميل جديد." },
+  { icon: Gavel, title: "سياسة العمل والإنذارات الذكية", desc: "مرجع كامل لسياسة العمل وفق نظام العمل السعودي (الغياب، النوم، إتلاف المنتجات، العصيان، إفشاء الأسرار…). أنشئ إنذاراً تصاعدياً (أول/ثاني/ثالث/فصل) مرتبطاً بالمادة النظامية بعد جلسة تحقيق مع الموظف، ويُرسل تلقائياً إلى بوابة الموظف الذاتية — دون ورق ودون انتظار موافقة الموظف، ويظهر له عدد إنذاراته ودرجاتها فوراً." },
 ];
 
 const featuresEn = [
@@ -49,11 +50,12 @@ const featuresEn = [
   { icon: GitBranch, title: "Succession Planning", desc: "Succession plans for critical roles, identify successors, readiness level, and risk and impact of loss." },
   { icon: Network, title: "Organization Structure", desc: "Build a flexible org structure the company shapes itself (exec › departments › supervisors › staff) with unlimited levels and units, with managers and planned/actual headcount per unit." },
   { icon: ClipboardList, title: "Workforce Planning", desc: "Workforce plans on an annual/multi‑year horizon: objectives, current vs target headcount, hiring gaps, budget, training, initiatives, KPIs, and plan status." },
-  { icon: BarChart3, title: "HR Analytics", desc: "Interactive dashboards and live KPIs: Saudization, attendance, cost of labor, and trends." },
+  { icon: BarChart3, title: "HR Analytics", desc: "Interactive dashboards and live KPIs: turnover & retention rates (annual/semi-annual/quarterly), Saudization, attendance, labor cost, and trends." },
   { icon: Car, title: "Fleet & Vehicles", desc: "Vehicles, insurance, licenses, periodic technical inspections, and assignees, with expiry alerts." },
   { icon: Landmark, title: "Government Licenses", desc: "Track all government authority licenses and maintenance contracts, a “not applicable” option, and an electronic copy for each license." },
   { icon: Plug, title: "Smart Integrations", desc: "Government integrations: licenses, Iqama (Muqeem/Absher), GOSI, and health insurance — all in one place." },
   { icon: Building2, title: "Client Trial Portal", desc: "Smart subscription system with a 30‑day free trial and instant owner notifications for every new client." },
+  { icon: Gavel, title: "Labor Policy & Smart Warnings", desc: "Full labor policy reference per Saudi Labor Law (absence, sleeping, product damage, insubordination, disclosure of secrets…). Issue a progressive warning (first/second/third/termination) linked to the relevant article after an investigation session with the employee; it is sent automatically to the employee self-service portal — paperless and without waiting for the employee's approval — and their warnings count and levels appear instantly." },
 ];
 
 const licensesAr = [

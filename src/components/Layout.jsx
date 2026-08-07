@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import {
     LayoutDashboard, Users, CalendarCheck, FileSpreadsheet, ClipboardCheck, Wallet, ShieldCheck, Building2,
     LogOut, Menu, X, UserCircle, Settings, Car, Calculator,
-    Target, Crown, BarChart3, Network, ClipboardList, CalendarDays, Plane, ClipboardPenLine, DoorOpen
+    Target, Crown, BarChart3, Network, ClipboardList, CalendarDays, Plane, ClipboardPenLine, DoorOpen, AlertTriangle
   } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
@@ -27,6 +27,7 @@ const navItems = [
   { to: "/succession", ar: "تخطيط التعاقب", en: "Succession", icon: Crown },
   { to: "/workforce-planning", ar: "تخطيط القوة العاملة", en: "Workforce Planning", icon: ClipboardList },
   { to: "/exit-interviews", ar: "مقابلات المغادرة", en: "Exit Interviews", icon: DoorOpen },
+  { to: "/warnings", ar: "سياسة العمل والإنذارات", en: "Labor Policy & Warnings", icon: AlertTriangle },
   { to: "/surveys", ar: "استبيانات الموظفين", en: "Surveys", icon: ClipboardPenLine },
   { to: "/licenses", ar: "تراخيص المنشأة", en: "Licenses", icon: ShieldCheck },
   { to: "/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
