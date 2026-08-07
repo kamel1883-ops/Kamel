@@ -7,6 +7,8 @@ import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import Logo from "@/components/Logo";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,16 +19,74 @@ import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 
-const tripStatus = {
-  draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
-  pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
-  approved: { label: "معتمدة", cls: "bg-blue-50 text-blue-600" },
-  in_progress: { label: "قيد التنفيذ", cls: "bg-indigo-50 text-indigo-600" },
-  completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
-  cancelled: { label: "ملغاة", cls: "bg-rose-50 text-rose-600" },
-};
-
 export default function MyRequests() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const tripStatus = isAr ? {
+    draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
+    pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
+    approved: { label: "معتمدة", cls: "bg-blue-50 text-blue-600" },
+    in_progress: { label: "قيد التنفيذ", cls: "bg-indigo-50 text-indigo-600" },
+    completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
+    cancelled: { label: "ملغاة", cls: "bg-rose-50 text-rose-600" },
+  } : {
+    draft: { label: "Draft", cls: "bg-slate-100 text-slate-600" },
+    pending: { label: "Pending", cls: "bg-amber-50 text-amber-600" },
+    approved: { label: "Approved", cls: "bg-blue-50 text-blue-600" },
+    in_progress: { label: "In progress", cls: "bg-indigo-50 text-indigo-600" },
+    completed: { label: "Completed", cls: "bg-emerald-50 text-emerald-600" },
+    cancelled: { label: "Cancelled", cls: "bg-rose-50 text-rose-600" },
+  };
+  const t = isAr ? {
+    dir: "rtl", brandSub: "بوابة الموظف الذاتية", brandOnly: "خاص بالموظف", logout: "خروج",
+    loading: "جارٍ التحميل...", mustLogin: "يجب تسجيل الدخول للوصول للبوابة.",
+    title: "بوابة الموظف الذاتية", subtitle: "اربط حسابك بسجلك كموظف للوصول إلى طلباتك ومعلوماتك",
+    linkTitle: "ربط الحساب بالسجل الوظيفي", linkDesc: "متاح فقط للموظفين المسجلين مسبقاً لدى المنشأة.",
+    linkInfo: "سجلك كموظف موجود مسبقاً لدى الموارد البشرية. أدخل رقم هويتك الوطنية أو رقم إقامتك للربط بحسابك",
+    idLabel: "رقم الهوية الوطنية / الإقامة", idPh: "مثال: 1234567890", linkBtn: "ربط الحساب",
+    linkOk: "تم ربط حسابك بسجلك كموظف بنجاح.", linkFail: "تعذر الربط",
+    leaveBtn: "طلب إجازة", loanBtn: "طلب سلفة", tripBtn: "طلب رحلة/انتداب",
+    yearsLabel: "سنوات الخدمة", yearsVal: (n) => `${n} سنة`, yearsSub: (d) => `من ${d}`,
+    leaveLabel: "رصيد الإجازات", leaveVal: (n) => `${n} يوم`, leaveSub: (e, u) => `مستحق: ${e} · مستخدم: ${u}`,
+    grossLabel: "الراتب الإجمالي", grossSub: (b) => `أساسي ${formatCurrency(b)}`,
+    ticketLabel: "استحقاق التذكرة", ticketYearly: "سنوي", ticketBiennial: "كل سنتين", ticketNone: "لا يستحق", ticketSaudi: "سعودي", ticketExpat: "مقيم",
+    detailTitle: "تفاصيل الخدمة والراتب",
+    dPosition: "المسمى الوظيفي", dDept: "الإدارة", dHire: "تاريخ التعيين", dService: "مدة الخدمة",
+    dContract: "نوع العقد", contractFT: "دوام كامل", contractPT: "جزئي", contractC: "عقد",
+    dBase: "الراتب الأساسي", dHousing: "بدل السكن", dTransport: "بدل المواصلات", dOther: "بدلات أخرى", dTotal: "الإجمالي",
+    attTitle: "سجل الحضور والانصراف (آخر 10)", attEmpty: "لا توجد سجلات حضور.",
+    thDate: "التاريخ", thIn: "الحضور", thOut: "الانصراف", thHours: "الساعات", thStatus: "الحالة",
+    leavesTitle: "طلبات الإجازات", loansTitle: "طلبات السلف", tripsTitle: "رحلات العمل والانتداب",
+    noLeaves: "لا توجد طلبات إجازات", noLoans: "لا توجد طلبات سلف", noTrips: "لا توجد طلبات رحلات",
+    fullClear: "تصفية كاملة", medReport: "تقرير طبي",
+    days: (n) => `${n} يوم`, loanMonthly: (m) => `${m} ر.س شهرياً`, loanInst: (n) => `${n} قسط`,
+    tripExternal: "خارجية", tripInternal: "داخلية", sar: "ر.س",
+  } : {
+    dir: "ltr", brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
+    loading: "Loading...", mustLogin: "You must sign in to access the portal.",
+    title: "Employee Self‑Service Portal", subtitle: "Link your account to your employee record to access your requests and info",
+    linkTitle: "Link account to your record", linkDesc: "Available only to employees already registered with the organization.",
+    linkInfo: "Your employee record already exists with HR. Enter your national ID or Iqama number to link it to your account",
+    idLabel: "National ID / Iqama number", idPh: "e.g. 1234567890", linkBtn: "Link account",
+    linkOk: "Your account was linked to your employee record successfully.", linkFail: "Could not link",
+    leaveBtn: "Leave request", loanBtn: "Loan request", tripBtn: "Business trip",
+    yearsLabel: "Years of service", yearsVal: (n) => `${n} yr`, yearsSub: (d) => `since ${d}`,
+    leaveLabel: "Leave balance", leaveVal: (n) => `${n} days`, leaveSub: (e, u) => `Entitled: ${e} · Used: ${u}`,
+    grossLabel: "Gross salary", grossSub: (b) => `Base ${formatCurrency(b)}`,
+    ticketLabel: "Ticket entitlement", ticketYearly: "Yearly", ticketBiennial: "Biennial", ticketNone: "None", ticketSaudi: "Saudi", ticketExpat: "Expat",
+    detailTitle: "Service & Salary Details",
+    dPosition: "Job title", dDept: "Department", dHire: "Hire date", dService: "Length of service",
+    dContract: "Contract type", contractFT: "Full time", contractPT: "Part time", contractC: "Contract",
+    dBase: "Base salary", dHousing: "Housing allowance", dTransport: "Transport allowance", dOther: "Other allowances", dTotal: "Total",
+    attTitle: "Attendance log (last 10)", attEmpty: "No attendance records.",
+    thDate: "Date", thIn: "Check in", thOut: "Check out", thHours: "Hours", thStatus: "Status",
+    leavesTitle: "Leave requests", loansTitle: "Loan requests", tripsTitle: "Business Trips & Deputation",
+    noLeaves: "No leave requests", noLoans: "No loan requests", noTrips: "No trip requests",
+    fullClear: "Full clearance", medReport: "Medical report",
+    days: (n) => `${n} days`, loanMonthly: (m) => `${formatCurrency(m)} / month`, loanInst: (n) => `${n} installments`,
+    tripExternal: "External", tripInternal: "Internal", sar: "SAR",
+  };
+
   const [user, setUser] = useState(null);
   const [employee, setEmployee] = useState(null);
   const [org, setOrg] = useState(null);
@@ -39,7 +99,6 @@ export default function MyRequests() {
   const [tripOpen, setTripOpen] = useState(false);
   const [trips, setTrips] = useState([]);
 
-  // ربط الحساب
   const [nationalId, setNationalId] = useState("");
   const [linking, setLinking] = useState(false);
   const [linkMsg, setLinkMsg] = useState({ type: "", text: "" });
@@ -82,14 +141,14 @@ export default function MyRequests() {
       const res = await base44.functions.invoke("linkEmployee", { national_id: id });
       const data = res?.data || res;
       if (data?.ok) {
-        setLinkMsg({ type: "ok", text: "تم ربط حسابك بسجلك كموظف بنجاح." });
+        setLinkMsg({ type: "ok", text: t.linkOk });
         setNationalId("");
         await load();
       } else {
-        setLinkMsg({ type: "err", text: data?.error || "تعذر الربط" });
+        setLinkMsg({ type: "err", text: data?.error || t.linkFail });
       }
     } catch (err) {
-      const msg = err?.response?.data?.error || err?.message || "تعذر الربط";
+      const msg = err?.response?.data?.error || err?.message || t.linkFail;
       setLinkMsg({ type: "err", text: msg });
     } finally {
       setLinking(false);
@@ -103,37 +162,30 @@ export default function MyRequests() {
 
   let content;
   if (loading) {
-    content = <div className="p-10 text-center text-muted-foreground">جارٍ التحميل...</div>;
+    content = <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
   } else if (!user) {
-    content = <div className="p-10 text-center text-muted-foreground">يجب تسجيل الدخول للوصول للبوابة.</div>;
+    content = <div className="p-10 text-center text-muted-foreground">{t.mustLogin}</div>;
   } else if (!employee) {
     content = (
       <div>
-        <PageHeader title="بوابة الموظف الذاتية" subtitle="اربط حسابك بسجلك كموظف للوصول إلى طلباتك ومعلوماتك" />
+        <PageHeader title={t.title} subtitle={t.subtitle} />
         <div className="max-w-xl mx-auto bg-white rounded-2xl border border-border p-8">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
               <Link2 size={22} className="text-violet-600" />
             </div>
             <div>
-              <h3 className="font-semibold">ربط الحساب بالسجل الوظيفي</h3>
-              <p className="text-xs text-muted-foreground">متاح فقط للموظفين المسجلين مسبقاً لدى المنشأة.</p>
+              <h3 className="font-semibold">{t.linkTitle}</h3>
+              <p className="text-xs text-muted-foreground">{t.linkDesc}</p>
             </div>
           </div>
           <div className="text-sm text-muted-foreground mb-4 bg-slate-50 rounded-lg p-3 leading-relaxed">
-            سجلك كموظف موجود مسبقاً لدى الموارد البشرية. أدخل رقم هويتك الوطنية أو رقم إقامتك للربط بحسابك
-            (<b className="text-foreground">{user?.email}</b>). لا يمكن التسجيل إلا إذا تطابق الرقم مع سجل موظف فعلي.
+            {t.linkInfo} (<b className="text-foreground">{user?.email}</b>).
           </div>
           <form onSubmit={linkAccount} className="space-y-4">
             <div className="space-y-1.5">
-              <Label>رقم الهوية الوطنية / الإقامة</Label>
-              <Input
-                value={nationalId}
-                onChange={(e) => setNationalId(e.target.value)}
-                placeholder="مثال: 1234567890"
-                required
-                disabled={linking}
-              />
+              <Label>{t.idLabel}</Label>
+              <Input value={nationalId} onChange={(e) => setNationalId(e.target.value)} placeholder={t.idPh} required disabled={linking} />
             </div>
             {linkMsg.text && (
               <div className={cn("text-sm rounded-lg p-3", linkMsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
@@ -142,7 +194,7 @@ export default function MyRequests() {
             )}
             <Button type="submit" disabled={linking} className="gap-2">
               {linking && <Loader2 size={16} className="animate-spin" />}
-              ربط الحساب
+              {t.linkBtn}
             </Button>
           </form>
         </div>
@@ -152,65 +204,64 @@ export default function MyRequests() {
     const hireDate = employee.hire_date ? new Date(employee.hire_date) : null;
     const serviceYears = hireDate ? Math.floor((Date.now() - hireDate.getTime()) / (365.25 * 24 * 3600 * 1000)) : 0;
     const gross =
-      (employee.base_salary || 0) +
-      (employee.housing_allowance || 0) +
-      (employee.transport_allowance || 0) +
-      (employee.other_allowances || 0);
+      (employee.base_salary || 0) + (employee.housing_allowance || 0) +
+      (employee.transport_allowance || 0) + (employee.other_allowances || 0);
     const entitled = org?.annual_leave_days || 21;
     const remaining = employee.leave_balance || 0;
     const used = Math.max(0, entitled - remaining);
+    const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;
 
     content = (
       <div>
         <PageHeader
-          title="بوابة الموظف الذاتية"
+          title={t.title}
           subtitle={`${employee.employee_number} — ${employee.position} — ${employee.department || ""}`}
           action={
-            <div className="flex gap-2">
-              <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> طلب إجازة</Button>
-              <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> طلب سلفة</Button>
-              <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> طلب رحلة/انتداب</Button>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>
+              <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> {t.loanBtn}</Button>
+              <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>
             </div>
           }
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <InfoCard icon={Clock} label="سنوات الخدمة" value={`${serviceYears} سنة`} sub={employee.hire_date ? `من ${employee.hire_date}` : ""} />
-          <InfoCard icon={CalendarCheck} label="رصيد الإجازات" value={`${remaining} يوم`} sub={`مستحق: ${entitled} · مستخدم: ${used}`} />
-          <InfoCard icon={Banknote} label="الراتب الإجمالي" value={formatCurrency(gross)} sub={`أساسي ${formatCurrency(employee.base_salary || 0)}`} />
-          <InfoCard icon={BadgeCheck} label="استحقاق التذكرة" value={employee.ticket_entitlement === "yearly" ? "سنوي" : employee.ticket_entitlement === "biennial" ? "كل سنتين" : "لا يستحق"} sub={employee.is_saudi ? "سعودي" : "مقيم"} />
+          <InfoCard icon={Clock} label={t.yearsLabel} value={t.yearsVal(serviceYears)} sub={employee.hire_date ? t.yearsSub(employee.hire_date) : ""} />
+          <InfoCard icon={CalendarCheck} label={t.leaveLabel} value={t.leaveVal(remaining)} sub={t.leaveSub(entitled, used)} />
+          <InfoCard icon={Banknote} label={t.grossLabel} value={formatCurrency(gross)} sub={t.grossSub(employee.base_salary || 0)} />
+          <InfoCard icon={BadgeCheck} label={t.ticketLabel} value={ticketLabel} sub={employee.is_saudi ? t.ticketSaudi : t.ticketExpat} />
         </div>
 
         <EmployeeClock employee={employee} org={org} onChanged={load} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <SideCard title="تفاصيل الخدمة والراتب">
-            <DLine label="المسمى الوظيفي" value={employee.position} />
-            <DLine label="الإدارة" value={employee.department} />
-            <DLine label="تاريخ التعيين" value={employee.hire_date} />
-            <DLine label="مدة الخدمة" value={`${serviceYears} سنة`} />
-            <DLine label="نوع العقد" value={employee.contract_type === "full_time" ? "دوام كامل" : employee.contract_type === "part_time" ? "جزئي" : "عقد"} />
-            <DLine label="الراتب الأساسي" value={formatCurrency(employee.base_salary || 0)} />
-            <DLine label="بدل السكن" value={formatCurrency(employee.housing_allowance || 0)} />
-            <DLine label="بدل المواصلات" value={formatCurrency(employee.transport_allowance || 0)} />
-            <DLine label="بدلات أخرى" value={formatCurrency(employee.other_allowances || 0)} />
-            <DLine label="الإجمالي" value={formatCurrency(gross)} strong />
+          <SideCard title={t.detailTitle}>
+            <DLine label={t.dPosition} value={employee.position} />
+            <DLine label={t.dDept} value={employee.department} />
+            <DLine label={t.dHire} value={employee.hire_date} />
+            <DLine label={t.dService} value={t.yearsVal(serviceYears)} />
+            <DLine label={t.dContract} value={employee.contract_type === "full_time" ? t.contractFT : employee.contract_type === "part_time" ? t.contractPT : t.contractC} />
+            <DLine label={t.dBase} value={formatCurrency(employee.base_salary || 0)} />
+            <DLine label={t.dHousing} value={formatCurrency(employee.housing_allowance || 0)} />
+            <DLine label={t.dTransport} value={formatCurrency(employee.transport_allowance || 0)} />
+            <DLine label={t.dOther} value={formatCurrency(employee.other_allowances || 0)} />
+            <DLine label={t.dTotal} value={formatCurrency(gross)} strong />
           </SideCard>
 
           <div className="lg:col-span-2">
-            <SideCard title="سجل الحضور والانصراف (آخر 10)">
+            <SideCard title={t.attTitle}>
               {attendance.length === 0 ? (
-                <div className="p-6 text-center text-muted-foreground text-sm">لا توجد سجلات حضور.</div>
+                <div className="p-6 text-center text-muted-foreground text-sm">{t.attEmpty}</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-xs text-muted-foreground">
-                        <th className="text-right font-medium pb-2">التاريخ</th>
-                        <th className="text-right font-medium pb-2">الحضور</th>
-                        <th className="text-right font-medium pb-2">الانصراف</th>
-                        <th className="text-right font-medium pb-2">الساعات</th>
-                        <th className="text-right font-medium pb-2">الحالة</th>
+                        <th className="text-right font-medium pb-2">{t.thDate}</th>
+                        <th className="text-right font-medium pb-2">{t.thIn}</th>
+                        <th className="text-right font-medium pb-2">{t.thOut}</th>
+                        <th className="text-right font-medium pb-2">{t.thHours}</th>
+                        <th className="text-right font-medium pb-2">{t.thStatus}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -235,29 +286,29 @@ export default function MyRequests() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Section title="طلبات الإجازات">
-            {leaves.length === 0 ? <Empty text="لا توجد طلبات إجازات" /> : leaves.map((r) => (
+          <Section title={t.leavesTitle}>
+            {leaves.length === 0 ? <Empty text={t.noLeaves} /> : leaves.map((r) => (
               <Row key={r.id}>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-sm">{leaveTypeLabel(r.leave_type)}</span>
-                    {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">تصفية كاملة</span>}
+                    {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
                     {r.medical_report_url && (
-                      <a href={r.medical_report_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">تقرير طبي</a>
+                      <a href={r.medical_report_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{t.medReport}</a>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {r.days_count} يوم</div>
+                  <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
                 </div>
                 <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
               </Row>
             ))}
           </Section>
-          <Section title="طلبات السلف">
-            {loans.length === 0 ? <Empty text="لا توجد طلبات سلف" /> : loans.map((r) => (
+          <Section title={t.loansTitle}>
+            {loans.length === 0 ? <Empty text={t.noLoans} /> : loans.map((r) => (
               <Row key={r.id}>
                 <div>
-                  <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} ر.س</div>
-                  <div className="text-xs text-muted-foreground mt-1">{r.installment_count} قسط · {r.monthly_installment} ر.س شهرياً</div>
+                  <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(r.monthly_installment)}</div>
                 </div>
                 <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
               </Row>
@@ -266,14 +317,14 @@ export default function MyRequests() {
         </div>
 
         <div className="mt-6">
-          <Section title="رحلات العمل والانتداب">
-            {trips.length === 0 ? <Empty text="لا توجد طلبات رحلات" /> : trips.map((r) => {
+          <Section title={t.tripsTitle}>
+            {trips.length === 0 ? <Empty text={t.noTrips} /> : trips.map((r) => {
               const st = tripStatus[r.status] || tripStatus.pending;
               return (
                 <Row key={r.id}>
                   <div>
-                    <div className="font-medium text-sm">{r.trip_type === "external" ? "خارجية" : "داخلية"} — {r.destination || "—"}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {r.days_count} يوم</div>
+                    <div className="font-medium text-sm">{r.trip_type === "external" ? t.tripExternal : t.tripInternal} — {r.destination || "—"}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
                   </div>
                   <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", st.cls)}>{st.label}</span>
                 </Row>
@@ -290,22 +341,22 @@ export default function MyRequests() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir={t.dir}>
       <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/portal"><Logo tone="light" size={38} /></Link>
             <div className="hidden sm:block text-xs text-white/60 leading-tight">
-              بوابة الموظف الذاتية<br />
-              <span className="text-white/40">خاص بالموظف</span>
+              {t.brandSub}<br />
+              <span className="text-white/40">{t.brandOnly}</span>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition"
-          >
-            <LogOut size={18} /> خروج
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+              <LogOut size={18} /> {t.logout}
+            </button>
+          </div>
         </div>
       </header>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">{content}</div>
