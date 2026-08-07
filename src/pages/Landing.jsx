@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import CheckoutModal from "@/components/CheckoutModal";
 import { useI18n } from "@/lib/i18n";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
@@ -130,9 +131,12 @@ export default function Landing() {
     planTrialLabel: "تجربة مجانية", planTrialDur: "30 يوماً", planTrialSub: "بدون بطاقة ائتمان",
     planTrialLi: ["تجربة كاملة لكل المميزات", "مدة 30 يوماً بدون بطاقة ائتمان", "استيراد بيانات الموظفين", "دعم فني خلال فترة التجربة", "بدون التزام"],
     planTrialCta: "سجّل تجربتك",
-    planAnnualLabel: "الاشتراك السنوي", planAnnualDur: "سنوي", planAnnualSub: "دفع عبر Visa / مدى أو مباشرة",
-    planAnnualLi: ["كل مميزات المنصة", "اشتراك سنوي بأسعار تنافسية", "الدفع عبر Visa / مدى", "تكاملات حكومية", "دعم مخصّص وتحديثات مستمرة"],
+    planAnnualLabel: "الاشتراك السنوي", planAnnualPrice: "2,500 ريال", planAnnualPriceNote: "السنة الأولى (تشمل سنة مجانية)", planAnnualAfter: "ثم 700 ريال سنوياً من العام الثاني", planAnnualSub: "الدفع الآمن عبر Visa / مدى",
+    planAnnualLi: ["كل مميزات المنصة", "السنة الأولى بـ 2,500 ريال (تشمل سنة مجانية)", "التجديد السنوي 700 ريال فقط من العام الثاني", "تكاملات حكومية", "دعم مخصّص وتحديثات مستمرة"],
     planAnnualBadge: "الأكثر اختياراً", planAnnualCta: "اشترك الآن",
+    paidVerifying: "جارٍ تأكيد الاشتراك والدفع…",
+    paidTitle: "تم الاشتراك بنجاح", paidDesc: "تم تفعيل اشتراكك السنوي ودفع 2,500 ريال بنجاح. سنتواصل معك على بياناتك لتأكيد الترحيل، وتجديد العام الثاني بـ 700 ريال. تحقق من بريدك.",
+    paidCta: "تسجيل الدخول للمنصة",
     trialTag: "سجّل في دقيقة", trialTitle: "ابدأ تجربتك المجانية الآن",
     doneTitle: "تم استلام طلبك بنجاح", doneDesc: "سيتواصل معك فريقنا خلال فترة التجربة لتفعيل اشتراكك السنوي ونقل بياناتك. تحقق من بريدك الإلكتروني.",
     doneCta: "تسجيل الدخول للمنصة",
@@ -168,9 +172,12 @@ export default function Landing() {
     planTrialLabel: "Free Trial", planTrialDur: "30 days", planTrialSub: "No credit card",
     planTrialLi: ["Full access to all features", "30 days, no credit card", "Import employee data", "Technical support during the trial", "No commitment"],
     planTrialCta: "Start your trial",
-    planAnnualLabel: "Annual Subscription", planAnnualDur: "Annual", planAnnualSub: "Pay via Visa / Mada or direct",
-    planAnnualLi: ["All platform features", "Competitive annual pricing", "Pay via Visa / Mada", "Government integrations", "Dedicated support and continuous updates"],
+    planAnnualLabel: "Annual Subscription", planAnnualPrice: "SAR 2,500", planAnnualPriceNote: "First year (includes one free year)", planAnnualAfter: "Then SAR 700 / year from year two", planAnnualSub: "Secure payment via Visa / Mada",
+    planAnnualLi: ["All platform features", "First year at SAR 2,500 (includes one free year)", "Annual renewal at only SAR 700 from year two", "Government integrations", "Dedicated support and continuous updates"],
     planAnnualBadge: "Most chosen", planAnnualCta: "Subscribe now",
+    paidVerifying: "Verifying subscription and payment…",
+    paidTitle: "Subscription successful", paidDesc: "Your annual subscription is active and SAR 2,500 was paid. We’ll contact you on your details to confirm onboarding; renewal from year two is SAR 700. Check your email.",
+    paidCta: "Sign in to the platform",
     trialTag: "Register in a minute", trialTitle: "Start your free trial now",
     doneTitle: "Your request was received", doneDesc: "Our team will contact you during the trial to activate your annual subscription and migrate your data. Check your email.",
     doneCta: "Sign in to the platform",
@@ -188,6 +195,28 @@ export default function Landing() {
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState("");
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [pay, setPay] = useState({ status: "idle", err: "" });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get("session_id");
+    if (params.get("paid") === "1" && sid) {
+      setPay({ status: "verifying", err: "" });
+      base44.functions.invoke("confirmSubscription", { session_id: sid })
+        .then((res) => {
+          if (res?.data?.ok) setPay({ status: "done", err: "" });
+          else setPay({ status: "idle", err: res?.data?.error || (isAr ? "تعذّر تأكيد الدفع" : "Could not confirm payment") });
+        })
+        .catch((e) => setPay({ status: "idle", err: e?.response?.data?.error || e?.message || (isAr ? "تعذّر تأكيد الدفع" : "Could not confirm payment") }))
+        .finally(() => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("paid");
+          url.searchParams.delete("session_id");
+          window.history.replaceState({}, "", url.toString());
+        });
+    }
+  }, []);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -408,12 +437,16 @@ export default function Landing() {
               <Star size={12} /> {t.planAnnualBadge}
             </div>
             <div className="text-sm text-violet-100 font-medium">{t.planAnnualLabel}</div>
-            <div className="text-4xl font-extrabold mt-2">{t.planAnnualDur}</div>
-            <div className="text-white/70 text-sm mt-1">{t.planAnnualSub}</div>
+            <div className="text-4xl font-extrabold mt-2">{t.planAnnualPrice}</div>
+            <div className="text-white/70 text-xs mt-1">{t.planAnnualPriceNote}</div>
+            <div className="inline-flex items-center gap-1.5 mt-2 text-xs bg-emerald-400/15 text-emerald-100 border border-emerald-300/20 rounded-full px-2.5 py-1 w-fit">
+              {t.planAnnualAfter}
+            </div>
+            <div className="text-white/50 text-xs mt-2">{t.planAnnualSub}</div>
             <ul className="space-y-3 mt-6 flex-1">
               {t.planAnnualLi.map((p) => <li key={p} className="flex items-start gap-2 text-sm text-white/90"><Check size={16} className="text-emerald-300 mt-0.5 shrink-0" /> {p}</li>)}
             </ul>
-            <button onClick={() => scrollTo("trial")} className="mt-6 w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3 font-semibold shadow-xl shadow-violet-500/30 transition">{t.planAnnualCta}</button>
+            <button onClick={() => setCheckoutOpen(true)} className="mt-6 w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3 font-semibold shadow-xl shadow-violet-500/30 transition">{t.planAnnualCta}</button>
           </div>
         </div>
       </section>
@@ -497,6 +530,37 @@ export default function Landing() {
         </div>
         <div className="text-center text-white/40 text-xs pb-6">{t.copy}</div>
       </footer>
+
+      {pay.status === "verifying" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1120]/80 backdrop-blur-sm">
+          <div className="bg-white/5 border border-white/15 rounded-3xl p-8 text-center max-w-sm mx-4">
+            <Loader2 size={40} className="animate-spin text-violet-300 mx-auto mb-4" />
+            <div className="text-lg font-semibold">{t.paidVerifying}</div>
+          </div>
+        </div>
+      )}
+
+      {pay.status === "done" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1120]/80 backdrop-blur-sm px-4">
+          <div className="bg-white/5 border border-emerald-400/30 rounded-3xl p-8 text-center max-w-md">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+              <BadgeCheck size={32} className="text-emerald-300" />
+            </div>
+            <div className="text-2xl font-bold">{t.paidTitle}</div>
+            <p className="text-white/70 mt-2">{t.paidDesc}</p>
+            <button onClick={() => setPay({ status: "idle", err: "" })} className="mt-6 text-xs text-white/50 hover:text-white/80">{isAr ? "إغلاق" : "Close"}</button>
+          </div>
+        </div>
+      )}
+
+      {pay.status === "idle" && pay.err && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-rose-500/15 border border-rose-400/30 text-rose-100 rounded-2xl px-4 py-3 text-sm max-w-md mx-4 text-center">
+          {pay.err}
+          <button onClick={() => setPay({ status: "idle", err: "" })} className="block mx-auto mt-1 text-xs text-rose-200/70 hover:text-rose-100">{isAr ? "إغلاق" : "Dismiss"}</button>
+        </div>
+      )}
+
+      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
     </div>
   );
 }
