@@ -5,6 +5,15 @@ const ANNUAL_AMOUNT = 2500; // SAR (Tap expects whole currency units)
 
 export default async function (req) {
   try {
+    const base44 = createClientFromRequest(req);
+
+    // إنشاء عملية دفع عملية حساسة — تقتصر على المالك
+    let user;
+    try { user = await base44.auth.me(); } catch (e) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+
     const body = await req.json().catch(() => ({}));
     const name = String(body.name || '').trim();
     const email = String(body.contact_email || '').trim();
