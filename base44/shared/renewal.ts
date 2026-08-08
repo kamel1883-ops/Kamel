@@ -2,8 +2,15 @@ import { secrets } from "base44:runtime";
 
 // سر مشترك للتحقق من أن استدعاء الدالة جاء من مجدول المنصة (scheduled workflow)
 // وليس من طلب HTTP مجهول. تُخزَّن قيمته في إدارة أسرار البيئة (CRON_SECRET) ولا تُكتب في المصدر.
-export function cronSecret() {
-  return String(secrets.get("CRON_SECRET") || "");
+// يتم التحقق بمطابقة آمنة: يُشترط أن يكون السر مُعدّاً وغير فارغ، وأن يطابق ما يُمرّر تماماً.
+export function verifyCronSecret(provided) {
+  const secret = String(secrets.get("CRON_SECRET") || "");
+  if (!secret || secret.length < 16) return false;
+  const p = String(provided || "");
+  if (!p || p.length !== secret.length) return false;
+  let diff = 0;
+  for (let i = 0; i < secret.length; i++) diff |= secret.charCodeAt(i) ^ p.charCodeAt(i);
+  return diff === 0;
 }
 
 export const RENEWAL_AMOUNT = 700;

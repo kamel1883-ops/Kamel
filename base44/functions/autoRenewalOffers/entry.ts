@@ -1,5 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { issueRenewalOffer, cronSecret } from "../../shared/renewal.ts";
+import { issueRenewalOffer, verifyCronSecret } from "../../shared/renewal.ts";
 
 const DAY = 1000 * 60 * 60 * 24;
 
@@ -7,7 +7,7 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    const isCron = String(body?.cron_secret || "") === cronSecret();
+    const isCron = verifyCronSecret(body?.cron_secret);
     if (!isCron) {
       let user;
       try { user = await base44.auth.me(); } catch (e) {

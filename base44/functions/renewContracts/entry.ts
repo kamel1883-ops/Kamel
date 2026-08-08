@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { cronSecret } from '../../shared/renewal.ts';
+import { verifyCronSecret } from '../../shared/renewal.ts';
 
 const pad = (n) => String(n).padStart(2, '0');
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -11,7 +11,7 @@ export default async function (req) {
 
     // دعم الاستدعاء اليدوي (يتطلب صلاحية المالك) واستدعاء الجدولة التلقائية (عبر سر مشترك)
     const body = await req.json().catch(() => ({}));
-    const isCron = String(body?.cron_secret || '') === cronSecret();
+    const isCron = verifyCronSecret(body?.cron_secret);
     if (!isCron) {
       let user;
       try { user = await base44.auth.me(); } catch (e) {
