@@ -21,7 +21,7 @@ export default async function (req) {
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
 
-    const origin = String(body.return_url || '').trim().replace(/\/$/, '') || 'https://jadara-hr.sa';
+    const origin = String(body.return_url || '').trim().replace(/\/$/, '') || 'https://jadara-hr.com';
 
     const contactName = String(body.contact_name || '').trim() || name;
     const firstSpace = contactName.indexOf(' ');

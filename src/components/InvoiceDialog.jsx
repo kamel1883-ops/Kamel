@@ -174,6 +174,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 <div className="text-xs text-slate-500 leading-relaxed">
                   <div className="font-semibold text-slate-700">{F.contactFoot}</div>
                   <div dir="ltr">WhatsApp: +966 594700782</div>
+                  <div dir="ltr">info@jadara-hr.com</div>
                 </div>
                 <div className="flex flex-col items-center">
                   <Stamp />

@@ -18,7 +18,7 @@ const BANK = {
   account: "1285607287",
 };
 const WHATSAPP = "https://wa.me/966594700782";
-const SALES_EMAIL = "sales@jadara.sa";
+const SALES_EMAIL = "info@jadara-hr.com";
 
 const featuresAr = [
   "إدارة الموظفين", "الحضور والانصراف (بصمة ذاتية)", "إدارة الإجازات والموافقات",

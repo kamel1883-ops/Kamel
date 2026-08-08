@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/i18n";
 import { Mail, MessageCircle, MapPin, Send, ArrowLeft, ShieldCheck } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
-const SALES_EMAIL = "sales@jadara.sa";
+const SALES_EMAIL = "info@jadara-hr.com";
 
 export default function Contact() {
   const { lang } = useI18n();

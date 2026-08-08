@@ -11,7 +11,7 @@ import {
 import { eosArticleReference } from "@/lib/eos";
 
 const WHATSAPP = "https://wa.me/966594700782";
-const SALES_EMAIL = "sales@jadara.sa";
+const SALES_EMAIL = "info@jadara-hr.com";
 
 const pillarsAr = [
   { icon: Users, t: "إدارة الموظفين", d: "ملفات ووثائق وإقامات وجوازات وتأمين طبي وحسابات بنكية وتنبيهات انتهاء." },

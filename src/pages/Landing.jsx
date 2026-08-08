@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
-const SALES_EMAIL = "sales@jadara.sa";
+const SALES_EMAIL = "info@jadara-hr.com";
 // روابط حسابات التواصل — تُحدّث لاحقاً بالروابط الفعلية
 const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com",

@@ -23,6 +23,7 @@ const BANK = {
 };
 const SIG = "المدير العام — كامل إسماعيل";
 const WA = "+966 594700782";
+const SUPPORT_EMAIL = "info@jadara-hr.com";
 
 function iso(d) { return new Date(d).toISOString().slice(0, 10); }
 function addYears(d, y) { const r = new Date(d); r.setFullYear(r.getFullYear() + y); return r; }
@@ -45,6 +46,7 @@ export function emailBody(tenant, start, end, today, toOwner) {
     "رقم الحساب: " + BANK.account,
     "رقم الآيبان (IBAN): " + BANK.iban, "",
     "ملاحظة مهمة: بعد إتمام تحويل رسوم التجديد، يرجى إرسال صورة من إيصال التحويل على واتساب: " + WA + " لتأكيد التجديد وتمديد اشتراككم السنوي.", "",
+    "للدعم والاستفسار — البريد: " + SUPPORT_EMAIL, "",
     "مع خالص التقدير،",
     SIG,
     "جدارة لإدارة الموارد البشرية",
