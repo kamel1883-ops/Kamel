@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, Share2, Copy, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/hr";
@@ -22,6 +22,7 @@ export default function OwnerAdmin() {
     noCustomers: "لا يوجد عملاء بعد — سجّل العملاء من صفحة الهبوط.",
     regSub: "تسجيل اشتراك", directActivate: "تفعيل مباشر",
     subActive: (d) => `اشتراك: ${d || "—"}`, subTrial: (d, n) => `تجربة: ${d || "—"} (${n} يوم)`,
+    shareTitle: "رابط التجربة المجانية", shareDesc: "شارك هذا الرابط مع العملاء — يفتحونه، يملؤون اسم منشأتهم، وتُسجَّل لهم تجربة 30 يوماً باسمها تلقائياً.", shareCopy: "نسخ الرابط", shareWa: "مشاركة عبر واتساب", copied: "تم النسخ",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trial periods, annual subscriptions and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
@@ -31,6 +32,7 @@ export default function OwnerAdmin() {
     noCustomers: "No customers yet — register customers from the landing page.",
     regSub: "Register subscription", directActivate: "Direct activate",
     subActive: (d) => `Subscription: ${d || "—"}`, subTrial: (d, n) => `Trial: ${d || "—"} (${n} days)`,
+    shareTitle: "Free trial link", shareDesc: "Share this link with customers — they open it, fill in their company name, and a 30-day trial is registered under their name automatically.", shareCopy: "Copy link", shareWa: "Share on WhatsApp", copied: "Copied",
   };
 
   const [tenants, setTenants] = useState([]);
@@ -74,6 +76,8 @@ export default function OwnerAdmin() {
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
+
+      <ShareLink t={t} isAr={isAr} />
 
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-7">
         <Stat icon={Building2} label={t.sTotal} value={stats.total} cls="text-[#2e2448] bg-[#2e2448]/10" />
@@ -260,5 +264,34 @@ function SubForm({ open, onClose, onSaved, tenant, isAr, t }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ShareLink({ t, isAr }) {
+  const link = `${window.location.origin}/`;
+  const waText = encodeURIComponent(isAr ? `اكتشف منصة جدارة لإدارة الموارد البشرية — جرّب مجاناً 30 يوماً عبر هذا الرابط: ${link}` : `Discover Jadara HR platform — try free for 30 days via this link: ${link}`);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
+  };
+  return (
+    <div className="bg-gradient-to-l from-violet-50 to-indigo-50 border border-violet-200/60 rounded-2xl p-5 mb-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-violet-600/15 text-violet-700 flex items-center justify-center shrink-0"><Share2 size={18} /></div>
+        <div>
+          <div className="font-semibold text-foreground">{t.shareTitle}</div>
+          <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl leading-relaxed">{t.shareDesc}</p>
+          <div dir="ltr" className="mt-2 text-xs text-violet-700 font-mono bg-violet-100/70 border border-violet-200 rounded-lg px-2.5 py-1.5 inline-block truncate max-w-full">{link}</div>
+        </div>
+      </div>
+      <div className="flex gap-2 shrink-0">
+        <Button size="sm" onClick={copy} variant="outline" className="gap-1.5 h-9">
+          {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />} {copied ? t.copied : t.shareCopy}
+        </Button>
+        <a href={`https://wa.me/?text=${waText}`} target="_blank" rel="noreferrer">
+          <Button size="sm" className="gap-1.5 h-9 bg-emerald-600 hover:bg-emerald-600/90"><MessageCircle size={14} /> {t.shareWa}</Button>
+        </a>
+      </div>
+    </div>
   );
 }
