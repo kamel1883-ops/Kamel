@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { CRON_SECRET } from '../../shared/renewal.ts';
 
 const pad = (n) => String(n).padStart(2, '0');
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -8,9 +9,14 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
 
-    // دعم الاستدعاء اليدوي (يتطلب صلاحية المالك) واستدعاء الجدولة التلقائية (بدون مستخدم)
+    // دعم الاستدعاء اليدوي (يتطلب صلاحية المالك) واستدعاء الجدولة التلقائية (عبر سر مشترك)
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
+    const body = await req.json().catch(() => ({}));
+    const isCron = String(body?.cron_secret || '') === CRON_SECRET;
+    if (!user && !isCron) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }

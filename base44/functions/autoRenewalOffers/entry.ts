@@ -1,5 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { issueRenewalOffer } from "../../shared/renewal.ts";
+import { issueRenewalOffer, CRON_SECRET } from "../../shared/renewal.ts";
 
 const DAY = 1000 * 60 * 60 * 24;
 
@@ -8,6 +8,9 @@ export default async function (req) {
     const base44 = createClientFromRequest(req);
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
+    const body = await req.json().catch(() => ({}));
+    const isCron = String(body?.cron_secret || "") === CRON_SECRET;
+    if (!user && !isCron) return Response.json({ error: "Unauthorized" }, { status: 401 });
     if (user && user.role !== "admin") return Response.json({ error: "Forbidden" }, { status: 403 });
 
     const today = new Date(); today.setHours(0, 0, 0, 0);

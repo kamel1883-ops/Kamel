@@ -1,5 +1,9 @@
 import { secrets } from "base44:runtime";
 
+// سر مشترك للتحقق من أن استدعاء الدالة جاء من مجدول المنصة (scheduled workflow)
+// وليس من طلب HTTP مجهول. لا يُمرَّر لأي عميل ويبقى ضمن كود الخادم وسير العمل فقط.
+export const CRON_SECRET = "jadara-cron-7f3a9c1e-2026-secure";
+
 export const RENEWAL_AMOUNT = 700;
 
 const BANK = {
