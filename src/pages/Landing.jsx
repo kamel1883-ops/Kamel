@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import ShareBar from "@/components/ShareBar";
 import { useI18n } from "@/lib/i18n";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
@@ -13,6 +14,7 @@ import {
   GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
   Network, ClipboardList, Plane, CalendarPlus, Server, Linkedin, Facebook, Twitter,
+  Send, Music2,
 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
@@ -22,6 +24,8 @@ const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com",
   facebook: "https://www.facebook.com",
   twitter: "https://twitter.com",
+  telegram: "https://t.me",
+  tiktok: "https://www.tiktok.com",
 };
 
 const featuresAr = [
@@ -507,6 +511,14 @@ export default function Landing() {
         )}
       </section>
 
+      {/* شارك جدارة */}
+      <section id="share" className="max-w-3xl mx-auto px-5 py-12 text-center">
+        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-3" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
+        <p className="text-white/60 mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
+        <ShareBar isAr={isAr} />
+      </section>
+
       {/* تواصل */}
       <section id="contact" className="max-w-5xl mx-auto px-5 py-14">
         <SectionHead tag={t.contactTag} title={t.contactTitle} />
@@ -547,6 +559,14 @@ export default function Landing() {
               <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noreferrer" aria-label="Twitter"
                 className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <Twitter size={17} className="text-white/80" />
+              </a>
+              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"
+                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Music2 size={17} className="text-white/80" />
+              </a>
+              <a href={SOCIAL_LINKS.telegram} target="_blank" rel="noreferrer" aria-label="Telegram"
+                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Send size={17} className="text-white/80" />
               </a>
             </div>
           </div>
