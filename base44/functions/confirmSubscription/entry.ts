@@ -10,6 +10,13 @@ function addYears(date, years) {
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
+
+    // تأكيد الدفع وإنشاء حساب العميل عملية حساسة — تقتصر على المالك
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) {}
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+
     const body = await req.json().catch(() => ({}));
     const tapId = String(body.tap_id || body.charge_id || body.session_id || '').trim();
     if (!tapId) return Response.json({ error: 'رقم العملية مطلوب' }, { status: 400 });
@@ -29,6 +36,10 @@ export default async function (req) {
 
     if (charge.status !== 'CAPTURED') {
       return Response.json({ error: 'لم يكتمل الدفع بعد' }, { status: 402 });
+    }
+    // تحقق إضافي من مطابقة المبلغ المتوقع لمنع إنشاء حساب من عملية بقيمة مختلفة
+    if (Number(charge.amount) !== 2500) {
+      return Response.json({ error: 'مبلغ العملية لا يطابق رسوم الاشتراك' }, { status: 400 });
     }
 
     const meta = charge.metadata || {};

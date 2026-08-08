@@ -14,11 +14,9 @@ export default async function (req) {
     try { user = await base44.auth.me(); } catch (_) {}
     const body = await req.json().catch(() => ({}));
     const isCron = String(body?.cron_secret || '') === CRON_SECRET;
-    if (!user && !isCron) {
+    const isAdmin = !!user && user.role === 'admin';
+    if (!isAdmin && !isCron) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    if (user && user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const employees = await base44.asServiceRole.entities.Employee.list('-created_date', 5000);

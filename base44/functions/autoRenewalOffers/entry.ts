@@ -10,8 +10,8 @@ export default async function (req) {
     try { user = await base44.auth.me(); } catch (_) {}
     const body = await req.json().catch(() => ({}));
     const isCron = String(body?.cron_secret || "") === CRON_SECRET;
-    if (!user && !isCron) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    if (user && user.role !== "admin") return Response.json({ error: "Forbidden" }, { status: 403 });
+    const isAdmin = !!user && user.role === "admin";
+    if (!isAdmin && !isCron) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const horizon = 14 * DAY;
