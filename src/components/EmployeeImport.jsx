@@ -5,7 +5,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  Download, Upload, FileSpreadsheet, Loader2, BadgeCheck, AlertTriangle, X,
+  Download, Upload, FileSpreadsheet, Loader2, BadgeCheck, AlertTriangle,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
@@ -13,40 +13,19 @@ import { useI18n } from "@/lib/i18n";
 const TEMPLATE_HEADERS = [
   "الاسم الكامل", "الرقم الوظيفي", "الهوية الوطنية / رقم الإقامة", "البريد الإلكتروني",
   "الجنسية", "سعودي (نعم/لا)", "الجنس (ذكر/أنثى)", "تاريخ الميلاد", "رقم الجوال", "العنوان",
-  "جهة اتصال طوارئ", "الإدارة / القسم", "المسمى الوظيفي", "الدرجة الوظيفية",
+  "جهة اتصال طوارئ", "الإدارة / القسم", "الفرع", "المسمى الوظيفي", "الدرجة الوظيفية",
   "المستوى الوظيفي (owner/executive/manager/supervisor/employee/worker)", "تاريخ التعيين",
   "نوع العقد (دوام كامل/جزئي/عقد)", "الراتب الأساسي", "بدل السكن", "بدل المواصلات",
   "بدلات أخرى", "تاريخ انتهاء الإقامة", "رقم الجواز", "تاريخ انتهاء الجواز",
   "رقم التأمين الطبي", "تاريخ انتهاء التأمين الطبي", "الحساب البنكي",
 ];
-const SAMPLE_ROW = [
-  "محمد عبدالله", "1001", "1234567890", "mohammed@company.sa", "سعودي", "نعم", "ذكر",
-  "1990-01-15", "0551234567", "الرياض", "0550000000", "المبيعات", "مندوب مبيعات",
-  "الثالثة", "employee", "2023-03-01", "دوام كامل", "8000", "1000", "500", "0",
-  "2027-05-01", "X1234567", "2030-01-01", "INS12345", "2026-12-31", "SA00001234",
-];
-
-function downloadTemplate(isAr) {
-  const bom = "\uFEFF";
-  const lines = [TEMPLATE_HEADERS, SAMPLE_ROW, TEMPLATE_HEADERS.map(() => "")];
-  const csv = bom + lines.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = isAr ? "قالب_موظفي_جدارة.csv" : "jadara_employees_template.csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
 
 export default function EmployeeImport({ open, onClose, onSaved }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "استيراد الموظفين عبر Excel",
-    desc: "حمّل القالب، عبّئ بيانات موظفيك، ثم ارفع الملف لاستيرادهم دفعة واحدة. سيتدفّقون تلقائياً إلى الهيكل التنظيمي والأقسام.",
+    desc: "حمّل القالب، عبّئ بيانات موظفيك (مع تحديد الفرع لكل موظف)، ثم ارفع الملف لاستيرادهم دفعة واحدة. تُحلّ الفروع تلقائياً — وإذا لم يكن لديك إلا الفرع الرئيسي يُسجَّل الجميع عليه تلقائياً.",
     download: "تحميل قالب Excel (CSV)",
     upload: "اختر ملف Excel/CSV",
     importing: "جارٍ الاستيراد…",
@@ -58,7 +37,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     errGeneric: "تعذّر قراءة الملف، تأكد من تطابق الأعمدة مع القالب",
   } : {
     title: "Import Employees via Excel",
-    desc: "Download the template, fill your staff data, then upload the file to import them in one batch. They auto-flow into the org structure and departments.",
+    desc: "Download the template, fill your staff data (set the branch per employee), then upload to import in one batch. Branches auto-resolve; if you only have the main branch everyone is assigned to it automatically.",
     download: "Download Excel template (CSV)",
     upload: "Choose an Excel/CSV file",
     importing: "Importing…",
@@ -72,12 +51,44 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
 
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [dlBusy, setDlBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [err, setErr] = useState("");
 
   const reset = () => { setFile(null); setBusy(false); setResult(null); setErr(""); };
 
   const handleClose = () => { reset(); onClose(); };
+
+  const downloadTemplate = async () => {
+    setDlBusy(true);
+    let mainName = "الفرع الرئيسي";
+    try {
+      const branches = await base44.entities.Branch.list("-is_main", 500);
+      const main = branches.find((b) => b.is_main) || branches[0];
+      if (main) mainName = main.name;
+    } catch (_) {}
+    setDlBusy(false);
+
+    const branchIndex = TEMPLATE_HEADERS.indexOf("الفرع");
+    const sample = [
+      "محمد عبدالله", "1001", "1234567890", "mohammed@company.sa", "سعودي", "نعم", "ذكر",
+      "1990-01-15", "0551234567", "الرياض", "0550000000", "المبيعات", mainName, "مندوب مبيعات",
+      "الثالثة", "employee", "2023-03-01", "دوام كامل", "8000", "1000", "500", "0",
+      "2027-05-01", "X1234567", "2030-01-01", "INS12345", "2026-12-31", "SA00001234",
+    ];
+    const bom = "\uFEFF";
+    const lines = [TEMPLATE_HEADERS, sample, TEMPLATE_HEADERS.map(() => "")];
+    const csv = bom + lines.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = isAr ? "قالب_موظفي_جدارة.csv" : "jadara_employees_template.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const run = async () => {
     if (!file) return;
@@ -107,8 +118,8 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
         <div className="space-y-5">
           <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-4">
             <div className="text-sm font-medium text-violet-700 mb-2">{t.download}</div>
-            <Button type="button" variant="outline" onClick={() => downloadTemplate(isAr)} className="gap-2">
-              <Download size={16} /> {t.download}
+            <Button type="button" variant="outline" onClick={downloadTemplate} disabled={dlBusy} className="gap-2">
+              {dlBusy ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} {t.download}
             </Button>
             <p className="text-xs text-muted-foreground mt-3">{t.supported}</p>
           </div>

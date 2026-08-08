@@ -17,7 +17,7 @@ const empty = {
   full_name: "",
   employee_number: "", national_id: "", email: "", nationality: "", gender: "male", is_saudi: false,
   birth_date: "", phone: "", address: "", emergency_contact: "",
-  department: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
+  department: "", branch_id: "", branch_name: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
   contract_type: "full_time", status: "active",
   termination_reason: "none", termination_date: "", manager_id: "",
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
@@ -33,7 +33,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   const t = isAr ? {
     edit: "تعديل بيانات الموظف", add: "إضافة موظف جديد",
     fullName: "الاسم الكامل", empNo: "الرقم الوظيفي",     natId: "الهوية الوطنية", email: "بريد العمل (لربط الحساب)", nationality: "الجنسية", gender: "الجنس", male: "ذكر", female: "أنثى",
-    birth: "تاريخ الميلاد", phone: "رقم الجوال", dept: "الإدارة", position: "المسمى الوظيفي", jobGrade: "الدرجة الوظيفية", hireDate: "تاريخ التعيين",
+    birth: "تاريخ الميلاد", phone: "رقم الجوال", dept: "الإدارة", branch: "الفرع", noBranch: "بدون فرع", position: "المسمى الوظيفي", jobGrade: "الدرجة الوظيفية", hireDate: "تاريخ التعيين",
     contract: "نوع العقد", full: "دوام كامل", part: "دوام جزئي", cont: "عقد",
     status: "الحالة الوظيفية", active: "على رأس العمل", onLeave: "في إجازة", terminated: "منهي", resigned: "مستقيل",
     base: "الراتب الأساسي (ريال)", housing: "بدل السكن", transport: "بدل المواصلات", other: "بدلات أخرى",
@@ -47,7 +47,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   } : {
     edit: "Edit employee", add: "Add new employee",
     fullName: "Full name", empNo: "Employee number",     natId: "National ID", email: "Work email (account linking)", nationality: "Nationality", gender: "Gender", male: "Male", female: "Female",
-    birth: "Birth date", phone: "Phone", dept: "Department", position: "Job title", jobGrade: "Job grade", hireDate: "Hire date",
+    birth: "Birth date", phone: "Phone", dept: "Department", branch: "Branch", noBranch: "No branch", position: "Job title", jobGrade: "Job grade", hireDate: "Hire date",
     contract: "Contract type", full: "Full-time", part: "Part-time", cont: "Contract",
     status: "Employment status", active: "Active", onLeave: "On leave", terminated: "Terminated", resigned: "Resigned",
     base: "Base salary (SAR)", housing: "Housing allowance", transport: "Transport allowance", other: "Other allowances",
@@ -63,10 +63,12 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [allEmployees, setAllEmployees] = useState([]);
+  const [branches, setBranches] = useState([]);
 
   useEffect(() => { setForm(employee ? { ...empty, ...employee } : empty); }, [employee, open]);
   useEffect(() => {
     base44.entities.Employee.list("-created_date", 500).then((list) => setAllEmployees(list));
+    base44.entities.Branch.list("-is_main", 500).then((list) => setBranches(list));
   }, [open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -106,6 +108,19 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             <Field label={t.dept}>
               <Input value={form.department} onChange={(e) => set("department", e.target.value)} required placeholder={t.deptHint} list="dept-options" />
               <datalist id="dept-options">{departments.map((d) => <option key={d} value={d} />)}</datalist>
+            </Field>
+            <Field label={t.branch}>
+              <Select value={form.branch_id || "none"} onValueChange={(v) => {
+                const b = branches.find((x) => x.id === v);
+                set("branch_id", v === "none" ? "" : v);
+                set("branch_name", v === "none" ? "" : (b?.name || ""));
+              }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t.noBranch}</SelectItem>
+                  {branches.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}{b.is_main ? ` (${isAr ? "رئيسي" : "main"})` : ""}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </Field>
             <Field label={t.position}><Input value={form.position} onChange={(e) => set("position", e.target.value)} required /></Field>
             <Field label={t.roleLevel}>

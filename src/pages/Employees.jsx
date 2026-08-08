@@ -3,12 +3,13 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import EmployeeForm from "@/components/EmployeeForm";
 import EmployeeImport from "@/components/EmployeeImport";
+import BranchManager from "@/components/BranchManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2, Users, Network, Upload } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
@@ -19,23 +20,25 @@ export default function Employees() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
-    title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد", importBtn: "استيراد من Excel",
-    search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", loading: "جارٍ التحميل...",
+    title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد", importBtn: "استيراد من Excel", branchesBtn: "إدارة الفروع",
+    search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", allBranches: "كل الفروع", loading: "جارٍ التحميل...",
     empty: "لا يوجد موظفون مطابقون", del: (n) => `حذف الموظف ${n}؟`,
-    thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
+    thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thBranch: "الفرع", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
   } : {
-    title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee", importBtn: "Import from Excel",
-    search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", loading: "Loading...",
+    title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee", importBtn: "Import from Excel", branchesBtn: "Branches",
+    search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", allBranches: "All branches", loading: "Loading...",
     empty: "No matching employees", del: (n) => `Delete employee ${n}?`,
-    thNum: "Number", thPos: "Title", thDept: "Department", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
+    thNum: "Number", thPos: "Title", thDept: "Department", thBranch: "Branch", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
   };
 
   const [employees, setEmployees] = useState([]);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [branchFilter, setBranchFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [branchOpen, setBranchOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,15 +47,17 @@ export default function Employees() {
     setEmployees(data);
     setLoading(false);
   };
-  useEffect(() => { load(); }, [editTarget, formOpen]);
+  useEffect(() => { load(); }, [editTarget, formOpen, branchOpen]);
 
   const departments = Array.from(new Set(employees.map((e) => e.department).filter(Boolean)));
+  const branchNames = Array.from(new Set(employees.map((e) => e.branch_name).filter(Boolean)));
   const filtered = employees.filter((e) => {
     const q = search.trim();
-    const matchQ = !q || e.employee_number?.includes(q) || e.position?.includes(q) || e.department?.includes(q);
+    const matchQ = !q || e.employee_number?.includes(q) || e.position?.includes(q) || e.department?.includes(q) || e.full_name?.includes(q);
     const matchD = deptFilter === "all" || e.department === deptFilter;
+    const matchB = branchFilter === "all" || e.branch_name === branchFilter;
     const matchR = roleFilter === "all" || e.role_level === roleFilter;
-    return matchQ && matchD && matchR;
+    return matchQ && matchD && matchB && matchR;
   });
 
   const remove = async (emp) => {
@@ -67,8 +72,9 @@ export default function Employees() {
         title={t.title}
         subtitle={t.subtitle}
         action={(
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={() => { setEditTarget(null); setFormOpen(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>
+            <Button variant="outline" onClick={() => setBranchOpen(true)} className="gap-2"><GitBranch size={18} /> {t.branchesBtn}</Button>
             <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2"><Upload size={18} /> {t.importBtn}</Button>
           </div>
         )}
@@ -80,6 +86,13 @@ export default function Employees() {
             <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.search} className="pr-10" />
           </div>
+          <Select value={branchFilter} onValueChange={setBranchFilter}>
+            <SelectTrigger className="sm:w-44"><SelectValue placeholder={t.allBranches} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t.allBranches}</SelectItem>
+              {branchNames.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+            </SelectContent>
+          </Select>
           <Select value={deptFilter} onValueChange={setDeptFilter}>
             <SelectTrigger className="sm:w-56"><SelectValue placeholder={t.allDepts} /></SelectTrigger>
             <SelectContent>
@@ -111,6 +124,7 @@ export default function Employees() {
                   <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thRole}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thSalary}</th>
@@ -123,6 +137,11 @@ export default function Employees() {
                     <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
                     <td className="px-4 py-3">{emp.position}</td>
                     <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
+                    <td className="px-4 py-3">
+                      {emp.branch_name ? (
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-violet-50 text-violet-700"><GitBranch size={11} /> {emp.branch_name}</span>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </td>
                     <td className="px-4 py-3"><RoleBadge level={emp.role_level} isAr={isAr} lang={lang} /></td>
                     <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>
                     <td className="px-4 py-3 tabular-nums">{formatCurrency(emp.base_salary)}</td>
@@ -143,6 +162,7 @@ export default function Employees() {
 
       <EmployeeForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={load} employee={editTarget} />
       <EmployeeImport open={importOpen} onClose={() => setImportOpen(false)} onSaved={load} />
+      <BranchManager open={branchOpen} onClose={() => setBranchOpen(false)} onSaved={load} />
     </div>
   );
 }

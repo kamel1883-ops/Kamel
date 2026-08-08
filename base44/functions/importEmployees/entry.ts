@@ -48,6 +48,7 @@ function normalizeRecord(r) {
     address: String(r.address ?? '').trim(),
     emergency_contact: String(r.emergency_contact ?? '').trim(),
     department: String(r.department ?? '').trim(),
+    branch_name: String(r.branch_name ?? '').trim(),
     position: String(r.position ?? '').trim(),
     job_grade: String(r.job_grade ?? '').trim(),
     role_level: ROLE[rl] || 'employee',
@@ -97,6 +98,7 @@ export default async function (req) {
               address: { type: 'string', title: 'العنوان' },
               emergency_contact: { type: 'string', title: 'جهة اتصال طوارئ' },
               department: { type: 'string', title: 'الإدارة / القسم' },
+              branch_name: { type: 'string', title: 'الفرع' },
               position: { type: 'string', title: 'المسمى الوظيفي' },
               job_grade: { type: 'string', title: 'الدرجة الوظيفية' },
               role_level: { type: 'string', title: 'المستوى الوظيفي' },
@@ -129,6 +131,26 @@ export default async function (req) {
     else if (result?.output?.records) raw = result.output.records;
     else if (result?.records) raw = result.records;
 
+    // === تجهيز الفروع: الفرع الرئيسي افتراضياً، وإنشاء أي فرع جديد مذكور ===
+    const branches = await base44.asServiceRole.entities.Branch.list('-created_date', 500);
+    let mainBranch = branches.find((b) => b.is_main) || branches[0];
+    if (!mainBranch) {
+      mainBranch = await base44.asServiceRole.entities.Branch.create({ name: 'الفرع الرئيسي', is_main: true });
+    }
+    const branchMap = new Map();
+    for (const b of branches) branchMap.set(lower(b.name), b);
+    branchMap.set(lower(mainBranch.name), mainBranch);
+
+    async function resolveBranch(name) {
+      const n = String(name ?? '').trim();
+      if (!n) return mainBranch;
+      const key = lower(n);
+      if (branchMap.has(key)) return branchMap.get(key);
+      const nb = await base44.asServiceRole.entities.Branch.create({ name: n, is_main: false });
+      branchMap.set(key, nb);
+      return nb;
+    }
+
     const existing = await base44.asServiceRole.entities.Employee.list('-created_date', 5000);
     const byNumber = new Set();
     for (const e of existing) if (e.employee_number) byNumber.add(String(e.employee_number).trim());
@@ -140,17 +162,16 @@ export default async function (req) {
       const r = normalizeRecord(rawRow);
       if (!r.employee_number || !r.department || !r.position || !r.hire_date || !r.base_salary) {
         failed++;
-        errors.push(`${isArErr(r)}`);
+        errors.push(`صف ناقص حقول إلزامية: ${r.employee_number || r.full_name || '—'}`);
         continue;
       }
       const key = String(r.employee_number).trim();
       if (byNumber.has(key)) { duplicate++; continue; }
       byNumber.add(key);
+      const br = await resolveBranch(r.branch_name);
+      r.branch_id = br.id;
+      r.branch_name = br.name;
       toCreate.push(r);
-    }
-
-    function isArErr(r) {
-      return `صف ناقص حقول إلزامية: ${r.employee_number || r.full_name || '—'}`;
     }
 
     if (toCreate.length) {
