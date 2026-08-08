@@ -12,7 +12,7 @@ import {
   Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
   GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
-  Network, ClipboardList, Plane, CalendarPlus, Linkedin, Facebook, Twitter,
+  Network, ClipboardList, Plane, CalendarPlus, Server, Linkedin, Facebook, Twitter,
 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
@@ -40,6 +40,7 @@ const featuresAr = [
   { icon: Car, title: "إدارة الأسطول والمركبات", desc: "مركبات، تأمين، رخص، فحوصات فنية دورية، ومسؤولين، مع تنبيهات انتهاء." },
   { icon: Landmark, title: "تراخيص المنشأة الحكومية", desc: "تتبّع كل تراخيص الجهات الحكومية وعقود الصيانة، خيار «لا ينطبق»، ونسخة إلكترونية لكل ترخيص." },
   { icon: Plug, title: "التكاملات الذكية", desc: "تكاملات حكومية: التراخيص، الإقامات (مقيم/أبشر)، التأمينات الاجتماعية، والضمان الصحي — حلول متكاملة كل ما تحتاجه في مكان واحد." },
+  { icon: Server, title: "بنية تحتية سحابية خاصة", desc: "نعمل على خوادم VPS ألمانية خاصة (غير مشتركة) بأعلى معايير التخزين السحابي، وتقنيات العزل والتشفير، فتعمل منصتك بأداء ثابت وسرعة فائقة لا تتأثر بضغط العمل أو عدد المستخدمين مهما كبر حجم منشأتك." },
   { icon: Building2, title: "بوابة تجربة العميل", desc: "نظام اشتراكات ذكي بفترة تجربة مجانية 30 يوماً، وإشعارات فورية للمالك بكل عميل جديد." },
   { icon: Gavel, title: "سياسة العمل والإنذارات الذكية", desc: "مرجع كامل لسياسة العمل وفق نظام العمل السعودي (الغياب، النوم، إتلاف المنتجات، العصيان، إفشاء الأسرار…). أنشئ إنذاراً تصاعدياً (أول/ثاني/ثالث/فصل) مرتبطاً بالمادة النظامية بعد جلسة تحقيق مع الموظف، ويُرسل تلقائياً إلى بوابة الموظف الذاتية — دون ورق ودون انتظار موافقة الموظف، ويظهر له عدد إنذاراته ودرجاتها فوراً." },
 ];
@@ -60,6 +61,7 @@ const featuresEn = [
   { icon: Car, title: "Fleet & Vehicles", desc: "Vehicles, insurance, licenses, periodic technical inspections, and assignees, with expiry alerts." },
   { icon: Landmark, title: "Government Licenses", desc: "Track all government authority licenses and maintenance contracts, a “not applicable” option, and an electronic copy for each license." },
   { icon: Plug, title: "Smart Integrations", desc: "Government integrations: licenses, Iqama (Muqeem/Absher), GOSI, and health insurance — all in one place." },
+  { icon: Server, title: "Private Cloud Infrastructure", desc: "We run on dedicated German VPS servers (not shared) with the highest cloud storage standards, isolation and encryption — so your platform runs with steady performance and blazing speed unaffected by workload or user volume, however large your organization grows." },
   { icon: Building2, title: "Client Trial Portal", desc: "Smart subscription system with a 30‑day free trial and instant owner notifications for every new client." },
   { icon: Gavel, title: "Labor Policy & Smart Warnings", desc: "Full labor policy reference per Saudi Labor Law (absence, sleeping, product damage, insubordination, disclosure of secrets…). Issue a progressive warning (first/second/third/termination) linked to the relevant article after an investigation session with the employee; it is sent automatically to the employee self-service portal — paperless and without waiting for the employee's approval — and their warnings count and levels appear instantly." },
 ];
@@ -98,6 +100,19 @@ const integrationsEn = [
   { icon: Stethoscope, t: "Medical Transactions", d: "Link medical transactions and tests to expat IDs." },
   { icon: Car, t: "Traffic for Vehicles", d: "Link vehicle licenses, insurance, and inspections with the Traffic Department." },
   { icon: Calculator, t: "Accounting (Odoo/ERP)", d: "Integration with Odoo and ERP systems to post payroll and journal entries." },
+];
+
+const tiersAr = [
+  { tier: "الشريحة الأولى (الناشئة)", range: "من 0 إلى 100 عامل", yearly: "2,000", monthly: "~ 166.6", note: "مناسبة للمنشآت الصغيرة والمشاريع الناشئة" },
+  { tier: "الشريحة الثانية (المتوسطة)", range: "من 101 إلى 599 عامل", yearly: "3,000", monthly: "~ 250", note: "تغطي نمو المنشأة وإدارة فرق العمل المتوسطة" },
+  { tier: "الشريحة الثالثة (الكبيرة)", range: "من 600 إلى 1000 عامل", yearly: "3,500", monthly: "~ 291.6", note: "دعم كامل وإمكانيات ربط متقدمة للمنشآت الكبيرة" },
+  { tier: "الشريحة الرابعة (المؤسسات)", range: "أكثر من 1000 عامل (+1001)", yearly: "4,000", monthly: "~ 333.3", note: "تغطية غير محدودة ودعم فني مخصص للشركات الكبرى" },
+];
+const tiersEn = [
+  { tier: "Tier 1 (Startup)", range: "0 – 100 employees", yearly: "2,000", monthly: "~ 166.6", note: "Ideal for small businesses and startups" },
+  { tier: "Tier 2 (Medium)", range: "101 – 599 employees", yearly: "3,000", monthly: "~ 250", note: "Covers growth and managing mid-sized teams" },
+  { tier: "Tier 3 (Large)", range: "600 – 1,000 employees", yearly: "3,500", monthly: "~ 291.6", note: "Full support and advanced integrations for large firms" },
+  { tier: "Tier 4 (Enterprise)", range: "More than 1,000 employees (+1001)", yearly: "4,000", monthly: "~ 333.3", note: "Unlimited coverage and dedicated support for large enterprises" },
 ];
 
 const fadeUp = {
@@ -412,34 +427,46 @@ export default function Landing() {
       </section>
 
       {/* الباقات */}
-      <section id="pricing" className="max-w-7xl mx-auto px-5 py-14">
-        <SectionHead tag={t.pricingTag} title={t.pricingTitle} />
-        <div className="grid md:grid-cols-2 gap-6 mt-10 max-w-4xl mx-auto">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-7 flex flex-col">
-            <div className="text-sm text-violet-200 font-medium">{t.planTrialLabel}</div>
-            <div className="text-4xl font-extrabold mt-2">{t.planTrialDur}</div>
-            <div className="text-white/60 text-sm mt-1">{t.planTrialSub}</div>
-            <ul className="space-y-3 mt-6 flex-1">
-              {t.planTrialLi.map((p) => <li key={p} className="flex items-start gap-2 text-sm text-white/80"><Check size={16} className="text-emerald-400 mt-0.5 shrink-0" /> {p}</li>)}
-            </ul>
-            <button onClick={() => scrollTo("trial")} className="mt-6 w-full bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3 font-medium transition">{t.planTrialCta}</button>
+      <section id="pricing" className="max-w-5xl mx-auto px-5 py-14">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 bg-sky-400/15 border border-sky-400/25 text-sky-200 rounded-full px-3 py-1 text-xs">{isAr ? "نظام تسعير سنوي / مرن" : "Annual / Flexible pricing system"}</div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mt-4" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "دليل هيكلة واحتساب خطة الأسعار الشرائحية العادلة" : "Fair Tiered Pricing Plan — Structure & Calculation"}</h2>
+        </div>
+
+        <div className="mt-8 rounded-3xl border border-white/10 overflow-hidden bg-[#0b1426]/70">
+          <div className="px-6 py-4 border-b border-white/10 bg-[#161c2d]/80">
+            <div className="font-bold text-white/90">{isAr ? "1. جدول شرائح الأسعار الرسمية" : "1. Official Pricing Tiers Table"}</div>
           </div>
-          <div className="relative bg-gradient-to-br from-violet-600/30 to-indigo-600/20 border border-violet-400/30 rounded-3xl p-7 flex flex-col">
-            <div className="absolute top-4 left-4 inline-flex items-center gap-1 text-xs bg-violet-400/20 text-violet-100 px-2.5 py-1 rounded-full">
-              <Star size={12} /> {t.planAnnualBadge}
-            </div>
-            <div className="text-sm text-violet-100 font-medium">{t.planAnnualLabel}</div>
-            <div className="text-4xl font-extrabold mt-2">{t.planAnnualPrice}</div>
-            <div className="text-white/70 text-xs mt-1">{t.planAnnualPriceNote}</div>
-            <div className="inline-flex items-center gap-1.5 mt-2 text-xs bg-emerald-400/15 text-emerald-100 border border-emerald-300/20 rounded-full px-2.5 py-1 w-fit">
-              {t.planAnnualAfter}
-            </div>
-            <div className="text-white/50 text-xs mt-2">{t.planAnnualSub}</div>
-            <ul className="space-y-3 mt-6 flex-1">
-              {t.planAnnualLi.map((p) => <li key={p} className="flex items-start gap-2 text-sm text-white/90"><Check size={16} className="text-emerald-300 mt-0.5 shrink-0" /> {p}</li>)}
-            </ul>
-            <button onClick={() => navigate("/quote")} className="mt-6 w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3 font-semibold shadow-xl shadow-violet-500/30 transition">{t.planAnnualCta}</button>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm whitespace-nowrap">
+              <thead className="bg-[#161c2d] text-white/80">
+                <tr>
+                  <th className="text-right font-semibold px-4 py-3">{isAr ? "الفئة / الشريحة" : "Tier"}</th>
+                  <th className="text-right font-semibold px-4 py-3">{isAr ? "نطاق أعداد العمال / الموظفين" : "Headcount range"}</th>
+                  <th className="text-right font-semibold px-4 py-3">{isAr ? "التسعير السنوي (ر.س)" : "Annual (SAR)"}</th>
+                  <th className="text-right font-semibold px-4 py-3">{isAr ? "التكلفة الشهرية التقديرية" : "Est. monthly"}</th>
+                  <th className="text-right font-semibold px-4 py-3">{isAr ? "ملاحظات القيمة والتغطية" : "Coverage notes"}</th>
+                </tr>
+              </thead>
+              <tbody className="text-white/80">
+                {(isAr ? tiersAr : tiersEn).map((row, i) => (
+                  <tr key={i} className={i % 2 ? "bg-white/[0.03]" : "bg-transparent"}>
+                    <td className="px-4 py-3 font-semibold text-white">{row.tier}</td>
+                    <td className="px-4 py-3">{row.range}</td>
+                    <td className="px-4 py-3"><span className="font-extrabold text-sky-300">{row.yearly} {isAr ? "ر.س / سنوياً" : "SAR/yr"}</span></td>
+                    <td className="px-4 py-3">{row.monthly} {isAr ? "ر.س / شهرياً" : "SAR/mo"}</td>
+                    <td className="px-4 py-3 text-white/65">{row.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+          <div className="px-6 py-4 border-t border-white/10 text-xs text-white/50">{isAr ? "جميع الأسعار سنوية شاملة الضريبة، وتشمل السنة الأولى سنة مجانية." : "All prices are annual, tax-inclusive; the first year includes one free year."}</div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4 mt-6">
+          <button onClick={() => scrollTo("trial")} className="bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3.5 font-medium transition">{isAr ? "جرّب مجاناً 30 يوماً" : "Try free for 30 days"}</button>
+          <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3.5 font-semibold shadow-xl shadow-violet-500/30 transition">{isAr ? "اطلب عرض سعر" : "Request a quote"}</button>
         </div>
       </section>
 

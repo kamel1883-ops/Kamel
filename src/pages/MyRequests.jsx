@@ -132,6 +132,13 @@ export default function MyRequests() {
   };
   useEffect(() => { load(); }, []);
 
+  // توجيه الزائر غير المسجّل لتسجيل الدخول ثم العودة للبوابة
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = `/login?returnTo=${encodeURIComponent("/portal")}`;
+    }
+  }, [loading, user]);
+
   const linkAccount = async (e) => {
     e.preventDefault();
     const id = nationalId.trim();

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2 } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText } from "lucide-react";
+import InvoiceDialog from "@/components/InvoiceDialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/hr";
@@ -24,6 +25,7 @@ export default function OwnerAdmin() {
     renewOffer: "عرض التجديد", confirmRenew: "تأكيد التجديد", suspend: "إيقاف مؤقت",
     pendingRenew: "بانتظار سداد التجديد", renewSent: "تم إرسال عرض التجديد للعميل",
     subActive: (d) => `اشتراك: ${d || "—"}`, subTrial: (d, n) => `تجربة: ${d || "—"} (${n} يوم)`,
+    invoice: "فاتورة",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trials, annual subscriptions, renewals and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
@@ -35,6 +37,7 @@ export default function OwnerAdmin() {
     renewOffer: "Renewal offer", confirmRenew: "Confirm renewal", suspend: "Suspend",
     pendingRenew: "Awaiting renewal payment", renewSent: "Renewal offer sent to client",
     subActive: (d) => `Subscription: ${d || "—"}`, subTrial: (d, n) => `Trial: ${d || "—"} (${n} days)`,
+    invoice: "Invoice",
   };
 
   const [tenants, setTenants] = useState([]);
@@ -47,6 +50,8 @@ export default function OwnerAdmin() {
   const [busyId, setBusyId] = useState(null);
   const [renewOpen, setRenewOpen] = useState(false);
   const [renewTarget, setRenewTarget] = useState(null);
+  const [invOpen, setInvOpen] = useState(false);
+  const [invTenant, setInvTenant] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -162,6 +167,7 @@ export default function OwnerAdmin() {
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
                           <Button size="sm" onClick={() => openSub(x)} className="gap-1.5 h-8"><Wallet size={14} /> {t.regSub}</Button>
+                          <Button size="sm" variant="outline" onClick={() => { setInvTenant(x); setInvOpen(true); }} className="gap-1.5 h-8"><FileText size={14} /> {t.invoice}</Button>
                           <Button size="sm" variant="outline" onClick={() => sendRenewal(x)} disabled={busyId === x.id} className="gap-1.5 h-8">
                             {busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} {t.renewOffer}
                           </Button>
@@ -182,6 +188,7 @@ export default function OwnerAdmin() {
 
       <SubForm open={subOpen} onClose={() => setSubOpen(false)} onSaved={load} tenant={tenant} isAr={isAr} t={t} />
       <RenewConfirmDialog open={renewOpen} onClose={() => setRenewOpen(false)} tenant={renewTarget} sub={renewTarget ? renewalByTenant.get(renewTarget.id) : null} isAr={isAr} onConfirm={confirmRenew} />
+      <InvoiceDialog open={invOpen} onClose={() => setInvOpen(false)} tenant={invTenant} subs={subs} isAr={isAr} />
     </div>
   );
 }

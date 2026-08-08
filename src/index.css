@@ -143,4 +143,8 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-quote, .print-quote * { visibility: visible !important; }
   .print-quote { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; }
   .print-quote .no-print { display: none !important; }
+
+  .print-invoice, .print-invoice * { visibility: visible !important; }
+  .print-invoice { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
+  .print-invoice .no-print { display: none !important; }
 }
