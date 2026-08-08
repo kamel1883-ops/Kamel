@@ -12,9 +12,10 @@ export default async function (req) {
     const base44 = createClientFromRequest(req);
 
     // تأكيد الدفع وإنشاء حساب العميل عملية حساسة — تقتصر على المالك
-    let user = null;
-    try { user = await base44.auth.me(); } catch (_) {}
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    let user;
+    try { user = await base44.auth.me(); } catch (e) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
