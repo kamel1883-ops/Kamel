@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Image } from "@/components/ui/image";
-import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Mail, ShieldCheck } from "lucide-react";
+import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Mail, ShieldCheck, AlertTriangle } from "lucide-react";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -64,6 +64,9 @@ export default function Quote() {
     stamp: "جدارة لإدارة الموارد البشرية",
     discCode: "كود الخصم (اختياري)",
     discBadge: "خصم", discApplied: "بعد تطبيق الكود", firstAfter: "السنة الأولى (بعد الخصم)",
+    emailNotice: "تنويه مهم",
+    emailNoticeBody: "هذا البريد سيُعتمد كبريد منشأتكم الرسمي لإدارة المنصة وشراء الباقة. عند الشراء، سجّلوا بنفس هذا البريد في بوابة الشركات لتفعيل اشتراككم — ولا يمكن تغييره لاحقاً.",
+    quoteEmailNote: (e) => `البريد المعتمد لمنشأتكم في هذه المنصة هو: ${e} — عند إتمام التحويل يرجى التوجه إلى بوابة الشركات والتسجيل بنفس هذا البريد لتفعيل اشتراككم وإدارة حسابكم.`,
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -85,6 +88,9 @@ export default function Quote() {
     stamp: "Jadara HR Management",
     discCode: "Discount code (optional)",
     discBadge: "OFF", discApplied: "After discount applied", firstAfter: "First year (after discount)",
+    emailNotice: "Important",
+    emailNoticeBody: "This email will be adopted as your organization's official email to manage the platform and buy the package. When purchasing, register with the same email in the Companies portal to activate your subscription — it cannot be changed later.",
+    quoteEmailNote: (e) => `Your organization's official email for this platform is: ${e} — after the transfer, go to the Companies portal and register with the same email to activate your subscription and manage your account.`,
   };
 
   const incoming = location.state?.company || null;
@@ -157,6 +163,10 @@ export default function Quote() {
               <Field label={t.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} />
             </div>
             <Field label={t.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
+            <div className="text-xs flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+              <div><b>{t.emailNotice}:</b> {t.emailNoticeBody}</div>
+            </div>
             <div className="space-y-1.5">
               <Label>{t.discCode}</Label>
               <Input value={form.discount_code || ""} onChange={(e) => set("discount_code", e.target.value.toUpperCase())} placeholder="JADARA100" />
@@ -288,6 +298,13 @@ export default function Quote() {
           <div className="py-6 border-t border-border text-sm">
             <div className="font-semibold mb-1">{t.proofTitle}</div>
             <p className="text-muted-foreground">{t.proof}</p>
+            <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 mt-3">
+              <div className="flex gap-2 text-sm text-amber-900">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <div><b>{t.emailNotice}: </b>{t.quoteEmailNote(company.contact_email)}</div>
+              </div>
+              <div className="mt-2 text-base font-bold text-amber-900 break-all" dir="ltr">{company.contact_email}</div>
+            </div>
             <div className="flex flex-wrap gap-3 mt-3">
               <a href={WHATSAPP} target="_blank" rel="noreferrer" className="no-print inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200"><MessageCircle size={14} /> WhatsApp</a>
               <a href={`mailto:${SALES_EMAIL}`} className="no-print inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 border border-violet-200"><Mail size={14} /> {SALES_EMAIL}</a>
