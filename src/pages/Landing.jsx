@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { useI18n } from "@/lib/i18n";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
@@ -203,17 +204,22 @@ export default function Landing() {
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState("");
+  const [captcha, setCaptcha] = useState("");
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const submit = async (e) => {
     e.preventDefault();
+    if (!captcha) { setErr(isAr ? "أكمل التحقق البشري أولاً" : "Please complete the human check first"); return; }
     setSaving(true); setErr("");
     try {
-      await base44.functions.invoke("createTrial", form);
+      await base44.functions.invoke("createTrial", { ...form, captcha_token: captcha });
       setDone(true);
     } catch (error) {
       setErr(error?.response?.data?.error || error?.message || (isAr ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again"));
+      setCaptcha("");
+      setCaptchaKey((k) => k + 1);
     } finally {
       setSaving(false);
     }
@@ -462,8 +468,11 @@ export default function Landing() {
               <Field label={t.form.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} />
             </div>
             <Field label={t.form.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
+            <div className="flex justify-center">
+              <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
+            </div>
             {err && <div className="text-rose-300 text-sm bg-rose-500/10 border border-rose-400/20 rounded-xl p-3">{err}</div>}
-            <button type="submit" disabled={saving} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition disabled:opacity-60">
+            <button type="submit" disabled={saving || !captcha} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition disabled:opacity-60">
               {saving ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} />} {t.form.submit}
             </button>
             <p className="text-white/50 text-xs text-center flex items-center justify-center gap-1.5"><Lock size={13} /> {t.form.secure}</p>

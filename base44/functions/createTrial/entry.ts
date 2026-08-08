@@ -14,6 +14,23 @@ export default async function (req) {
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
 
+    // التحقق البشري (Cloudflare Turnstile) — يمنع الإساءة الآلية لبوابة التسجيل العامة
+    const captchaToken = String(body.captcha_token || '');
+    if (!captchaToken) return Response.json({ error: 'التحقق البشري مطلوب' }, { status: 400 });
+    const turnstileSecret = String(secrets.get('TURNSTILE_SECRET_KEY') || '');
+    if (!turnstileSecret) return Response.json({ error: 'لم يتم إعداد التحقق البشري' }, { status: 500 });
+    try {
+      const vr = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: turnstileSecret, response: captchaToken }),
+      });
+      const vdata = await vr.json();
+      if (!vdata || !vdata.success) return Response.json({ error: 'فشل التحقق البشري' }, { status: 403 });
+    } catch (_e) {
+      return Response.json({ error: 'تعذّر التحقق البشري' }, { status: 500 });
+    }
+
     // —— كود الخصم (اختياري) — يُتحقق منه خادمياً ويزيد عداد الاستخدام
     let discount_percent = 0;
     let discount_code = '';
