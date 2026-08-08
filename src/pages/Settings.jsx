@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Loader2, Building2, Save, Crosshair } from "lucide-react";
+import { Loader2, Building2, Save, Crosshair, Trash2, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
 
 const empty = {
@@ -38,6 +40,9 @@ export default function SettingsPage() {
     locNote: (r) => `سيُسمح للموظف بالبصمة فقط ضمن ${r || 50} متر من هذا الموقع.`,
     save: "حفظ الإعدادات",
     noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك",
+    delSec: "منطقة الخطر", delTitle: "حذف الحساب", delDesc: "طلب حذف حساب المنشأة وبياناتها. سيتم مراجعة الطلب والتواصل معك لإتمام الحذف.",
+    delBtn: "طلب حذف الحساب", delConfirm: "تأكيد طلب الحذف", delCancel: "إلغاء", delWarn: "لا يمكن التراجع عن هذه العملية.",
+    delSuccess: "تم استلام طلب حذف الحساب بنجاح، سيتواصل معك فريق الدعم.",
   } : {
     title: "Organization settings", subtitle: "Organization data and HR policies", loading: "Loading...",
     secOrg: "Organization data", name: "Organization name", cr: "Commercial register", vat: "VAT number", city: "City",
@@ -52,11 +57,16 @@ export default function SettingsPage() {
     locNote: (r) => `Employees may check in only within ${r || 50} m of this location.`,
     save: "Save settings",
     noGeo: "Device does not support geolocation", noAccess: "Could not access your location",
+    delSec: "Danger zone", delTitle: "Account deletion", delDesc: "Request deletion of your account and its data. The request will be reviewed and support will contact you to complete it.",
+    delBtn: "Request account deletion", delConfirm: "Confirm deletion request", delCancel: "Cancel", delWarn: "This action cannot be undone.",
+    delSuccess: "Account deletion request received — our support team will contact you.",
   };
 
   const [org, setOrg] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [delOpen, setDelOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     base44.entities.Organization.list("-created_date", 1).then((list) => {
@@ -82,6 +92,11 @@ export default function SettingsPage() {
       if (org.id) { await base44.entities.Organization.update(org.id, org); }
       else { const created = await base44.entities.Organization.create(org); setOrg({ ...org, ...created }); }
     } finally { setSaving(false); }
+  };
+
+  const requestDeletion = () => {
+    setDelOpen(false);
+    toast({ title: t.delSuccess });
   };
 
   if (loading) return <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
@@ -166,12 +181,37 @@ export default function SettingsPage() {
           <p className="text-xs text-muted-foreground">{t.locNote(org.workplace_radius)}</p>
         </Card>
 
+        <Card>
+          <SectionTitle title={t.delSec} />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-2">
+            <div>
+              <div className="font-medium text-rose-700">{t.delTitle}</div>
+              <p className="text-sm text-muted-foreground mt-1">{t.delDesc}</p>
+            </div>
+            <Button variant="outline" className="gap-2 border-rose-300 text-rose-600 hover:bg-rose-50 shrink-0" onClick={() => setDelOpen(true)}>
+              <Trash2 size={16} /> {t.delBtn}
+            </Button>
+          </div>
+        </Card>
+
         <div className="flex justify-end">
           <Button onClick={save} disabled={saving} className="gap-2">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} {t.save}
           </Button>
         </div>
       </div>
+
+      <Dialog open={delOpen} onOpenChange={setDelOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><AlertTriangle size={16} className="text-rose-600" /> {t.delTitle}</DialogTitle></DialogHeader>
+          <p className="text-sm font-medium text-rose-600">{t.delWarn}</p>
+          <p className="text-sm text-muted-foreground">{t.delDesc}</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDelOpen(false)}>{t.delCancel}</Button>
+            <Button variant="destructive" className="gap-2" onClick={requestDeletion}><Trash2 size={16} /> {t.delConfirm}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

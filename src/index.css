@@ -148,3 +148,24 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-invoice { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-invoice .no-print { display: none !important; }
 }
+
+/* === Native WebView / mobile enhancements === */
+@media (max-width: 1023px) {
+  header.sticky, .app-header { padding-top: max(env(safe-area-inset-top), 0px); }
+}
+
+button, a, [role="button"], nav, header, footer, svg, .lucide {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body, p, span, article, li, td, th, input, textarea, label, h1, h2, h3, h4, h5, h6, div {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+[class*="overflow-auto"], [class*="overflow-y-auto"], [class*="overflow-x-auto"], .scrollable {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}

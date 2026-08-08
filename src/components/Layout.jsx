@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Building2, TicketPercent, LogOut, Menu, X, UserCircle } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -10,6 +10,13 @@ import { useI18n } from "@/lib/i18n";
 const navItems = [
   { to: "/owner", ar: "العملاء والاشتراكات", en: "Customers & Subscriptions", icon: Building2 },
   { to: "/discounts", ar: "كودات الخصم", en: "Discount Codes", icon: TicketPercent },
+];
+
+const bottomNav = [
+  { to: "/app", ar: "الرئيسية", en: "Home", icon: LayoutDashboard },
+  { to: "/employees", ar: "الموظفون", en: "Employees", icon: Users },
+  { to: "/approvals", ar: "الموافقات", en: "Approvals", icon: ClipboardCheck },
+  { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
 ];
 
 export default function Layout() {
@@ -91,17 +98,38 @@ export default function Layout() {
       {open && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setOpen(false)} />}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="lg:hidden h-16 bg-[#0b1120] text-white border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-20">
-          <div className="flex items-center gap-2.5"><Logo tone="light" size={36} /></div>
+        <header className="lg:hidden h-16 bg-[#0b1120] text-white border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-20" style={{ paddingTop: "max(env(safe-area-inset-top), 0px)" }}>
+          <div className="flex items-center gap-2.5">
+            {location.pathname !== "/app" && location.pathname !== "/" && (
+              <button onClick={() => navigate(-1)} className="text-white/80 active:scale-95 transition" aria-label="back">
+                <ArrowRight size={22} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+              </button>
+            )}
+            <Logo tone="light" size={36} />
+          </div>
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <button onClick={() => setOpen(true)} className="text-white/80"><Menu size={22} /></button>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-9 animate-fade-in">
+        <main className="flex-1 p-4 sm:p-6 lg:p-9 pb-24 lg:pb-9 animate-fade-in">
           <Outlet />
         </main>
+
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0b1120]/95 backdrop-blur border-t border-white/10 flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          {bottomNav.map((item) => {
+            const Icon = item.icon;
+            const active = item.to === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.to);
+            return (
+              <Link key={item.to} to={item.to} onClick={() => setOpen(false)}
+                className={cn("flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-[11px] font-medium transition-colors", active ? "text-violet-300" : "text-white/55")}>
+                <Icon size={20} />
+                {isAr ? item.ar : item.en}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
