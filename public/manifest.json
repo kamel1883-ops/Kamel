@@ -1,0 +1,15 @@
+{
+  "name": "جدارة — منصة الموارد البشرية والرواتب والحضور",
+  "short_name": "جدارة",
+  "description": "منصة سحابية سعودية متكاملة لإدارة الموارد البشرية والرواتب والحضور والانصراف للمنشآت في السعودية والخليج.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "productivity"],
+  "icons": []
+}

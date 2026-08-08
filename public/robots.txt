@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /quote
+Disallow: /app
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /portal
+Disallow: /employees
+Disallow: /attendance
+Disallow: /payroll
+
+Sitemap: https://jadara-hr.com/sitemap.xml
+Host: https://jadara-hr.com
