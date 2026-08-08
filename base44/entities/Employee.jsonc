@@ -89,7 +89,7 @@
     "hire_date": {
       "type": "string",
       "format": "date",
-      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u062a\u0639\u064a\u064a\u0646"
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0645\u0628\u0627\u0634\u0631\u0629 (\u062b\u0627\u0628\u062a \u2014 \u0645\u0631\u062c\u0639 \u0646\u0647\u0627\u064a\u0629 \u0627\u0644\u062e\u062f\u0645\u0629 \u0648\u0627\u0644\u0625\u062c\u0627\u0632\u0627\u062a)"
     },
     "contract_type": {
       "type": "string",
@@ -99,6 +99,16 @@
         "contract"
       ],
       "title": "\u0646\u0648\u0639 \u0627\u0644\u0639\u0642\u062f"
+    },
+    "contract_start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0628\u062f\u0621 \u0627\u0644\u0639\u0642\u062f"
+    },
+    "contract_end_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0646\u0647\u0627\u064a\u0629 \u0627\u0644\u0639\u0642\u062f"
     },
     "status": {
       "type": "string",

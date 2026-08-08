@@ -54,6 +54,8 @@ function normalizeRecord(r) {
     role_level: ROLE[rl] || 'employee',
     hire_date: parseDate(r.hire_date),
     contract_type: CONTRACT[c] || 'full_time',
+    contract_start_date: parseDate(r.contract_start_date),
+    contract_end_date: parseDate(r.contract_end_date),
     base_salary: num(r.base_salary),
     housing_allowance: num(r.housing_allowance),
     transport_allowance: num(r.transport_allowance),
@@ -102,8 +104,10 @@ export default async function (req) {
               position: { type: 'string', title: 'المسمى الوظيفي' },
               job_grade: { type: 'string', title: 'الدرجة الوظيفية' },
               role_level: { type: 'string', title: 'المستوى الوظيفي' },
-              hire_date: { type: 'string', title: 'تاريخ التعيين' },
+              hire_date: { type: 'string', title: 'تاريخ المباشرة' },
               contract_type: { type: 'string', title: 'نوع العقد' },
+              contract_start_date: { type: 'string', title: 'تاريخ بدء العقد' },
+              contract_end_date: { type: 'string', title: 'تاريخ نهاية العقد' },
               base_salary: { type: 'number', title: 'الراتب الأساسي' },
               housing_allowance: { type: 'number', title: 'بدل السكن' },
               transport_allowance: { type: 'number', title: 'بدل المواصلات' },
@@ -168,6 +172,14 @@ export default async function (req) {
       const key = String(r.employee_number).trim();
       if (byNumber.has(key)) { duplicate++; continue; }
       byNumber.add(key);
+      // إن لم يُحدد تاريخ بداية العقد، نأخذه من تاريخ المباشرة
+      if (!r.contract_start_date) r.contract_start_date = r.hire_date;
+      // إن لم يُحدد تاريخ نهاية العقد، نُحدد سنة واحدة من بدايته
+      if (!r.contract_end_date && r.contract_start_date) {
+        const d = new Date(r.contract_start_date);
+        d.setFullYear(d.getFullYear() + 1);
+        r.contract_end_date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      }
       const br = await resolveBranch(r.branch_name);
       r.branch_id = br.id;
       r.branch_name = br.name;

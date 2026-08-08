@@ -18,7 +18,7 @@ const empty = {
   employee_number: "", national_id: "", email: "", nationality: "", gender: "male", is_saudi: false,
   birth_date: "", phone: "", address: "", emergency_contact: "",
   department: "", branch_id: "", branch_name: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
-  contract_type: "full_time", status: "active",
+  contract_type: "full_time", contract_start_date: "", contract_end_date: "", status: "active",
   termination_reason: "none", termination_date: "", manager_id: "",
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
   avatar_url: "",
@@ -33,7 +33,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   const t = isAr ? {
     edit: "تعديل بيانات الموظف", add: "إضافة موظف جديد",
     fullName: "الاسم الكامل", empNo: "الرقم الوظيفي",     natId: "الهوية الوطنية", email: "بريد العمل (لربط الحساب)", nationality: "الجنسية", gender: "الجنس", male: "ذكر", female: "أنثى",
-    birth: "تاريخ الميلاد", phone: "رقم الجوال", dept: "الإدارة", branch: "الفرع", noBranch: "بدون فرع", position: "المسمى الوظيفي", jobGrade: "الدرجة الوظيفية", hireDate: "تاريخ التعيين",
+    birth: "تاريخ الميلاد", phone: "رقم الجوال", dept: "الإدارة", branch: "الفرع", noBranch: "بدون فرع", position: "المسمى الوظيفي", jobGrade: "الدرجة الوظيفية", hireDate: "تاريخ المباشرة (ثابت — مرجع نهاية الخدمة والإجازات)", contractStart: "تاريخ بدء العقد", contractEnd: "تاريخ نهاية العقد",
     contract: "نوع العقد", full: "دوام كامل", part: "دوام جزئي", cont: "عقد",
     status: "الحالة الوظيفية", active: "على رأس العمل", onLeave: "في إجازة", terminated: "منهي", resigned: "مستقيل",
     base: "الراتب الأساسي (ريال)", housing: "بدل السكن", transport: "بدل المواصلات", other: "بدلات أخرى",
@@ -47,7 +47,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   } : {
     edit: "Edit employee", add: "Add new employee",
     fullName: "Full name", empNo: "Employee number",     natId: "National ID", email: "Work email (account linking)", nationality: "Nationality", gender: "Gender", male: "Male", female: "Female",
-    birth: "Birth date", phone: "Phone", dept: "Department", branch: "Branch", noBranch: "No branch", position: "Job title", jobGrade: "Job grade", hireDate: "Hire date",
+    birth: "Birth date", phone: "Phone", dept: "Department", branch: "Branch", noBranch: "No branch", position: "Job title", jobGrade: "Job grade", hireDate: "Commencement date (fixed — EOS & leave reference)", contractStart: "Contract start date", contractEnd: "Contract end date",
     contract: "Contract type", full: "Full-time", part: "Part-time", cont: "Contract",
     status: "Employment status", active: "Active", onLeave: "On leave", terminated: "Terminated", resigned: "Resigned",
     base: "Base salary (SAR)", housing: "Housing allowance", transport: "Transport allowance", other: "Other allowances",
@@ -131,6 +131,8 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             </Field>
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
+            <Field label={t.contractStart}><Input type="date" value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
+            <Field label={t.contractEnd}><Input type="date" value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>
             <Field label={t.directManager}>
               <Select value={form.manager_id || "none"} onValueChange={(v) => set("manager_id", v === "none" ? "" : v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

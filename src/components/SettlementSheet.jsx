@@ -12,7 +12,7 @@ export default function SettlementSheet({ record, org }) {
   const t = L ? {
     orgNameFallback: "اسم المنشأة", cr: "س.ت", vat: "رقم ضريبي", title: "مخالصة نهاية الخدمة", no: "رقم",
     emp: "اسم الموظف", empNo: "الرقم الوظيفي", natId: "الهوية/الإقامة", nationality: "الجنسية", dept: "الإدارة", position: "المسمى الوظيفي",
-    hireDate: "تاريخ التعيين", lwd: "آخر يوم عمل", years: (n) => `${n} سنة`, reason: "سبب الإنهاء",
+    hireDate: "تاريخ المباشرة", lwd: "آخر يوم عمل", years: (n) => `${n} سنة`, reason: "سبب الإنهاء",
     item: "البند", detail: "التفصيل", amount: "المبلغ (ر.س)",
     monthly: "الأجر الشهري", monthlyD: (b) => `أساس: ${b === "gross" ? "إجمالي" : "أساسي فقط"}`, daily: "الأجر اليومي", dailyD: "الأجر الشهري ÷ 30",
     eos: "مكافأة نهاية الخدمة", leaveCash: "تصفية رصيد الإجازات", leaveD: (n) => `${n} يوم × الأجر اليومي`,
@@ -22,7 +22,7 @@ export default function SettlementSheet({ record, org }) {
   } : {
     orgNameFallback: "Organization name", cr: "CR", vat: "VAT no", title: "End-of-service settlement", no: "No.",
     emp: "Employee name", empNo: "Employee no", natId: "ID/Iqama", nationality: "Nationality", dept: "Department", position: "Job title",
-    hireDate: "Hire date", lwd: "Last working date", years: (n) => `${n} years`, reason: "Termination reason",
+    hireDate: "Commencement date", lwd: "Last working date", years: (n) => `${n} years`, reason: "Termination reason",
     item: "Item", detail: "Detail", amount: "Amount (SAR)",
     monthly: "Monthly wage", monthlyD: (b) => `Basis: ${b === "gross" ? "Gross" : "Base only"}`, daily: "Daily wage", dailyD: "Monthly wage ÷ 30",
     eos: "EOS award", leaveCash: "Leave balance settlement", leaveD: (n) => `${n} days × daily wage`,
