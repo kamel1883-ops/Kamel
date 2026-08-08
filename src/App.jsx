@@ -41,7 +41,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Quote from "@/pages/Quote";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/portal"];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -72,6 +72,7 @@ const AuthenticatedApp = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/quote" element={<Quote />} />
+        <Route path="/portal" element={<MyRequests />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
@@ -80,7 +81,6 @@ const AuthenticatedApp = () => {
   // Render the main app (authenticated)
   return (
     <Routes>
-      <Route path="/portal" element={<MyRequests />} />
       <Route element={<Layout />}>
         <Route path="/app" element={<Dashboard />} />
         <Route path="/employees" element={<Employees />} />

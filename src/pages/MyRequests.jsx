@@ -41,6 +41,12 @@ export default function MyRequests() {
   const t = isAr ? {
     dir: "rtl", brandSub: "بوابة الموظف الذاتية", brandOnly: "خاص بالموظف", logout: "خروج",
     loading: "جارٍ التحميل...", mustLogin: "يجب تسجيل الدخول للوصول للبوابة.",
+    gSubtitle: "بوابة الموظف الذاتية — خاص بالموظفين المرتبطين بمنشأة",
+    gTitle: "تسجيل الدخول للبوابة", gDesc: "متاح فقط للموظفين المسجلين لدى المنشآت. أدخل رقم هويتك وبريدك للتحقق قبل الدخول.",
+    gEmailLabel: "البريد الإلكتروني", gBtn: "تحقق ومتابعة الدخول",
+    gOk: "تم التحقق من هويتك، سيتم تحويلك لتسجيل الدخول...", gPending: "سجلك موجود لدى المنشأة، لكن لم يتم تفعيل حسابك بعد من الموارد البشرية.",
+    gFail: "الهوية أو البريد غير مرتبط بمنشأة — لا يمكن الدخول للبوابة.",
+    gNote: "لا يمكن إنشاء حساب جديد من هنا؛ يتم إضافة الموظفين من الموارد البشرية فقط.",
     title: "بوابة الموظف الذاتية", subtitle: "اربط حسابك بسجلك كموظف للوصول إلى طلباتك ومعلوماتك",
     linkTitle: "ربط الحساب بالسجل الوظيفي", linkDesc: "متاح فقط للموظفين المسجلين مسبقاً لدى المنشأة.",
     linkInfo: "سجلك كموظف موجود مسبقاً لدى الموارد البشرية. أدخل رقم هويتك الوطنية أو رقم إقامتك للربط بحسابك",
@@ -65,6 +71,12 @@ export default function MyRequests() {
   } : {
     dir: "ltr", brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
     loading: "Loading...", mustLogin: "You must sign in to access the portal.",
+    gSubtitle: "Employee Self‑Service Portal — for employees linked to a company only",
+    gTitle: "Portal sign‑in", gDesc: "Available only to employees already registered with an organization. Enter your national ID and email to verify before signing in.",
+    gEmailLabel: "Email", gBtn: "Verify & continue",
+    gOk: "Identity verified — redirecting you to sign in...", gPending: "Your record exists with the organization, but your account hasn't been activated by HR yet.",
+    gFail: "The ID or email is not linked to any company — portal access is not allowed.",
+    gNote: "New accounts can't be created here; employees are added by HR only.",
     title: "Employee Self‑Service Portal", subtitle: "Link your account to your employee record to access your requests and info",
     linkTitle: "Link account to your record", linkDesc: "Available only to employees already registered with the organization.",
     linkInfo: "Your employee record already exists with HR. Enter your national ID or Iqama number to link it to your account",
@@ -103,6 +115,10 @@ export default function MyRequests() {
   const [nationalId, setNationalId] = useState("");
   const [linking, setLinking] = useState(false);
   const [linkMsg, setLinkMsg] = useState({ type: "", text: "" });
+  const [gid, setGid] = useState("");
+  const [gemail, setGemail] = useState("");
+  const [gloading, setGloading] = useState(false);
+  const [gmsg, setGmsg] = useState({ type: "", text: "" });
 
   const load = async () => {
     setLoading(true);
@@ -132,12 +148,28 @@ export default function MyRequests() {
   };
   useEffect(() => { load(); }, []);
 
-  // توجيه الزائر غير المسجّل لتسجيل الدخول ثم العودة للبوابة
-  useEffect(() => {
-    if (!loading && !user) {
-      window.location.href = `/login?returnTo=${encodeURIComponent("/portal")}`;
-    }
-  }, [loading, user]);
+  const verifyPortal = async (e) => {
+    e.preventDefault();
+    const nid = gid.trim(), em = gemail.trim();
+    if (!nid || !em) return;
+    setGloading(true); setGmsg({ type: "", text: "" });
+    try {
+      const res = await base44.functions.invoke("verifyEmployeePortal", { national_id: nid, email: em });
+      const data = res?.data || res;
+      if (data?.ok) {
+        if (data.has_account) {
+          setGmsg({ type: "ok", text: t.gOk });
+          setTimeout(() => { window.location.href = `/login?returnTo=${encodeURIComponent("/portal")}`; }, 700);
+        } else {
+          setGmsg({ type: "info", text: t.gPending });
+        }
+      } else {
+        setGmsg({ type: "err", text: t.gFail });
+      }
+    } catch (err) {
+      setGmsg({ type: "err", text: err?.response?.data?.error || t.gFail });
+    } finally { setGloading(false); }
+  };
 
   const linkAccount = async (e) => {
     e.preventDefault();
@@ -172,7 +204,42 @@ export default function MyRequests() {
   if (loading) {
     content = <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
   } else if (!user) {
-    content = <div className="p-10 text-center text-muted-foreground">{t.mustLogin}</div>;
+    content = (
+      <div>
+        <PageHeader title={t.title} subtitle={t.gSubtitle} />
+        <div className="max-w-xl mx-auto bg-white rounded-2xl border border-border p-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
+              <Link2 size={22} className="text-violet-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold">{t.gTitle}</h3>
+              <p className="text-xs text-muted-foreground">{t.gDesc}</p>
+            </div>
+          </div>
+          <form onSubmit={verifyPortal} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>{t.idLabel}</Label>
+              <Input value={gid} onChange={(e) => setGid(e.target.value)} placeholder={t.idPh} required disabled={gloading} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t.gEmailLabel}</Label>
+              <Input type="email" value={gemail} onChange={(e) => setGemail(e.target.value)} placeholder="name@company.com" required disabled={gloading} dir="ltr" />
+            </div>
+            {gmsg.text && (
+              <div className={cn("text-sm rounded-lg p-3 leading-relaxed", gmsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : gmsg.type === "info" ? "bg-blue-50 text-blue-700" : "bg-rose-50 text-rose-700")}>
+                {gmsg.text}
+              </div>
+            )}
+            <Button type="submit" disabled={gloading} className="gap-2">
+              {gloading && <Loader2 size={16} className="animate-spin" />}
+              {t.gBtn}
+            </Button>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
+          </form>
+        </div>
+      </div>
+    );
   } else if (!employee) {
     content = (
       <div>
@@ -365,9 +432,11 @@ export default function MyRequests() {
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
-              <LogOut size={18} /> {t.logout}
-            </button>
+            {user && (
+              <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+                <LogOut size={18} /> {t.logout}
+              </button>
+            )}
           </div>
         </div>
       </header>
