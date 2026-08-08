@@ -30,7 +30,7 @@
           "with": {
             "function_name": "autoRenewalOffers",
             "args": {
-              "cron_secret": "jadara-cron-7f3a9c1e-2026-secure"
+              "cron_secret": "${ env.CRON_SECRET }"
             }
           },
           "then": "end",
