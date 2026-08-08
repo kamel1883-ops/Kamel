@@ -1,11 +1,18 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { verifyTurnstile } from "../../shared/turnstile.ts";
 
-// التحقق من هوية موظف قبل السماح له بدخول بوابة الموظف الذاتية (عام، بدون مصادقة)
-// يرد ok:true فقط إذا وُجد سجل موظف بنفس رقم الهوية والبريد، مع إعلام إن كان لديه حساب مستخدم مفعّل
+// التحقق من هوية موظف قبل السماح له بدخول بوابة الموظف الذاتية (عام، بدون مصادقة مستخدم)
+// محمي بـ Turnstile لمنع الإساءة الآلية — يرد ok:true فقط إذا وُجد سجل موظف بنفس الهوية والبريد
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+
+    // حماية بشرية لمنع الإساءة الآلية
+    const captchaToken = String(body.captcha_token || "");
+    if (!captchaToken) return Response.json({ ok: false, error: "captcha_required" }, { status: 400 });
+    if (!(await verifyTurnstile(captchaToken))) return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
+
     const nid = String(body.national_id || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
     if (!nid || !email) return Response.json({ ok: false, error: "national_id and email are required" }, { status: 400 });

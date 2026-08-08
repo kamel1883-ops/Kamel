@@ -1,10 +1,17 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { verifyTurnstile } from "../../shared/turnstile.ts";
 
-// التحقق أن البريد مفعّل للاشتراك (مرتبط بعميل حالة تجربة أو فعّال) قبل السماح بالتسجيل في بوابة الشركات
+// التحقق أن البريد مفعّل للاشتراك قبل السماح بالتسجيل في بوابة الشركات (عام، بدون مصادقة)
+// محمي بـ Turnstile لمنع الإساءة الآلية
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+
+    const captchaToken = String(body.captcha_token || "");
+    if (!captchaToken) return Response.json({ ok: false, error: "captcha_required" }, { status: 400 });
+    if (!(await verifyTurnstile(captchaToken))) return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
+
     const email = String(body.email || "").trim().toLowerCase();
     if (!email) return Response.json({ ok: false, error: "email required" }, { status: 400 });
 

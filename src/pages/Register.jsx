@@ -9,6 +9,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { useI18n } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
@@ -16,8 +17,8 @@ export default function Register() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr
-    ? { title: "أنشئ حسابك", subtitle: "سجّل للبدء الآن", haveAccount: "لديك حساب بالفعل؟", signin: "تسجيل الدخول", google: "المتابعة عبر Google", or: "أو", email: "البريد الإلكتروني", password: "كلمة المرور", confirm: "تأكيد كلمة المرور", mismatch: "كلمتا المرور غير متطابقتين", failed: "فشل التسجيل", creating: "جارٍ إنشاء الحساب...", create: "إنشاء الحساب", otpTitle: "تأكيد بريدك الإلكتروني", otpSub: "أرسلنا رمزاً إلى", verifying: "جارٍ التحقق...", verify: "تحقّق", noCode: "لم يصلك الرمز؟", resend: "إعادة الإرسال", resendOk: "تم إرسال الرمز", resendOkDesc: "تحقق من بريدك الإلكتروني للرمز الجديد.", resendFail: "تعذّرت إعادة إرسال الرمز", otpFail: "رمز التحقق غير صحيح", notActivated: "هذا البريد غير مفعّل للاشتراك. لا يمكن التسجيل إلا للبريد الذي صدر له عرض سعر وتم الدفع والتفعيل من الإدارة.", note: "التسجيل متاح فقط للبريد المفعّل من جدارة (بعد عرض السعر والدفع)." }
-    : { title: "Create your account", subtitle: "Register to get started", haveAccount: "Already have an account?", signin: "Sign in", google: "Continue with Google", or: "or", email: "Email", password: "Password", confirm: "Confirm password", mismatch: "Passwords do not match", failed: "Registration failed", creating: "Creating account...", create: "Create account", otpTitle: "Verify your email", otpSub: "We sent a code to", verifying: "Verifying...", verify: "Verify", noCode: "Didn't get the code?", resend: "Resend", resendOk: "Code sent", resendOkDesc: "Check your email for the new code.", resendFail: "Could not resend the code", otpFail: "Invalid verification code", notActivated: "This email is not activated for subscription. Registration is only available for emails that received a quote and were paid and activated by our team.", note: "Registration is only available for emails activated by Jadara (after a quote and payment)." };
+    ? { title: "أنشئ حسابك", subtitle: "سجّل للبدء الآن", haveAccount: "لديك حساب بالفعل؟", signin: "تسجيل الدخول", google: "المتابعة عبر Google", or: "أو", email: "البريد الإلكتروني", password: "كلمة المرور", confirm: "تأكيد كلمة المرور", mismatch: "كلمتا المرور غير متطابقتين", failed: "فشل التسجيل", creating: "جارٍ إنشاء الحساب...", create: "إنشاء الحساب", otpTitle: "تأكيد بريدك الإلكتروني", otpSub: "أرسلنا رمزاً إلى", verifying: "جارٍ التحقق...", verify: "تحقّق", noCode: "لم يصلك الرمز؟", resend: "إعادة الإرسال", resendOk: "تم إرسال الرمز", resendOkDesc: "تحقق من بريدك الإلكتروني للرمز الجديد.", resendFail: "تعذّرت إعادة إرسال الرمز", otpFail: "رمز التحقق غير صحيح", notActivated: "هذا البريد غير مفعّل للاشتراك. لا يمكن التسجيل إلا للبريد الذي صدر له عرض سعر وتم الدفع والتفعيل من الإدارة.", note: "التسجيل متاح فقط للبريد المفعّل من جدارة (بعد عرض السعر والدفع).", captchaFail: "فشل التحقق البشري — أعد المحاولة." }
+    : { title: "Create your account", subtitle: "Register to get started", haveAccount: "Already have an account?", signin: "Sign in", google: "Continue with Google", or: "or", email: "Email", password: "Password", confirm: "Confirm password", mismatch: "Passwords do not match", failed: "Registration failed", creating: "Creating account...", create: "Create account", otpTitle: "Verify your email", otpSub: "We sent a code to", verifying: "Verifying...", verify: "Verify", noCode: "Didn't get the code?", resend: "Resend", resendOk: "Code sent", resendOkDesc: "Check your email for the new code.", resendFail: "Could not resend the code", otpFail: "Invalid verification code", notActivated: "This email is not activated for subscription. Registration is only available for emails that received a quote and were paid and activated by our team.", note: "Registration is only available for emails activated by Jadara (after a quote and payment).", captchaFail: "Human verification failed — please retry." };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +27,8 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [captcha, setCaptcha] = useState("");
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,9 +36,9 @@ export default function Register() {
     if (password !== confirmPassword) { setError(t.mismatch); return; }
     setLoading(true);
     try {
-      const ac = await base44.functions.invoke("checkTenantAccess", { email });
+      const ac = await base44.functions.invoke("checkTenantAccess", { email, captcha_token: captcha });
       const ad = ac?.data || ac;
-      if (!ad?.ok) { setError(t.notActivated); setLoading(false); return; }
+      if (!ad?.ok) { setError(ad?.error === "captcha_failed" ? t.captchaFail : t.notActivated); setCaptcha(""); setCaptchaKey((k) => k + 1); setLoading(false); return; }
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {
@@ -133,7 +136,8 @@ export default function Register() {
             <Input id="confirm" type="password" autoComplete="new-password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10 h-12" required />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <div className="flex justify-center"><TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" /></div>
+        <Button type="submit" className="w-full h-12 font-medium" disabled={loading || !captcha}>
           {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t.creating}</>) : t.create}
         </Button>
       </form>

@@ -9,6 +9,7 @@ import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ export default function MyRequests() {
     gEmailLabel: "البريد الإلكتروني", gBtn: "تحقق ومتابعة الدخول",
     gOk: "تم التحقق من هويتك، سيتم تحويلك لتسجيل الدخول...", gPending: "سجلك موجود لدى المنشأة، لكن لم يتم تفعيل حسابك بعد من الموارد البشرية.",
     gFail: "الهوية أو البريد غير مرتبط بمنشأة — لا يمكن الدخول للبوابة.",
+    gCaptchaFail: "فشل التحقق البشري — أعد المحاولة.",
     gNote: "لا يمكن إنشاء حساب جديد من هنا؛ يتم إضافة الموظفين من الموارد البشرية فقط.",
     title: "بوابة الموظف الذاتية", subtitle: "اربط حسابك بسجلك كموظف للوصول إلى طلباتك ومعلوماتك",
     linkTitle: "ربط الحساب بالسجل الوظيفي", linkDesc: "متاح فقط للموظفين المسجلين مسبقاً لدى المنشأة.",
@@ -76,6 +78,7 @@ export default function MyRequests() {
     gEmailLabel: "Email", gBtn: "Verify & continue",
     gOk: "Identity verified — redirecting you to sign in...", gPending: "Your record exists with the organization, but your account hasn't been activated by HR yet.",
     gFail: "The ID or email is not linked to any company — portal access is not allowed.",
+    gCaptchaFail: "Human verification failed — please retry.",
     gNote: "New accounts can't be created here; employees are added by HR only.",
     title: "Employee Self‑Service Portal", subtitle: "Link your account to your employee record to access your requests and info",
     linkTitle: "Link account to your record", linkDesc: "Available only to employees already registered with the organization.",
@@ -119,6 +122,8 @@ export default function MyRequests() {
   const [gemail, setGemail] = useState("");
   const [gloading, setGloading] = useState(false);
   const [gmsg, setGmsg] = useState({ type: "", text: "" });
+  const [gcaptcha, setGcaptcha] = useState("");
+  const [gcaptchaKey, setGcaptchaKey] = useState(0);
 
   const load = async () => {
     setLoading(true);
@@ -151,10 +156,10 @@ export default function MyRequests() {
   const verifyPortal = async (e) => {
     e.preventDefault();
     const nid = gid.trim(), em = gemail.trim();
-    if (!nid || !em) return;
+    if (!nid || !em || !gcaptcha) return;
     setGloading(true); setGmsg({ type: "", text: "" });
     try {
-      const res = await base44.functions.invoke("verifyEmployeePortal", { national_id: nid, email: em });
+      const res = await base44.functions.invoke("verifyEmployeePortal", { national_id: nid, email: em, captcha_token: gcaptcha });
       const data = res?.data || res;
       if (data?.ok) {
         if (data.has_account) {
@@ -164,10 +169,12 @@ export default function MyRequests() {
           setGmsg({ type: "info", text: t.gPending });
         }
       } else {
-        setGmsg({ type: "err", text: t.gFail });
+        setGmsg({ type: "err", text: data?.error === "captcha_failed" ? t.gCaptchaFail : t.gFail });
+        setGcaptcha(""); setGcaptchaKey((k) => k + 1);
       }
     } catch (err) {
       setGmsg({ type: "err", text: err?.response?.data?.error || t.gFail });
+      setGcaptcha(""); setGcaptchaKey((k) => k + 1);
     } finally { setGloading(false); }
   };
 
@@ -231,7 +238,8 @@ export default function MyRequests() {
                 {gmsg.text}
               </div>
             )}
-            <Button type="submit" disabled={gloading} className="gap-2">
+            <div className="flex justify-center"><TurnstileWidget key={gcaptchaKey} onToken={setGcaptcha} className="rounded-xl overflow-hidden" /></div>
+            <Button type="submit" disabled={gloading || !gcaptcha} className="gap-2">
               {gloading && <Loader2 size={16} className="animate-spin" />}
               {t.gBtn}
             </Button>
