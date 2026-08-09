@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut
+  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
@@ -450,7 +450,15 @@ export default function MyRequests() {
           </div>
         </div>
       </header>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">{content}</div>
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 animate-fade-in overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/[0.10] via-indigo-500/[0.05] to-amber-200/[0.10] dark:from-violet-500/[0.14] dark:via-indigo-500/[0.10] dark:to-amber-500/[0.08]" aria-hidden="true" />
+        <div className="pointer-events-none absolute -top-24 -right-16 w-[420px] h-[420px] rounded-full bg-violet-500/[0.10] dark:bg-violet-500/[0.16] blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-28 -left-20 w-[380px] h-[380px] rounded-full bg-amber-400/[0.10] dark:bg-amber-500/[0.10] blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07] dark:opacity-[0.10]" aria-hidden="true">
+          <Crown size={400} className="text-amber-500 dark:text-amber-400" strokeWidth={0.8} />
+        </div>
+        <div className="relative">{content}</div>
+      </div>
     </div>
   );
 }
