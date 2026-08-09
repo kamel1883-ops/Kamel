@@ -36,6 +36,13 @@ export default function ReportsPanel({ employees, attendance }) {
     survSent: "الانطباع العام", survAvg: "متوسط التقييم", survCount: "الردود",
     genAI: "توليد توصيات بالذكاء الاصطناعي", generating: "جارٍ التوليد…", aiSummary: "خلاصة", aiRecs: "التوصيات",
     export: "تصدير PDF / معاينة وطباعة",
+    contractStart: "بداية العقد", contractEnd: "نهاية العقد",
+    nationalId: "الهوية", committer: "الأكثر التزاماً", absenteer: "الأكثر غياباً",
+    overallComm: "نسبة الالتزام العام", range: "النطاق",
+    monthAbs: "الغيابات الشهرية", monthLabel: "الشهر", presentDays: "أيام الحضور", absentDays: "أيام الغياب",
+    vehCount: "عدد المركبات", vehicleName: "المركبة", plate: "اللوحة",
+    warnRange: "نطاق الإنذارات", promotionReady: "جاهز للترقية", notPromote: "غير جاهز للترقية",
+    topReasons: "أهم أسباب المغادرة", countLabel: "العدد", issueDate: "تاريخ الإصدار",
   } : {
     section: "Reports Center", sectionSub: "Reports & charts for decision support — inside Analytics",
     pick: "Pick a report",
@@ -56,6 +63,13 @@ export default function ReportsPanel({ employees, attendance }) {
     survSent: "Overall sentiment", survAvg: "Avg rating", survCount: "Responses",
     genAI: "Generate AI recommendations", generating: "Generating…", aiSummary: "Summary", aiRecs: "Recommendations",
     export: "Export PDF / preview & print",
+    contractStart: "Contract start", contractEnd: "Contract end",
+    nationalId: "National ID", committer: "Most committed", absenteer: "Most absent",
+    overallComm: "Overall commitment", range: "Range",
+    monthAbs: "Monthly absences", monthLabel: "Month", presentDays: "Present days", absentDays: "Absent days",
+    vehCount: "Vehicles count", vehicleName: "Vehicle", plate: "Plate",
+    warnRange: "Warnings range", promotionReady: "Promotion ready", notPromote: "Not ready for promotion",
+    topReasons: "Top exit reasons", countLabel: "Count", issueDate: "Issue date",
   };
 
   const REPORTS = [
@@ -63,7 +77,6 @@ export default function ReportsPanel({ employees, attendance }) {
     { id: "turnover", label: t.rTurnover, icon: TrendingDown },
     { id: "attAll", label: t.rAttAll, icon: CalendarCheck },
     { id: "attOne", label: t.rAttOne, icon: Clock },
-    { id: "actInactive", label: t.rActive, icon: Users },
     { id: "licenses", label: t.rLicenses, icon: ShieldCheck },
     { id: "vehicles", label: t.rVehicles, icon: Car },
     { id: "trips", label: t.rTrips, icon: Plane },
@@ -138,9 +151,8 @@ export default function ReportsPanel({ employees, attendance }) {
       <div ref={reportRef}>
         {(rid === "contracts") && <ContractsReport employees={employees} winM={winM} setWinM={setWinM} t={t} />}
         {rid === "turnover" && <TurnoverReport employees={employees} t={t} />}
-        {rid === "attAll" && <AttAllReport attendance={attendance} statusLabel={statusLabel} t={t} />}
+        {rid === "attAll" && <AttAllReport employees={employees} attendance={attendance} statusLabel={statusLabel} t={t} />}
         {rid === "attOne" && <AttOneReport employees={employees} attendance={attendance} empId={empId} setEmpId={setEmpId} statusLabel={statusLabel} t={t} />}
-        {rid === "actInactive" && <ActInactiveReport employees={employees} t={t} />}
         {rid === "licenses" && <LicensesReport records={extra.lic || []} t={t} />}
         {rid === "vehicles" && <VehiclesReport records={extra.veh || []} t={t} />}
         {rid === "trips" && <TripsReport records={extra.trp || []} tripM={tripM} setTripM={setTripM} t={t} />}
@@ -193,9 +205,9 @@ function ContractsReport({ employees, winM, setWinM, t }) {
       <Card title={t.daysLeft}>
         {rows.length ? (
           <div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.retire}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
+            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.contractStart}</th><th className="text-right pb-2 font-medium">{t.contractEnd}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
             <tbody>{rows.map(({ e, d }) => (
-              <tr key={e.id} className="border-t border-border"><td className="py-2">{e.full_name}</td><td className="py-2">{e.contract_end_date}</td>
+              <tr key={e.id} className="border-t border-border"><td className="py-2">{e.full_name}</td><td className="py-2">{e.national_id || "—"}</td><td className="py-2">{e.contract_start_date || "—"}</td><td className="py-2">{e.contract_end_date}</td>
                 <td className="py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full", d < 0 ? "bg-rose-100 text-rose-700" : d <= 30 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700")}>{d} {t.days}</span></td></tr>
             ))}</tbody>
           </table></div>
@@ -229,58 +241,110 @@ function TurnoverReport({ employees, t }) {
   );
 }
 
-function AttAllReport({ attendance, statusLabel, t }) {
+function AttAllReport({ employees, attendance, statusLabel, t }) {
   const counts = useMemo(() => { const m = {}; attendance.forEach((a) => { m[a.status] = (m[a.status] || 0) + 1; }); return Object.entries(m).map(([k,v]) => ({ name: statusLabel(k), value: v })); }, [attendance, statusLabel]);
   const total = counts.reduce((s, x) => s + x.value, 0);
   const present = (counts.find((c) => c.name === t.present)?.value || 0);
   const absent = (counts.find((c) => c.name === t.absent)?.value || 0);
-  const late = (counts.find((c) => c.name === t.late)?.value || 0);
   const attRate = total ? Math.round((present / total) * 100) : 0;
   const absRate = total ? Math.round((absent / total) * 100) : 0;
+  const perEmp = useMemo(() => {
+    const m = {};
+    attendance.forEach((a) => { const k = a.employee_id; if (!k) return; const e = m[k] || (m[k] = { present:0, absent:0, late:0, leave:0, total:0 }); e.total++; if (a.status === "present") e.present++; else if (a.status === "absent") e.absent++; else if (a.status === "late") e.late++; else if (a.status === "leave") e.leave++; });
+    return m;
+  }, [attendance]);
+  const empName = (id) => employees.find((e) => e.id === id)?.full_name || "—";
+  const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "—";
+  const committed = Object.entries(perEmp).map(([id, v]) => ({ id, name: empName(id), rate: v.total ? Math.round((v.present / v.total) * 100) : 0 })).filter((x) => x.rate > 0).sort((a,b) => b.rate - a.rate).slice(0, 6);
+  const absentees = Object.entries(perEmp).map(([id, v]) => ({ id, name: empName(id), nat: empNat(id), absent: v.absent })).filter((x) => x.absent > 0).sort((a,b) => b.absent - a.absent).slice(0, 6);
   return (
     <Card title={t.rAttAll}>
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3"><div className="text-xs text-muted-foreground">{t.attRate}</div><div className="text-xl font-bold">{attRate}%</div></div>
+        <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3"><div className="text-xs text-muted-foreground">{t.overallComm}</div><div className="text-xl font-bold">{attRate}%</div></div>
         <div className="rounded-xl bg-rose-50 border border-rose-100 p-3"><div className="text-xs text-muted-foreground">{t.absRate}</div><div className="text-xl font-bold">{absRate}%</div></div>
       </div>
       {counts.length ? (
-        <ResponsiveContainer width="100%" height={240}>
-          <PieChart><Pie data={counts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} label>{counts.map((_,i)=><Cell key={i} fill={CHART_PALETTE[i%CHART_PALETTE.length]} />)}</Pie><Legend /><Tooltip /></PieChart>
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart><Pie data={counts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label>{counts.map((_,i)=><Cell key={i} fill={CHART_PALETTE[i%CHART_PALETTE.length]} />)}</Pie><Legend /><Tooltip /></PieChart>
         </ResponsiveContainer>
       ) : <Empty />}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-4">
+        <div>
+          <div className="text-xs font-semibold text-muted-foreground mb-2">{t.committer}</div>
+          {committed.length ? (
+            <ResponsiveContainer width="100%" height={190}><BarChart data={committed} layout="vertical" margin={{left:8,right:8}}><XAxis type="number" domain={[0,100]} tick={{fontSize:10}} /><YAxis type="category" dataKey="name" tick={{fontSize:10}} width={90} /><Tooltip /><Bar dataKey="rate" name={t.attRate} radius={[0,4,4,0]} fill="#10b981" /></BarChart></ResponsiveContainer>
+          ) : <NoRows text={t.noData} />}
+        </div>
+        <div>
+          <div className="text-xs font-semibold text-muted-foreground mb-2">{t.absenteer}</div>
+          {absentees.length ? (
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-left pb-2 font-medium">{t.absentDays}</th></tr></thead>
+              <tbody>{absentees.map((a) => (<tr key={a.id} className="border-t border-border"><td className="py-2">{a.name}</td><td className="py-2">{a.nat}</td><td className="py-2 text-left">{a.absent}</td></tr>))}</tbody>
+            </table></div>
+          ) : <NoRows text={t.noData} />}
+        </div>
+      </div>
     </Card>
   );
 }
 
 function AttOneReport({ employees, attendance, empId, setEmpId, statusLabel, t }) {
-  const rows = useMemo(() => empId ? attendance.filter((a) => a.employee_id === empId) : [], [attendance, empId]);
+  const { lang } = useI18n(); const isAr = lang === "ar";
+  const [rangeM, setRangeM] = useState(6);
+  const rows = useMemo(() => empId ? attendance.filter((a) => {
+    if (a.employee_id !== empId) return false;
+    if (!a.date) return true;
+    const d = new Date(a.date); const since = new Date(); since.setMonth(since.getMonth() - rangeM);
+    return d >= since;
+  }) : [], [attendance, empId, rangeM]);
   const counts = useMemo(() => { const m = {}; rows.forEach((a) => { m[a.status] = (m[a.status] || 0) + 1; }); return Object.entries(m).map(([k,v]) => ({ name: statusLabel(k), value: v })); }, [rows, statusLabel]);
   const total = counts.reduce((s, x) => s + x.value, 0);
   const present = counts.find((c) => c.name === t.present)?.value || 0;
   const absent = counts.find((c) => c.name === t.absent)?.value || 0;
   const attRate = total ? Math.round((present / total) * 100) : 0;
   const absRate = total ? Math.round((absent / total) * 100) : 0;
+  const monthly = useMemo(() => {
+    const m = {}; rows.forEach((a) => { if (!a.date) return; const k = monthKey(a.date); if (!m[k]) m[k] = { name: k, present:0, absent:0, late:0 }; if (a.status === "present") m[k].present++; else if (a.status === "absent") m[k].absent++; else if (a.status === "late") m[k].late++; });
+    return Object.values(m).sort((a,b)=> (a.name < b.name ? -1 : 1));
+  }, [rows]);
   return (
     <div>
-      <select value={empId} onChange={(e) => setEmpId(e.target.value)} className="mb-4 h-9 rounded-md border border-input bg-transparent px-3 text-sm">
-        <option value="">{t.selectEmp}</option>
-        {employees.map((e) => <option key={e.id} value={e.id}>{e.full_name}</option>)}
-      </select>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <select value={empId} onChange={(e) => setEmpId(e.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm">
+          <option value="">{t.selectEmp}</option>
+          {employees.map((e) => <option key={e.id} value={e.id}>{e.full_name}</option>)}
+        </select>
+        <div className="inline-flex rounded-lg border border-border bg-white overflow-hidden">
+          {[[3,t.window3],[6,t.window6],[12,isAr?"12 شهر":"12 months"]].map(([v,l]) => (
+            <button key={v} onClick={() => setRangeM(v)} className={cn("px-3 py-1.5 text-sm font-medium", rangeM === v ? "bg-slate-800 text-white" : "text-muted-foreground hover:bg-slate-50")}>{l}</button>
+          ))}
+        </div>
+      </div>
       {empId ? (
-        <Card title={t.rAttOne}>
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3"><div className="text-xs text-muted-foreground">{t.attRate}</div><div className="text-xl font-bold">{attRate}%</div></div>
-            <div className="rounded-xl bg-rose-50 border border-rose-100 p-3"><div className="text-xs text-muted-foreground">{t.absRate}</div><div className="text-xl font-bold">{absRate}%</div></div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {counts.length ? (
-              <ResponsiveContainer width="100%" height={220}><PieChart><Pie data={counts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label>{counts.map((_,i)=><Cell key={i} fill={CHART_PALETTE[i%CHART_PALETTE.length]} />)}</Pie><Legend /><Tooltip /></PieChart></ResponsiveContainer>
-            ) : <Empty />}
-            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">تاريخ</th><th className="text-right pb-2 font-medium">حضور</th><th className="text-right pb-2 font-medium">انصراف</th><th className="text-right pb-2 font-medium">حالة</th></tr></thead>
-              <tbody>{rows.slice(0,12).map((a) => (<tr key={a.id} className="border-t border-border"><td className="py-2">{a.date}</td><td className="py-2">{a.check_in||"—"}</td><td className="py-2">{a.check_out||"—"}</td><td className="py-2">{statusLabel(a.status)}</td></tr>))}</tbody>
-            </table></div>
-          </div>
-        </Card>
+        <>
+          <Card title={t.rAttOne}>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3"><div className="text-xs text-muted-foreground">{t.attRate}</div><div className="text-xl font-bold">{attRate}%</div></div>
+              <div className="rounded-xl bg-rose-50 border border-rose-100 p-3"><div className="text-xs text-muted-foreground">{t.absRate}</div><div className="text-xl font-bold">{absRate}%</div></div>
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3"><div className="text-xs text-muted-foreground">{t.absentDays}</div><div className="text-xl font-bold">{absent}</div></div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {counts.length ? (
+                <ResponsiveContainer width="100%" height={220}><PieChart><Pie data={counts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label>{counts.map((_,i)=><Cell key={i} fill={CHART_PALETTE[i%CHART_PALETTE.length]} />)}</Pie><Legend /><Tooltip /></PieChart></ResponsiveContainer>
+              ) : <Empty />}
+              {monthly.length ? (
+                <ResponsiveContainer width="100%" height={220}><BarChart data={monthly} margin={{top:10,right:10,left:0,bottom:0}}><CartesianGrid strokeDasharray="3 3" className="opacity-30" /><XAxis dataKey="name" tick={{fontSize:10}} /><YAxis tick={{fontSize:10}} allowDecimals={false} /><Tooltip /><Legend /><Bar dataKey="present" name={t.presentDays} stackId="a" fill="#10b981" radius={[4,4,0,0]} /><Bar dataKey="absent" name={t.absentDays} stackId="a" fill="#f43f5e" radius={[4,4,0,0]} /><Bar dataKey="late" name={t.late} stackId="a" fill="#f59e0b" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer>
+              ) : <Empty />}
+            </div>
+          </Card>
+          <Card title={isAr ? ("السجل الشهري — آخر " + rangeM + " شهر") : (`Monthly log — last ${rangeM} months`)}>
+            {monthly.length ? (
+              <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.monthLabel}</th><th className="text-right pb-2 font-medium">{t.presentDays}</th><th className="text-right pb-2 font-medium">{t.absentDays}</th></tr></thead>
+                <tbody>{monthly.map((m) => (<tr key={m.name} className="border-t border-border"><td className="py-2">{m.name}</td><td className="py-2">{m.present}</td><td className="py-2">{m.absent}</td></tr>))}</tbody>
+              </table></div>
+            ) : <NoRows text={t.noData} />}
+          </Card>
+        </>
       ) : <NoRows text={t.selectEmp} />}
     </div>
   );
@@ -310,9 +374,9 @@ function LicensesReport({ records, t }) {
     <Card title={t.rLicenses}>
       {soon.length ? (
         <div className="overflow-x-auto"><table className="w-full text-sm">
-          <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{isArLabel(t,"الترخيص","License")}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الجهة","Authority")}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الانتهاء","Expiry")}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
+          <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{isArLabel(t,"الترخيص","License")}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الجهة","Authority")}</th><th className="text-right pb-2 font-medium">{t.issueDate}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الانتهاء","Expiry")}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
           <tbody>{soon.map(({ l, d }) => (
-            <tr key={l.id} className="border-t border-border"><td className="py-2">{l.custom_label || l.license_type}</td><td className="py-2">{l.issuing_authority || "—"}</td><td className="py-2">{l.expiry_date}</td>
+            <tr key={l.id} className="border-t border-border"><td className="py-2">{l.custom_label || l.license_type}</td><td className="py-2">{l.issuing_authority || "—"}</td><td className="py-2">{l.issue_date || "—"}</td><td className="py-2">{l.expiry_date}</td>
               <td className="py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full", d < 0 ? "bg-rose-100 text-rose-700" : d <= 30 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700")}>{d} {t.days}</span></td></tr>
           ))}</tbody>
         </table></div>
@@ -327,25 +391,30 @@ function VehiclesReport({ records, t }) {
   const rows = records.filter((v) => v.insurance_expiry || v.license_expiry || v.inspection_expiry)
     .map((v) => ({ v, d: Math.min(...[v.insurance_expiry, v.license_expiry, v.inspection_expiry].filter(Boolean).map((x) => daysUntil(x) ?? Infinity)) }))
     .filter((x) => Number.isFinite(x.d) && x.d <= 90).sort((a,b) => a.d - b.d);
+  const vehLabel = (v) => [v.brand, v.model].filter(Boolean).join(" ") || v.plate_number || "—";
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <Card title={t.vehStatus}>
-        {statusCounts.length ? (
-          <ResponsiveContainer width="100%" height={240}><PieChart><Pie data={statusCounts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>{statusCounts.map((_,i)=><Cell key={i} fill={CHART_PALETTE[i%CHART_PALETTE.length]} />)}</Pie><Legend /><Tooltip /></PieChart></ResponsiveContainer>
-        ) : <Empty />}
-      </Card>
-      <Card title={t.vehExpiry}>
-        {rows.length ? (
-          <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{isArLabel(t,"المركبة","Vehicle")}</th><th className="text-right pb-2 font-medium">{t.insuranceExp}</th><th className="text-right pb-2 font-medium">{t.licenseExp}</th><th className="text-right pb-2 font-medium">{t.inspectionExp}</th></tr></thead>
-            <tbody>{rows.map(({ v }) => (
-              <tr key={v.id} className="border-t border-border"><td className="py-2">{v.plate_number || v.brand}</td>
-                <td className="py-2"><ExpCell d={daysUntil(v.insurance_expiry)} t={t} /></td>
-                <td className="py-2"><ExpCell d={daysUntil(v.license_expiry)} t={t} /></td>
-                <td className="py-2"><ExpCell d={daysUntil(v.inspection_expiry)} t={t} /></td></tr>
-            ))}</tbody>
-          </table></div>
-        ) : <NoRows text={t.noData} />}
-      </Card>
+    <div>
+      <div className="rounded-xl bg-muted/60 border border-border p-3 mb-4 inline-block"><div className="text-xs text-muted-foreground">{t.vehCount}</div><div className="text-xl font-bold">{records.length}</div></div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Card title={t.vehStatus}>
+          {statusCounts.length ? (
+            <ResponsiveContainer width="100%" height={240}><PieChart><Pie data={statusCounts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>{statusCounts.map((_,i)=><Cell key={i} fill={CHART_PALETTE[i%CHART_PALETTE.length]} />)}</Pie><Legend /><Tooltip /></PieChart></ResponsiveContainer>
+          ) : <Empty />}
+        </Card>
+        <Card title={t.vehExpiry}>
+          {rows.length ? (
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.vehicleName}</th><th className="text-right pb-2 font-medium">{t.plate}</th><th className="text-right pb-2 font-medium">{t.insuranceExp}</th><th className="text-right pb-2 font-medium">{t.licenseExp}</th><th className="text-right pb-2 font-medium">{t.inspectionExp}</th></tr></thead>
+              <tbody>{rows.map(({ v }) => (
+                <tr key={v.id} className="border-t border-border"><td className="py-2">{vehLabel(v)}</td>
+                  <td className="py-2">{v.plate_number || "—"}</td>
+                  <td className="py-2"><ExpCell d={daysUntil(v.insurance_expiry)} t={t} /></td>
+                  <td className="py-2"><ExpCell d={daysUntil(v.license_expiry)} t={t} /></td>
+                  <td className="py-2"><ExpCell d={daysUntil(v.inspection_expiry)} t={t} /></td></tr>
+              ))}</tbody>
+            </table></div>
+          ) : <NoRows text={t.noData} />}
+        </Card>
+      </div>
     </div>
   );
 }
@@ -427,15 +496,28 @@ function AIInsights({ reportType, summary, t }) {
 function WarningsReport({ records, employees, empId, setEmpId, t }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
-  const rows = empId ? records.filter((w) => w.employee_id === empId) : [];
+  const [rangeM, setRangeM] = useState(6);
+  const rows = useMemo(() => (empId ? records.filter((w) => {
+    if (w.employee_id !== empId) return false;
+    if (!w.incident_date) return true;
+    const since = new Date(); since.setMonth(since.getMonth() - rangeM);
+    return new Date(w.incident_date) >= since;
+  }) : []), [records, empId, rangeM]);
   const byLevel = ["first", "second", "third", "termination"].map((k) => ({ name: isAr ? warnLevelMap[k].ar : warnLevelMap[k].en, value: rows.filter((w) => w.warning_level === k).length })).filter((x) => x.value > 0);
   const byType = Object.keys(warnTypeMap).map((k) => ({ name: isAr ? warnTypeMap[k].ar : warnTypeMap[k].en, value: rows.filter((w) => w.violation_category === k).length })).filter((x) => x.value > 0);
   return (
     <div>
-      <select value={empId} onChange={(e) => setEmpId(e.target.value)} className="mb-4 h-9 rounded-md border border-input bg-transparent px-3 text-sm">
-        <option value="">{t.selectEmp}</option>
-        {employees.map((e) => <option key={e.id} value={e.id}>{e.full_name}</option>)}
-      </select>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <select value={empId} onChange={(e) => setEmpId(e.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm">
+          <option value="">{t.selectEmp}</option>
+          {employees.map((e) => <option key={e.id} value={e.id}>{e.full_name}</option>)}
+        </select>
+        <div className="inline-flex rounded-lg border border-border bg-white overflow-hidden">
+          {[[3,t.window3],[6,t.window6],[12,isAr?"12 شهر":"12 months"]].map(([v,l]) => (
+            <button key={v} onClick={() => setRangeM(v)} className={cn("px-3 py-1.5 text-sm font-medium", rangeM === v ? "bg-slate-800 text-white" : "text-muted-foreground hover:bg-slate-50")}>{l}</button>
+          ))}
+        </div>
+      </div>
       <Card title={t.warnCount}>
         {empId ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -478,8 +560,21 @@ function PerformanceReport({ records, employees, empId, setEmpId, t }) {
   const rows = records.filter((r) => r.employee_id === empId);
   const recent = rows.slice().reverse().slice(-5);
   const radar = recent.map((r) => ({ name: r.review_period ? String(r.review_period) : "", goals: Number(r.goals_rating) || 0, comp: Number(r.competencies_rating) || 0, values: Number(r.values_rating) || 0, overall: Number(r.overall_rating) || 0 }));
+  const latest = rows[rows.length - 1];
+  const ready = rows.some((r) => r.promotion_ready);
+  const recLabel = latest ? (isAr ? (recLevelMap[latest.recommendation]?.ar || latest.recommendation) : (recLevelMap[latest.recommendation]?.en || latest.recommendation)) : "—";
   return (
     <div>
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className={cn("rounded-xl border p-3", ready ? "bg-emerald-50 border-emerald-100" : "bg-slate-50 border-slate-200")}>
+          <div className="text-xs text-muted-foreground">{t.promotionReady}</div>
+          <div className="text-xl font-bold mt-1">{ready ? (isAr ? "نعم" : "Yes") : (isAr ? "لا" : "No")}</div>
+        </div>
+        <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
+          <div className="text-xs text-muted-foreground">{t.perfRec}</div>
+          <div className="text-sm font-bold mt-1">{recLabel}</div>
+        </div>
+      </div>
       <Card title={t.perfOne}>
         {radar.length ? (
           <ResponsiveContainer width="100%" height={260}><BarChart data={radar} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" className="opacity-30" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis domain={[0, 5]} tick={{ fontSize: 11 }} /><Tooltip /><Legend /><Bar dataKey="goals" name={isAr ? "الأهداف" : "Goals"} fill="#6366f1" radius={[4, 4, 0, 0]} /><Bar dataKey="comp" name={isAr ? "الكفاءات" : "Comp."} fill="#10b981" radius={[4, 4, 0, 0]} /><Bar dataKey="values" name={isAr ? "القيم" : "Values"} fill="#f59e0b" radius={[4, 4, 0, 0]} /><Bar dataKey="overall" name={isAr ? "الكلي" : "Overall"} fill="#ef4444" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>
@@ -523,6 +618,13 @@ function ExitReport({ records, t }) {
             <ResponsiveContainer width="100%" height={240}><BarChart data={sat} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" className="opacity-30" /><XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-15} textAnchor="end" height={60} interval={0} /><YAxis domain={[0, 5]} tick={{ fontSize: 11 }} /><Tooltip /><Bar dataKey="v" name={t.exitSat} radius={[6, 6, 0, 0]} fill="#8b5cf6" /></BarChart></ResponsiveContainer>
           ) : <Empty />}
         </div>
+      </Card>
+      <Card title={t.topReasons}>
+        {reasons.length ? (
+          <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{isAr ? "السبب" : "Reason"}</th><th className="text-left pb-2 font-medium">{t.countLabel}</th></tr></thead>
+            <tbody>{reasons.slice().sort((a,b)=>b.value-a.value).map((r) => (<tr key={r.name} className="border-t border-border"><td className="py-2">{r.name}</td><td className="py-2 text-left">{r.value}</td></tr>))}</tbody>
+          </table></div>
+        ) : <NoRows text={t.noData} />}
       </Card>
       <AIInsights reportType="exit" summary={summary} t={t} />
     </div>
