@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plane } from "lucide-react";
+import { Plane, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
+import { formatCurrency, statusEmployeeLabel, leaveTypeLabel } from "@/lib/hr";
 import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import { reasonMeta, computeSettlement } from "@/lib/eos";
+import { badge } from "@/lib/approvals";
 import { useI18n } from "@/lib/i18n";
 
 function Row({ label, value }) {
@@ -64,6 +65,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
     employee, org,
     lastWorkingDate: employee.termination_date || new Date().toISOString().slice(0, 10),
     reason: employee.termination_reason && employee.termination_reason !== "none" ? employee.termination_reason : "end_of_contract",
+    leaveBalance: remaining,
   }) : null;
   const tmeta = employee?.termination_reason && employee.termination_reason !== "none" ? reasonMeta(employee.termination_reason) : null;
 
@@ -140,6 +142,41 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
                 </div>
               </Block>
             )}
+
+            <Block title={isAr ? "سجل الإجازات" : "Leave requests"}>
+              {leaves.length === 0 ? (
+                <div className="text-sm text-muted-foreground">—</div>
+              ) : leaves.map((r) => {
+                const stages = [
+                  { label: isAr ? "طلب الموظف" : "Employee request", who: r.employee_name, date: (r.created_date || "").slice(0, 10), note: r.reason, doc: r.medical_report_url, done: true },
+                  { label: isAr ? "المدير المباشر" : "Direct manager", who: r.manager_name, date: r.manager_date, note: r.manager_note, done: r.manager_status === "approved", reject: r.manager_status === "rejected" },
+                  { label: isAr ? "الموارد البشرية" : "HR", who: r.hr_name, date: r.hr_date, note: r.hr_note, doc: r.hr_document_url, done: r.hr_status === "approved", reject: r.hr_status === "rejected" },
+                  { label: isAr ? "المالية" : "Finance", who: isAr ? "المالية" : "Finance", date: r.finance_paid_date, note: r.finance_note, doc: r.finance_proof_url, done: r.finance_status === "paid", reject: r.finance_status === "rejected" },
+                ];
+                return (
+                  <div key={r.id} className="rounded-lg border border-border bg-white p-3 mb-2 last:mb-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">{leaveTypeLabel(r.leave_type)} · {r.start_date} ← {r.end_date} · {r.days_count} {isAr ? "يوم" : "d"}</span>
+                      <span className={cn("text-xs px-2 py-0.5 rounded-full", badge(r.status).cls)}>{badge(r.status).label}</span>
+                    </div>
+                    <ol className="mt-1 space-y-1">
+                      {stages.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs">
+                          <span className={cn("mt-1 w-2 h-2 rounded-full shrink-0", s.reject ? "bg-rose-500" : s.done ? "bg-emerald-500" : "bg-slate-300")} />
+                          <div className="flex-1">
+                            <span className="font-medium">{s.label}</span>
+                            {s.date && <span className="text-muted-foreground mx-1">· {s.date}</span>}
+                            {s.who && <span className="text-muted-foreground">· {s.who}</span>}
+                            {s.note && <div className="text-muted-foreground mt-0.5">{s.note}</div>}
+                            {s.doc && <a href={s.doc} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-blue-600 mt-0.5"><Download size={11} /> {isAr ? "مرفق" : "attachment"}</a>}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                );
+              })}
+            </Block>
           </div>
         )}
       </DialogContent>

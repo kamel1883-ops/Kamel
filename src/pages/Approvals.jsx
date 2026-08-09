@@ -43,6 +43,11 @@ export default function Approvals() {
     tripPayNote: "عند الاعتماد يُولّد مستند الموافقة آلياً ويُحفظ في ملف الموظف.", tripApproveBtn: "اعتماد وتوليد المستند",
     tripExt: "خارجية", tripInt: "داخلية", tripCost: (c) => `التكلفة: ${formatCurrency(c)}`, tripDocBtn: "مستند الانتداب",
     tripLine: (d, p) => d ? `${d} — ${p}` : "—",
+    leaveHrTitle: "اعتماد الموارد البشرية — حجز وتأكيد", leaveHrNote: "ملاحظات الموارد البشرية",
+    leaveHrNotePh: "حجز تذاكر الطيران، تأكيد التواريخ، …. تُسجّل على الطلب وتظهر في مسار الطلب.",
+    leaveHrDoc: "مرفقات الموارد البشرية (تذاكر طيران/حجوزات)", leaveHrBtn: "اعتماد وتحويل للمالية",
+    leaveHrWarn: "عند الاعتماد يُخصم رصيد الإجازات ويُحوّل الطلب إلى المالية لإثبات السداد.",
+    finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
   } : {
     title: "Approvals & Requests", subtitle: "Approval flow: Direct manager ← HR ← Finance ← Settlement with proof",
     loading: "Loading...", tabLeaves: (n) => `Leaves (${n})`, tabLoans: (n) => `Loans (${n})`,
@@ -67,6 +72,11 @@ export default function Approvals() {
     tripPayNote: "On approval the approval document is generated automatically and saved to the employee file.", tripApproveBtn: "Approve & generate doc",
     tripExt: "External", tripInt: "Internal", tripCost: (c) => `Cost: ${formatCurrency(c)}`, tripDocBtn: "Trip doc",
     tripLine: (d, p) => d ? `${d} — ${p}` : "—",
+    leaveHrTitle: "HR approval — booking & confirm", leaveHrNote: "HR notes",
+    leaveHrNotePh: "Flight tickets booking, confirm dates, …. Recorded on the request and shown in its trail.",
+    leaveHrDoc: "HR attachments (tickets/bookings)", leaveHrBtn: "Approve & forward to finance",
+    leaveHrWarn: "On approval the leave balance is deducted and the request moves to finance for payment proof.",
+    finNote: "Finance notes/description", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
   };
 
   const [leaves, setLeaves] = useState([]);
@@ -126,7 +136,7 @@ export default function Approvals() {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "manager") });
     } else if (s === "manager_approved") {
-      btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => hrApprove(type, r) });
+      btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => (type === "leaves" ? openLeaveHr(r) : hrApprove(type, r)) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
     } else if (s === "awaiting_finance" || s === "hr_approved") {
       btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance(type, r) });
@@ -176,6 +186,33 @@ export default function Approvals() {
     }
     load();
   };
+  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); };
+  const confirmLeaveHr = async () => {
+    if (!acting) return;
+    setBusy(true);
+    let url = "";
+    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    try {
+      const r = acting.req;
+      const emp = empOf(r.employee_id);
+      const balance = Number(emp?.leave_balance) || 0;
+      const deduct = Math.min(r.days_count, balance);
+      const fin = needsFinance(r, emp, org);
+      const ticket = fin ? leaveTicketAmount(emp, org) : 0;
+      const finalStatus = fin ? "awaiting_finance" : "completed";
+      await base44.entities.LeaveRequest.update(r.id, {
+        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
+        hr_note: note, hr_document_url: url,
+        balance_deducted: deduct, ticket_amount: ticket, settlement_amount: ticket,
+        status: finalStatus, finance_status: "pending",
+      });
+      if (emp) {
+        await base44.entities.Employee.update(emp.id, { leave_balance: Math.max(0, balance - deduct), status: "on_leave" });
+      }
+      if (!fin) { try { await generateLeaveSettlement(r, emp, org, leaves); } catch (e) {} }
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+  };
   const openReject = (type, r, stage) => { setActing({ type, req: r, action: "reject", stage }); setNote(""); };
   const reject = async () => {
     if (!acting) return;
@@ -192,13 +229,14 @@ export default function Approvals() {
     if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
     const patch = { finance_status: "paid", finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(), status: "completed" };
     if (acting.type === "loans") patch.paid_amount = Number(acting.req.amount) || 0;
+    if (acting.type === "leaves") patch.finance_note = note;
     await update(acting.type, acting.req.id, patch);
     if (acting.type === "leaves" && acting.req.ticket_amount > 0) {
       const emp = empOf(acting.req.employee_id);
       if (emp) await base44.entities.Employee.update(emp.id, { ticket_last_used_year: new Date().getFullYear() });
     }
     if (acting.type === "leaves") { try { await generateLeaveSettlement(acting.req, empOf(acting.req.employee_id), org, leaves); } catch (e) {} }
-    setBusy(false); setActing(null); setProofFile(null); load();
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
   };
   const update = async (type, id, patch) => {
     if (type === "leaves") await base44.entities.LeaveRequest.update(id, patch);
@@ -289,6 +327,8 @@ export default function Approvals() {
                     {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
                     {r.ticket_amount > 0 && <span className="text-xs text-muted-foreground">{t.ticket(r.ticket_amount)}</span>}
                     {r.balance_deducted > 0 && <span className="text-xs text-muted-foreground">{t.deduct(r.balance_deducted)}</span>}
+                    {r.hr_document_url && <a href={r.hr_document_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">تذاكر الموارد البشرية</a>}
+                    {r.finance_proof_url && <a href={r.finance_proof_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">إثبات المالية</a>}
                   </RequestCard>
                 ))}
               </div>
@@ -359,6 +399,10 @@ export default function Approvals() {
                 {acting.type === "leaves" ? t.leavePay(acting.req.ticket_amount) : t.loanPay(acting.req.amount)}
               </div>
               <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.finNote}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t.finNotePh} />
+              </div>
+              <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.proof}</Label>
                 <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
               </div>
@@ -400,6 +444,33 @@ export default function Approvals() {
                 <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
                 <Button onClick={confirmLoanPay} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
                   {busy && <Loader2 size={16} className="animate-spin" />} {t.save}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={acting?.action === "leavehr"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.leaveHrTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">{leaveTypeLabel(acting.req.leave_type)} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}</div>
+              {acting.req.medical_report_url && <a href={acting.req.medical_report_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} placeholder={t.leaveHrNotePh} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrDoc}</Label>
+                <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
+              </div>
+              <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.leaveHrWarn}</div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmLeaveHr} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.leaveHrBtn}
                 </Button>
               </DialogFooter>
             </div>

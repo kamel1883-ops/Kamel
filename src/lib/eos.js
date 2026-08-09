@@ -91,11 +91,11 @@ export function computeGOSI({ employee, org }) {
   return { isSaudi: false, gosi_employee: 0, gosi_employer: gross * expatRate, gross };
 }
 
-export function computeSettlement({ employee, org, lastWorkingDate, reason }) {
+export function computeSettlement({ employee, org, lastWorkingDate, reason, leaveBalance }) {
   const basis = org?.eos_basis || "gross";
   const eos = computeEOS({ employee, lastWorkingDate, reason, basis });
-  const leaveBalance = Number(employee.leave_balance) || 0;
-  const leaveCash = Number((eos.dailyWage * leaveBalance).toFixed(2));
+  const lb = leaveBalance != null ? Number(leaveBalance) : (Number(employee.leave_balance) || 0);
+  const leaveCash = Number((eos.dailyWage * lb).toFixed(2));
   const currentYear = new Date().getFullYear();
   const lastUsed = Number(employee.ticket_last_used_year) || 0;
   const ticketValue = Number(org?.ticket_value) || 0;
@@ -105,7 +105,7 @@ export function computeSettlement({ employee, org, lastWorkingDate, reason }) {
     if (currentYear - lastUsed >= cycle) ticketAmount = ticketValue;
   }
   const total = Number((eos.amount + leaveCash + ticketAmount).toFixed(2));
-  return { ...eos, basis, leaveBalance, leaveCash, ticketEntitlement: employee.ticket_entitlement, ticketValue, ticketAmount, total_settlement: total };
+  return { ...eos, basis, leaveBalance: lb, leaveCash, ticketEntitlement: employee.ticket_entitlement, ticketValue, ticketAmount, total_settlement: total };
 }
 
 export function isSaudiNationalId(id) {
