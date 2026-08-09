@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 
 const CLIENTS = [
-  { name: "عيادة دكتور توم البيطرية", en: "Dr. Tom Veterinary Clinic", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/da2c6d72a_Screenshot2026-08-09155309.png" },
-  { name: "شركة كود الأعمال للمقاولات", en: "Business Code Co.", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9e2348fc4_Screenshot2026-08-09155940.png" },
-  { name: "مصنع درز للخياطة الراقية", en: "Darz Tailoring Factory", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/c041990ed_Screenshot2026-08-09155842.png" },
+  { name: "عيادة دكتور توم البيطرية", en: "Dr. Tom Veterinary Clinic", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5ae9d2097_Screenshot2026-08-05143830.png" },
+  { name: "شركة كود الأعمال للمقاولات", en: "Business Code Co.", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/d146af91b_Screenshot2026-08-09155940.png" },
+  { name: "مصنع درز للخياطة الراقية", en: "Darz Tailoring Factory", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/64e527d78_Screenshot2026-08-09155842.png" },
 ];
 
 export default function ClientMarquee() {
@@ -32,7 +32,7 @@ export default function ClientMarquee() {
         >
           {loop.map((c, i) => (
             <div key={i} className="shrink-0 w-[300px] h-[150px] rounded-2xl bg-white border border-white/10 flex flex-col items-center justify-center gap-3 px-4 shadow-lg">
-              <img src={c.logo} alt={isAr ? c.name : c.en} className="h-20 w-20 object-contain rounded-xl" />
+              <img src={c.logo} alt={isAr ? c.name : c.en} className="h-24 w-32 object-contain rounded-xl" />
               <div className="text-center text-sm font-semibold text-slate-800 leading-tight" dir={isAr ? "rtl" : "ltr"}>
                 {isAr ? c.name : c.en}
               </div>

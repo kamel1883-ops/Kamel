@@ -116,7 +116,9 @@ export default function Performance() {
                     {(r.target_grade || r.current_grade) && (
                       <div className="text-xs text-muted-foreground flex items-center gap-1.5"><Target size={14} />{r.current_grade || "—"} ← <span className="font-medium text-foreground">{r.target_grade || "—"}</span></div>
                     )}
-                    {r.goals && <p className="text-xs text-muted-foreground line-clamp-2">{r.goals}</p>}
+                    {r.review_type === "goal_setting"
+                      ? (r.personal_goals || r.behaviors || r.tasks_coverage) && <p className="text-xs text-muted-foreground line-clamp-2">{r.personal_goals || r.behaviors || r.tasks_coverage}</p>
+                      : r.goals && <p className="text-xs text-muted-foreground line-clamp-2">{r.goals}</p>}
                     <div className="flex items-center justify-between pt-1 border-t border-border">
                       <span className="text-xs text-muted-foreground">{r.review_date || ""}</span>
                       <div className="flex gap-1">

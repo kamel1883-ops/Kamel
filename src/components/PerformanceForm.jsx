@@ -18,6 +18,7 @@ const empty = {
   employee_id: "", review_period: "annual", period_year: new Date().getFullYear(),
   review_type: "annual", goals: "", goals_rating: 0, competencies_rating: 0,
   values_rating: 0, overall_rating: 0, strengths: "", improvements: "",
+  personal_goals: "", behaviors: "", tasks_coverage: "", tasks_amendments: "",
   recommendation: "none", target_grade: "", promotion_ready: false,
   review_date: todayISO(), next_review_date: "", status: "draft", notes: "",
 };
@@ -31,6 +32,7 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
     revType: "نوع المراجعة", annualT: "سنوي", midyearT: "نصف سنوي", probationT: "فترة التجربة", goalT: "تحديد الأهداف",
     period: "فترة التقييم", annualP: "سنوي", midyearP: "نصف سنوي", probationP: "تجربة", q1: "الربع الأول", q2: "الربع الثاني", q3: "الربع الثالث",
     year: "السنة", goals: "الأهداف والمخرجات",
+    goalSection: "إطار تحديد الأهداف", personalGoals: "الأهداف الشخصية", behaviors: "السلوكيات المهنية", tasksCoverage: "تغطية المهام والإنجاز", tasksAmend: "تعديل وتطوير المهام",
     goalsR: "تقييم الأهداف", compR: "تقييم الكفاءات", valuesR: "تقييم القيم",
     strengths: "نقاط القوة", improvements: "فرص التحسين",
     rec: "التوصية", recNone: "بدون", recMaintain: "إبقاء على الوضع", recPromote: "ترقية", recBonus: "حافز", recWarn: "إنذار", recTerminate: "إنهاء",
@@ -45,6 +47,7 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
     revType: "Review type", annualT: "Annual", midyearT: "Mid-year", probationT: "Probation", goalT: "Goal setting",
     period: "Review period", annualP: "Annual", midyearP: "Mid-year", probationP: "Probation", q1: "Q1", q2: "Q2", q3: "Q3",
     year: "Year", goals: "Goals & outcomes",
+    goalSection: "Goal setting framework", personalGoals: "Personal goals", behaviors: "Professional behaviors", tasksCoverage: "Tasks coverage & delivery", tasksAmend: "Tasks amendment & development",
     goalsR: "Goals rating", compR: "Competencies rating", valuesR: "Values rating",
     strengths: "Strengths", improvements: "Improvement areas",
     rec: "Recommendation", recNone: "None", recMaintain: "Maintain", recPromote: "Promote", recBonus: "Bonus", recWarn: "Warn", recTerminate: "Terminate",
@@ -105,17 +108,30 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
             <Field label={t.year}><Input type="number" value={form.period_year} onChange={(e) => set("period_year", e.target.value)} /></Field>
           </div>
 
-          <Field label={t.goals}><Textarea value={form.goals} onChange={(e) => set("goals", e.target.value)} rows={3} /></Field>
+          {form.review_type === "goal_setting" ? (
+            <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50/40 p-3">
+              <div className="text-xs font-semibold text-violet-700">{t.goalSection}</div>
+              <Field label={t.personalGoals}><Textarea value={form.personal_goals} onChange={(e) => set("personal_goals", e.target.value)} rows={2} /></Field>
+              <Field label={t.behaviors}><Textarea value={form.behaviors} onChange={(e) => set("behaviors", e.target.value)} rows={2} /></Field>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label={t.tasksCoverage}><Textarea value={form.tasks_coverage} onChange={(e) => set("tasks_coverage", e.target.value)} rows={2} /></Field>
+                <Field label={t.tasksAmend}><Textarea value={form.tasks_amendments} onChange={(e) => set("tasks_amendments", e.target.value)} rows={2} /></Field>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Field label={t.goals}><Textarea value={form.goals} onChange={(e) => set("goals", e.target.value)} rows={3} /></Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t.strengths}><Textarea value={form.strengths} onChange={(e) => set("strengths", e.target.value)} rows={2} /></Field>
+                <Field label={t.improvements}><Textarea value={form.improvements} onChange={(e) => set("improvements", e.target.value)} rows={2} /></Field>
+              </div>
+            </>
+          )}
 
           <div className="grid grid-cols-3 gap-3">
             <RatingField label={t.goalsR} value={form.goals_rating} onChange={(v) => set("goals_rating", v)} />
             <RatingField label={t.compR} value={form.competencies_rating} onChange={(v) => set("competencies_rating", v)} />
             <RatingField label={t.valuesR} value={form.values_rating} onChange={(v) => set("values_rating", v)} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t.strengths}><Textarea value={form.strengths} onChange={(e) => set("strengths", e.target.value)} rows={2} /></Field>
-            <Field label={t.improvements}><Textarea value={form.improvements} onChange={(e) => set("improvements", e.target.value)} rows={2} /></Field>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
