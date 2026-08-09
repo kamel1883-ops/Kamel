@@ -31,6 +31,20 @@ const GENDER = { 'ذكر':'male','male':'male','m':'male','أنثى':'female','�
 const CONTRACT = { 'دوام كامل':'full_time','full_time':'full_time','full':'full_time','كامل':'full_time','جزئي':'part_time','part_time':'part_time','part':'part_time','عقد':'contract','contract':'contract' };
 const ROLE = { 'owner':'owner','مالك':'owner','executive':'executive','تنفيذي':'executive','manager':'manager','مدير':'manager','supervisor':'supervisor','مشرف':'supervisor','employee':'employee','موظف':'employee','worker':'worker','عامل':'worker' };
 
+function monthDiff(fromISO, toISO) {
+  if (!fromISO) return 0;
+  const a = new Date(fromISO); const b = new Date(toISO);
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
+  return Math.max(0, (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()));
+}
+function computeEntitlement(hireDate, annualDays) {
+  const days = Number(annualDays) || 21;
+  if (!hireDate) return 0;
+  const months = monthDiff(hireDate, new Date().toISOString());
+  if (months <= 0) return 0;
+  return Math.round((months / 12) * days * 10) / 10;
+}
+
 function normalizeRecord(r) {
   const g = lower(r.gender);
   const c = lower(r.contract_type);
@@ -66,6 +80,7 @@ function normalizeRecord(r) {
     health_insurance_number: String(r.health_insurance_number ?? '').trim(),
     health_insurance_expiry: parseDate(r.health_insurance_expiry),
     bank_account: String(r.bank_account ?? '').trim(),
+    prior_used_leave: num(r.prior_used_leave),
   };
 }
 
@@ -118,6 +133,7 @@ export default async function (req) {
               health_insurance_number: { type: 'string', title: 'رقم التأمين الطبي' },
               health_insurance_expiry: { type: 'string', title: 'تاريخ انتهاء التأمين الطبي' },
               bank_account: { type: 'string', title: 'الحساب البنكي' },
+              prior_used_leave: { type: 'number', title: 'أيام الإجازات المستخدمة سابقاً' },
             },
           },
         },
@@ -155,6 +171,9 @@ export default async function (req) {
       return nb;
     }
 
+    const orgs = await base44.asServiceRole.entities.Organization.list("-created_date", 1);
+    const annualDays = Number(orgs[0]?.annual_leave_days) || 21;
+
     const existing = await base44.asServiceRole.entities.Employee.list('-created_date', 5000);
     const byNumber = new Set();
     for (const e of existing) if (e.employee_number) byNumber.add(String(e.employee_number).trim());
@@ -183,6 +202,9 @@ export default async function (req) {
       const br = await resolveBranch(r.branch_name);
       r.branch_id = br.id;
       r.branch_name = br.name;
+      const ent = computeEntitlement(r.hire_date, annualDays);
+      r.prior_used_leave = r.prior_used_leave || 0;
+      r.leave_balance = Math.max(0, Math.round((ent - r.prior_used_leave) * 10) / 10);
       toCreate.push(r);
     }
 

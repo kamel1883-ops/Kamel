@@ -15,6 +15,7 @@ const TEMPLATE_HEADERS = [
   "الجنسية", "سعودي (نعم/لا)", "الجنس (ذكر/أنثى)", "تاريخ الميلاد", "رقم الجوال", "العنوان",
   "جهة اتصال طوارئ", "الإدارة / القسم", "الفرع", "المسمى الوظيفي", "الدرجة الوظيفية",
   "المستوى الوظيفي (owner/executive/manager/supervisor/employee/worker)", "تاريخ المباشرة",
+  "إجمالي الإجازات المستحقة (تلقائي)", "أيام الإجازات المستخدمة سابقاً", "رصيد الإجازات المتبقي (تلقائي)",
   "نوع العقد (دوام كامل/جزئي/عقد)", "تاريخ بدء العقد", "تاريخ نهاية العقد",
   "الراتب الأساسي", "بدل السكن", "بدل المواصلات",
   "بدلات أخرى", "تاريخ انتهاء الإقامة", "رقم الجواز", "تاريخ انتهاء الجواز",
@@ -26,7 +27,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "استيراد الموظفين عبر Excel",
-    desc: "حمّل القالب، عبّئ بيانات موظفيك (مع تحديد الفرع لكل موظف)، ثم ارفع الملف لاستيرادهم دفعة واحدة. تُحلّ الفروع تلقائياً — وإذا لم يكن لديك إلا الفرع الرئيسي يُسجَّل الجميع عليه تلقائياً.",
+    desc: "حمّل القالب، عبّئ بيانات موظفيك (مع تحديد الفرع لكل موظف)، ثم ارفع الملف لاستيرادهم دفعة واحدة. تُحلّ الفروع تلقائياً — وإذا لم يكن لديك إلا الفرع الرئيسي يُسجَّل الجميع عليه تلقائياً. رصيد الإجازات المستحق والمتبقي يُحسبان تلقائياً من تاريخ المباشرة وسياسة الشركة؛ املأ عمود «أيام الإجازات المستخدمة سابقاً» للإجازات التي استُنفدت قبل النظام (للشركات التي لديها سجل سابق).",
     download: "تحميل قالب Excel (CSV)",
     upload: "اختر ملف Excel/CSV",
     importing: "جارٍ الاستيراد…",
@@ -38,7 +39,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     errGeneric: "تعذّر قراءة الملف، تأكد من تطابق الأعمدة مع القالب",
   } : {
     title: "Import Employees via Excel",
-    desc: "Download the template, fill your staff data (set the branch per employee), then upload to import in one batch. Branches auto-resolve; if you only have the main branch everyone is assigned to it automatically.",
+    desc: "Download the template, fill your staff data (set the branch per employee), then upload to import in one batch. Branches auto-resolve; if you only have the main branch everyone is assigned to it automatically. Leave entitlement and remaining balance are auto-computed from the hire date and company policy; fill the 'Prior leave days used' column for leave consumed before this system (for companies with prior history).",
     download: "Download Excel template (CSV)",
     upload: "Choose an Excel/CSV file",
     importing: "Importing…",
@@ -74,7 +75,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     const sample = [
       "محمد عبدالله", "1001", "1234567890", "mohammed@company.sa", "سعودي", "نعم", "ذكر",
       "1990-01-15", "0551234567", "الرياض", "0550000000", "المبيعات", mainName, "مندوب مبيعات",
-      "الثالثة", "employee", "2023-03-01", "دوام كامل", "2023-03-01", "2024-03-01",
+      "الثالثة", "employee", "2023-03-01", "", "10", "", "دوام كامل", "2023-03-01", "2024-03-01",
       "8000", "1000", "500", "0",
       "2027-05-01", "X1234567", "2030-01-01", "INS12345", "2026-12-31", "SA00001234",
     ];

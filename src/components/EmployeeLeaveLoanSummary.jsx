@@ -29,7 +29,8 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
 
   const annualDays = Number(org?.annual_leave_days) || 21;
   const entitlement = computeEntitlement(employee?.hire_date, annualDays);
-  const used = sumUsedDays(leaves);
+  const prior = Number(employee?.prior_used_leave) || 0;
+  const used = Math.round((sumUsedDays(leaves) + prior) * 10) / 10;
   const remaining = Math.max(0, Math.round((entitlement - used) * 10) / 10);
 
   const doneLeaves = leaves.filter((l) => l.status === "completed" || l.status === "paid");
