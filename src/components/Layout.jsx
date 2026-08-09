@@ -158,10 +158,11 @@ export default function Layout() {
         </header>
 
         <main className="relative flex-1 p-4 sm:p-6 lg:p-9 pb-24 lg:pb-9 animate-fade-in overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/[0.05] via-transparent to-indigo-500/[0.05] dark:from-violet-500/[0.10] dark:to-indigo-500/[0.10]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -top-24 -left-16 w-[420px] h-[420px] rounded-full bg-violet-500/[0.06] dark:bg-violet-500/[0.12] blur-3xl" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.05] dark:opacity-[0.07]" aria-hidden="true">
-            <Crown size={440} className="text-[#2e2448] dark:text-violet-300" strokeWidth={0.8} />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/[0.10] via-indigo-500/[0.05] to-amber-200/[0.10] dark:from-violet-500/[0.14] dark:via-indigo-500/[0.10] dark:to-amber-500/[0.08]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -top-24 -left-16 w-[460px] h-[460px] rounded-full bg-violet-500/[0.10] dark:bg-violet-500/[0.16] blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-28 -right-20 w-[380px] h-[380px] rounded-full bg-amber-400/[0.10] dark:bg-amber-500/[0.10] blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07] dark:opacity-[0.10]" aria-hidden="true">
+            <Crown size={440} className="text-amber-500 dark:text-amber-400" strokeWidth={0.8} />
           </div>
           <div className="relative">
             <Outlet />
