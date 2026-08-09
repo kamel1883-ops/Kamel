@@ -113,11 +113,40 @@
       "type": "string",
       "title": "\u0645\u0633\u062a\u0646\u062f \u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0627\u0646\u062a\u062f\u0627\u0628 (PDF)"
     },
+    "finance_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "rejected"
+      ],
+      "default": "pending",
+      "title": "\u062d\u0627\u0644\u0629 \u0627\u0644\u0635\u0631\u0641 \u0627\u0644\u0645\u0627\u0644\u064a"
+    },
+    "finance_note": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a/\u0648\u0635\u0641 \u0627\u0644\u0645\u0627\u0644\u064a\u0629"
+    },
+    "finance_paid_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0635\u0631\u0641"
+    },
+    "finance_proof_url": {
+      "type": "string",
+      "title": "\u0625\u062b\u0628\u0627\u062a \u0627\u0644\u062a\u062d\u0648\u064a\u0644"
+    },
+    "finance_proof_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0625\u062b\u0628\u0627\u062a \u0627\u0644\u062a\u062d\u0648\u064a\u0644"
+    },
     "status": {
       "type": "string",
       "enum": [
         "draft",
         "pending",
+        "awaiting_finance",
         "approved",
         "in_progress",
         "completed",

@@ -48,6 +48,8 @@ export default function Approvals() {
     leaveHrDoc: "مرفقات الموارد البشرية (تذاكر طيران/حجوزات)", leaveHrBtn: "اعتماد وتحويل للمالية",
     leaveHrWarn: "عند الاعتماد يُخصم رصيد الإجازات ويُحوّل الطلب إلى المالية لإثبات السداد.",
     finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
+    tripFinTitle: "صرف الانتداب — المالية/المحاسبة", tripFinWarn: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل ويصبح الطلب مكتملًا.",
+    finProof: "إثبات التحويل",
   } : {
     title: "Approvals & Requests", subtitle: "Approval flow: Direct manager ← HR ← Finance ← Settlement with proof",
     loading: "Loading...", tabLeaves: (n) => `Leaves (${n})`, tabLoans: (n) => `Loans (${n})`,
@@ -77,6 +79,8 @@ export default function Approvals() {
     leaveHrDoc: "HR attachments (tickets/bookings)", leaveHrBtn: "Approve & forward to finance",
     leaveHrWarn: "On approval the leave balance is deducted and the request moves to finance for payment proof.",
     finNote: "Finance notes/description", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
+    tripFinTitle: "Trip payout — Finance/Accounting", tripFinWarn: "On confirmation the process closes, the transfer proof is recorded and the request is completed.",
+    finProof: "Transfer proof",
   };
 
   const [leaves, setLeaves] = useState([]);
@@ -127,8 +131,11 @@ export default function Approvals() {
       if (s === "pending" || s === "draft") {
         tb.push({ label: t.hrTripApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openTripApprove(r) });
         tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
+      } else if (s === "awaiting_finance") {
+        tb.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openTripFinance(r) });
       }
       if (r.approval_pdf_url) tb.push({ label: t.tripDocBtn, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.approval_pdf_url, icon: "download" });
+      if (r.finance_proof_url) tb.push({ label: t.finProof, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.finance_proof_url, icon: "download" });
       return tb;
     }
     const btns = [];
@@ -197,19 +204,16 @@ export default function Approvals() {
       const emp = empOf(r.employee_id);
       const balance = Number(emp?.leave_balance) || 0;
       const deduct = Math.min(r.days_count, balance);
-      const fin = needsFinance(r, emp, org);
-      const ticket = fin ? leaveTicketAmount(emp, org) : 0;
-      const finalStatus = fin ? "awaiting_finance" : "completed";
+      const ticket = leaveTicketAmount(emp, org);
       await base44.entities.LeaveRequest.update(r.id, {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
         hr_note: note, hr_document_url: url,
         balance_deducted: deduct, ticket_amount: ticket, settlement_amount: ticket,
-        status: finalStatus, finance_status: "pending",
+        status: "awaiting_finance", finance_status: "pending",
       });
       if (emp) {
         await base44.entities.Employee.update(emp.id, { leave_balance: Math.max(0, balance - deduct), status: "on_leave" });
       }
-      if (!fin) { try { await generateLeaveSettlement(r, emp, org, leaves); } catch (e) {} }
     } catch (e) {}
     setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
   };
@@ -278,7 +282,8 @@ export default function Approvals() {
       const r = acting.req;
       const emp = empOf(r.employee_id);
       const patch = {
-        status: "approved", approver_id: me?.id, approver_name: me?.full_name, approved_date: todayISO(),
+        status: "awaiting_finance", finance_status: "pending",
+        approver_id: me?.id, approver_name: me?.full_name, approved_date: todayISO(),
         hr_note: note, hr_document_url: url,
       };
       await base44.entities.BusinessTrip.update(r.id, patch);
@@ -293,6 +298,20 @@ export default function Approvals() {
       await base44.entities.BusinessTrip.update(acting.req.id, { status: "rejected", hr_note: note });
     } catch (e) {}
     setBusy(false); setActing(null); setNote(""); load();
+  };
+  const openTripFinance = (r) => { setActing({ type: "trips", req: r, action: "tripfinance" }); setNote(""); setProofFile(null); };
+  const confirmTripFinance = async () => {
+    if (!acting) return;
+    setBusy(true);
+    let url = "";
+    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    try {
+      await base44.entities.BusinessTrip.update(acting.req.id, {
+        status: "completed", finance_status: "paid", finance_note: note,
+        finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(),
+      });
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
   };
 
   return (
@@ -519,6 +538,35 @@ export default function Approvals() {
               {busy && <Loader2 size={16} className="animate-spin" />} <X size={16} /> {t.confirmReject}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={acting?.action === "tripfinance"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.tripFinTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                {acting.req.destination} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}
+                {acting.req.total_cost > 0 && <> · {t.tripCost(acting.req.total_cost)}</>}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.finNote}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t.finNotePh} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.proof}</Label>
+                <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
+              </div>
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{t.tripFinWarn}</div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmTripFinance} disabled={busy} className="gap-1 bg-blue-600 hover:bg-blue-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.confirmPay}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

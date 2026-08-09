@@ -45,7 +45,7 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee }) {
         employee_id: employee.id, employee_user_id: employee.user_id || "",
         employee_name: `${employee.employee_number} - ${employee.position}`,
         amount, reason: form.reason, installment_count: installments, monthly_installment: monthly,
-        status: "pending_manager", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        status: "manager_approved", manager_status: "pending", hr_status: "pending", finance_status: "pending",
       });
       onSaved?.(); onClose?.();
     } finally {
