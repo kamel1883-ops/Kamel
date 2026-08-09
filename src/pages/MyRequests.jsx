@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
+import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 
 export default function MyRequests() {
   const { lang } = useI18n();
@@ -289,9 +290,10 @@ export default function MyRequests() {
     const gross =
       (employee.base_salary || 0) + (employee.housing_allowance || 0) +
       (employee.transport_allowance || 0) + (employee.other_allowances || 0);
-    const entitled = org?.annual_leave_days || 21;
-    const remaining = employee.leave_balance || 0;
-    const used = Math.max(0, entitled - remaining);
+    const annualDays = org?.annual_leave_days || 21;
+    const entitled = computeEntitlement(employee.hire_date, annualDays);
+    const used = sumUsedDays(leaves);
+    const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
     const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;
 
     content = (

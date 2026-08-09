@@ -18,7 +18,8 @@ const empty = {
   employee_id: "", trip_type: "internal", destination: "", purpose: "",
   start_date: "", end_date: "", transport_mode: "car",
   transport_cost: 0, accommodation_cost: 0, per_diem: 0,
-  other_costs: 0, advance_amount: 0, notes: ""
+  other_costs: 0, advance_amount: 0, notes: "",
+  employee_note: "", employee_document_url: ""
 };
 
 export default function BusinessTripForm({ open, onClose, onSaved, employees, editing, currentUserEmployee }) {
@@ -51,6 +52,20 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const uploadEmpDoc = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      set("employee_document_url", file_url);
+    } catch (e) {
+      setErr(e?.message || "تعذر رفع المستند");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -159,6 +174,18 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
           <div className="rounded-xl bg-muted/60 p-4 flex flex-wrap justify-between gap-3 text-sm">
             <span className="text-muted-foreground">{t.perDiemTotal} <b className="text-foreground">{perDiemTotal.toLocaleString()}</b></span>
             <span className="text-muted-foreground">{t.total} <b className="text-foreground">{total.toLocaleString()}</b></span>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">{isAr ? "وصف الانتداب (السبب والعالية/الخطة)" : "Trip description (reason & plan)"}</Label>
+            <Textarea value={form.employee_note} onChange={(e) => set("employee_note", e.target.value)} rows={3} placeholder={isAr ? "وضّح سبب الانتداب وخطة التنفيذ ومواعيد السفر والعودة…" : "Explain reason, plan, travel & return dates…"} />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">{isAr ? "مستندات الموظف (تذاكر/حجوزات فندق)" : "Employee documents (tickets/hotel)"}</Label>
+            <Input type="file" onChange={(e) => uploadEmpDoc(e.target.files?.[0])} disabled={uploading} />
+            {uploading && <div className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> {isAr ? "جارٍ الرفع…" : "Uploading…"}</div>}
+            {form.employee_document_url && <div className="text-xs text-emerald-600 break-all">✓ {form.employee_document_url}</div>}
           </div>
 
           <div className="space-y-1.5">

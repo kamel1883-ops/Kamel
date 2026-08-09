@@ -4,6 +4,7 @@ import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import LeaveClearanceDoc from "@/components/docs/LeaveClearanceDoc";
 import LoanStatementDoc from "@/components/docs/LoanStatementDoc";
+import BusinessTripApprovalDoc from "@/components/docs/BusinessTripApprovalDoc";
 
 // مخالصة تصفية إجازة — تُولّد PDF، تُرفع، وتُخزّن على الطلب + تُرجع الرابط
 export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) {
@@ -32,5 +33,13 @@ export async function generateLoanStatement(loan, emp, org) {
   const blob = await renderToPdfBlob(<LoanStatementDoc employee={emp} loan={loan} org={org} />);
   const url = await uploadPdfBlob(blob, `loan-statement-${loan.id}.pdf`);
   await base44.entities.LoanRequest.update(loan.id, { statement_pdf_url: url });
+  return url;
+}
+
+// مستند موافقة الانتداب — يُولّد PDF بتفاصيل الرحلة والملاحظات ويُخزّن على الطلب، ويُرجع الرابط
+export async function generateBusinessTripApproval(trip, emp, org) {
+  const blob = await renderToPdfBlob(<BusinessTripApprovalDoc employee={emp} trip={trip} org={org} />);
+  const url = await uploadPdfBlob(blob, `trip-approval-${trip.id}.pdf`);
+  await base44.entities.BusinessTrip.update(trip.id, { approval_pdf_url: url });
   return url;
 }

@@ -9,12 +9,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
-import { ClipboardCheck, Check, X, Loader2, Search, Download, RefreshCw, Wallet } from "lucide-react";
+import { ClipboardCheck, Check, X, Loader2, Search, Download, RefreshCw, Wallet, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, todayISO } from "@/lib/hr";
 import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
 import { useI18n } from "@/lib/i18n";
-import { generateLeaveSettlement, generateLoanStatement } from "@/lib/docGenerators";
+import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
 
 export default function Approvals() {
   const { lang } = useI18n();
@@ -36,6 +36,13 @@ export default function Approvals() {
     loanPay: (v) => <>سلفة بقيمة <b className="text-foreground">{formatCurrency(v)}</b></>, proof: "إثبات التحويل (صورة)",
     payNoteL: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل. ويُحدّث آخر استخدام للتذكرة.",
     payNote: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل.", confirmPay: "تأكيد الصرف",
+    tabTrips: (n) => `الانتدابات (${n})`, hrTripApprove: "اعتماد الموارد البشرية", tripReject: "رفض",
+    tripApproveTitle: "اعتماد انتداب — إدارة الموارد البشرية", tripNote: "ملاحظات/وصف الموارد البشرية",
+    tripNotePh: "متى السفر والعودة، ترتيبات التذاكر/الفندق، التكلفة، …. تُسجّل على الطلب وتظهر في المستند.",
+    tripDoc: "مستندات إضافية (سداد/حجوزات)", tripRejectTitle: "رفض انتداب",
+    tripPayNote: "عند الاعتماد يُولّد مستند الموافقة آلياً ويُحفظ في ملف الموظف.", tripApproveBtn: "اعتماد وتوليد المستند",
+    tripExt: "خارجية", tripInt: "داخلية", tripCost: (c) => `التكلفة: ${formatCurrency(c)}`, tripDocBtn: "مستند الانتداب",
+    tripLine: (d, p) => d ? `${d} — ${p}` : "—",
   } : {
     title: "Approvals & Requests", subtitle: "Approval flow: Direct manager ← HR ← Finance ← Settlement with proof",
     loading: "Loading...", tabLeaves: (n) => `Leaves (${n})`, tabLoans: (n) => `Loans (${n})`,
@@ -53,10 +60,18 @@ export default function Approvals() {
     loanPay: (v) => <>Loan of <b className="text-foreground">{formatCurrency(v)}</b></>, proof: "Transfer proof (image)",
     payNoteL: "On confirmation the process closes and the transfer proof is recorded. Last ticket usage is updated.",
     payNote: "On confirmation the process closes and the transfer proof is recorded.", confirmPay: "Confirm payment",
+    tabTrips: (n) => `Trips (${n})`, hrTripApprove: "HR approve", tripReject: "Reject",
+    tripApproveTitle: "Trip approval — HR", tripNote: "HR notes/description",
+    tripNotePh: "Travel/return dates, ticket/hotel arrangements, cost, …. Recorded on the request and shown in the document.",
+    tripDoc: "Additional documents (payment/bookings)", tripRejectTitle: "Reject trip",
+    tripPayNote: "On approval the approval document is generated automatically and saved to the employee file.", tripApproveBtn: "Approve & generate doc",
+    tripExt: "External", tripInt: "Internal", tripCost: (c) => `Cost: ${formatCurrency(c)}`, tripDocBtn: "Trip doc",
+    tripLine: (d, p) => d ? `${d} — ${p}` : "—",
   };
 
   const [leaves, setLeaves] = useState([]);
   const [loans, setLoans] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [org, setOrg] = useState(null);
   const [me, setMe] = useState(null);
@@ -71,13 +86,14 @@ export default function Approvals() {
 
   const load = async () => {
     setLoading(true);
-    const [lv, ln, emps, orgs] = await Promise.all([
+    const [lv, ln, tr, emps, orgs] = await Promise.all([
       base44.entities.LeaveRequest.list("-created_date", 500),
       base44.entities.LoanRequest.list("-created_date", 500),
+      base44.entities.BusinessTrip.list("-created_date", 500),
       base44.entities.Employee.list("-created_date", 500),
       base44.entities.Organization.list("-created_date", 1),
     ]);
-    setLeaves(lv); setLoans(ln); setEmployees(emps); setOrg(orgs[0]);
+    setLeaves(lv); setLoans(ln); setTrips(tr); setEmployees(emps); setOrg(orgs[0]);
     try { setMe(await base44.auth.me()); } catch {}
     setLoading(false);
   };
@@ -92,9 +108,19 @@ export default function Approvals() {
     : null;
   const visLeaves = matchedIds ? leaves.filter((l) => matchedIds.has(l.employee_id)) : leaves;
   const visLoans = matchedIds ? loans.filter((l) => matchedIds.has(l.employee_id)) : loans;
+  const visTrips = matchedIds ? trips.filter((l) => matchedIds.has(l.employee_id)) : trips;
 
   const actionsFor = (type, r) => {
     const s = r.status;
+    if (type === "trips") {
+      const tb = [];
+      if (s === "pending" || s === "draft") {
+        tb.push({ label: t.hrTripApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openTripApprove(r) });
+        tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
+      }
+      if (r.approval_pdf_url) tb.push({ label: t.tripDocBtn, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.approval_pdf_url, icon: "download" });
+      return tb;
+    }
     const btns = [];
     if (s === "pending_manager" || s === "pending") {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
@@ -203,6 +229,33 @@ export default function Approvals() {
     });
     setBusy(false); setActing(null); setLoanPayAmount(""); load();
   };
+  const openTripApprove = (r) => { setActing({ type: "trips", req: r, action: "tripapprove" }); setNote(""); setProofFile(null); };
+  const openTripReject = (r) => { setActing({ type: "trips", req: r, action: "tripreject" }); setNote(""); };
+  const confirmTripApprove = async () => {
+    if (!acting) return;
+    setBusy(true);
+    let url = "";
+    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    try {
+      const r = acting.req;
+      const emp = empOf(r.employee_id);
+      const patch = {
+        status: "approved", approver_id: me?.id, approver_name: me?.full_name, approved_date: todayISO(),
+        hr_note: note, hr_document_url: url,
+      };
+      await base44.entities.BusinessTrip.update(r.id, patch);
+      try { await generateBusinessTripApproval({ ...r, ...patch }, emp, org); } catch (e) {}
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+  };
+  const confirmTripReject = async () => {
+    if (!acting) return;
+    setBusy(true);
+    try {
+      await base44.entities.BusinessTrip.update(acting.req.id, { status: "rejected", hr_note: note });
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); load();
+  };
 
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
@@ -226,6 +279,7 @@ export default function Approvals() {
             <TabsList className="mb-4">
               <TabsTrigger value="leaves">{t.tabLeaves(visLeaves.length)}</TabsTrigger>
               <TabsTrigger value="loans">{t.tabLoans(visLoans.length)}</TabsTrigger>
+              <TabsTrigger value="trips">{t.tabTrips(visTrips.length)}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="leaves">
@@ -253,6 +307,24 @@ export default function Approvals() {
                       </div>
                     }>
                       <span className="text-xs text-muted-foreground">{r.installment_count} · {formatCurrency(r.monthly_installment)}</span>
+                    </RequestCard>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="trips">
+              <div className="space-y-3">
+                {visTrips.length === 0 ? <Empty t={t} /> : visTrips.map((r) => {
+                  const emp = empOf(r.employee_id);
+                  const rc = { ...r, employee_name: emp?.full_name || r.employee_name };
+                  return (
+                    <RequestCard key={r.id} r={rc} emp={emp} actions={actionsFor("trips", r)} t={t} genBusy={genBusy}
+                      kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 flex items-center gap-1"><Plane size={11} /> {r.trip_type === "external" ? t.tripExt : t.tripInt}</span>}
+                      extra={<div className="text-xs text-muted-foreground mt-1">{t.tripLine(r.destination, r.purpose)} · {t.days(r.start_date, r.end_date, r.days_count)}</div>}>
+                      {r.total_cost > 0 && <span className="text-xs text-muted-foreground">{t.tripCost(r.total_cost)}</span>}
+                      {r.employee_document_url && <a href={r.employee_document_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">مرفق الموظف</a>}
+                      {r.hr_document_url && <a href={r.hr_document_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">مرفق المالية</a>}
                     </RequestCard>
                   );
                 })}
@@ -334,11 +406,55 @@ export default function Approvals() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={acting?.action === "tripapprove"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.tripApproveTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                {acting.req.trip_type === "external" ? t.tripExt : t.tripInt} — {acting.req.destination} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.tripNote}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} placeholder={t.tripNotePh} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.tripDoc}</Label>
+                <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
+              </div>
+              <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.tripPayNote}</div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmTripApprove} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.tripApproveBtn}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={acting?.action === "tripreject"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.tripRejectTitle}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-xs font-medium text-muted-foreground">{t.rejectReason}</Label>
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+            <Button variant="destructive" onClick={confirmTripReject} disabled={busy} className="gap-1">
+              {busy && <Loader2 size={16} className="animate-spin" />} <X size={16} /> {t.confirmReject}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra }) {
+function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, kindBadge }) {
   return (
     <div className="bg-white rounded-2xl border border-border p-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -346,9 +462,11 @@ function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra })
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-sm">{r.employee_name}</span>
             {emp?.national_id && <span className="text-xs text-muted-foreground">· {emp.national_id}</span>}
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-              {r.leave_type ? leaveTypeLabel(r.leave_type) : t.loan}
-            </span>
+            {kindBadge || (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                {r.leave_type ? leaveTypeLabel(r.leave_type) : t.loan}
+              </span>
+            )}
           </div>
           <div className="text-xs text-muted-foreground mt-1">
             {r.start_date ? t.days(r.start_date, r.end_date, r.days_count) : t.loanLine(r.amount, r.reason || "")}

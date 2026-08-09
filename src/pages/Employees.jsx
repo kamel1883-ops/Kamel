@@ -4,12 +4,13 @@ import PageHeader from "@/components/PageHeader";
 import EmployeeForm from "@/components/EmployeeForm";
 import EmployeeImport from "@/components/EmployeeImport";
 import BranchManager from "@/components/BranchManager";
+import EmployeeTripsDialog from "@/components/EmployeeTripsDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch, Plane } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
@@ -41,6 +42,8 @@ export default function Employees() {
   const [branchOpen, setBranchOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tripsOpen, setTripsOpen] = useState(false);
+  const [tripsEmp, setTripsEmp] = useState(null);
 
   const load = async () => {
     const data = await base44.entities.Employee.list("-created_date", 500);
@@ -148,6 +151,7 @@ export default function Employees() {
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
                         <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
+                        <button onClick={() => { setTripsEmp(emp); setTripsOpen(true); }} title={isAr ? "انتدابات الموظف" : "Employee trips"} className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"><Plane size={16} /></button>
                         <Link to="/org-structure" title={isAr ? "عرض في الهيكل" : "View in org chart"} className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Network size={16} /></Link>
                         <button onClick={() => remove(emp)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
                       </div>
@@ -163,6 +167,7 @@ export default function Employees() {
       <EmployeeForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={load} employee={editTarget} />
       <EmployeeImport open={importOpen} onClose={() => setImportOpen(false)} onSaved={load} />
       <BranchManager open={branchOpen} onClose={() => setBranchOpen(false)} onSaved={load} />
+      <EmployeeTripsDialog open={tripsOpen} onClose={() => setTripsOpen(false)} employee={tripsEmp} />
     </div>
   );
 }
