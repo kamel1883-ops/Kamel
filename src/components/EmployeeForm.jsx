@@ -12,6 +12,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
+import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
 
 const empty = {
   full_name: "",
@@ -90,6 +91,11 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{employee ? t.edit : t.add}</DialogTitle></DialogHeader>
+        {employee?.id && (
+          <div className="mb-3 max-h-64 overflow-y-auto p-3 rounded-xl bg-slate-50/60 border border-border">
+            <EmployeeLeaveLoanSummary employee={employee} />
+          </div>
+        )}
         <form onSubmit={submit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Field label={t.fullName}><Input value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder={isAr ? "مثال: محمد عبدالله" : "e.g. Mohammed Alharbi"} /></Field>
