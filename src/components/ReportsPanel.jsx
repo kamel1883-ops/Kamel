@@ -8,6 +8,7 @@ import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users,
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { printReport } from "@/lib/reportPrint";
+import PayrollReport from "@/components/reports/PayrollReport";
 
 const daysUntil = (d) => { if (!d) return null; const t = new Date(d).getTime(); if (isNaN(t)) return null; return Math.ceil((t - Date.now()) / 86400000); };
 const addMonths = (n) => { const d = new Date(); d.setMonth(d.getMonth() + n); return d; };
@@ -172,6 +173,7 @@ export default function ReportsPanel({ employees, attendance }) {
         {rid === "performance" && <PerformanceReport records={extra.reviews || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
         {rid === "exit" && <ExitReport records={extra.exits || []} t={t} />}
         {rid === "surveys" && <SurveysReport surveys={extra.surveys || []} responses={extra.sresponses || []} t={t} />}
+        {rid === "payroll" && <PayrollReport org={org} records={extra.payroll || []} t={t} />}
       </div>
     </div>
   );
