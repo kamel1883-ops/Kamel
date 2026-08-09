@@ -43,6 +43,7 @@ export default function ReportsPanel({ employees, attendance }) {
     vehCount: "عدد المركبات", vehicleName: "المركبة", plate: "اللوحة",
     warnRange: "نطاق الإنذارات", promotionReady: "جاهز للترقية", notPromote: "غير جاهز للترقية",
     topReasons: "أهم أسباب المغادرة", countLabel: "العدد", issueDate: "تاريخ الإصدار",
+    licenseNumber: "رقم الترخيص", na: "لا ينطبق",
   } : {
     section: "Reports Center", sectionSub: "Reports & charts for decision support — inside Analytics",
     pick: "Pick a report",
@@ -70,6 +71,7 @@ export default function ReportsPanel({ employees, attendance }) {
     vehCount: "Vehicles count", vehicleName: "Vehicle", plate: "Plate",
     warnRange: "Warnings range", promotionReady: "Promotion ready", notPromote: "Not ready for promotion",
     topReasons: "Top exit reasons", countLabel: "Count", issueDate: "Issue date",
+    licenseNumber: "License number", na: "N/A",
   };
 
   const REPORTS = [
@@ -368,16 +370,28 @@ function ActInactiveReport({ employees, t }) {
 }
 
 function LicensesReport({ records, t }) {
-  const rows = records.filter((l) => !l.not_applicable && l.expiry_date && daysUntil(l.expiry_date) != null).map((l) => ({ l, d: daysUntil(l.expiry_date) })).sort((a,b) => a.d - b.d);
-  const soon = rows.filter((x) => x.d <= 90);
+  const rows = records
+    .map((l) => ({ l, d: l.not_applicable ? null : daysUntil(l.expiry_date) }))
+    .filter((x) => x.l.not_applicable || (x.d != null))
+    .sort((a, b) => {
+      if (a.l.not_applicable) return 1;
+      if (b.l.not_applicable) return -1;
+      return a.d - b.d;
+    });
   return (
     <Card title={t.rLicenses}>
-      {soon.length ? (
+      {rows.length ? (
         <div className="overflow-x-auto"><table className="w-full text-sm">
-          <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{isArLabel(t,"الترخيص","License")}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الجهة","Authority")}</th><th className="text-right pb-2 font-medium">{t.issueDate}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الانتهاء","Expiry")}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
-          <tbody>{soon.map(({ l, d }) => (
-            <tr key={l.id} className="border-t border-border"><td className="py-2">{l.custom_label || l.license_type}</td><td className="py-2">{l.issuing_authority || "—"}</td><td className="py-2">{l.issue_date || "—"}</td><td className="py-2">{l.expiry_date}</td>
-              <td className="py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full", d < 0 ? "bg-rose-100 text-rose-700" : d <= 30 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700")}>{d} {t.days}</span></td></tr>
+          <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{isArLabel(t,"الترخيص","License")}</th><th className="text-right pb-2 font-medium">{t.licenseNumber}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الجهة","Authority")}</th><th className="text-right pb-2 font-medium">{t.issueDate}</th><th className="text-right pb-2 font-medium">{isArLabel(t,"الانتهاء","Expiry")}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
+          <tbody>{rows.map(({ l, d }) => (
+            <tr key={l.id} className="border-t border-border">
+              <td className="py-2">{l.custom_label || l.license_type}</td>
+              <td className="py-2">{l.license_number || "—"}</td>
+              <td className="py-2">{l.issuing_authority || "—"}</td>
+              <td className="py-2">{l.issue_date || "—"}</td>
+              <td className="py-2">{l.not_applicable ? t.na : (l.expiry_date || "—")}</td>
+              <td className="py-2">{l.not_applicable ? <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">{t.na}</span> : <span className={cn("text-xs px-2 py-0.5 rounded-full", d < 0 ? "bg-rose-100 text-rose-700" : d <= 30 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700")}>{d} {t.days}</span>}</td>
+            </tr>
           ))}</tbody>
         </table></div>
       ) : <NoRows text={t.noData} />}
