@@ -108,25 +108,21 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
             <Field label={t.year}><Input type="number" value={form.period_year} onChange={(e) => set("period_year", e.target.value)} /></Field>
           </div>
 
-          {form.review_type === "goal_setting" ? (
-            <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50/40 p-3">
-              <div className="text-xs font-semibold text-violet-700">{t.goalSection}</div>
-              <Field label={t.personalGoals}><Textarea value={form.personal_goals} onChange={(e) => set("personal_goals", e.target.value)} rows={2} /></Field>
-              <Field label={t.behaviors}><Textarea value={form.behaviors} onChange={(e) => set("behaviors", e.target.value)} rows={2} /></Field>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label={t.tasksCoverage}><Textarea value={form.tasks_coverage} onChange={(e) => set("tasks_coverage", e.target.value)} rows={2} /></Field>
-                <Field label={t.tasksAmend}><Textarea value={form.tasks_amendments} onChange={(e) => set("tasks_amendments", e.target.value)} rows={2} /></Field>
-              </div>
+          <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50/40 p-3">
+            <div className="text-xs font-semibold text-violet-700">{t.goalSection}</div>
+            <Field label={t.personalGoals}><Textarea value={form.personal_goals} onChange={(e) => set("personal_goals", e.target.value)} rows={2} /></Field>
+            <Field label={t.behaviors}><Textarea value={form.behaviors} onChange={(e) => set("behaviors", e.target.value)} rows={2} /></Field>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label={t.tasksCoverage}><Textarea value={form.tasks_coverage} onChange={(e) => set("tasks_coverage", e.target.value)} rows={2} /></Field>
+              <Field label={t.tasksAmend}><Textarea value={form.tasks_amendments} onChange={(e) => set("tasks_amendments", e.target.value)} rows={2} /></Field>
             </div>
-          ) : (
-            <>
-              <Field label={t.goals}><Textarea value={form.goals} onChange={(e) => set("goals", e.target.value)} rows={3} /></Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t.strengths}><Textarea value={form.strengths} onChange={(e) => set("strengths", e.target.value)} rows={2} /></Field>
-                <Field label={t.improvements}><Textarea value={form.improvements} onChange={(e) => set("improvements", e.target.value)} rows={2} /></Field>
-              </div>
-            </>
-          )}
+          </div>
+
+          <Field label={t.goals}><Textarea value={form.goals} onChange={(e) => set("goals", e.target.value)} rows={3} /></Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t.strengths}><Textarea value={form.strengths} onChange={(e) => set("strengths", e.target.value)} rows={2} /></Field>
+            <Field label={t.improvements}><Textarea value={form.improvements} onChange={(e) => set("improvements", e.target.value)} rows={2} /></Field>
+          </div>
 
           <div className="grid grid-cols-3 gap-3">
             <RatingField label={t.goalsR} value={form.goals_rating} onChange={(v) => set("goals_rating", v)} />
