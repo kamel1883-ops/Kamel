@@ -19,6 +19,7 @@ const empty = {
   eos_basis: "gross",
   gosi_saudi_employee_rate: 9.75, gosi_saudi_employer_rate: 9.75, gosi_expat_employer_rate: 2,
   work_week_hours: 48, work_week_days: 6, late_grace_minutes: 15,
+  work_start_time: "08:00", work_end_time: "17:00", work_hours_per_day: 9,
   absence_deduction_type: "monthly_divided",
   workplace_lat: "", workplace_lng: "", workplace_radius: 50,
 };
@@ -35,6 +36,7 @@ export default function SettingsPage() {
     gross: "الراتب الإجمالي (أساسي + بدلات)", baseOnly: "الراتب الأساسي فقط",
     gosiEmp: "نسبة تأمين الموظف السعودي %", gosiErSa: "نسبة تأمين صاحب العمل (سعودي) %", gosiErEx: "نسبة تأمين صاحب العمل (مقيم) %",
     secAtt: "إعدادات الحضور والدوام", weekHours: "ساعات العمل الأسبوعية", weekDays: "أيام العمل الأسبوعية", grace: "سماح التأخير (دقيقة)",
+    dayStart: "بداية الدوام", dayEnd: "نهاية الدوام", dayHours: "ساعات العمل اليومية المطلوبة",
     absType: "طريقة خصم الغياب", monthlyDiv: "الراتب الشهري ÷ 30 لليوم", dailyWage: "الأجر اليومي",
     secLoc: "موقع مقر العمل (للبصمة)", lat: "خط العرض", lng: "خط الطول", radius: "نطاق البصمة (متر)", capture: "تحديد موقعي الحالي",
     locNote: (r) => `سيُسمح للموظف بالبصمة فقط ضمن ${r || 50} متر من هذا الموقع.`,
@@ -52,6 +54,7 @@ export default function SettingsPage() {
     gross: "Gross salary (base + allowances)", baseOnly: "Base salary only",
     gosiEmp: "Saudi employee GOSI rate %", gosiErSa: "Employer GOSI (Saudi) %", gosiErEx: "Employer GOSI (Expat) %",
     secAtt: "Attendance & working time", weekHours: "Weekly working hours", weekDays: "Weekly working days", grace: "Late grace (minutes)",
+    dayStart: "Daily start time", dayEnd: "Daily end time", dayHours: "Required daily work hours",
     absType: "Absence deduction method", monthlyDiv: "Monthly salary ÷ 30 per day", dailyWage: "Daily wage",
     secLoc: "Workplace location (for check‑in)", lat: "Latitude", lng: "Longitude", radius: "Check‑in radius (m)", capture: "Set my current location",
     locNote: (r) => `Employees may check in only within ${r || 50} m of this location.`,
@@ -156,6 +159,11 @@ export default function SettingsPage() {
             <Field label={t.weekHours}><Input type="number" value={org.work_week_hours} onChange={(e) => set("work_week_hours", Number(e.target.value))} /></Field>
             <Field label={t.weekDays}><Input type="number" value={org.work_week_days} onChange={(e) => set("work_week_days", Number(e.target.value))} /></Field>
             <Field label={t.grace}><Input type="number" value={org.late_grace_minutes} onChange={(e) => set("late_grace_minutes", Number(e.target.value))} /></Field>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <Field label={t.dayStart}><Input type="time" value={org.work_start_time || ""} onChange={(e) => set("work_start_time", e.target.value)} /></Field>
+            <Field label={t.dayEnd}><Input type="time" value={org.work_end_time || ""} onChange={(e) => set("work_end_time", e.target.value)} /></Field>
+            <Field label={t.dayHours}><Input type="number" step="0.1" value={org.work_hours_per_day} onChange={(e) => set("work_hours_per_day", Number(e.target.value))} /></Field>
           </div>
           <div className="grid grid-cols-1 mt-4">
             <Field label={t.absType}>

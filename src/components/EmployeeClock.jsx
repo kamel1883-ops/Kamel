@@ -44,6 +44,7 @@ export default function EmployeeClock({ employee, org, onChanged }) {
     title: "البصمة اليومية", sub: (r, d) => `يُسمح بالبصمة فقط من مقر العمل ضمن ${r} متر — بتاريخ ${d}`,
     in: "الحضور", out: "الانصراف", btnIn: "تسجيل الحضور", btnOut: "تسجيل الانصراف",
     complete: (h) => `اكتمل تسجيل اليوم (${h} ساعة)`, noWorkplace2: "لم يحدد المقر الرسمي بعد.",
+    nowLabel: "الوقت الآن", schedLabel: (s, e) => `الدوام الرسمي: ${s} — ${e}`,
   } : {
     noGeo: "Device does not support geolocation", noAccess: "Could not access your location — enable location permission",
     noWorkplace: "Workplace not set — contact HR",
@@ -54,12 +55,15 @@ export default function EmployeeClock({ employee, org, onChanged }) {
     title: "Daily check‑in", sub: (r, d) => `Check‑in is allowed only from the workplace within ${r} m — on ${d}`,
     in: "Check in", out: "Check out", btnIn: "Check in", btnOut: "Check out",
     complete: (h) => `Today completed (${h} hours)`, noWorkplace2: "Workplace not set yet.",
+    nowLabel: "Current time", schedLabel: (s, e) => `Official hours: ${s} — ${e}`,
   };
 
   const [today, setToday] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
 
   const loadToday = async () => {
     setLoading(true);
@@ -125,6 +129,18 @@ export default function EmployeeClock({ employee, org, onChanged }) {
           <h3 className="font-semibold text-sm">{t.title}</h3>
           <p className="text-xs text-muted-foreground">{t.sub(radius, localToday())}</p>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4 rounded-xl bg-muted/60 border border-border px-3 py-2">
+        <div className="text-xs">
+          <span className="text-muted-foreground">{t.nowLabel}: </span>
+          <span className="font-semibold tabular-nums">
+            {now.toLocaleDateString(isAr ? "ar-EG" : "en-GB")} · {String(now.getHours()).padStart(2,"0")}:{String(now.getMinutes()).padStart(2,"0")}:{String(now.getSeconds()).padStart(2,"0")}
+          </span>
+        </div>
+        {org?.work_start_time && org?.work_end_time && (
+          <div className="text-xs text-muted-foreground">{t.schedLabel(org.work_start_time, org.work_end_time)}</div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
