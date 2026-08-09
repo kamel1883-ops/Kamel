@@ -6,6 +6,7 @@ import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import ShareBar from "@/components/ShareBar";
+import ClientMarquee from "@/components/ClientMarquee";
 import { useI18n } from "@/lib/i18n";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
@@ -341,6 +342,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* عملاؤنا */}
+      <ClientMarquee />
 
       {/* المميزات */}
       <section id="features" className="max-w-7xl mx-auto px-5 py-14">

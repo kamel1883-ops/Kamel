@@ -12,6 +12,7 @@ import {
 import { formatCurrency } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import ReportsPanel from "@/components/ReportsPanel";
 
 const PERIODS = [
   { key: "year", months: 12 },
@@ -294,6 +295,8 @@ export default function Analytics() {
           </ChartCard>
         )}
       </div>
+
+      <ReportsPanel employees={employees} attendance={attendance} />
     </div>
   );
 }
