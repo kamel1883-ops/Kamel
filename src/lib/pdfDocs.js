@@ -21,6 +21,18 @@ function waitForImages(node) {
 // يحوّل عنصر DOM إلى Blob PDF (A4، عربي RTL عبر html2canvas)
 export async function elementToPdfBlob(node) {
   await waitForImages(node);
+  // html2canvas يفكّك أحرف العربية (أشكال معزولة) عند أي letter-spacing غير صفري،
+  // لذا نصفّر المسافة لكل العناصر داخل العنصر المُلتقط (يُصلح عناوين <h3> ... إلخ)
+  // كما نضمن خطاً عربياً مدعوماً ليُطبَّق التشكيل/الوصل بصورة صحيحة.
+  try {
+    node.querySelectorAll("*").forEach((el) => {
+      if (!el.style) return;
+      if (el.style.letterSpacing !== "normal") el.style.letterSpacing = "normal";
+      if (el.tagName === "TEXT" || el.tagName === "TSPAN") {
+        el.setAttribute("letter-spacing", "normal");
+      }
+    });
+  } catch (e) {}
   const canvas = await html2canvas(node, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
   const img = canvas.toDataURL("image/jpeg", 0.95);
   const pdf = new jsPDF("p", "mm", "a4");
