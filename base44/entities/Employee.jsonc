@@ -103,7 +103,7 @@
     "contract_start_date": {
       "type": "string",
       "format": "date",
-      "title": "\u062a\u0627\u0631\u064a\u062e \u0628\u062f\u0621 \u0627\u0644\u0639\u0642\u062f"
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0628\u062f\u0627\u064a\u0629 \u0627\u0644\u0639\u0642\u062f"
     },
     "contract_end_date": {
       "type": "string",
@@ -126,9 +126,15 @@
       "enum": [
         "none",
         "end_of_contract",
+        "contract_non_renewal",
         "employer_termination",
+        "unjustified_dismissal",
         "resignation",
         "dismissal_for_cause",
+        "employee_leave_with_rights",
+        "mutual_consent",
+        "death",
+        "incapacity",
         "force_majeure"
       ],
       "default": "none",

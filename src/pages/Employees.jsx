@@ -5,17 +5,22 @@ import EmployeeForm from "@/components/EmployeeForm";
 import EmployeeImport from "@/components/EmployeeImport";
 import BranchManager from "@/components/BranchManager";
 import EmployeeTripsDialog from "@/components/EmployeeTripsDialog";
+import EmployeeProfileDialog from "@/components/EmployeeProfileDialog";
+import TerminateEmployeeDialog from "@/components/TerminateEmployeeDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch, Plane } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch, Plane, FileText, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
+import { reasonMeta } from "@/lib/eos";
+
+const isInactive = (e) => e.status === "terminated" || e.status === "resigned";
 
 export default function Employees() {
   const { lang } = useI18n();
@@ -23,20 +28,30 @@ export default function Employees() {
   const t = isAr ? {
     title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد", importBtn: "استيراد من Excel", branchesBtn: "إدارة الفروع",
     search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", allBranches: "كل الفروع", loading: "جارٍ التحميل...",
-    empty: "لا يوجد موظفون مطابقون", del: (n) => `حذف الموظف ${n}؟`,
+    empty: "لا يوجد موظفون مطابقون",
+    activeHead: "الموظفون النشطون", inactiveHead: "الموظفون غير النشطون (الأرشيف)",
     thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thBranch: "الفرع", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
+    thTermReason: "سبب الإنهاء", thTermDate: "تاريخ الإنهاء",
+    del: (n) => `حذف الموظف ${n}؟`, terminateTitle: "فسخ عقد", profileTitle: "ملف الموظف", tripsTitle: "انتدابات",
+    yearFilter: "السنة", allYears: "كل السنوات", noInactive: "لا يوجد موظفون تركوا العمل",
   } : {
     title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee", importBtn: "Import from Excel", branchesBtn: "Branches",
     search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", allBranches: "All branches", loading: "Loading...",
-    empty: "No matching employees", del: (n) => `Delete employee ${n}?`,
+    empty: "No matching employees",
+    activeHead: "Active employees", inactiveHead: "Inactive employees (archive)",
     thNum: "Number", thPos: "Title", thDept: "Department", thBranch: "Branch", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
+    thTermReason: "Termination reason", thTermDate: "Termination date",
+    del: (n) => `Delete employee ${n}?`, terminateTitle: "Terminate", profileTitle: "Profile", tripsTitle: "Trips",
+    yearFilter: "Year", allYears: "All years", noInactive: "No terminated employees",
   };
 
   const [employees, setEmployees] = useState([]);
+  const [org, setOrg] = useState(null);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [branchFilter, setBranchFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [branchOpen, setBranchOpen] = useState(false);
@@ -44,24 +59,36 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [tripsOpen, setTripsOpen] = useState(false);
   const [tripsEmp, setTripsEmp] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEmp, setProfileEmp] = useState(null);
+  const [termOpen, setTermOpen] = useState(false);
+  const [termEmp, setTermEmp] = useState(null);
 
   const load = async () => {
-    const data = await base44.entities.Employee.list("-created_date", 500);
+    const [data, orgs] = await Promise.all([
+      base44.entities.Employee.list("-created_date", 500),
+      base44.entities.Organization.list("-created_date", 1),
+    ]);
     setEmployees(data);
+    setOrg(orgs[0] || null);
     setLoading(false);
   };
   useEffect(() => { load(); }, [editTarget, formOpen, branchOpen]);
 
   const departments = Array.from(new Set(employees.map((e) => e.department).filter(Boolean)));
   const branchNames = Array.from(new Set(employees.map((e) => e.branch_name).filter(Boolean)));
-  const filtered = employees.filter((e) => {
+  const matches = (e) => {
     const q = search.trim();
     const matchQ = !q || e.employee_number?.includes(q) || e.position?.includes(q) || e.department?.includes(q) || e.full_name?.includes(q);
     const matchD = deptFilter === "all" || e.department === deptFilter;
     const matchB = branchFilter === "all" || e.branch_name === branchFilter;
     const matchR = roleFilter === "all" || e.role_level === roleFilter;
     return matchQ && matchD && matchB && matchR;
-  });
+  };
+  const activeList = employees.filter((e) => !isInactive(e) && matches(e));
+  const inactiveRaw = employees.filter((e) => isInactive(e) && matches(e));
+  const years = Array.from(new Set(inactiveRaw.map((e) => e.termination_date?.slice(0, 4)).filter(Boolean))).sort((a, b) => b - a);
+  const inactiveList = yearFilter === "all" ? inactiveRaw : inactiveRaw.filter((e) => e.termination_date?.slice(0, 4) === yearFilter);
 
   const remove = async (emp) => {
     if (!confirm(t.del(emp.employee_number))) return;
@@ -111,63 +138,156 @@ export default function Employees() {
             </SelectContent>
           </Select>
         </div>
-
-        {loading ? (
-          <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
-        ) : filtered.length === 0 ? (
-          <div className="p-14 text-center">
-            <Users size={40} className="mx-auto text-slate-300 mb-3" />
-            <p className="text-muted-foreground">{t.empty}</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-muted-foreground text-xs">
-                <tr>
-                  <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thRole}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thSalary}</th>
-                  <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.map((emp) => (
-                  <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
-                    <td className="px-4 py-3">{emp.position}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
-                    <td className="px-4 py-3">
-                      {emp.branch_name ? (
-                        <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-violet-50 text-violet-700"><GitBranch size={11} /> {emp.branch_name}</span>
-                      ) : <span className="text-muted-foreground">—</span>}
-                    </td>
-                    <td className="px-4 py-3"><RoleBadge level={emp.role_level} isAr={isAr} lang={lang} /></td>
-                    <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>
-                    <td className="px-4 py-3 tabular-nums">{formatCurrency(emp.base_salary)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1">
-                        <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
-                        <button onClick={() => { setTripsEmp(emp); setTripsOpen(true); }} title={isAr ? "انتدابات الموظف" : "Employee trips"} className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"><Plane size={16} /></button>
-                        <Link to="/org-structure" title={isAr ? "عرض في الهيكل" : "View in org chart"} className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Network size={16} /></Link>
-                        <button onClick={() => remove(emp)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
+
+      {loading ? (
+        <div className="p-10 text-center text-muted-foreground bg-white rounded-2xl border border-border mt-4">{t.loading}</div>
+      ) : (
+        <div className="space-y-6 mt-4">
+          {/* Active */}
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="text-lg font-bold text-foreground">{t.activeHead}</h2>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{activeList.length}</span>
+            </div>
+            <div className="bg-white rounded-2xl border border-border overflow-hidden">
+              {activeList.length === 0 ? (
+                <div className="p-14 text-center">
+                  <Users size={40} className="mx-auto text-slate-300 mb-3" />
+                  <p className="text-muted-foreground">{t.empty}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-muted-foreground text-xs">
+                      <tr>
+                        <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thRole}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thSalary}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {activeList.map((emp) => (
+                        <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
+                          <td className="px-4 py-3">{emp.position}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
+                          <td className="px-4 py-3">
+                            {emp.branch_name ? (
+                              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-violet-50 text-violet-700"><GitBranch size={11} /> {emp.branch_name}</span>
+                            ) : <span className="text-muted-foreground">—</span>}
+                          </td>
+                          <td className="px-4 py-3"><RoleBadge level={emp.role_level} lang={lang} /></td>
+                          <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>
+                          <td className="px-4 py-3 tabular-nums">{formatCurrency(emp.base_salary)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-1">
+                              <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} title={isAr ? "تعديل" : "Edit"} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
+                              <button onClick={() => { setProfileEmp(emp); setProfileOpen(true); }} title={t.profileTitle} className="p-2 rounded-lg hover:bg-amber-50 text-amber-600"><FileText size={16} /></button>
+                              <button onClick={() => { setTripsEmp(emp); setTripsOpen(true); }} title={t.tripsTitle} className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"><Plane size={16} /></button>
+                              <button onClick={() => { setTermEmp(emp); setTermOpen(true); }} title={t.terminateTitle} className="p-2 rounded-lg hover:bg-rose-50 text-rose-600"><UserX size={16} /></button>
+                              <Link to="/org-structure" title={isAr ? "عرض في الهيكل" : "Org chart"} className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Network size={16} /></Link>
+                              <button onClick={() => remove(emp)} title={isAr ? "حذف" : "Delete"} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Inactive / archive */}
+          <section>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-foreground">{t.inactiveHead}</h2>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{inactiveList.length}</span>
+              </div>
+              {years.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{t.yearFilter}:</span>
+                  <Select value={yearFilter} onValueChange={setYearFilter}>
+                    <SelectTrigger className="w-36 h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t.allYears}</SelectItem>
+                      {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <div className="bg-white rounded-2xl border border-border overflow-hidden">
+              {inactiveList.length === 0 ? (
+                <div className="p-14 text-center">
+                  <Users size={40} className="mx-auto text-slate-300 mb-3" />
+                  <p className="text-muted-foreground">{t.noInactive}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-muted-foreground text-xs">
+                      <tr>
+                        <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thTermReason}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thTermDate}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {inactiveList.map((emp) => {
+                        const meta = emp.termination_reason && emp.termination_reason !== "none" ? reasonMeta(emp.termination_reason) : null;
+                        return (
+                          <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-4 py-3 font-medium cursor-pointer" onClick={() => { setProfileEmp(emp); setProfileOpen(true); }}>{emp.employee_number}</td>
+                            <td className="px-4 py-3">{emp.position}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
+                            <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>
+                            <td className="px-4 py-3">
+                              {meta ? (
+                                <div>
+                                  <div className="text-xs font-medium">{meta.label}</div>
+                                  <div className="text-xs text-muted-foreground">{meta.article} · {meta.note}</div>
+                                </div>
+                              ) : <span className="text-muted-foreground">—</span>}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-muted-foreground tabular-nums">{emp.termination_date || "—"}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex gap-1">
+                                <button onClick={() => { setProfileEmp(emp); setProfileOpen(true); }} title={t.profileTitle} className="p-2 rounded-lg hover:bg-amber-50 text-amber-600"><FileText size={16} /></button>
+                                <button onClick={() => { setTripsEmp(emp); setTripsOpen(true); }} title={t.tripsTitle} className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"><Plane size={16} /></button>
+                                <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} title={isAr ? "تعديل" : "Edit"} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
+                                <button onClick={() => remove(emp)} title={isAr ? "حذف" : "Delete"} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
 
       <EmployeeForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={load} employee={editTarget} />
       <EmployeeImport open={importOpen} onClose={() => setImportOpen(false)} onSaved={load} />
       <BranchManager open={branchOpen} onClose={() => setBranchOpen(false)} onSaved={load} />
       <EmployeeTripsDialog open={tripsOpen} onClose={() => setTripsOpen(false)} employee={tripsEmp} />
+      <EmployeeProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} employee={profileEmp} org={org} onOpenTrips={() => { setProfileOpen(false); setTripsOpen(true); }} />
+      <TerminateEmployeeDialog open={termOpen} onClose={() => setTermOpen(false)} employee={termEmp} onSaved={load} />
     </div>
   );
 }
@@ -175,8 +295,7 @@ export default function Employees() {
 function StatusBadge({ status }) {
   return <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", statusEmployeeLabel(status).cls)}>{statusEmployeeLabel(status).label}</span>;
 }
-
-function RoleBadge({ level, isAr, lang }) {
+function RoleBadge({ level, lang }) {
   const s = ROLE_STYLES[level] || ROLE_STYLES.employee;
   return <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1", s.bg, s.text)}><span>{s.icon}</span>{roleLabel(level, lang)}</span>;
 }
