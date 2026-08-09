@@ -1,4 +1,5 @@
 import React from "react";
+import { Crown } from "lucide-react";
 
 // شعار الشركة يميناً + شعار جدارة يساراً — يظهر على كل مستند مُولّد
 export default function BrandHeader({ org }) {
@@ -33,25 +34,26 @@ export default function BrandHeader({ org }) {
       </div>
 
       {/* يسار — جدارة */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
+            width: 44,
+            height: 44,
+            borderRadius: 14,
             background: "linear-gradient(135deg,#0b0f19,#2e2448)",
-            color: "#f5d77a",
-            fontWeight: 800,
+            boxShadow: "0 0 0 1px rgba(252,211,77,.3)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 18,
+            flexShrink: 0,
           }}
         >
-          ج
+          <Crown size={22} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
         </div>
-        <div style={{ fontWeight: 800, fontSize: 13, marginTop: 6, color: "#0b1120" }}>جدارة</div>
-        <div style={{ fontSize: 9, color: "#666" }}>لإدارة الموارد البشرية</div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#0b1120", fontFamily: "var(--font-display)" }}>جدارة</div>
+          <div style={{ fontSize: 10, color: "#666", marginTop: 1 }}>لإدارة الموارد البشرية</div>
+        </div>
       </div>
     </div>
   );

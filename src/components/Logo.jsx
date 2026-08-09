@@ -1,5 +1,6 @@
 import React from "react";
 import { Crown } from "lucide-react";
+export { Crown };
 import { cn } from "@/lib/utils";
 
 export default function Logo({ variant = "full", tone = "light", size = 44, className }) {
