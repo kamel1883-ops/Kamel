@@ -11,9 +11,14 @@ export default async function (req) {
 
     const name = String(body.name || '').trim();
     const email = String(body.contact_email || '').trim();
+    const phone = String(body.contact_phone || '').trim();
+    const unified = String(body.unified_number || '').trim();
     if (!name) return Response.json({ error: 'اسم المنشأة مطلوب' }, { status: 400 });
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
+    if (!phone) return Response.json({ error: 'رقم الهاتف مطلوب' }, { status: 400 });
+    if (!unified || !/^7\d{7,11}$/.test(unified))
+      return Response.json({ error: 'الرقم الموحد مطلوب ويجب أن يبدأ بـ7' }, { status: 400 });
 
     // التحقق البشري (Cloudflare Turnstile) — يمنع الإساءة الآلية لبوابة التسجيل العامة
     const captchaToken = String(body.captcha_token || '');
@@ -51,7 +56,8 @@ export default async function (req) {
       industry: String(body.industry || '').trim(),
       contact_name: String(body.contact_name || '').trim(),
       contact_email: email,
-      contact_phone: String(body.contact_phone || '').trim(),
+      contact_phone: phone,
+      unified_number: unified,
       city: String(body.city || '').trim(),
       country: String(body.country || 'السعودية').trim(),
       plan: 'trial',
@@ -74,7 +80,8 @@ export default async function (req) {
           'القطاع: ' + (body.industry || '-') + '\n' +
           'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
           'البريد: ' + email + '\n' +
-          'الهاتف: ' + (body.contact_phone || '-') + '\n' +
+          'الهاتف: ' + phone + '\n' +
+          'الرقم الموحد: ' + unified + '\n' +
           'المدينة: ' + (body.city || '-') + '\n\n' +
           'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n';
         if (discount_percent > 0) {

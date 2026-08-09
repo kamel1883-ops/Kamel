@@ -169,7 +169,7 @@ export default function Landing() {
     trialTag: "سجّل في دقيقة", trialTitle: "ابدأ تجربتك المجانية الآن",
     doneTitle: "تم استلام طلبك بنجاح", doneDesc: "سيتواصل معك فريقنا خلال فترة التجربة لتفعيل اشتراكك السنوي ونقل بياناتك. تحقق من بريدك الإلكتروني.",
     doneCta: "تسجيل الدخول للمنصة",
-    form: { company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط", city: "المدينة", contact: "جهة الاتصال", phone: "الهاتف", email: "البريد الإلكتروني *", submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
+    form: { company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط", city: "المدينة", contact: "جهة الاتصال", phone: "الهاتف *", unified: "الرقم الموحد (يبدأ بـ7) *", email: "البريد الإلكتروني *", submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
     wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
@@ -210,7 +210,7 @@ export default function Landing() {
     trialTag: "Register in a minute", trialTitle: "Start your free trial now",
     doneTitle: "Your request was received", doneDesc: "Our team will contact you during the trial to activate your annual subscription and migrate your data. Check your email.",
     doneCta: "Sign in to the platform",
-    form: { company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity", city: "City", contact: "Contact person", phone: "Phone", email: "Email *", submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
+    form: { company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity", city: "City", contact: "Contact person", phone: "Phone *", unified: "Unified number (starts with 7) *", email: "Email *", submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
     contactTag: "We’re here to help", contactTitle: "Contact us",
     wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia",
     footerDesc: "The integrated Saudi HR platform — one place bringing together everything you need to manage human capital.",
@@ -219,7 +219,7 @@ export default function Landing() {
 
   const [form, setForm] = useState({
     name: "", commercial_register: "", industry: "",
-    contact_name: "", contact_email: "", contact_phone: "", city: "",
+    contact_name: "", contact_email: "", contact_phone: "", unified_number: "", city: "",
   });
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
@@ -500,7 +500,8 @@ export default function Landing() {
               <Field label={t.form.industry} value={form.industry} onChange={(v) => set("industry", v)} />
               <Field label={t.form.city} value={form.city} onChange={(v) => set("city", v)} />
               <Field label={t.form.contact} value={form.contact_name} onChange={(v) => set("contact_name", v)} />
-              <Field label={t.form.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} />
+              <Field label={t.form.unified} value={form.unified_number} onChange={(v) => set("unified_number", v.replace(/\D/g, ""))} required />
+              <Field label={t.form.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} required />
             </div>
             <Field label={t.form.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
             <div className="flex justify-center">

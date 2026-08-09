@@ -37,7 +37,7 @@ const featuresEn = [
   "Client Trial Portal", "Labor Policy & Smart Warnings", "Employee Self-Service Portal",
 ];
 
-const empty = { name: "", commercial_register: "", industry: "", contact_name: "", contact_email: "", contact_phone: "", city: "", discount_code: "" };
+const empty = { name: "", commercial_register: "", industry: "", contact_name: "", contact_email: "", contact_phone: "", unified_number: "", city: "", discount_code: "" };
 
 export default function Quote() {
   const { lang } = useI18n();
@@ -48,8 +48,8 @@ export default function Quote() {
     barBack: "العودة للرئيسية", barPrint: "طباعة / حفظ PDF",
     formTitle: "بيانات المنشأة", formSub: "أدخل بيانات منشأتك لتوليد عرض سعر رسمي مع بيانات التحويل البنكي.",
     company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط", contact: "جهة الاتصال",
-    phone: "الهاتف", email: "البريد الإلكتروني *", city: "المدينة",
-    generate: "توليد عرض السعر", errForm: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح",
+    phone: "الهاتف *", email: "البريد الإلكتروني *", unified: "الرقم الموحد (يبدأ بـ7) *", city: "المدينة",
+    generate: "توليد عرض السعر", errForm: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح ورقم موحد يبدأ بـ7",
     errGeneric: "تعذّر توليد العرض، حاول مرة أخرى", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث",
     to: "إلى", quoteNo: "رقم العرض", date: "التاريخ", planTitle: "الاشتراك السنوي — منصة جدارة",
     planDesc: "باقة واحدة متكاملة تشمل كل ميزات المنصة:", includes: "تشمل الباقة:",
@@ -65,15 +65,15 @@ export default function Quote() {
     discCode: "كود الخصم (اختياري)",
     discBadge: "خصم", discApplied: "بعد تطبيق الكود", firstAfter: "السنة الأولى (بعد الخصم)",
     emailNotice: "تنويه مهم",
-    emailNoticeBody: "هذا البريد سيُعتمد كبريد منشأتكم الرسمي لإدارة المنصة وشراء الباقة. عند الشراء، سجّلوا بنفس هذا البريد في بوابة الشركات لتفعيل اشتراككم — ولا يمكن تغييره لاحقاً.",
-    quoteEmailNote: (e) => `البريد المعتمد لمنشأتكم في هذه المنصة هو: ${e} — عند إتمام التحويل يرجى التوجه إلى بوابة الشركات والتسجيل بنفس هذا البريد لتفعيل اشتراككم وإدارة حسابكم.`,
+    emailNoticeBody: "الرقم الموحد (الذي يبدأ بـ7) هو معرّف منشأتكم الرسمي في المنصة. عند إتمام التحويل، سجّلوا في بوابة الشركات بهذا الرقم الموحد وبنفس البريد المسجل هنا لتفعيل اشتراككم وإدارة حسابكم.",
+    quoteEmailNote: (e, u) => `الرقم الموحد لمنشأتكم في هذه المنصة هو: ${u} — عند إتمام التحويل يرجى التوجه إلى بوابة الشركات والتسجيل بنفس هذا الرقم والمسجل بالبريد ${e} لتفعيل اشتراككم وإدارة حسابكم.`,
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
     formTitle: "Company details", formSub: "Enter your company data to generate an official quotation with bank transfer details.",
     company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity", contact: "Contact person",
-    phone: "Phone", email: "Email *", city: "City",
-    generate: "Generate quotation", errForm: "Please enter a company name and a valid email",
+    phone: "Phone *", email: "Email *", unified: "Unified number (starts with 7) *", city: "City",
+    generate: "Generate quotation", errForm: "Please enter a company name, a valid email and a unified number starting with 7",
     errGeneric: "Could not generate the quote, try again", secure: "Your data is safe and never sold to third parties",
     to: "To", quoteNo: "Quote no.", date: "Date", planTitle: "Annual Subscription — Jadara Platform",
     planDesc: "One integrated package including every feature of the platform:", includes: "The package includes:",
@@ -89,8 +89,8 @@ export default function Quote() {
     discCode: "Discount code (optional)",
     discBadge: "OFF", discApplied: "After discount applied", firstAfter: "First year (after discount)",
     emailNotice: "Important",
-    emailNoticeBody: "This email will be adopted as your organization's official email to manage the platform and buy the package. When purchasing, register with the same email in the Companies portal to activate your subscription — it cannot be changed later.",
-    quoteEmailNote: (e) => `Your organization's official email for this platform is: ${e} — after the transfer, go to the Companies portal and register with the same email to activate your subscription and manage your account.`,
+    emailNoticeBody: "The unified number (starting with 7) is your organization's official identifier on the platform. After the transfer, register in the Companies portal with this unified number and the same email entered here to activate your subscription and manage your account.",
+    quoteEmailNote: (e, u) => `Your organization's unified number for this platform is: ${u} — after the transfer, go to the Companies portal and register with this number and the registered email ${e} to activate your subscription and manage your account.`,
   };
 
   const incoming = location.state?.company || null;
@@ -115,7 +115,8 @@ export default function Quote() {
     setErr("");
     const name = form.name.trim();
     const email = form.contact_email.trim();
-    if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setErr(t.errForm); return; }
+    const unified = form.unified_number.trim();
+    if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^7\d{7,11}$/.test(unified)) { setErr(t.errForm); return; }
     setSubmitting(true);
     try {
       const res = await base44.functions.invoke("createTrial", { ...form, discount_code: form.discount_code?.trim() || undefined });
@@ -160,7 +161,8 @@ export default function Quote() {
               <Field label={t.industry} value={form.industry} onChange={(v) => set("industry", v)} />
               <Field label={t.city} value={form.city} onChange={(v) => set("city", v)} />
               <Field label={t.contact} value={form.contact_name} onChange={(v) => set("contact_name", v)} />
-              <Field label={t.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} />
+              <Field label={t.unified} value={form.unified_number} onChange={(v) => set("unified_number", v.replace(/\D/g, ""))} required />
+              <Field label={t.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} required />
             </div>
             <Field label={t.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
             <div className="text-xs flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
@@ -225,6 +227,7 @@ export default function Quote() {
               <Row k={t.city} v={company.city} />
               <Row k={t.contact} v={company.contact_name} />
               <Row k={t.phone} v={company.contact_phone} />
+              <Row k={t.unified} v={company.unified_number} />
               <Row k={t.email} v={company.contact_email} />
             </div>
           </div>
@@ -301,9 +304,9 @@ export default function Quote() {
             <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 mt-3">
               <div className="flex gap-2 text-sm text-amber-900">
                 <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-                <div><b>{t.emailNotice}: </b>{t.quoteEmailNote(company.contact_email)}</div>
+                <div><b>{t.emailNotice}: </b>{t.quoteEmailNote(company.contact_email, company.unified_number)}</div>
               </div>
-              <div className="mt-2 text-base font-bold text-amber-900 break-all" dir="ltr">{company.contact_email}</div>
+              <div className="mt-2 text-base font-bold text-amber-900 break-all" dir="ltr">{company.unified_number} — {company.contact_email}</div>
             </div>
             <div className="flex flex-wrap gap-3 mt-3">
               <a href={WHATSAPP} target="_blank" rel="noreferrer" className="no-print inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200"><MessageCircle size={14} /> WhatsApp</a>
