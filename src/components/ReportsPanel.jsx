@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/hr";
 import { turnoverWindow, attendanceRate, statusSplit, CHART_PALETTE } from "@/lib/analytics";
-import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users, ShieldCheck, Truck, TrendingDown, Clock, AlertTriangle, Target, DoorOpen, ClipboardList, Sparkles, Loader2, Printer } from "lucide-react";
+import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users, ShieldCheck, Truck, TrendingDown, Clock, AlertTriangle, Target, DoorOpen, ClipboardList, Sparkles, Loader2, Printer, Wallet } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { printReport } from "@/lib/reportPrint";
@@ -29,7 +29,7 @@ export default function ReportsPanel({ employees, attendance }) {
     vehStatus: "حالة المركبات", vehExpiry: "انتهاءات قريبة", insuranceExp: "تأمين", licenseExp: "رخصة", inspectionExp: "فحص",
     tripTable: "رحلات ضمن الفترة", tripEmp: "الموظف", tripDest: "الوجهة", tripDates: "الفترة", tripDays: "الأيام", tripCost: "التكلفة", tripsByMonth: "رحلات حسب الشهر",
     window3: "3 أشهر", window6: "6 أشهر",
-    rWarnings: "الإنذارات (موظف)", rPerf: "إدارة الأداء", rExit: "مقابلات المغادرة", rSurveys: "الاستبيانات",
+    rWarnings: "الإنذارات (موظف)", rPerf: "إدارة الأداء", rExit: "مقابلات المغادرة", rSurveys: "الاستبيانات", rPayroll: "كشوف الرواتب المصروفة",
     warnType: "نوع المخالفة", warnLevel: "الدرجة", warnCount: "عدد الإنذارات", warnDate: "تاريخ الواقعة", warnNote: "نص الإنذار",
     perfAll: "متوسط الأداء للموظفين", perfOne: "أداء الموظف", perfPeriod: "الفترة", perfRate: "التقييم", perfRec: "التوصية",
     exitReasons: "أسباب المغادرة", exitSat: "متوسط الرضا", exitCount: "عدد المقابلات",
@@ -44,6 +44,10 @@ export default function ReportsPanel({ employees, attendance }) {
     warnRange: "نطاق الإنذارات", promotionReady: "جاهز للترقية", notPromote: "غير جاهز للترقية",
     topReasons: "أهم أسباب المغادرة", countLabel: "العدد", issueDate: "تاريخ الإصدار",
     licenseNumber: "رقم الترخيص", na: "لا ينطبق",
+    paySel: "اختر شهر كشف الرواتب المصروف", payTotal: "إجمالي الصافي", payEmps: "عدد الموظفين",
+    payExport: "تحميل PDF (مع ختم تم الدفع)", payNone: "لا توجد كشوف رواتب مصروفة بعد",
+    payThEmp: "الموظف", payThBase: "أساسي", payThNet: "الصافي", payThStatus: "الحالة", payPaid: "مدفوع", payDate: "تاريخ الصرف",
+    monthsList: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
   } : {
     section: "Reports Center", sectionSub: "Reports & charts for decision support — inside Analytics",
     pick: "Pick a report",
@@ -57,7 +61,7 @@ export default function ReportsPanel({ employees, attendance }) {
     vehStatus: "Vehicle status", vehExpiry: "Upcoming expiries", insuranceExp: "Insurance", licenseExp: "License", inspectionExp: "Inspection",
     tripTable: "Trips in period", tripEmp: "Employee", tripDest: "Destination", tripDates: "Period", tripDays: "Days", tripCost: "Cost", tripsByMonth: "Trips by month",
     window3: "3 months", window6: "6 months",
-    rWarnings: "Warnings (employee)", rPerf: "Performance", rExit: "Exit interviews", rSurveys: "Surveys",
+    rWarnings: "Warnings (employee)", rPerf: "Performance", rExit: "Exit interviews", rSurveys: "Surveys", rPayroll: "Paid payroll sheets",
     warnType: "Violation type", warnLevel: "Level", warnCount: "Warnings count", warnDate: "Incident date", warnNote: "Warning text",
     perfAll: "Avg performance per employee", perfOne: "Employee performance", perfPeriod: "Period", perfRate: "Rating", perfRec: "Recommendation",
     exitReasons: "Exit reasons", exitSat: "Avg satisfaction", exitCount: "Interviews",
@@ -72,6 +76,10 @@ export default function ReportsPanel({ employees, attendance }) {
     warnRange: "Warnings range", promotionReady: "Promotion ready", notPromote: "Not ready for promotion",
     topReasons: "Top exit reasons", countLabel: "Count", issueDate: "Issue date",
     licenseNumber: "License number", na: "N/A",
+    paySel: "Pick a paid payroll month", payTotal: "Total net", payEmps: "Employees",
+    payExport: "Download PDF (with PAID stamp)", payNone: "No paid payroll sheets yet",
+    payThEmp: "Employee", payThBase: "Base", payThNet: "Net", payThStatus: "Status", payPaid: "Paid", payDate: "Paid date",
+    monthsList: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
   };
 
   const REPORTS = [
@@ -86,6 +94,7 @@ export default function ReportsPanel({ employees, attendance }) {
     { id: "performance", label: t.rPerf, icon: Target },
     { id: "exit", label: t.rExit, icon: DoorOpen },
     { id: "surveys", label: t.rSurveys, icon: ClipboardList },
+    { id: "payroll", label: t.rPayroll, icon: Wallet },
   ];
 
   const [rid, setRid] = useState("contracts");
@@ -108,7 +117,7 @@ export default function ReportsPanel({ employees, attendance }) {
 
   useEffect(() => {
     (async () => {
-      const [lic, veh, trp, wrn, rev, exi, srv, sres, orgs] = await Promise.all([
+      const [lic, veh, trp, wrn, rev, exi, srv, sres, orgs, prl] = await Promise.all([
         base44.entities.License.list("-expiry_date", 500).catch(() => []),
         base44.entities.Vehicle.list("-created_date", 500).catch(() => []),
         base44.entities.BusinessTrip.list("-start_date", 500).catch(() => []),
@@ -118,8 +127,9 @@ export default function ReportsPanel({ employees, attendance }) {
         base44.entities.Survey.list("-created_date", 500).catch(() => []),
         base44.entities.SurveyResponse.list("-submitted_date", 1000).catch(() => []),
         base44.entities.Organization.list("-created_date", 1).catch(() => []),
+        base44.entities.Payroll.filter({ status: "paid" }, "-created_date", 2000).catch(() => []),
       ]);
-      setExtra({ lic, veh, trp, warnings: wrn, reviews: rev, exits: exi, surveys: srv, sresponses: sres });
+      setExtra({ lic, veh, trp, warnings: wrn, reviews: rev, exits: exi, surveys: srv, sresponses: sres, payroll: prl });
       setOrg(orgs?.[0] || null);
     })();
   }, []);

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown
+  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown, ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
@@ -441,6 +441,9 @@ export default function MyRequests() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+              <ArrowRight size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {isAr ? "العودة للموقع" : "Back to site"}
+            </Link>
             <LanguageToggle />
             {user && (
               <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">

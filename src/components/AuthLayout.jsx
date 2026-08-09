@@ -1,5 +1,6 @@
 import React from "react";
-import { ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ShieldCheck, ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useI18n } from "@/lib/i18n";
@@ -45,7 +46,11 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6 relative">
-        <div className="absolute top-4 inset-x-4 flex justify-end">
+        <div className="absolute top-4 inset-x-4 flex items-center justify-between">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowRight size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+            {isAr ? "العودة للرئيسية" : "Back to home"}
+          </Link>
           <LanguageToggle />
         </div>
         <div className="w-full max-w-md">

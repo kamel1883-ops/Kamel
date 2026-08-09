@@ -18,8 +18,23 @@ function waitForImages(node) {
   );
 }
 
+// يرسم ختم "PAID" كبير شبه شفاف ومائل في منتصف الصفحة الحالية
+function drawPaidStamp(pdf, pageW, pageH) {
+  try { pdf.setGState(new pdf.GState({ opacity: 0.14 })); } catch (e) {}
+  pdf.setTextColor(5, 150, 105);
+  try { pdf.setFont("helvetica", "bold"); pdf.setFontSize(96); } catch (e) {}
+  try { pdf.text("PAID", pageW / 2, pageH / 2 + 22, { align: "center", angle: 32 }); } catch (e) {}
+  try {
+    pdf.setDrawColor(5, 150, 105);
+    pdf.setLineWidth(1.2);
+    pdf.ellipse(pageW / 2, pageH / 2 - 2, 52, 26, "S");
+  } catch (e) {}
+  try { pdf.setGState(new pdf.GState({ opacity: 1 })); } catch (e) {}
+}
+
 // يحوّل عنصر DOM إلى Blob PDF (A4، عربي RTL عبر html2canvas)
-export async function elementToPdfBlob(node) {
+// options.stamp = true يضع ختم "تم الدفع / PAID" كبير على كل صفحة
+export async function elementToPdfBlob(node, options = {}) {
   await waitForImages(node);
   // html2canvas يفكّك أحرف العربية (أشكال معزولة) عند أي letter-spacing غير صفري،
   // لذا نصفّر المسافة لكل العناصر داخل العنصر المُلتقط (يُصلح عناوين <h3> ... إلخ)
@@ -41,11 +56,13 @@ export async function elementToPdfBlob(node) {
   let heightLeft = imgH;
   let position = 0;
   pdf.addImage(img, "JPEG", 0, position, pageW, imgH);
+  if (options.stamp) drawPaidStamp(pdf, pageW, pageH);
   heightLeft -= pageH;
   while (heightLeft > 0) {
     position -= pageH;
     pdf.addPage();
     pdf.addImage(img, "JPEG", 0, position, pageW, imgH);
+    if (options.stamp) drawPaidStamp(pdf, pageW, pageH);
     heightLeft -= pageH;
   }
   return pdf.output("blob");

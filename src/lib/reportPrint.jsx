@@ -66,7 +66,7 @@ function buildTitle(title, subtitle) {
   return c;
 }
 
-export async function printReport(node, { org, title, subtitle }) {
+export async function printReport(node, { org, title, subtitle, stamp } = {}) {
   if (!node) return;
   const width = Math.min(900, node.offsetWidth || 900);
   const wrapper = document.createElement("div");
@@ -89,7 +89,7 @@ export async function printReport(node, { org, title, subtitle }) {
   wrapper.appendChild(clone);
 
   try {
-    const blob = await elementToPdfBlob(wrapper);
+    const blob = await elementToPdfBlob(wrapper, { stamp: !!stamp });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
     setTimeout(() => URL.revokeObjectURL(url), 60000);

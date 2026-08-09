@@ -7,11 +7,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { computeGOSI } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
+import { printReport } from "@/lib/reportPrint";
 
 export default function Payroll() {
   const { lang } = useI18n();
@@ -25,6 +26,7 @@ export default function Payroll() {
     months: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
+    pdf: "تحميل / طباعة PDF", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
     thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
   } : {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
@@ -35,6 +37,7 @@ export default function Payroll() {
     months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
+    pdf: "Download / Print PDF", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
     thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
   };
 
@@ -46,6 +49,8 @@ export default function Payroll() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [batching, setBatching] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const sheetRef = React.useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -136,6 +141,45 @@ export default function Payroll() {
     setBatching(false); load();
   };
 
+  // إعادة فتح الكشف للتعديل وإعادة الاعتماد (من مدفوع ← معتمد)
+  const reopen = async () => {
+    setBatching(true);
+    const updates = payrolls.filter((p) => p.status === "paid").map((p) => ({ id: p.id, status: "approved", paid_date: null }));
+    if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
+    setBatching(false); load();
+  };
+
+  const exportPdf = async () => {
+    if (!sheetRef.current) return;
+    setExporting(true);
+    try {
+      await printReport(sheetRef.current, {
+        org,
+        title: isAr ? `كشف رواتب ${t.months[month - 1]} ${year}` : `Payroll sheet ${t.months[month - 1]} ${year}`,
+        subtitle: isAr ? `إجمالي الصافي: ${formatCurrency(totalNet)} — ${payrolls.length} موظف` : `Total net: ${formatCurrency(totalNet)} — ${payrolls.length} employees`,
+      });
+    } finally { setExporting(false); }
+  };
+
+  const exportExcel = () => {
+    const headers = [t.thEmp, t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
+    const rows = payrolls.map((p) => [
+      p.employee_name || "", p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
+      p.bonus || 0, p.gosi_employee || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
+      p.net_salary || 0, payrollStatusLabel(p.status).label,
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `payroll-${year}-${String(month).padStart(2, "0")}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+
   const totalNet = payrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
   const totalBonus = payrolls.reduce((s, p) => s + (p.bonus || 0), 0);
   const totalDed = payrolls.reduce((s, p) => s + (p.deductions || 0), 0);
@@ -192,14 +236,17 @@ export default function Payroll() {
             <span className={cn("px-3 py-1 rounded-full font-medium text-xs", payrollStatusLabel(monthStatus).cls)}>{payrollStatusLabel(monthStatus).label}</span>
             <span className="text-xs text-muted-foreground">{t.empCount(payrolls.length)}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {anyDraft && (<Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2"><FileCheck size={16} /> {t.approve}</Button>)}
             {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
+            {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
+            <Button onClick={exportPdf} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
+            <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-border overflow-hidden">
+      <div ref={sheetRef} className="bg-white rounded-2xl border border-border overflow-hidden">
         {loading ? (
           <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
         ) : payrolls.length === 0 ? (
