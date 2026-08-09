@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/hr";
 import { turnoverWindow, attendanceRate, statusSplit, CHART_PALETTE } from "@/lib/analytics";
-import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users, ShieldCheck, Truck, TrendingDown, Clock, AlertTriangle, Target, DoorOpen, ClipboardList, Sparkles, Loader2 } from "lucide-react";
+import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users, ShieldCheck, Truck, TrendingDown, Clock, AlertTriangle, Target, DoorOpen, ClipboardList, Sparkles, Loader2, Printer } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
+import { printReport } from "@/lib/reportPrint";
 
 const daysUntil = (d) => { if (!d) return null; const t = new Date(d).getTime(); if (isNaN(t)) return null; return Math.ceil((t - Date.now()) / 86400000); };
 const addMonths = (n) => { const d = new Date(); d.setMonth(d.getMonth() + n); return d; };
@@ -34,6 +35,7 @@ export default function ReportsPanel({ employees, attendance }) {
     exitReasons: "أسباب المغادرة", exitSat: "متوسط الرضا", exitCount: "عدد المقابلات",
     survSent: "الانطباع العام", survAvg: "متوسط التقييم", survCount: "الردود",
     genAI: "توليد توصيات بالذكاء الاصطناعي", generating: "جارٍ التوليد…", aiSummary: "خلاصة", aiRecs: "التوصيات",
+    export: "تصدير PDF / معاينة وطباعة",
   } : {
     section: "Reports Center", sectionSub: "Reports & charts for decision support — inside Analytics",
     pick: "Pick a report",
@@ -53,6 +55,7 @@ export default function ReportsPanel({ employees, attendance }) {
     exitReasons: "Exit reasons", exitSat: "Avg satisfaction", exitCount: "Interviews",
     survSent: "Overall sentiment", survAvg: "Avg rating", survCount: "Responses",
     genAI: "Generate AI recommendations", generating: "Generating…", aiSummary: "Summary", aiRecs: "Recommendations",
+    export: "Export PDF / preview & print",
   };
 
   const REPORTS = [
@@ -75,10 +78,22 @@ export default function ReportsPanel({ employees, attendance }) {
   const [winM, setWinM] = useState(90);
   const [tripM, setTripM] = useState(6);
   const [empId, setEmpId] = useState("");
+  const [org, setOrg] = useState(null);
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef(null);
+
+  const exportPdf = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try {
+      const active = REPORTS.find((r) => r.id === rid);
+      await printReport(reportRef.current, { org, title: active ? active.label : t.section, subtitle: t.sectionSub });
+    } finally { setExporting(false); }
+  };
 
   useEffect(() => {
     (async () => {
-      const [lic, veh, trp, wrn, rev, exi, srv, sres] = await Promise.all([
+      const [lic, veh, trp, wrn, rev, exi, srv, sres, orgs] = await Promise.all([
         base44.entities.License.list("-expiry_date", 500).catch(() => []),
         base44.entities.Vehicle.list("-created_date", 500).catch(() => []),
         base44.entities.BusinessTrip.list("-start_date", 500).catch(() => []),
@@ -87,8 +102,10 @@ export default function ReportsPanel({ employees, attendance }) {
         base44.entities.ExitInterview.list("-interview_date", 1000).catch(() => []),
         base44.entities.Survey.list("-created_date", 500).catch(() => []),
         base44.entities.SurveyResponse.list("-submitted_date", 1000).catch(() => []),
+        base44.entities.Organization.list("-created_date", 1).catch(() => []),
       ]);
       setExtra({ lic, veh, trp, warnings: wrn, reviews: rev, exits: exi, surveys: srv, sresponses: sres });
+      setOrg(orgs?.[0] || null);
     })();
   }, []);
 
@@ -96,9 +113,14 @@ export default function ReportsPanel({ employees, attendance }) {
 
   return (
     <div className="mt-8" dir={isAr ? "rtl" : "ltr"}>
-      <div className="mb-5">
-        <h2 className="text-lg font-bold flex items-center gap-2"><BarChart3 size={20} className="text-violet-600" /> {t.section}</h2>
-        <p className="text-sm text-muted-foreground mt-1">{t.sectionSub}</p>
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2"><BarChart3 size={20} className="text-violet-600" /> {t.section}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{t.sectionSub}</p>
+        </div>
+        <Button onClick={exportPdf} disabled={exporting} className="gap-2 shrink-0">
+          {exporting ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />} {t.export}
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-5">
@@ -113,18 +135,20 @@ export default function ReportsPanel({ employees, attendance }) {
         })}
       </div>
 
-      {(rid === "contracts") && <ContractsReport employees={employees} winM={winM} setWinM={setWinM} t={t} />}
-      {rid === "turnover" && <TurnoverReport employees={employees} t={t} />}
-      {rid === "attAll" && <AttAllReport attendance={attendance} statusLabel={statusLabel} t={t} />}
-      {rid === "attOne" && <AttOneReport employees={employees} attendance={attendance} empId={empId} setEmpId={setEmpId} statusLabel={statusLabel} t={t} />}
-      {rid === "actInactive" && <ActInactiveReport employees={employees} t={t} />}
-      {rid === "licenses" && <LicensesReport records={extra.lic || []} t={t} />}
-      {rid === "vehicles" && <VehiclesReport records={extra.veh || []} t={t} />}
-      {rid === "trips" && <TripsReport records={extra.trp || []} tripM={tripM} setTripM={setTripM} t={t} />}
-      {rid === "warningsOne" && <WarningsReport records={extra.warnings || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
-      {rid === "performance" && <PerformanceReport records={extra.reviews || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
-      {rid === "exit" && <ExitReport records={extra.exits || []} t={t} />}
-      {rid === "surveys" && <SurveysReport surveys={extra.surveys || []} responses={extra.sresponses || []} t={t} />}
+      <div ref={reportRef}>
+        {(rid === "contracts") && <ContractsReport employees={employees} winM={winM} setWinM={setWinM} t={t} />}
+        {rid === "turnover" && <TurnoverReport employees={employees} t={t} />}
+        {rid === "attAll" && <AttAllReport attendance={attendance} statusLabel={statusLabel} t={t} />}
+        {rid === "attOne" && <AttOneReport employees={employees} attendance={attendance} empId={empId} setEmpId={setEmpId} statusLabel={statusLabel} t={t} />}
+        {rid === "actInactive" && <ActInactiveReport employees={employees} t={t} />}
+        {rid === "licenses" && <LicensesReport records={extra.lic || []} t={t} />}
+        {rid === "vehicles" && <VehiclesReport records={extra.veh || []} t={t} />}
+        {rid === "trips" && <TripsReport records={extra.trp || []} tripM={tripM} setTripM={setTripM} t={t} />}
+        {rid === "warningsOne" && <WarningsReport records={extra.warnings || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
+        {rid === "performance" && <PerformanceReport records={extra.reviews || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
+        {rid === "exit" && <ExitReport records={extra.exits || []} t={t} />}
+        {rid === "surveys" && <SurveysReport surveys={extra.surveys || []} responses={extra.sresponses || []} t={t} />}
+      </div>
     </div>
   );
 }
