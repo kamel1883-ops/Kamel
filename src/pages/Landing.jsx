@@ -22,7 +22,7 @@ const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "info@jadara-hr.com";
 // روابط حسابات التواصل الرسمية
 const SOCIAL_LINKS = {
-  linkedin: "https://www.linkedin.com/company/جدارة-لإدارة-الموارد-البشرية",
+  linkedin: "https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9",
   twitter: "https://x.com/jadarahr",
 };
 
@@ -143,6 +143,10 @@ export default function Landing() {
     portalDesc: "دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. يُربط الحساب برقم الهوية/الإقامة بعد اعتماد الموارد البشرية.",
     portalCta: "دخول البوابة",
     featuresTag: "كل ما تحتاجه في مكان واحد", featuresTitle: "منصة واحدة، حلول متكاملة",
+    vmvTag: "هويتنا", vmvTitle: "رؤيتنا، رسالتنا، وأهدافنا",
+    visionLabel: "رؤيتنا", visionText: "أن نكون المنصة السعودية الرائدة والمفضّلة لإدارة الموارد البشرية بحلول 2027، نمكّن المنشآت من تحويل مواردها البشرية إلى ميزة تنافسية حقيقية عبر تقنية سحابية ذكية وامتثال تام للأنظمة.",
+    missionLabel: "رسالتنا", missionText: "تبسيط إدارة الموارد البشرية للمنشآت السعودية بمختلف أحجامها عبر منصة واحدة متكاملة، تجمع الموظفين والحضور والرواتب والإجازات ونهاية الخدمة والتراخيص والتحليلات، وتوفّر تجربة فاخرة وآمنة ودقيقة بلا تعقيد.",
+    goalsLabel: "أهدافنا", goalsText: "نمكّن عملاءنا من الكفاءة والامتثال والنمو، ونختصر الوقت والجهد، ونعزز السعودة وقرارات الموارد البشرية بالبيانات، ونبني شراكة طويلة الأمد قائمة على الثقة والشفافية.",
     licensesTag: "امتثال تام", licensesTitle: "تراخيص حكومية شاملة تحت سقف واحد",
     licBadge: "مزايا إدارة التراخيص",
     licLi: ["خيار «لا ينطبق» لأي ترخيص غير ملزم لمنشأتك.", "إرفاق نسخة إلكترونية لكل ترخيص.", "تنبيهات استباقية قبل انتهاء الترخيص.", "تسجيل عقود الصيانة وتواريخها.", "تصنيف مخصّص لأي ترخيص حكومي إضافي."],
@@ -166,7 +170,7 @@ export default function Landing() {
     trialTag: "سجّل في دقيقة", trialTitle: "ابدأ تجربتك المجانية الآن",
     doneTitle: "تم استلام طلبك بنجاح", doneDesc: "سيتواصل معك فريقنا خلال فترة التجربة لتفعيل اشتراكك السنوي ونقل بياناتك. تحقق من بريدك الإلكتروني.",
     doneCta: "تسجيل الدخول للمنصة",
-    form: { company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط", city: "المدينة", contact: "جهة الاتصال", phone: "الهاتف *", unified: "الرقم الموحد (يبدأ بـ7) *", email: "البريد الإلكتروني *", submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
+    form: { company: "اسم المنشأة *", industry: "القطاع / النشاط", city: "المدينة", contact: "اسم الشخص المسؤول", phone: "الهاتف *", unified: "الرقم الموحد (يبدأ بـ7) *", email: "البريد الإلكتروني *", submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
     wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
@@ -184,6 +188,10 @@ export default function Landing() {
     portalDesc: "Employees only — clock in/out from the phone within 50 meters of the workplace (no devices), view salary and leave balance, and submit loan, leave, and business‑trip requests directly. The account is linked by national ID/Iqama after HR approval.",
     portalCta: "Enter Portal",
     featuresTag: "Everything in one place", featuresTitle: "One platform, integrated solutions",
+    vmvTag: "Our Identity", vmvTitle: "Our Vision, Mission & Goals",
+    visionLabel: "Our Vision", visionText: "To be the leading and preferred Saudi platform for human resource management by 2027, empowering organizations to turn their human capital into a genuine competitive advantage through smart cloud technology and full regulatory compliance.",
+    missionLabel: "Our Mission", missionText: "Simplify HR management for Saudi organizations of all sizes through one integrated platform that brings together employees, attendance, payroll, leaves, end-of-service, licenses, and analytics — delivering a premium, secure, and accurate experience without complexity.",
+    goalsLabel: "Our Goals", goalsText: "Empower our clients' efficiency, compliance, and growth; cut time and effort; strengthen Saudization and data-driven HR decisions; and build a long-term partnership grounded in trust and transparency.",
     licensesTag: "Full compliance", licensesTitle: "All government licenses under one roof",
     licBadge: "License management perks",
     licLi: ["A “not applicable” option for any license not binding to you.", "Attach an electronic copy for each license.", "Proactive alerts before expiry.", "Record maintenance contracts and dates.", "Custom classification for any extra government license."],
@@ -207,7 +215,7 @@ export default function Landing() {
     trialTag: "Register in a minute", trialTitle: "Start your free trial now",
     doneTitle: "Your request was received", doneDesc: "Our team will contact you during the trial to activate your annual subscription and migrate your data. Check your email.",
     doneCta: "Sign in to the platform",
-    form: { company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity", city: "City", contact: "Contact person", phone: "Phone *", unified: "Unified number (starts with 7) *", email: "Email *", submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
+    form: { company: "Company name *", industry: "Sector / Activity", city: "City", contact: "Responsible person", phone: "Phone *", unified: "Unified number (starts with 7) *", email: "Email *", submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
     contactTag: "We’re here to help", contactTitle: "Contact us",
     wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia",
     footerDesc: "The integrated Saudi HR platform — one place bringing together everything you need to manage human capital.",
@@ -342,6 +350,31 @@ export default function Landing() {
 
       {/* عملاؤنا */}
       <ClientMarquee />
+
+      {/* الرؤية والرسالة والأهداف */}
+      <section id="vmv" className="max-w-6xl mx-auto px-5 py-14">
+        <SectionHead tag={t.vmvTag} title={t.vmvTitle} />
+        <div className="grid md:grid-cols-3 gap-5 mt-10">
+          {[
+            { icon: Star, label: t.visionLabel, text: t.visionText, glow: "from-amber-500/20 to-yellow-500/10", ring: "text-amber-300" },
+            { icon: ShieldCheck, label: t.missionLabel, text: t.missionText, glow: "from-emerald-500/20 to-teal-500/10", ring: "text-emerald-300" },
+            { icon: Target, label: t.goalsLabel, text: t.goalsText, glow: "from-violet-500/20 to-indigo-500/10", ring: "text-violet-300" },
+          ].map((c) => {
+            const I = c.icon;
+            return (
+              <motion.div key={c.label} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
+                className="relative bg-[#13161f] border border-white/10 rounded-3xl p-7 overflow-hidden">
+                <div className={`absolute -top-10 -left-10 w-40 h-40 rounded-full bg-gradient-to-br ${c.glow} blur-2xl`} />
+                <div className="relative w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mb-4 shadow-lg">
+                  <I size={22} className={c.ring} />
+                </div>
+                <div className="relative text-xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>{c.label}</div>
+                <p className="relative text-white/65 text-sm leading-relaxed">{c.text}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* المميزات */}
       <section id="features" className="max-w-7xl mx-auto px-5 py-14">
@@ -493,7 +526,6 @@ export default function Landing() {
           <form onSubmit={submit} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-7 mt-8 space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label={t.form.company} value={form.name} onChange={(v) => set("name", v)} required />
-              <Field label={t.form.cr} value={form.commercial_register} onChange={(v) => set("commercial_register", v)} />
               <Field label={t.form.industry} value={form.industry} onChange={(v) => set("industry", v)} />
               <Field label={t.form.city} value={form.city} onChange={(v) => set("city", v)} />
               <Field label={t.form.contact} value={form.contact_name} onChange={(v) => set("contact_name", v)} />

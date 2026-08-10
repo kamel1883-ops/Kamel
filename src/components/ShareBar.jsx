@@ -75,7 +75,7 @@ export default function ShareBar({ isAr = true }) {
         </button>
       </div>
       <p className="text-xs text-white/45 max-w-xl text-center leading-relaxed">
-        {isAr ? "للتابع والمشاركة عبر حساباتنا الرسمية:" : "Follow & share via our official accounts:"}{" "}
+        {isAr ? "للمتابعة والمشاركة عبر حساباتنا الرسمية:" : "Follow & share via our official accounts:"}{" "}
         <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white underline underline-offset-2">LinkedIn</a>{" · "}
         <a href={SOCIAL.x} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white underline underline-offset-2">X</a>
       </p>
