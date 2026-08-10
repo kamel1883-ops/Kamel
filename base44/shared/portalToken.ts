@@ -2,7 +2,11 @@
 // الاستخدام: verifyEmployeePortal يُوقّع الرمز بعد نجاح مطابقة الهوية + الميلاد،
 // و portalData / approvalQueue / approvalAction يتحققون منه لاحقاً.
 
-const SECRET = Deno.env.get("CRON_SECRET") || "fallback-portal-secret";
+const SECRET = Deno.env.get("CRON_SECRET") || "";
+if (!SECRET) {
+  // لا يُسمح بتشغيل البوابة بدون مفتاح توقيع سري — يمنع رمز جلسة قابل للتزوير
+  throw new Error("CRON_SECRET is not configured");
+}
 
 const enc = new TextEncoder();
 
