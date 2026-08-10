@@ -47,7 +47,7 @@ export default function Quote() {
     pageTitle: "عرض سعر — الاشتراك السنوي",
     barBack: "العودة للرئيسية", barPrint: "طباعة / حفظ PDF",
     formTitle: "بيانات المنشأة", formSub: "أدخل بيانات منشأتك لتوليد عرض سعر رسمي مع بيانات التحويل البنكي.",
-    company: "اسم المنشأة *", cr: "السجل التجاري", industry: "القطاع / النشاط", contact: "جهة الاتصال",
+    company: "اسم المنشأة *", industry: "القطاع / النشاط", contact: "اسم الشخص المسؤول",
     phone: "الهاتف *", email: "البريد الإلكتروني *", unified: "الرقم الموحد (يبدأ بـ7) *", city: "المدينة",
     generate: "توليد عرض السعر", errForm: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح ورقم موحد يبدأ بـ7",
     errGeneric: "تعذّر توليد العرض، حاول مرة أخرى", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث",
@@ -71,7 +71,7 @@ export default function Quote() {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
     formTitle: "Company details", formSub: "Enter your company data to generate an official quotation with bank transfer details.",
-    company: "Company name *", cr: "Commercial Register", industry: "Sector / Activity", contact: "Contact person",
+    company: "Company name *", industry: "Sector / Activity", contact: "Responsible person",
     phone: "Phone *", email: "Email *", unified: "Unified number (starts with 7) *", city: "City",
     generate: "Generate quotation", errForm: "Please enter a company name, a valid email and a unified number starting with 7",
     errGeneric: "Could not generate the quote, try again", secure: "Your data is safe and never sold to third parties",
@@ -157,7 +157,6 @@ export default function Quote() {
           <form onSubmit={submit} className="bg-white border border-border rounded-2xl p-6 mt-6 space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label={t.company} value={form.name} onChange={(v) => set("name", v)} required />
-              <Field label={t.cr} value={form.commercial_register} onChange={(v) => set("commercial_register", v)} />
               <Field label={t.industry} value={form.industry} onChange={(v) => set("industry", v)} />
               <Field label={t.city} value={form.city} onChange={(v) => set("city", v)} />
               <Field label={t.contact} value={form.contact_name} onChange={(v) => set("contact_name", v)} />
@@ -222,7 +221,6 @@ export default function Quote() {
             <div className="text-xs font-semibold text-muted-foreground mb-2">{t.to}</div>
             <div className="grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
               <Row k={t.company} v={company.name} />
-              <Row k={t.cr} v={company.commercial_register} />
               <Row k={t.industry} v={company.industry} />
               <Row k={t.city} v={company.city} />
               <Row k={t.contact} v={company.contact_name} />
