@@ -15,6 +15,7 @@ import { leaveTypeLabel, formatCurrency, todayISO } from "@/lib/hr";
 import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
+import InviteApproverDialog from "@/components/InviteApproverDialog";
 
 export default function Approvals() {
   const { lang } = useI18n();
@@ -316,7 +317,7 @@ export default function Approvals() {
 
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
-      <PageHeader title={t.title} subtitle={t.subtitle} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={<InviteApproverDialog />} />
 
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
