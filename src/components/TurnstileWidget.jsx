@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
 // مفتاح الموقع العام لـ Cloudflare Turnstile. (مفتاح اختبار يمرّر دائماً — استبدله بمفتاحك الحقيقي من لوحة Cloudflare Turnstile).
-const TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+const TURNSTILE_SITE_KEY = "0x4AAAAAAEMIP2HAccXXBa2n";
 
 let scriptPromise = null;
 function loadScript() {
