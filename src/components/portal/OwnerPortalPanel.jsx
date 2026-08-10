@@ -12,7 +12,7 @@ import {
 import {
   Crown, Building2, FlaskConical, BadgeCheck, CalendarClock, Wallet, Loader2,
   AlertTriangle, Pause, Play, RefreshCw, FileCheck2, Bell, Mail, Search,
-  Users, MessageSquare, Check, Sparkles, ShieldCheck, Clock,
+  Users, MessageSquare, Check, Sparkles, ShieldCheck, Clock, Ban, RotateCcw,
 } from "lucide-react";
 
 // بوابة مالك النظام — تُفتح داخل بوابة الموظف عند role_level === "owner"
@@ -27,14 +27,14 @@ export default function OwnerPortalPanel({ session, employee }) {
     sTotal: "إجمالي العملاء", sTrial: "تجارب جارية", sPaid: "مُشتركون فعّالون",
     sSuspended: "موقوفون", sExpiring: "قارب الانتهاء", sRevenue: "الإيرادات (ر.س/سنة)",
     filterAll: "الكل", filterTrial: "تجربة", filterActive: "سنوي فعّال",
-    filterSuspended: "موقوف", filterExpiring: "قارب الانتهاء",
+    filterSuspended: "موقوف", filterExpiring: "قارب الانتهاء", filterCancelled: "ملغيات",
     searchPh: "ابحث باسم المنشأة أو جهة الاتصال…",
     thCustomer: "العميل", thContact: "جهة الاتصال", thStatus: "الحالة",
     thEnd: "نهاية الفترة", thActions: "إجراءات",
     uptime: (d) => `اشتراك: ${d || "—"}`, triTime: (d, n) => `تجربة: ${d || "—"} (${n} يوم)`,
     daysLeft: (n) => `متبقي ${n} يوم`, ended: "انتهت — راجع الحساب",
     regSub: "تسجيل اشتراك", confirmRenew: "تأكيد الدفع والتفعيل", suspend: "إيقاف",
-    resume: "إعادة تفعيل", activate: "تفعيل مباشر",
+    resume: "إعادة تفعيل", activate: "تفعيل مباشر", cancel: "إلغاء نهائي", restore: "استرجاع",
     pendingPay: "بانتظار تأكيد الدفع", noTenants: "لا يوجد عملاء بعد — تُسجّل تلقائياً من صفحة الهبوط.",
     notifTitle: "تنبيهات قرب الانتهاء", noNotif: "لا تنبيهات حالياً.",
     mailtoSub: "تذكير: اقتراب انتهاء اشتراك منصة جدارة",
@@ -53,14 +53,14 @@ export default function OwnerPortalPanel({ session, employee }) {
     sTotal: "Total clients", sTrial: "Active trials", sPaid: "Active subscribers",
     sSuspended: "Suspended", sExpiring: "Expiring soon", sRevenue: "Revenue (SAR/yr)",
     filterAll: "All", filterTrial: "Trial", filterActive: "Active",
-    filterSuspended: "Suspended", filterExpiring: "Expiring",
+    filterSuspended: "Suspended", filterExpiring: "Expiring", filterCancelled: "Cancelled",
     searchPh: "Search by company or contact…",
     thCustomer: "Customer", thContact: "Contact", thStatus: "Status",
     thEnd: "Period end", thActions: "Actions",
     uptime: (d) => `Sub: ${d || "—"}`, triTime: (d, n) => `Trial: ${d || "—"} (${n}d)`,
     daysLeft: (n) => `${n} days left`, ended: "Ended — review",
     regSub: "Register sub", confirmRenew: "Confirm & activate", suspend: "Suspend",
-    resume: "Resume", activate: "Direct activate",
+    resume: "Resume", activate: "Direct activate", cancel: "Cancel", restore: "Restore",
     pendingPay: "Awaiting payment confirmation", noTenants: "No clients yet — registered automatically from landing.",
     notifTitle: "Expiry alerts", noNotif: "No alerts right now.",
     mailtoSub: "Reminder: Jadara subscription ending soon",
@@ -155,9 +155,13 @@ export default function OwnerPortalPanel({ session, employee }) {
     if (filter === "trial") list = list.filter((x) => x.status === "trial");
     else if (filter === "active") list = list.filter((x) => x.status === "active");
     else if (filter === "suspended") list = list.filter((x) => x.status === "expired");
+    else if (filter === "cancelled") list = list.filter((x) => x.status === "cancelled");
     else if (filter === "expiring") {
       const ids = new Set(expiring.map((e) => e.id));
       list = list.filter((x) => ids.has(x.id));
+    } else {
+      // «الكل» يُخفي الملغيات من القائمة الرئيسية.
+      list = list.filter((x) => x.status !== "cancelled");
     }
     const s = q.trim().toLowerCase();
     if (s) list = list.filter((x) => (`${x.name} ${x.contact_name || ""} ${x.contact_email || ""}`).toLowerCase().includes(s));
@@ -296,7 +300,7 @@ export default function OwnerPortalPanel({ session, employee }) {
             <div className="flex flex-wrap gap-1.5">
               {[
                 ["all", t.filterAll], ["trial", t.filterTrial], ["active", t.filterActive],
-                ["suspended", t.filterSuspended], ["expiring", t.filterExpiring],
+                ["suspended", t.filterSuspended], ["expiring", t.filterExpiring], ["cancelled", t.filterCancelled],
               ].map(([k, label]) => (
                 <button key={k} type="button" onClick={() => setFilter(k)}
                   className={cn("px-3.5 py-1.5 rounded-full text-xs font-medium border transition",
@@ -383,12 +387,17 @@ export default function OwnerPortalPanel({ session, employee }) {
                                 {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <Pause size={13} />} {t.suspend}
                               </Button>
                             )}
-                            {x.status === "expired" && (
+                            {(x.status === "expired" || x.status === "cancelled") && (
                               <Button size="sm" variant="ghost" onClick={() => act(x.id, "owner_resume", { tenant_id: x.id })} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">
-                                {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} {t.resume}
+                                {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : x.status === "cancelled" ? <RotateCcw size={13} /> : <Play size={13} />} {x.status === "cancelled" ? t.restore : t.resume}
                               </Button>
                             )}
-                            {x.status !== "active" && !pending && x.status !== "expired" && (
+                            {!owner && x.status !== "cancelled" && (
+                              <Button size="sm" variant="ghost" onClick={() => act(x.id, "owner_cancel", { tenant_id: x.id })} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">
+                                {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <Ban size={13} />} {t.cancel}
+                              </Button>
+                            )}
+                            {x.status !== "active" && !pending && x.status !== "expired" && x.status !== "cancelled" && (
                               <Button size="sm" variant="outline" onClick={() => act(x.id, "owner_activate", { tenant_id: x.id })} disabled={busyId === x.id} className="gap-1.5 h-8">
                                 {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <Crown size={13} />} {t.activate}
                               </Button>

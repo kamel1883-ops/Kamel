@@ -203,6 +203,18 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    if (action === "owner_cancel") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tid = String(body.tenant_id || "");
+      if (!tid) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const tx = await base44.asServiceRole.entities.Tenant.get(tid);
+      if (!tx) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+      // إلغاء نهائي: يُنقل العميل لقائمة الملغيات ويُخفى من القائمة الرئيسية، مع حفظ حالته السابقة للاسترجاع.
+      await base44.asServiceRole.entities.Tenant.update(tid, { status: "cancelled", suspended_from: tx.status || "trial" });
+      return Response.json({ ok: true });
+    }
+
+    // owner_resume يُعيد التفعيل من حالة «موقوف (expired)» أو «ملغي (cancelled)» باستعادة suspended_from.
     if (action === "today_attendance") {
       const recs = await base44.asServiceRole.entities.Attendance.filter(
         { employee_id: employeeId, date: todayISO() }, "-created_date", 5
