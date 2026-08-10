@@ -111,6 +111,6 @@ export const orgStats = (employees) => {
 export const uniqueDepartments = (employees) =>
   Array.from(new Set(employees.map((e) => e.department).filter(Boolean))).sort((a, b) => a.localeCompare(b, "ar"));
 
-// المرشحون ليكونوا مدراء مباشرين (المالك/التنفيذي/المدير/المشرف) — من يحق لهم أن يكون لديهم فريق
+// المرشحون ليكونوا مدراء مباشرين — أي موظف في الشركة (يستثنى الموظف نفسه)، لضمان حرية ربط كل موظف بمديره المباشر.
 export const managerCandidates = (employees, excludeId = null) =>
-  employees.filter((e) => e.id !== excludeId && ["owner", "executive", "manager", "supervisor"].includes(e.role_level));
+  employees.filter((e) => e.id !== excludeId);

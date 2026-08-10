@@ -20,6 +20,7 @@ const TEMPLATE_HEADERS = [
   "الراتب الأساسي", "بدل السكن", "بدل المواصلات",
   "بدلات أخرى", "تاريخ انتهاء الإقامة", "رقم الجواز", "تاريخ انتهاء الجواز",
   "رقم التأمين الطبي", "تاريخ انتهاء التأمين الطبي", "الحساب البنكي",
+  "الرقم الوظيفي للمدير المباشر",
 ];
 
 export default function EmployeeImport({ open, onClose, onSaved }) {
@@ -36,6 +37,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     supported: "صيغ مدعومة: CSV / Excel (xlsx) — يجب أن تحتوي الأعمدة على نفس حقول القالب.",
     result: "نتيجة الاستيراد",
     total: "الإجمالي", created: "تمت الإضافة", duplicate: "مكرر (تم تخطيه)", failed: "صفوف ناقصة",
+    managersLinked: "مدير مباشر مُربوط",
     errGeneric: "تعذّر قراءة الملف، تأكد من تطابق الأعمدة مع القالب",
   } : {
     title: "Import Employees via Excel",
@@ -48,6 +50,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     supported: "Supported formats: CSV / Excel (xlsx) — columns must match the template.",
     result: "Import result",
     total: "Total", created: "Created", duplicate: "Duplicates (skipped)", failed: "Incomplete rows",
+    managersLinked: "Managers linked",
     errGeneric: "Could not read the file, make sure columns match the template",
   };
 
@@ -78,6 +81,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
       "الثالثة", "employee", "2023-03-01", "10", "دوام كامل", "2023-03-01", "2024-03-01",
       "8000", "1000", "500", "0",
       "2027-05-01", "X1234567", "2030-01-01", "INS12345", "2026-12-31", "SA00001234",
+      "1000",
     ];
     const bom = "\uFEFF";
     const lines = [TEMPLATE_HEADERS, sample, TEMPLATE_HEADERS.map(() => "")];
@@ -145,6 +149,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
                   <Metric label={t.created} value={result.created} tone="emerald" />
                   <Metric label={t.duplicate} value={result.duplicate} tone="amber" />
                   <Metric label={t.failed} value={result.failed} tone="rose" />
+                  {result.managers_linked > 0 && <Metric label={t.managersLinked} value={result.managers_linked} tone="violet" />}
                 </div>
                 {result.failed > 0 && (
                   <div className="flex items-start gap-2 text-xs text-rose-600 bg-rose-50 rounded-lg p-2">
@@ -170,7 +175,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
 }
 
 function Metric({ label, value, tone }) {
-  const cls = tone === "emerald" ? "text-emerald-700" : tone === "amber" ? "text-amber-700" : tone === "rose" ? "text-rose-700" : "text-foreground";
+  const cls = tone === "emerald" ? "text-emerald-700" : tone === "amber" ? "text-amber-700" : tone === "rose" ? "text-rose-700" : tone === "violet" ? "text-violet-700" : "text-foreground";
   return (
     <div className="rounded-lg bg-white border border-border px-3 py-2">
       <div className="text-xs text-muted-foreground">{label}</div>

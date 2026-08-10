@@ -81,6 +81,7 @@ function normalizeRecord(r) {
     health_insurance_expiry: parseDate(r.health_insurance_expiry),
     bank_account: String(r.bank_account ?? '').trim(),
     prior_used_leave: num(r.prior_used_leave),
+    manager_employee_number: String(r.manager_employee_number ?? '').trim(),
   };
 }
 
@@ -134,6 +135,7 @@ export default async function (req) {
               health_insurance_expiry: { type: 'string', title: 'تاريخ انتهاء التأمين الطبي' },
               bank_account: { type: 'string', title: 'الحساب البنكي' },
               prior_used_leave: { type: 'number', title: 'أيام الإجازات المستخدمة سابقاً' },
+              manager_employee_number: { type: 'string', title: 'الرقم الوظيفي للمدير المباشر' },
             },
           },
         },
@@ -212,11 +214,34 @@ export default async function (req) {
       await base44.asServiceRole.entities.Employee.bulkCreate(toCreate);
     }
 
+    // === ربط المدير المباشر: نُنشئ الكل أولاً ثم نربط كل موظف بمديره عبر الرقم الوظيفي ===
+    let managersLinked = 0, managersUnresolved = 0;
+    const needLink = toCreate.filter((r) => r.manager_employee_number);
+    if (needLink.length) {
+      const allEmps = await base44.asServiceRole.entities.Employee.list('-created_date', 5000);
+      const numToId = new Map();
+      for (const e of allEmps) if (e.employee_number) numToId.set(String(e.employee_number).trim(), e.id);
+      const updates = [];
+      for (const r of needLink) {
+        const mid = numToId.get(String(r.manager_employee_number).trim());
+        const myId = numToId.get(String(r.employee_number).trim());
+        if (!mid) { managersUnresolved++; errors.push(`مدير مباشر غير معروف: ${r.manager_employee_number} (للموظف ${r.employee_number})`); continue; }
+        if (mid === myId) continue;
+        updates.push({ id: myId, manager_id: mid });
+      }
+      if (updates.length) {
+        await base44.asServiceRole.entities.Employee.bulkUpdate(updates);
+        managersLinked = updates.length;
+      }
+    }
+
     return Response.json({
       total: raw.length,
       created: toCreate.length,
       duplicate,
       failed,
+      managers_linked: managersLinked,
+      managers_unresolved: managersUnresolved,
       errors: errors.slice(0, 50),
     });
   } catch (error) {
