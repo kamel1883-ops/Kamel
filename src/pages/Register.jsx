@@ -16,9 +16,12 @@ import { safeReturnTo } from "@/lib/authReturnTo";
 export default function Register() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const inviteToken = new URLSearchParams(window.location.search).get("invite");
   const t = isAr
-    ? { title: "أنشئ حسابك", subtitle: "سجّل للبدء الآن", haveAccount: "لديك حساب بالفعل؟", signin: "تسجيل الدخول", google: "المتابعة عبر Google", or: "أو", email: "البريد الإلكتروني", password: "كلمة المرور", confirm: "تأكيد كلمة المرور", mismatch: "كلمتا المرور غير متطابقتين", failed: "فشل التسجيل", creating: "جارٍ إنشاء الحساب...", create: "إنشاء الحساب", otpTitle: "تأكيد بريدك الإلكتروني", otpSub: "أرسلنا رمزاً إلى", verifying: "جارٍ التحقق...", verify: "تحقّق", noCode: "لم يصلك الرمز؟", resend: "إعادة الإرسال", resendOk: "تم إرسال الرمز", resendOkDesc: "تحقق من بريدك الإلكتروني للرمز الجديد.", resendFail: "تعذّرت إعادة إرسال الرمز", otpFail: "رمز التحقق غير صحيح", notActivated: "هذا البريد غير مفعّل للاشتراك. لا يمكن التسجيل إلا للبريد الذي صدر له عرض سعر وتم الدفع والتفعيل من الإدارة.", note: "التسجيل متاح فقط للبريد المفعّل من جدارة (بعد عرض السعر والدفع).", captchaFail: "فشل التحقق البشري — أعد المحاولة." }
-    : { title: "Create your account", subtitle: "Register to get started", haveAccount: "Already have an account?", signin: "Sign in", google: "Continue with Google", or: "or", email: "Email", password: "Password", confirm: "Confirm password", mismatch: "Passwords do not match", failed: "Registration failed", creating: "Creating account...", create: "Create account", otpTitle: "Verify your email", otpSub: "We sent a code to", verifying: "Verifying...", verify: "Verify", noCode: "Didn't get the code?", resend: "Resend", resendOk: "Code sent", resendOkDesc: "Check your email for the new code.", resendFail: "Could not resend the code", otpFail: "Invalid verification code", notActivated: "This email is not activated for subscription. Registration is only available for emails that received a quote and were paid and activated by our team.", note: "Registration is only available for emails activated by Jadara (after a quote and payment).", captchaFail: "Human verification failed — please retry." };
+    ? { title: "أنشئ حسابك", subtitle: "سجّل للبدء الآن", haveAccount: "لديك حساب بالفعل؟", signin: "تسجيل الدخول", google: "المتابعة عبر Google", or: "أو", email: "البريد الإلكتروني", password: "كلمة المرور", confirm: "تأكيد كلمة المرور", mismatch: "كلمتا المرور غير متطابقتين", failed: "فشل التسجيل", creating: "جارٍ إنشاء الحساب...", create: "إنشاء الحساب", otpTitle: "تأكيد بريدك الإلكتروني", otpSub: "أرسلنا رمزاً إلى", verifying: "جارٍ التحقق...", verify: "تحقّق", noCode: "لم يصلك الرمز؟", resend: "إعادة الإرسال", resendOk: "تم إرسال الرمز", resendOkDesc: "تحقق من بريدك الإلكتروني للرمز الجديد.", resendFail: "تعذّرت إعادة إرسال الرمز", otpFail: "رمز التحقق غير صحيح", notActivated: "هذا البريد غير مفعّل للاشتراك. لا يمكن التسجيل إلا للبريد الذي صدر له عرض سعر وتم الدفع والتفعيل من الإدارة.", note: "التسجيل متاح فقط للبريد المفعّل من جدارة (بعد عرض السعر والدفع).", captchaFail: "فشل التحقق البشري — أعد المحاولة.",
+    inviteNote: "أنت معتمد مدعوّ — أكمل إنشاء حسابك بالبريد نفسه الذي وصلك عليه الدعوة، واختر كلمة المرور التي تريدها. سيحوّل إنشاؤك تلقائياً إلى بوابة الاعتمادات.",
+    inviteInvalid: "الدعوة غير صالحة أو منتهية، أو أن البريد لا يطابق بريد الدعوة." }
+    : { title: "Create your account", subtitle: "Register to get started", haveAccount: "Already have an account?", signin: "Sign in", google: "Continue with Google", or: "or", email: "Email", password: "Password", confirm: "Confirm password", mismatch: "Passwords do not match", failed: "Registration failed", creating: "Creating account...", create: "Create account", otpTitle: "Verify your email", otpSub: "We sent a code to", verifying: "Verifying...", verify: "Verify", noCode: "Didn't get the code?", resend: "Resend", resendOk: "Code sent", resendOkDesc: "Check your email for the new code.", resendFail: "Could not resend the code", otpFail: "Invalid verification code", notActivated: "This email is not activated for subscription. Registration is only available for emails that received a quote and were paid and activated by our team.", note: "Registration is only available for emails activated by Jadara (after a quote and payment).", captchaFail: "Human verification failed — please retry.", inviteNote: "You're an invited approver — finish creating your account with the exact email the invitation was sent to and choose your own password. You'll be redirected to the approvals portal.", inviteInvalid: "The invitation is invalid/expired, or the email doesn't match the invited email." };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,9 +39,11 @@ export default function Register() {
     if (password !== confirmPassword) { setError(t.mismatch); return; }
     setLoading(true);
     try {
-      const ac = await base44.functions.invoke("checkTenantAccess", { email, captcha_token: captcha });
+      const ac = inviteToken
+        ? await base44.functions.invoke("validateApproverInvite", { email, invite_token: inviteToken, captcha_token: captcha })
+        : await base44.functions.invoke("checkTenantAccess", { email, captcha_token: captcha });
       const ad = ac?.data || ac;
-      if (!ad?.ok) { setError(ad?.error === "captcha_failed" ? t.captchaFail : t.notActivated); setCaptcha(""); setCaptchaKey((k) => k + 1); setLoading(false); return; }
+      if (!ad?.ok) { setError(ad?.error === "captcha_failed" ? t.captchaFail : (inviteToken ? t.inviteInvalid : t.notActivated)); setCaptcha(""); setCaptchaKey((k) => k + 1); setLoading(false); return; }
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {
@@ -54,6 +59,10 @@ export default function Register() {
     try {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) base44.auth.setToken(result.access_token);
+      if (inviteToken) {
+        try { await base44.functions.invoke("activateApproverInvite", { email, invite_token: inviteToken }); }
+        catch (e) { /* non-fatal — admin can assign role manually if needed */ }
+      }
       window.location.href = safeReturnTo();
     } catch (err) {
       setError(err.message || t.otpFail);
@@ -112,7 +121,9 @@ export default function Register() {
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
         <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-3 text-muted-foreground">{t.or}</span></div>
       </div>
-      <div className="mb-4 p-3 rounded-lg bg-violet-50 text-violet-700 text-xs leading-relaxed">{t.note}</div>
+      {inviteToken
+        ? <div className="mb-4 p-3 rounded-lg bg-indigo-50 text-indigo-700 text-xs leading-relaxed">{t.inviteNote}</div>
+        : <div className="mb-4 p-3 rounded-lg bg-violet-50 text-violet-700 text-xs leading-relaxed">{t.note}</div>}
       {error && <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

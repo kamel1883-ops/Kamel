@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { UserPlus, Loader2 } from "lucide-react";
+import { UserPlus, Loader2, Copy, Check, Send } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
-// زرّ دعوة مدير مباشر / مالية — يستخدمه الأدمن (الموارد البشرية/المالك) لدعوة حسابات الموافقات ببريد + دور.
+// دعوة معتمد ذاتية التسجيل: لا نُنشئ حساباً مسبقاً. نُولّد رابط تسجيل يفتحه المعتمد بنفسه
+// وينشئ حسابه ويختار كلمة مروره. لا يمكن إرسال الرابط آلياً بالبريد إلا لبريد مسجّل مسبقاً
+// على المنصة، لذا يُعرض الرابط للأدمن لنسخه وإرساله عبر واتساب عند تعذّر الإرسال الآلي.
 export default function InviteApproverDialog() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
@@ -17,26 +19,32 @@ export default function InviteApproverDialog() {
     email: "بريد المعتمد",
     roleM: "مدير مباشر (موافقات الإجازات)",
     roleF: "مالية (الصرف النهائي)",
-    note: "يصله بريدان: رسالة المنصة الافتراضية + رسالة مُموَّهة من «جدارة» تحوي شعارنا وبيانات التواصل ورابط بوابة المعتمدين وطريقة ضبط كلمة المرور. للمدير المباشر: اربط بريده بسجل موظفه (الموظفون ← تعديل ← بريد العمل)، ثم اجعل مرؤوسيه يشيرون إليه في حقل «المدير المباشر». للمالية: يكفيه الدخول لبوابة الاعتمادات بعد ضبط كلمة المرور.",
-    brandedSent: "(وصل بريد جدارة المُموَّه بشعارنا وبيانات التواصل لضبط كلمة المرور).",
-    brandedFail: "(تعذّر إرسال بريد جدارة المُموَّه آلياً — استخدم رابط الدعوة من رسالة المنصة).",
-    send: "إرسال الدعوة", cancel: "إلغاء", invalid: "بريد غير صالح",
-    ok: (e, r) => `تمت دعوة «${e}» بدور ${r}.`,
-    partial: (e) => `تمت دعوة «${e}»، لكن تعذّر تعيين الدور المخصّص تلقائياً — يرجى إعادة المحاولة.`,
+    note: "لا نُنشئ حساباً مسبقاً. نُولّد رابط تسجيل يفتحه المعتمد بنفسه وينشئ حسابه ويختار كلمة مروره. لا يمكن إرساله آلياً بالبريد إلا لبريد مسجّل مسبقاً على المنصة — لذا انسخ الرابط وأرسله عبر واتساب عند تعذّر الإرسال الآلي.",
+    send: "توليد رابط الدعوة", cancel: "إلغاء", invalid: "بريد غير صالح",
+    ok: (e) => `تم توليد رابط الدعوة لـ «${e}».`,
+    emailed: "وصل الرابط آلياً إلى بريده (مسجّل مسبقاً).",
+    notEmailed: "تعذّر الإرسال الآلي (بريده غير مسجّل) — انسخ الرابط وأرسله عبر واتساب.",
+    linkLabel: "رابط التسجيل المخصّص",
+    copy: "نسخ", copied: "تم النسخ",
+    wa: "مشاركة عبر واتساب",
     err: (m) => `تعذّر: ${m}`,
+    done: "تم",
   } : {
     btn: "Invite approver",
     title: "Invite direct manager / finance",
     email: "Approver email",
     roleM: "Direct manager (leave approvals)",
     roleF: "Finance (final payment)",
-    note: "They'll receive two emails: the platform's default invite + a branded Jadara email with our logo, contact info, the approvers-portal link and how to set a password. For a manager: link their email to their employee record (Employees → edit → work email), then set them as their subordinates' direct manager. For finance: they just sign in to the approvals portal after setting their password.",
-    brandedSent: "(A branded Jadara email with our logo and contact info was sent for password setup).",
-    brandedFail: "(Couldn't send the branded Jadara email automatically — use the invite link from the platform message.)",
-    send: "Send invite", cancel: "Cancel", invalid: "Invalid email",
-    ok: (e, r) => `Invited "${e}" as ${r}.`,
-    partial: (e) => `Invited "${e}", but couldn't set the custom role automatically — please retry.`,
+    note: "No account is pre-created. We generate a sign-up link the approver opens themselves to create their account and pick their password. It can't be auto-emailed unless their email is already registered on the platform — so copy the link and send it via WhatsApp if auto-email fails.",
+    send: "Generate invite link", cancel: "Cancel", invalid: "Invalid email",
+    ok: (e) => `Invite link generated for "${e}".`,
+    emailed: "The link was emailed automatically (already registered).",
+    notEmailed: "Auto-email failed (not registered) — copy the link and send it via WhatsApp.",
+    linkLabel: "Dedicated sign-up link",
+    copy: "Copy", copied: "Copied",
+    wa: "Share via WhatsApp",
     err: (m) => `Failed: ${m}`,
+    done: "Done",
   };
 
   const [open, setOpen] = useState(false);
@@ -45,63 +53,90 @@ export default function InviteApproverDialog() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
+  const [link, setLink] = useState("");
+  const [emailed, setEmailed] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const reset = () => { setErr(""); setOk(""); setLink(""); setEmailed(false); setCopied(false); };
+
+  const waShare = () => {
+    const text = encodeURIComponent((isAr ? "رابط إنشاء حسابك في بوابة المعتمدين بجدارة: " : "Your Jadara approvers-portal sign-up link: ") + link);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  };
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch (e) {}
+  };
 
   const submit = async () => {
-    setErr(""); setOk("");
+    setErr(""); setOk(""); setLink(""); setEmailed(false); setCopied(false);
     const em = email.trim().toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setErr(t.invalid); return; }
     setBusy(true);
     try {
-      // منصة Base44 تقبل فقط user/admin في inviteUser؛ ندعوه user ثم نعيّن دوره المخصّص.
-      await base44.users.inviteUser(em, "user");
-      let roleOk = true;
-      try {
-        let uid = null;
-        const users = await base44.entities.User.list("-created_date", 500);
-        const target = users.find((u) => (u.email || "").toLowerCase() === em);
-        uid = target?.id || null;
-        if (uid) await base44.entities.User.update(uid, { role });
-      } catch (e2) { roleOk = false; }
-      let brandedOk = true;
-      try { await base44.functions.invoke("sendApproverInvite", { email: em, role }); }
-      catch (e3) { brandedOk = false; }
-      const baseOk = roleOk ? t.ok(em, role === "manager" ? t.roleM : t.roleF) : t.partial(em);
-      setOk(baseOk + " " + (brandedOk ? t.brandedSent : t.brandedFail));
-      setEmail("");
-      setTimeout(() => setOpen(false), 1500);
+      const res = await base44.functions.invoke("createApproverInvite", { email: em, role });
+      const rd = res?.data || res;
+      if (!rd?.ok && rd?.error) throw new Error(rd.error);
+      setLink(rd.link || "");
+      setEmailed(!!rd.emailed);
+      setOk(t.ok(em));
     } catch (e) { setErr(t.err(e?.message || "")); }
     finally { setBusy(false); }
   };
+
+  const close = () => { setOpen(false); setTimeout(reset, 200); setEmail(""); setRole("manager"); };
 
   return (
     <>
       <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-1.5 h-9">
         <UserPlus size={15} /> {t.btn}
       </Button>
-      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setErr(""); setOk(""); } }}>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) close(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{t.title}</DialogTitle></DialogHeader>
           <div className="space-y-3 text-sm">
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">{t.email}</Label>
-              <Input type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
+              <Input type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" disabled={!!link} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">{isAr ? "الدور" : "Role"}</Label>
-              <select value={role} onChange={(e) => setRole(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm">
+              <select value={role} onChange={(e) => setRole(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm" disabled={!!link}>
                 <option value="manager">{t.roleM}</option>
                 <option value="finance">{t.roleF}</option>
               </select>
             </div>
             <div className="text-xs text-muted-foreground bg-slate-50 border border-border rounded-lg p-3 leading-relaxed">{t.note}</div>
             {err && <div className="text-sm text-destructive bg-destructive/10 rounded-lg p-2.5">{err}</div>}
-            {ok && <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">{ok}</div>}
+            {ok && (
+              <div className="space-y-2.5">
+                <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+                  {ok} {emailed ? t.emailed : t.notEmailed}
+                </div>
+                {link && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">{t.linkLabel}</Label>
+                    <div className="flex items-center gap-2">
+                      <Input dir="ltr" readOnly value={link} className="text-xs" onFocus={(e) => e.target.select()} />
+                      <Button type="button" size="icon" variant="outline" onClick={copy} title={t.copy}>
+                        {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      </Button>
+                    </div>
+                    <Button type="button" variant="secondary" size="sm" onClick={waShare} className="gap-1.5 w-full">
+                      <Send size={15} /> {t.wa}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>{t.cancel}</Button>
-            <Button onClick={submit} disabled={busy || !email.trim()} className="gap-1.5">
-              {busy ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />} {t.send}
-            </Button>
+            <Button variant="outline" onClick={close} disabled={busy}>{link ? t.done : t.cancel}</Button>
+            {!link && (
+              <Button onClick={submit} disabled={busy || !email.trim()} className="gap-1.5">
+                {busy ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />} {t.send}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
