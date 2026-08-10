@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText, KeyRound } from "lucide-react";
 import InvoiceDialog from "@/components/InvoiceDialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
@@ -26,6 +26,7 @@ export default function OwnerAdmin() {
     pendingRenew: "بانتظار سداد التجديد", renewSent: "تم إرسال عرض التجديد للعميل",
     subActive: (d) => `اشتراك: ${d || "—"}`, subTrial: (d, n) => `تجربة: ${d || "—"} (${n} يوم)`,
     invoice: "فاتورة",
+    relink: "ربط إيميل جديد",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trials, annual subscriptions, renewals and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
@@ -38,6 +39,7 @@ export default function OwnerAdmin() {
     pendingRenew: "Awaiting renewal payment", renewSent: "Renewal offer sent to client",
     subActive: (d) => `Subscription: ${d || "—"}`, subTrial: (d, n) => `Trial: ${d || "—"} (${n} days)`,
     invoice: "Invoice",
+    relink: "Re-link email",
   };
 
   const [tenants, setTenants] = useState([]);
@@ -52,6 +54,8 @@ export default function OwnerAdmin() {
   const [renewTarget, setRenewTarget] = useState(null);
   const [invOpen, setInvOpen] = useState(false);
   const [invTenant, setInvTenant] = useState(null);
+  const [relOpen, setRelOpen] = useState(false);
+  const [relTenant, setRelTenant] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -168,6 +172,7 @@ export default function OwnerAdmin() {
                         <div className="flex flex-wrap gap-1.5">
                           <Button size="sm" onClick={() => openSub(x)} className="gap-1.5 h-8"><Wallet size={14} /> {t.regSub}</Button>
                           <Button size="sm" variant="outline" onClick={() => { setInvTenant(x); setInvOpen(true); }} className="gap-1.5 h-8"><FileText size={14} /> {t.invoice}</Button>
+                          <Button size="sm" variant="outline" onClick={() => { setRelTenant(x); setRelOpen(true); }} className="gap-1.5 h-8"><KeyRound size={14} /> {t.relink}</Button>
                           <Button size="sm" variant="outline" onClick={() => sendRenewal(x)} disabled={busyId === x.id} className="gap-1.5 h-8">
                             {busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} {t.renewOffer}
                           </Button>
@@ -189,6 +194,7 @@ export default function OwnerAdmin() {
       <SubForm open={subOpen} onClose={() => setSubOpen(false)} onSaved={load} tenant={tenant} isAr={isAr} t={t} />
       <RenewConfirmDialog open={renewOpen} onClose={() => setRenewOpen(false)} tenant={renewTarget} sub={renewTarget ? renewalByTenant.get(renewTarget.id) : null} isAr={isAr} onConfirm={confirmRenew} />
       <InvoiceDialog open={invOpen} onClose={() => setInvOpen(false)} tenant={invTenant} subs={subs} isAr={isAr} />
+      <RelinkEmailDialog open={relOpen} onClose={() => setRelOpen(false)} tenant={relTenant} isAr={isAr} onSaved={load} />
     </div>
   );
 }
@@ -364,6 +370,93 @@ function SubForm({ open, onClose, onSaved, tenant, isAr, t }) {
           <Button variant="outline" onClick={onClose} disabled={saving}>{f.cancel}</Button>
           <Button onClick={submit} disabled={saving || !amount} className="gap-1.5">
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {f.confirm}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RelinkEmailDialog({ open, onClose, tenant, isAr, onSaved }) {
+  const [email, setEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+  const [done, setDone] = useState("");
+  const f = isAr ? {
+    title: (n) => `ربط إيميل جديد — ${n}`,
+    current: "البريد الحالي للمنشأة",
+    unified: "الرقم الموحد",
+    newEmail: "البريد الإلكتروني الجديد",
+    note: "استخدم هذا الإجراء عندما ينسى العميل بريده القديم تماماً. سيتم تحديث بريد المنشأة وتوجيه دعوة لإنشاء حساب بالإيميل الجديد. بعد ذلك يستطيع العميل تسجيل الدخول عبر بوابة الشركات بالإيميل الجديد + الرقم الموحد + كلمة المرور، أو اتباع «نسيت كلمة المرور» لاستلام رابط التعيين على البريد الجديد.",
+    cancel: "إغلاق", confirm: "ربط الإيميل الجديد",
+    invalid: "بريد إلكتروني غير صالح",
+    sameErr: "البريد الجديد مطابق للبريد الحالي",
+    ok: (em) => `تم ربط «${em}» بالمنشأة وإرسال دعوة إنشاء حساب إليه. اطلب من العميل إكمال الدعوة (أو «نسيت كلمة المرور») ثم الدخول بالإيميل الجديد + الرقم الموحد + كلمة المرور.`,
+    err: (m) => `تعذّر إتمام العملية: ${m}`,
+  } : {
+    title: (n) => `Re-link email — ${n}`,
+    current: "Current company email",
+    unified: "Unified number",
+    newEmail: "New email address",
+    note: "Use this when a client has completely forgotten their old email. The company email will be updated and an invite to set up an account will be sent to the new one. The client can then sign in via the company portal with the new email + unified number + password, or use “Forgot password” to receive a setup link at the new email.",
+    cancel: "Close", confirm: "Link new email",
+    invalid: "Invalid email address",
+    sameErr: "New email is the same as the current one",
+    ok: (em) => `Linked “${em}” to the organization and sent a setup invite to it. Ask the client to complete the invite (or use “Forgot password”), then sign in with the new email + unified number + password.`,
+    err: (m) => `Operation failed: ${m}`,
+  };
+
+  React.useEffect(() => { if (open) { setEmail(""); setErr(""); setDone(""); } }, [open, tenant]);
+
+  const submit = async () => {
+    setErr(""); setDone("");
+    const em = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setErr(f.invalid); return; }
+    if (tenant && em === String(tenant.contact_email || "").trim().toLowerCase()) { setErr(f.sameErr); return; }
+    setSaving(true);
+    try {
+      await base44.entities.Tenant.update(tenant.id, { contact_email: em });
+      try {
+        await base44.users.inviteUser(em, "admin");
+      } catch (e) {
+        // غالباً: حساب موجود بهذا البريد مسبقاً — لا يمنع عملية الربط.
+      }
+      setDone(f.ok(em));
+      onSaved?.();
+    } catch (e) {
+      setErr(f.err(e?.message || ""));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>{f.title(tenant?.name)}</DialogTitle></DialogHeader>
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">{f.current}</Label>
+              <div className="rounded-md border border-border bg-slate-50 px-3 py-2 truncate">{tenant?.contact_email || "—"}</div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">{f.unified}</Label>
+              <div className="rounded-md border border-border bg-slate-50 px-3 py-2" dir="ltr">{tenant?.unified_number || "—"}</div>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{f.newEmail}</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="new@company.com" dir="ltr" />
+          </div>
+          <div className="text-xs text-muted-foreground bg-slate-50 border border-border rounded-lg p-3 leading-relaxed">{f.note}</div>
+          {err && <div className="text-sm text-destructive bg-destructive/10 rounded-lg p-2.5">{err}</div>}
+          {done && <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 leading-relaxed">{done}</div>}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={saving}>{f.cancel}</Button>
+          <Button onClick={submit} disabled={saving || !email.trim()} className="gap-1.5">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />} {f.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>
