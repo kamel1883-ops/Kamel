@@ -8,6 +8,7 @@ import TurnstileWidget from "@/components/TurnstileWidget";
 import ShareBar from "@/components/ShareBar";
 import ClientMarquee from "@/components/ClientMarquee";
 import { useI18n } from "@/lib/i18n";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
   Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
@@ -104,18 +105,8 @@ const integrationsEn = [
   { icon: Calculator, t: "Accounting (Odoo/ERP)", d: "Integration with Odoo and ERP systems to post payroll and journal entries." },
 ];
 
-const tiersAr = [
-  { tier: "الشريحة الأولى (الناشئة)", range: "من 0 إلى 100 عامل", yearly: "2,000", monthly: "~ 166.6", note: "مناسبة للمنشآت الصغيرة والمشاريع الناشئة" },
-  { tier: "الشريحة الثانية (المتوسطة)", range: "من 101 إلى 599 عامل", yearly: "3,000", monthly: "~ 250", note: "تغطي نمو المنشأة وإدارة فرق العمل المتوسطة" },
-  { tier: "الشريحة الثالثة (الكبيرة)", range: "من 600 إلى 1000 عامل", yearly: "3,500", monthly: "~ 291.6", note: "دعم كامل وإمكانيات ربط متقدمة للمنشآت الكبيرة" },
-  { tier: "الشريحة الرابعة (المؤسسات)", range: "أكثر من 1000 عامل (+1001)", yearly: "4,000", monthly: "~ 333.3", note: "تغطية غير محدودة ودعم فني مخصص للشركات الكبرى" },
-];
-const tiersEn = [
-  { tier: "Tier 1 (Startup)", range: "0 – 100 employees", yearly: "2,000", monthly: "~ 166.6", note: "Ideal for small businesses and startups" },
-  { tier: "Tier 2 (Medium)", range: "101 – 599 employees", yearly: "3,000", monthly: "~ 250", note: "Covers growth and managing mid-sized teams" },
-  { tier: "Tier 3 (Large)", range: "600 – 1,000 employees", yearly: "3,500", monthly: "~ 291.6", note: "Full support and advanced integrations for large firms" },
-  { tier: "Tier 4 (Enterprise)", range: "More than 1,000 employees (+1001)", yearly: "4,000", monthly: "~ 333.3", note: "Unlimited coverage and dedicated support for large enterprises" },
-];
+const tiersAr = PRICING_TIERS_AR;
+const tiersEn = PRICING_TIERS_EN;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -476,30 +467,28 @@ export default function Landing() {
             <div className="font-bold text-white/90">{isAr ? "1. جدول شرائح الأسعار الرسمية" : "1. Official Pricing Tiers Table"}</div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm whitespace-nowrap">
+            <table className="w-full text-sm">
               <thead className="bg-[#161c2d] text-white/80">
                 <tr>
                   <th className="text-right font-semibold px-4 py-3">{isAr ? "الفئة / الشريحة" : "Tier"}</th>
                   <th className="text-right font-semibold px-4 py-3">{isAr ? "نطاق أعداد العمال / الموظفين" : "Headcount range"}</th>
-                  <th className="text-right font-semibold px-4 py-3">{isAr ? "التسعير السنوي (ر.س)" : "Annual (SAR)"}</th>
-                  <th className="text-right font-semibold px-4 py-3">{isAr ? "التكلفة الشهرية التقديرية" : "Est. monthly"}</th>
+                  <th className="text-right font-semibold px-4 py-3">{isAr ? "السعر السنوي (ر.س)" : "Annual (SAR)"}</th>
                   <th className="text-right font-semibold px-4 py-3">{isAr ? "ملاحظات القيمة والتغطية" : "Coverage notes"}</th>
                 </tr>
               </thead>
               <tbody className="text-white/80">
                 {(isAr ? tiersAr : tiersEn).map((row, i) => (
-                  <tr key={i} className={i % 2 ? "bg-white/[0.03]" : "bg-transparent"}>
-                    <td className="px-4 py-3 font-semibold text-white">{row.tier}</td>
-                    <td className="px-4 py-3">{row.range}</td>
-                    <td className="px-4 py-3"><span className="font-extrabold text-sky-300">{row.yearly} {isAr ? "ر.س / سنوياً" : "SAR/yr"}</span></td>
-                    <td className="px-4 py-3">{row.monthly} {isAr ? "ر.س / شهرياً" : "SAR/mo"}</td>
+                  <tr key={row.id || i} className={i % 2 ? "bg-white/[0.03]" : "bg-transparent"}>
+                    <td className="px-4 py-3 font-semibold text-white whitespace-nowrap">{row.tier}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{row.range}</td>
+                    <td className="px-4 py-3 whitespace-nowrap"><span className="font-extrabold text-sky-300">{row.yearly.toLocaleString()} {isAr ? "ر.س / سنوياً" : "SAR/yr"}</span></td>
                     <td className="px-4 py-3 text-white/65">{row.note}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="px-6 py-4 border-t border-white/10 text-xs text-white/50">{isAr ? "جميع الأسعار سنوية شاملة الضريبة، وتشمل السنة الأولى سنة مجانية." : "All prices are annual, tax-inclusive; the first year includes one free year."}</div>
+          <div className="px-6 py-4 border-t border-white/10 text-xs text-white/50">{isAr ? "جميع الأسعار سنوية شاملة الضريبة. تُحدّد الشريحة المناسبة وفق عدد الموظفين." : "All prices are annual, tax-inclusive. The applicable tier is determined by employee headcount."}</div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4 mt-6">

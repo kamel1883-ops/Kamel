@@ -10,6 +10,7 @@ import InvoiceDialog from "@/components/InvoiceDialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/hr";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 
 export default function OwnerAdmin() {
   const { lang } = useI18n();
@@ -302,17 +303,24 @@ function RenewConfirmDialog({ open, onClose, tenant, sub, isAr, onConfirm }) {
 function SubForm({ open, onClose, onSaved, tenant, isAr, t }) {
   const [plan, setPlan] = useState("annual");
   const [amount, setAmount] = useState("");
+  const [headcount, setHeadcount] = useState("");
   const [method, setMethod] = useState("direct");
   const [proof, setProof] = useState(null);
   const [today] = useState(new Date().toISOString().slice(0, 10));
   const [saving, setSaving] = useState(false);
+  const tiers = isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN;
+  const matched = tierForCount(headcount, tiers);
   const f = isAr ? {
     title: (n) => `تسجيل اشتراك — ${n}`, plan: "الباقة", planAnnual: "سنوي", planMonthly: "شهري", amount: "المبلغ (ر.س)",
+    headcount: "عدد الموظفين / العمال", tierTable: "شرائح الأسعار الرسمية (اضغط الشريحة للتعبئة)",
+    tierMatch: (n) => `الشريحة المطابقة: ${n}`,
     method: "طريقة الدفع", direct: "تحويل مباشر", online: "دفع عبر الإنترنت (Visa/Mada)", proof: "إثبات الدفع (اختياري)",
     onlineNote: "سيتم تفعيل بوابة الدفع الإلكترونية (Stripe) قريباً لإتمام الدفع عبر Visa وMada داخل المنصة.",
     cancel: "إلغاء", confirm: "تأكيد وتفعيل الاشتراك",
   } : {
     title: (n) => `Register subscription — ${n}`, plan: "Plan", planAnnual: "Annual", planMonthly: "Monthly", amount: "Amount (SAR)",
+    headcount: "Employees count", tierTable: "Official pricing tiers (click a tier to fill)",
+    tierMatch: (n) => `Matched tier: ${n}`,
     method: "Payment method", direct: "Direct transfer", online: "Online (Visa/Mada)", proof: "Payment proof (optional)",
     onlineNote: "The online payment gateway (Stripe) will be available soon for Visa & Mada payments.",
     cancel: "Cancel", confirm: "Confirm & activate",
@@ -349,9 +357,26 @@ function SubForm({ open, onClose, onSaved, tenant, isAr, t }) {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">{f.amount}</Label>
-              <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <Label className="text-xs text-muted-foreground">{f.headcount}</Label>
+              <Input type="number" min="0" value={headcount} onChange={(e) => { setHeadcount(e.target.value); const tr = tierForCount(e.target.value, tiers); if (tr) setAmount(String(tr.yearly)); }} placeholder="—" />
             </div>
+          </div>
+          <div className="rounded-lg border border-border bg-slate-50 p-3">
+            <div className="text-xs font-semibold text-muted-foreground mb-1.5">{f.tierTable}</div>
+            <div className="grid grid-cols-1 gap-1">
+              {tiers.map((tr) => (
+                <button type="button" key={tr.id} onClick={() => { setHeadcount(String(tr.min)); setAmount(String(tr.yearly)); }}
+                  className={cn("text-right text-xs px-2.5 py-1.5 rounded-md flex items-center justify-between gap-2 transition border", matched && matched.id === tr.id ? "bg-violet-100 text-violet-700 font-semibold border-violet-200" : "hover:bg-white border-transparent")}>
+                  <span className="truncate shrink-0">{tr.tier}</span>
+                  <span className="text-muted-foreground truncate">{tr.range} · <b className="text-foreground">{tr.yearly.toLocaleString()} {isAr ? "ر.س" : "SAR"}</b></span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{f.amount}</Label>
+            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            {matched && <div className="text-xs text-emerald-600">{f.tierMatch(matched.tier)}</div>}
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">{f.method}</Label>
