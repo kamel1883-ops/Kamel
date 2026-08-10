@@ -20,7 +20,7 @@ export default function ReportsPanel({ employees, attendance }) {
   const t = isAr ? {
     section: "مركز التقارير", sectionSub: "تقارير ورسوم بيانية لدعم القرار — ضمن صفحة التحليلات",
     pick: "اختر تقريراً",
-    rContracts: "العقود المنتهية", rTurnover: "معدل الدوران", rAttAll: "الحضور والغياب (الجميع)", rAttOne: "الحضور والغياب (موظف)",
+    rContracts: "عقود قاربت بالانتهاء", rTurnover: "معدل الدوران", rAttAll: "الحضور والغياب (الجميع)", rAttOne: "الحضور والغياب (موظف)",
     rActive: "نشط/غير نشط", rLicenses: "تراخيص قاربت الانتهاء", rVehicles: "تقرير الأسطول", rTrips: "رحلات العمل",
     window: "نافذة الإنذار", m30: "30 يوم", m60: "60 يوم", m90: "90 يوم", expiringSoon: "قارب الانتهاء", expired: "منتهي", within: "خلال",
     noData: "لا توجد بيانات", allEmps: "كل الموظفين", selectEmp: "اختر موظفاً",
@@ -198,7 +198,7 @@ function WinButtons({ winM, setWinM, t }) {
 function ContractsReport({ employees, winM, setWinM, t }) {
   const rows = useMemo(() => employees
     .map((e) => ({ e, d: daysUntil(e.contract_end_date) }))
-    .filter((x) => x.d != null && x.d <= winM)
+    .filter((x) => x.d != null && x.d >= 0 && x.d <= winM)
     .sort((a, b) => a.d - b.d), [employees, winM]);
   const byDept = useMemo(() => {
     const m = {}; rows.forEach(({ e }) => { const d = e.department || "—"; m[d] = (m[d] || 0) + 1; });

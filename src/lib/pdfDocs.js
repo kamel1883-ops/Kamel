@@ -19,15 +19,26 @@ function waitForImages(node) {
 }
 
 // يرسم ختم "PAID" كبير شبه شفاف ومائل في منتصف الصفحة الحالية
+// يُدار النص حول نقطة الأساس، لذا يُزاح مركز البيضاوي ليطابق المركز البصري الفعلي للنص بعد الدوران
 function drawPaidStamp(pdf, pageW, pageH) {
-  try { pdf.setGState(new pdf.GState({ opacity: 0.14 })); } catch (e) {}
+  const cx = pageW / 2, cy = pageH / 2;
+  const angle = 24;
+  const fontSize = 92;
+  try { pdf.setGState(new pdf.GState({ opacity: 0.15 })); } catch (e) {}
   pdf.setTextColor(5, 150, 105);
-  try { pdf.setFont("helvetica", "bold"); pdf.setFontSize(96); } catch (e) {}
-  try { pdf.text("PAID", pageW / 2, pageH / 2 + 22, { align: "center", angle: 32 }); } catch (e) {}
+  try { pdf.setFont("helvetica", "bold"); pdf.setFontSize(fontSize); } catch (e) {}
+  // نصف ارتفاع الحرف التقريبي بالـmm لمعرفة إزاحة المركز البصري عن خط الأساس
+  const halfH = (fontSize * 0.3528) * 0.36;
+  const rad = (angle * Math.PI) / 180;
+  // النص يدور حول نقطة الأساس (cx, cy)
+  try { pdf.text("PAID", cx, cy, { align: "center", angle }); } catch (e) {}
   try {
     pdf.setDrawColor(5, 150, 105);
-    pdf.setLineWidth(1.2);
-    pdf.ellipse(pageW / 2, pageH / 2 - 2, 52, 26, "S");
+    pdf.setLineWidth(1.5);
+    // مركز البيضاوي = المركز البصري للنص بعد الدوران حول نقطة الأساس
+    const ecx = cx + halfH * Math.sin(rad);
+    const ecy = cy - halfH * Math.cos(rad);
+    pdf.ellipse(ecx, ecy, 50, 36, "S");
   } catch (e) {}
   try { pdf.setGState(new pdf.GState({ opacity: 1 })); } catch (e) {}
 }

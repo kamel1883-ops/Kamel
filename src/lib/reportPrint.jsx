@@ -60,7 +60,9 @@ function buildTitle(title, subtitle) {
   const s = document.createElement("div"); s.textContent = subtitle;
   Object.assign(s.style, { fontSize: "11px", color: "#666", marginTop: "4px" });
   const d = document.createElement("div");
-  d.textContent = new Date().toLocaleDateString("ar-SA");
+  const monthsAr = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const now = new Date();
+  d.textContent = `${now.getDate()} ${monthsAr[now.getMonth()]} ${now.getFullYear()} م`;
   Object.assign(d.style, { fontSize: "10px", color: "#999", marginTop: "4px" });
   c.appendChild(t); c.appendChild(s); c.appendChild(d);
   return c;
