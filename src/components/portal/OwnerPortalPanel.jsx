@@ -86,9 +86,13 @@ export default function OwnerPortalPanel({ session, employee }) {
   const [renewInfo, setRenewInfo] = useState(null); // { tenant, sub }
 
   const call = useCallback(async (action, extra = {}) => {
-    const res = await base44.functions.invoke("portalData", {
+    const p = base44.functions.invoke("portalData", {
       token: session.token, employee_id: session.employee_id, action, ...extra,
     });
+    const res = await Promise.race([
+      p,
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000)),
+    ]);
     const d = res?.data || res;
     if (!d?.ok) throw new Error(d?.error || "fail");
     return d;
@@ -178,7 +182,10 @@ export default function OwnerPortalPanel({ session, employee }) {
           <Loader2 className="animate-spin" size={18} /> {t.loading}
         </div>
       ) : err ? (
-        <div className="p-4 rounded-xl bg-rose-50 text-rose-700 text-sm">{t.fail} ({err})</div>
+        <div className="p-4 rounded-xl bg-rose-50 text-rose-700 text-sm flex items-center justify-between gap-3 flex-wrap">
+          <span>{t.fail} ({err})</span>
+          <Button size="sm" variant="outline" onClick={() => { load(); loadExtras(); }} className="shrink-0 gap-1.5 h-8"><RefreshCw size={13} /> {isAr ? "إعادة المحاولة" : "Retry"}</Button>
+        </div>
       ) : (
         <>
           {/* مؤشرات */}
