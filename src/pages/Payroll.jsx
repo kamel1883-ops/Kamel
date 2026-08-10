@@ -27,6 +27,7 @@ export default function Payroll() {
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
     pdf: "تحميل / طباعة PDF", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
+    wps: "ملف WPS لمدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
     thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
   } : {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
@@ -38,6 +39,7 @@ export default function Payroll() {
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
     pdf: "Download / Print PDF", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
+    wps: "WPS file (Mudad)", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
     thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
   };
 
@@ -136,9 +138,14 @@ export default function Payroll() {
   };
   const payAll = async () => {
     setBatching(true);
-    const updates = payrolls.filter((p) => p.status === "approved").map((p) => ({ id: p.id, status: "paid", paid_date: todayISO() }));
+    const target = payrolls.filter((p) => p.status === "approved");
+    const updates = target.map((p) => ({ id: p.id, status: "paid", paid_date: todayISO() }));
     if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
-    setBatching(false); load();
+    const updated = payrolls.map((p) => (target.find((tg) => tg.id === p.id) ? { ...p, status: "paid", paid_date: todayISO() } : p));
+    setPayrolls(updated);
+    setBatching(false);
+    if (updated.some((p) => p.status === "paid")) exportWps(updated);
+    load();
   };
 
   // إعادة فتح الكشف للتعديل وإعادة الاعتماد (من مدفوع ← معتمد)
@@ -176,6 +183,57 @@ export default function Payroll() {
     const a = document.createElement("a");
     a.href = url;
     a.download = `payroll-${year}-${String(month).padStart(2, "0")}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+
+  // توليد ملف حماية الأجور (WPS) الجاهز للرفع على مُدّد — من الرواتب المصروفة فقط
+  const exportWps = (rows = payrolls) => {
+    const paid = rows.filter((p) => p.status === "paid");
+    if (paid.length === 0) { alert(t.wpsEmptyExport); return; }
+    const empMap = {};
+    for (const e of employees) empMap[e.id] = e;
+    const mm = String(month).padStart(2, "0");
+    const lastDay = new Date(year, month, 0).getDate();
+    const start = `${year}-${mm}-01`;
+    const end = `${year}-${mm}-${String(lastDay).padStart(2, "0")}`;
+    const headers = [
+      "رقم الهوية/الإقامة", "اسم الموظف", "رقم الآيبان (IBAN)",
+      "الراتب الأساسي", "بدل السكن", "بدل المواصلات", "بدلات أخرى", "حوافز",
+      "إجمالي الراتب", "خصومات (غياب/أخرى)", "تأمينات الموظف (GOSI)", "قسط السلفة",
+      "صافي الراتب", "تاريخ بداية الفترة", "تاريخ نهاية الفترة", "عدد أيام العمل",
+    ];
+    const lines = [headers];
+    for (const p of paid) {
+      const emp = empMap[p.employee_id] || {};
+      const absent = Number(p.absent_days) || 0;
+      const workDays = Math.max(0, lastDay - absent);
+      lines.push([
+        emp.national_id || "",
+        emp.full_name || p.employee_name || "",
+        emp.bank_account || "",
+        p.base_salary || 0,
+        p.housing_allowance || 0,
+        p.transport_allowance || 0,
+        p.other_allowances || 0,
+        p.bonus || 0,
+        p.gross_salary || 0,
+        p.deductions || 0,
+        p.gosi_employee || 0,
+        p.loan_installment || 0,
+        p.net_salary || 0,
+        start, end, workDays,
+      ]);
+    }
+    const csv = lines.map((r) => r.map((c) => {
+      const s = String(c);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `WPS_Mudad_${org?.unified_number || "EST"}_${year}-${mm}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   };
@@ -241,6 +299,7 @@ export default function Payroll() {
             {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
             {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
             <Button onClick={exportPdf} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
+            <Button onClick={() => exportWps()} disabled={paidCount === 0} variant="outline" className="gap-2"><Shield size={16} /> {t.wps}</Button>
             <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
           </div>
         </div>
