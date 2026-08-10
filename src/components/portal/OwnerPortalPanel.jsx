@@ -182,10 +182,27 @@ export default function OwnerPortalPanel({ session, employee }) {
         </div>
       </div>
 
-      {loading ? (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
-          <Loader2 className="animate-spin" size={22} />
-          <span className="text-sm">{t.loading}</span>
+      {loading && !data ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (<div key={i} className="h-24 rounded-2xl bg-slate-100 border border-border animate-pulse" />))}
+          </div>
+          <div className="rounded-2xl border border-border bg-white p-5 space-y-3 animate-pulse">
+            <div className="h-4 w-40 rounded bg-slate-100" />
+            <div className="h-16 rounded-xl bg-slate-100" />
+            <div className="h-16 rounded-xl bg-slate-100" />
+          </div>
+          <div className="rounded-2xl border border-border bg-white p-5 space-y-3 animate-pulse">
+            <div className="h-4 w-40 rounded bg-slate-100" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-20 rounded-xl bg-slate-100" />
+              <div className="h-20 rounded-xl bg-slate-100" />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-border bg-white overflow-hidden animate-pulse">
+            <div className="h-11 border-b border-border bg-slate-50" />
+            {Array.from({ length: 9 }).map((_, i) => (<div key={i} className="h-14 border-b border-border bg-white" />))}
+          </div>
         </div>
       ) : err ? (
         <div className="p-4 rounded-xl bg-rose-50 text-rose-700 text-sm flex items-center justify-between gap-3 flex-wrap">

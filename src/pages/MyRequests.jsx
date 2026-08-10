@@ -176,14 +176,8 @@ export default function MyRequests() {
 
   useEffect(() => {
     if (!session) return;
-    // المالك لا يحتاج جلب بيانات الموظف (إجازات/حضور…) — اعرض لوحته مباشرة لتفادي شاشة تحميل مزدوجة والقفز.
-    if (session.employee?.role_level === "owner") {
-      setEmployee(session.employee);
-      setOrg(session.org || null);
-      setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]);
-      setTodayAtt(null);
-      return;
-    }
+    // المالك يُعرض مباشرة من بيانات الجلسة في سلسلة العرض — لا جلب ولا حالة وسيطة ولا قفز.
+    if (session.employee?.role_level === "owner") return;
     load(session);
   }, [session, load]);
 
@@ -330,10 +324,10 @@ export default function MyRequests() {
         </div>
       </div>
     );
+  } else if (session.employee?.role_level === "owner") {
+    content = <OwnerPortalPanel session={session} employee={session.employee} />;
   } else if (loading || !employee) {
     content = <div className="min-h-[70vh] flex items-center justify-center gap-2 text-muted-foreground"><Loader2 className="animate-spin" size={20} /> {t.loading}</div>;
-  } else if (employee.role_level === "owner") {
-    content = <OwnerPortalPanel session={session} employee={employee} />;
   } else {
     const hireDate = employee.hire_date ? new Date(employee.hire_date) : null;
     const serviceYears = hireDate ? Math.floor((Date.now() - hireDate.getTime()) / (365.25 * 24 * 3600 * 1000)) : 0;
