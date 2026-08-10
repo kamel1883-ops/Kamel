@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -14,7 +14,8 @@ const ownerItems = [
 
 const appNav = [
   { to: "/app", ar: "الرئيسية", en: "Dashboard", icon: LayoutDashboard },
-  { to: "/employees", ar: "الموظفون", en: "Employees", icon: Users },
+  { to: "/recruitment", ar: "إدارة التوظيف", en: "Recruitment", icon: Briefcase },
+  { to: "/employees", ar: "الموظفين", en: "Employees", icon: Users },
   { to: "/attendance", ar: "الحضور", en: "Attendance", icon: Fingerprint },
   { to: "/import-attendance", ar: "استيراد الحضور", en: "Import Attendance", icon: ClipboardList },
   { to: "/approvals", ar: "الموافقات", en: "Approvals", icon: CheckCircle2 },
@@ -24,10 +25,11 @@ const appNav = [
   { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield },
   { to: "/fleet", ar: "المركبات", en: "Fleet", icon: Car },
   { to: "/end-of-service", ar: "نهاية الخدمة", en: "End of Service", icon: FileText },
-  { to: "/performance", ar: "الأداء", en: "Performance", icon: Target },
+  { to: "/performance", ar: "إدارة الأداء", en: "Performance", icon: Target },
+  { to: "/training", ar: "التدريب والتطوير", en: "Training & Development", icon: GraduationCap },
+  { to: "/workforce-planning", ar: "تخطيط القوى العاملة", en: "Workforce Planning", icon: CalendarRange },
   { to: "/succession", ar: "التعاقب الوظيفي", en: "Succession", icon: GitBranch },
   { to: "/org-structure", ar: "الهيكل التنظيمي", en: "Org Structure", icon: Network },
-  { to: "/workforce-planning", ar: "تخطيط القوى العاملة", en: "Workforce Planning", icon: CalendarRange },
   { to: "/exit-interviews", ar: "مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare },
   { to: "/surveys", ar: "الاستبيانات", en: "Surveys", icon: ClipboardList },
   { to: "/warnings", ar: "الإنذارات", en: "Warnings", icon: ShieldAlert },
@@ -38,7 +40,7 @@ const appNav = [
 
 const bottomNav = [
   { to: "/app", ar: "الرئيسية", en: "Home", icon: LayoutDashboard },
-  { to: "/employees", ar: "الموظفون", en: "Employees", icon: Users },
+  { to: "/employees", ar: "الموظفين", en: "Employees", icon: Users },
   { to: "/approvals", ar: "الموافقات", en: "Approvals", icon: ClipboardCheck },
   { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
 ];

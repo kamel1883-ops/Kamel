@@ -28,6 +28,8 @@ import Performance from "@/pages/Performance";
 import Succession from "@/pages/Succession";
 import OrgStructure from "@/pages/OrgStructure";
 import WorkforcePlanning from "@/pages/WorkforcePlanning";
+import Recruitment from "@/pages/Recruitment";
+import Training from "@/pages/Training";
 import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import Landing from "@/pages/Landing";
@@ -103,6 +105,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/app" element={<Dashboard />} />
+        <Route path="/recruitment" element={<Recruitment />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/import-attendance" element={<ImportAttendance />} />
@@ -114,6 +117,7 @@ const AuthenticatedApp = () => {
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/end-of-service" element={<EndOfService />} />
         <Route path="/performance" element={<Performance />} />
+        <Route path="/training" element={<Training />} />
         <Route path="/succession" element={<Succession />} />
         <Route path="/org-structure" element={<OrgStructure />} />
         <Route path="/workforce-planning" element={<WorkforcePlanning />} />
