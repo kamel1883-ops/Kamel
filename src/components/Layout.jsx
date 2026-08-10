@@ -5,6 +5,7 @@ import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard,
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import NotificationsBell from "@/components/NotificationsBell";
 import { useI18n } from "@/lib/i18n";
 
 const ownerItems = [
@@ -163,10 +164,16 @@ export default function Layout() {
             <Logo tone="light" size={36} />
           </div>
           <div className="flex items-center gap-2">
+            <NotificationsBell tone="light" />
             <LanguageToggle />
             <button onClick={() => setOpen(true)} className="text-white/80"><Menu size={22} /></button>
           </div>
         </header>
+
+        <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b bg-background/80 backdrop-blur sticky top-0 z-20">
+          <div className="text-sm text-muted-foreground">{isAr ? "منصة جدارة — الموارد البشرية" : "Jadara HR Platform"}</div>
+          <NotificationsBell tone="dark" />
+        </div>
 
         <main className="relative flex-1 p-4 sm:p-6 lg:p-9 pb-24 lg:pb-9 animate-fade-in overflow-hidden">
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/[0.10] via-indigo-500/[0.05] to-amber-200/[0.10] dark:from-violet-500/[0.14] dark:via-indigo-500/[0.10] dark:to-amber-500/[0.08]" aria-hidden="true" />

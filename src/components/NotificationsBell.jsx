@@ -1,0 +1,50 @@
+import React, { useState, useEffect, useRef } from "react";
+import { base44 } from "@/api/base44Client";
+import { Bell, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export default function NotificationsBell({ tone = "light" }) {
+  const [items, setItems] = useState([]);
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const load = async () => { try { const n = await base44.entities.Notification.list("-created_date", 30); setItems(n || []); } catch {} };
+  useEffect(() => { load(); const i = setInterval(load, 30000); return () => clearInterval(i); }, []);
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const unread = items.filter((n) => !n.is_read).length;
+  const markRead = async () => {
+    if (!unread) return;
+    try { await base44.entities.Notification.updateMany({ is_read: false }, { $set: { is_read: true } }); load(); } catch {}
+  };
+  const toggle = () => { const next = !open; setOpen(next); if (next && unread) setTimeout(markRead, 500); };
+
+  const btnCls = tone === "light" ? "text-white/80 hover:text-white" : "text-foreground hover:text-foreground";
+
+  return (
+    <div className="relative" ref={ref}>
+      <button onClick={toggle} className={cn("relative p-2 rounded-lg transition", btnCls)} aria-label="notifications">
+        <Bell size={20} />
+        {unread > 0 && <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">{unread}</span>}
+      </button>
+      {open && (
+        <div className="absolute mt-2 right-0 w-80 max-h-96 overflow-y-auto rounded-2xl border bg-white shadow-2xl z-50 text-foreground">
+          <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white">
+            <span className="font-semibold text-sm">الإشعارات</span>
+            {unread > 0 && <button onClick={markRead} className="text-xs text-violet-600 flex items-center gap-1"><Check size={12} /> مقروء</button>}
+          </div>
+          {items.length === 0 ? <div className="px-4 py-8 text-center text-sm text-muted-foreground">لا توجد إشعارات</div> :
+            items.map((n) => (
+              <div key={n.id} className={cn("px-4 py-3 border-b text-sm", n.is_read ? "bg-white" : "bg-violet-50")}>
+                <div className="font-medium">{n.title}</div>
+                {n.body && <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{n.body}</div>}
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}

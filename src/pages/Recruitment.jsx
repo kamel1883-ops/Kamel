@@ -4,12 +4,15 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ChevronLeft, ClipboardList } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ClipboardList, FileCheck } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobFormDialog from "@/components/recruitment/JobFormDialog";
 import ApplicantsDialog from "@/components/recruitment/ApplicantsDialog";
 import TrialEvaluationDialog from "@/components/recruitment/TrialEvaluationDialog";
 import ShareJobDialog from "@/components/recruitment/ShareJobDialog";
+
+const plus90 = (d) => d ? new Date(new Date(d).getTime() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10) : "";
+const todayISO = () => new Date().toISOString().slice(0, 10);
 
 export default function Recruitment() {
   const { toast } = useToast();
@@ -60,30 +63,57 @@ export default function Recruitment() {
       } />
 
       <Card className="p-4 mb-5">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><CalendarCheck size={22} /></div>
           <div>
-            <div className="font-semibold">تقرير: موظفون تم توظيفهم خلال آخر ٩٠ يوم</div>
-            <div className="text-sm text-muted-foreground">{hiredRecent.length} موظف — مع تقييم فترة التجربة لكل موظف</div>
+            <div className="font-semibold">تقرير: الموظفون المعيّنون خلال آخر ٩٠ يوماً (فترة التجربة)</div>
+            <div className="text-sm text-muted-foreground">{hiredRecent.length} موظف — مع تاريخ التعيين ونهاية فترة التجربة وإجراء التقييم</div>
           </div>
         </div>
         {hiredRecent.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-2">لا يوجد موظفون توظّفوا خلال آخر ٩٠ يوم.</div>
+          <div className="text-sm text-muted-foreground py-3">لا يوجد موظفون توظّفوا خلال آخر ٩٠ يوم.</div>
         ) : (
-          <div className="space-y-2">
-            {hiredRecent.map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-3 border rounded-xl p-2.5 bg-slate-50/60">
-                <div className="min-w-0">
-                  <div className="font-medium text-sm">{a.full_name}</div>
-                  <div className="text-xs text-muted-foreground">{a.job_title} · تم التعيين {a.hired_date}</div>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => openHiredEval(a)}><ClipboardList size={14} /> تقييم فترة التجربة <ChevronLeft size={14} /></Button>
-              </div>
-            ))}
+          <div className="overflow-x-auto rounded-xl border">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/60 text-muted-foreground">
+                <tr>
+                  <th className="text-right font-semibold px-3 py-2.5">الموظف</th>
+                  <th className="text-right font-semibold px-3 py-2.5">الوظيفة</th>
+                  <th className="text-right font-semibold px-3 py-2.5">تاريخ التعيين</th>
+                  <th className="text-right font-semibold px-3 py-2.5">نهاية فترة التجربة (٩٠ يوماً)</th>
+                  <th className="text-right font-semibold px-3 py-2.5">الحالة</th>
+                  <th className="text-right font-semibold px-3 py-2.5">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {hiredRecent.map((a) => {
+                  const end = plus90(a.hired_date);
+                  const inTrial = end >= todayISO();
+                  return (
+                    <tr key={a.id} className="border-t hover:bg-muted/40">
+                      <td className="px-3 py-2.5 font-medium">{a.full_name}</td>
+                      <td className="px-3 py-2.5 text-muted-foreground">{a.job_title}</td>
+                      <td className="px-3 py-2.5">{a.hired_date}</td>
+                      <td className="px-3 py-2.5">{end}</td>
+                      <td className="px-3 py-2.5">
+                        {inTrial ? <Badge className="bg-amber-100 text-amber-800 border-0">في فترة التجربة</Badge> : <Badge className="bg-violet-100 text-violet-800 border-0">أكمل فترة التجربة</Badge>}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Button size="sm" variant="outline" onClick={() => openHiredEval(a)}><ClipboardList size={14} /> تقييم فترة التجربة</Button>
+                          {a.appointment_doc_url && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-emerald-700 underline"><FileCheck size={13} /> قرار التعيين</a>}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </Card>
 
+      <h3 className="text-sm font-semibold mb-3 text-muted-foreground">الوظائف</h3>
       {loading ? (
         <div className="py-24 text-center text-muted-foreground">جارٍ التحميل...</div>
       ) : jobs.length === 0 ? (

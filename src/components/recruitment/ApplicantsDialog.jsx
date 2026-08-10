@@ -6,7 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import { CheckCircle2, XCircle, CalendarClock, UserCheck, ClipboardList } from "lucide-react";
+import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
+import AppointmentLetterDoc from "@/components/docs/AppointmentLetterDoc";
+import { CheckCircle2, XCircle, CalendarClock, UserCheck, ClipboardList, Loader2, FileCheck } from "lucide-react";
 
 const statusMap = {
   applied: { ar: "قُدمت", cls: "bg-slate-100 text-slate-700" },
@@ -20,6 +22,7 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
   const { toast } = useToast();
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [onlySuitable, setOnlySuitable] = useState(false);
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -47,19 +50,43 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
   };
 
   const hire = async (a) => {
-    if (!confirm(`تعيين ${a.full_name}؟ سيتم إغلاق الوظيفة ورفض بقية الطلبات تلقائياً.`)) return;
+    if (!confirm(`تعيين ${a.full_name}؟ سيتم إنشاء ملف موظف ومستند قرار تعيين ومعتمد، وإغلاق الوظيفة ورفض بقية الطلبات تلقائياً.`)) return;
+    setBusy(true);
     try {
       const today = new Date().toISOString().slice(0, 10);
-      await base44.entities.JobApplication.update(a.id, { status: "hired", hired_date: today });
+      let org = null;
+      try { const orgs = await base44.entities.Organization.list("-created_date", 1); org = orgs[0] || null; } catch {}
+
+      let docUrl = "";
+      try {
+        const blob = await renderToPdfBlob(<AppointmentLetterDoc applicant={{ ...a, hired_date: today }} job={job} org={org} />);
+        docUrl = await uploadPdfBlob(blob, `appointment_${a.id}.pdf`);
+      } catch (e) { console.error(e); }
+
+      await base44.entities.JobApplication.update(a.id, { status: "hired", hired_date: today, appointment_doc_url: docUrl, appointment_approved: true });
       await base44.entities.Job.update(job.id, { status: "closed", closed_date: today, hired_applicant_name: a.full_name });
       await base44.entities.JobApplication.updateMany(
         { job_id: job.id, status: { $in: ["applied", "screened", "interview"] } },
         { $set: { status: "rejected", reject_reason: "تم تعيين مرشّح آخر" } }
       );
-      toast({ title: "تم التعيين وإغلاق الوظيفة" });
+
+      const empNo = "JDR-" + Date.now().toString().slice(-6);
+      await base44.entities.Employee.create({
+        full_name: a.full_name, employee_number: empNo, department: job.department || "",
+        position: job.title, hire_date: today, base_salary: job.salary || 0,
+        phone: a.phone, nationality: a.nationality, status: "active", termination_reason: "none",
+      });
+      await base44.entities.Notification.create({
+        title: "تعيين موظف جديد",
+        body: `تم تعيين ${a.full_name} كـ${job.title} (رقم ${empNo})، وتم إصدار قرار التعيين. الرجاء استكمال كافة بياناته لاعتماده ضمن الموظفين الثابتين.`,
+        type: "hired", link: "/employees", is_read: false,
+      });
+
+      toast({ title: "تم التعيين وإغلاق الوظيفة", description: "تم إنشاء ملف الموظف وقرار التعيين وإشعار المسؤول" });
       onHired?.();
       load();
     } catch (e) { toast({ title: "تعذر إتمام التعيين", description: e.message, variant: "destructive" }); }
+    finally { setBusy(false); }
   };
 
   const doReject = async () => {
@@ -99,13 +126,16 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
                     <Badge className={st.cls + " border-0"}>{st.ar}</Badge>
                   </div>
                   {a.qualifications && <div className="text-sm text-muted-foreground">المؤهلات: {a.qualifications}</div>}
-                  {a.cv_url && <a href={a.cv_url} target="_blank" rel="noreferrer" className="text-xs text-violet-700 underline">عرض السيرة الذاتية</a>}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {a.cv_url && <a href={a.cv_url} target="_blank" rel="noreferrer" className="text-xs text-violet-700 underline">عرض السيرة الذاتية</a>}
+                    {a.appointment_doc_url && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 underline inline-flex items-center gap-1"><FileCheck size={12} /> قرار التعيين</a>}
+                  </div>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {a.status === "applied" && <Button size="sm" variant="outline" onClick={() => setStatus(a, "screened")}><UserCheck size={14} /> ترشيح</Button>}
                     {a.status !== "interview" && a.status !== "hired" && a.status !== "rejected" && <Button size="sm" variant="outline" onClick={() => setStatus(a, "interview", { interview_date: new Date().toISOString().slice(0, 10) })}><CalendarClock size={14} /> استدعاء للمقابلة</Button>}
-                    {job && job.status === "open" && a.status !== "hired" && a.status !== "rejected" && <Button size="sm" variant="default" onClick={() => hire(a)}><CheckCircle2 size={14} /> تعيين وإغلاق</Button>}
+                    {job && job.status === "open" && a.status !== "hired" && a.status !== "rejected" && <Button size="sm" variant="default" onClick={() => hire(a)} disabled={busy}>{busy ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} تعيين وإصدار قرار</Button>}
                     {a.status !== "hired" && a.status !== "rejected" && <Button size="sm" variant="destructive" onClick={() => { setRejectTarget(a); setRejectReason(""); }}><XCircle size={14} /> رفض</Button>}
-                    {a.status === "hired" && <Button size="sm" variant="outline" onClick={() => onEvaluate?.(a)}><ClipboardList size={14} /> تقييم التجربة</Button>}
+                    {a.status === "hired" && <Button size="sm" variant="outline" onClick={() => onEvaluate?.(a)}><ClipboardList size={14} /> تقييم فترة التجربة</Button>}
                   </div>
                   {a.reject_reason && <div className="text-xs text-red-700">سبب الرفض: {a.reject_reason}</div>}
                 </div>
