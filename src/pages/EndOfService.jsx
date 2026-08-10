@@ -177,8 +177,9 @@ export default function EndOfService() {
       });
       if (s.employee_id) {
         const empStatus = s.reason === "resignation" ? "resigned" : "terminated";
+        const empReason = s.reason === "probation_dismissal" ? "employer_termination" : s.reason;
         await base44.entities.Employee.update(s.employee_id, {
-          status: empStatus, termination_reason: s.reason, termination_date: s.last_working_date,
+          status: empStatus, termination_reason: empReason, termination_date: s.last_working_date,
         });
       }
     } catch (e) {}

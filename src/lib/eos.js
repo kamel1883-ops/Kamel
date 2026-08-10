@@ -13,6 +13,7 @@ export const terminationReasons = [
   { value: "death", category: "full", ar: { label: "وفاة العامل", article: "مادة 74", note: "تنصرف مكافأة نهاية الخدمة للورثة بالكامل" }, en: { label: "Death", article: "Art. 74", note: "Award paid in full to heirs" } },
   { value: "incapacity", category: "full", ar: { label: "العجز أو عدم اللياقة الصحية", article: "مادة 74", note: "انتهاء العقد بسبب العجز الصحي — مكافأة مستحقة" }, en: { label: "Incapacity / unfitness", article: "Art. 74", note: "Termination for health incapacity — award due" } },
   { value: "force_majeure", category: "none", ar: { label: "القوة القاهرة", article: "مادة 74", note: "ظرف خارج عن إرادة الطرفين — يُقدّر حسب الحالة" }, en: { label: "Force majeure", article: "Art. 74", note: "Beyond parties' control — assessed per case" } },
+  { value: "probation_dismissal", category: "full", ar: { label: "الاستبعاد وإنهاء الخدمة أثناء فترة التجربة", article: "مادة 53", note: "جواز إنهاء العقد خلال فترة التجربة دون إخطار أو تعويض — يستحق العامل أجره عن المدة المقضاة، وتُحسب المكافأة وفق المدة (مادة 84)" }, en: { label: "Dismissal during probation", article: "Art. 53", note: "Either party may terminate during probation without notice or compensation — wages for days worked; award per tenure (Art. 84)" } },
 ];
 
 export function reasonMeta(reason) {
@@ -30,6 +31,7 @@ export const eosArticleReference = [
   { article: "مادة 81", ar: { title: "ترك العامل العمل", desc: "حالات يحق فيها للعامل ترك العمل مع الاحتفاظ بكل حقوقه ومكافأته." }, en: { title: "Employee leaving", desc: "Cases where the employee may leave keeping full rights and award." } },
   { article: "مادة 84", ar: { title: "أساس حساب المكافأة", desc: "نصف شهر عن كل سنة من أول خمس سنوات، وشهر كامل عن كل سنة بعدها." }, en: { title: "Award basis", desc: "Half a month per year for the first five years, a full month per year thereafter." } },
   { article: "مادة 85", ar: { title: "مكافأة الاستقالة", desc: "احتساب جزء من المكافأة بحسب مدة الخدمة عند الاستقالة." }, en: { title: "Resignation award", desc: "Partial award by tenure on resignation." } },
+  { article: "مادة 53", ar: { title: "الإنهاء أثناء فترة التجربة", desc: "يجوز لكل من العامل وصاحب العمل إنهاء العقد خلال فترة التجربة دون إخطار أو تعويض، مع وجوب دفع أجور العامل عن المدة التي قضاها في العمل." }, en: { title: "Termination during probation", desc: "Either party may terminate during probation without notice or compensation, with wages paid for days worked." } },
 ];
 
 export function computeYearsOfService(hireDate, lastWorkingDate) {

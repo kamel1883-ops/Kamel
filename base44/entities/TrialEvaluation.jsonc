@@ -12,7 +12,7 @@
     },
     "applicant_id": {
       "type": "string",
-      "title": "\u0627\u0644\u0645\u062a\u0642\u062f\u0645/\u0627\u0644\u0645\u0639\u064a\u0651\u0646"
+      "title": "\u0627\u0644\u0645\u062a\u0642\u062f\u0645 / \u0627\u0644\u0645\u0639\u064a\u0651\u0646"
     },
     "employee_name": {
       "type": "string",
@@ -27,20 +27,30 @@
       "format": "date",
       "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u062a\u0642\u064a\u064a\u0645"
     },
-    "performance_rating": {
+    "competence_rating": {
       "type": "number",
       "default": 0,
-      "title": "\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0623\u062f\u0627\u0621 (1-5)"
+      "title": "\u0627\u0644\u0643\u0641\u0627\u0621\u0629 (1-5)"
     },
-    "punctuality_rating": {
+    "behavior_rating": {
       "type": "number",
       "default": 0,
-      "title": "\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u0627\u0644\u062a\u0632\u0627\u0645 (1-5)"
+      "title": "\u0627\u0644\u0633\u0644\u0648\u0643 (1-5)"
     },
-    "adaptability_rating": {
+    "knowledge_rating": {
       "type": "number",
       "default": 0,
-      "title": "\u062a\u0642\u064a\u064a\u0645 \u0627\u0644\u062a\u0643\u064a\u0651\u0641 (1-5)"
+      "title": "\u0627\u0644\u0645\u0639\u0631\u0641\u0629 (1-5)"
+    },
+    "professional_field_rating": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0627\u0644\u0645\u062c\u0627\u0644 \u0627\u0644\u0645\u0647\u0646\u064a (1-5)"
+    },
+    "experience_rating": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0627\u0644\u062e\u0628\u0631\u0629 (1-5)"
     },
     "overall_rating": {
       "type": "number",
@@ -59,8 +69,8 @@
       "type": "string",
       "enum": [
         "confirm",
-        "extend",
-        "terminate"
+        "dismiss_probation",
+        "extend"
       ],
       "default": "confirm",
       "title": "\u0627\u0644\u062a\u0648\u0635\u064a\u0629"

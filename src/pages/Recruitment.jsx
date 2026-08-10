@@ -4,11 +4,12 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Link2, Users, CalendarCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ChevronLeft, ClipboardList } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobFormDialog from "@/components/recruitment/JobFormDialog";
 import ApplicantsDialog from "@/components/recruitment/ApplicantsDialog";
 import TrialEvaluationDialog from "@/components/recruitment/TrialEvaluationDialog";
+import ShareJobDialog from "@/components/recruitment/ShareJobDialog";
 
 export default function Recruitment() {
   const { toast } = useToast();
@@ -19,6 +20,8 @@ export default function Recruitment() {
   const [editingJob, setEditingJob] = useState(null);
   const [applicantsJob, setApplicantsJob] = useState(null);
   const [evalApplicant, setEvalApplicant] = useState(null);
+  const [evalJob, setEvalJob] = useState(null);
+  const [shareJob, setShareJob] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -43,24 +46,44 @@ export default function Recruitment() {
     try { await base44.entities.Job.delete(j.id); toast({ title: "تم الحذف" }); load(); }
     catch (e) { toast({ title: "تعذر الحذف", description: e.message, variant: "destructive" }); }
   };
-  const shareLink = (j) => {
-    const url = window.location.origin + "/jobs/" + j.id;
-    navigator.clipboard?.writeText(url);
-    toast({ title: "تم نسخ رابط الوظيفة", description: url });
+
+  const openHiredEval = (app) => {
+    const job = jobs.find((x) => x.id === app.job_id) || null;
+    setEvalApplicant(app);
+    setEvalJob(job);
   };
 
   return (
     <div>
-      <PageHeader title="إدارة التوظيف" subtitle="إدارة الوظائف الشاغرة والوصف الوظيفي والمتقدمين والتعيين وتقييم التجربة" action={
+      <PageHeader title="إدارة التوظيف" subtitle="إدارة الوظائف الشاغرة والوصف الوظيفي والمتقدمين والتعيين وتقييم فترة التجربة" action={
         <Button onClick={openNew}><Plus size={16} /> وظيفة جديدة</Button>
       } />
-      <Card className="p-4 mb-5 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><CalendarCheck size={22} /></div>
-        <div>
-          <div className="font-semibold">موظفون تم توظيفهم خلال آخر ٩٠ يوم</div>
-          <div className="text-sm text-muted-foreground">{hiredRecent.length} موظف</div>
+
+      <Card className="p-4 mb-5">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><CalendarCheck size={22} /></div>
+          <div>
+            <div className="font-semibold">تقرير: موظفون تم توظيفهم خلال آخر ٩٠ يوم</div>
+            <div className="text-sm text-muted-foreground">{hiredRecent.length} موظف — مع تقييم فترة التجربة لكل موظف</div>
+          </div>
         </div>
+        {hiredRecent.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-2">لا يوجد موظفون توظّفوا خلال آخر ٩٠ يوم.</div>
+        ) : (
+          <div className="space-y-2">
+            {hiredRecent.map((a) => (
+              <div key={a.id} className="flex items-center justify-between gap-3 border rounded-xl p-2.5 bg-slate-50/60">
+                <div className="min-w-0">
+                  <div className="font-medium text-sm">{a.full_name}</div>
+                  <div className="text-xs text-muted-foreground">{a.job_title} · تم التعيين {a.hired_date}</div>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => openHiredEval(a)}><ClipboardList size={14} /> تقييم فترة التجربة <ChevronLeft size={14} /></Button>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
+
       {loading ? (
         <div className="py-24 text-center text-muted-foreground">جارٍ التحميل...</div>
       ) : jobs.length === 0 ? (
@@ -81,7 +104,7 @@ export default function Recruitment() {
               {j.hired_applicant_name && <div className="text-xs text-emerald-700">تم التعيين: {j.hired_applicant_name}</div>}
               <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t">
                 <Button size="sm" variant="outline" onClick={() => setApplicantsJob(j)}><Users size={14} /> المتقدمون</Button>
-                <Button size="sm" variant="ghost" onClick={() => shareLink(j)}><Link2 size={14} /> رابط الوظيفة</Button>
+                <Button size="sm" variant="ghost" onClick={() => setShareJob(j)}><Share2 size={14} /> مشاركة</Button>
                 <Button size="icon" variant="ghost" onClick={() => openEdit(j)}><Pencil size={15} /></Button>
                 <Button size="icon" variant="ghost" onClick={() => del(j)}><Trash2 size={15} /></Button>
               </div>
@@ -90,8 +113,9 @@ export default function Recruitment() {
         </div>
       )}
       <JobFormDialog open={jobDialog} onOpenChange={setJobDialog} onSaved={load} job={editingJob} />
-      <ApplicantsDialog open={!!applicantsJob} onOpenChange={(o) => !o && setApplicantsJob(null)} job={applicantsJob} onHired={load} onEvaluate={(a) => setEvalApplicant(a)} />
-      <TrialEvaluationDialog open={!!evalApplicant} onOpenChange={(o) => !o && setEvalApplicant(null)} applicant={evalApplicant} job={applicantsJob} onSaved={load} />
+      <ApplicantsDialog open={!!applicantsJob} onOpenChange={(o) => !o && setApplicantsJob(null)} job={applicantsJob} onHired={load} onEvaluate={(a) => { setEvalApplicant(a); setEvalJob(applicantsJob); }} />
+      <TrialEvaluationDialog open={!!evalApplicant} onOpenChange={(o) => !o && setEvalApplicant(null)} applicant={evalApplicant} job={evalJob} onSaved={load} />
+      <ShareJobDialog open={!!shareJob} onOpenChange={(o) => !o && setShareJob(null)} job={shareJob} />
     </div>
   );
 }

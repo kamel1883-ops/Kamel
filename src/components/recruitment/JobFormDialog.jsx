@@ -90,6 +90,7 @@ export default function JobFormDialog({ open, onOpenChange, onSaved, job }) {
             <Button size="sm" variant="outline" onClick={generate} disabled={generating}><Sparkles size={14} />{generating ? "توليد..." : "توليد بالذكاء الاصطناعي"}</Button>
           </div>
           <Textarea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="الوصف الوظيفي — يمكنك توليده تلقائياً أو كتابته يدوياً" />
+          <p className="text-xs text-muted-foreground">يكون الوصف المولّد قابلاً للتعديل: أضف المهام أو احذفها يدوياً قبل الحفظ.</p>
           <div><Label>الحالة</Label>
             <Select value={form.status} onValueChange={(v) => set("status", v)}>
               <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
