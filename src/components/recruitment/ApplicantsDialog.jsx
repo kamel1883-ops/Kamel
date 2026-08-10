@@ -63,19 +63,18 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
         docUrl = await uploadPdfBlob(blob, `appointment_${a.id}.pdf`);
       } catch (e) { console.error(e); }
 
-      await base44.entities.JobApplication.update(a.id, { status: "hired", hired_date: today, appointment_doc_url: docUrl, appointment_approved: true });
+      const empNo = "JDR-" + Date.now().toString().slice(-6);
+      const emp = await base44.entities.Employee.create({
+        full_name: a.full_name, employee_number: empNo, department: job.department || "",
+        position: job.title, hire_date: today, base_salary: job.salary || 0,
+        phone: a.phone, nationality: a.nationality, status: "active", termination_reason: "none",
+      });
+      await base44.entities.JobApplication.update(a.id, { status: "hired", hired_date: today, appointment_doc_url: docUrl, appointment_approved: true, hired_employee_id: emp.id });
       await base44.entities.Job.update(job.id, { status: "closed", closed_date: today, hired_applicant_name: a.full_name });
       await base44.entities.JobApplication.updateMany(
         { job_id: job.id, status: { $in: ["applied", "screened", "interview"] } },
         { $set: { status: "rejected", reject_reason: "تم تعيين مرشّح آخر" } }
       );
-
-      const empNo = "JDR-" + Date.now().toString().slice(-6);
-      await base44.entities.Employee.create({
-        full_name: a.full_name, employee_number: empNo, department: job.department || "",
-        position: job.title, hire_date: today, base_salary: job.salary || 0,
-        phone: a.phone, nationality: a.nationality, status: "active", termination_reason: "none",
-      });
       await base44.entities.Notification.create({
         title: "تعيين موظف جديد",
         body: `تم تعيين ${a.full_name} كـ${job.title} (رقم ${empNo})، وتم إصدار قرار التعيين. الرجاء استكمال كافة بياناته لاعتماده ضمن الموظفين الثابتين.`,

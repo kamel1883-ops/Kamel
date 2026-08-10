@@ -26,14 +26,23 @@ export default function Recruitment() {
   const [evalJob, setEvalJob] = useState(null);
   const [shareJob, setShareJob] = useState(null);
 
+  const [evalMap, setEvalMap] = useState({});
   const load = async () => {
     setLoading(true);
     try {
-      const [j, apps] = await Promise.all([
+      const [j, apps, evals] = await Promise.all([
         base44.entities.Job.list("-created_date", 200),
         base44.entities.JobApplication.filter({ status: "hired" }, "-hired_date", 500),
+        base44.entities.TrialEvaluation.list("-created_date", 500),
       ]);
       setJobs(j || []);
+      const em = {};
+      (evals || []).forEach((t) => {
+        const k = t.applicant_id;
+        if (!k) return;
+        if (!em[k] || new Date(t.updated_date || t.created_date) > new Date(em[k].updated_date || em[k].created_date)) em[k] = t;
+      });
+      setEvalMap(em);
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 90);
       setHiredRecent((apps || []).filter((a) => new Date(a.hired_date || a.created_date) >= cutoff));
@@ -89,6 +98,8 @@ export default function Recruitment() {
                 {hiredRecent.map((a) => {
                   const end = plus90(a.hired_date);
                   const inTrial = end >= todayISO();
+                  const ev = evalMap[a.id];
+                  const rec = ev?.recommendation;
                   return (
                     <tr key={a.id} className="border-t hover:bg-muted/40">
                       <td className="px-3 py-2.5 font-medium">{a.full_name}</td>
@@ -96,11 +107,15 @@ export default function Recruitment() {
                       <td className="px-3 py-2.5">{a.hired_date}</td>
                       <td className="px-3 py-2.5">{end}</td>
                       <td className="px-3 py-2.5">
-                        {inTrial ? <Badge className="bg-amber-100 text-amber-800 border-0">في فترة التجربة</Badge> : <Badge className="bg-violet-100 text-violet-800 border-0">أكمل فترة التجربة</Badge>}
+                        {rec === "confirm" ? <Badge className="bg-emerald-100 text-emerald-800 border-0">مثبّت — موظف ثابت</Badge>
+                          : rec === "dismiss_probation" ? <Badge className="bg-rose-100 text-rose-700 border-0">مستبعد (مادة 53)</Badge>
+                          : rec === "extend" ? <Badge className="bg-blue-100 text-blue-800 border-0">تمديد التجربة</Badge>
+                          : inTrial ? <Badge className="bg-amber-100 text-amber-800 border-0">في فترة التجربة</Badge>
+                          : <Badge className="bg-violet-100 text-violet-800 border-0">أكمل التجربة — بانتظار التقييم</Badge>}
                       </td>
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <Button size="sm" variant="outline" onClick={() => openHiredEval(a)}><ClipboardList size={14} /> تقييم فترة التجربة</Button>
+                          <Button size="sm" variant="outline" onClick={() => openHiredEval(a)}><ClipboardList size={14} /> التقييم</Button>
                           {a.appointment_doc_url && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-emerald-700 underline"><FileCheck size={13} /> قرار التعيين</a>}
                         </div>
                       </td>

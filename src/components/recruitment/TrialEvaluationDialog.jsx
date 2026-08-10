@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2, Check, AlertTriangle, FileX2, BadgeCheck } from "lucide-react";
 
 const CRITERIA = [
   { key: "competence_rating", label: "الكفاءة" },
@@ -16,23 +18,37 @@ const CRITERIA = [
   { key: "experience_rating", label: "الخبرة" },
 ];
 
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
 export default function TrialEvaluationDialog({ open, onOpenChange, onSaved, applicant, job }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const empty = {
     job_id: "", job_title: "", applicant_id: "", employee_name: "", department: "",
-    evaluation_date: new Date().toISOString().slice(0, 10),
+    evaluation_date: todayISO(),
     competence_rating: 3, behavior_rating: 3, knowledge_rating: 3, professional_field_rating: 3, experience_rating: 3,
     overall_rating: 3, strengths: "", improvements: "", recommendation: "confirm", status: "completed", notes: "",
   };
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [existing, setExisting] = useState(null);
+  const [pendingTerminate, setPendingTerminate] = useState(false);
+  const [doneConfirm, setDoneConfirm] = useState(false);
 
   useEffect(() => {
     if (applicant) {
+      setPendingTerminate(false);
+      setDoneConfirm(false);
       setForm((f) => ({ ...f, job_id: job?.id || "", job_title: job?.title || "", applicant_id: applicant.id, employee_name: applicant.full_name, department: job?.department || "" }));
       base44.entities.TrialEvaluation.filter({ applicant_id: applicant.id }, "-created_date", 1)
-        .then((r) => { if (r && r.length) { setExisting(r[0]); setForm({ ...empty, ...r[0] }); } else setExisting(null); })
+        .then((r) => {
+          if (r && r.length) {
+            setExisting(r[0]);
+            setForm({ ...empty, ...r[0] });
+            if (r[0].recommendation === "confirm") setDoneConfirm(true);
+            if (r[0].recommendation === "dismiss_probation" && !r[0]._terminated) setPendingTerminate(true);
+          } else setExisting(null);
+        })
         .catch(() => setExisting(null));
     }
   }, [applicant?.id, open]);
@@ -55,10 +71,51 @@ export default function TrialEvaluationDialog({ open, onOpenChange, onSaved, app
       };
       if (existing) await base44.entities.TrialEvaluation.update(existing.id, payload);
       else await base44.entities.TrialEvaluation.create(payload);
-      toast({ title: "تم حفظ التقييم" });
+
+      if (form.recommendation === "confirm") {
+        await base44.entities.Notification.create({
+          title: "تثبيت موظف (اجتياز فترة التجربة)",
+          body: `تم تثبيت ${applicant?.full_name} كموظف ثابت. الرجاء استكمال كافة بيانات ملفه لاعتماده ضمن كادر المنشأة.`,
+          type: "confirmed", link: "/employees", is_read: false,
+        });
+        setDoneConfirm(true);
+        toast({ title: "تم حفظ التقييم وتثبيت الموظف", description: "أُرسل إشعار للمسؤول باستكمال ملف الموظف" });
+      } else if (form.recommendation === "dismiss_probation") {
+        setPendingTerminate(true);
+        toast({ title: "تم حفظ التقييم", description: "نفّذ الفسخ بموجب المادة 53 ثم انتقل لاحتساب نهاية الخدمة" });
+      } else {
+        toast({ title: "تم حفظ التقييم" });
+      }
+      onSaved?.();
+    } catch (e) { toast({ title: "تعذر الحفظ", description: e.message, variant: "destructive" }); }
+    finally { setSaving(false); }
+  };
+
+  const terminate = async () => {
+    if (!applicant?.hired_employee_id) {
+      toast({ title: "تعذّر الفسخ", description: "لم يُعثر على سجل الموظف المرتبط — تأكد أن التعيين أنشأ ملف الموظف", variant: "destructive" });
+      return;
+    }
+    const ok = confirm(`تنفيذ فسخ العلاقة التعاقدية مع ${applicant?.full_name} بموجب المادة 53؟ سيتم إنهاء الموظف ونقلك لقسم نهاية الخدمة لاحتساب مستحقاته (لا مكافأة لأنه لم يكمل سنة، مع تصفية رصيد الإجازات وفقاً للأشهر المعمولة).`);
+    if (!ok) return;
+    setSaving(true);
+    try {
+      const today = todayISO();
+      await base44.entities.Employee.update(applicant.hired_employee_id, {
+        status: "terminated",
+        termination_reason: "employer_termination",
+        termination_date: today,
+      });
+      await base44.entities.Notification.create({
+        title: "فسخ العلاقة التعاقدية (مادة 53)",
+        body: `تم إنهاء ${applicant?.full_name} أثناء فترة التجربة بموجب المادة 53. الرجاء مراجعة قسم نهاية الخدمة لاحتساب وتصفية مستحقاته.`,
+        type: "dismissed", link: "/end-of-service", is_read: false,
+      });
+      toast({ title: "تم الفسخ وإنهاء الموظف", description: "جارٍ الانتقال لقسم نهاية الخدمة" });
       onSaved?.();
       onOpenChange(false);
-    } catch (e) { toast({ title: "تعذر الحفظ", description: e.message, variant: "destructive" }); }
+      navigate(`/end-of-service?emp=${applicant.hired_employee_id}&reason=probation_dismissal&lwd=${today}`);
+    } catch (e) { toast({ title: "تعذّر تنفيذ الفسخ", description: e.message, variant: "destructive" }); }
     finally { setSaving(false); }
   };
 
@@ -79,21 +136,37 @@ export default function TrialEvaluationDialog({ open, onOpenChange, onSaved, app
           <div><Label>نقاط القوة</Label><Textarea rows={2} value={form.strengths} onChange={(e) => set("strengths", e.target.value)} /></div>
           <div><Label>فرص التحسين</Label><Textarea rows={2} value={form.improvements} onChange={(e) => set("improvements", e.target.value)} /></div>
           <div><Label>التوصية</Label>
-            <Select value={form.recommendation} onValueChange={(v) => set("recommendation", v)}>
+            <Select value={form.recommendation} onValueChange={(v) => { set("recommendation", v); setPendingTerminate(false); setDoneConfirm(false); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="confirm">تثبيت الموظف (اجتاز فترة التجربة)</SelectItem>
+                <SelectItem value="confirm">تثبيت الموظف (اجتاز فترة التجربة — إيجابي)</SelectItem>
                 <SelectItem value="extend">تمديد فترة التجربة</SelectItem>
-                <SelectItem value="dismiss_probation">استبعاد الموظف وإنهاء خدماته أثناء فترة التجربة (مادة 53)</SelectItem>
+                <SelectItem value="dismiss_probation">استبعاد الموظف (سلبي) — فسخ العلاقة بموجب المادة 53</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {form.recommendation === "dismiss_probation" && (
-            <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-3">
-              وفقاً للمادة 53 من نظام العمل السعودي: يجوز لكل من العامل وصاحب العمل إنهاء العقد خلال فترة التجربة دون إخطار أو تعويض، مع وجوب دفع أجور العامل عن المدة التي قضاها في العمل. عند تنفيذ الاستبعاد يُحسب ملف نهاية الخدمة باختيار سبب «الاستبعاد وإنهاء الخدمة أثناء فترة التجربة (مادة 53)».
+            <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-3 flex gap-2">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <span>وفقاً للمادة 53: يجوز إنهاء العقد خلال فترة التجربة دون إخطار أو تعويض، مع دفع أجر العامل عن المدة المقضاة. بعد حفظ التقييم اضغط زر «تنفيذ الفسخ»، ثم انتقل لقسم نهاية الخدمة لتصفية مستحقاته (لا مكافأة لأنه لم يكمل سنة، ويُحسب رصيد إجازاته تناسبياً حسب الأشهر المعمولة).</span>
             </div>
           )}
           <div><Label>ملاحظات</Label><Textarea rows={2} value={form.notes} onChange={(e) => set("notes", e.target.value)} /></div>
+
+          {doneConfirm && (
+            <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
+              <BadgeCheck size={16} /> تم تثبيت الموظف كموظف ثابت وأُرسل إشعار للمسؤول باستكمال ملفه.
+            </div>
+          )}
+          {pendingTerminate && (
+            <div className="border rounded-xl p-3 bg-rose-50/60 border-rose-200 space-y-2">
+              <div className="text-sm font-medium text-rose-800">تنفيذ قرار الاستبعاد (مادة 53)</div>
+              <div className="text-xs text-muted-foreground">اضغط لفسخ العلاقة التعاقدية وإنهاء الموظف، ثم ستنتقل تلقائياً لقسم نهاية الخدمة لاختيار الموظف واحتساب مستحقاته.</div>
+              <Button variant="destructive" onClick={terminate} disabled={saving}>
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <FileX2 size={16} />} تنفيذ الفسخ بموجب المادة 53 ونقل لاحتساب نهاية الخدمة
+              </Button>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>إلغاء</Button>

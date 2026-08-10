@@ -90,6 +90,13 @@ export default function EndOfService() {
     try { setMe(await base44.auth.me()); } catch {}
     setLoading(false);
   };
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const e = p.get("emp"), r = p.get("reason"), d = p.get("lwd");
+    if (r) setReason(r);
+    if (d) setLwd(d);
+    if (e) setEmpId(e);
+  }, []);
   useEffect(() => { load(); }, []);
 
   useEffect(() => {
