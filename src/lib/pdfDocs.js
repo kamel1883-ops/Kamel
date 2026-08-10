@@ -27,19 +27,8 @@ function drawPaidStamp(pdf, pageW, pageH) {
   try { pdf.setGState(new pdf.GState({ opacity: 0.15 })); } catch (e) {}
   pdf.setTextColor(5, 150, 105);
   try { pdf.setFont("helvetica", "bold"); pdf.setFontSize(fontSize); } catch (e) {}
-  // نصف ارتفاع الحرف التقريبي بالـmm لمعرفة إزاحة المركز البصري عن خط الأساس
-  const halfH = (fontSize * 0.3528) * 0.36;
-  const rad = (angle * Math.PI) / 180;
   // النص يدور حول نقطة الأساس (cx, cy)
   try { pdf.text("PAID", cx, cy, { align: "center", angle }); } catch (e) {}
-  try {
-    pdf.setDrawColor(5, 150, 105);
-    pdf.setLineWidth(1.5);
-    // مركز البيضاوي = المركز البصري للنص بعد الدوران حول نقطة الأساس
-    const ecx = cx + halfH * Math.sin(rad);
-    const ecy = cy - halfH * Math.cos(rad);
-    pdf.ellipse(ecx, ecy, 50, 36, "S");
-  } catch (e) {}
   try { pdf.setGState(new pdf.GState({ opacity: 1 })); } catch (e) {}
 }
 
