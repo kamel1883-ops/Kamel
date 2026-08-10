@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import PerformanceForm from "@/components/PerformanceForm";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Star, Target, TrendingUp, Award, ArrowUpRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Target, TrendingUp, Award, ArrowUpRight, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
@@ -36,6 +36,7 @@ export default function Performance() {
     ready: "جاهز للترقية", noGrade: "غير محدد", perYear: (y, p) => `${y} / ${p}`,
     ladderH: "سلم الدرجات الوظيفية", gradeEmpty: "لا توجد بيانات درجات وظيفية", empCount: (n) => `${n} موظف`,
     promoH: "مرشحو الترقية", promoEmpty: "لا يوجد مرشحون للترقية حالياً",
+    reopen: "إعادة التقييم", reopenAsk: "سيُعاد فتح هذا التقييم كمسودة لإعادة التقييم. متابعة؟",
   } : {
     title: "Performance & career paths", subtitle: "Periodic performance reviews and career path management", add: "New review",
     tabReviews: "Performance reviews", tabPaths: "Career paths",
@@ -43,6 +44,7 @@ export default function Performance() {
     ready: "Promotion ready", noGrade: "Unspecified", perYear: (y, p) => `${y} / ${p}`,
     ladderH: "Job grade ladder", gradeEmpty: "No job grade data", empCount: (n) => `${n} employees`,
     promoH: "Promotion candidates", promoEmpty: "No promotion candidates currently",
+    reopen: "Re-evaluate", reopenAsk: "This review will be reopened as a draft for re-evaluation. Continue?",
   };
 
   const [reviews, setReviews] = useState([]);
@@ -65,6 +67,11 @@ export default function Performance() {
   useEffect(() => { load(); }, []);
 
   const remove = async (id) => { await base44.entities.Performance.delete(id); load(); };
+  const reopen = async (r) => {
+    if (!window.confirm(t.reopenAsk)) return;
+    await base44.entities.Performance.update(r.id, { status: "draft" });
+    load();
+  };
 
   const gradeLadder = (() => {
     const map = {};
@@ -122,6 +129,9 @@ export default function Performance() {
                     <div className="flex items-center justify-between pt-1 border-t border-border">
                       <span className="text-xs text-muted-foreground">{r.review_date || ""}</span>
                       <div className="flex gap-1">
+                        {(r.status === "acknowledged" || r.status === "completed") && (
+                          <button onClick={() => reopen(r)} title={t.reopen} className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-600" aria-label={t.reopen}><RotateCcw size={15} /></button>
+                        )}
                         <button onClick={() => { setEditing(r); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>
                         <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
                       </div>
