@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Trash2 } from "lucide-react";
+import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2 } from "lucide-react";
 import { computeSettlement, reasonMeta, terminationReasons, todayISO, isSaudiNationalId } from "@/lib/eos";
 import { formatCurrency } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
@@ -18,18 +18,22 @@ export default function EndOfService() {
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "نهاية الخدمة", subtitle: "حاسبة مكافأة نهاية الخدمة وفق نظام العمل السعودي (المواد 74 إلى 85) — جميع أسباب الإنهاء ومواد النظام المقابلة مع تصفية الإجازات والتذاكر",
-    chooseEmp: "اختر الموظف", choosePh: "— اختر موظفاً من القائمة —", reason: "سبب الإنهاء", lwd: "تاريخ آخر يوم عمل", calc: "احسب المخالصة",
+    chooseEmp: "اختر الموظف", choosePh: "— اختر موظفاً من القائمة —", reason: "سبب الإنهاء", lwd: "تاريخ آخر يوم عمل",
+    ticketAmt: "قيمة التذكرة (ريال — اختيارية)", ticketHint: "اتركها فارغة: المخالصة = مكافأة نهاية الخدمة + تصفية الإجازات فقط. أدخل مبلغاً فقط إن رغبت الشركة بإضافة تعويض تذكرة.",
+    calc: "احسب المخالصة",
     empInfo: (e) => `الراتب الأساسي: ${formatCurrency(e.base_salary)} • بدل السكن: ${formatCurrency(e.housing_allowance)} • رصيد الإجازات: ${e.leave_balance || 0} يوم • استحقاق التذكرة: ${e.ticket_entitlement === "yearly" ? "سنوي" : e.ticket_entitlement === "biennial" ? "كل سنتين" : "لا يستحق"}`,
     loading: "جارٍ التحميل...", preview: "معاينة المخالصة", savePrint: "حفظ وطباعة", saving: "جارٍ الحفظ...", printOnly: "طباعة فقط",
     savedH: "المخالصات المحفوظة", print: "طباعة",
-    note: "نصف شهر عن كل سنة من أول 5 سنوات ثم شهر كامل عن كل سنة بعدها. الاستقالة تُخفض المكافأة حسب المدة (مادة 85). الفصل لأسباب مشروعة (مادة 80) لا يستحق مكافأة. يتم تصفية رصيد الإجازات وتعويض التذكرة المستحقة ضمن المخالصة. تُطبع المخالصة بشعار المنشأة المُعرّف في الإعدادات.",
+    note: "نصف شهر عن كل سنة من أول 5 سنوات ثم شهر كامل عن كل سنة بعدها. الاستقالة تُخفض المكافأة حسب المدة (مادة 85). الفصل لأسباب مشروعة (مادة 80) لا يستحق مكافأة. المخالصة تحسب مكافأة نهاية الخدمة + تصفية رصيد الإجازات المتبقي، وقيمة التذكرة مفتوحة (اختيارية) يضيفها المسؤول يدوياً إن رغبت الشركة. تُطبع المخالصة بشعار المنشأة المُعرّف في الإعدادات.",
   } : {
     title: "End of service", subtitle: "EOS award calculator per Saudi Labor Law (Art. 74 to 85) — all termination reasons and matching articles, with leave balance and ticket compensation",
-    chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date", calc: "Calculate settlement",
+    chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date",
+    ticketAmt: "Ticket value (SAR — optional)", ticketHint: "Leave empty: settlement = EOS + leave balance only. Enter an amount only if the company wishes to add ticket compensation.",
+    calc: "Calculate settlement",
     empInfo: (e) => `Base: ${formatCurrency(e.base_salary)} • Housing: ${formatCurrency(e.housing_allowance)} • Leave balance: ${e.leave_balance || 0} days • Ticket: ${e.ticket_entitlement === "yearly" ? "Yearly" : e.ticket_entitlement === "biennial" ? "Biennial" : "None"}`,
     loading: "Loading...", preview: "Settlement preview", savePrint: "Save & print", saving: "Saving...", printOnly: "Print only",
     savedH: "Saved settlements", print: "Print",
-    note: "Half a month per year for the first 5 years, then a full month per year. Resignation reduces the award by tenure (Art. 85). Dismissal for cause (Art. 80) is not entitled. Leave balance and ticket compensation are included. Printed with the organization logo set in settings.",
+    note: "Half a month per year for the first 5 years, then a full month per year. Resignation reduces the award by tenure (Art. 85). Dismissal for cause (Art. 80) is not entitled. The settlement computes EOS + remaining leave balance; ticket value is open (optional) and added manually by the admin if the company wishes. Printed with the organization logo set in settings.",
   };
 
   const [employees, setEmployees] = useState([]);
@@ -37,6 +41,7 @@ export default function EndOfService() {
   const [empId, setEmpId] = useState("");
   const [reason, setReason] = useState("end_of_contract");
   const [lwd, setLwd] = useState(todayISO());
+  const [ticketAmount, setTicketAmount] = useState("");
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -60,7 +65,7 @@ export default function EndOfService() {
 
   const compute = () => {
     if (!emp) return;
-    const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason });
+    const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount });
     const record = {
       employee_id: emp.id, employee_number: emp.employee_number,
       employee_name: `${emp.employee_number} - ${emp.position}`,
@@ -120,6 +125,11 @@ export default function EndOfService() {
           <div className="space-y-1.5">
             <Label className="text-xs font-medium flex items-center gap-1 text-muted-foreground"><CalendarDays size={14} /> {t.lwd}</Label>
             <Input type="date" value={lwd} onChange={(e) => setLwd(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium flex items-center gap-1 text-muted-foreground"><Plane size={14} /> {t.ticketAmt}</Label>
+            <Input type="number" dir="ltr" value={ticketAmount} placeholder="0" onChange={(e) => setTicketAmount(e.target.value)} />
+            <span className="text-xs text-muted-foreground">{t.ticketHint}</span>
           </div>
           <div className="flex items-end">
             <Button onClick={compute} disabled={!emp} className="w-full gap-2"><Calculator size={18} /> {t.calc}</Button>

@@ -16,7 +16,7 @@ const empty = {
   name: "", industry: "", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
   vat_number: "", city: "", country: "المملكة العربية السعودية",
   logo_url: "",
-  annual_leave_days: 21, ticket_policy: "yearly", ticket_value: 0,
+  annual_leave_days: 21, ticket_policy: "yearly",
   eos_basis: "gross",
   gosi_saudi_employee_rate: 9.75, gosi_saudi_employer_rate: 9.75, gosi_expat_employer_rate: 2,
   work_week_hours: 48, work_week_days: 6, late_grace_minutes: 15,
@@ -35,7 +35,7 @@ export default function SettingsPage() {
     phone: "الهاتف", unified: "الرقم الموحد (يبدأ بـ7)", email: "البريد الإلكتروني",
     vat: "الرقم الضريبي", city: "المدينة",
     secLeave: "سياسات الإجازات والتذاكر", annualDays: "أيام الإجازة السنوية", ticketPolicy: "سياسة التذاكر",
-    ticketValue: "قيمة التذكرة (ريال)", yearly: "سنوية", biennial: "كل سنتين", none: "بدون",
+    yearly: "سنوية", biennial: "كل سنتين", none: "بدون",
     secEos: "إعدادات نهاية الخدمة والتأمينات", eosBasis: "أساس حساب نهاية الخدمة",
     gross: "الراتب الإجمالي (أساسي + بدلات)", baseOnly: "الراتب الأساسي فقط",
     gosiEmp: "نسبة تأمين الموظف السعودي %", gosiErSa: "نسبة تأمين صاحب العمل (سعودي) %", gosiErEx: "نسبة تأمين صاحب العمل (مقيم) %",
@@ -56,7 +56,7 @@ export default function SettingsPage() {
     phone: "Phone", unified: "Unified number (starts with 7)", email: "Email",
     vat: "VAT number", city: "City",
     secLeave: "Leave & ticket policies", annualDays: "Annual leave days", ticketPolicy: "Ticket policy",
-    ticketValue: "Ticket value (SAR)", yearly: "Yearly", biennial: "Biennial", none: "None",
+    yearly: "Yearly", biennial: "Biennial", none: "None",
     secEos: "EOS & GOSI settings", eosBasis: "EOS calculation basis",
     gross: "Gross salary (base + allowances)", baseOnly: "Base salary only",
     gosiEmp: "Saudi employee GOSI rate %", gosiErSa: "Employer GOSI (Saudi) %", gosiErEx: "Employer GOSI (Expat) %",
@@ -169,7 +169,6 @@ export default function SettingsPage() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label={t.ticketValue}><Input type="number" value={org.ticket_value} onChange={(e) => set("ticket_value", Number(e.target.value))} /></Field>
           </div>
         </Card>
 

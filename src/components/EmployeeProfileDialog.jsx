@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plane, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel, leaveTypeLabel } from "@/lib/hr";
 import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
@@ -48,6 +50,18 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
   };
   const [trips, setTrips] = useState([]);
   const [leaves, setLeaves] = useState([]);
+  const [ticketValue, setTicketValue] = useState("");
+  const [savingTicket, setSavingTicket] = useState(false);
+
+  useEffect(() => { setTicketValue(employee?.ticket_value ?? ""); }, [employee?.id]);
+
+  const saveTicket = async (v) => {
+    if (!employee?.id) return;
+    const num = Number(v) || 0;
+    setSavingTicket(true);
+    try { await base44.entities.Employee.update(employee.id, { ticket_value: num }); }
+    catch (_) {} finally { setSavingTicket(false); }
+  };
 
   useEffect(() => {
     if (!open || !employee?.id) return;
@@ -66,6 +80,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
     lastWorkingDate: employee.termination_date || new Date().toISOString().slice(0, 10),
     reason: employee.termination_reason && employee.termination_reason !== "none" ? employee.termination_reason : "end_of_contract",
     leaveBalance: remaining,
+    ticketAmount: ticketValue,
   }) : null;
   const tmeta = employee?.termination_reason && employee.termination_reason !== "none" ? reasonMeta(employee.termination_reason) : null;
 
@@ -116,6 +131,11 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
               <Row label={t.leaveUsed(used)} value={`${used}`} />
               <Row label={t.leaveRem(remaining)} value={`${remaining}`} />
               <Row label={isAr ? "استحقاق التذاكر" : "Ticket entitlement"} value={employee.ticket_entitlement === "yearly" ? "سنوي" : employee.ticket_entitlement === "biennial" ? "كل سنتين" : employee.ticket_entitlement} />
+              <div className="pt-1">
+                <Label className="text-xs text-muted-foreground">{isAr ? "قيمة التذكرة (ريال — مفتوحة يحددها المسؤول)" : "Ticket value (SAR — open, set by admin)"}</Label>
+                <Input type="number" dir="ltr" value={ticketValue} placeholder="0" onChange={(e) => setTicketValue(e.target.value)} onBlur={(e) => saveTicket(e.target.value)} className="mt-1" />
+                {savingTicket && <div className="text-xs text-muted-foreground mt-1">{isAr ? "جارٍ حفظ قيمة التذكرة..." : "Saving ticket value..."}</div>}
+              </div>
             </Block>
 
             <Block title={t.termination}>

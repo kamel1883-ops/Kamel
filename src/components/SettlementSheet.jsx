@@ -42,7 +42,6 @@ export default function SettlementSheet({ record, org }) {
           )}
           <div>
             <div className="font-bold text-lg">{org?.name || t.orgNameFallback}</div>
-            <div className="text-xs text-slate-500">{t.cr}: {org?.commercial_register || "—"}</div>
             <div className="text-xs text-slate-500">{t.vat}: {org?.vat_number || "—"}</div>
           </div>
         </div>
@@ -79,7 +78,9 @@ export default function SettlementSheet({ record, org }) {
           <Row label={t.daily} detail={t.dailyD} value={r.daily_wage} />
           <Row label={t.eos} detail={r.fraction_label} value={r.eos_amount} bold />
           <Row label={t.leaveCash} detail={t.leaveD(r.leave_balance_days)} value={r.leave_cash} />
-          <Row label={t.ticket} detail={r.ticket_entitlement === "none" ? t.ticketD : r.ticket_entitlement || ""} value={r.ticket_amount} />
+          {Number(r.ticket_amount) > 0 && (
+            <Row label={t.ticket} detail={r.ticket_entitlement === "none" ? t.ticketD : r.ticket_entitlement || ""} value={r.ticket_amount} />
+          )}
           <tr className="bg-slate-100 font-bold">
             <td className="p-2 border-t-2 border-slate-900">{t.total}</td>
             <td className="p-2 border-t-2 border-slate-900"></td>

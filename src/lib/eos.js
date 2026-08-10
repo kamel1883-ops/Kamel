@@ -91,21 +91,26 @@ export function computeGOSI({ employee, org }) {
   return { isSaudi: false, gosi_employee: 0, gosi_employer: gross * expatRate, gross };
 }
 
-export function computeSettlement({ employee, org, lastWorkingDate, reason, leaveBalance }) {
+export function computeSettlement({ employee, org, lastWorkingDate, reason, leaveBalance, ticketAmount }) {
   const basis = org?.eos_basis || "gross";
   const eos = computeEOS({ employee, lastWorkingDate, reason, basis });
   const lb = leaveBalance != null ? Number(leaveBalance) : (Number(employee.leave_balance) || 0);
   const leaveCash = Number((eos.dailyWage * lb).toFixed(2));
-  const currentYear = new Date().getFullYear();
-  const lastUsed = Number(employee.ticket_last_used_year) || 0;
-  const ticketValue = Number(org?.ticket_value) || 0;
-  let ticketAmount = 0;
-  if (employee.ticket_entitlement !== "none" && ticketValue > 0) {
-    const cycle = employee.ticket_entitlement === "biennial" ? 2 : 1;
-    if (currentYear - lastUsed >= cycle) ticketAmount = ticketValue;
+  // قيمة التذكرة مفتوحة: أولوية للقيمة المُدخلة يدوياً (قرار مباشر من الشركة)، ثم قيمة الموظف مع مراعاة الاستحقاق والدورة
+  let ticketVal = 0;
+  if (ticketAmount != null && ticketAmount !== "" && Number(ticketAmount) > 0) {
+    ticketVal = Number(ticketAmount);
+  } else {
+    const empTicket = Number(employee.ticket_value) || 0;
+    if (employee.ticket_entitlement !== "none" && empTicket > 0) {
+      const currentYear = new Date().getFullYear();
+      const lastUsed = Number(employee.ticket_last_used_year) || 0;
+      const cycle = employee.ticket_entitlement === "biennial" ? 2 : 1;
+      if (currentYear - lastUsed >= cycle) ticketVal = empTicket;
+    }
   }
-  const total = Number((eos.amount + leaveCash + ticketAmount).toFixed(2));
-  return { ...eos, basis, leaveBalance: lb, leaveCash, ticketEntitlement: employee.ticket_entitlement, ticketValue, ticketAmount, total_settlement: total };
+  const total = Number((eos.amount + leaveCash + ticketVal).toFixed(2));
+  return { ...eos, basis, leaveBalance: lb, leaveCash, ticketEntitlement: employee.ticket_entitlement, ticketValue: ticketVal, ticketAmount: ticketVal, total_settlement: total };
 }
 
 export function isSaudiNationalId(id) {

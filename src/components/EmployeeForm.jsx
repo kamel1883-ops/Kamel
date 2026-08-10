@@ -25,7 +25,7 @@ const empty = {
   avatar_url: "",
   iqama_expiry: "", passport_number: "", passport_expiry: "",
   health_insurance_number: "", health_insurance_expiry: "",
-  bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null,
+  bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null, ticket_value: "",
 };
 
 export default function EmployeeForm({ open, onClose, onSaved, employee }) {
@@ -41,7 +41,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     address: "العنوان", emergency: "جهة اتصال الطوارئ",
     saudi: "سعودي؟", saudiY: "سعودي", saudiN: "مقيم", iqama: "انتهاء الإقامة/الهوية",
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medNo: "رقم التأمين الطبي", medExp: "انتهاء التأمين الطبي",
-    ticket: "استحقاق التذاكر", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
+    ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
     cancel: "إلغاء", save: "حفظ",
@@ -55,7 +55,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     address: "Address", emergency: "Emergency contact",
     saudi: "Saudi?", saudiY: "Saudi", saudiN: "Expat", iqama: "Iqama/ID expiry",
     passNo: "Passport number", passExp: "Passport expiry", medNo: "Health insurance no", medExp: "Insurance expiry",
-    ticket: "Ticket entitlement", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
+    ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
     deptHint: "Pick from existing departments or type a new one",
     cancel: "Cancel", save: "Save",
@@ -80,7 +80,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
   const submit = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      const payload = { ...form, base_salary: Number(form.base_salary) || 0, housing_allowance: Number(form.housing_allowance) || 0, transport_allowance: Number(form.transport_allowance) || 0, other_allowances: Number(form.other_allowances) || 0 };
+      const payload = { ...form, base_salary: Number(form.base_salary) || 0, housing_allowance: Number(form.housing_allowance) || 0, transport_allowance: Number(form.transport_allowance) || 0, other_allowances: Number(form.other_allowances) || 0, ticket_value: Number(form.ticket_value) || 0 };
       if (employee) await base44.entities.Employee.update(employee.id, payload);
       else await base44.entities.Employee.create(payload);
       onSaved?.(); onClose?.();
@@ -186,6 +186,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
                 <SelectContent><SelectItem value="yearly">{t.yearly}</SelectItem><SelectItem value="biennial">{t.biennial}</SelectItem><SelectItem value="none">{t.none}</SelectItem></SelectContent>
               </Select>
             </Field>
+            <Field label={t.ticketValue}><Input type="number" value={form.ticket_value} onChange={(e) => set("ticket_value", e.target.value)} placeholder="0" dir="ltr" /></Field>
             <Field label={t.bank}><Input value={form.bank_account} onChange={(e) => set("bank_account", e.target.value)} /></Field>
           </div>
 
