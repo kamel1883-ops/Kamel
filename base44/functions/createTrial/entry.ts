@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { verifyTurnstile } from "../../shared/turnstile.ts";
 import { tierForCount } from "../../shared/pricing.ts";
+import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
 
 export default async function (req) {
   try {
@@ -104,7 +105,7 @@ export default async function (req) {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: ownerEmail,
           subject: 'اشتراك تجريبي جديد — ' + name,
-          body: emailBody,
+          body: emailBody + EMAIL_FOOTER,
         });
       } catch (_e) {
         // رسالة تسجيل الإنشاء لا يجب أن تفشل كل العملية إذا تعطل البريد

@@ -1,5 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyCronSecret } from "../../shared/renewal.ts";
+import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
 
 const DAY = 1000 * 60 * 60 * 24;
 const SUPPORT_EMAIL = "info@jadara-hr.com";
@@ -57,7 +58,7 @@ export default async function (req) {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to,
             subject,
-            body: bodyText,
+            body: bodyText + EMAIL_FOOTER,
             from_name: "جدارة",
           });
           sent.push({ id: tt.id, name: tt.name, ended, daysLeft });

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
 
 export default async function(req) {
   try {
@@ -37,7 +38,7 @@ export default async function(req) {
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: new_email,
       subject,
-      body: bodyText,
+      body: bodyText + EMAIL_FOOTER,
       from_name: "جدارة",
     });
 

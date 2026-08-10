@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
+import { EMAIL_FOOTER } from '../../shared/emailFooter.ts';
 
 function addYears(date, years) {
   const d = new Date(date);
@@ -104,7 +105,7 @@ export default async function (req) {
             'تاريخ الاشتراك: ' + todayStr + '\n' +
             'تنتهي السنة الأولى في: ' + subEnd.toISOString().slice(0, 10) + '\n' +
             'تُجدد تلقائياً (تذكير) بـ 700 ريال سنوياً من العام الثاني.\n\n' +
-            'رقم عملية Tap: ' + tapId,
+            'رقم عملية Tap: ' + tapId + EMAIL_FOOTER,
         });
       } catch (_e) {
         // لا تعطّل العملية إن تعطل البريد
@@ -130,7 +131,7 @@ export default async function (req) {
             '1) ادخلوا بوابة الشركات في منصة جدارة.\n' +
             '2) سجّلوا الدخول بالبريد المرتبط بحسابكم + الرقم الموحد (الذي يبدأ بـ7).\n\n' +
             'للدعم والاستفسار — البريد: info@jadara-hr.com\n\n' +
-            'مع خالص التقدير،\nفريق دعم جدارة',
+            'مع خالص التقدير،\nفريق دعم جدارة' + EMAIL_FOOTER,
           from_name: 'جدارة',
         });
       } catch (_e) {

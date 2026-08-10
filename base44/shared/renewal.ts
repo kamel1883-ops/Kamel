@@ -1,4 +1,5 @@
 import { secrets } from "base44:runtime";
+import { EMAIL_FOOTER } from "./emailFooter.ts";
 
 // سر مشترك للتحقق من أن استدعاء الدالة جاء من مجدول المنصة (scheduled workflow)
 // وليس من طلب HTTP مجهول. تُخزَّن قيمته في إدارة أسرار البيئة (CRON_SECRET) ولا تُكتب في المصدر.
@@ -69,7 +70,7 @@ export async function issueRenewalOffer(base44, tenant, opts = {}) {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: tenant.contact_email,
           subject: "عرض تجديد الاشتراك السنوي — منصة جدارة",
-          body: emailBody(tenant, periodStart, periodEnd, todayStr, false),
+          body: emailBody(tenant, periodStart, periodEnd, todayStr, false) + EMAIL_FOOTER,
         });
       } catch (_) {}
     }
@@ -95,7 +96,7 @@ export async function issueRenewalOffer(base44, tenant, opts = {}) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to,
         subject: "عرض تجديد الاشتراك السنوي — منصة جدارة",
-        body: emailBody(tenant, periodStart, periodEnd, todayStr, false),
+        body: emailBody(tenant, periodStart, periodEnd, todayStr, false) + EMAIL_FOOTER,
       });
       emailed = true;
     } catch (_) {}
@@ -106,7 +107,7 @@ export async function issueRenewalOffer(base44, tenant, opts = {}) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: ownerEmail,
         subject: "توليد عرض تجديد سنوي — " + tenant.name,
-        body: emailBody(tenant, periodStart, periodEnd, todayStr, true),
+        body: emailBody(tenant, periodStart, periodEnd, todayStr, true) + EMAIL_FOOTER,
       });
     } catch (_) {}
   }
