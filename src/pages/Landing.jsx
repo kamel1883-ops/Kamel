@@ -131,7 +131,7 @@ export default function Landing() {
     cta1: "جرّب مجاناً لمدة شهر", cta2: "استكشف المميزات",
     stats: [{ n: "+50", l: "عميل تابع" }, { n: "+15,000", l: "موظف مُدار" }, { n: "99.9%", l: "استمرارية" }],
     portalTitle: "بوابة الموظف الذاتية",
-    portalDesc: "دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. يُربط الحساب برقم الهوية/الإقامة بعد اعتماد الموارد البشرية.",
+    portalDesc: "دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. يتم الدخول برقم الهوية/الإقامة وتاريخ الميلاد فقط — بدون بريد أو كلمة مرور.",
     portalCta: "دخول البوابة",
     approvers: "بوابة المعتمدين",
     approversTitle: "بوابة المعتمدين",
@@ -180,7 +180,7 @@ export default function Landing() {
     cta1: "Try free for a month", cta2: "Explore Features",
     stats: [{ n: "+50", l: "Active Clients" }, { n: "+15,000", l: "Employees Managed" }, { n: "99.9%", l: "Uptime" }],
     portalTitle: "Employee Self‑Service Portal",
-    portalDesc: "Employees only — clock in/out from the phone within 50 meters of the workplace (no devices), view salary and leave balance, and submit loan, leave, and business‑trip requests directly. The account is linked by national ID/Iqama after HR approval.",
+    portalDesc: "Employees only — clock in/out from the phone within 50 meters of the workplace (no devices), view salary and leave balance, and submit loan, leave, and business‑trip requests directly. Sign in with national ID/Iqama and date of birth only — no email or password needed.",
     portalCta: "Enter Portal",
     approvers: "Approvers Portal",
     approversTitle: "Approvers Portal",
@@ -311,44 +311,50 @@ export default function Landing() {
           <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
             <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="Team" className="w-full h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0b1120] via-transparent to-transparent" />
-            <div className="absolute bottom-4 right-4 left-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {features.map((f) => {
-                  const I = f.icon;
-                  return (
-                    <div key={f.title} className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-2.5 py-2 flex items-center gap-1.5">
-                      <I size={14} className="text-violet-200 shrink-0" />
-                      <span className="text-[11px] leading-tight text-white/90">{f.title}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </motion.div>
       </section>
 
-      {/* بوابات الدخول: الموظف + المعتمدين */}
-      <section className="max-w-7xl mx-auto px-5 py-8 grid md:grid-cols-2 gap-6">
+      {/* بوابة الموظف + شبكة الخدمات بمحاذاتها */}
+      <section className="max-w-7xl mx-auto px-5 py-8 grid lg:grid-cols-12 gap-6 items-start">
         {/* بوابة الموظف الذاتية */}
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-blue-600/20 p-8 sm:p-10">
+        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-blue-600/20 p-8 sm:p-10">
           <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="relative flex flex-col gap-6">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
                 <Users size={26} className="text-violet-200" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold">{t.portalTitle}</h3>
-                <p className="text-white/70 mt-2 max-w-2xl leading-relaxed">{t.portalDesc}</p>
+                <p className="text-white/70 mt-2 leading-relaxed">{t.portalDesc}</p>
               </div>
             </div>
-            <Link to="/portal" className="shrink-0 inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
+            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
               {t.portalCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
         </div>
 
+        {/* شبكة الخدمات — بمحاذاة بوابة الموظف */}
+        <div className="lg:col-span-7 relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-7">
+          <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-indigo-500/15 blur-3xl" />
+          <div className="relative mb-4 flex items-center gap-2">
+            <Sparkles size={16} className="text-violet-200" />
+            <span className="text-sm font-semibold text-white/85">{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</span>
+          </div>
+          <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {features.map((f) => {
+              const I = f.icon;
+              return (
+                <div key={f.title} className="bg-white/8 border border-white/12 rounded-xl px-2.5 py-2.5 flex items-center gap-2">
+                  <I size={15} className="text-violet-200 shrink-0" />
+                  <span className="text-[11px] leading-tight text-white/90">{f.title}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* عملاؤنا */}
