@@ -71,6 +71,7 @@ export default function OwnerAdmin() {
   const [relTenant, setRelTenant] = useState(null);
   const [trialOpen, setTrialOpen] = useState(false);
   const [trialTenant, setTrialTenant] = useState(null);
+  const [filter, setFilter] = useState("all");
 
   const load = async () => {
     setLoading(true);
@@ -103,6 +104,23 @@ export default function OwnerAdmin() {
     }).length,
     pendingRenew: renewalByTenant.size,
   };
+
+  const filters = [
+    { id: "all", label: isAr ? "الكل" : "All", count: tenants.length },
+    { id: "trial", label: isAr ? "تجربة جارية" : "Trial", count: tenants.filter((x) => x.status === "trial").length },
+    { id: "active", label: isAr ? "مشترك فعّال" : "Active", count: tenants.filter((x) => x.status === "active").length },
+    { id: "expired", label: isAr ? "موقوف" : "Suspended", count: tenants.filter((x) => x.status === "expired").length },
+    { id: "ending", label: isAr ? "تنتهي قريباً" : "Ending soon", count: stats.endingSoon },
+  ];
+  const filteredTenants = tenants.filter((x) => {
+    if (filter === "all") return true;
+    if (filter === "ending") {
+      if (isOwnerTenant(x)) return false;
+      const dl = x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null;
+      return dl != null && dl <= 30;
+    }
+    return x.status === filter;
+  });
 
   const openSub = (tt) => { setTenant(tt); setSubOpen(true); };
   const uploadLogo = async (tt, file) => {
@@ -184,6 +202,16 @@ export default function OwnerAdmin() {
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
       ) : (
+        <>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {filters.map((f) => (
+            <button key={f.id} onClick={() => setFilter(f.id)}
+              className={cn("px-3.5 py-1.5 rounded-full text-sm font-medium border transition",
+                filter === f.id ? "bg-[#2e2448] text-white border-[#2e2448]" : "bg-white border-border text-muted-foreground hover:bg-slate-50")}>
+              {f.label} <span className={cn("opacity-80", filter === f.id ? "text-white/80" : "")}>({f.count})</span>
+            </button>
+          ))}
+        </div>
         <div className="bg-white rounded-2xl border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -198,7 +226,7 @@ export default function OwnerAdmin() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {tenants.map((x) => {
+                {filteredTenants.map((x) => {
                   const pending = renewalByTenant.get(x.id);
                   const owner = isOwnerTenant(x);
                   const dl = owner ? null : (x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null);
@@ -247,11 +275,12 @@ export default function OwnerAdmin() {
                     </tr>
                   );
                 })}
-                {tenants.length === 0 && (<tr><td colSpan={6} className="p-12 text-center text-muted-foreground">{t.noCustomers}</td></tr>)}
+                {filteredTenants.length === 0 && (<tr><td colSpan={6} className="p-12 text-center text-muted-foreground">{filter === "all" ? t.noCustomers : (isAr ? "لا يوجد عملاء في هذه الفئة." : "No customers in this category.")}</td></tr>)}
               </tbody>
             </table>
           </div>
         </div>
+        </>
       )}
 
       <SubForm open={subOpen} onClose={() => setSubOpen(false)} onSaved={load} tenant={tenant} isAr={isAr} t={t} />
