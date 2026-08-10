@@ -44,6 +44,7 @@ export default async function (req) {
         employee_number: emp.employee_number,
         position: emp.position,
         department: emp.department,
+        role_level: emp.role_level || "employee",
         is_approver_manager: !!emp.is_approver_manager,
         is_approver_finance: !!emp.is_approver_finance,
       },

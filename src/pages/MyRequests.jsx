@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
@@ -8,6 +8,7 @@ import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
+import OwnerPortalPanel from "@/components/portal/OwnerPortalPanel";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -134,6 +135,12 @@ export default function MyRequests() {
   const [loanOpen, setLoanOpen] = useState(false);
   const [tripOpen, setTripOpen] = useState(false);
   const [view, setView] = useState("self");
+  const didInitView = useRef(false);
+  useEffect(() => {
+    if (didInitView.current || !employee) return;
+    didInitView.current = true;
+    setView(employee.role_level === "owner" ? "owner" : "self");
+  }, [employee]);
 
   // نموذج الدخول
   const [nid, setNid] = useState("");
@@ -327,12 +334,14 @@ export default function MyRequests() {
     const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;
 
     const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
+    const isOwner = employee.role_level === "owner";
+    const ownerTabLabel = isAr ? "بوابة المالك" : "Owner";
     content = (
-      <div>
-        {/* بطاقة المنشأة + الصلاحيات */}
-        <div className="bg-white rounded-2xl border border-border p-5 mb-6 overflow-hidden">
+          <div>
+          {/* بطاقة المنشأة + الصلاحيات */}
+          <div className={"rounded-2xl border p-5 mb-6 overflow-hidden " + (isOwner ? "border-amber-300 bg-gradient-to-br from-amber-50 via-white to-violet-50" : "bg-white border-border")}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
               {org?.logo_url ? (
                 <Image src={org.logo_url} fittingType="fit" className="h-14 w-14 rounded-xl bg-slate-50 p-1.5 border border-border shrink-0" />
               ) : (
@@ -365,13 +374,22 @@ export default function MyRequests() {
           </div>
         </div>
 
-        {hasApprovals && (
-          <div className="flex gap-2 mb-5 border-b border-border">
+        {(isOwner || hasApprovals) && (
+          <div className="flex gap-2 mb-5 border-b border-border flex-wrap">
+            {isOwner && (
+              <button type="button" onClick={() => setView("owner")} className={cn("inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "owner" ? "border-amber-500 text-amber-700" : "border-transparent text-muted-foreground hover:text-foreground")}>
+                <Crown size={15} /> {ownerTabLabel}
+              </button>
+            )}
             <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
-            <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
+            {hasApprovals && (
+              <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
+            )}
           </div>
         )}
-        {hasApprovals && view === "approvals" ? (
+        {isOwner && view === "owner" ? (
+          <OwnerPortalPanel session={session} employee={employee} />
+        ) : hasApprovals && view === "approvals" ? (
           <ApprovalsPortal portalSession={session} />
         ) : (
           <>
