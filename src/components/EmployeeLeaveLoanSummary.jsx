@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { computeEntitlement, sumUsedDays, getOrgOnce } from "@/lib/leaveBalance";
+import { computeEntitlement, sumUsedDays, getOrgOnce, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { generateLeaveSettlement, generateLoanStatement } from "@/lib/docGenerators";
 import { formatCurrency, leaveTypeLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
@@ -27,8 +27,9 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
 
   useEffect(() => { load(); }, [employee?.id]);
 
-  const annualDays = Number(org?.annual_leave_days) || 21;
+  const annualDays = getEmployeeAnnualDays(employee, org);
   const entitlement = computeEntitlement(employee?.hire_date, annualDays);
+  const empSystem = Number(employee?.annual_leave_entitlement) === 30 ? 30 : 21;
   const prior = Number(employee?.prior_used_leave) || 0;
   const used = Math.round((sumUsedDays(leaves) + prior) * 10) / 10;
   const remaining = Math.max(0, Math.round((entitlement - used) * 10) / 10);
@@ -59,7 +60,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
           <Stat label="المتبقي" value={`${remaining} يوم`} tone="emerald" />
         </div>
         <div className="text-[11px] text-muted-foreground mt-1">
-          سياسة الشركة: {annualDays} يوماً/سنة · تناسبي شهرياً
+          نظام الموظف: {empSystem} يوماً/سنة · تناسبي شهرياً من تاريخ المباشرة
         </div>
       </div>
 

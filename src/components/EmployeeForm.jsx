@@ -27,6 +27,7 @@ const empty = {
   iqama_expiry: "", passport_number: "", passport_expiry: "",
   health_insurance_number: "", health_insurance_expiry: "",
   bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null, ticket_value: "",
+  annual_leave_entitlement: 21,
 };
 
 export default function EmployeeForm({ open, onClose, onSaved, employee }) {
@@ -43,6 +44,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     saudi: "سعودي؟", saudiY: "سعودي", saudiN: "مقيم", iqama: "انتهاء الإقامة/الهوية",
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medNo: "رقم التأمين الطبي", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
+    annualLeaveEnt: "رصيد الإجازات السنوي (يحدده الموارد البشرية)", d21: "21 يوم", d30: "30 يوم",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
     approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
@@ -58,6 +60,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     saudi: "Saudi?", saudiY: "Saudi", saudiN: "Expat", iqama: "Iqama/ID expiry",
     passNo: "Passport number", passExp: "Passport expiry", medNo: "Health insurance no", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
+    annualLeaveEnt: "Annual leave entitlement (set by HR)", d21: "21 days", d30: "30 days",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
     approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)",
     deptHint: "Pick from existing departments or type a new one",
@@ -140,6 +143,15 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             </Field>
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
+            <Field label={t.annualLeaveEnt}>
+              <Select value={String(form.annual_leave_entitlement === 30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="21">{t.d21}</SelectItem>
+                  <SelectItem value="30">{t.d30}</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label={t.contractStart}><Input type="date" value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
             <Field label={t.contractEnd}><Input type="date" value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>
             <Field label={t.directManager}>

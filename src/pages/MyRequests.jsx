@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
-import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { portalSession } from "@/lib/portalSession";
 
 const localToday = () => {
@@ -307,7 +307,7 @@ export default function MyRequests() {
     const gross =
       (employee.base_salary || 0) + (employee.housing_allowance || 0) +
       (employee.transport_allowance || 0) + (employee.other_allowances || 0);
-    const annualDays = org?.annual_leave_days || 21;
+    const annualDays = getEmployeeAnnualDays(employee, org);
     const entitled = computeEntitlement(employee.hire_date, annualDays);
     const used = sumUsedDays(leaves);
     const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);

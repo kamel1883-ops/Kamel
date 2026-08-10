@@ -32,7 +32,17 @@ export async function getOrgOnce() {
 
 export async function getAnnualLeaveDays() {
   const org = await getOrgOnce();
-  return Number(org?.annual_leave_days) || 21;
+  const v = Number(org?.annual_leave_days);
+  return v === 21 || v === 30 ? v : 21;
+}
+
+// رصيد الإجازات السنوي للموظف: أولوية لاختيار الموارد البشرية في ملف الموظف (21 أو 30)،
+// ثم إعداد المنشأة، ثم 21 افتراضياً. هذا المصدر الموحّد لكل حسابات الإجازات ومخالصتها ونهاية الخدمة.
+export function getEmployeeAnnualDays(employee, org) {
+  const emp = Number(employee?.annual_leave_entitlement);
+  if (emp === 21 || emp === 30) return emp;
+  const orgV = Number(org?.annual_leave_days);
+  return orgV === 21 || orgV === 30 ? orgV : 21;
 }
 
 // مجموع الأيام المستخدمة من طلبات الإجازة المعتمدة/المكتملة (باستثناء المرفوضة المؤرشفة)

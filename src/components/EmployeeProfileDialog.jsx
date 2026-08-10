@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel, leaveTypeLabel } from "@/lib/hr";
-import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { reasonMeta, computeSettlement } from "@/lib/eos";
 import { badge } from "@/lib/approvals";
 import { useI18n } from "@/lib/i18n";
@@ -71,7 +71,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
       .then(setLeaves).catch(() => setLeaves([]));
   }, [open, employee?.id]);
 
-  const annualDays = org?.annual_leave_days || 21;
+  const annualDays = getEmployeeAnnualDays(employee, org);
   const entitled = employee ? computeEntitlement(employee.hire_date, annualDays) : 0;
   const used = sumUsedDays(leaves);
   const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
@@ -127,6 +127,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
             </Block>
 
             <Block title={t.leave}>
+              <Row label={isAr ? "نظام الإجازات السنوي" : "Annual leave system"} value={`${annualDays} ${isAr ? "يوم / سنة" : "days/yr"}`} />
               <Row label={t.leaveEnt(entitled?.toFixed(1))} value={`${entitled?.toFixed(1)}`} />
               <Row label={t.leaveUsed(used)} value={`${used}`} />
               <Row label={t.leaveRem(remaining)} value={`${remaining}`} />

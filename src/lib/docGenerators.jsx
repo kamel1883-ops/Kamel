@@ -1,14 +1,14 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
-import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import LeaveClearanceDoc from "@/components/docs/LeaveClearanceDoc";
 import LoanStatementDoc from "@/components/docs/LoanStatementDoc";
 import BusinessTripApprovalDoc from "@/components/docs/BusinessTripApprovalDoc";
 
 // مخالصة تصفية إجازة — تُولّد PDF، تُرفع، وتُخزّن على الطلب + تُرجع الرابط
 export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) {
-  const annualDays = Number(org?.annual_leave_days) || 21;
+  const annualDays = getEmployeeAnnualDays(emp, org);
   const asOf = leave?.end_date ? new Date(leave.end_date) : new Date();
   const entitlement = computeEntitlement(emp?.hire_date, annualDays, asOf);
   const others = (allLeavesForEmp || []).filter((l) => l.id !== leave.id);

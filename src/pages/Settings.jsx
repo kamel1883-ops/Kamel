@@ -202,7 +202,15 @@ export default function SettingsPage() {
         <Card>
           <SectionTitle title={t.secLeave} />
           <div className="grid grid-cols-2 gap-4">
-            <Field label={t.annualDays}><Input type="number" value={org.annual_leave_days} onChange={(e) => set("annual_leave_days", Number(e.target.value))} /></Field>
+            <Field label={t.annualDays}>
+              <Select value={String(org.annual_leave_days === 30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_days", Number(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="21">21 {isAr ? "يوم" : "days"}</SelectItem>
+                  <SelectItem value="30">30 {isAr ? "يوم" : "days"}</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label={t.ticketPolicy}>
               <Select value={org.ticket_policy} onValueChange={(v) => set("ticket_policy", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
