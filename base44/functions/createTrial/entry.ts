@@ -19,7 +19,7 @@ export default async function (req) {
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
     if (!phone) return Response.json({ error: 'رقم الهاتف مطلوب' }, { status: 400 });
     if (!unified || !/^7\d{7,11}$/.test(unified))
-      return Response.json({ error: 'الرقم الموحد مطلوب ويجب أن يبدأ بـ7' }, { status: 400 });
+      return Response.json({ error: 'الرقم الوطني الموحد للمنشآت مطلوب (10 خانات تبدأ بـ7)' }, { status: 400 });
     if (!Number.isFinite(employeeCount) || employeeCount <= 0)
       return Response.json({ error: 'عدد الموظفين المتوقع مطلوب' }, { status: 400 });
 
@@ -90,7 +90,7 @@ export default async function (req) {
           'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
           'البريد: ' + email + '\n' +
           'الهاتف: ' + phone + '\n' +
-          'الرقم الموحد: ' + unified + '\n' +
+          'الرقم الوطني الموحّد للمنشآت: ' + unified + '\n' +
           'المدينة: ' + (body.city || '-') + '\n' +
           'عدد الموظفين: ' + employeeCount + '\n' +
           'الشريحة: ' + pricingTier + '\n' +

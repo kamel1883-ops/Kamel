@@ -15,33 +15,33 @@ export default function CompanyForgotPassword() {
   const t = isAr
     ? {
         title: "استعادة كلمة المرور",
-        subtitle: "أدخل بريد المنشأة ورقمها الموحد لإرسال رابط التعديل",
+        subtitle: "أدخل بريد المنشأة والرقم الوطني الموحد للمنشآت لإرسال رابط التعديل",
         email: "البريد الإلكتروني للمنشأة",
-        unified: "الرقم الموحد (يبدأ بـ7)",
+        unified: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7)",
         sending: "جارٍ الإرسال...",
         submit: "إرسال رابط الاستعادة",
         sent: "إذا تطابقت بيانات المنشأة، فستصلك رسالة استعادة كلمة المرور على بريدك قريباً. افتح الرابط لتعيين كلمة مرور جديدة.",
-        errUnified: "الرقم الموحد يجب أن يبدأ بـ7",
+        errUnified: "الرقم الوطني الموحد للمنشآت يجب أن تكون 10 خانات تبدأ بـ7",
         errCaptcha: "يرجى إكمال التحقق البشري (CAPTCHA) أولاً",
-        errCreds: "بيانات المنشأة غير مطابقة. تأكد من البريد والرقم الموحد.",
+        errCreds: "بيانات المنشأة غير مطابقة. تأكد من البريد والرقم الوطني الموحد للمنشآت.",
         back: "العودة لدخول المنشأة",
         forgotEmailTitle: "نسيت البريد الإلكتروني نفسه؟",
-        forgotEmailBody: "لا يمكن إضافة بريد بديل لاستقبال الرمز تلقائياً (الإرسال يقتصر على المستخدمين المسجّلين). تواصل مع دعم جدارة على info@jadara-hr.com مع إثبات ملكية المنشأة (الرقم الموحد + السجل التجاري) لإعادة ربط حسابك.",
+        forgotEmailBody: "لا يمكن إضافة بريد بديل لاستقبال الرمز تلقائياً (الإرسال يقتصر على المستخدمين المسجّلين). تواصل مع دعم جدارة على info@jadara-hr.com مع إثبات ملكية المنشأة (الرقم الوطني الموحد للمنشآت + السجل التجاري) لإعادة ربط حسابك.",
       }
     : {
         title: "Recover your password",
-        subtitle: "Enter your company email and unified number to receive a reset link",
+        subtitle: "Enter your company email and National Unified Number to receive a reset link",
         email: "Company email",
-        unified: "Unified number (starts with 7)",
+        unified: "National Unified Number (10 digits, starts with 7)",
         sending: "Sending...",
         submit: "Send recovery link",
         sent: "If your company details match, a password reset message will arrive at your inbox shortly. Open the link to set a new password.",
-        errUnified: "Unified number must start with 7",
+        errUnified: "National Unified Number must be 10 digits starting with 7",
         errCaptcha: "Please complete the human verification (CAPTCHA) first",
-        errCreds: "Company credentials do not match. Verify email and unified number.",
+        errCreds: "Company credentials do not match. Verify email and National Unified Number.",
         back: "Back to company sign-in",
         forgotEmailTitle: "Forgot the email itself?",
-        forgotEmailBody: "Adding an alternate email to receive the code isn't supported automatically (email delivery is limited to registered users). Contact Jadara support at info@jadara-hr.com with proof of ownership (unified number + commercial register) to re-link your account.",
+        forgotEmailBody: "Adding an alternate email to receive the code isn't supported automatically (email delivery is limited to registered users). Contact Jadara support at info@jadara-hr.com with proof of ownership (National Unified Number + commercial register) to re-link your account.",
       };
 
   const [email, setEmail] = useState("");

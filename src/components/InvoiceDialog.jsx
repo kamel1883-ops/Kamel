@@ -68,7 +68,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
 
   const F = isAr ? {
     title: "إنشاء فاتورة", pul: "تُجلب بيانات العميل تلقائياً — راجعها وعدّلها ثم اطبع",
-    name: "اسم المنشأة", unified: "الرقم الموحد", contact: "جهة الاتصال",
+    name: "اسم المنشأة", unified: "الرقم الوطني الموحد للمنشآت", contact: "جهة الاتصال",
     phone: "الهاتف", email: "البريد", city: "المدينة", plan: "الباقة",
     empCount: "عدد الموظفين", pricePer: "سعر الباقة",
     pstart: "بداية الاشتراك", pend: "نهاية الاشتراك", amount: "المبلغ (ر.س)",
@@ -78,7 +78,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
     contactFoot: "للاستفسار", subLine: "باقة جدارة السنوية للمنصة",
   } : {
     title: "Create invoice", pul: "Client data is pulled automatically — review, edit, then print",
-    name: "Company name", unified: "Unified number", contact: "Contact",
+    name: "Company name", unified: "National Unified Number", contact: "Contact",
     phone: "Phone", email: "Email", city: "City", plan: "Plan",
     empCount: "Employees", pricePer: "Plan price",
     pstart: "Start date", pend: "End date", amount: "Amount (SAR)",
