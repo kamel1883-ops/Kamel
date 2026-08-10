@@ -20,6 +20,7 @@ export default function InviteApproverDialog() {
     note: "يصله رابط إعداد كلمة المرور على بريده. للمدير المباشر: اربط بريده بسجل موظفه (الموظفون ← تعديل ← بريد العمل)، ثم اجعل مرؤوسيه يشيرون إليه في حقل «المدير المباشر». للمالية: يكفيه الدخول لبوابة الموافقات بعد تفعيل بريده.",
     send: "إرسال الدعوة", cancel: "إلغاء", invalid: "بريد غير صالح",
     ok: (e, r) => `تمت دعوة «${e}» بدور ${r}.`,
+    partial: (e) => `تمت دعوة «${e}»، لكن تعذّر تعيين الدور المخصّص تلقائياً — يرجى إعادة المحاولة.`,
     err: (m) => `تعذّر: ${m}`,
   } : {
     btn: "Invite approver",
@@ -30,6 +31,7 @@ export default function InviteApproverDialog() {
     note: "They'll receive a password setup link. For a manager: link their email to their employee record (Employees → edit → work email), then set them as their subordinates' direct manager. For finance: they just sign in to the approvals portal once their email is activated.",
     send: "Send invite", cancel: "Cancel", invalid: "Invalid email",
     ok: (e, r) => `Invited "${e}" as ${r}.`,
+    partial: (e) => `Invited "${e}", but couldn't set the custom role automatically — please retry.`,
     err: (m) => `Failed: ${m}`,
   };
 
@@ -46,10 +48,19 @@ export default function InviteApproverDialog() {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setErr(t.invalid); return; }
     setBusy(true);
     try {
-      await base44.users.inviteUser(em, role);
-      setOk(t.ok(em, role === "manager" ? t.roleM : t.roleF));
+      // منصة Base44 تقبل فقط user/admin في inviteUser؛ ندعوه user ثم نعيّن دوره المخصّص.
+      await base44.users.inviteUser(em, "user");
+      let roleOk = true;
+      try {
+        let uid = null;
+        const users = await base44.entities.User.list("-created_date", 500);
+        const target = users.find((u) => (u.email || "").toLowerCase() === em);
+        uid = target?.id || null;
+        if (uid) await base44.entities.User.update(uid, { role });
+      } catch (e2) { roleOk = false; }
+      setOk(roleOk ? t.ok(em, role === "manager" ? t.roleM : t.roleF) : t.partial(em));
       setEmail("");
-      setTimeout(() => setOpen(false), 1200);
+      setTimeout(() => setOpen(false), 1500);
     } catch (e) { setErr(t.err(e?.message || "")); }
     finally { setBusy(false); }
   };
