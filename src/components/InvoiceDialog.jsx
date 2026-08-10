@@ -111,7 +111,8 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
             </div>
 
             {/* الفاتورة القابلة للطباعة */}
-            <div className="print-invoice bg-white text-slate-900 rounded-xl border border-slate-200 p-6" dir={isAr ? "rtl" : "ltr"}>
+            <div className="print-invoice bg-white text-slate-900 rounded-xl border border-slate-200 p-8 mx-auto" style={{ maxWidth: "780px" }} dir={isAr ? "rtl" : "ltr"}>
+              {/* رأس الفاتورة */}
               <div className="flex items-start justify-between border-b-2 border-slate-300 pb-4">
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-lg bg-[#1d3a5f] text-white flex items-center justify-center font-extrabold text-lg">ج</div>
@@ -127,24 +128,27 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 </div>
               </div>
 
-              <div className="flex justify-center my-4">
+              {/* الباركود */}
+              <div className="flex flex-col items-center my-4">
                 <img src={barcodeUrl} alt={invNum} className="h-12" />
-                <div className="w-full text-center text-[10px] text-slate-500 -mt-1">{invNum}</div>
+                <div className="text-[10px] text-slate-500 mt-1">{invNum}</div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-4">
-                <div className="text-xs font-semibold text-slate-500 mb-1.5">{F.billedTo}</div>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-                  <div className="font-bold">{f.name}</div>
-                  <div className="text-slate-600">{F.unified}: {f.unified_number || "—"}</div>
-                  <div className="text-slate-600">{f.contact_name}</div>
-                  <div className="text-slate-600" dir="ltr">{f.contact_phone}</div>
-                  <div className="text-slate-600" dir="ltr">{f.contact_email}</div>
-                  <div className="text-slate-600">{f.city}</div>
+              {/* بيانات العميل — كاملة ضمن الإطار */}
+              <div className="bg-slate-50 border border-slate-300 rounded-lg p-4 mb-4 break-inside-avoid">
+                <div className="text-xs font-semibold text-slate-500 mb-2">{F.billedTo}</div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm break-inside-avoid">
+                  <div className="font-bold text-slate-900 break-words min-w-0">{f.name || "—"}</div>
+                  <div className="text-slate-600 break-words min-w-0">{F.unified}: {f.unified_number || "—"}</div>
+                  <div className="text-slate-600 break-words min-w-0">{f.contact_name || "—"}</div>
+                  <div className="text-slate-600 break-words min-w-0" dir="ltr">{f.contact_phone || "—"}</div>
+                  <div className="text-slate-600 break-words min-w-0" dir="ltr">{f.contact_email || "—"}</div>
+                  <div className="text-slate-600 break-words min-w-0">{f.city || "—"}</div>
                 </div>
               </div>
 
-              <table className="w-full text-sm border border-slate-300 mb-4">
+              {/* جدول البنود */}
+              <table className="w-full text-sm border border-slate-300 mb-4 break-inside-avoid">
                 <thead className="bg-slate-100 text-slate-700">
                   <tr>
                     <th className="text-right p-2 border-b border-slate-300">{F.desc}</th>
@@ -154,18 +158,19 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="p-2 border-b border-slate-200">{f.plan} — {F.subLine}</td>
-                    <td className="p-2 border-b border-slate-200">{f.period_start} → {f.period_end || "—"}</td>
-                    <td className="p-2 border-b border-slate-200 font-semibold">{Number(f.amount).toLocaleString()} {sar}</td>
+                    <td className="p-2 border-b border-slate-200 break-words">{f.plan} — {F.subLine}</td>
+                    <td className="p-2 border-b border-slate-200 whitespace-nowrap">{f.period_start} → {f.period_end || "—"}</td>
+                    <td className="p-2 border-b border-slate-200 font-semibold whitespace-nowrap">{Number(f.amount).toLocaleString()} {sar}</td>
                   </tr>
                   <tr>
                     <td colSpan={2} className="p-2 text-left font-bold text-slate-800">{F.total}</td>
-                    <td className="p-2 font-extrabold text-base text-[#1d3a5f]">{Number(f.amount).toLocaleString()} {sar}</td>
+                    <td className="p-2 font-extrabold text-base text-[#1d3a5f] whitespace-nowrap">{Number(f.amount).toLocaleString()} {sar}</td>
                   </tr>
                 </tbody>
               </table>
 
-              <div className="flex items-end justify-between">
+              {/* التذييل */}
+              <div className="flex items-end justify-between break-inside-avoid">
                 <div className="text-xs text-slate-500 leading-relaxed">
                   <div className="font-semibold text-slate-700">{F.contactFoot}</div>
                   <div dir="ltr">WhatsApp: +966 594700782</div>
