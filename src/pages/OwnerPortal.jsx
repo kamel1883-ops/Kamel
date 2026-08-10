@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import OwnerPortalPanel from "@/components/portal/OwnerPortalPanel";
@@ -52,6 +52,30 @@ export default function OwnerPortal() {
 
   const [session, setSession] = useState(() => portalSession.load());
   const [employee, setEmployee] = useState(session?.employee || null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // عند وجود جلسة محفوظة، نُتحقق منها خادمياً ونُحدّث بيانات المالك (role_level)
+  // من المصدر — الجلسات القديمة قد تفتقد role_level أو تكون منتهية/بسرّ مُستبدل.
+  // إن كان الرمز غير صالح نُفرغ الجلسة ليعود المالك لشاشة الدخول بدل التعليق.
+  useEffect(() => {
+    if (!session) return;
+    setRefreshing(true);
+    base44.functions.invoke("portalData", {
+      token: session.token, employee_id: session.employee_id, action: "fetch",
+    }).then((res) => {
+      const d = res?.data || res;
+      if (d?.ok && d.employee) {
+        const updated = { ...session, employee: d.employee };
+        portalSession.save(updated);
+        setSession(updated);
+        setEmployee(d.employee);
+      } else if (d?.error === "invalid_session") {
+        portalSession.clear();
+        setSession(null); setEmployee(null);
+      }
+    }).catch(() => {}).finally(() => setRefreshing(false));
+  }, [session?.token, session?.employee_id]);
+
   const [nid, setNid] = useState("");
   const [birth, setBirth] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
@@ -157,6 +181,19 @@ export default function OwnerPortal() {
               <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
             </form>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ——— جلسة لكن نتحقق من صلاحية المالك ———
+  if (session && !employee?.role_level) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <Header />
+        <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
+          {refreshing && <Loader2 className="animate-spin" size={24} />}
+          <p className="text-sm">{t.loading}</p>
         </div>
       </div>
     );
