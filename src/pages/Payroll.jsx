@@ -167,6 +167,7 @@ export default function Payroll() {
         org,
         title: isAr ? `كشف رواتب ${t.months[month - 1]} ${year}` : `Payroll sheet ${t.months[month - 1]} ${year}`,
         subtitle: isAr ? `إجمالي الصافي: ${formatCurrency(totalNet)} — ${payrolls.length} موظف` : `Total net: ${formatCurrency(totalNet)} — ${payrolls.length} employees`,
+        stamp: monthStatus === "paid" && payrolls.length > 0,
       });
     } finally { setExporting(false); }
   };
@@ -314,12 +315,6 @@ export default function Payroll() {
       )}
 
       <div ref={sheetRef} className="relative bg-white rounded-2xl border border-border overflow-hidden">
-        {monthStatus === "paid" && payrolls.length > 0 && (
-          <div className="absolute top-5 left-6 z-10 -rotate-12 border-[3px] border-rose-600 rounded-xl px-5 py-2 bg-rose-50 select-none pointer-events-none">
-            <div className="text-2xl font-black tracking-widest leading-none text-rose-700">مدفوع</div>
-            <div className="text-[10px] font-bold mt-1 text-rose-600 tracking-widest">PAID</div>
-          </div>
-        )}
         {loading ? (
           <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
         ) : payrolls.length === 0 ? (

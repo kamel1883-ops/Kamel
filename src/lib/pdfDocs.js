@@ -18,10 +18,10 @@ function waitForImages(node) {
   );
 }
 
-// يرسم ختم "PAID" كبير شبه شفاف ومائل في منتصف الصفحة الحالية
+// يرسم ختم "PAID" كبير شبه شفاف ومائل أسفل محتوى الصفحة مع هامش معقول من الأسفل
 // يُدار النص حول نقطة الأساس، لذا يُزاح مركز البيضاوي ليطابق المركز البصري الفعلي للنص بعد الدوران
 function drawPaidStamp(pdf, pageW, pageH) {
-  const cx = pageW / 2, cy = pageH / 2;
+  const cx = pageW / 2, cy = pageH - 55;
   const angle = 24;
   const fontSize = 92;
   try { pdf.setGState(new pdf.GState({ opacity: 0.15 })); } catch (e) {}
