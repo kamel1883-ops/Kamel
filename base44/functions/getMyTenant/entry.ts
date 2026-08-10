@@ -33,6 +33,9 @@ export default async function (req) {
         vat_number: t.vat_number || '',
         country: t.country || '',
         status: t.status || '',
+        employee_count: t.employee_count || 0,
+        pricing_tier: t.pricing_tier || '',
+        quoted_amount: t.quoted_amount || 0,
       },
     });
   } catch (error) {

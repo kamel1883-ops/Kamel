@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Loader2, Building2, Save, Crosshair, Trash2, AlertTriangle } from "lucide-react";
+import { Loader2, Building2, Save, Crosshair, Trash2, AlertTriangle, Wallet } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
@@ -31,6 +31,7 @@ export default function SettingsPage() {
   const t = isAr ? {
     title: "إعدادات المنشأة", subtitle: "بيانات المنشأة والسياسات المواردية", loading: "جارٍ التحميل...",
     secOrg: "بيانات المنشأة", secOrgNote: "مجلوبة من طلب عرض السعر / التفعيل — يمكنك تعديلها وستُحفظ لمنشأتك.",
+    secSub: "بيانات الاشتراك", subCount: "عدد الموظفين", subTier: "الشريحة", subPrice: "السعر السنوي للباقة (ر.س)", subStatus: "الحالة",
     name: "اسم المنشأة", industry: "القطاع / النشاط", responsible: "اسم الشخص المسؤول",
     phone: "الهاتف", unified: "الرقم الموحد (يبدأ بـ7)", email: "البريد الإلكتروني",
     vat: "الرقم الضريبي", city: "المدينة",
@@ -52,6 +53,7 @@ export default function SettingsPage() {
   } : {
     title: "Organization settings", subtitle: "Organization data and HR policies", loading: "Loading...",
     secOrg: "Organization data", secOrgNote: "Pulled from your quote / activation request — edit to save them to your organization.",
+    secSub: "Subscription data", subCount: "Employees count", subTier: "Tier", subPrice: "Annual package price (SAR)", subStatus: "Status",
     name: "Organization name", industry: "Sector / Activity", responsible: "Responsible person",
     phone: "Phone", unified: "Unified number (starts with 7)", email: "Email",
     vat: "VAT number", city: "City",
@@ -76,6 +78,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [delOpen, setDelOpen] = useState(false);
+  const [subInfo, setSubInfo] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,6 +106,12 @@ export default function SettingsPage() {
               city: tt.city || orgData.city,
               country: tt.country || orgData.country,
             };
+            setSubInfo({
+              employee_count: tt.employee_count || 0,
+              pricing_tier: tt.pricing_tier || '',
+              quoted_amount: tt.quoted_amount || 0,
+              status: tt.status || '',
+            });
           }
         } catch (_) {}
       }
@@ -141,6 +150,16 @@ export default function SettingsPage() {
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
       <div className="max-w-3xl space-y-6">
+        {subInfo && (subInfo.employee_count > 0 || subInfo.quoted_amount > 0) && (
+          <Section title={t.secSub} icon={Wallet}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Field label={t.subCount}><div className="text-sm font-semibold px-3 py-2 rounded-md bg-muted">{subInfo.employee_count || "—"}</div></Field>
+              <Field label={t.subTier}><div className="text-sm font-semibold px-3 py-2 rounded-md bg-muted truncate" title={subInfo.pricing_tier}>{subInfo.pricing_tier || "—"}</div></Field>
+              <Field label={t.subPrice}><div className="text-sm font-semibold px-3 py-2 rounded-md bg-muted">{subInfo.quoted_amount ? subInfo.quoted_amount.toLocaleString() : "—"}</div></Field>
+              <Field label={t.subStatus}><div className="text-sm font-semibold px-3 py-2 rounded-md bg-muted">{subInfo.status || "—"}</div></Field>
+            </div>
+          </Section>
+        )}
         <Section title={t.secOrg} icon={Building2}>
           <p className="text-xs text-muted-foreground -mt-1">{t.secOrgNote}</p>
           <div className="grid grid-cols-2 gap-4">

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Image } from "@/components/ui/image";
 import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Mail, ShieldCheck, AlertTriangle } from "lucide-react";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -37,7 +38,7 @@ const featuresEn = [
   "Client Trial Portal", "Labor Policy & Smart Warnings", "Employee Self-Service Portal",
 ];
 
-const empty = { name: "", commercial_register: "", industry: "", contact_name: "", contact_email: "", contact_phone: "", unified_number: "", city: "", discount_code: "" };
+const empty = { name: "", commercial_register: "", industry: "", contact_name: "", contact_email: "", contact_phone: "", unified_number: "", city: "", discount_code: "", employee_count: "" };
 
 export default function Quote() {
   const { lang } = useI18n();
@@ -49,12 +50,14 @@ export default function Quote() {
     formTitle: "بيانات المنشأة", formSub: "أدخل بيانات منشأتك لتوليد عرض سعر رسمي مع بيانات التحويل البنكي.",
     company: "اسم المنشأة *", industry: "القطاع / النشاط", contact: "اسم الشخص المسؤول",
     phone: "الهاتف *", email: "البريد الإلكتروني *", unified: "الرقم الموحد (يبدأ بـ7) *", city: "المدينة",
-    generate: "توليد عرض السعر", errForm: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح ورقم موحد يبدأ بـ7",
+    generate: "توليد عرض السعر", errForm: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح ورقم موحد يبدأ بـ7 وعدد موظفين متوقع",
     errGeneric: "تعذّر توليد العرض، حاول مرة أخرى", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث",
     to: "إلى", quoteNo: "رقم العرض", date: "التاريخ", planTitle: "الاشتراك السنوي — منصة جدارة",
     planDesc: "باقة واحدة متكاملة تشمل كل ميزات المنصة:", includes: "تشمل الباقة:",
-    priceFirst: "السنة الأولى", priceFirstVal: "2,500 ريال", priceFirstNote: "(تشمل سنة مجانية)",
-    priceRenew: "التجديد السنوي (من العام الثاني)", priceRenewVal: "700 ريال / سنة",
+    planTier: "شريحة الاشتراك", planTierRange: "نطاق الموظفين", planPrice: "السعر السنوي للباقة",
+    renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك (حسب عدد الموظفين وقت التجديد).",
+    headcountLabel: "عدد الموظفين المتوقع *", headcountHint: (tier, price) => `شريحتك: ${tier} — السعر السنوي: ${price.toLocaleString()} ريال`,
+    headcountRequired: "أدخل عدد الموظفين المتوقع لحساب سعر الباقة تلقائياً",
     payTitle: "بيانات التحويل البنكي", payNote: "يُرجى إجراء التحويل إلى الحساب التالي وإرسال إثبات التحويل لتفعيل اشتراكك:",
     beneficiary: "المستفيد", bank: "البنك", iban: "رقم الآيبان", account: "رقم الحساب",
     copy: "نسخ الآيبان", copied: "تم النسخ", proofTitle: "بعد التحويل",
@@ -73,12 +76,14 @@ export default function Quote() {
     formTitle: "Company details", formSub: "Enter your company data to generate an official quotation with bank transfer details.",
     company: "Company name *", industry: "Sector / Activity", contact: "Responsible person",
     phone: "Phone *", email: "Email *", unified: "Unified number (starts with 7) *", city: "City",
-    generate: "Generate quotation", errForm: "Please enter a company name, a valid email and a unified number starting with 7",
+    generate: "Generate quotation", errForm: "Please enter a company name, a valid email, a unified number starting with 7, and the expected employee count",
     errGeneric: "Could not generate the quote, try again", secure: "Your data is safe and never sold to third parties",
     to: "To", quoteNo: "Quote no.", date: "Date", planTitle: "Annual Subscription — Jadara Platform",
     planDesc: "One integrated package including every feature of the platform:", includes: "The package includes:",
-    priceFirst: "First year", priceFirstVal: "SAR 2,500", priceFirstNote: "(includes one free year)",
-    priceRenew: "Annual renewal (from year two)", priceRenewVal: "SAR 700 / year",
+    planTier: "Subscription tier", planTierRange: "Headcount range", planPrice: "Annual package price",
+    renewNote: "The subscription renews annually at your tier's value (based on headcount at renewal).",
+    headcountLabel: "Expected employees count *", headcountHint: (tier, price) => `Your tier: ${tier} — Annual: ${price.toLocaleString()} SAR`,
+    headcountRequired: "Enter the expected employee count to auto-calculate the package price",
     payTitle: "Bank Transfer Details", payNote: "Please transfer to the account below and send proof to activate your subscription:",
     beneficiary: "Beneficiary", bank: "Bank", iban: "IBAN", account: "Account number",
     copy: "Copy IBAN", copied: "Copied", proofTitle: "After transfer",
@@ -103,6 +108,7 @@ export default function Quote() {
   const [discount, setDiscount] = useState(null);
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
+  const matchedTier = company?.employee_count ? tierForCount(company.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
 
   useEffect(() => {
     if (incoming && !registered) {
@@ -116,7 +122,7 @@ export default function Quote() {
     const name = form.name.trim();
     const email = form.contact_email.trim();
     const unified = form.unified_number.trim();
-    if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^7\d{7,11}$/.test(unified)) { setErr(t.errForm); return; }
+    if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^7\d{7,11}$/.test(unified) || !Number(form.employee_count) || Number(form.employee_count) <= 0) { setErr(t.errForm); return; }
     setSubmitting(true);
     try {
       const res = await base44.functions.invoke("createTrial", { ...form, discount_code: form.discount_code?.trim() || undefined });
@@ -164,6 +170,8 @@ export default function Quote() {
               <Field label={t.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} required />
             </div>
             <Field label={t.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
+            <Field label={t.headcountLabel} value={form.employee_count} onChange={(v) => set("employee_count", v.replace(/\D/g, ""))} required />
+            {(() => { const pt = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt ? <div className="text-sm rounded-xl bg-violet-50 border border-violet-200 text-violet-700 px-4 py-3">{t.headcountHint(pt.tier, pt.yearly)}</div> : <div className="text-xs text-muted-foreground">{t.headcountRequired}</div>; })()}
             <div className="text-xs flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               <div><b>{t.emailNotice}:</b> {t.emailNoticeBody}</div>
@@ -248,33 +256,25 @@ export default function Quote() {
           {/* الأسعار */}
           <div className="py-6 border-t border-border">
             <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-5 space-y-3">
-              {discount ? (
-                <div className="flex items-baseline justify-between gap-3">
-                  <div>
-                    <div className="font-medium">{t.firstAfter}</div>
-                    <div className="text-xs text-violet-600 font-semibold">
-                      {t.discBadge} {discount.percent}% — {discount.code} — {t.discApplied}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">{t.priceFirstNote}</div>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <div className="text-sm text-muted-foreground line-through">{t.priceFirstVal}</div>
-                    <div className="text-2xl font-extrabold text-violet-700">{discount.amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
-                  </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <div>
+                  <div className="font-medium">{matchedTier ? matchedTier.tier : t.planTier}</div>
+                  <div className="text-xs text-muted-foreground">{matchedTier ? matchedTier.range : t.planTierRange}</div>
                 </div>
-              ) : (
-                <div className="flex items-baseline justify-between gap-3">
+                <div className={discount ? "text-sm text-muted-foreground line-through" : "text-2xl font-extrabold text-violet-700"}>
+                  {(matchedTier ? matchedTier.yearly : 0).toLocaleString()} {isAr ? "ريال" : "SAR"}
+                </div>
+              </div>
+              {discount && (
+                <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-violet-200/70">
                   <div>
-                    <div className="font-medium">{t.priceFirst}</div>
-                    <div className="text-xs text-muted-foreground">{t.priceFirstNote}</div>
+                    <div className="font-medium">{t.discBadge} {discount.percent}% — {discount.code}</div>
+                    <div className="text-xs text-muted-foreground">{t.discApplied}</div>
                   </div>
-                  <div className="text-2xl font-extrabold text-violet-700">{t.priceFirstVal}</div>
+                  <div className="text-2xl font-extrabold text-violet-700">{discount.amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
                 </div>
               )}
-              <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-violet-200/70">
-                <div className="font-medium">{t.priceRenew}</div>
-                <div className="text-lg font-bold">{t.priceRenewVal}</div>
-              </div>
+              <div className="text-xs text-muted-foreground pt-2 border-t border-violet-200/70">{t.renewNote}</div>
             </div>
           </div>
 

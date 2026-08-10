@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText, KeyRound } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText, KeyRound, Users } from "lucide-react";
 import InvoiceDialog from "@/components/InvoiceDialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
@@ -163,6 +163,9 @@ export default function OwnerAdmin() {
                       <td className="px-4 py-3 text-muted-foreground">{x.commercial_register || "—"}</td>
                       <td className="px-4 py-3">
                         <div className="leading-tight"><div>{x.contact_name || "—"}</div><div className="text-xs text-muted-foreground">{x.contact_phone || x.contact_email}</div></div>
+                        {(x.employee_count > 0 || x.pricing_tier) && (
+                          <div className="text-[11px] mt-1 text-violet-600 flex items-center gap-1"><Users size={11} /> {x.employee_count || 0} {isAr ? "موظف" : "emp"} · {x.pricing_tier || "—"}</div>
+                        )}
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={x.status} isAr={isAr} /></td>
                       <td className="px-4 py-3 text-muted-foreground">

@@ -8,7 +8,7 @@ import TurnstileWidget from "@/components/TurnstileWidget";
 import ShareBar from "@/components/ShareBar";
 import ClientMarquee from "@/components/ClientMarquee";
 import { useI18n } from "@/lib/i18n";
-import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
   Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
@@ -161,7 +161,7 @@ export default function Landing() {
     trialTag: "سجّل في دقيقة", trialTitle: "ابدأ تجربتك المجانية الآن",
     doneTitle: "تم استلام طلبك بنجاح", doneDesc: "سيتواصل معك فريقنا خلال فترة التجربة لتفعيل اشتراكك السنوي ونقل بياناتك. تحقق من بريدك الإلكتروني.",
     doneCta: "تسجيل الدخول للمنصة",
-    form: { company: "اسم المنشأة *", industry: "القطاع / النشاط", city: "المدينة", contact: "اسم الشخص المسؤول", phone: "الهاتف *", unified: "الرقم الموحد (يبدأ بـ7) *", email: "البريد الإلكتروني *", submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
+    form: { company: "اسم المنشأة *", industry: "القطاع / النشاط", city: "المدينة", contact: "اسم الشخص المسؤول", phone: "الهاتف *", unified: "الرقم الموحد (يبدأ بـ7) *", email: "البريد الإلكتروني *", headcount: "عدد الموظفين المتوقع *", pricePreview: (tier, price) => `شريحتك: ${tier} — السعر السنوي للباقة: ${price.toLocaleString()} ر.س`, submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
     wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
@@ -206,7 +206,7 @@ export default function Landing() {
     trialTag: "Register in a minute", trialTitle: "Start your free trial now",
     doneTitle: "Your request was received", doneDesc: "Our team will contact you during the trial to activate your annual subscription and migrate your data. Check your email.",
     doneCta: "Sign in to the platform",
-    form: { company: "Company name *", industry: "Sector / Activity", city: "City", contact: "Responsible person", phone: "Phone *", unified: "Unified number (starts with 7) *", email: "Email *", submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
+    form: { company: "Company name *", industry: "Sector / Activity", city: "City", contact: "Responsible person", phone: "Phone *", unified: "Unified number (starts with 7) *", email: "Email *", headcount: "Expected employees count *", pricePreview: (tier, price) => `Your tier: ${tier} — Annual package price: ${price.toLocaleString()} SAR`, submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
     contactTag: "We’re here to help", contactTitle: "Contact us",
     wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia",
     footerDesc: "The integrated Saudi HR platform — one place bringing together everything you need to manage human capital.",
@@ -216,6 +216,7 @@ export default function Landing() {
   const [form, setForm] = useState({
     name: "", commercial_register: "", industry: "",
     contact_name: "", contact_email: "", contact_phone: "", unified_number: "", city: "",
+    employee_count: "",
   });
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
@@ -228,6 +229,7 @@ export default function Landing() {
   const submit = async (e) => {
     e.preventDefault();
     if (!captcha) { setErr(isAr ? "أكمل التحقق البشري أولاً" : "Please complete the human check first"); return; }
+    if (!form.employee_count || Number(form.employee_count) <= 0) { setErr(isAr ? "أدخل عدد الموظفين المتوقع" : "Please enter the expected employee count"); return; }
     setSaving(true); setErr("");
     try {
       await base44.functions.invoke("createTrial", { ...form, captcha_token: captcha });
@@ -522,6 +524,8 @@ export default function Landing() {
               <Field label={t.form.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} required />
             </div>
             <Field label={t.form.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
+            <Field label={t.form.headcount} value={form.employee_count} onChange={(v) => set("employee_count", v.replace(/\D/g, ""))} required />
+            {(() => { const pt = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt ? <div className="text-sm rounded-xl bg-violet-500/10 border border-violet-400/20 text-violet-200 px-4 py-3">{t.form.pricePreview(pt.tier, pt.yearly)}</div> : null; })()}
             <div className="flex justify-center">
               <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
             </div>

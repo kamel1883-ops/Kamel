@@ -1,8 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { verifyTurnstile } from "../../shared/turnstile.ts";
-
-const ANNUAL_PRICE = 2500;
+import { tierForCount } from "../../shared/pricing.ts";
 
 export default async function (req) {
   try {
@@ -13,19 +12,22 @@ export default async function (req) {
     const email = String(body.contact_email || '').trim();
     const phone = String(body.contact_phone || '').trim();
     const unified = String(body.unified_number || '').trim();
+    const employeeCount = Number(body.employee_count);
     if (!name) return Response.json({ error: 'اسم المنشأة مطلوب' }, { status: 400 });
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
     if (!phone) return Response.json({ error: 'رقم الهاتف مطلوب' }, { status: 400 });
     if (!unified || !/^7\d{7,11}$/.test(unified))
       return Response.json({ error: 'الرقم الموحد مطلوب ويجب أن يبدأ بـ7' }, { status: 400 });
+    if (!Number.isFinite(employeeCount) || employeeCount <= 0)
+      return Response.json({ error: 'عدد الموظفين المتوقع مطلوب' }, { status: 400 });
 
     // التحقق البشري (Cloudflare Turnstile) — يمنع الإساءة الآلية لبوابة التسجيل العامة
     const captchaToken = String(body.captcha_token || '');
     if (!captchaToken) return Response.json({ error: 'التحقق البشري مطلوب' }, { status: 400 });
     if (!(await verifyTurnstile(captchaToken))) return Response.json({ error: 'فشل التحقق البشري' }, { status: 403 });
 
-    // —— كود الخصم (اختياري) — يُتحقق منه خادمياً ويزيد عداد الاستخدام
+    // —— كود الخصم (اختياري)
     let discount_percent = 0;
     let discount_code = '';
     const rawCode = String(body.discount_code || '').trim();
@@ -43,7 +45,12 @@ export default async function (req) {
         used_count: (Number(code.used_count) || 0) + 1,
       });
     }
-    const quoted_amount = Math.round(ANNUAL_PRICE * (1 - discount_percent / 100));
+
+    // —— السعر يُحتسب تلقائياً حسب شريحة عدد الموظفين
+    const tier = tierForCount(employeeCount);
+    const basePrice = tier ? tier.yearly : 0;
+    const pricingTier = tier ? tier.tier : '';
+    const quoted_amount = Math.round(basePrice * (1 - discount_percent / 100));
 
     const today = new Date();
     const trialEnd = new Date(today);
@@ -67,6 +74,8 @@ export default async function (req) {
       discount_code,
       discount_percent,
       quoted_amount,
+      employee_count: employeeCount,
+      pricing_tier: pricingTier,
       notes: String(body.notes || '').trim(),
     });
 
@@ -76,18 +85,20 @@ export default async function (req) {
         let emailBody =
           'عميل جديد سجّل الفترة التجريبية عبر الموقع:\n\n' +
           'المنشأة: ' + name + '\n' +
-          'السجل التجاري: ' + (body.commercial_register || '-') + '\n' +
           'القطاع: ' + (body.industry || '-') + '\n' +
           'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
           'البريد: ' + email + '\n' +
           'الهاتف: ' + phone + '\n' +
           'الرقم الموحد: ' + unified + '\n' +
-          'المدينة: ' + (body.city || '-') + '\n\n' +
+          'المدينة: ' + (body.city || '-') + '\n' +
+          'عدد الموظفين: ' + employeeCount + '\n' +
+          'الشريحة: ' + pricingTier + '\n' +
+          'السعر السنوي للباقة: ' + basePrice + ' ر.س\n\n' +
           'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n';
         if (discount_percent > 0) {
           emailBody +=
             'كود الخصم: ' + discount_code + ' — نسبة الخصم: ' + discount_percent + '%\n' +
-            'المبلغ المعروض بعد الخصم: ' + quoted_amount + ' ر.س (بدلاً من 2500 ر.س)\n';
+            'المبلغ المعروض بعد الخصم: ' + quoted_amount + ' ر.س (بدلاً من ' + basePrice + ' ر.س)\n';
         }
         emailBody += '\nيرجى التواصل مع العميل خلال فترة التجربة لإتمام التحويل للاشتراك السنوي.';
         await base44.asServiceRole.integrations.Core.SendEmail({
@@ -100,7 +111,7 @@ export default async function (req) {
       }
     }
 
-    return Response.json({ ok: true, tenant_id: tenant.id, discount_percent, quoted_amount });
+    return Response.json({ ok: true, tenant_id: tenant.id, discount_percent, quoted_amount, pricing_tier: pricingTier, employee_count: employeeCount });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
