@@ -43,8 +43,12 @@ import Contact from "@/pages/Contact";
 import Quote from "@/pages/Quote";
 import CompanyLogin from "@/pages/CompanyLogin";
 import CompanyForgotPassword from "@/pages/CompanyForgotPassword";
+import QiwaMudadPage from "@/pages/landings/QiwaMudadPage";
+import WpsMudadPage from "@/pages/landings/WpsMudadPage";
+import EosCalculatorPage from "@/pages/landings/EosCalculatorPage";
+import ContractsPage from "@/pages/landings/ContractsPage";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -78,6 +82,10 @@ const AuthenticatedApp = () => {
         <Route path="/quote" element={<Quote />} />
         <Route path="/company-login" element={<CompanyLogin />} />
         <Route path="/company-forgot-password" element={<CompanyForgotPassword />} />
+        <Route path="/qiwa-mudad" element={<QiwaMudadPage />} />
+        <Route path="/wps-mudad" element={<WpsMudadPage />} />
+        <Route path="/eos-calculator" element={<EosCalculatorPage />} />
+        <Route path="/contracts" element={<ContractsPage />} />
         <Route path="/portal" element={<MyRequests />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -570,7 +570,7 @@ export default function Landing() {
 
       {/* التذييل */}
       <footer className="border-t border-white/10 mt-10">
-        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm text-white/60">
+        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm text-white/60">
           <div>
             <div className="mb-2"><Logo tone="light" size={36} /></div>
             <p>{t.footerDesc}</p>
@@ -584,6 +584,13 @@ export default function Landing() {
                 <Twitter size={17} className="text-white/80" />
               </a>
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <div className="font-medium text-white mb-1">{isAr ? "الحلول" : "Solutions"}</div>
+            <Link to="/qiwa-mudad" className="block hover:text-white">{isAr ? "تكامل قوى ومدد" : "Qiwa & Mudad"}</Link>
+            <Link to="/wps-mudad" className="block hover:text-white">{isAr ? "حماية الأجور (مدد)" : "Wage Protection (Mudad)"}</Link>
+            <Link to="/eos-calculator" className="block hover:text-white">{isAr ? "حاسبة نهاية الخدمة" : "EOS Calculator"}</Link>
+            <Link to="/contracts" className="block hover:text-white">{isAr ? "إدارة العقود واللوائح" : "Contracts & Policies"}</Link>
           </div>
           <div className="space-y-1.5">
             <div className="font-medium text-white mb-1">{t.footContact}</div>
