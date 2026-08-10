@@ -47,8 +47,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
     if (!tenant) return;
     setF({
       name: tenant.name || "",
-      commercial_register: tenant.commercial_register || "",
-      vat_number: tenant.vat_number || "",
+      unified_number: tenant.unified_number || "",
       contact_name: tenant.contact_name || "",
       contact_phone: tenant.contact_phone || "",
       contact_email: tenant.contact_email || "",
@@ -67,19 +66,19 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
 
   const F = isAr ? {
     title: "إنشاء فاتورة", pul: "تُجلب بيانات العميل تلقائياً — راجعها وعدّلها ثم اطبع",
-    name: "اسم المنشأة", cr: "السجل التجاري", vat: "الرقم الضريبي", contact: "جهة الاتصال",
+    name: "اسم المنشأة", unified: "الرقم الموحد", contact: "جهة الاتصال",
     phone: "الهاتف", email: "البريد", city: "المدينة", plan: "الباقة", pstart: "بداية الفترة",
     pend: "نهاية الفترة", amount: "المبلغ (ر.س)", print: "طباعة / حفظ PDF", close: "إغلاق",
-    taxTitle: "فاتورة ضريبية", billedTo: "فاتورة إلى", desc: "الوصف", period: "الفترة",
-    amt: "المبلغ", total: "الإجمالي", vatNote: "السعر شامل ضريبة القيمة المضافة. لا توجد رسوم إضافية.",
+    docTitle: "فاتورة", billedTo: "فاتورة إلى", desc: "الوصف", period: "الفترة",
+    amt: "المبلغ", total: "الإجمالي",
     contactFoot: "للاستفسار", subLine: "باقة جدارة السنوية للمنصة",
   } : {
     title: "Create invoice", pul: "Client data is pulled automatically — review, edit, then print",
-    name: "Company name", cr: "Commercial Register", vat: "VAT number", contact: "Contact",
+    name: "Company name", unified: "Unified number", contact: "Contact",
     phone: "Phone", email: "Email", city: "City", plan: "Plan", pstart: "Period start",
     pend: "Period end", amount: "Amount (SAR)", print: "Print / Save PDF", close: "Close",
-    taxTitle: "TAX INVOICE", billedTo: "Billed to", desc: "Description", period: "Period",
-    amt: "Amount", total: "Total", vatNote: "Price is VAT-inclusive. No additional charges.",
+    docTitle: "Invoice", billedTo: "Billed to", desc: "Description", period: "Period",
+    amt: "Amount", total: "Total",
     contactFoot: "Inquiries", subLine: "Jadara annual platform plan",
   };
 
@@ -95,8 +94,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
             {/* تأكيد/تعديل بيانات العميل */}
             <div className="no-print grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
               <Inp label={F.name} value={f.name} onChange={(v) => set("name", v)} />
-              <Inp label={F.cr} value={f.commercial_register} onChange={(v) => set("commercial_register", v)} />
-              <Inp label={F.vat} value={f.vat_number} onChange={(v) => set("vat_number", v)} />
+              <Inp label={F.unified} value={f.unified_number} onChange={(v) => set("unified_number", v)} />
               <Inp label={F.contact} value={f.contact_name} onChange={(v) => set("contact_name", v)} />
               <Inp label={F.phone} value={f.contact_phone} onChange={(v) => set("contact_phone", v)} />
               <Inp label={F.email} value={f.contact_email} onChange={(v) => set("contact_email", v)} />
@@ -123,7 +121,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                   </div>
                 </div>
                 <div className="text-left">
-                  <div className="text-xl font-extrabold tracking-tight">{F.taxTitle}</div>
+                  <div className="text-xl font-extrabold tracking-tight">{F.docTitle}</div>
                   <div className="text-xs text-slate-600 mt-1">{isAr ? "رقم الفاتورة" : "Invoice No."}: <b className="text-slate-900">{invNum}</b></div>
                   <div className="text-xs text-slate-600">{isAr ? "التاريخ" : "Date"}: <b className="text-slate-900"> {today}</b></div>
                 </div>
@@ -138,8 +136,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 <div className="text-xs font-semibold text-slate-500 mb-1.5">{F.billedTo}</div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
                   <div className="font-bold">{f.name}</div>
-                  <div className="text-slate-600">{F.cr}: {f.commercial_register || "—"}</div>
-                  <div className="text-slate-600">{F.vat}: {f.vat_number || "—"}</div>
+                  <div className="text-slate-600">{F.unified}: {f.unified_number || "—"}</div>
                   <div className="text-slate-600">{f.contact_name}</div>
                   <div className="text-slate-600" dir="ltr">{f.contact_phone}</div>
                   <div className="text-slate-600" dir="ltr">{f.contact_email}</div>
@@ -167,8 +164,6 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                   </tr>
                 </tbody>
               </table>
-
-              <div className="text-xs text-slate-500 mb-5">{F.vatNote}</div>
 
               <div className="flex items-end justify-between">
                 <div className="text-xs text-slate-500 leading-relaxed">

@@ -28,8 +28,8 @@ export default function BrandHeader({ org }) {
         <div style={{ fontWeight: 700, fontSize: 13, color: "#0b1120", marginTop: 6, textAlign: "right" }}>
           {org?.name || "—"}
         </div>
-        {org?.commercial_register ? (
-          <div style={{ fontSize: 10, color: "#666" }}>س.ت: {org.commercial_register}</div>
+        {org?.unified_number ? (
+          <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحد: {org.unified_number}</div>
         ) : null}
       </div>
 

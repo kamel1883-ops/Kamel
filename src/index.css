@@ -125,6 +125,8 @@ main [class~="rounded-2xl"][class~="border"] { box-shadow: 0 1px 2px rgba(16,24,
 main .hover\:bg-slate-50:hover { background-color: hsl(var(--muted)); }
 main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
 
+@page { size: A4; margin: 10mm; }
+
 @media print {
   body * { visibility: hidden !important; }
   .print-settlement, .print-settlement * { visibility: visible !important; }

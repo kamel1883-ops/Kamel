@@ -20,9 +20,9 @@ function buildBrandHeader(org) {
   nm.textContent = org?.name || "—";
   Object.assign(nm.style, { fontWeight: "700", fontSize: "13px", color: "#0b1120", marginTop: "6px", textAlign: "right" });
   right.appendChild(nm);
-  if (org?.commercial_register) {
+  if (org?.unified_number) {
     const c = document.createElement("div");
-    c.textContent = "س.ت: " + org.commercial_register;
+    c.textContent = "الرقم الموحد: " + org.unified_number;
     Object.assign(c.style, { fontSize: "10px", color: "#666" });
     right.appendChild(c);
   }
