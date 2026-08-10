@@ -52,6 +52,8 @@ import EosCalculatorPage from "@/pages/landings/EosCalculatorPage";
 import ContractsPage from "@/pages/landings/ContractsPage";
 import Blog from "@/pages/Blog";
 import BlogArticle from "@/pages/BlogArticle";
+import CustomerSurveys from "@/pages/CustomerSurveys";
+import CustomerSurveyTake from "@/pages/public/CustomerSurveyTake";
 
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts"];
 
@@ -59,7 +61,7 @@ const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const path = window.location.pathname;
   const isRestricted = user && user.role !== "admin";
-  const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog") || path.startsWith("/jobs");
+  const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog") || path.startsWith("/jobs") || path.startsWith("/c");
 
   if (!isPublicPage && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
@@ -96,6 +98,7 @@ const AuthenticatedApp = () => {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogArticle />} />
         <Route path="/jobs/:id" element={<JobApply />} />
+        <Route path="/c/:surveyId" element={<CustomerSurveyTake />} />
         <Route path="/portal" element={<MyRequests />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -129,6 +132,7 @@ const AuthenticatedApp = () => {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/owner" element={<OwnerAdmin />} />
+        <Route path="/customer-surveys" element={<CustomerSurveys />} />
         <Route path="/discounts" element={<Discounts />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

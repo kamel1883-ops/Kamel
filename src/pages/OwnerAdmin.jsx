@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, Play, FileCheck2, FileText, KeyRound, Users } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, Play, FileCheck2, FileText, KeyRound, Users, MessageSquareText } from "lucide-react";
 import InvoiceDialog from "@/components/InvoiceDialog";
 import TrialManageDialog from "@/components/TrialManageDialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/hr";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
+import { Link } from "react-router-dom";
 
 export default function OwnerAdmin() {
   const { lang } = useI18n();
@@ -167,6 +168,16 @@ export default function OwnerAdmin() {
         <Stat icon={AlertTriangle} label={t.sEnding} value={stats.endingSoon} cls="text-rose-600 bg-rose-50" />
         <Stat icon={UserPlus} label={t.sNew} value={stats.newThisMonth} cls="text-[#2e2448] bg-[#2e2448]/10" />
         <Stat icon={RefreshCw} label={t.sRenew} value={stats.pendingRenew} cls="text-amber-600 bg-amber-50" />
+      </div>
+
+      <div className="mb-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm text-violet-800">
+          <MessageSquareText size={18} className="shrink-0" />
+          <span>{isAr ? "استبيانات تجربة العميل — أرسل استبيانات قصيرة لمشتركيك وتابع نتائجهم." : "Customer experience surveys — send short surveys to your subscribers and track results."}</span>
+        </div>
+        <Link to="/customer-surveys" className="shrink-0">
+          <Button size="sm" className="gap-1.5">{isAr ? "إدارة الاستبيانات" : "Manage surveys"}</Button>
+        </Link>
       </div>
 
       {loading ? (
