@@ -133,6 +133,10 @@ export default function Landing() {
     portalTitle: "بوابة الموظف الذاتية",
     portalDesc: "دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. يُربط الحساب برقم الهوية/الإقامة بعد اعتماد الموارد البشرية.",
     portalCta: "دخول البوابة",
+    approvers: "بوابة المعتمدين",
+    approversTitle: "بوابة المعتمدين",
+    approversDesc: "دخول مخصّص للمديرين المباشرين والمديرين الماليين لاعتماد طلبات الإجازات والسلف ورحلات العمل ونهاية الخدمة — عبر البريد الإلكتروني وكلمة المرور فقط. ليست بوابة الموظف (إقامة) ولا بوابة الشركات (رقم موحّد).",
+    approversCta: "دخول المعتمدين",
     featuresTag: "كل ما تحتاجه في مكان واحد", featuresTitle: "منصة واحدة، حلول متكاملة",
     vmvTag: "هويتنا", vmvTitle: "رؤيتنا، رسالتنا، وأهدافنا",
     visionLabel: "رؤيتنا", visionText: "أن نكون المنصة السعودية الرائدة والمفضّلة لإدارة الموارد البشرية بحلول 2027، نمكّن المنشآت من تحويل مواردها البشرية إلى ميزة تنافسية حقيقية عبر تقنية سحابية ذكية وامتثال تام للأنظمة.",
@@ -178,6 +182,10 @@ export default function Landing() {
     portalTitle: "Employee Self‑Service Portal",
     portalDesc: "Employees only — clock in/out from the phone within 50 meters of the workplace (no devices), view salary and leave balance, and submit loan, leave, and business‑trip requests directly. The account is linked by national ID/Iqama after HR approval.",
     portalCta: "Enter Portal",
+    approvers: "Approvers Portal",
+    approversTitle: "Approvers Portal",
+    approversDesc: "Sign-in for direct managers and finance managers to approve leave, loan, business-trip and end-of-service requests — email and password only. Not the employee portal (Iqama) nor the company portal (unified number).",
+    approversCta: "Approvers sign in",
     featuresTag: "Everything in one place", featuresTitle: "One platform, integrated solutions",
     vmvTag: "Our Identity", vmvTitle: "Our Vision, Mission & Goals",
     visionLabel: "Our Vision", visionText: "To be the leading and preferred Saudi platform for human resource management by 2027, empowering organizations to turn their human capital into a genuine competitive advantage through smart cloud technology and full regulatory compliance.",
@@ -271,6 +279,7 @@ export default function Landing() {
             <LanguageToggle />
             <Link to="/portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
             <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.login}</Link>
+            <Link to="/login?returnTo=/approvals-portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.approvers}</Link>
             <button onClick={() => scrollTo("trial")} className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition">{t.start}</button>
           </div>
         </div>
@@ -320,8 +329,9 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* بوابة الموظف الذاتية */}
-      <section className="max-w-7xl mx-auto px-5 py-8">
+      {/* بوابات الدخول: الموظف + المعتمدين */}
+      <section className="max-w-7xl mx-auto px-5 py-8 grid md:grid-cols-2 gap-6">
+        {/* بوابة الموظف الذاتية */}
         <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-blue-600/20 p-8 sm:p-10">
           <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -336,6 +346,25 @@ export default function Landing() {
             </div>
             <Link to="/portal" className="shrink-0 inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
               {t.portalCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+            </Link>
+          </div>
+        </div>
+
+        {/* بوابة المعتمدين (مدير مباشر / مدير مالي) */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-gradient-to-l from-indigo-600/20 via-blue-600/15 to-cyan-600/20 p-8 sm:p-10">
+          <div className="absolute -top-12 -right-12 w-60 h-60 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                <ClipboardList size={26} className="text-indigo-200" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold">{t.approversTitle}</h3>
+                <p className="text-white/70 mt-2 max-w-2xl leading-relaxed">{t.approversDesc}</p>
+              </div>
+            </div>
+            <Link to="/login?returnTo=/approvals-portal" className="shrink-0 inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
+              {t.approversCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
         </div>
