@@ -321,6 +321,8 @@ export default function MyRequests() {
     );
   } else if (loading || !employee) {
     content = <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
+  } else if (employee.role_level === "owner") {
+    content = <OwnerPortalPanel session={session} employee={employee} />;
   } else {
     const hireDate = employee.hire_date ? new Date(employee.hire_date) : null;
     const serviceYears = hireDate ? Math.floor((Date.now() - hireDate.getTime()) / (365.25 * 24 * 3600 * 1000)) : 0;

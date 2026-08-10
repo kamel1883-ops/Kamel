@@ -65,6 +65,140 @@ export default async function (req) {
       });
     }
 
+    // ====== لوحة المالك الكاملة — قائمة العملاء والعمليات الإدارية ======
+    if (action === "owner_list") {
+      if ((emp.role_level || "employee") !== "owner")
+        return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [tenants, paidSubs, pendings, notifs, resps] = await Promise.all([
+        base44.asServiceRole.entities.Tenant.list("-created_date", 500),
+        base44.asServiceRole.entities.Subscription.filter({ status: "paid" }, "-created_date", 500),
+        base44.asServiceRole.entities.Subscription.filter({ status: "pending" }, "-created_date", 200),
+        base44.asServiceRole.entities.Notification.list("-created_date", 60),
+        base44.asServiceRole.entities.CustomerSurveyResponse.list("-created_date", 500),
+      ]);
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      let trials = 0, paid = 0, suspended = 0, expiring = 0, revenue = 0, newThisMonth = 0;
+      const expiringList = [];
+      const pendingByTenant = new Map();
+      for (const p of pendings || []) if (p.tenant_id) pendingByTenant.set(p.tenant_id, p);
+      for (const tx of tenants || []) {
+        if (tx.status === "trial" || (tx.plan === "trial" && tx.status !== "expired")) trials++;
+        if (tx.status === "active") { paid++; revenue += Number(tx.quoted_amount || 0); }
+        if (tx.status === "expired") suspended++;
+        if (tx.created_date && new Date(tx.created_date) >= monthStart) newThisMonth++;
+        const endField = tx.status === "active" ? tx.subscription_end : tx.status === "trial" ? tx.trial_end : (tx.subscription_end || tx.trial_end);
+        if (endField) {
+          const d = new Date(endField);
+          if (!isNaN(d.getTime())) {
+            const dl = Math.round((d.getTime() - now.getTime()) / 86400000);
+            if (dl <= 30) {
+              expiring++;
+              expiringList.push({ id: tx.id, name: tx.name, end: endField, days: dl, status: tx.status, contact_email: tx.contact_email, contact_phone: tx.contact_phone, plan: tx.plan });
+            }
+          }
+        }
+      }
+      const surveyStats = {
+        responses: (resps || []).length,
+        avg: resps && resps.length ? Math.round((resps.reduce((s, r) => s + (Number(r.avg_rating) || 0), 0) / resps.length) * 10) / 10 : 0,
+      };
+      return Response.json({
+        ok: true,
+        tenants: tenants || [],
+        pendings: pendings || [],
+        paid_subs: paidSubs || [],
+        pending_by_tenant: Array.from(pendingByTenant.entries()).map(([k, v]) => ({ tenant_id: k, sub: v })),
+        notifications: notifs || [],
+        expiring: expiringList,
+        stats: { total: (tenants || []).length, trials, paid, suspended, expiring, revenue, newThisMonth },
+        surveyStats,
+      });
+    }
+
+    if (action === "owner_suspend") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tid = String(body.tenant_id || "");
+      if (!tid) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const tx = await base44.asServiceRole.entities.Tenant.get(tid);
+      if (!tx) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+      await base44.asServiceRole.entities.Tenant.update(tid, { status: "expired", suspended_from: tx.status || "trial" });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_resume") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tid = String(body.tenant_id || "");
+      if (!tid) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const tx = await base44.asServiceRole.entities.Tenant.get(tid);
+      if (!tx) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+      const restore = tx.suspended_from || "trial";
+      const updates: any = { status: restore, suspended_from: null };
+      if (restore === "active" && !tx.subscription_end) {
+        const end = new Date(); end.setDate(end.getDate() + 30);
+        updates.subscription_end = end.toISOString().slice(0, 10);
+      }
+      await base44.asServiceRole.entities.Tenant.update(tid, updates);
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_activate") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tid = String(body.tenant_id || "");
+      if (!tid) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const end = new Date(); end.setDate(end.getDate() + 365);
+      await base44.asServiceRole.entities.Tenant.update(tid, {
+        status: "active", plan: "annual", subscription_end: end.toISOString().slice(0, 10), suspended_from: null,
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_register_sub") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tid = String(body.tenant_id || "");
+      const plan = String(body.plan || "annual");
+      const amount = Number(body.amount || 0);
+      const method = String(body.method || "direct");
+      const proofUrl = String(body.proof_url || "");
+      if (!tid || !amount) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const tx = await base44.asServiceRole.entities.Tenant.get(tid);
+      const today = new Date().toISOString().slice(0, 10);
+      const end = new Date(); end.setDate(end.getDate() + (plan === "annual" ? 365 : 30));
+      await base44.asServiceRole.entities.Subscription.create({
+        tenant_id: tid, tenant_name: tx?.name || "", plan, amount, period_start: today,
+        period_end: end.toISOString().slice(0, 10), payment_method: method, status: "paid",
+        paid_date: today, proof_url: proofUrl,
+      });
+      await base44.asServiceRole.entities.Tenant.update(tid, {
+        status: "active", plan, subscription_end: end.toISOString().slice(0, 10), suspended_from: null,
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_confirm_renew") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tid = String(body.tenant_id || "");
+      const subId = String(body.sub_id || "");
+      const proofUrl = String(body.proof_url || "");
+      if (!tid || !subId) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const sub = await base44.asServiceRole.entities.Subscription.get(subId);
+      if (!sub || sub.tenant_id !== tid) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+      const today = new Date().toISOString().slice(0, 10);
+      await base44.asServiceRole.entities.Subscription.update(subId, { status: "paid", paid_date: today, proof_url: proofUrl });
+      await base44.asServiceRole.entities.Tenant.update(tid, {
+        status: "active", plan: "annual", subscription_end: sub.period_end, suspended_from: null,
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_read_notif") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const nid = String(body.notification_id || "");
+      if (!nid) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.Notification.update(nid, { is_read: true });
+      return Response.json({ ok: true });
+    }
+
     if (action === "today_attendance") {
       const recs = await base44.asServiceRole.entities.Attendance.filter(
         { employee_id: employeeId, date: todayISO() }, "-created_date", 5
