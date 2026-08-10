@@ -64,18 +64,7 @@ export async function issueRenewalOffer(base44, tenant, opts = {}) {
 
   const pendings = await base44.asServiceRole.entities.Subscription.filter({ tenant_id: tenant.id, status: "pending" });
   const already = (pendings || []).find((s) => s.period_start === periodStart);
-  if (already) {
-    if (opts.resend) {
-      try {
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: tenant.contact_email,
-          subject: "عرض تجديد الاشتراك السنوي — منصة جدارة",
-          body: emailBody(tenant, periodStart, periodEnd, todayStr, false) + EMAIL_FOOTER,
-        });
-      } catch (_) {}
-    }
-    return { ok: true, already: true, subscription_id: already.id, period_end: periodEnd };
-  }
+  if (already) return { ok: true, already: true, subscription_id: already.id, period_end: periodEnd };
 
   const sub = await base44.asServiceRole.entities.Subscription.create({
     tenant_id: tenant.id,
@@ -88,28 +77,5 @@ export async function issueRenewalOffer(base44, tenant, opts = {}) {
     status: "pending",
     notes: "عرض تجديد سنوي — " + todayStr,
   });
-
-  let emailed = false;
-  const to = String(tenant.contact_email || "").trim();
-  if (to) {
-    try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to,
-        subject: "عرض تجديد الاشتراك السنوي — منصة جدارة",
-        body: emailBody(tenant, periodStart, periodEnd, todayStr, false) + EMAIL_FOOTER,
-      });
-      emailed = true;
-    } catch (_) {}
-  }
-  const ownerEmail = secrets.get("OWNER_EMAIL");
-  if (ownerEmail) {
-    try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: ownerEmail,
-        subject: "توليد عرض تجديد سنوي — " + tenant.name,
-        body: emailBody(tenant, periodStart, periodEnd, todayStr, true) + EMAIL_FOOTER,
-      });
-    } catch (_) {}
-  }
-  return { ok: true, subscription_id: sub.id, emailed, period_end: periodEnd };
+  return { ok: true, subscription_id: sub.id, period_end: periodEnd };
 }

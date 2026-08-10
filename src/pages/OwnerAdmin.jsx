@@ -18,7 +18,7 @@ export default function OwnerAdmin() {
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "إدارة العملاء والاشتراكات", subtitle: "متابعة العملاء، فترات التجربة، الاشتراكات السنوية، تجديدات الحسابات، والإيرادات",
-    sTotal: "إجمالي العملاء", sTrial: "تجربة جارية", sActive: "مُشترك فعّال", sRevenue: "إيرادات سنوية (ر.س)", sEnding: "تجارب تنتهي قريباً",
+    sTotal: "إجمالي العملاء", sTrial: "تجربة جارية", sActive: "مُشترك فعّال", sRevenue: "إيرادات سنوية (ر.س)", sEnding: "تنتهي خلال ٣٠ يوم",
     sNew: "عملاء جدد (الشهر)", sRenew: "بانتظار تجديد",
     loading: "جارٍ التحميل...",
     thCustomer: "العميل", thCr: "السجل التجاري", thContact: "جهة الاتصال", thStatus: "الحالة", thEnd: "نهاية الفترة", thActions: "إجراءات",
@@ -36,7 +36,7 @@ export default function OwnerAdmin() {
     resumeConfirm: "هل تريد إلغاء الإيقاف المؤقت وإعادة تفعيل هذا العميل؟",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trials, annual subscriptions, renewals and revenue",
-    sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
+    sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Ending within 30 days",
     sNew: "New (this month)", sRenew: "Pending renewal",
     loading: "Loading...",
     thCustomer: "Customer", thCr: "Commercial reg.", thContact: "Contact", thStatus: "Status", thEnd: "Period end", thActions: "Actions",
@@ -95,7 +95,10 @@ export default function OwnerAdmin() {
     active: tenants.filter((x) => x.status === "active").length,
     expired: tenants.filter((x) => x.status === "expired").length,
     newThisMonth: tenants.filter((x) => new Date(x.created_date) >= monthStart).length,
-    endingSoon: tenants.filter((x) => x.status === "trial" && daysLeft(x.trial_end) <= 7 && daysLeft(x.trial_end) >= 0).length,
+    endingSoon: tenants.filter((x) => {
+      const dl = x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null;
+      return dl != null && dl <= 30;
+    }).length,
     pendingRenew: renewalByTenant.size,
   };
 
@@ -185,8 +188,10 @@ export default function OwnerAdmin() {
               <tbody className="divide-y divide-border">
                 {tenants.map((x) => {
                   const pending = renewalByTenant.get(x.id);
+                  const dl = x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null;
+                  const endingSoon = dl != null && dl <= 30;
                   return (
-                    <tr key={x.id} className="hover:bg-slate-50">
+                    <tr key={x.id} className={cn("hover:bg-slate-50", endingSoon && "bg-rose-50/70")}>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <Logo tt={x} onUpload={(f) => uploadLogo(x, f)} />
@@ -205,8 +210,9 @@ export default function OwnerAdmin() {
                         )}
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={x.status} isAr={isAr} /></td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className={cn("px-4 py-3", endingSoon ? "text-rose-700 font-medium" : "text-muted-foreground")}>
                         {x.status === "active" ? t.subActive(x.subscription_end) : x.status === "trial" ? t.subTrial(x.trial_end, daysLeft(x.trial_end)) : "—"}
+                        {endingSoon && (<div className="text-xs flex items-center gap-1 mt-0.5 text-rose-600"><AlertTriangle size={12} /> {dl <= 0 ? (isAr ? "انتهت — راجع الحساب" : "Ended — review") : (isAr ? `متبقي ${dl} يوم` : `${dl} days left`)}</div>)}
                         {pending && (<div className="text-xs text-amber-600 mt-0.5 flex items-center gap-1"><Clock size={11} /> {t.pendingRenew} — 700 {isAr ? "ر.س" : "SAR"}</div>)}
                       </td>
                       <td className="px-4 py-3">
