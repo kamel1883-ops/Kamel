@@ -7,9 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Loader2, Building2, Save, Crosshair, Trash2, AlertTriangle, Wallet } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { Loader2, Building2, Save, Crosshair, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 const empty = {
@@ -77,9 +75,7 @@ export default function SettingsPage() {
   const [org, setOrg] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [delOpen, setDelOpen] = useState(false);
   const [subInfo, setSubInfo] = useState(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     (async () => {
@@ -88,12 +84,19 @@ export default function SettingsPage() {
         const list = await base44.entities.Organization.list("-created_date", 1);
         if (list && list[0]) orgData = { ...empty, ...list[0] };
       } catch (_) {}
-      // تعبئة قبلية ببيانات المنشأة من طلب عرض السعر / التفعيل إن لم توجد بعد
-      if (!orgData.name) {
-        try {
-          const res = await base44.functions.invoke("getMyTenant");
-          const tt = res?.data?.tenant;
-          if (tt) {
+      // بيانات الاشتراك تُجلب دائماً من المنشأة (Tenant) — تُعرض للعميل للقراءة فقط
+      try {
+        const res = await base44.functions.invoke("getMyTenant");
+        const tt = res?.data?.tenant;
+        if (tt) {
+          setSubInfo({
+            employee_count: tt.employee_count || 0,
+            pricing_tier: tt.pricing_tier || '',
+            quoted_amount: tt.quoted_amount || 0,
+            status: tt.status || '',
+          });
+          // تعبئة قبلية ببيانات المنشأة فقط إن لم تُحفظ بعد
+          if (!orgData.name) {
             orgData = {
               ...orgData,
               name: tt.name || orgData.name,
@@ -106,15 +109,9 @@ export default function SettingsPage() {
               city: tt.city || orgData.city,
               country: tt.country || orgData.country,
             };
-            setSubInfo({
-              employee_count: tt.employee_count || 0,
-              pricing_tier: tt.pricing_tier || '',
-              quoted_amount: tt.quoted_amount || 0,
-              status: tt.status || '',
-            });
           }
-        } catch (_) {}
-      }
+        }
+      } catch (_) {}
       setOrg(orgData);
       setLoading(false);
     })();
@@ -137,11 +134,6 @@ export default function SettingsPage() {
       if (org.id) { await base44.entities.Organization.update(org.id, org); }
       else { const created = await base44.entities.Organization.create(org); setOrg({ ...org, ...created }); }
     } finally { setSaving(false); }
-  };
-
-  const requestDeletion = () => {
-    setDelOpen(false);
-    toast({ title: t.delSuccess });
   };
 
   if (loading) return <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
@@ -245,37 +237,12 @@ export default function SettingsPage() {
           <p className="text-xs text-muted-foreground">{t.locNote(org.workplace_radius)}</p>
         </Card>
 
-        <Card>
-          <SectionTitle title={t.delSec} />
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-2">
-            <div>
-              <div className="font-medium text-rose-700">{t.delTitle}</div>
-              <p className="text-sm text-muted-foreground mt-1">{t.delDesc}</p>
-            </div>
-            <Button variant="outline" className="gap-2 border-rose-300 text-rose-600 hover:bg-rose-50 shrink-0" onClick={() => setDelOpen(true)}>
-              <Trash2 size={16} /> {t.delBtn}
-            </Button>
-          </div>
-        </Card>
-
         <div className="flex justify-end">
           <Button onClick={save} disabled={saving} className="gap-2">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} {t.save}
           </Button>
         </div>
       </div>
-
-      <Dialog open={delOpen} onOpenChange={setDelOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><AlertTriangle size={16} className="text-rose-600" /> {t.delTitle}</DialogTitle></DialogHeader>
-          <p className="text-sm font-medium text-rose-600">{t.delWarn}</p>
-          <p className="text-sm text-muted-foreground">{t.delDesc}</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDelOpen(false)}>{t.delCancel}</Button>
-            <Button variant="destructive" className="gap-2" onClick={requestDeletion}><Trash2 size={16} /> {t.delConfirm}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
