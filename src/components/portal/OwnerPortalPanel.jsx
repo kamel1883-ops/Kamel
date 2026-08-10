@@ -108,6 +108,11 @@ export default function OwnerPortalPanel({ session, employee }) {
   }, [call]);
 
   useEffect(() => { load(); }, [load]);
+  const [extras, setExtras] = useState(null);
+  const loadExtras = useCallback(async () => {
+    try { const d = await call("owner_extras"); setExtras(d); } catch (_e) { setExtras(null); }
+  }, [call]);
+  useEffect(() => { loadExtras(); }, [loadExtras]);
 
   const flash = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2500); };
 
@@ -117,6 +122,7 @@ export default function OwnerPortalPanel({ session, employee }) {
       await call(action, extra);
       flash(t.sent);
       await load();
+      await loadExtras();
     } catch (e) {
       alert((e?.message || "fail"));
     } finally {
@@ -125,11 +131,10 @@ export default function OwnerPortalPanel({ session, employee }) {
   };
 
   const tenants = data?.tenants || [];
-  const pendings = data?.pendings || [];
-  const notifications = (data?.notifications || []).filter((n) => !n.is_read);
+  const pendings = extras?.pendings || [];
   const expiring = data?.expiring || [];
   const stats = data?.stats || {};
-  const surveyStats = data?.surveyStats || {};
+  const surveyStats = extras?.surveyStats || { responses: 0, avg: 0 };
   const pendingByTenant = useMemo(() => {
     const m = new Map();
     for (const p of pendings) if (p.tenant_id) m.set(p.tenant_id, p);

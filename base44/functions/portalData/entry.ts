@@ -69,19 +69,12 @@ export default async function (req) {
     if (action === "owner_list") {
       if ((emp.role_level || "employee") !== "owner")
         return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
-      const [tenants, paidSubs, pendings, notifs, resps] = await Promise.all([
-        base44.asServiceRole.entities.Tenant.list("-created_date", 500),
-        base44.asServiceRole.entities.Subscription.filter({ status: "paid" }, "-created_date", 500),
-        base44.asServiceRole.entities.Subscription.filter({ status: "pending" }, "-created_date", 200),
-        base44.asServiceRole.entities.Notification.list("-created_date", 60),
-        base44.asServiceRole.entities.CustomerSurveyResponse.list("-created_date", 500),
-      ]);
+      // البيانات الأساسية فقط — سريعة ومُجرّبة (Tenant.list كما في owner_stats).
+      const tenants = await base44.asServiceRole.entities.Tenant.list("-created_date", 500);
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       let trials = 0, paid = 0, suspended = 0, expiring = 0, revenue = 0, newThisMonth = 0;
       const expiringList = [];
-      const pendingByTenant = new Map();
-      for (const p of pendings || []) if (p.tenant_id) pendingByTenant.set(p.tenant_id, p);
       for (const tx of tenants || []) {
         if (tx.status === "trial" || (tx.plan === "trial" && tx.status !== "expired")) trials++;
         if (tx.status === "active") { paid++; revenue += Number(tx.quoted_amount || 0); }
@@ -99,21 +92,31 @@ export default async function (req) {
           }
         }
       }
-      const surveyStats = {
-        responses: (resps || []).length,
-        avg: resps && resps.length ? Math.round((resps.reduce((s, r) => s + (Number(r.avg_rating) || 0), 0) / resps.length) * 10) / 10 : 0,
-      };
       return Response.json({
         ok: true,
         tenants: tenants || [],
-        pendings: pendings || [],
-        paid_subs: paidSubs || [],
-        pending_by_tenant: Array.from(pendingByTenant.entries()).map(([k, v]) => ({ tenant_id: k, sub: v })),
-        notifications: notifs || [],
         expiring: expiringList,
         stats: { total: (tenants || []).length, trials, paid, suspended, expiring, revenue, newThisMonth },
-        surveyStats,
       });
+    }
+
+    // البيانات الثانوية (مدفوعات معلّقة + استبيانات) — مستدعاة منفصلة حتى لا تعطّل اللوحة إن تأخرت/فشلت.
+    if (action === "owner_extras") {
+      if ((emp.role_level || "employee") !== "owner")
+        return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      let pendings: any[] = [];
+      let surveyStats = { responses: 0, avg: 0 };
+      try {
+        pendings = await base44.asServiceRole.entities.Subscription.filter({ status: "pending" }, "-created_date", 200);
+      } catch (_e) { /* لا تعطّل اللوحة */ }
+      try {
+        const resps = await base44.asServiceRole.entities.CustomerSurveyResponse.list("-created_date", 50);
+        surveyStats = {
+          responses: (resps || []).length,
+          avg: resps && resps.length ? Math.round((resps.reduce((s, r) => s + (Number(r.avg_rating) || 0), 0) / resps.length) * 10) / 10 : 0,
+        };
+      } catch (_e) { /* لا تعطّل اللوحة */ }
+      return Response.json({ ok: true, pendings: pendings || [], surveyStats });
     }
 
     if (action === "owner_suspend") {
