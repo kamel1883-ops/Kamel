@@ -17,7 +17,9 @@ export default function InviteApproverDialog() {
     email: "بريد المعتمد",
     roleM: "مدير مباشر (موافقات الإجازات)",
     roleF: "مالية (الصرف النهائي)",
-    note: "يصله رابط إعداد كلمة المرور على بريده. للمدير المباشر: اربط بريده بسجل موظفه (الموظفون ← تعديل ← بريد العمل)، ثم اجعل مرؤوسيه يشيرون إليه في حقل «المدير المباشر». للمالية: يكفيه الدخول لبوابة الموافقات بعد تفعيل بريده.",
+    note: "يصله بريدان: رسالة المنصة الافتراضية + رسالة مُموَّهة من «جدارة» تحوي شعارنا وبيانات التواصل ورابط بوابة المعتمدين وطريقة ضبط كلمة المرور. للمدير المباشر: اربط بريده بسجل موظفه (الموظفون ← تعديل ← بريد العمل)، ثم اجعل مرؤوسيه يشيرون إليه في حقل «المدير المباشر». للمالية: يكفيه الدخول لبوابة الاعتمادات بعد ضبط كلمة المرور.",
+    brandedSent: "(وصل بريد جدارة المُموَّه بشعارنا وبيانات التواصل لضبط كلمة المرور).",
+    brandedFail: "(تعذّر إرسال بريد جدارة المُموَّه آلياً — استخدم رابط الدعوة من رسالة المنصة).",
     send: "إرسال الدعوة", cancel: "إلغاء", invalid: "بريد غير صالح",
     ok: (e, r) => `تمت دعوة «${e}» بدور ${r}.`,
     partial: (e) => `تمت دعوة «${e}»، لكن تعذّر تعيين الدور المخصّص تلقائياً — يرجى إعادة المحاولة.`,
@@ -28,7 +30,9 @@ export default function InviteApproverDialog() {
     email: "Approver email",
     roleM: "Direct manager (leave approvals)",
     roleF: "Finance (final payment)",
-    note: "They'll receive a password setup link. For a manager: link their email to their employee record (Employees → edit → work email), then set them as their subordinates' direct manager. For finance: they just sign in to the approvals portal once their email is activated.",
+    note: "They'll receive two emails: the platform's default invite + a branded Jadara email with our logo, contact info, the approvers-portal link and how to set a password. For a manager: link their email to their employee record (Employees → edit → work email), then set them as their subordinates' direct manager. For finance: they just sign in to the approvals portal after setting their password.",
+    brandedSent: "(A branded Jadara email with our logo and contact info was sent for password setup).",
+    brandedFail: "(Couldn't send the branded Jadara email automatically — use the invite link from the platform message.)",
     send: "Send invite", cancel: "Cancel", invalid: "Invalid email",
     ok: (e, r) => `Invited "${e}" as ${r}.`,
     partial: (e) => `Invited "${e}", but couldn't set the custom role automatically — please retry.`,
@@ -58,7 +62,11 @@ export default function InviteApproverDialog() {
         uid = target?.id || null;
         if (uid) await base44.entities.User.update(uid, { role });
       } catch (e2) { roleOk = false; }
-      setOk(roleOk ? t.ok(em, role === "manager" ? t.roleM : t.roleF) : t.partial(em));
+      let brandedOk = true;
+      try { await base44.functions.invoke("sendApproverInvite", { email: em, role }); }
+      catch (e3) { brandedOk = false; }
+      const baseOk = roleOk ? t.ok(em, role === "manager" ? t.roleM : t.roleF) : t.partial(em);
+      setOk(baseOk + " " + (brandedOk ? t.brandedSent : t.brandedFail));
       setEmail("");
       setTimeout(() => setOpen(false), 1500);
     } catch (e) { setErr(t.err(e?.message || "")); }
