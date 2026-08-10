@@ -7,6 +7,7 @@ import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
+import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -71,6 +72,7 @@ export default function MyRequests() {
     fullClear: "تصفية كاملة", medReport: "تقرير طبي",
     days: (n) => `${n} يوم`, loanMonthly: (m) => `${m} ر.س شهرياً`, loanInst: (n) => `${n} قسط`,
     tripExternal: "خارجية", tripInternal: "داخلية", sar: "ر.س",
+    selfTab: "خدماتي", approvalsTab: "الاعتمادات",
   } : {
     dir: "ltr", brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
     loading: "Loading...", mustLogin: "You must sign in to access the portal.",
@@ -102,6 +104,7 @@ export default function MyRequests() {
     fullClear: "Full clearance", medReport: "Medical report",
     days: (n) => `${n} days`, loanMonthly: (m) => `${formatCurrency(m)} / month`, loanInst: (n) => `${n} installments`,
     tripExternal: "External", tripInternal: "Internal", sar: "SAR",
+    selfTab: "My Services", approvalsTab: "Approvals",
   };
 
   const [user, setUser] = useState(null);
@@ -115,6 +118,7 @@ export default function MyRequests() {
   const [loanOpen, setLoanOpen] = useState(false);
   const [tripOpen, setTripOpen] = useState(false);
   const [trips, setTrips] = useState([]);
+  const [view, setView] = useState("self");
 
   const [nationalId, setNationalId] = useState("");
   const [linking, setLinking] = useState(false);
@@ -239,8 +243,7 @@ export default function MyRequests() {
                 {gmsg.text}
               </div>
             )}
-            <div className="flex justify-center"><TurnstileWidget key={gcaptchaKey} onToken={setGcaptcha} className="rounded-xl overflow-hidden" /></div>
-            <Button type="submit" disabled={gloading || !gcaptcha} className="gap-2">
+            <Button type="submit" disabled={gloading} className="gap-2">
               {gloading && <Loader2 size={16} className="animate-spin" />}
               {t.gBtn}
             </Button>
@@ -296,10 +299,21 @@ export default function MyRequests() {
     const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
     const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;
 
+    const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
     content = (
       <div>
-        <PageHeader
-          title={t.title}
+        {hasApprovals && (
+          <div className="flex gap-2 mb-5 border-b border-border">
+            <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
+            <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
+          </div>
+        )}
+        {hasApprovals && view === "approvals" ? (
+          <ApprovalsPortal />
+        ) : (
+          <>
+            <PageHeader
+            title={t.title}
           subtitle={`${employee.employee_number} — ${employee.position} — ${employee.department || ""}`}
           action={
             <div className="flex flex-wrap gap-2">
@@ -425,6 +439,8 @@ export default function MyRequests() {
         <div className="mt-6">
           <EmployeeWarnings employee={employee} />
         </div>
+          </>
+        )}
       </div>
     );
   }

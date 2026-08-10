@@ -90,7 +90,7 @@ export default function ApprovalsPortal() {
   };
   useEffect(() => { load(); }, []);
 
-  const role = me?.role;
+  const role = data?.role;
 
   const call = async (payload) => {
     await base44.functions.invoke("approvalAction", payload);

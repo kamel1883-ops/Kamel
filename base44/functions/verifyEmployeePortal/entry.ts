@@ -8,11 +8,7 @@ export default async function (req) {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
 
-    // حماية بشرية لمنع الإساءة الآلية
-    const captchaToken = String(body.captcha_token || "");
-    if (!captchaToken) return Response.json({ ok: false, error: "captcha_required" }, { status: 400 });
-    if (!(await verifyTurnstile(captchaToken))) return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
-
+    // مطابقة الهوية + البريد مقابل سجل موظف موجود هي بحدّ ذاتها الحماية — لا حاجة لـ Turnstile.
     const nid = String(body.national_id || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
     if (!nid || !email) return Response.json({ ok: false, error: "national_id and email are required" }, { status: 400 });

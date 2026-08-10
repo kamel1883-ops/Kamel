@@ -2,9 +2,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-// تنفيذ إجراء موافقة نيابة عن المدير المباشر أو المدير المالي (تتجاوز RLS عبر خدمة-الدور).
-// التحقق من الصلاحية مطبق: المدير لا يوافق إلا على إجازات مرؤوسيه، والمالية لا تصرف إلا الطلبات في مرحلة الصرف.
-// ملاحظة: توليد مستندات PDF (المخالصة/كشف السلفة/موافقة الانتداب) يبقى في الواجهة الأمامية لإدارة الموارد البشرية.
+// تنفيذ إجراء موافقة بناءً على علامات سجل الموظف (وليس دور المستخدم):
+// - المدير المباشر (is_approver_manager): لا يوافق إلا على إجازات مرؤوسيه في مرحلة المدير.
+// - المعتمد المالي (is_approver_finance): صرف/رفض الإجازات والسلف والانتدابات والمخالصات في مرحلة الصرف.
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -12,9 +12,8 @@ export default async function(req: Request): Promise<Response> {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'يجب تسجيل الدخول' }, { status: 401 });
 
-    const role = user.role;
     const body = await req.json().catch(() => ({}));
-    const type = body.type;        // 'leaves' | 'loans' | 'trips'
+    const type = body.type;        // 'leaves' | 'loans' | 'trips' | 'settlements'
     const action = body.action;    // 'approve' | 'reject' | 'confirm'
     const id = body.id;
     const note = String(body.note || '');
@@ -22,12 +21,12 @@ export default async function(req: Request): Promise<Response> {
 
     if (!id || !type || !action) return Response.json({ error: 'بيانات ناقصة' }, { status: 400 });
 
-    if (role === 'manager') {
-      if (type !== 'leaves' || (action !== 'approve' && action !== 'reject'))
-        return Response.json({ error: 'غير مصرح لك بهذا الإجراء' }, { status: 403 });
-      const allEmployees = await base44.asServiceRole.entities.Employee.list('-created_date', 500);
-      const myEmp = (allEmployees || []).find((e) => e.user_id === user.id);
-      if (!myEmp) return Response.json({ error: 'لم يتم ربط حسابك بسجل موظف' }, { status: 403 });
+    const allEmployees = await base44.asServiceRole.entities.Employee.list('-created_date', 500);
+    const myEmp = (allEmployees || []).find((e) => e.user_id === user.id);
+    if (!myEmp) return Response.json({ error: 'لم يتم ربط حسابك بسجل موظف' }, { status: 403 });
+
+    // ===== المدير المباشر =====
+    if (myEmp.is_approver_manager && type === 'leaves' && (action === 'approve' || action === 'reject')) {
       const leave = await base44.asServiceRole.entities.LeaveRequest.get(id);
       const emp = (allEmployees || []).find((e) => e.id === leave.employee_id);
       if (!emp || emp.manager_id !== myEmp.id)
@@ -49,10 +48,8 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ ok: true });
     }
 
-    if (role === 'finance') {
-      if (action !== 'confirm' && action !== 'reject')
-        return Response.json({ error: 'غير مصرح' }, { status: 403 });
-
+    // ===== المعتمد المالي =====
+    if (myEmp.is_approver_finance && (action === 'confirm' || action === 'reject')) {
       if (type === 'leaves') {
         const r = await base44.asServiceRole.entities.LeaveRequest.get(id);
         if (!['awaiting_finance', 'hr_approved'].includes(r.status))
@@ -133,7 +130,7 @@ export default async function(req: Request): Promise<Response> {
       }
     }
 
-    return Response.json({ error: 'غير مصرح' }, { status: 403 });
+    return Response.json({ error: 'غير مصرح لك بهذا الإجراء' }, { status: 403 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

@@ -21,6 +21,7 @@ const empty = {
   department: "", branch_id: "", branch_name: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
   contract_type: "full_time", contract_start_date: "", contract_end_date: "", status: "active",
   termination_reason: "none", termination_date: "", manager_id: "",
+  is_approver_manager: false, is_approver_finance: false,
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
   avatar_url: "",
   iqama_expiry: "", passport_number: "", passport_expiry: "",
@@ -43,6 +44,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medNo: "رقم التأمين الطبي", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
+    approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
     cancel: "إلغاء", save: "حفظ",
   } : {
@@ -57,6 +59,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     passNo: "Passport number", passExp: "Passport expiry", medNo: "Health insurance no", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
+    approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)",
     deptHint: "Pick from existing departments or type a new one",
     cancel: "Cancel", save: "Save",
   };
@@ -147,6 +150,12 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
                   {managers.map((m) => <SelectItem key={m.id} value={m.id}>{managerLabel(m)}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </Field>
+            <Field label={t.approverManager}>
+              <label className="flex items-center gap-2 h-9"><input type="checkbox" checked={!!form.is_approver_manager} onChange={(e) => set("is_approver_manager", e.target.checked)} className="w-4 h-4 accent-violet-600" /> <span className="text-sm">{isAr ? "تفعيل صلاحية اعتماد إجازات مرؤوسيه" : "Enable leave approval rights"}</span></label>
+            </Field>
+            <Field label={t.approverFinance}>
+              <label className="flex items-center gap-2 h-9"><input type="checkbox" checked={!!form.is_approver_finance} onChange={(e) => set("is_approver_finance", e.target.checked)} className="w-4 h-4 accent-violet-600" /> <span className="text-sm">{isAr ? "تفعيل صلاحية الصرف المالي" : "Enable finance payment rights"}</span></label>
             </Field>
             <Field label={t.contract}>
               <Select value={form.contract_type} onValueChange={(v) => set("contract_type", v)}>

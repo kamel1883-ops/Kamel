@@ -42,11 +42,6 @@ const bottomNav = [
   { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
 ];
 
-// قائمة المدير المباشر والمالك المالي — بوابة الموافقات فقط، بلا وصول لبيانات الموارد البشرية
-const portalNav = [
-  { to: "/approvals-portal", ar: "الموافقات", en: "Approvals", icon: ClipboardCheck },
-];
-
 export default function Layout() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
@@ -64,12 +59,11 @@ export default function Layout() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const restricted = user && (user.role === "manager" || user.role === "finance");
+  const restricted = user && user.role !== "admin";
   useEffect(() => {
-    if (restricted && !location.pathname.startsWith("/approvals-portal")) {
-      navigate("/approvals-portal", { replace: true });
-    }
-  }, [restricted, location.pathname, navigate]);
+    if (restricted) navigate("/portal", { replace: true });
+  }, [restricted, navigate]);
+  if (restricted) return null;
 
   const handleLogout = async () => {
     await base44.auth.logout();
@@ -87,7 +81,7 @@ export default function Layout() {
         )}
       >
         <div className="h-20 flex items-center justify-between px-5 border-b border-white/10">
-          <Link to={restricted ? "/approvals-portal" : (demoMode ? "/app" : "/owner")}><Logo tone="light" size={44} /></Link>
+          <Link to={demoMode ? "/app" : "/owner"}><Logo tone="light" size={44} /></Link>
           <button className="lg:hidden text-white/60" onClick={() => setOpen(false)}><X size={20} /></button>
         </div>
         <div className="h-px bg-gradient-to-l from-violet-500/50 to-indigo-500/30" />
@@ -113,7 +107,7 @@ export default function Layout() {
         ) : null}
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {(restricted ? portalNav : (demoMode ? appNav : ownerItems)).map((item) => {
+          {(demoMode ? appNav : ownerItems).map((item) => {
             const Icon = item.icon;
             const active = isActive(item.to);
             return (
@@ -184,7 +178,7 @@ export default function Layout() {
         </main>
 
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0b1120]/95 backdrop-blur border-t border-white/10 flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          {(restricted ? portalNav : bottomNav).map((item) => {
+          {bottomNav.map((item) => {
             const Icon = item.icon;
             const active = item.to === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.to);
             return (

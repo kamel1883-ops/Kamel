@@ -279,7 +279,6 @@ export default function Landing() {
             <LanguageToggle />
             <Link to="/portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
             <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.login}</Link>
-            <Link to="/login?returnTo=/approvals-portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.approvers}</Link>
             <button onClick={() => scrollTo("trial")} className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition">{t.start}</button>
           </div>
         </div>
@@ -350,24 +349,6 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* بوابة المعتمدين (مدير مباشر / مدير مالي) */}
-        <div className="relative overflow-hidden rounded-[2rem] border border-indigo-400/30 bg-gradient-to-l from-indigo-600/20 via-blue-600/15 to-cyan-600/20 p-8 sm:p-10">
-          <div className="absolute -top-12 -right-12 w-60 h-60 rounded-full bg-indigo-500/20 blur-3xl" />
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                <ClipboardList size={26} className="text-indigo-200" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold">{t.approversTitle}</h3>
-                <p className="text-white/70 mt-2 max-w-2xl leading-relaxed">{t.approversDesc}</p>
-              </div>
-            </div>
-            <Link to="/login?returnTo=/approvals-portal" className="shrink-0 inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
-              {t.approversCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
-            </Link>
-          </div>
-        </div>
       </section>
 
       {/* عملاؤنا */}
