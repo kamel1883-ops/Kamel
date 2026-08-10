@@ -4,6 +4,7 @@ import { isAr } from "@/lib/lang";
 const ar = {
   pending_manager: { label: "بانتظار المدير المباشر", cls: "bg-amber-50 text-amber-600", step: 1 },
   manager_approved: { label: "وافق المدير — بانتظار الموارد البشرية", cls: "bg-blue-50 text-blue-600", step: 2 },
+  hr_settled: { label: "مسودة الموارد — بانتظار الاعتماد والطباعة", cls: "bg-violet-50 text-violet-600", step: 2.5 },
   hr_approved: { label: "وافقت الموارد البشرية", cls: "bg-violet-50 text-violet-600", step: 3 },
   awaiting_finance: { label: "بانتظار المالية/المحاسبة", cls: "bg-blue-50 text-blue-600", step: 4 },
   paid: { label: "تم الصرف", cls: "bg-emerald-50 text-emerald-600", step: 5 },
@@ -15,6 +16,7 @@ const ar = {
 const en = {
   pending_manager: { label: "Awaiting direct manager", cls: "bg-amber-50 text-amber-600", step: 1 },
   manager_approved: { label: "Manager approved — awaiting HR", cls: "bg-blue-50 text-blue-600", step: 2 },
+  hr_settled: { label: "HR draft — awaiting approval & print", cls: "bg-violet-50 text-violet-600", step: 2.5 },
   hr_approved: { label: "HR approved", cls: "bg-violet-50 text-violet-600", step: 3 },
   awaiting_finance: { label: "Awaiting Finance/Accounting", cls: "bg-blue-50 text-blue-600", step: 4 },
   paid: { label: "Paid", cls: "bg-emerald-50 text-emerald-600", step: 5 },

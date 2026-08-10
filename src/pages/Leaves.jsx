@@ -31,6 +31,7 @@ export default function Leaves() {
   const statusLabel = isAr ? {
     pending_manager: { label: "بانتظار المدير", cls: "bg-amber-50 text-amber-600" },
     manager_approved: { label: "اعتمد المدير", cls: "bg-blue-50 text-blue-600" },
+    hr_settled: { label: "مسودة الموارد", cls: "bg-violet-50 text-violet-600" },
     hr_approved: { label: "اعتمدت الموارد", cls: "bg-indigo-50 text-indigo-600" },
     awaiting_finance: { label: "بانتظار المالية", cls: "bg-violet-50 text-violet-600" },
     paid: { label: "صُرفت", cls: "bg-emerald-50 text-emerald-600" },
@@ -41,6 +42,7 @@ export default function Leaves() {
   } : {
     pending_manager: { label: "Awaiting manager", cls: "bg-amber-50 text-amber-600" },
     manager_approved: { label: "Manager approved", cls: "bg-blue-50 text-blue-600" },
+    hr_settled: { label: "HR draft", cls: "bg-violet-50 text-violet-600" },
     hr_approved: { label: "HR approved", cls: "bg-indigo-50 text-indigo-600" },
     awaiting_finance: { label: "Awaiting finance", cls: "bg-violet-50 text-violet-600" },
     paid: { label: "Paid", cls: "bg-emerald-50 text-emerald-600" },

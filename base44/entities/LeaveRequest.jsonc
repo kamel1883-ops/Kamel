@@ -80,6 +80,7 @@
       "type": "string",
       "enum": [
         "pending",
+        "settled",
         "approved",
         "rejected"
       ],
@@ -165,6 +166,7 @@
       "enum": [
         "pending_manager",
         "manager_approved",
+        "hr_settled",
         "hr_approved",
         "awaiting_finance",
         "paid",

@@ -44,10 +44,11 @@ export default function Approvals() {
     tripPayNote: "عند الاعتماد يُولّد مستند الموافقة آلياً ويُحفظ في ملف الموظف.", tripApproveBtn: "اعتماد وتوليد المستند",
     tripExt: "خارجية", tripInt: "داخلية", tripCost: (c) => `التكلفة: ${formatCurrency(c)}`, tripDocBtn: "مستند الانتداب",
     tripLine: (d, p) => d ? `${d} — ${p}` : "—",
-    leaveHrTitle: "اعتماد الموارد البشرية — حجز وتأكيد", leaveHrNote: "ملاحظات الموارد البشرية",
-    leaveHrNotePh: "حجز تذاكر الطيران، تأكيد التواريخ، …. تُسجّل على الطلب وتظهر في مسار الطلب.",
-    leaveHrDoc: "مرفقات الموارد البشرية (تذاكر طيران/حجوزات)", leaveHrBtn: "اعتماد وتحويل للمالية",
-    leaveHrWarn: "عند الاعتماد يُخصم رصيد الإجازات ويُحوّل الطلب إلى المالية لإثبات السداد.",
+    leaveHrTitle: "احتساب التصفية ومراجعة الإجازة", leaveHrNote: "ملاحظات الموارد البشرية",
+    leaveHrNotePh: "حجز تذاكر الطيران، تأكيد التواريخ، …. تُسجّل على الطلب وتظهر في المخالصة ومسار الطلب.",
+    leaveHrDoc: "مرفقات الموارد البشرية (تذاكر طيران/حجوزات)", leaveHrBtn: "احتساب وحفظ كمسودة",
+    leaveHrWarn: "عند الحفظ يُحسب تعويض التذكرة/التصفية ويُولّد مستند المخالصة (PDF) للمعاينة والطباعة لأخذ الموافقة الورقية أولاً. يُحفظ الطلب كمسودة ولن يُحوّل للمالية حتى تعتمده لاحقاً من القائمة.",
+    forwardBtn: "اعتماد وتحويل للمالية", printSettle: "معاينة/طباعة المخالصة",
     finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
     tripFinTitle: "صرف الانتداب — المالية/المحاسبة", tripFinWarn: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل ويصبح الطلب مكتملًا.",
     finProof: "إثبات التحويل",
@@ -75,10 +76,11 @@ export default function Approvals() {
     tripPayNote: "On approval the approval document is generated automatically and saved to the employee file.", tripApproveBtn: "Approve & generate doc",
     tripExt: "External", tripInt: "Internal", tripCost: (c) => `Cost: ${formatCurrency(c)}`, tripDocBtn: "Trip doc",
     tripLine: (d, p) => d ? `${d} — ${p}` : "—",
-    leaveHrTitle: "HR approval — booking & confirm", leaveHrNote: "HR notes",
-    leaveHrNotePh: "Flight tickets booking, confirm dates, …. Recorded on the request and shown in its trail.",
-    leaveHrDoc: "HR attachments (tickets/bookings)", leaveHrBtn: "Approve & forward to finance",
-    leaveHrWarn: "On approval the leave balance is deducted and the request moves to finance for payment proof.",
+    leaveHrTitle: "Leave review & settlement preview", leaveHrNote: "HR notes",
+    leaveHrNotePh: "Flight tickets booking, confirm dates, …. Recorded on the request and shown in the clearance.",
+    leaveHrDoc: "HR attachments (tickets/bookings)", leaveHrBtn: "Calculate & save as draft",
+    leaveHrWarn: "On save the ticket/settlement is calculated and a clearance PDF is generated for preview/print to get the paper approval first. The request is saved as draft and won't be sent to finance until you approve it later.",
+    forwardBtn: "Approve & forward to finance", printSettle: "Preview/print settlement",
     finNote: "Finance notes/description", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
     tripFinTitle: "Trip payout — Finance/Accounting", tripFinWarn: "On confirmation the process closes, the transfer proof is recorded and the request is completed.",
     finProof: "Transfer proof",
@@ -144,7 +146,10 @@ export default function Approvals() {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "manager") });
     } else if (s === "manager_approved") {
-      btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => (type === "leaves" ? openLeaveHr(r) : hrApprove(type, r)) });
+      btns.push({ label: type === "leaves" ? t.leaveHrBtn : t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => (type === "leaves" ? openLeaveHr(r) : hrApprove(type, r)) });
+      btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
+    } else if (s === "hr_settled") {
+      btns.push({ label: t.forwardBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => forwardToFinance(r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
     } else if (s === "awaiting_finance" || s === "hr_approved") {
       btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance(type, r) });
@@ -152,7 +157,7 @@ export default function Approvals() {
 
     if (type === "leaves") {
       if (r.settlement_pdf_url) {
-        btns.push({ label: t.settlement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.settlement_pdf_url, icon: "download" });
+        btns.push({ label: t.printSettle, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.settlement_pdf_url, icon: "download" });
       } else if (s === "completed" || s === "paid") {
         btns.push({ label: t.genSettlement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeSettlement(r), icon: "refresh", busyKey: "l" + r.id });
       }
@@ -205,18 +210,34 @@ export default function Approvals() {
       const emp = empOf(r.employee_id);
       const balance = Number(emp?.leave_balance) || 0;
       const deduct = Math.min(r.days_count, balance);
+      const after = Math.max(0, balance - deduct);
       const ticket = leaveTicketAmount(emp, org);
-      await base44.entities.LeaveRequest.update(r.id, {
-        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
+      const patch = {
+        hr_status: "settled", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
         hr_note: note, hr_document_url: url,
-        balance_deducted: deduct, ticket_amount: ticket, settlement_amount: ticket,
-        status: "awaiting_finance", finance_status: "pending",
+        balance_before: balance, balance_after: after, balance_deducted: deduct,
+        ticket_amount: ticket, settlement_amount: ticket, status: "hr_settled",
+      };
+      await base44.entities.LeaveRequest.update(r.id, patch);
+      try { await generateLeaveSettlement({ ...r, ...patch }, emp, org, leaves); } catch (e) {}
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+  };
+  const forwardToFinance = async (r) => {
+    try {
+      const emp = empOf(r.employee_id);
+      const balance = Number(emp?.leave_balance) || 0;
+      const deduct = Math.min(r.days_count, balance);
+      const fin = needsFinance(r, emp, org);
+      const finalStatus = fin ? "awaiting_finance" : "completed";
+      await base44.entities.LeaveRequest.update(r.id, {
+        hr_status: "approved", status: finalStatus, finance_status: "pending", balance_deducted: deduct,
       });
       if (emp) {
         await base44.entities.Employee.update(emp.id, { leave_balance: Math.max(0, balance - deduct), status: "on_leave" });
       }
     } catch (e) {}
-    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+    load();
   };
   const openReject = (type, r, stage) => { setActing({ type, req: r, action: "reject", stage }); setNote(""); };
   const reject = async () => {
@@ -478,6 +499,19 @@ export default function Approvals() {
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">{leaveTypeLabel(acting.req.leave_type)} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}</div>
               {acting.req.medical_report_url && <a href={acting.req.medical_report_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
+              {(() => {
+                const emp = empOf(acting.req.employee_id);
+                const ticket = leaveTicketAmount(emp, org);
+                const balance = Number(emp?.leave_balance) || 0;
+                const deduct = Math.min(acting.req.days_count, balance);
+                return (
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div className="rounded-lg bg-slate-50 p-2.5"><div className="text-xs text-muted-foreground">{isAr ? "رصيد الإجازات" : "Balance"}</div><div className="font-bold">{balance}</div></div>
+                    <div className="rounded-lg bg-violet-50 p-2.5"><div className="text-xs text-muted-foreground">{isAr ? "المخصوم" : "Deducted"}</div><div className="font-bold">{deduct}</div></div>
+                    <div className="rounded-lg bg-blue-50 p-2.5"><div className="text-xs text-muted-foreground">{isAr ? "تعويض التذكرة" : "Ticket"}</div><div className="font-bold">{formatCurrency(ticket)}</div></div>
+                  </div>
+                );
+              })()}
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} placeholder={t.leaveHrNotePh} />
