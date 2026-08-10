@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText, KeyRound, Users } from "lucide-react";
 import InvoiceDialog from "@/components/InvoiceDialog";
+import TrialManageDialog from "@/components/TrialManageDialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/hr";
@@ -28,6 +29,7 @@ export default function OwnerAdmin() {
     subActive: (d) => `اشتراك: ${d || "—"}`, subTrial: (d, n) => `تجربة: ${d || "—"} (${n} يوم)`,
     invoice: "فاتورة",
     relink: "ربط إيميل جديد",
+    manageTrial: "إدارة التجربة",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trials, annual subscriptions, renewals and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
@@ -41,6 +43,7 @@ export default function OwnerAdmin() {
     subActive: (d) => `Subscription: ${d || "—"}`, subTrial: (d, n) => `Trial: ${d || "—"} (${n} days)`,
     invoice: "Invoice",
     relink: "Re-link email",
+    manageTrial: "Manage trial",
   };
 
   const [tenants, setTenants] = useState([]);
@@ -57,6 +60,8 @@ export default function OwnerAdmin() {
   const [invTenant, setInvTenant] = useState(null);
   const [relOpen, setRelOpen] = useState(false);
   const [relTenant, setRelTenant] = useState(null);
+  const [trialOpen, setTrialOpen] = useState(false);
+  const [trialTenant, setTrialTenant] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -105,6 +110,7 @@ export default function OwnerAdmin() {
     await base44.entities.Tenant.update(tt.id, { status: "expired" });
     load();
   };
+  const openTrial = (tt) => { setTrialTenant(tt); setTrialOpen(true); };
   const openConfirmRenew = (tt) => { setRenewTarget(tt); setRenewOpen(true); };
   const confirmRenew = async (proof) => {
     const tt = renewTarget;
@@ -186,6 +192,7 @@ export default function OwnerAdmin() {
                           </Button>
                           {pending && (<Button size="sm" variant="secondary" onClick={() => openConfirmRenew(x)} className="gap-1.5 h-8"><FileCheck2 size={14} /> {t.confirmRenew}</Button>)}
                           {x.status === "active" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} className="gap-1.5 h-8 text-rose-600"><Pause size={14} /> {t.suspend}</Button>)}
+                          {x.status === "trial" && (<Button size="sm" variant="outline" onClick={() => openTrial(x)} className="gap-1.5 h-8"><Clock size={14} /> {t.manageTrial}</Button>)}
                           {x.status !== "active" && !pending && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
                         </div>
                       </td>
@@ -203,6 +210,7 @@ export default function OwnerAdmin() {
       <RenewConfirmDialog open={renewOpen} onClose={() => setRenewOpen(false)} tenant={renewTarget} sub={renewTarget ? renewalByTenant.get(renewTarget.id) : null} isAr={isAr} onConfirm={confirmRenew} />
       <InvoiceDialog open={invOpen} onClose={() => setInvOpen(false)} tenant={invTenant} subs={subs} isAr={isAr} />
       <RelinkEmailDialog open={relOpen} onClose={() => setRelOpen(false)} tenant={relTenant} isAr={isAr} onSaved={load} />
+      <TrialManageDialog open={trialOpen} onClose={() => setTrialOpen(false)} tenant={trialTenant} onSaved={load} />
     </div>
   );
 }
