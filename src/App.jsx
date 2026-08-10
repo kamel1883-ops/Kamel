@@ -47,6 +47,8 @@ import QiwaMudadPage from "@/pages/landings/QiwaMudadPage";
 import WpsMudadPage from "@/pages/landings/WpsMudadPage";
 import EosCalculatorPage from "@/pages/landings/EosCalculatorPage";
 import ContractsPage from "@/pages/landings/ContractsPage";
+import Blog from "@/pages/Blog";
+import BlogArticle from "@/pages/BlogArticle";
 
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts"];
 
@@ -54,7 +56,7 @@ const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const path = window.location.pathname;
   const isRestricted = user && (user.role === "manager" || user.role === "finance");
-  const isPublicPage = PUBLIC_PATHS.includes(path) && !isRestricted;
+  const isPublicPage = (PUBLIC_PATHS.includes(path) || path.startsWith("/blog")) && !isRestricted;
 
   if (!isPublicPage && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
@@ -86,6 +88,8 @@ const AuthenticatedApp = () => {
         <Route path="/wps-mudad" element={<WpsMudadPage />} />
         <Route path="/eos-calculator" element={<EosCalculatorPage />} />
         <Route path="/contracts" element={<ContractsPage />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogArticle />} />
         <Route path="/portal" element={<MyRequests />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

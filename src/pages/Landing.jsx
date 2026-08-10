@@ -591,6 +591,7 @@ export default function Landing() {
             <Link to="/wps-mudad" className="block hover:text-white">{isAr ? "حماية الأجور (مدد)" : "Wage Protection (Mudad)"}</Link>
             <Link to="/eos-calculator" className="block hover:text-white">{isAr ? "حاسبة نهاية الخدمة" : "EOS Calculator"}</Link>
             <Link to="/contracts" className="block hover:text-white">{isAr ? "إدارة العقود واللوائح" : "Contracts & Policies"}</Link>
+            <Link to="/blog" className="block hover:text-white">{isAr ? "مدونة HR" : "HR Blog"}</Link>
           </div>
           <div className="space-y-1.5">
             <div className="font-medium text-white mb-1">{t.footContact}</div>
