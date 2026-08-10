@@ -272,7 +272,7 @@ export default function Landing() {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <Link to="/portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
-            <Link to="/register?returnTo=/app" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.login}</Link>
+            <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.login}</Link>
             <button onClick={() => scrollTo("trial")} className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition">{t.start}</button>
           </div>
         </div>
@@ -488,7 +488,7 @@ export default function Landing() {
             </div>
             <div className="text-2xl font-bold">{t.doneTitle}</div>
             <p className="text-white/70 mt-2">{t.doneDesc}</p>
-            <Link to="/login?returnTo=/app" className="inline-flex items-center gap-2 mt-6 text-violet-300 hover:text-violet-200">
+            <Link to="/company-login?returnTo=/app" className="inline-flex items-center gap-2 mt-6 text-violet-300 hover:text-violet-200">
               {t.doneCta} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
@@ -586,7 +586,7 @@ export default function Landing() {
             <button onClick={() => scrollTo("pricing")} className="block hover:text-white">{t.nav.pricing}</button>
             <Link to="/about" className="block hover:text-white">{isAr ? "من نحن" : "About"}</Link>
             <Link to="/contact" className="block hover:text-white">{t.nav.contact}</Link>
-            <Link to="/register?returnTo=/app" className="block hover:text-white">{t.login}</Link>
+            <Link to="/company-login?returnTo=/app" className="block hover:text-white">{t.login}</Link>
           </div>
         </div>
         <div className="text-center text-white/40 text-xs pb-6">{t.copy}</div>
