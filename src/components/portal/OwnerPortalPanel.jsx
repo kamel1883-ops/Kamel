@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -98,11 +98,17 @@ export default function OwnerPortalPanel({ session, employee }) {
     return d;
   }, [session?.token, session?.employee_id]);
 
-  const load = useCallback(async () => {
+  const [extras, setExtras] = useState(null);
+  const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const d = await call("owner_list");
+      // جلب القائمة والبيانات الثانوية بالتوازي، ثم ضبطها دفعة واحدة لتفادي إعادة التصيير/القفز المزدوج.
+      const [d, ex] = await Promise.all([
+        call("owner_list"),
+        call("owner_extras").catch(() => null),
+      ]);
       setData(d);
+      setExtras(ex);
       setErr("");
     } catch (e) {
       setErr(String(e?.message || e));
@@ -111,12 +117,12 @@ export default function OwnerPortalPanel({ session, employee }) {
     }
   }, [call]);
 
-  useEffect(() => { load(); }, [load]);
-  const [extras, setExtras] = useState(null);
-  const loadExtras = useCallback(async () => {
-    try { const d = await call("owner_extras"); setExtras(d); } catch (_e) { setExtras(null); }
-  }, [call]);
-  useEffect(() => { loadExtras(); }, [loadExtras]);
+  const didMount = useRef(false);
+  useEffect(() => {
+    if (didMount.current) return;
+    didMount.current = true;
+    loadAll();
+  }, [loadAll]);
 
   const flash = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2500); };
 
@@ -125,8 +131,7 @@ export default function OwnerPortalPanel({ session, employee }) {
     try {
       await call(action, extra);
       flash(t.sent);
-      await load();
-      await loadExtras();
+      await loadAll();
     } catch (e) {
       alert((e?.message || "fail"));
     } finally {
@@ -185,7 +190,7 @@ export default function OwnerPortalPanel({ session, employee }) {
       ) : err ? (
         <div className="p-4 rounded-xl bg-rose-50 text-rose-700 text-sm flex items-center justify-between gap-3 flex-wrap">
           <span>{t.fail} ({err})</span>
-          <Button size="sm" variant="outline" onClick={() => { load(); loadExtras(); }} className="shrink-0 gap-1.5 h-8"><RefreshCw size={13} /> {isAr ? "إعادة المحاولة" : "Retry"}</Button>
+          <Button size="sm" variant="outline" onClick={() => { loadAll(); }} className="shrink-0 gap-1.5 h-8"><RefreshCw size={13} /> {isAr ? "إعادة المحاولة" : "Retry"}</Button>
         </div>
       ) : (
         <>
