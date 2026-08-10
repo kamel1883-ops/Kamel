@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, FileCheck2, FileText, KeyRound, Users } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, Play, FileCheck2, FileText, KeyRound, Users } from "lucide-react";
 import InvoiceDialog from "@/components/InvoiceDialog";
 import TrialManageDialog from "@/components/TrialManageDialog";
 import { cn } from "@/lib/utils";
@@ -24,12 +24,16 @@ export default function OwnerAdmin() {
     thCustomer: "العميل", thCr: "السجل التجاري", thContact: "جهة الاتصال", thStatus: "الحالة", thEnd: "نهاية الفترة", thActions: "إجراءات",
     noCustomers: "لا يوجد عملاء بعد — سجّل العملاء من صفحة الهبوط.",
     regSub: "تسجيل اشتراك", directActivate: "تفعيل مباشر",
-    renewOffer: "عرض التجديد", confirmRenew: "تأكيد التجديد", suspend: "إيقاف مؤقت",
+    renewOffer: "عرض التجديد", confirmRenew: "تأكيد التجديد", suspend: "إيقاف مؤقت", resume: "إلغاء الإيقاف",
+    suspendTrial: "إيقاف التجربة", suspendSub: "إيقاف الاشتراك",
     pendingRenew: "بانتظار سداد التجديد", renewSent: "تم إرسال عرض التجديد للعميل",
     subActive: (d) => `اشتراك: ${d || "—"}`, subTrial: (d, n) => `تجربة: ${d || "—"} (${n} يوم)`,
     invoice: "فاتورة",
     relink: "ربط إيميل جديد",
     manageTrial: "إدارة التجربة",
+    suspendConfirmTrial: "هل تريد إيقاف تجربة هذا العميل مؤقتاً؟ لن يستطيع الدخول للنظام حتى تُلغي الإيقاف.",
+    suspendConfirmSub: "هل تريد إيقاف اشتراك هذا العميل مؤقتاً؟ لم يسدد التجديد، لن يستطيع الدخول حتى تُلغي الإيقاف.",
+    resumeConfirm: "هل تريد إلغاء الإيقاف المؤقت وإعادة تفعيل هذا العميل؟",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trials, annual subscriptions, renewals and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Trials ending soon",
@@ -38,12 +42,16 @@ export default function OwnerAdmin() {
     thCustomer: "Customer", thCr: "Commercial reg.", thContact: "Contact", thStatus: "Status", thEnd: "Period end", thActions: "Actions",
     noCustomers: "No customers yet — register customers from the landing page.",
     regSub: "Register subscription", directActivate: "Direct activate",
-    renewOffer: "Renewal offer", confirmRenew: "Confirm renewal", suspend: "Suspend",
+    renewOffer: "Renewal offer", confirmRenew: "Confirm renewal", suspend: "Suspend", resume: "Resume",
+    suspendTrial: "Suspend trial", suspendSub: "Suspend subscription",
     pendingRenew: "Awaiting renewal payment", renewSent: "Renewal offer sent to client",
     subActive: (d) => `Subscription: ${d || "—"}`, subTrial: (d, n) => `Trial: ${d || "—"} (${n} days)`,
     invoice: "Invoice",
     relink: "Re-link email",
     manageTrial: "Manage trial",
+    suspendConfirmTrial: "Suspend this client's trial? They won't access the system until resumed.",
+    suspendConfirmSub: "Suspend this client's subscription? They didn't renew and won't access until resumed.",
+    resumeConfirm: "Resume this client and restore their access?",
   };
 
   const [tenants, setTenants] = useState([]);
@@ -107,8 +115,27 @@ export default function OwnerAdmin() {
     } finally { setBusyId(null); }
   };
   const suspendTenant = async (tt) => {
-    await base44.entities.Tenant.update(tt.id, { status: "expired" });
-    load();
+    const msg = tt.status === "active" ? t.suspendConfirmSub : t.suspendConfirmTrial;
+    if (!window.confirm(msg)) return;
+    setBusyId(tt.id);
+    try {
+      await base44.entities.Tenant.update(tt.id, { status: "expired", suspended_from: tt.status });
+      await load();
+    } finally { setBusyId(null); }
+  };
+  const resumeTenant = async (tt) => {
+    const restore = tt.suspended_from || "trial";
+    if (!window.confirm(`${t.resumeConfirm} (${restore === "active" ? (isAr ? "مشترك فعال" : "Active subscriber") : (isAr ? "تجربة" : "Trial")})`)) return;
+    setBusyId(tt.id);
+    try {
+      const updates = { status: restore, suspended_from: null };
+      if (restore === "active" && !tt.subscription_end) {
+        const end = new Date(); end.setDate(end.getDate() + 30);
+        updates.subscription_end = end.toISOString().slice(0, 10);
+      }
+      await base44.entities.Tenant.update(tt.id, updates);
+      await load();
+    } finally { setBusyId(null); }
   };
   const openTrial = (tt) => { setTrialTenant(tt); setTrialOpen(true); };
   const openConfirmRenew = (tt) => { setRenewTarget(tt); setRenewOpen(true); };
@@ -191,9 +218,11 @@ export default function OwnerAdmin() {
                             {busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} {t.renewOffer}
                           </Button>
                           {pending && (<Button size="sm" variant="secondary" onClick={() => openConfirmRenew(x)} className="gap-1.5 h-8"><FileCheck2 size={14} /> {t.confirmRenew}</Button>)}
-                          {x.status === "active" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} className="gap-1.5 h-8 text-rose-600"><Pause size={14} /> {t.suspend}</Button>)}
+                          {x.status === "active" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendSub}</Button>)}
+                          {x.status === "trial" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendTrial}</Button>)}
                           {x.status === "trial" && (<Button size="sm" variant="outline" onClick={() => openTrial(x)} className="gap-1.5 h-8"><Clock size={14} /> {t.manageTrial}</Button>)}
-                          {x.status !== "active" && !pending && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
+                          {x.status === "expired" && (<Button size="sm" variant="ghost" onClick={() => resumeTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} {t.resume}</Button>)}
+                          {x.status !== "active" && !pending && x.status !== "expired" && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
                         </div>
                       </td>
                     </tr>

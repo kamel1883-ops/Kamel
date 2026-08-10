@@ -79,11 +79,16 @@ export default async function (req) {
       50
     );
 
-    const valid = (tenants || []).some(
+    const t = (tenants || []).find(
       (tt) => String(tt.contact_email || '').trim().toLowerCase() === email
     );
 
-    return Response.json({ valid });
+    if (!t) return Response.json({ valid: false });
+    if (!["trial", "active"].includes(t.status)) {
+      return Response.json({ valid: false, suspended: true });
+    }
+
+    return Response.json({ valid: true });
   } catch {
     return Response.json({ valid: false });
   }
