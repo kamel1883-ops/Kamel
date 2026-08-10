@@ -14,14 +14,15 @@ export default function Login() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr
-    ? { title: "مرحباً بعودتك", subtitle: "سجّل الدخول إلى حسابك", noAccount: "ليس لديك حساب؟", create: "أنشئ حساباً", google: "المتابعة عبر Google", or: "أو", email: "البريد الإلكتروني", password: "كلمة المرور", forgot: "نسيت كلمة المرور؟", signing: "جارٍ تسجيل الدخول...", submit: "تسجيل الدخول", err: "البريد الإلكتروني أو كلمة المرور غير صحيحة" }
-    : { title: "Welcome back", subtitle: "Sign in to your account", noAccount: "No account?", create: "Create one", google: "Continue with Google", or: "or", email: "Email", password: "Password", forgot: "Forgot password?", signing: "Signing in...", submit: "Sign in", err: "Invalid email or password" };
+    ? { title: "مرحباً بعودتك", subtitle: "سجّل الدخول إلى حسابك", noAccount: "ليس لديك حساب؟", create: "أنشئ حساباً", google: "المتابعة عبر Google", or: "أو", email: "البريد الإلكتروني", password: "كلمة المرور", forgot: "نسيت كلمة المرور؟", signing: "جارٍ تسجيل الدخول...", submit: "تسجيل الدخول", err: "البريد الإلكتروني أو كلمة المرور غير صحيحة", approverNote: "أنت معتمد مدعوّ؟ حسابك مُنشأ بالفعل — استخدم رابط «إعداد كلمة المرور» في رسالة الدعوة المرسلة لبريدك مباشرة. لا تُنشئ حساباً جديداً (سيفشل بخطأ 403 لأن بريدك مُسجّل سابقاً). إن فقدت رابط الدعوة أو لم يصلك، اطلب من الموارد البشرية إعادة إرسال الدعوة من لوحة الاعتمادات." }
+    : { title: "Welcome back", subtitle: "Sign in to your account", noAccount: "No account?", create: "Create one", google: "Continue with Google", or: "or", email: "Email", password: "Password", forgot: "Forgot password?", signing: "Signing in...", submit: "Sign in", err: "Invalid email or password", approverNote: "Invited as an approver? Your account already exists — use the “set password” link in the invitation email sent to you. Don't create a new account (it will fail with 403 since your email is already registered). If you lost the invite link or it never arrived, ask HR to resend the invitation from the approvals dashboard." };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const returnTo = safeReturnTo();
+  const isApprover = returnTo.includes("approvals-portal");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,6 +52,11 @@ export default function Login() {
         </>
       }
     >
+      {isApprover && (
+        <div className="mb-4 p-3 rounded-lg bg-violet-50 text-violet-800 text-xs leading-relaxed border border-violet-200">
+          {t.approverNote}
+        </div>
+      )}
       <Button variant="outline" className="w-full h-12 text-sm font-medium mb-6" onClick={handleGoogle}>
         <GoogleIcon className="w-5 h-5 mr-2" /> {t.google}
       </Button>
