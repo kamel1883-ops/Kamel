@@ -1,5 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { signToken } from "../../shared/portalToken.ts";
+import { verifyTurnstile } from "../../shared/turnstile.ts";
 
 // بوابة الموظف الذاتية — دخول برقم الهوية/الإقامة + تاريخ الميلاد فقط،
 // دون كلمة مرور أو بريد. متاح للموظفين المسجّلين والمنتمين لمنشأة فقط.
@@ -13,6 +14,11 @@ export default async function (req) {
     const birthDate = String(body.birth_date || "").trim();
     if (!nid || !birthDate)
       return Response.json({ ok: false, error: "missing" }, { status: 400 });
+
+    // التحقق البشري (Turnstile) — تحمي بوابة الدخول العامة من المحاولات الآلية
+    const captchaToken = String(body.captcha_token || "");
+    if (!captchaToken) return Response.json({ ok: false, error: "captcha_required" }, { status: 400 });
+    if (!(await verifyTurnstile(captchaToken))) return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
 
     const emps = await base44.asServiceRole.entities.Employee.filter({ national_id: nid });
     const emp = (emps || []).find((e) => (e.birth_date || "").slice(0, 10) === birthDate);

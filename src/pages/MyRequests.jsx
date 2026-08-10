@@ -10,6 +10,7 @@ import EmployeeWarnings from "@/components/EmployeeWarnings";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { Image } from "@/components/ui/image";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -133,6 +134,7 @@ export default function MyRequests() {
   // نموذج الدخول
   const [nid, setNid] = useState("");
   const [birth, setBirth] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [signingIn, setSigningIn] = useState(false);
   const [signInMsg, setSignInMsg] = useState({ type: "", text: "" });
 
@@ -167,10 +169,11 @@ export default function MyRequests() {
     e.preventDefault();
     const id = nid.trim(), bd = birth.trim();
     if (!id || !bd) return;
+    if (!captchaToken) { setSignInMsg({ type: "err", text: isAr ? "يرجى إكمال التحقق البشري أولاً." : "Please complete the human verification first." }); return; }
     setSigningIn(true); setSignInMsg({ type: "", text: "" });
     try {
       const res = await base44.functions.invoke("verifyEmployeePortal", {
-        national_id: id, birth_date: bd,
+        national_id: id, birth_date: bd, captcha_token: captchaToken,
       });
       const data = res?.data || res;
       if (data?.ok) {
@@ -281,12 +284,13 @@ export default function MyRequests() {
               <Label>{t.gBirthLabel}</Label>
               <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
             </div>
+            <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
             {signInMsg.text && (
               <div className={cn("text-sm rounded-lg p-3 leading-relaxed", signInMsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
                 {signInMsg.text}
               </div>
             )}
-            <Button type="submit" disabled={signingIn} className="gap-2">
+            <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2">
               {signingIn && <Loader2 size={16} className="animate-spin" />}
               {t.gBtn}
             </Button>
