@@ -20,13 +20,10 @@ import {
 
 const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "info@jadara-hr.com";
-// روابط حسابات التواصل — تُحدّث لاحقاً بالروابط الفعلية
+// روابط حسابات التواصل الرسمية
 const SOCIAL_LINKS = {
-  linkedin: "https://www.linkedin.com",
-  facebook: "https://www.facebook.com",
-  twitter: "https://twitter.com",
-  telegram: "https://t.me",
-  tiktok: "https://www.tiktok.com",
+  linkedin: "https://www.linkedin.com/company/جدارة-لإدارة-الموارد-البشرية",
+  twitter: "https://x.com/jadarahr",
 };
 
 const featuresAr = [
@@ -557,21 +554,9 @@ export default function Landing() {
                 className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <Linkedin size={17} className="text-white/80" />
               </a>
-              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" aria-label="Facebook"
-                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Facebook size={17} className="text-white/80" />
-              </a>
-              <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noreferrer" aria-label="Twitter"
+              <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noreferrer" aria-label="X (Twitter)"
                 className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <Twitter size={17} className="text-white/80" />
-              </a>
-              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"
-                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Music2 size={17} className="text-white/80" />
-              </a>
-              <a href={SOCIAL_LINKS.telegram} target="_blank" rel="noreferrer" aria-label="Telegram"
-                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Send size={17} className="text-white/80" />
               </a>
             </div>
           </div>
