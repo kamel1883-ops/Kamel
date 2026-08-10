@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, Play, FileCheck2, FileText, KeyRound, Users, MessageSquareText } from "lucide-react";
+import { Building2, Crown, Wallet, TrendingUp, AlertTriangle, Check, Loader2, BadgeCheck, Upload, Clock, UserPlus, RefreshCw, Pause, Play, FileCheck2, FileText, KeyRound, Users, MessageSquareText, Ban, RotateCcw } from "lucide-react";
 import InvoiceDialog from "@/components/InvoiceDialog";
 import TrialManageDialog from "@/components/TrialManageDialog";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,10 @@ export default function OwnerAdmin() {
     suspendConfirmTrial: "هل تريد إيقاف تجربة هذا العميل مؤقتاً؟ لن يستطيع الدخول للنظام حتى تُلغي الإيقاف.",
     suspendConfirmSub: "هل تريد إيقاف اشتراك هذا العميل مؤقتاً؟ لم يسدد التجديد، لن يستطيع الدخول حتى تُلغي الإيقاف.",
     resumeConfirm: "هل تريد إلغاء الإيقاف المؤقت وإعادة تفعيل هذا العميل؟",
+    cancelSub: "إلغاء نهائي",
+    cancelConfirmSub: "هل تريد إلغاء اشتراك هذا العميل نهائياً؟ سيُنقل إلى «الملغيات» ويختفي من القائمة الرئيسية. يمكن استرجاعه لاحقاً من فلتر «الملغيات».",
+    restoreSub: "استرجاع",
+    restoreConfirm: "هل تريد استرجاع هذا العميل؟ سيعود كتجربة جارية لمدة 30 يوماً.",
   } : {
     title: "Customers & subscriptions", subtitle: "Track customers, trials, annual subscriptions, renewals and revenue",
     sTotal: "Total customers", sTrial: "Trial running", sActive: "Active subscriber", sRevenue: "Annual revenue (SAR)", sEnding: "Ending within 30 days",
@@ -53,6 +57,10 @@ export default function OwnerAdmin() {
     suspendConfirmTrial: "Suspend this client's trial? They won't access the system until resumed.",
     suspendConfirmSub: "Suspend this client's subscription? They didn't renew and won't access until resumed.",
     resumeConfirm: "Resume this client and restore their access?",
+    cancelSub: "Cancel",
+    cancelConfirmSub: "Permanently cancel this client's subscription? They'll move to 'Cancelled' and disappear from the main list. You can restore them later from the 'Cancelled' filter.",
+    restoreSub: "Restore",
+    restoreConfirm: "Restore this client? They'll return as a 30-day trial.",
   };
 
   const [tenants, setTenants] = useState([]);
@@ -106,14 +114,15 @@ export default function OwnerAdmin() {
   };
 
   const filters = [
-    { id: "all", label: isAr ? "الكل" : "All", count: tenants.length },
+    { id: "all", label: isAr ? "الكل" : "All", count: tenants.filter((x) => x.status !== "cancelled").length },
     { id: "trial", label: isAr ? "تجربة جارية" : "Trial", count: tenants.filter((x) => x.status === "trial").length },
     { id: "active", label: isAr ? "مشترك فعّال" : "Active", count: tenants.filter((x) => x.status === "active").length },
     { id: "expired", label: isAr ? "موقوف" : "Suspended", count: tenants.filter((x) => x.status === "expired").length },
+    { id: "cancelled", label: isAr ? "ملغيات" : "Cancelled", count: tenants.filter((x) => x.status === "cancelled").length },
     { id: "ending", label: isAr ? "تنتهي قريباً" : "Ending soon", count: stats.endingSoon },
   ];
   const filteredTenants = tenants.filter((x) => {
-    if (filter === "all") return true;
+    if (filter === "all") return x.status !== "cancelled";
     if (filter === "ending") {
       if (isOwnerTenant(x)) return false;
       const dl = x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null;
@@ -157,6 +166,23 @@ export default function OwnerAdmin() {
         updates.subscription_end = end.toISOString().slice(0, 10);
       }
       await base44.entities.Tenant.update(tt.id, updates);
+      await load();
+    } finally { setBusyId(null); }
+  };
+  const cancelTenant = async (tt) => {
+    if (!window.confirm(t.cancelConfirmSub)) return;
+    setBusyId(tt.id);
+    try {
+      await base44.entities.Tenant.update(tt.id, { status: "cancelled", suspended_from: null });
+      await load();
+    } finally { setBusyId(null); }
+  };
+  const restoreTenant = async (tt) => {
+    if (!window.confirm(t.restoreConfirm)) return;
+    setBusyId(tt.id);
+    try {
+      const end = new Date(); end.setDate(end.getDate() + 30);
+      await base44.entities.Tenant.update(tt.id, { status: "trial", trial_end: end.toISOString().slice(0, 10), suspended_from: null });
       await load();
     } finally { setBusyId(null); }
   };
@@ -269,7 +295,9 @@ export default function OwnerAdmin() {
                           {x.status === "trial" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendTrial}</Button>)}
                           {x.status === "trial" && (<Button size="sm" variant="outline" onClick={() => openTrial(x)} className="gap-1.5 h-8"><Clock size={14} /> {t.manageTrial}</Button>)}
                           {x.status === "expired" && (<Button size="sm" variant="ghost" onClick={() => resumeTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} {t.resume}</Button>)}
-                          {x.status !== "active" && !pending && x.status !== "expired" && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
+                          {x.status !== "active" && !pending && x.status !== "expired" && x.status !== "cancelled" && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
+                          {x.status === "cancelled" && (<Button size="sm" variant="ghost" onClick={() => restoreTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} {t.restoreSub}</Button>)}
+                          {x.status !== "cancelled" && !owner && (<Button size="sm" variant="ghost" onClick={() => cancelTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />} {t.cancelSub}</Button>)}
                         </div>
                       </td>
                     </tr>
