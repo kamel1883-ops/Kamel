@@ -182,8 +182,9 @@ export default function CustomerSurveyTake() {
             </div>
 
             <div className="space-y-1.5 mt-3">
-              <Label className="text-xs text-muted-foreground">ملاحظات إضافية (اختياري)</Label>
-              <Textarea value={comment} onChange={e => setComment(e.target.value)} rows={2} maxLength={1000} />
+              <Label className="text-xs text-muted-foreground">التحسينات التي توصي بها (اختياري)</Label>
+              <Textarea value={comment} onChange={e => setComment(e.target.value)} rows={3} maxLength={1000} placeholder="ما الذي يمكننا تحسينه لخدمتك بشكل أفضل؟" />
+              <p className="text-[11px] text-emerald-700">وسنعمل جاهدين لنلبي طلباتكم.</p>
             </div>
 
             <div className="mt-4">

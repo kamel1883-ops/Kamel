@@ -284,20 +284,26 @@ export default function OwnerAdmin() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1.5">
-                          <Button size="sm" onClick={() => openSub(x)} className="gap-1.5 h-8"><Wallet size={14} /> {t.regSub}</Button>
-                          <Button size="sm" variant="outline" onClick={() => { setInvTenant(x); setInvOpen(true); }} className="gap-1.5 h-8"><FileText size={14} /> {t.invoice}</Button>
-                          <Button size="sm" variant="outline" onClick={() => { setRelTenant(x); setRelOpen(true); }} className="gap-1.5 h-8"><KeyRound size={14} /> {t.relink}</Button>
-                          <Button size="sm" variant="outline" onClick={() => sendRenewal(x)} disabled={busyId === x.id} className="gap-1.5 h-8">
-                            {busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} {t.renewOffer}
-                          </Button>
-                          {pending && (<Button size="sm" variant="secondary" onClick={() => openConfirmRenew(x)} className="gap-1.5 h-8"><FileCheck2 size={14} /> {t.confirmRenew}</Button>)}
-                          {x.status === "active" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendSub}</Button>)}
-                          {x.status === "trial" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendTrial}</Button>)}
-                          {x.status === "trial" && (<Button size="sm" variant="outline" onClick={() => openTrial(x)} className="gap-1.5 h-8"><Clock size={14} /> {t.manageTrial}</Button>)}
-                          {x.status === "expired" && (<Button size="sm" variant="ghost" onClick={() => resumeTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} {t.resume}</Button>)}
-                          {x.status !== "active" && !pending && x.status !== "expired" && x.status !== "cancelled" && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
-                          {x.status === "cancelled" && (<Button size="sm" variant="ghost" onClick={() => restoreTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} {t.restoreSub}</Button>)}
-                          {x.status !== "cancelled" && !owner && (<Button size="sm" variant="ghost" onClick={() => cancelTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />} {t.cancelSub}</Button>)}
+                          {owner ? (
+                            <Button size="sm" variant="outline" onClick={() => { setRelTenant(x); setRelOpen(true); }} className="gap-1.5 h-8"><KeyRound size={14} /> {t.relink}</Button>
+                          ) : (
+                            <>
+                            <Button size="sm" onClick={() => openSub(x)} className="gap-1.5 h-8"><Wallet size={14} /> {t.regSub}</Button>
+                            <Button size="sm" variant="outline" onClick={() => { setInvTenant(x); setInvOpen(true); }} className="gap-1.5 h-8"><FileText size={14} /> {t.invoice}</Button>
+                            <Button size="sm" variant="outline" onClick={() => { setRelTenant(x); setRelOpen(true); }} className="gap-1.5 h-8"><KeyRound size={14} /> {t.relink}</Button>
+                            <Button size="sm" variant="outline" onClick={() => sendRenewal(x)} disabled={busyId === x.id} className="gap-1.5 h-8">
+                              {busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} {t.renewOffer}
+                            </Button>
+                            {pending && (<Button size="sm" variant="secondary" onClick={() => openConfirmRenew(x)} className="gap-1.5 h-8"><FileCheck2 size={14} /> {t.confirmRenew}</Button>)}
+                            {x.status === "active" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendSub}</Button>)}
+                            {x.status === "trial" && (<Button size="sm" variant="ghost" onClick={() => suspendTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {t.suspendTrial}</Button>)}
+                            {x.status === "trial" && (<Button size="sm" variant="outline" onClick={() => openTrial(x)} className="gap-1.5 h-8"><Clock size={14} /> {t.manageTrial}</Button>)}
+                            {x.status === "expired" && (<Button size="sm" variant="ghost" onClick={() => resumeTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} {t.resume}</Button>)}
+                            {x.status !== "active" && !pending && x.status !== "expired" && x.status !== "cancelled" && (<Button size="sm" variant="outline" onClick={() => activate(x, load)} className="gap-1.5 h-8"><Crown size={14} /> {t.directActivate}</Button>)}
+                            {x.status === "cancelled" && (<Button size="sm" variant="ghost" onClick={() => restoreTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} {t.restoreSub}</Button>)}
+                            {x.status !== "cancelled" && !owner && (<Button size="sm" variant="ghost" onClick={() => cancelTenant(x)} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">{busyId === x.id ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />} {t.cancelSub}</Button>)}
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
