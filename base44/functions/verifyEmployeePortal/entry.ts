@@ -1,30 +1,47 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { verifyTurnstile } from "../../shared/turnstile.ts";
+import { signToken } from "../../shared/portalToken.ts";
 
-// التحقق من هوية موظف قبل السماح له بدخول بوابة الموظف الذاتية (عام، بدون مصادقة مستخدم)
-// محمي بـ Turnstile لمنع الإساءة الآلية — يرد ok:true فقط إذا وُجد سجل موظف بنفس الهوية والبريد
+// بوابة الموظف الذاتية — دخول برقم الهوية/الإقامة + تاريخ الميلاد فقط،
+// دون كلمة مرور أو بريد. متاح للموظفين المسجّلين والمنتمين لمنشأة فقط.
+// عند المطابقة يُوقّع رمز جلسة (HMAC) صالح 30 يوماً يُستخدم للوصول للبيانات والطلبات.
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-
-    // مطابقة الهوية + البريد مقابل سجل موظف موجود هي بحدّ ذاتها الحماية — لا حاجة لـ Turnstile.
     const nid = String(body.national_id || "").trim();
-    const email = String(body.email || "").trim().toLowerCase();
-    if (!nid || !email) return Response.json({ ok: false, error: "national_id and email are required" }, { status: 400 });
+    const birthDate = String(body.birth_date || "").trim();
+    if (!nid || !birthDate)
+      return Response.json({ ok: false, error: "missing" }, { status: 400 });
 
     const emps = await base44.asServiceRole.entities.Employee.filter({ national_id: nid });
-    const emp = (emps || []).find((e) => String(e.email || "").toLowerCase() === email);
+    const emp = (emps || []).find((e) => (e.birth_date || "").slice(0, 10) === birthDate);
     if (!emp) return Response.json({ ok: false, error: "not_linked" });
+    if (emp.status && emp.status !== "active" && emp.status !== "on_leave")
+      return Response.json({ ok: false, error: "inactive" });
+
+    const token = await signToken(emp.id);
+
+    let org = null;
+    try {
+      const orgs = await base44.asServiceRole.entities.Organization.list("-created_date", 1);
+      org = orgs?.[0] || null;
+    } catch {}
 
     return Response.json({
       ok: true,
-      has_account: Boolean(emp.user_id),
-      employee_name: emp.full_name || null,
-      position: emp.position || null,
-      department: emp.department || null,
-      status: emp.status || null,
-      email: emp.email,
+      token,
+      expires_at: Date.now() + 30 * 24 * 3600 * 1000,
+      employee: {
+        id: emp.id,
+        full_name: emp.full_name,
+        employee_number: emp.employee_number,
+        position: emp.position,
+        department: emp.department,
+        is_approver_manager: !!emp.is_approver_manager,
+        is_approver_finance: !!emp.is_approver_finance,
+      },
+      org: org ? { name: org.name, logo_url: org.logo_url } : null,
     });
   } catch (error) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });

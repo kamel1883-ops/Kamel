@@ -13,7 +13,7 @@ import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import { useI18n } from "@/lib/i18n";
 
-export default function ApprovalsPortal() {
+export default function ApprovalsPortal({ portalSession }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -76,12 +76,20 @@ export default function ApprovalsPortal() {
   const [proofFile, setProofFile] = useState(null);
   const [busy, setBusy] = useState(false);
 
+  const portalArgs = portalSession
+    ? { portal_token: portalSession.token, portal_employee_id: portalSession.employee_id }
+    : {};
+
   const load = async () => {
     setLoading(true);
     try {
-      const m = await base44.auth.me();
-      setMe(m);
-      const res = await base44.functions.invoke("approvalQueue", {});
+      if (!portalSession) {
+        const m = await base44.auth.me();
+        setMe(m);
+      } else {
+        setMe(portalSession.employee);
+      }
+      const res = await base44.functions.invoke("approvalQueue", portalArgs);
       setData(res.data);
     } catch (e) {
       setData({ error: e.message });
@@ -93,7 +101,7 @@ export default function ApprovalsPortal() {
   const role = data?.role;
 
   const call = async (payload) => {
-    await base44.functions.invoke("approvalAction", payload);
+    await base44.functions.invoke("approvalAction", { ...payload, ...portalArgs });
     setActing(null); setNote(""); setProofFile(null);
     await load();
   };

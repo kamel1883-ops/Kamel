@@ -22,7 +22,7 @@ const empty = {
   employee_note: "", employee_document_url: ""
 };
 
-export default function BusinessTripForm({ open, onClose, onSaved, employees, editing, currentUserEmployee }) {
+export default function BusinessTripForm({ open, onClose, onSaved, employees, editing, currentUserEmployee, portalCreate }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -98,6 +98,7 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
         days_count: days, per_diem_total: perDiemTotal, total_cost: total,
       };
       if (editing) await base44.entities.BusinessTrip.update(editing.id, payload);
+      else if (portalCreate) await portalCreate({ ...payload, status: "pending" });
       else await base44.entities.BusinessTrip.create({ ...payload, status: "pending" });
       onSaved?.(); onClose?.();
     } catch (error) {

@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react";
 import { differenceInDays, parseISO } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 
-export default function LeaveRequestForm({ open, onClose, onSaved, employees, currentUserEmployee }) {
+export default function LeaveRequestForm({ open, onClose, onSaved, employees, currentUserEmployee, portalCreate }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -69,14 +69,16 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
         const up = await base44.integrations.Core.UploadFile({ file: medicalFile });
         medical_url = up.file_url;
       }
-      await base44.entities.LeaveRequest.create({
+      const payload = {
         ...form,
         employee_user_id: emp?.user_id || "",
         employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
         days_count: days, is_full_clearance: form.is_full_clearance,
         medical_report_url: medical_url, status: "pending_manager",
         manager_status: "pending", hr_status: "pending", finance_status: "pending",
-      });
+      };
+      if (portalCreate) await portalCreate(payload);
+      else await base44.entities.LeaveRequest.create(payload);
       onSaved?.(); onClose?.();
     } catch (error) {
       setErr(error?.message || t.fail);

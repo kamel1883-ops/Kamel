@@ -13,7 +13,7 @@ import { formatCurrency } from "@/lib/hr";
 
 const empty = { amount: "", reason: "", installment_count: 1 };
 
-export default function LoanRequestForm({ open, onClose, onSaved, employee }) {
+export default function LoanRequestForm({ open, onClose, onSaved, employee, portalCreate }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -41,12 +41,14 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee }) {
     if (amount <= 0) return;
     setSaving(true);
     try {
-      await base44.entities.LoanRequest.create({
+      const payload = {
         employee_id: employee.id, employee_user_id: employee.user_id || "",
         employee_name: `${employee.employee_number} - ${employee.position}`,
         amount, reason: form.reason, installment_count: installments, monthly_installment: monthly,
         status: "manager_approved", manager_status: "pending", hr_status: "pending", finance_status: "pending",
-      });
+      };
+      if (portalCreate) await portalCreate(payload);
+      else await base44.entities.LoanRequest.create(payload);
       onSaved?.(); onClose?.();
     } finally {
       setSaving(false);

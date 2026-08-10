@@ -31,7 +31,7 @@ const getPosition = (t) =>
     );
   });
 
-export default function EmployeeClock({ employee, org, onChanged }) {
+export default function EmployeeClock({ employee, org, onChanged, clockApi, initialToday }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -66,16 +66,22 @@ export default function EmployeeClock({ employee, org, onChanged }) {
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
 
   const loadToday = async () => {
+    if (initialToday != null) { setToday(initialToday); setLoading(false); return; }
     setLoading(true);
     try {
-      const recs = await base44.entities.Attendance.filter({ employee_id: employee.id, date: localToday() }, "-created_date", 5);
-      setToday(recs[0] || null);
+      if (clockApi?.today) {
+        const t = await clockApi.today();
+        setToday(t || null);
+      } else {
+        const recs = await base44.entities.Attendance.filter({ employee_id: employee.id, date: localToday() }, "-created_date", 5);
+        setToday(recs[0] || null);
+      }
     } catch {
       setToday(null);
     }
     setLoading(false);
   };
-  useEffect(() => { if (employee?.id) loadToday(); }, [employee?.id]);
+  useEffect(() => { if (employee?.id) loadToday(); }, [employee?.id, clockApi, initialToday]);
 
   const radius = Number(org?.workplace_radius) || 50;
   const hasWorkplace = org && org.workplace_lat != null && org.workplace_lat !== "" && org.workplace_lng != null && org.workplace_lng !== "";
@@ -90,11 +96,15 @@ export default function EmployeeClock({ employee, org, onChanged }) {
       if (dist > radius) { setMsg({ type: "err", text: t.outRange(dist, radius) }); setBusy(false); return; }
       if (kind === "in") {
         if (today && today.check_in) { setMsg({ type: "err", text: t.alreadyIn }); setBusy(false); return; }
-        const name = `${employee.employee_number} - ${employee.position}`;
-        if (today) {
-          await base44.entities.Attendance.update(today.id, { check_in: nowHM(), status: "present", source: "portal", employee_user_id: employee.user_id });
+        if (clockApi?.clockIn) {
+          await clockApi.clockIn();
         } else {
-          await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: nowHM(), status: "present", source: "portal", work_hours: 0 });
+          const name = `${employee.employee_number} - ${employee.position}`;
+          if (today) {
+            await base44.entities.Attendance.update(today.id, { check_in: nowHM(), status: "present", source: "portal", employee_user_id: employee.user_id });
+          } else {
+            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: nowHM(), status: "present", source: "portal", work_hours: 0 });
+          }
         }
         setMsg({ type: "ok", text: t.doneIn });
       } else {
@@ -104,7 +114,11 @@ export default function EmployeeClock({ employee, org, onChanged }) {
         const d = new Date();
         const mins = d.getHours() * 60 + d.getMinutes() - (h * 60 + m);
         const wh = Math.max(0, Math.round((mins / 60) * 100) / 100);
-        await base44.entities.Attendance.update(today.id, { check_out: nowHM(), work_hours: wh, source: "portal" });
+        if (clockApi?.clockOut) {
+          await clockApi.clockOut(wh);
+        } else {
+          await base44.entities.Attendance.update(today.id, { check_out: nowHM(), work_hours: wh, source: "portal" });
+        }
         setMsg({ type: "ok", text: t.doneOut });
       }
       await loadToday(); onChanged?.();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
@@ -10,19 +10,28 @@ import EmployeeWarnings from "@/components/EmployeeWarnings";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
-import TurnstileWidget from "@/components/TurnstileWidget";
 import { Image } from "@/components/ui/image";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  CalendarPlus, Wallet, Link2, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown, ArrowRight
+  CalendarPlus, Wallet, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown, ArrowRight, ShieldCheck, Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import { computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { portalSession } from "@/lib/portalSession";
+
+const localToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+const nowHM = () => {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
 
 export default function MyRequests() {
   const { lang } = useI18n();
@@ -44,19 +53,18 @@ export default function MyRequests() {
   };
   const t = isAr ? {
     dir: "rtl", brandSub: "بوابة الموظف الذاتية", brandOnly: "خاص بالموظف", logout: "خروج",
-    loading: "جارٍ التحميل...", mustLogin: "يجب تسجيل الدخول للوصول للبوابة.",
-    gSubtitle: "بوابة الموظف الذاتية — خاص بالموظفين المرتبطين بمنشأة",
-    gTitle: "تسجيل الدخول للبوابة", gDesc: "متاح فقط للموظفين المسجلين لدى المنشآت. أدخل رقم هويتك وبريدك للتحقق قبل الدخول.",
-    gEmailLabel: "البريد الإلكتروني", gBtn: "تحقق ومتابعة الدخول",
-    gOk: "تم التحقق من هويتك، سيتم تحويلك لتسجيل الدخول...", gPending: "سجلك موجود لدى المنشأة، لكن لم يتم تفعيل حسابك بعد من الموارد البشرية.",
-    gFail: "الهوية أو البريد غير مرتبط بمنشأة — لا يمكن الدخول للبوابة.",
-    gCaptchaFail: "فشل التحقق البشري — أعد المحاولة.",
+    loading: "جارٍ التحميل...",
+    gTitle: "تسجيل الدخول للبوابة", gSubtitle: "بوابة الموظف الذاتية — خاص بالموظفين المسجّلين والمنتمين لمنشأة",
+    gDesc: "أدخل رقم هويتك الوطنية أو رقم إقامتك مع تاريخ ميلادك للتحقق. متاح فقط للموظفين المسجّلين لدى المنشآت.",
+    gIdLabel: "رقم الهوية الوطنية / الإقامة", gIdPh: "مثال: 1234567890",
+    gBirthLabel: "تاريخ الميلاد", gBtn: "تسجيل الدخول",
+    gFail: "البيانات غير مطابقة لسجل موظف مسجّل في المنشأة.",
+    gInactive: "حالتك الوظيفية لا تسمح بالدخول للبوابة.",
     gNote: "لا يمكن إنشاء حساب جديد من هنا؛ يتم إضافة الموظفين من الموارد البشرية فقط.",
-    title: "بوابة الموظف الذاتية", subtitle: "اربط حسابك بسجلك كموظف للوصول إلى طلباتك ومعلوماتك",
-    linkTitle: "ربط الحساب بالسجل الوظيفي", linkDesc: "متاح فقط للموظفين المسجلين مسبقاً لدى المنشأة.",
-    linkInfo: "سجلك كموظف موجود مسبقاً لدى الموارد البشرية. أدخل رقم هويتك الوطنية أو رقم إقامتك للربط بحسابك",
-    idLabel: "رقم الهوية الوطنية / الإقامة", idPh: "مثال: 1234567890", linkBtn: "ربط الحساب",
-    linkOk: "تم ربط حسابك بسجلك كموظف بنجاح.", linkFail: "تعذر الربط",
+    orgLabel: "المنشأة",
+    delegatedManager: "معتمد إجازات (مدير مباشر)",
+    delegatedFinance: "معتمد مالي (صرف)",
+    title: "بوابة الموظف الذاتية", subtitle: "",
     leaveBtn: "طلب إجازة", loanBtn: "طلب سلفة", tripBtn: "طلب رحلة/انتداب",
     yearsLabel: "سنوات الخدمة", yearsVal: (n) => `${n} سنة`, yearsSub: (d) => `من ${d}`,
     leaveLabel: "رصيد الإجازات", leaveVal: (n) => `${n} يوم`, leaveSub: (e, u) => `مستحق: ${e} · مستخدم: ${u}`,
@@ -76,19 +84,18 @@ export default function MyRequests() {
     selfTab: "خدماتي", approvalsTab: "الاعتمادات",
   } : {
     dir: "ltr", brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
-    loading: "Loading...", mustLogin: "You must sign in to access the portal.",
-    gSubtitle: "Employee Self‑Service Portal — for employees linked to a company only",
-    gTitle: "Portal sign‑in", gDesc: "Available only to employees already registered with an organization. Enter your national ID and email to verify before signing in.",
-    gEmailLabel: "Email", gBtn: "Verify & continue",
-    gOk: "Identity verified — redirecting you to sign in...", gPending: "Your record exists with the organization, but your account hasn't been activated by HR yet.",
-    gFail: "The ID or email is not linked to any company — portal access is not allowed.",
-    gCaptchaFail: "Human verification failed — please retry.",
+    loading: "Loading...",
+    gTitle: "Portal sign‑in", gSubtitle: "Employee Self‑Service Portal — for registered employees only",
+    gDesc: "Enter your national ID / Iqama number and your birth date to sign in. Available only to employees registered with an organization.",
+    gIdLabel: "National ID / Iqama number", gIdPh: "e.g. 1234567890",
+    gBirthLabel: "Date of birth", gBtn: "Sign in",
+    gFail: "These credentials do not match any registered employee.",
+    gInactive: "Your employment status does not allow portal access.",
     gNote: "New accounts can't be created here; employees are added by HR only.",
-    title: "Employee Self‑Service Portal", subtitle: "Link your account to your employee record to access your requests and info",
-    linkTitle: "Link account to your record", linkDesc: "Available only to employees already registered with the organization.",
-    linkInfo: "Your employee record already exists with HR. Enter your national ID or Iqama number to link it to your account",
-    idLabel: "National ID / Iqama number", idPh: "e.g. 1234567890", linkBtn: "Link account",
-    linkOk: "Your account was linked to your employee record successfully.", linkFail: "Could not link",
+    orgLabel: "Organization",
+    delegatedManager: "Leave approver (direct manager)",
+    delegatedFinance: "Finance approver (payment)",
+    title: "Employee Self‑Service Portal", subtitle: "",
     leaveBtn: "Leave request", loanBtn: "Loan request", tripBtn: "Business trip",
     yearsLabel: "Years of service", yearsVal: (n) => `${n} yr`, yearsSub: (d) => `since ${d}`,
     leaveLabel: "Leave balance", leaveVal: (n) => `${n} days`, leaveSub: (e, u) => `Entitled: ${e} · Used: ${u}`,
@@ -108,144 +115,179 @@ export default function MyRequests() {
     selfTab: "My Services", approvalsTab: "Approvals",
   };
 
-  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(() => portalSession.load());
   const [employee, setEmployee] = useState(null);
   const [org, setOrg] = useState(null);
   const [leaves, setLeaves] = useState([]);
   const [loans, setLoans] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [trips, setTrips] = useState([]);
+  const [warnings, setWarnings] = useState([]);
+  const [todayAtt, setTodayAtt] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [loanOpen, setLoanOpen] = useState(false);
   const [tripOpen, setTripOpen] = useState(false);
-  const [trips, setTrips] = useState([]);
   const [view, setView] = useState("self");
 
-  const [nationalId, setNationalId] = useState("");
-  const [linking, setLinking] = useState(false);
-  const [linkMsg, setLinkMsg] = useState({ type: "", text: "" });
-  const [gid, setGid] = useState("");
-  const [gemail, setGemail] = useState("");
-  const [gloading, setGloading] = useState(false);
-  const [gmsg, setGmsg] = useState({ type: "", text: "" });
-  const [gcaptcha, setGcaptcha] = useState("");
-  const [gcaptchaKey, setGcaptchaKey] = useState(0);
+  // نموذج الدخول
+  const [nid, setNid] = useState("");
+  const [birth, setBirth] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
+  const [signInMsg, setSignInMsg] = useState({ type: "", text: "" });
 
-  const load = async () => {
+  const load = useCallback(async (sess = session) => {
+    if (!sess) return;
     setLoading(true);
     try {
-      const me = await base44.auth.me();
-      setUser(me);
-      const [emps, orgs] = await Promise.all([
-        base44.entities.Employee.list("-created_date", 500),
-        base44.entities.Organization.list("-created_date", 1),
-      ]);
-      const emp = emps.find((e) => e.user_id === me?.id);
-      setEmployee(emp || null);
-      setOrg(orgs[0] || null);
-      if (emp) {
-        const [lv, ln, att, tr] = await Promise.all([
-          base44.entities.LeaveRequest.filter({ employee_id: emp.id }, "-created_date", 200),
-          base44.entities.LoanRequest.filter({ employee_id: emp.id }, "-created_date", 200),
-          base44.entities.Attendance.filter({ employee_id: emp.id }, "-date", 10),
-          base44.entities.BusinessTrip.filter({ employee_id: emp.id }, "-created_date", 200),
-        ]);
-        setLeaves(lv); setLoans(ln); setAttendance(att); setTrips(tr);
-      }
-    } catch {
-      setEmployee(null);
-    }
-    setLoading(false);
-  };
-  useEffect(() => { load(); }, []);
-
-  const verifyPortal = async (e) => {
-    e.preventDefault();
-    const nid = gid.trim(), em = gemail.trim();
-    if (!nid || !em || !gcaptcha) return;
-    setGloading(true); setGmsg({ type: "", text: "" });
-    try {
-      const res = await base44.functions.invoke("verifyEmployeePortal", { national_id: nid, email: em, captcha_token: gcaptcha });
+      const res = await base44.functions.invoke("portalData", {
+        token: sess.token, employee_id: sess.employee_id, action: "fetch",
+      });
       const data = res?.data || res;
-      if (data?.ok) {
-        if (data.has_account) {
-          setGmsg({ type: "ok", text: t.gOk });
-          setTimeout(() => { window.location.href = `/login?returnTo=${encodeURIComponent("/portal")}`; }, 700);
-        } else {
-          setGmsg({ type: "info", text: t.gPending });
-        }
-      } else {
-        setGmsg({ type: "err", text: data?.error === "captcha_failed" ? t.gCaptchaFail : t.gFail });
-        setGcaptcha(""); setGcaptchaKey((k) => k + 1);
+      if (!data?.ok) {
+        if (data?.error === "invalid_session") { handlePortalLogout(); return; }
+        setSignInMsg({ type: "err", text: data?.error || t.loading });
+        setLoading(false); return;
       }
-    } catch (err) {
-      setGmsg({ type: "err", text: err?.response?.data?.error || t.gFail });
-      setGcaptcha(""); setGcaptchaKey((k) => k + 1);
-    } finally { setGloading(false); }
-  };
-
-  const linkAccount = async (e) => {
-    e.preventDefault();
-    const id = nationalId.trim();
-    if (!id) return;
-    setLinking(true);
-    setLinkMsg({ type: "", text: "" });
-    try {
-      const res = await base44.functions.invoke("linkEmployee", { national_id: id });
-      const data = res?.data || res;
-      if (data?.ok) {
-        setLinkMsg({ type: "ok", text: t.linkOk });
-        setNationalId("");
-        await load();
-      } else {
-        setLinkMsg({ type: "err", text: data?.error || t.linkFail });
-      }
-    } catch (err) {
-      const msg = err?.response?.data?.error || err?.message || t.linkFail;
-      setLinkMsg({ type: "err", text: msg });
+      setEmployee(data.employee); setOrg(data.org);
+      setLeaves(data.leaves || []); setLoans(data.loans || []);
+      setAttendance(data.attendance || []); setTrips(data.trips || []);
+      setWarnings(data.warnings || []);
+      setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
+    } catch (e) {
+      setSignInMsg({ type: "err", text: e?.message || t.loading });
     } finally {
-      setLinking(false);
+      setLoading(false);
+    }
+  }, [session]);
+
+  useEffect(() => { if (session) load(session); }, [session]);
+
+  const handlePortalLogin = async (e) => {
+    e.preventDefault();
+    const id = nid.trim(), bd = birth.trim();
+    if (!id || !bd) return;
+    setSigningIn(true); setSignInMsg({ type: "", text: "" });
+    try {
+      const res = await base44.functions.invoke("verifyEmployeePortal", {
+        national_id: id, birth_date: bd,
+      });
+      const data = res?.data || res;
+      if (data?.ok) {
+        const newSession = {
+          token: data.token,
+          employee_id: data.employee.id,
+          employee: data.employee,
+          org: data.org,
+          expires_at: data.expires_at,
+        };
+        portalSession.save(newSession);
+        setSession(newSession);
+        setNid(""); setBirth("");
+      } else {
+        setSignInMsg({
+          type: "err",
+          text: data?.error === "inactive" ? t.gInactive : t.gFail,
+        });
+      }
+    } catch (err) {
+      setSignInMsg({ type: "err", text: err?.response?.data?.error || err?.message || t.gFail });
+    } finally {
+      setSigningIn(false);
     }
   };
 
-  const handleLogout = async () => {
-    await base44.auth.logout();
-    window.location.href = "/login";
+  const handlePortalLogout = () => {
+    portalSession.clear();
+    setSession(null);
+    setEmployee(null); setOrg(null);
+    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]);
+    setView("self");
+  };
+
+  const portalArgs = session
+    ? { token: session.token, employee_id: session.employee_id }
+    : {};
+
+  const portalCreateLeave = async (payload) => {
+    const res = await base44.functions.invoke("portalData", {
+      ...portalArgs, action: "create_leave", payload,
+    });
+    const data = res?.data || res;
+    if (!data?.ok) throw new Error(data?.error || "fail");
+    return data.leave;
+  };
+  const portalCreateLoan = async (payload) => {
+    const res = await base44.functions.invoke("portalData", {
+      ...portalArgs, action: "create_loan", payload,
+    });
+    const data = res?.data || res;
+    if (!data?.ok) throw new Error(data?.error || "fail");
+    return data.loan;
+  };
+  const portalCreateTrip = async (payload) => {
+    const res = await base44.functions.invoke("portalData", {
+      ...portalArgs, action: "create_trip", payload,
+    });
+    const data = res?.data || res;
+    if (!data?.ok) throw new Error(data?.error || "fail");
+    return data.trip;
+  };
+
+  const clockApi = {
+    today: async () => {
+      const res = await base44.functions.invoke("portalData", { ...portalArgs, action: "today_attendance" });
+      return res?.data?.today || null;
+    },
+    clockIn: async () => {
+      const res = await base44.functions.invoke("portalData", {
+        ...portalArgs, action: "clock_in", check_in: nowHM(),
+      });
+      const data = res?.data || res;
+      if (!data?.ok) throw new Error(data?.error || "fail");
+      setTodayAtt(data.today);
+    },
+    clockOut: async (workHours) => {
+      const res = await base44.functions.invoke("portalData", {
+        ...portalArgs, action: "clock_out", check_out: nowHM(), work_hours: workHours,
+      });
+      const data = res?.data || res;
+      if (!data?.ok) throw new Error(data?.error || "fail");
+      setTodayAtt(data.today);
+    },
   };
 
   let content;
-  if (loading) {
-    content = <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
-  } else if (!user) {
+  if (!session) {
     content = (
       <div>
         <PageHeader title={t.title} subtitle={t.gSubtitle} />
         <div className="max-w-xl mx-auto bg-white rounded-2xl border border-border p-8">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
-              <Link2 size={22} className="text-violet-600" />
+              <ShieldCheck size={22} className="text-violet-600" />
             </div>
             <div>
               <h3 className="font-semibold">{t.gTitle}</h3>
               <p className="text-xs text-muted-foreground">{t.gDesc}</p>
             </div>
           </div>
-          <form onSubmit={verifyPortal} className="space-y-4">
+          <form onSubmit={handlePortalLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <Label>{t.idLabel}</Label>
-              <Input value={gid} onChange={(e) => setGid(e.target.value)} placeholder={t.idPh} required disabled={gloading} />
+              <Label>{t.gIdLabel}</Label>
+              <Input value={nid} onChange={(e) => setNid(e.target.value)} placeholder={t.gIdPh} required disabled={signingIn} dir="ltr" />
             </div>
             <div className="space-y-1.5">
-              <Label>{t.gEmailLabel}</Label>
-              <Input type="email" value={gemail} onChange={(e) => setGemail(e.target.value)} placeholder="name@company.com" required disabled={gloading} dir="ltr" />
+              <Label>{t.gBirthLabel}</Label>
+              <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
             </div>
-            {gmsg.text && (
-              <div className={cn("text-sm rounded-lg p-3 leading-relaxed", gmsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : gmsg.type === "info" ? "bg-blue-50 text-blue-700" : "bg-rose-50 text-rose-700")}>
-                {gmsg.text}
+            {signInMsg.text && (
+              <div className={cn("text-sm rounded-lg p-3 leading-relaxed", signInMsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
+                {signInMsg.text}
               </div>
             )}
-            <Button type="submit" disabled={gloading} className="gap-2">
-              {gloading && <Loader2 size={16} className="animate-spin" />}
+            <Button type="submit" disabled={signingIn} className="gap-2">
+              {signingIn && <Loader2 size={16} className="animate-spin" />}
               {t.gBtn}
             </Button>
             <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
@@ -253,41 +295,8 @@ export default function MyRequests() {
         </div>
       </div>
     );
-  } else if (!employee) {
-    content = (
-      <div>
-        <PageHeader title={t.title} subtitle={t.subtitle} />
-        <div className="max-w-xl mx-auto bg-white rounded-2xl border border-border p-8">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
-              <Link2 size={22} className="text-violet-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold">{t.linkTitle}</h3>
-              <p className="text-xs text-muted-foreground">{t.linkDesc}</p>
-            </div>
-          </div>
-          <div className="text-sm text-muted-foreground mb-4 bg-slate-50 rounded-lg p-3 leading-relaxed">
-            {t.linkInfo} (<b className="text-foreground">{user?.email}</b>).
-          </div>
-          <form onSubmit={linkAccount} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>{t.idLabel}</Label>
-              <Input value={nationalId} onChange={(e) => setNationalId(e.target.value)} placeholder={t.idPh} required disabled={linking} />
-            </div>
-            {linkMsg.text && (
-              <div className={cn("text-sm rounded-lg p-3", linkMsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
-                {linkMsg.text}
-              </div>
-            )}
-            <Button type="submit" disabled={linking} className="gap-2">
-              {linking && <Loader2 size={16} className="animate-spin" />}
-              {t.linkBtn}
-            </Button>
-          </form>
-        </div>
-      </div>
-    );
+  } else if (loading || !employee) {
+    content = <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
   } else {
     const hireDate = employee.hire_date ? new Date(employee.hire_date) : null;
     const serviceYears = hireDate ? Math.floor((Date.now() - hireDate.getTime()) / (365.25 * 24 * 3600 * 1000)) : 0;
@@ -303,6 +312,42 @@ export default function MyRequests() {
     const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
     content = (
       <div>
+        {/* بطاقة المنشأة + الصلاحيات */}
+        <div className="bg-white rounded-2xl border border-border p-5 mb-6 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              {org?.logo_url ? (
+                <Image src={org.logo_url} fittingType="fit" className="h-14 w-14 rounded-xl bg-slate-50 p-1.5 border border-border shrink-0" />
+              ) : (
+                <div className="h-14 w-14 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                  <Building2 size={26} className="text-violet-600" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">{t.orgLabel}</div>
+                <div className="text-lg font-bold truncate">{org?.name || "—"}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {employee.employee_number} · {employee.position} · {employee.department || ""}
+                </div>
+              </div>
+            </div>
+            {(hasApprovals) && (
+              <div className="flex flex-wrap gap-2">
+                {employee.is_approver_manager && (
+                  <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    <BadgeCheck size={14} /> {t.delegatedManager}
+                  </span>
+                )}
+                {employee.is_approver_finance && (
+                  <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                    <BadgeCheck size={14} /> {t.delegatedFinance}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
         {hasApprovals && (
           <div className="flex gap-2 mb-5 border-b border-border">
             <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
@@ -310,136 +355,136 @@ export default function MyRequests() {
           </div>
         )}
         {hasApprovals && view === "approvals" ? (
-          <ApprovalsPortal />
+          <ApprovalsPortal portalSession={session} />
         ) : (
           <>
             <PageHeader
-            title={t.title}
-          subtitle={`${employee.employee_number} — ${employee.position} — ${employee.department || ""}`}
-          action={
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>
-              <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> {t.loanBtn}</Button>
-              <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>
+              title={t.title}
+              subtitle={`${employee.full_name || ""}`}
+              action={
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>
+                  <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> {t.loanBtn}</Button>
+                  <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>
+                </div>
+              }
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <InfoCard icon={Clock} label={t.yearsLabel} value={t.yearsVal(serviceYears)} sub={employee.hire_date ? t.yearsSub(employee.hire_date) : ""} />
+              <InfoCard icon={CalendarCheck} label={t.leaveLabel} value={t.leaveVal(remaining)} sub={t.leaveSub(entitled, used)} />
+              <InfoCard icon={Banknote} label={t.grossLabel} value={formatCurrency(gross)} sub={t.grossSub(employee.base_salary || 0)} />
+              <InfoCard icon={BadgeCheck} label={t.ticketLabel} value={ticketLabel} sub={employee.is_saudi ? t.ticketSaudi : t.ticketExpat} />
             </div>
-          }
-        />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <InfoCard icon={Clock} label={t.yearsLabel} value={t.yearsVal(serviceYears)} sub={employee.hire_date ? t.yearsSub(employee.hire_date) : ""} />
-          <InfoCard icon={CalendarCheck} label={t.leaveLabel} value={t.leaveVal(remaining)} sub={t.leaveSub(entitled, used)} />
-          <InfoCard icon={Banknote} label={t.grossLabel} value={formatCurrency(gross)} sub={t.grossSub(employee.base_salary || 0)} />
-          <InfoCard icon={BadgeCheck} label={t.ticketLabel} value={ticketLabel} sub={employee.is_saudi ? t.ticketSaudi : t.ticketExpat} />
-        </div>
+            <EmployeeClock employee={employee} org={org} onChanged={() => load(session)} clockApi={clockApi} initialToday={todayAtt} />
 
-        <EmployeeClock employee={employee} org={org} onChanged={load} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <SideCard title={t.detailTitle}>
+                <DLine label={t.dPosition} value={employee.position} />
+                <DLine label={t.dDept} value={employee.department} />
+                <DLine label={t.dHire} value={employee.hire_date} />
+                <DLine label={t.dService} value={t.yearsVal(serviceYears)} />
+                <DLine label={t.dContract} value={employee.contract_type === "full_time" ? t.contractFT : employee.contract_type === "part_time" ? t.contractPT : t.contractC} />
+                <DLine label={t.dBase} value={formatCurrency(employee.base_salary || 0)} />
+                <DLine label={t.dHousing} value={formatCurrency(employee.housing_allowance || 0)} />
+                <DLine label={t.dTransport} value={formatCurrency(employee.transport_allowance || 0)} />
+                <DLine label={t.dOther} value={formatCurrency(employee.other_allowances || 0)} />
+                <DLine label={t.dTotal} value={formatCurrency(gross)} strong />
+              </SideCard>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <SideCard title={t.detailTitle}>
-            <DLine label={t.dPosition} value={employee.position} />
-            <DLine label={t.dDept} value={employee.department} />
-            <DLine label={t.dHire} value={employee.hire_date} />
-            <DLine label={t.dService} value={t.yearsVal(serviceYears)} />
-            <DLine label={t.dContract} value={employee.contract_type === "full_time" ? t.contractFT : employee.contract_type === "part_time" ? t.contractPT : t.contractC} />
-            <DLine label={t.dBase} value={formatCurrency(employee.base_salary || 0)} />
-            <DLine label={t.dHousing} value={formatCurrency(employee.housing_allowance || 0)} />
-            <DLine label={t.dTransport} value={formatCurrency(employee.transport_allowance || 0)} />
-            <DLine label={t.dOther} value={formatCurrency(employee.other_allowances || 0)} />
-            <DLine label={t.dTotal} value={formatCurrency(gross)} strong />
-          </SideCard>
-
-          <div className="lg:col-span-2">
-            <SideCard title={t.attTitle}>
-              {attendance.length === 0 ? (
-                <div className="p-6 text-center text-muted-foreground text-sm">{t.attEmpty}</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-xs text-muted-foreground">
-                        <th className="text-right font-medium pb-2">{t.thDate}</th>
-                        <th className="text-right font-medium pb-2">{t.thIn}</th>
-                        <th className="text-right font-medium pb-2">{t.thOut}</th>
-                        <th className="text-right font-medium pb-2">{t.thHours}</th>
-                        <th className="text-right font-medium pb-2">{t.thStatus}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attendance.map((a) => {
-                        const st = attendanceStatusLabel(a.status);
-                        return (
-                          <tr key={a.id} className="border-t border-border">
-                            <td className="py-2">{a.date}</td>
-                            <td className="py-2">{a.check_in || "—"}</td>
-                            <td className="py-2">{a.check_out || "—"}</td>
-                            <td className="py-2">{a.work_hours || "—"}</td>
-                            <td className="py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full", st.cls)}>{st.label}</span></td>
+              <div className="lg:col-span-2">
+                <SideCard title={t.attTitle}>
+                  {attendance.length === 0 ? (
+                    <div className="p-6 text-center text-muted-foreground text-sm">{t.attEmpty}</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-xs text-muted-foreground">
+                            <th className="text-right font-medium pb-2">{t.thDate}</th>
+                            <th className="text-right font-medium pb-2">{t.thIn}</th>
+                            <th className="text-right font-medium pb-2">{t.thOut}</th>
+                            <th className="text-right font-medium pb-2">{t.thHours}</th>
+                            <th className="text-right font-medium pb-2">{t.thStatus}</th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </SideCard>
-          </div>
-        </div>
+                        </thead>
+                        <tbody>
+                          {attendance.map((a) => {
+                            const st = attendanceStatusLabel(a.status);
+                            return (
+                              <tr key={a.id} className="border-t border-border">
+                                <td className="py-2">{a.date}</td>
+                                <td className="py-2">{a.check_in || "—"}</td>
+                                <td className="py-2">{a.check_out || "—"}</td>
+                                <td className="py-2">{a.work_hours || "—"}</td>
+                                <td className="py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full", st.cls)}>{st.label}</span></td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </SideCard>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Section title={t.leavesTitle}>
-            {leaves.length === 0 ? <Empty text={t.noLeaves} /> : leaves.map((r) => (
-              <Row key={r.id}>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm">{leaveTypeLabel(r.leave_type)}</span>
-                    {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
-                    {r.medical_report_url && (
-                      <a href={r.medical_report_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{t.medReport}</a>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
-                </div>
-                <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
-              </Row>
-            ))}
-          </Section>
-          <Section title={t.loansTitle}>
-            {loans.length === 0 ? <Empty text={t.noLoans} /> : loans.map((r) => (
-              <Row key={r.id}>
-                <div>
-                  <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(r.monthly_installment)}</div>
-                </div>
-                <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
-              </Row>
-            ))}
-          </Section>
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Section title={t.leavesTitle}>
+                {leaves.length === 0 ? <Empty text={t.noLeaves} /> : leaves.map((r) => (
+                  <Row key={r.id}>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{leaveTypeLabel(r.leave_type)}</span>
+                        {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
+                        {r.medical_report_url && (
+                          <a href={r.medical_report_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{t.medReport}</a>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
+                    </div>
+                    <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
+                  </Row>
+                ))}
+              </Section>
+              <Section title={t.loansTitle}>
+                {loans.length === 0 ? <Empty text={t.noLoans} /> : loans.map((r) => (
+                  <Row key={r.id}>
+                    <div>
+                      <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(r.monthly_installment)}</div>
+                    </div>
+                    <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
+                  </Row>
+                ))}
+              </Section>
+            </div>
 
-        <div className="mt-6">
-          <Section title={t.tripsTitle}>
-            {trips.length === 0 ? <Empty text={t.noTrips} /> : trips.map((r) => {
-              const st = tripStatus[r.status] || tripStatus.pending;
-              return (
-                <Row key={r.id}>
-                  <div>
-                    <div className="font-medium text-sm">{r.trip_type === "external" ? t.tripExternal : t.tripInternal} — {r.destination || "—"}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
-                  </div>
-                  <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", st.cls)}>{st.label}</span>
-                </Row>
-              );
-            })}
-          </Section>
-        </div>
+            <div className="mt-6">
+              <Section title={t.tripsTitle}>
+                {trips.length === 0 ? <Empty text={t.noTrips} /> : trips.map((r) => {
+                  const st = tripStatus[r.status] || tripStatus.pending;
+                  return (
+                    <Row key={r.id}>
+                      <div>
+                        <div className="font-medium text-sm">{r.trip_type === "external" ? t.tripExternal : t.tripInternal} — {r.destination || "—"}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
+                      </div>
+                      <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", st.cls)}>{st.label}</span>
+                    </Row>
+                  );
+                })}
+              </Section>
+            </div>
 
-        <LeaveRequestForm open={leaveOpen} onClose={() => setLeaveOpen(false)} onSaved={load} employees={[employee]} currentUserEmployee={employee} />
-        <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={load} employee={employee} />
-        <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={load} employees={[employee]} currentUserEmployee={employee} />
+            <LeaveRequestForm open={leaveOpen} onClose={() => setLeaveOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateLeave} />
+            <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={() => load(session)} employee={employee} portalCreate={portalCreateLoan} />
+            <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateTrip} />
 
-        <div className="mt-6">
-          <EmployeeWarnings employee={employee} />
-        </div>
+            <div className="mt-6">
+              <EmployeeWarnings employee={employee} warnings={warnings} />
+            </div>
           </>
         )}
       </div>
@@ -456,7 +501,7 @@ export default function MyRequests() {
               {t.brandSub}<br />
               <span className="text-white/40">{t.brandOnly}</span>
             </div>
-            {employee && org && (
+            {session && org && (
               <div className="hidden sm:flex items-center gap-2 ps-3 border-s border-white/10">
                 {org.logo_url ? <Image src={org.logo_url} fittingType="fit" className="h-8 w-8 rounded bg-white/90 p-0.5" /> : null}
                 <span className="text-sm font-medium text-white/90 truncate max-w-[160px]" title={org.name}>{org.name}</span>
@@ -468,8 +513,8 @@ export default function MyRequests() {
               <ArrowRight size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {isAr ? "العودة للموقع" : "Back to site"}
             </Link>
             <LanguageToggle />
-            {user && (
-              <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+            {session && (
+              <button onClick={handlePortalLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
                 <LogOut size={18} /> {t.logout}
               </button>
             )}

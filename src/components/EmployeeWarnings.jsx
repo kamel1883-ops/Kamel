@@ -5,7 +5,7 @@ import { WARNING_LEVELS, categoryById, levelById } from "@/lib/laborPolicy";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-export default function EmployeeWarnings({ employee }) {
+export default function EmployeeWarnings({ employee, warnings: propWarnings }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -22,6 +22,7 @@ export default function EmployeeWarnings({ employee }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (propWarnings) { setWarnings(propWarnings); setLoading(false); return; }
     if (!employee?.id) { setLoading(false); return; }
     let on = true;
     (async () => {
@@ -32,7 +33,7 @@ export default function EmployeeWarnings({ employee }) {
       if (on) setLoading(false);
     })();
     return () => { on = false; };
-  }, [employee?.id]);
+  }, [employee?.id, propWarnings]);
 
   const counts = WARNING_LEVELS.map((l) => ({ ...l, n: warnings.filter((w) => w.warning_level === l.id).length }));
 
