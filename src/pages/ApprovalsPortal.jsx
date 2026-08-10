@@ -18,8 +18,9 @@ export default function ApprovalsPortal() {
   const isAr = lang === "ar";
   const t = isAr ? {
     mTitle: "موافقات الإجازات", mSub: "اعتماد طلبات إجازات مرؤوسيك المباشرين",
-    fTitle: "الموافقات المالية", fSub: "اعتماد الصرف النهائي للإجازات والسلف والانتدابات",
+    fTitle: "الموافقات المالية", fSub: "اعتماد الصرف النهائي للإجازات والسلف والانتدابات ومخالصات نهاية الخدمة",
     loading: "جارٍ التحميل...", tabLeaves: (n) => `الإجازات (${n})`, tabLoans: (n) => `السلف (${n})`, tabTrips: (n) => `الانتدابات (${n})`,
+    tabSettlements: (n) => `نهاية الخدمة (${n})`,
     approve: "موافقة", reject: "رفض", pay: "تأكيد الصرف",
     days: (s, e, n) => `${s} ← ${e} · ${n} يوم`,
     loan: "سلفة", loanLine: (v, r) => `${formatCurrency(v)} · ${r || ""}`,
@@ -30,6 +31,8 @@ export default function ApprovalsPortal() {
     leavePay: (v) => <>تصفية إجازة — تعويض التذكرة: <b className="text-foreground">{formatCurrency(v)}</b></>,
     loanPay: (v) => <>سلفة بقيمة <b className="text-foreground">{formatCurrency(v)}</b></>,
     tripPay: () => <>صرف انتداب</>,
+    settlePay: (v) => <>مخالصة نهاية خدمة بقيمة <b className="text-foreground">{formatCurrency(v)}</b></>,
+    payNoteSettle: "عند التأكيد يُسجّل إثبات التحويل ويُقفل الموظف نهائياً (حالته تُحدّث إلى منتهي/مستقيل).",
     finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
     proof: "إثبات التحويل (صورة)",
     payNote: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل على الطلب.", confirmPay: "تأكيد الصرف",
@@ -40,8 +43,9 @@ export default function ApprovalsPortal() {
     noLink: "لم يتم ربط حسابك بسجل موظف بعد — تواصل مع الموارد البشرية.",
   } : {
     mTitle: "Leave approvals", mSub: "Approve leave requests of your direct subordinates",
-    fTitle: "Finance approvals", fSub: "Final payment approval for leaves, loans and trips",
+    fTitle: "Finance approvals", fSub: "Final payment approval for leaves, loans, trips and end-of-service settlements",
     loading: "Loading...", tabLeaves: (n) => `Leaves (${n})`, tabLoans: (n) => `Loans (${n})`, tabTrips: (n) => `Trips (${n})`,
+    tabSettlements: (n) => `End of service (${n})`,
     approve: "Approve", reject: "Reject", pay: "Confirm payment",
     days: (s, e, n) => `${s} ← ${e} · ${n} days`,
     loan: "Loan", loanLine: (v, r) => `${formatCurrency(v)} · ${r || ""}`,
@@ -52,6 +56,8 @@ export default function ApprovalsPortal() {
     leavePay: (v) => <>Leave clearance — ticket compensation: <b className="text-foreground">{formatCurrency(v)}</b></>,
     loanPay: (v) => <>Loan of <b className="text-foreground">{formatCurrency(v)}</b></>,
     tripPay: () => <>Trip payout</>,
+    settlePay: (v) => <>End-of-service settlement of <b className="text-foreground">{formatCurrency(v)}</b></>,
+    payNoteSettle: "On confirmation the transfer proof is recorded and the employee is closed permanently (status set to terminated/resigned).",
     finNote: "Finance notes", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
     proof: "Transfer proof (image)",
     payNote: "On confirmation the process closes and the transfer proof is recorded.", confirmPay: "Confirm payment",
@@ -208,6 +214,7 @@ export default function ApprovalsPortal() {
   const leaves = data?.leaves || [];
   const loans = data?.loans || [];
   const trips = data?.trips || [];
+  const settlements = data?.settlements || [];
 
   const leaveActions = (r) => {
     const a = [{ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("leaves", r) },
@@ -228,6 +235,12 @@ export default function ApprovalsPortal() {
     if (r.approval_pdf_url) a.push({ label: t.tripDoc, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.approval_pdf_url });
     return a;
   };
+  const settlementActions = (r) => {
+    const a = [{ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("settlements", r) },
+               { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("settlements", r) }];
+    if (r.finance_proof_url) a.push({ label: t.finProof, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.finance_proof_url });
+    return a;
+  };
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="animate-fade-in">
@@ -237,6 +250,7 @@ export default function ApprovalsPortal() {
           <TabsTrigger value="leaves">{t.tabLeaves(leaves.length)}</TabsTrigger>
           <TabsTrigger value="loans">{t.tabLoans(loans.length)}</TabsTrigger>
           <TabsTrigger value="trips">{t.tabTrips(trips.length)}</TabsTrigger>
+          {settlements.length > 0 && <TabsTrigger value="settlements">{t.tabSettlements(settlements.length)}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="leaves">
@@ -268,6 +282,37 @@ export default function ApprovalsPortal() {
             ))}
           </div>
         </TabsContent>
+
+        <TabsContent value="settlements">
+          <div className="space-y-3">
+            {settlements.length === 0 ? <Empty /> : settlements.map((r) => (
+              <div key={r.id} className="bg-white rounded-2xl border border-border p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{r.employee_name || "—"}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{isAr ? "نهاية الخدمة" : "End of service"}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {isAr ? "إجمالي المخالصة: " : "Total settlement: "}<b className="text-foreground">{formatCurrency(r.total_settlement)}</b> · {r.last_working_date || ""}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                    {settlementActions(r).map((a, i) => a.href ? (
+                      <a key={i} href={a.href} target="_blank" rel="noreferrer" className={cn("inline-flex items-center gap-1 h-8 px-3 rounded-md text-xs font-medium", a.cls)}>
+                        <Download size={14} /> {a.label}
+                      </a>
+                    ) : (
+                      <Button key={i} size="sm" onClick={a.onClick} disabled={busy} className={cn("h-8 text-xs gap-1", a.cls)}>
+                        {a.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* رفض */}
@@ -294,7 +339,7 @@ export default function ApprovalsPortal() {
           {acting && (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
-                {acting.type === "leaves" ? t.leavePay(acting.req.ticket_amount || 0) : acting.type === "loans" ? t.loanPay(acting.req.amount) : t.tripPay()}
+                {acting.type === "leaves" ? t.leavePay(acting.req.ticket_amount || 0) : acting.type === "loans" ? t.loanPay(acting.req.amount) : acting.type === "settlements" ? t.settlePay(acting.req.total_settlement) : t.tripPay()}
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.finNote}</Label>
@@ -304,7 +349,7 @@ export default function ApprovalsPortal() {
                 <Label className="text-xs font-medium text-muted-foreground">{t.proof}</Label>
                 <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
               </div>
-              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{t.payNote}</div>
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{acting.type === "settlements" ? t.payNoteSettle : t.payNote}</div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setActing(null)}>{t.cancel}</Button>
                 <Button onClick={confirmFinance} disabled={busy} className="gap-1 bg-blue-600 hover:bg-blue-700">

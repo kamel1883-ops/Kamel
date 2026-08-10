@@ -107,6 +107,30 @@ export default async function(req: Request): Promise<Response> {
         }
         return Response.json({ ok: true });
       }
+
+      if (type === 'settlements') {
+        const r = await base44.asServiceRole.entities.Settlement.get(id);
+        if (r.status !== 'awaiting_finance')
+          return Response.json({ error: 'الطلب ليس في مرحلة الصرف' }, { status: 400 });
+        if (action === 'confirm') {
+          await base44.asServiceRole.entities.Settlement.update(id, {
+            finance_status: 'paid', finance_id: user.id, finance_name: user.full_name,
+            finance_paid_date: today(), finance_proof_url: proofUrl, finance_proof_date: today(),
+            finance_note: note, status: 'completed',
+          });
+          if (r.employee_id) {
+            const empStatus = r.reason === 'resignation' ? 'resigned' : 'terminated';
+            await base44.asServiceRole.entities.Employee.update(r.employee_id, {
+              status: empStatus, termination_reason: r.reason, termination_date: r.last_working_date,
+            });
+          }
+        } else {
+          await base44.asServiceRole.entities.Settlement.update(id, {
+            finance_status: 'rejected', finance_note: note, status: 'rejected',
+          });
+        }
+        return Response.json({ ok: true });
+      }
     }
 
     return Response.json({ error: 'غير مصرح' }, { status: 403 });

@@ -44,16 +44,18 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // finance
-    const [allLeaves, allLoans, allTrips] = await Promise.all([
+    const [allLeaves, allLoans, allTrips, allSettlements] = await Promise.all([
       base44.asServiceRole.entities.LeaveRequest.list('-created_date', 500),
       base44.asServiceRole.entities.LoanRequest.list('-created_date', 500),
       base44.asServiceRole.entities.BusinessTrip.list('-created_date', 500),
+      base44.asServiceRole.entities.Settlement.list('-created_date', 500),
     ]);
     const finStatuses = ['awaiting_finance', 'hr_approved'];
     const leaves = (allLeaves || []).filter((l) => finStatuses.includes(l.status));
     const loans = (allLoans || []).filter((l) => finStatuses.includes(l.status));
     const trips = (allTrips || []).filter((t) => t.status === 'awaiting_finance');
-    return Response.json({ role: 'finance', leaves, loans, trips });
+    const settlements = (allSettlements || []).filter((s) => s.status === 'awaiting_finance');
+    return Response.json({ role: 'finance', leaves, loans, trips, settlements });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

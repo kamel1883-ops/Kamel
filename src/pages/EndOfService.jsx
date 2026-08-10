@@ -8,10 +8,15 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2 } from "lucide-react";
+import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2, Loader2, Check, Upload, Send, Wallet, X } from "lucide-react";
 import { computeSettlement, reasonMeta, terminationReasons, todayISO, isSaudiNationalId } from "@/lib/eos";
 import { formatCurrency } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 export default function EndOfService() {
   const { lang } = useI18n();
@@ -25,6 +30,15 @@ export default function EndOfService() {
     loading: "جارٍ التحميل...", preview: "معاينة المخالصة", savePrint: "حفظ وطباعة", saving: "جارٍ الحفظ...", printOnly: "طباعة فقط",
     savedH: "المخالصات المحفوظة", print: "طباعة",
     note: "نصف شهر عن كل سنة من أول 5 سنوات ثم شهر كامل عن كل سنة بعدها. الاستقالة تُخفض المكافأة حسب المدة (مادة 85). الفصل لأسباب مشروعة (مادة 80) لا يستحق مكافأة. المخالصة تحسب مكافأة نهاية الخدمة + تصفية رصيد الإجازات المتبقي، وقيمة التذكرة مفتوحة (اختيارية) يضيفها المسؤول يدوياً إن رغبت الشركة. تُطبع المخالصة بشعار المنشأة المُعرّف في الإعدادات.",
+    eosFlow: "مسار الموافقة: الموارد البشرية ← المالية (تأكيد السداد بإثبات) ← إقفال الموظف نهائياً",
+    stDraft: "مسودة", stFin: "بانتظار المالية", stDone: "تم الصرف وإقفال الموظف", stRejected: "مرفوض", stSettled: "مُحوّلة",
+    hrApprove: "اعتماد وتحويل للمالية", pay: "تأكيد الصرف + إثبات", reject: "رفض",
+    hrDialogTitle: "اعتماد مخالصة — الموارد البشرية", finDialogTitle: "صرف المخالصة — المالية/المحاسبة",
+    rejectTitle: "رفض المخالصة", cancel: "إلغاء",
+    confirmPay: "تأكيد الصرف النهائي", confirmReject: "تأكيد الرفض",
+    noteLabel: "ملاحظات", proof: "إثبات التحويل (صورة/ملف)", proofLink: "إثبات التحويل",
+    hrWarn: "عند الاعتماد تُحوّل المخالصة إلى المالية لإثبات السداد ثم الإقفال النهائي.",
+    payWarn: "عند التأكيد يُسجّل إثبات التحويل ويُقفل الموظف نهائياً (حالته تُحدّث إلى منتهي/مستقيل).",
   } : {
     title: "End of service", subtitle: "EOS award calculator per Saudi Labor Law (Art. 74 to 85) — all termination reasons and matching articles, with leave balance and ticket compensation",
     chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date",
@@ -34,6 +48,15 @@ export default function EndOfService() {
     loading: "Loading...", preview: "Settlement preview", savePrint: "Save & print", saving: "Saving...", printOnly: "Print only",
     savedH: "Saved settlements", print: "Print",
     note: "Half a month per year for the first 5 years, then a full month per year. Resignation reduces the award by tenure (Art. 85). Dismissal for cause (Art. 80) is not entitled. The settlement computes EOS + remaining leave balance; ticket value is open (optional) and added manually by the admin if the company wishes. Printed with the organization logo set in settings.",
+    eosFlow: "Approval flow: HR ← Finance (settlement with proof) ← close the employee permanently",
+    stDraft: "Draft", stFin: "Awaiting finance", stDone: "Paid & employee closed", stRejected: "Rejected", stSettled: "Transferred",
+    hrApprove: "Approve & send to finance", pay: "Confirm settlement + proof", reject: "Reject",
+    hrDialogTitle: "Settlement approval — HR", finDialogTitle: "Settlement payout — Finance/Accounting",
+    rejectTitle: "Reject settlement", cancel: "Cancel",
+    confirmPay: "Confirm final settlement", confirmReject: "Confirm rejection",
+    noteLabel: "Notes", proof: "Transfer proof (image/file)", proofLink: "Transfer proof",
+    hrWarn: "On approval the settlement moves to finance for payment proof and final closure.",
+    payWarn: "On confirmation the transfer proof is recorded and the employee is closed permanently (status set to terminated/resigned).",
   };
 
   const [employees, setEmployees] = useState([]);
@@ -46,6 +69,11 @@ export default function EndOfService() {
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [settlements, setSettlements] = useState([]);
+  const [me, setMe] = useState(null);
+  const [acting, setActing] = useState(null);
+  const [note, setNote] = useState("");
+  const [proofFile, setProofFile] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -57,6 +85,7 @@ export default function EndOfService() {
     setEmployees(emps.filter((e) => e.base_salary > 0));
     setOrg(orgs[0]);
     setSettlements(sets);
+    try { setMe(await base44.auth.me()); } catch {}
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -92,6 +121,68 @@ export default function EndOfService() {
   };
   const reprint = (rec) => { setPreview({ ...rec, employee_name_full: rec.employee_name }); setTimeout(() => window.print(), 200); };
   const removeSettlement = async (id) => { await base44.entities.Settlement.delete(id); load(); };
+
+  const settBadge = (status) => {
+    const map = {
+      draft: { label: t.stDraft, cls: "bg-slate-100 text-slate-600" },
+      awaiting_finance: { label: t.stFin, cls: "bg-amber-100 text-amber-700" },
+      completed: { label: t.stDone, cls: "bg-emerald-100 text-emerald-700" },
+      rejected: { label: t.stRejected, cls: "bg-rose-100 text-rose-600" },
+      settled: { label: t.stSettled, cls: "bg-blue-100 text-blue-700" },
+    };
+    return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
+  };
+
+  const openEosHr = (s) => { setActing({ req: s, action: "eoshr" }); setNote(""); };
+  const confirmEosHr = async () => {
+    if (!acting) return;
+    setBusy(true);
+    try {
+      const s = acting.req;
+      await base44.entities.Settlement.update(s.id, {
+        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
+        status: "awaiting_finance", finance_status: "pending",
+      });
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); load();
+  };
+
+  const openEosFin = (s) => { setActing({ req: s, action: "eosfin" }); setNote(""); setProofFile(null); };
+  const confirmEosFin = async () => {
+    if (!acting) return;
+    setBusy(true);
+    let url = "";
+    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    try {
+      const s = acting.req;
+      await base44.entities.Settlement.update(s.id, {
+        finance_status: "paid", finance_id: me?.id, finance_name: me?.full_name,
+        finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(), finance_note: note,
+        status: "completed",
+      });
+      if (s.employee_id) {
+        const empStatus = s.reason === "resignation" ? "resigned" : "terminated";
+        await base44.entities.Employee.update(s.employee_id, {
+          status: empStatus, termination_reason: s.reason, termination_date: s.last_working_date,
+        });
+      }
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+  };
+
+  const openEosReject = (s) => { setActing({ req: s, action: "eosreject" }); setNote(""); };
+  const confirmEosReject = async () => {
+    if (!acting) return;
+    setBusy(true);
+    try {
+      const s = acting.req;
+      const stage = s.status === "awaiting_finance" ? "finance" : "hr";
+      await base44.entities.Settlement.update(s.id, {
+        status: "rejected", [`${stage}_status`]: "rejected", [`${stage}_note`]: note,
+      });
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); load();
+  };
 
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
@@ -158,20 +249,43 @@ export default function EndOfService() {
 
           {settlements.length > 0 && (
             <div>
+              <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3 mb-3 no-print">{t.eosFlow}</div>
               <h3 className="text-sm font-semibold mb-3 no-print">{t.savedH}</h3>
               <div className="space-y-2 no-print">
-                {settlements.map((s) => (
-                  <div key={s.id} className="bg-white rounded-xl border border-border p-3 flex items-center justify-between gap-3">
-                    <div>
-                      <div className="font-medium text-sm">{s.employee_name}</div>
-                      <div className="text-xs text-muted-foreground">{s.last_working_date} • {reasonMeta(s.reason).label} • {formatCurrency(s.total_settlement)}</div>
+                {settlements.map((s) => {
+                  const b = settBadge(s.status);
+                  return (
+                    <div key={s.id} className="bg-white rounded-xl border border-border p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm">{s.employee_name}</div>
+                          <div className="text-xs text-muted-foreground">{s.last_working_date} • {reasonMeta(s.reason).label} • {formatCurrency(s.total_settlement)}</div>
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", b.cls)}>{b.label}</span>
+                            {s.hr_name && <span className="text-xs text-muted-foreground">{s.hr_name} • {s.hr_date}</span>}
+                            {s.finance_proof_url && <a href={s.finance_proof_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{isAr ? t.proofLink : t.proofLink}</a>}
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0 flex-wrap justify-end">
+                          <Button size="sm" variant="outline" onClick={() => reprint(s)} className="gap-1 h-7"><Printer size={14} /> {t.print}</Button>
+                          {s.status === "draft" && (
+                            <>
+                              <Button size="sm" onClick={() => openEosHr(s)} className="gap-1 h-7 bg-violet-600 hover:bg-violet-700"><Send size={13} /> {t.hrApprove}</Button>
+                              <Button size="sm" variant="ghost" onClick={() => openEosReject(s)} className="h-7 text-rose-500">{t.reject}</Button>
+                            </>
+                          )}
+                          {s.status === "awaiting_finance" && (
+                            <>
+                              <Button size="sm" onClick={() => openEosFin(s)} className="gap-1 h-7 bg-blue-600 hover:bg-blue-700"><Wallet size={13} /> {t.pay}</Button>
+                              <Button size="sm" variant="ghost" onClick={() => openEosReject(s)} className="h-7 text-rose-500">{t.reject}</Button>
+                            </>
+                          )}
+                          <Button size="sm" variant="ghost" onClick={() => removeSettlement(s.id)} className="h-7 text-rose-500"><Trash2 size={14} /></Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="outline" onClick={() => reprint(s)} className="gap-1 h-7"><Printer size={14} /> {t.print}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => removeSettlement(s.id)} className="h-7 text-rose-500"><Trash2 size={14} /></Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -182,6 +296,72 @@ export default function EndOfService() {
           </div>
         </div>
       )}
+
+      <Dialog open={acting?.action === "eoshr"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.hrDialogTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">{acting.req.employee_name} • {formatCurrency(acting.req.total_settlement)}</div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.noteLabel}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+              </div>
+              <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.hrWarn}</div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmEosHr} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.hrApprove}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={acting?.action === "eosfin"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.finDialogTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">{acting.req.employee_name} • {formatCurrency(acting.req.total_settlement)}</div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.noteLabel}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.proof}</Label>
+                <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
+              </div>
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{t.payWarn}</div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmEosFin} disabled={busy} className="gap-1 bg-blue-600 hover:bg-blue-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.confirmPay}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={acting?.action === "eosreject"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.rejectTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-3">
+              <Label className="text-xs font-medium text-muted-foreground">{t.noteLabel}</Label>
+              <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button variant="destructive" onClick={confirmEosReject} disabled={busy} className="gap-1">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />} {t.confirmReject}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
