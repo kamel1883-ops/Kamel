@@ -139,7 +139,7 @@ export default function MyRequests() {
   useEffect(() => {
     if (didInitView.current || !employee) return;
     didInitView.current = true;
-    setView(employee.role_level === "owner" ? "owner" : "self");
+    setView("self");
   }, [employee]);
 
   // نموذج الدخول
@@ -176,8 +176,7 @@ export default function MyRequests() {
 
   useEffect(() => {
     if (!session) return;
-    // المالك يُعرض مباشرة من بيانات الجلسة في سلسلة العرض — لا جلب ولا حالة وسيطة ولا قفز.
-    if (session.employee?.role_level === "owner") return;
+    // المالك يمر بنفس مسار الموظف (جلب إجازات/سلف/حضور…) ثم تظهر له تبويبات تشمل بوابة المالك.
     load(session);
   }, [session, load]);
 
@@ -324,8 +323,6 @@ export default function MyRequests() {
         </div>
       </div>
     );
-  } else if (session.employee?.role_level === "owner") {
-    content = <OwnerPortalPanel session={session} employee={session.employee} />;
   } else if (loading || !employee) {
     content = <div className="min-h-[70vh] flex items-center justify-center gap-2 text-muted-foreground"><Loader2 className="animate-spin" size={20} /> {t.loading}</div>;
   } else {
