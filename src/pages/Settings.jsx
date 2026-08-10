@@ -131,8 +131,11 @@ export default function SettingsPage() {
   const save = async () => {
     setSaving(true);
     try {
-      if (org.id) { await base44.entities.Organization.update(org.id, org); }
-      else { const created = await base44.entities.Organization.create(org); setOrg({ ...org, ...created }); }
+      const payload = { ...org };
+      payload.workplace_lat = payload.workplace_lat === "" || payload.workplace_lat === null ? null : Number(payload.workplace_lat);
+      payload.workplace_lng = payload.workplace_lng === "" || payload.workplace_lng === null ? null : Number(payload.workplace_lng);
+      if (org.id) { await base44.entities.Organization.update(org.id, payload); }
+      else { const created = await base44.entities.Organization.create(payload); setOrg({ ...org, ...created }); }
     } finally { setSaving(false); }
   };
 
