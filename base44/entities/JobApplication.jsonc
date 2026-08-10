@@ -1,0 +1,105 @@
+{
+  "name": "JobApplication",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0648\u0638\u064a\u0641\u0629"
+    },
+    "job_title": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0648\u0638\u064a\u0641\u0629"
+    },
+    "full_name": {
+      "type": "string",
+      "title": "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644"
+    },
+    "email": {
+      "type": "string",
+      "title": "\u0627\u0644\u0628\u0631\u064a\u062f"
+    },
+    "phone": {
+      "type": "string",
+      "title": "\u0627\u0644\u0647\u0627\u062a\u0641"
+    },
+    "nationality": {
+      "type": "string",
+      "title": "\u0627\u0644\u062c\u0646\u0633\u064a\u0629"
+    },
+    "qualifications": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0624\u0647\u0644\u0627\u062a"
+    },
+    "experience_years": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0633\u0646\u0648\u0627\u062a \u0627\u0644\u062e\u0628\u0631\u0629"
+    },
+    "cv_url": {
+      "type": "string",
+      "title": "\u0627\u0644\u0633\u064a\u0631\u0629 \u0627\u0644\u0630\u0627\u062a\u064a\u0629"
+    },
+    "notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a \u0627\u0644\u0645\u062a\u0642\u062f\u0645"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "applied",
+        "screened",
+        "interview",
+        "hired",
+        "rejected"
+      ],
+      "default": "applied",
+      "title": "\u0627\u0644\u062d\u0627\u0644\u0629"
+    },
+    "applied_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u062a\u0642\u062f\u064a\u0645"
+    },
+    "interview_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0629"
+    },
+    "interview_notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a \u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0629"
+    },
+    "hired_date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u062a\u0639\u064a\u064a\u0646"
+    },
+    "reject_reason": {
+      "type": "string",
+      "title": "\u0633\u0628\u0628 \u0627\u0644\u0631\u0641\u0636"
+    }
+  },
+  "required": [
+    "job_id",
+    "full_name",
+    "status"
+  ],
+  "rls": {
+    "create": null,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

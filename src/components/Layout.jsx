@@ -34,7 +34,7 @@ const appNav = [
   { to: "/warnings", ar: "إدارة الإنذارات", en: "Warnings", icon: ShieldAlert },
   { to: "/exit-interviews", ar: "مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare },
   { to: "/surveys", ar: "الاستبيانات", en: "Surveys", icon: ClipboardList },
-  { to: "/analytics", ar: "التحليلات", en: "Analytics", icon: BarChart3 },
+  { to: "/analytics", ar: "إدارة التحليلات والتقارير", en: "Analytics & Reports", icon: BarChart3 },
   { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
 ];
 

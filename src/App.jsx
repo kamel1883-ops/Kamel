@@ -30,6 +30,7 @@ import OrgStructure from "@/pages/OrgStructure";
 import WorkforcePlanning from "@/pages/WorkforcePlanning";
 import Recruitment from "@/pages/Recruitment";
 import Training from "@/pages/Training";
+import JobApply from "@/pages/public/JobApply";
 import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import Landing from "@/pages/Landing";
@@ -58,7 +59,7 @@ const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const path = window.location.pathname;
   const isRestricted = user && user.role !== "admin";
-  const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog");
+  const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog") || path.startsWith("/jobs");
 
   if (!isPublicPage && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
@@ -94,6 +95,7 @@ const AuthenticatedApp = () => {
         <Route path="/contracts" element={<ContractsPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogArticle />} />
+        <Route path="/jobs/:id" element={<JobApply />} />
         <Route path="/portal" element={<MyRequests />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
