@@ -16,6 +16,7 @@ import Approvals from "@/pages/Approvals";
 import Leaves from "@/pages/Leaves";
 import BusinessTrips from "@/pages/BusinessTrips";
 import MyRequests from "@/pages/MyRequests";
+import OwnerPortal from "@/pages/OwnerPortal";
 import ExitInterviews from "@/pages/ExitInterviews";
 import Surveys from "@/pages/Surveys";
 import Warnings from "@/pages/Warnings";
@@ -55,7 +56,7 @@ import BlogArticle from "@/pages/BlogArticle";
 import CustomerSurveys from "@/pages/CustomerSurveys";
 import CustomerSurveyTake from "@/pages/public/CustomerSurveyTake";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -100,6 +101,7 @@ const AuthenticatedApp = () => {
         <Route path="/jobs/:id" element={<JobApply />} />
         <Route path="/c/:surveyId" element={<CustomerSurveyTake />} />
         <Route path="/portal" element={<MyRequests />} />
+        <Route path="/owner-portal" element={<OwnerPortal />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );

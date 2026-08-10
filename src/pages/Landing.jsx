@@ -128,7 +128,7 @@ export default function Landing() {
 
   const t = isAr ? {
     nav: { features: "المميزات", licenses: "التراخيص", integrations: "التكاملات", about: "عن المؤسس", pricing: "الباقات", contact: "تواصل" },
-    portal: "بوابة الموظف الذاتية", login: "بوابة الشركات", start: "ابدأ الآن",
+    portal: "بوابة الموظف الذاتية", ownerPortal: "بوابة المالك الذاتية", login: "بوابة الشركات", start: "ابدأ الآن",
     badge: "منصة الموارد البشرية السعودية لعام 2027",
     titlePre: "نظام موارد بشرية",
     titleHi: "خارق ومتكامل",
@@ -177,7 +177,7 @@ export default function Landing() {
     footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2027 جدارة — جميع الحقوق محفوظة",
   } : {
     nav: { features: "Features", licenses: "Licenses", integrations: "Integrations", about: "Founder", pricing: "Pricing", contact: "Contact" },
-    portal: "Employee Self‑Service Portal", login: "Company Portal", start: "Get Started",
+    portal: "Employee Self‑Service Portal", ownerPortal: "Owner Portal", login: "Company Portal", start: "Get Started",
     badge: "The Saudi HR Platform for 2027",
     titlePre: "A Super, Integrated",
     titleHi: "HR System",
@@ -283,6 +283,7 @@ export default function Landing() {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <Link to="/portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
+            <Link to="/owner-portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.ownerPortal}</Link>
             <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.login}</Link>
             <button onClick={() => scrollTo("trial")} className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition">{t.start}</button>
           </div>

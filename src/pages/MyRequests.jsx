@@ -8,7 +8,6 @@ import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
-import OwnerPortalPanel from "@/components/portal/OwnerPortalPanel";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -176,9 +175,15 @@ export default function MyRequests() {
 
   useEffect(() => {
     if (!session) return;
-    // المالك يمر بنفس مسار الموظف (جلب إجازات/سلف/حضور…) ثم تظهر له تبويبات تشمل بوابة المالك.
     load(session);
   }, [session, load]);
+
+  // المالك لديه بوابة مستقلة — حوّله تلقائياً من بوابة الموظف إلى بوابة المالك.
+  useEffect(() => {
+    if (employee && employee.role_level === "owner") {
+      window.location.href = "/owner-portal";
+    }
+  }, [employee]);
 
   const handlePortalLogin = async (e) => {
     e.preventDefault();
@@ -325,6 +330,13 @@ export default function MyRequests() {
     );
   } else if (loading || !employee) {
     content = <div className="min-h-[70vh] flex items-center justify-center gap-2 text-muted-foreground"><Loader2 className="animate-spin" size={20} /> {t.loading}</div>;
+  } else if (employee.role_level === "owner") {
+    content = (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
+        <Loader2 className="animate-spin" size={24} />
+        <p className="text-sm">{isAr ? "جارٍ تحويلك إلى بوابة المالك الذاتية…" : "Redirecting to owner portal…"}</p>
+      </div>
+    );
   } else {
     const hireDate = employee.hire_date ? new Date(employee.hire_date) : null;
     const serviceYears = hireDate ? Math.floor((Date.now() - hireDate.getTime()) / (365.25 * 24 * 3600 * 1000)) : 0;
@@ -339,7 +351,6 @@ export default function MyRequests() {
 
     const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
     const isOwner = employee.role_level === "owner";
-    const ownerTabLabel = isAr ? "بوابة المالك" : "Owner";
     content = (
           <div>
           {/* بطاقة المنشأة + الصلاحيات */}
@@ -378,22 +389,15 @@ export default function MyRequests() {
           </div>
         </div>
 
-        {(isOwner || hasApprovals) && (
+        {hasApprovals && (
           <div className="flex gap-2 mb-5 border-b border-border flex-wrap">
-            {isOwner && (
-              <button type="button" onClick={() => setView("owner")} className={cn("inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "owner" ? "border-amber-500 text-amber-700" : "border-transparent text-muted-foreground hover:text-foreground")}>
-                <Crown size={15} /> {ownerTabLabel}
-              </button>
-            )}
             <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
             {hasApprovals && (
               <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
             )}
           </div>
         )}
-        {isOwner && view === "owner" ? (
-          <OwnerPortalPanel session={session} employee={employee} />
-        ) : hasApprovals && view === "approvals" ? (
+        {hasApprovals && view === "approvals" ? (
           <ApprovalsPortal portalSession={session} />
         ) : (
           <>
