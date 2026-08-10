@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Mail, Lock, Hash, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { useI18n } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
@@ -51,6 +52,7 @@ export default function CompanyLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
   const returnTo = safeReturnTo();
 
   const handleSubmit = async (e) => {
@@ -59,11 +61,13 @@ export default function CompanyLogin() {
     const u = unified.replace(/\D/g, "");
     if (!/^7\d{7,11}$/.test(u)) { setError(t.errUnified); return; }
     const em = email.trim().toLowerCase();
+    if (!captchaToken) { setError(isAr ? "أكّد أنك لست روبوت" : "Please verify you're human"); return; }
     setLoading(true);
     try {
       const res = await base44.functions.invoke("verifyTenantCredentials", {
         email: em,
         unified_number: u,
+        turnstileToken: captchaToken,
       });
       if (!res?.data?.valid) { setError(t.errCreds); return; }
       await base44.auth.loginViaEmailPassword(em, password);
@@ -119,7 +123,8 @@ export default function CompanyLogin() {
               value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12" required />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <TurnstileWidget onToken={setCaptchaToken} className="mt-2" />
+        <Button type="submit" className="w-full h-12 font-medium" disabled={loading || !captchaToken}>
           {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t.signing}</>) : t.submit}
         </Button>
       </form>
