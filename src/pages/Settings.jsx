@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Loader2, Building2, Save, Crosshair, Wallet } from "lucide-react";
+import { Image } from "@/components/ui/image";
+import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 const empty = {
@@ -43,6 +44,8 @@ export default function SettingsPage() {
     absType: "طريقة خصم الغياب", monthlyDiv: "الراتب الشهري ÷ 30 لليوم", dailyWage: "الأجر اليومي",
     secLoc: "موقع مقر العمل (للبصمة)", lat: "خط العرض", lng: "خط الطول", radius: "نطاق البصمة (متر)", capture: "تحديد موقعي الحالي",
     locNote: (r) => `سيُسمح للموظف بالبصمة فقط ضمن ${r || 50} متر من هذا الموقع.`,
+    logo: "شعار المنشأة", logoHint: "يظهر في بوابة الموظف والاعتمادات", uploading: "جارٍ الرفع...",
+    changeLogo: "تغيير الشعار", chooseLogo: "اختيار صورة", logoEmpty: "لم يتم رفع شعار بعد",
     save: "حفظ الإعدادات",
     noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك",
     delSec: "منطقة الخطر", delTitle: "حذف الحساب", delDesc: "طلب حذف حساب المنشأة وبياناتها. سيتم مراجعة الطلب والتواصل معك لإتمام الحذف.",
@@ -65,6 +68,8 @@ export default function SettingsPage() {
     absType: "Absence deduction method", monthlyDiv: "Monthly salary ÷ 30 per day", dailyWage: "Daily wage",
     secLoc: "Workplace location (for check‑in)", lat: "Latitude", lng: "Longitude", radius: "Check‑in radius (m)", capture: "Set my current location",
     locNote: (r) => `Employees may check in only within ${r || 50} m of this location.`,
+    logo: "Company logo", logoHint: "Shown in the employee & approvals portal", uploading: "Uploading...",
+    changeLogo: "Change logo", chooseLogo: "Choose image", logoEmpty: "No logo uploaded yet",
     save: "Save settings",
     noGeo: "Device does not support geolocation", noAccess: "Could not access your location",
     delSec: "Danger zone", delTitle: "Account deletion", delDesc: "Request deletion of your account and its data. The request will be reviewed and support will contact you to complete it.",
@@ -76,6 +81,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subInfo, setSubInfo] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -128,6 +134,16 @@ export default function SettingsPage() {
     );
   };
 
+  const onLogoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      set("logo_url", file_url);
+    } catch (_) {} finally { setUploading(false); }
+  };
+
   const save = async () => {
     setSaving(true);
     try {
@@ -166,6 +182,20 @@ export default function SettingsPage() {
             <Field label={t.unified}><Input value={org.unified_number} onChange={(e) => set("unified_number", e.target.value.replace(/\D/g, ""))} dir="ltr" /></Field>
             <Field label={t.email}><Input type="email" value={org.contact_email} onChange={(e) => set("contact_email", e.target.value)} dir="ltr" /></Field>
             <Field label={t.vat}><Input value={org.vat_number} onChange={(e) => set("vat_number", e.target.value)} dir="ltr" /></Field>
+          </div>
+          <div className="flex items-center gap-4 pt-2">
+            <div className="w-20 h-20 rounded-xl border border-input bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+              {org.logo_url ? <Image src={org.logo_url} fittingType="fit" className="w-full h-full" /> : <Building2 size={28} className="text-muted-foreground" />}
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs font-medium text-muted-foreground">{t.logo}</Label>
+              <p className="text-xs text-muted-foreground mb-2">{org.logo_url ? t.logoHint : t.logoEmpty}</p>
+              <label className="inline-flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-md border border-input bg-transparent hover:bg-accent cursor-pointer">
+                {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                {uploading ? t.uploading : (org.logo_url ? t.changeLogo : t.chooseLogo)}
+                <input type="file" accept="image/*" className="hidden" onChange={onLogoChange} disabled={uploading} />
+              </label>
+            </div>
           </div>
         </Section>
 

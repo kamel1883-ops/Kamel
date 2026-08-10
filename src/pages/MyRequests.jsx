@@ -11,6 +11,7 @@ import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { Image } from "@/components/ui/image";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -455,6 +456,12 @@ export default function MyRequests() {
               {t.brandSub}<br />
               <span className="text-white/40">{t.brandOnly}</span>
             </div>
+            {employee && org && (
+              <div className="hidden sm:flex items-center gap-2 ps-3 border-s border-white/10">
+                {org.logo_url ? <Image src={org.logo_url} fittingType="fit" className="h-8 w-8 rounded bg-white/90 p-0.5" /> : null}
+                <span className="text-sm font-medium text-white/90 truncate max-w-[160px]" title={org.name}>{org.name}</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
