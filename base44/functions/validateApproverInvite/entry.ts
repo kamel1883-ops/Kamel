@@ -1,16 +1,11 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { verifyTurnstile } from "../../shared/turnstile.ts";
 
-// تحقق من صلاحية رابط دعوة المعتمد عند التسجيل الذاتي (عام، دون مصادقة) — محمي بـ Turnstile.
+// تحقق من صلاحية رابط دعوة المعتمد عند التسجيل الذاتي (عام، دون مصادقة).
+// الرمز العشوائي (UUID) للدعوة هو بحدّ ذاته الحماية من الإساءة — لا حاجة لـ Turnstile.
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-
-    const captchaToken = String(body.captcha_token || "");
-    if (!captchaToken) return Response.json({ ok: false, error: "captcha_required" }, { status: 400 });
-    if (!(await verifyTurnstile(captchaToken)))
-      return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
 
     const email = String(body.email || "").trim().toLowerCase();
     const token = String(body.invite_token || "").trim();

@@ -147,8 +147,10 @@ export default function Register() {
             <Input id="confirm" type="password" autoComplete="new-password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10 h-12" required />
           </div>
         </div>
-        <div className="flex justify-center"><TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" /></div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading || !captcha}>
+        {!inviteToken && (
+          <div className="flex justify-center"><TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" /></div>
+        )}
+        <Button type="submit" className="w-full h-12 font-medium" disabled={loading || (!inviteToken && !captcha)}>
           {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t.creating}</>) : t.create}
         </Button>
       </form>

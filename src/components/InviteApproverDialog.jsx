@@ -60,7 +60,11 @@ export default function InviteApproverDialog() {
   const reset = () => { setErr(""); setOk(""); setLink(""); setEmailed(false); setCopied(false); };
 
   const waShare = () => {
-    const text = encodeURIComponent((isAr ? "رابط إنشاء حسابك في بوابة المعتمدين بجدارة: " : "Your Jadara approvers-portal sign-up link: ") + link);
+    const roleText = role === "finance" ? (isAr ? "مدير مالي" : "finance manager") : (isAr ? "مدير مباشر" : "direct manager");
+    const msg = isAr
+      ? `السلام عليكم ورحمة الله،\n\nتمت دعوتك للعمل كمعتمد (${roleText}) في منصة «جدارة» لإدارة الموارد البشرية.\n\nأنشئ حسابك بنفسك واختر كلمة المرور التي تريدها عبر الرابط الآتي:\n${link}\n\nخطوات التسجيل:\n1) افتح الرابط أعلاه.\n2) أدخل بريدك نفسه الذي وصلك عليه هذا الإيميل: ${email}\n3) اضبط كلمة المرور وأكّدها ثم اضغط «إنشاء الحساب».\n4) أدخل رمز التحقق الذي سيصلك، وستحوّل تلقائياً إلى بوابة الاعتمادات.\n\nتنبيه: الرابط مخصّص لبريدك ولا يعمل مع بريد آخر.\n\n— فريق دعم جدارة\n📞 واتساب: 0594700782\n✉️ info@jadara-hr.com`
+      : `Hello,\n\nYou've been invited as an approver (${roleText}) on the Jadara HR platform.\n\nCreate your account and choose your password here:\n${link}\n\nSteps:\n1) Open the link above.\n2) Enter the same email this was sent to: ${email}\n3) Set and confirm your password, then click "Create account".\n4) Enter the verification code you'll receive — you'll be redirected to the approvals portal.\n\nNote: the link works only with your email.\n\n— Jadara Support\nWhatsApp: 0594700782\ninfo@jadara-hr.com`;
+    const text = encodeURIComponent(msg);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
