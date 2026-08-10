@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, Wallet, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -21,6 +21,7 @@ const appNav = [
   { to: "/leaves", ar: "الإجازات", en: "Leaves", icon: CalendarDays },
   { to: "/business-trips", ar: "رحلات العمل", en: "Business Trips", icon: Plane },
   { to: "/payroll", ar: "الرواتب", en: "Payroll", icon: Wallet },
+  { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield },
   { to: "/fleet", ar: "المركبات", en: "Fleet", icon: Car },
   { to: "/end-of-service", ar: "نهاية الخدمة", en: "End of Service", icon: FileText },
   { to: "/performance", ar: "الأداء", en: "Performance", icon: Target },

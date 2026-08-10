@@ -20,6 +20,7 @@ import ExitInterviews from "@/pages/ExitInterviews";
 import Surveys from "@/pages/Surveys";
 import Warnings from "@/pages/Warnings";
 import Payroll from "@/pages/Payroll";
+import Gosi from "@/pages/Gosi";
 import SettingsPage from "@/pages/Settings";
 import Fleet from "@/pages/Fleet";
 import EndOfService from "@/pages/EndOfService";
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
         <Route path="/leaves" element={<Leaves />} />
         <Route path="/business-trips" element={<BusinessTrips />} />
         <Route path="/payroll" element={<Payroll />} />
+        <Route path="/gosi" element={<Gosi />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/end-of-service" element={<EndOfService />} />
         <Route path="/performance" element={<Performance />} />

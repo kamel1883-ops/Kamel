@@ -1,0 +1,114 @@
+{
+  "name": "GosiRecord",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "employee_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "employee_number": {
+      "type": "string",
+      "title": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0648\u0638\u064a\u0641\u064a"
+    },
+    "national_id": {
+      "type": "string",
+      "title": "\u0627\u0644\u0647\u0648\u064a\u0629/\u0627\u0644\u0625\u0642\u0627\u0645\u0629"
+    },
+    "is_saudi": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u0633\u0639\u0648\u062f\u064a"
+    },
+    "department": {
+      "type": "string",
+      "title": "\u0627\u0644\u0625\u062f\u0627\u0631\u0629"
+    },
+    "month": {
+      "type": "number",
+      "title": "\u0627\u0644\u0634\u0647\u0631"
+    },
+    "year": {
+      "type": "number",
+      "title": "\u0627\u0644\u0633\u0646\u0629"
+    },
+    "period_key": {
+      "type": "string",
+      "title": "\u0645\u0641\u062a\u0627\u062d \u0627\u0644\u0641\u062a\u0631\u0629 (\u0633\u0646\u0629-\u0634\u0647\u0631)"
+    },
+    "gross_wage": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0627\u0644\u0623\u062c\u0631 \u0627\u0644\u062e\u0627\u0636\u0639 \u0644\u0644\u0627\u0634\u062a\u0631\u0627\u0643"
+    },
+    "employee_rate": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0646\u0633\u0628\u0629 \u062d\u0635\u0629 \u0627\u0644\u0645\u0648\u0638\u0641 %"
+    },
+    "employer_rate": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0646\u0633\u0628\u0629 \u062d\u0635\u0629 \u0635\u0627\u062d\u0628 \u0627\u0644\u0639\u0645\u0644 %"
+    },
+    "gosi_employee": {
+      "type": "number",
+      "default": 0,
+      "title": "\u062d\u0635\u0629 \u0627\u0644\u0645\u0648\u0638\u0641"
+    },
+    "gosi_employer": {
+      "type": "number",
+      "default": 0,
+      "title": "\u062d\u0635\u0629 \u0635\u0627\u062d\u0628 \u0627\u0644\u0639\u0645\u0644"
+    },
+    "gosi_total": {
+      "type": "number",
+      "default": 0,
+      "title": "\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0627\u0634\u062a\u0631\u0627\u0643"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "saved"
+      ],
+      "default": "saved",
+      "title": "\u0627\u0644\u062d\u0627\u0644\u0629"
+    },
+    "notes": {
+      "type": "string",
+      "title": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a"
+    }
+  },
+  "required": [
+    "employee_id",
+    "month",
+    "year",
+    "gosi_total",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
