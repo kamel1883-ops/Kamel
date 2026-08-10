@@ -97,6 +97,7 @@ export default function OwnerAdmin() {
     expired: tenants.filter((x) => x.status === "expired").length,
     newThisMonth: tenants.filter((x) => new Date(x.created_date) >= monthStart).length,
     endingSoon: tenants.filter((x) => {
+      if (isOwnerTenant(x)) return false;
       const dl = x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null;
       return dl != null && dl <= 30;
     }).length,
@@ -199,7 +200,8 @@ export default function OwnerAdmin() {
               <tbody className="divide-y divide-border">
                 {tenants.map((x) => {
                   const pending = renewalByTenant.get(x.id);
-                  const dl = x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null;
+                  const owner = isOwnerTenant(x);
+                  const dl = owner ? null : (x.status === "trial" ? daysLeft(x.trial_end) : x.status === "active" ? daysLeft(x.subscription_end) : null);
                   const endingSoon = dl != null && dl <= 30;
                   return (
                     <tr key={x.id} className={cn("hover:bg-slate-50", endingSoon && "bg-rose-50/70")}>
@@ -221,9 +223,9 @@ export default function OwnerAdmin() {
                         )}
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={x.status} isAr={isAr} /></td>
-                      <td className={cn("px-4 py-3", endingSoon ? "text-rose-700 font-medium" : "text-muted-foreground")}>
-                        {x.status === "active" ? t.subActive(x.subscription_end) : x.status === "trial" ? t.subTrial(x.trial_end, daysLeft(x.trial_end)) : "—"}
-                        {endingSoon && (<div className="text-xs flex items-center gap-1 mt-0.5 text-rose-600"><AlertTriangle size={12} /> {dl <= 0 ? (isAr ? "انتهت — راجع الحساب" : "Ended — review") : (isAr ? `متبقي ${dl} يوم` : `${dl} days left`)}</div>)}
+                      <td className={cn("px-4 py-3", owner ? "text-emerald-700 font-medium" : endingSoon ? "text-rose-700 font-medium" : "text-muted-foreground")}>
+                        {owner ? (isAr ? "مدى الحياة" : "Lifetime") : (x.status === "active" ? t.subActive(x.subscription_end) : x.status === "trial" ? t.subTrial(x.trial_end, daysLeft(x.trial_end)) : "—")}
+                        {!owner && endingSoon && (<div className="text-xs flex items-center gap-1 mt-0.5 text-rose-600"><AlertTriangle size={12} /> {dl <= 0 ? (isAr ? "انتهت — راجع الحساب" : "Ended — review") : (isAr ? `متبقي ${dl} يوم` : `${dl} days left`)}</div>)}
                         {pending && (<div className="text-xs text-amber-600 mt-0.5 flex items-center gap-1"><Clock size={11} /> {t.pendingRenew} — 700 {isAr ? "ر.س" : "SAR"}</div>)}
                       </td>
                       <td className="px-4 py-3">
@@ -271,6 +273,10 @@ function daysLeft(date) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const d = new Date(date); d.setHours(0, 0, 0, 0);
   return Math.round((d - today) / 86400000);
+}
+// حساب المالك دائم مدى الحياة — لا تاريخ انتهاء لاشتراكه.
+function isOwnerTenant(x) {
+  return /\(المالك\)|\(owner\)/i.test(x?.name || "");
 }
 
 function StatusBadge({ status, isAr }) {

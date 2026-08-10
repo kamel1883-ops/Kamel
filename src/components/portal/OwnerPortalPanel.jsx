@@ -304,7 +304,8 @@ export default function OwnerPortalPanel({ session, employee }) {
                 <tbody className="divide-y divide-border">
                   {filtered.map((x) => {
                     const pending = pendingByTenant.get(x.id);
-                    const dl = x.status === "active" ? daysLeft(x.subscription_end) : x.status === "trial" ? daysLeft(x.trial_end) : null;
+                    const owner = isOwnerTenant(x);
+                    const dl = owner ? null : (x.status === "active" ? daysLeft(x.subscription_end) : x.status === "trial" ? daysLeft(x.trial_end) : null);
                     const endingSoon = dl != null && dl <= 30;
                     return (
                       <tr key={x.id} className={cn("hover:bg-slate-50", endingSoon && "bg-rose-50/70")}>
@@ -334,9 +335,9 @@ export default function OwnerPortalPanel({ session, employee }) {
                           <div className="text-xs text-muted-foreground truncate">{x.contact_phone || x.contact_email || "—"}</div></div>
                         </td>
                         <td className="px-4 py-3"><StatusBadge status={x.status} isAr={isAr} /></td>
-                        <td className={cn("px-4 py-3", endingSoon ? "text-rose-700 font-medium" : "text-muted-foreground")}>
-                          {x.status === "active" ? t.uptime(x.subscription_end) : x.status === "trial" ? t.triTime(x.trial_end, daysLeft(x.trial_end)) : "—"}
-                          {endingSoon && (
+                        <td className={cn("px-4 py-3", owner ? "text-emerald-700 font-medium" : endingSoon ? "text-rose-700 font-medium" : "text-muted-foreground")}>
+                          {owner ? (isAr ? "مدى الحياة" : "Lifetime") : (x.status === "active" ? t.uptime(x.subscription_end) : x.status === "trial" ? t.triTime(x.trial_end, daysLeft(x.trial_end)) : "—")}
+                          {!owner && endingSoon && (
                             <div className="text-xs text-rose-600 mt-0.5 flex items-center gap-1">
                               <AlertTriangle size={11} /> {dl <= 0 ? t.ended : t.daysLeft(dl)}
                             </div>
@@ -399,6 +400,11 @@ export default function OwnerPortalPanel({ session, employee }) {
         onDone={(payload) => act(renewInfo?.tenant?.id, "owner_confirm_renew", { tenant_id: renewInfo?.tenant?.id, sub_id: renewInfo?.sub?.id, ...payload })} />
     </div>
   );
+}
+
+// حساب المالك دائم مدى الحياة — لا تاريخ انتهاء لاشتراكه.
+function isOwnerTenant(x) {
+  return /\(المالك\)|\(owner\)/i.test(x?.name || "");
 }
 
 function daysLeft(date) {
