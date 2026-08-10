@@ -164,7 +164,11 @@ export default function OwnerAdmin() {
                       <td className="px-4 py-3">
                         <div className="leading-tight"><div>{x.contact_name || "—"}</div><div className="text-xs text-muted-foreground">{x.contact_phone || x.contact_email}</div></div>
                         {(x.employee_count > 0 || x.pricing_tier) && (
-                          <div className="text-[11px] mt-1 text-violet-600 flex items-center gap-1"><Users size={11} /> {x.employee_count || 0} {isAr ? "موظف" : "emp"} · {x.pricing_tier || "—"}</div>
+                          <div className="text-[11px] mt-1 text-violet-600 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <span className="flex items-center gap-1"><Users size={11} /> {x.employee_count || 0} {isAr ? "موظف" : "emp"}</span>
+                            <span>· {x.pricing_tier || "—"}</span>
+                            {x.quoted_amount > 0 && <span className="font-semibold">· {x.quoted_amount.toLocaleString()} {isAr ? "ر.س/سنة" : "SAR/yr"}</span>}
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={x.status} isAr={isAr} /></td>
