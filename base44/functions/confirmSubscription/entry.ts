@@ -111,6 +111,33 @@ export default async function (req) {
       }
     }
 
+    // — تأكيد تفعيل الاشتراك للعميل (عربي) —
+    const clientEmail = String(tenant.contact_email || email || '').trim();
+    if (clientEmail) {
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: clientEmail,
+          subject: 'تم تفعيل اشتراككم السنوي في منصة جدارة',
+          body:
+            'السلام عليكم ورحمة الله وبركاته،\n\n' +
+            'أهلاً بكم في منصة «جدارة لإدارة الموارد البشرية». تم بنجاح تفعيل اشتراككم السنوي وإطلاق حساب منشأتكم.\n\n' +
+            'بيانات الاشتراك:\n' +
+            'المنشأة: ' + name + '\n' +
+            'نوع الباقة: سنوي\n' +
+            'تاريخ بدء الاشتراك: ' + todayStr + '\n' +
+            'ينتهي الاشتراك في: ' + subEnd.toISOString().slice(0, 10) + '\n\n' +
+            'خطوات الدخول لمنشأتكم:\n' +
+            '1) ادخلوا بوابة الشركات في منصة جدارة.\n' +
+            '2) سجّلوا الدخول بالبريد المرتبط بحسابكم + الرقم الموحد (الذي يبدأ بـ7).\n\n' +
+            'للدعم والاستفسار — البريد: info@jadara-hr.com\n\n' +
+            'مع خالص التقدير،\nفريق دعم جدارة',
+          from_name: 'جدارة',
+        });
+      } catch (_e) {
+        // لا تعطّل العملية إن تعطل البريد
+      }
+    }
+
     return Response.json({ ok: true, tenant_id: tenant.id });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
