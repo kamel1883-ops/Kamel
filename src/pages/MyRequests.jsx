@@ -44,6 +44,7 @@ export default function MyRequests() {
     in_progress: { label: "قيد التنفيذ", cls: "bg-indigo-50 text-indigo-600" },
     completed: { label: "مكتملة", cls: "bg-emerald-50 text-emerald-600" },
     cancelled: { label: "ملغاة", cls: "bg-rose-50 text-rose-600" },
+    rejected: { label: "مرفوضة", cls: "bg-rose-50 text-rose-600" },
   } : {
     draft: { label: "Draft", cls: "bg-slate-100 text-slate-600" },
     pending: { label: "Pending", cls: "bg-amber-50 text-amber-600" },
@@ -51,6 +52,7 @@ export default function MyRequests() {
     in_progress: { label: "In progress", cls: "bg-indigo-50 text-indigo-600" },
     completed: { label: "Completed", cls: "bg-emerald-50 text-emerald-600" },
     cancelled: { label: "Cancelled", cls: "bg-rose-50 text-rose-600" },
+    rejected: { label: "Rejected", cls: "bg-rose-50 text-rose-600" },
   };
   const t = isAr ? {
     dir: "rtl", brandSub: "بوابة الموظف الذاتية", brandOnly: "خاص بالموظف", logout: "خروج",
@@ -80,6 +82,7 @@ export default function MyRequests() {
     leavesTitle: "طلبات الإجازات", loansTitle: "طلبات السلف", tripsTitle: "رحلات العمل والانتداب",
     noLeaves: "لا توجد طلبات إجازات", noLoans: "لا توجد طلبات سلف", noTrips: "لا توجد طلبات رحلات",
     fullClear: "تصفية كاملة", medReport: "تقرير طبي",
+    rejectReason: "سبب الرفض", rejectByMgr: "المدير المباشر", rejectByHr: "الموارد البشرية", rejectByFin: "المالية", resubmitHint: "يمكنك رفع طلب جديد من الأزرار بالأعلى.",
     days: (n) => `${n} يوم`, loanMonthly: (m) => `${m} ر.س شهرياً`, loanInst: (n) => `${n} قسط`,
     tripExternal: "خارجية", tripInternal: "داخلية", sar: "ر.س",
     selfTab: "خدماتي", approvalsTab: "الاعتمادات",
@@ -111,6 +114,7 @@ export default function MyRequests() {
     leavesTitle: "Leave requests", loansTitle: "Loan requests", tripsTitle: "Business Trips & Deputation",
     noLeaves: "No leave requests", noLoans: "No loan requests", noTrips: "No trip requests",
     fullClear: "Full clearance", medReport: "Medical report",
+    rejectReason: "Rejection reason", rejectByMgr: "Direct manager", rejectByHr: "Human Resources", rejectByFin: "Finance", resubmitHint: "You can submit a new request using the buttons above.",
     days: (n) => `${n} days`, loanMonthly: (m) => `${formatCurrency(m)} / month`, loanInst: (n) => `${n} installments`,
     tripExternal: "External", tripInternal: "Internal", sar: "SAR",
     selfTab: "My Services", approvalsTab: "Approvals",
@@ -258,6 +262,15 @@ export default function MyRequests() {
       if (!data?.ok) throw new Error(data?.error || "fail");
       setTodayAtt(data.today);
     },
+  };
+
+  const rejectReason = (r) => {
+    if (!r || r.status !== "rejected") return null;
+    if (r.finance_status === "rejected" && r.finance_note) return { who: t.rejectByFin, text: r.finance_note };
+    if (r.hr_status === "rejected" && r.hr_note) return { who: t.rejectByHr, text: r.hr_note };
+    if (r.manager_status === "rejected" && r.manager_note) return { who: t.rejectByMgr, text: r.manager_note };
+    const text = r.finance_note || r.hr_note || r.manager_note || r.notes || "";
+    return text ? { who: "", text } : null;
   };
 
   let content;
@@ -447,6 +460,7 @@ export default function MyRequests() {
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
+                      {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                     </div>
                     <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
                   </Row>
@@ -458,6 +472,7 @@ export default function MyRequests() {
                     <div>
                       <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
                       <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(r.monthly_installment)}</div>
+                      {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                     </div>
                     <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
                   </Row>
@@ -474,6 +489,7 @@ export default function MyRequests() {
                       <div>
                         <div className="font-medium text-sm">{r.trip_type === "external" ? t.tripExternal : t.tripInternal} — {r.destination || "—"}</div>
                         <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
+                        {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                       </div>
                       <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", st.cls)}>{st.label}</span>
                     </Row>
@@ -581,4 +597,14 @@ function Row({ children }) {
 }
 function Empty({ text }) {
   return <div className="p-8 text-center text-muted-foreground text-sm">{text}</div>;
+}
+function RejectedNote({ reason, t }) {
+  if (!reason) return null;
+  return (
+    <div className="mt-2 rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs">
+      <div className="font-semibold text-rose-700 mb-0.5">{t.rejectReason}{reason.who ? ` — ${reason.who}` : ""}</div>
+      <div className="text-rose-600 leading-relaxed whitespace-pre-wrap">{reason.text}</div>
+      <div className="text-rose-400 mt-1.5">{t.resubmitHint}</div>
+    </div>
+  );
 }
