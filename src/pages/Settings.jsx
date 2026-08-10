@@ -13,7 +13,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
 
 const empty = {
-  name: "", commercial_register: "", vat_number: "", city: "", country: "المملكة العربية السعودية",
+  name: "", industry: "", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
+  vat_number: "", city: "", country: "المملكة العربية السعودية",
   logo_url: "",
   annual_leave_days: 21, ticket_policy: "yearly", ticket_value: 0,
   eos_basis: "gross",
@@ -29,7 +30,10 @@ export default function SettingsPage() {
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "إعدادات المنشأة", subtitle: "بيانات المنشأة والسياسات المواردية", loading: "جارٍ التحميل...",
-    secOrg: "بيانات المنشأة", name: "اسم المنشأة", cr: "السجل التجاري", vat: "الرقم الضريبي", city: "المدينة",
+    secOrg: "بيانات المنشأة", secOrgNote: "مجلوبة من طلب عرض السعر / التفعيل — يمكنك تعديلها وستُحفظ لمنشأتك.",
+    name: "اسم المنشأة", industry: "القطاع / النشاط", responsible: "اسم الشخص المسؤول",
+    phone: "الهاتف", unified: "الرقم الموحد (يبدأ بـ7)", email: "البريد الإلكتروني",
+    vat: "الرقم الضريبي", city: "المدينة",
     secLeave: "سياسات الإجازات والتذاكر", annualDays: "أيام الإجازة السنوية", ticketPolicy: "سياسة التذاكر",
     ticketValue: "قيمة التذكرة (ريال)", yearly: "سنوية", biennial: "كل سنتين", none: "بدون",
     secEos: "إعدادات نهاية الخدمة والتأمينات", eosBasis: "أساس حساب نهاية الخدمة",
@@ -47,7 +51,10 @@ export default function SettingsPage() {
     delSuccess: "تم استلام طلب حذف الحساب بنجاح، سيتواصل معك فريق الدعم.",
   } : {
     title: "Organization settings", subtitle: "Organization data and HR policies", loading: "Loading...",
-    secOrg: "Organization data", name: "Organization name", cr: "Commercial register", vat: "VAT number", city: "City",
+    secOrg: "Organization data", secOrgNote: "Pulled from your quote / activation request — edit to save them to your organization.",
+    name: "Organization name", industry: "Sector / Activity", responsible: "Responsible person",
+    phone: "Phone", unified: "Unified number (starts with 7)", email: "Email",
+    vat: "VAT number", city: "City",
     secLeave: "Leave & ticket policies", annualDays: "Annual leave days", ticketPolicy: "Ticket policy",
     ticketValue: "Ticket value (SAR)", yearly: "Yearly", biennial: "Biennial", none: "None",
     secEos: "EOS & GOSI settings", eosBasis: "EOS calculation basis",
@@ -72,10 +79,36 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    base44.entities.Organization.list("-created_date", 1).then((list) => {
-      setOrg(list[0] ? { ...empty, ...list[0] } : empty);
+    (async () => {
+      let orgData = empty;
+      try {
+        const list = await base44.entities.Organization.list("-created_date", 1);
+        if (list && list[0]) orgData = { ...empty, ...list[0] };
+      } catch (_) {}
+      // تعبئة قبلية ببيانات المنشأة من طلب عرض السعر / التفعيل إن لم توجد بعد
+      if (!orgData.name) {
+        try {
+          const res = await base44.functions.invoke("getMyTenant");
+          const tt = res?.data?.tenant;
+          if (tt) {
+            orgData = {
+              ...orgData,
+              name: tt.name || orgData.name,
+              industry: tt.industry || orgData.industry,
+              contact_name: tt.contact_name || orgData.contact_name,
+              contact_phone: tt.contact_phone || orgData.contact_phone,
+              unified_number: tt.unified_number || orgData.unified_number,
+              contact_email: tt.contact_email || orgData.contact_email,
+              vat_number: tt.vat_number || orgData.vat_number,
+              city: tt.city || orgData.city,
+              country: tt.country || orgData.country,
+            };
+          }
+        } catch (_) {}
+      }
+      setOrg(orgData);
       setLoading(false);
-    });
+    })();
   }, []);
 
   const set = (k, v) => setOrg((o) => ({ ...o, [k]: v }));
@@ -109,11 +142,16 @@ export default function SettingsPage() {
       <PageHeader title={t.title} subtitle={t.subtitle} />
       <div className="max-w-3xl space-y-6">
         <Section title={t.secOrg} icon={Building2}>
+          <p className="text-xs text-muted-foreground -mt-1">{t.secOrgNote}</p>
           <div className="grid grid-cols-2 gap-4">
             <Field label={t.name}><Input value={org.name} onChange={(e) => set("name", e.target.value)} /></Field>
-            <Field label={t.cr}><Input value={org.commercial_register} onChange={(e) => set("commercial_register", e.target.value)} /></Field>
-            <Field label={t.vat}><Input value={org.vat_number} onChange={(e) => set("vat_number", e.target.value)} /></Field>
+            <Field label={t.industry}><Input value={org.industry} onChange={(e) => set("industry", e.target.value)} /></Field>
             <Field label={t.city}><Input value={org.city} onChange={(e) => set("city", e.target.value)} /></Field>
+            <Field label={t.responsible}><Input value={org.contact_name} onChange={(e) => set("contact_name", e.target.value)} /></Field>
+            <Field label={t.phone}><Input value={org.contact_phone} onChange={(e) => set("contact_phone", e.target.value)} dir="ltr" /></Field>
+            <Field label={t.unified}><Input value={org.unified_number} onChange={(e) => set("unified_number", e.target.value.replace(/\D/g, ""))} dir="ltr" /></Field>
+            <Field label={t.email}><Input type="email" value={org.contact_email} onChange={(e) => set("contact_email", e.target.value)} dir="ltr" /></Field>
+            <Field label={t.vat}><Input value={org.vat_number} onChange={(e) => set("vat_number", e.target.value)} dir="ltr" /></Field>
           </div>
         </Section>
 

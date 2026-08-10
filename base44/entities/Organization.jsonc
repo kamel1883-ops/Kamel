@@ -6,9 +6,26 @@
       "type": "string",
       "title": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u0634\u0623\u0629"
     },
-    "commercial_register": {
+    "industry": {
       "type": "string",
-      "title": "\u0627\u0644\u0633\u062c\u0644 \u0627\u0644\u062a\u062c\u0627\u0631\u064a"
+      "title": "\u0627\u0644\u0642\u0637\u0627\u0639 / \u0627\u0644\u0646\u0634\u0627\u0637"
+    },
+    "contact_name": {
+      "type": "string",
+      "title": "\u0627\u0633\u0645 \u0627\u0644\u0634\u062e\u0635 \u0627\u0644\u0645\u0633\u0624\u0648\u0644"
+    },
+    "contact_phone": {
+      "type": "string",
+      "title": "\u0627\u0644\u0647\u0627\u062a\u0641"
+    },
+    "unified_number": {
+      "type": "string",
+      "title": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0645\u0648\u062d\u062f (\u064a\u0628\u062f\u0623 \u0628\u06407)"
+    },
+    "contact_email": {
+      "type": "string",
+      "title": "\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
+      "format": "email"
     },
     "vat_number": {
       "type": "string",
@@ -29,7 +46,7 @@
     "annual_leave_days": {
       "type": "number",
       "default": 21,
-      "title": "\u0623\u064a\u0627\u0645 \u0627\u0644\u0625\u062c\u0627\u0632\u0629 \u0627\u0644\u0633\u0646\u0648\u064a\u0629"
+      "title": "\u0623\u064a\u0627\u0645 \u0627\u0644\u0625\u062c\u0627\u0632\u0629 \u0627\u0644\u0633\u0646\u0648\u062a\u064a\u0629"
     },
     "ticket_policy": {
       "type": "string",
@@ -68,7 +85,7 @@
     "gosi_expat_employer_rate": {
       "type": "number",
       "default": 2,
-      "title": "\u0646\u0633\u0628\u0629 \u0627\u0644\u062a\u0623\u0645\u064a\u0646 - \u0635\u0627\u062d\u0628 \u0627\u0644\u0639\u0645\u0644 \u0644\u0644\u0645\u0642\u064a\u0645 %"
+      "title": "\u0646\u0633\u0628\u0629 \u0627\u0644\u062a\u0623\u0645\u064a\u0646 - \u0635\u0627\u062d\u0628 \u0627\u0644\u0639\u0645\u0644 \u0644\u0644\u0645\u0642\u062a\u0645 %"
     },
     "work_week_hours": {
       "type": "number",
@@ -82,21 +99,21 @@
     },
     "work_start_time": {
       "type": "string",
-      "title": "\u0628\u062f\u0627\u064a\u0629 \u0627\u0644\u062f\u0648\u0627\u0645 \u0627\u0644\u064a\u0648\u0645\u064a\u0629 (HH:MM)"
+      "title": "\u0628\u062f\u0627\u064a\u0629 \u0627\u0644\u062f\u0648\u0627\u0645 \u0627\u0644\u062a\u0648\u0645\u064a\u0629 (HH:MM)"
     },
     "work_end_time": {
       "type": "string",
-      "title": "\u0646\u0647\u0627\u064a\u0629 \u0627\u0644\u062f\u0648\u0627\u0645 \u0627\u0644\u064a\u0648\u0645\u064a\u0629 (HH:MM)"
+      "title": "\u0646\u0647\u0627\u064a\u0629 \u0627\u0644\u0623\u0633\u0628\u0648\u0639\u064a\u0629 \u0627\u0644\u062a\u0648\u0645\u064a\u0629"
     },
     "work_hours_per_day": {
       "type": "number",
       "default": 0,
-      "title": "\u0633\u0627\u0639\u0627\u062a \u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u064a\u0648\u0645\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629"
+      "title": "\u0633\u0627\u0639\u0627\u062a \u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u062a\u0648\u0645\u064a\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629"
     },
     "late_grace_minutes": {
       "type": "number",
       "default": 15,
-      "title": "\u0633\u0645\u0627\u062d \u0627\u0644\u062a\u0623\u062e\u064a\u0631 (\u062f\u0642\u064a\u0642\u0629)"
+      "title": "\u0633\u0645\u0627\u062d \u0627\u0644\u062a\u0623\u062e\u062a\u0631 (\u062f\u0642\u064a\u0642\u0629)"
     },
     "absence_deduction_type": {
       "type": "string",
@@ -105,7 +122,7 @@
         "monthly_divided"
       ],
       "default": "monthly_divided",
-      "title": "\u0637\u0631\u064a\u0642\u0629 \u062e\u0635\u0645 \u0627\u0644\u063a\u064a\u0627\u0628"
+      "title": "\u0637\u0631\u064a\u0642\u0629 \u062e\u0635\u0645 \u0627\u0644\u063a\u062a\u0627\u0628"
     },
     "workplace_lat": {
       "type": "number",
