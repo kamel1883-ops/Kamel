@@ -174,7 +174,18 @@ export default function MyRequests() {
     }
   }, [session]);
 
-  useEffect(() => { if (session) load(session); }, [session]);
+  useEffect(() => {
+    if (!session) return;
+    // المالك لا يحتاج جلب بيانات الموظف (إجازات/حضور…) — اعرض لوحته مباشرة لتفادي شاشة تحميل مزدوجة والقفز.
+    if (session.employee?.role_level === "owner") {
+      setEmployee(session.employee);
+      setOrg(session.org || null);
+      setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]);
+      setTodayAtt(null);
+      return;
+    }
+    load(session);
+  }, [session, load]);
 
   const handlePortalLogin = async (e) => {
     e.preventDefault();
@@ -320,7 +331,7 @@ export default function MyRequests() {
       </div>
     );
   } else if (loading || !employee) {
-    content = <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
+    content = <div className="min-h-[70vh] flex items-center justify-center gap-2 text-muted-foreground"><Loader2 className="animate-spin" size={20} /> {t.loading}</div>;
   } else if (employee.role_level === "owner") {
     content = <OwnerPortalPanel session={session} employee={employee} />;
   } else {

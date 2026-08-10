@@ -178,8 +178,9 @@ export default function OwnerPortalPanel({ session, employee }) {
       </div>
 
       {loading ? (
-        <div className="p-10 text-center text-muted-foreground flex items-center justify-center gap-2">
-          <Loader2 className="animate-spin" size={18} /> {t.loading}
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
+          <Loader2 className="animate-spin" size={22} />
+          <span className="text-sm">{t.loading}</span>
         </div>
       ) : err ? (
         <div className="p-4 rounded-xl bg-rose-50 text-rose-700 text-sm flex items-center justify-between gap-3 flex-wrap">
