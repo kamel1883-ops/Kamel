@@ -13,6 +13,7 @@ import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/Employees";
 import Attendance from "@/pages/Attendance";
 import Approvals from "@/pages/Approvals";
+import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Leaves from "@/pages/Leaves";
 import BusinessTrips from "@/pages/BusinessTrips";
 import MyRequests from "@/pages/MyRequests";
@@ -46,9 +47,10 @@ import CompanyForgotPassword from "@/pages/CompanyForgotPassword";
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/portal"];
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const path = window.location.pathname;
-  const isPublicPage = PUBLIC_PATHS.includes(path);
+  const isRestricted = user && (user.role === "manager" || user.role === "finance");
+  const isPublicPage = PUBLIC_PATHS.includes(path) && !isRestricted;
 
   if (!isPublicPage && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
@@ -91,6 +93,7 @@ const AuthenticatedApp = () => {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/import-attendance" element={<ImportAttendance />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="/approvals-portal" element={<ApprovalsPortal />} />
         <Route path="/leaves" element={<Leaves />} />
         <Route path="/business-trips" element={<BusinessTrips />} />
         <Route path="/payroll" element={<Payroll />} />
