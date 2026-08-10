@@ -3,15 +3,38 @@ Allow: /
 Allow: /about
 Allow: /contact
 Allow: /quote
-Disallow: /app
+
+# Auth & internal app — not for indexing
 Disallow: /login
 Disallow: /register
 Disallow: /forgot-password
 Disallow: /reset-password
+Disallow: /company-login
+Disallow: /company-forgot-password
 Disallow: /portal
+Disallow: /app
 Disallow: /employees
 Disallow: /attendance
+Disallow: /import-attendance
+Disallow: /approvals
+Disallow: /approvals-portal
+Disallow: /leaves
+Disallow: /business-trips
 Disallow: /payroll
+Disallow: /fleet
+Disallow: /end-of-service
+Disallow: /performance
+Disallow: /succession
+Disallow: /org-structure
+Disallow: /workforce-planning
+Disallow: /exit-interviews
+Disallow: /surveys
+Disallow: /warnings
+Disallow: /analytics
+Disallow: /licenses
+Disallow: /owner
+Disallow: /discounts
+Disallow: /settings
 
 Sitemap: https://jadara-hr.com/sitemap.xml
 Host: https://jadara-hr.com
