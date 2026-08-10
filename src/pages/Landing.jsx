@@ -13,7 +13,7 @@ import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
   Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
   Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
-  GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
+  Briefcase, GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
   Network, ClipboardList, Plane, CalendarPlus, Server, Linkedin, Facebook, Twitter,
   Send, Music2,
@@ -46,6 +46,8 @@ const featuresAr = [
   { icon: Server, title: "بنية تحتية سحابية خاصة", desc: "نعمل على خوادم VPS ألمانية خاصة (غير مشتركة) بأعلى معايير التخزين السحابي، وتقنيات العزل والتشفير، فتعمل منصتك بأداء ثابت وسرعة فائقة لا تتأثر بضغط العمل أو عدد المستخدمين مهما كبر حجم منشأتك." },
   { icon: Building2, title: "بوابة تجربة العميل", desc: "نظام اشتراكات ذكي بفترة تجربة مجانية 30 يوماً، وإشعارات فورية للمالك بكل عميل جديد." },
   { icon: Gavel, title: "سياسة العمل والإنذارات الذكية", desc: "مرجع كامل لسياسة العمل وفق نظام العمل السعودي (الغياب، النوم، إتلاف المنتجات، العصيان، إفشاء الأسرار…). أنشئ إنذاراً تصاعدياً (أول/ثاني/ثالث/فصل) مرتبطاً بالمادة النظامية بعد جلسة تحقيق مع الموظف، ويُرسل تلقائياً إلى بوابة الموظف الذاتية — دون ورق ودون انتظار موافقة الموظف، ويظهر له عدد إنذاراته ودرجاتها فوراً." },
+  { icon: Briefcase, title: "إدارة التوظيف", desc: "أنشئ الوظائف الشاغرة ببيانات كاملة (المهنة، الدرجة، الراتب، النوع، المطلوب سعودياً/مقيماً)، وولّد الوصف الوظيفي تلقائياً بالذكاء الاصطناعي — ويمكنك تعديله وإضافة أو حذف المهام. شارك إعلان الوظيفة عبر واتساب وتيليجرام ولينكدإن والبريد مع رابط تقديم عام يستقبل المتقدمين ويرفع السير الذاتية، رشّح المناسبين وادعُهم للمقابلة، وعند التعيين تُغلق الوظيفة وتُرفض بقية الطلبات تلقائياً، مع تقرير الموظفين الذين تم توظيفهم خلال آخر 90 يوماً وتقييم فترة التجربة (الكفاءة، السلوك، المعرفة، المجال المهني، الخبرة) والتوصية بتثبيت الموظف أو استبعاده وفق المادة 53 من نظام العمل." },
+  { icon: GraduationCap, title: "التدريب والتطوير", desc: "ضع خططاً تدريبية لموظف محدد أو لجهة/قسم كامل بمعايير موحّدة: حدّد مشاكل النقص لدى الموظف، الهدف بعد الخطة، آلية التنفيذ والتكلفة والتواريخ، مع صناديق شرح ووصف تفصيلية، وتتبّع حالة كل خطة حتى الاكتمال لرفع كفاءة الموارد البشرية وفق احتياج المنشأة." },
 ];
 
 const featuresEn = [
@@ -67,6 +69,8 @@ const featuresEn = [
   { icon: Server, title: "Private Cloud Infrastructure", desc: "We run on dedicated German VPS servers (not shared) with the highest cloud storage standards, isolation and encryption — so your platform runs with steady performance and blazing speed unaffected by workload or user volume, however large your organization grows." },
   { icon: Building2, title: "Client Trial Portal", desc: "Smart subscription system with a 30‑day free trial and instant owner notifications for every new client." },
   { icon: Gavel, title: "Labor Policy & Smart Warnings", desc: "Full labor policy reference per Saudi Labor Law (absence, sleeping, product damage, insubordination, disclosure of secrets…). Issue a progressive warning (first/second/third/termination) linked to the relevant article after an investigation session with the employee; it is sent automatically to the employee self-service portal — paperless and without waiting for the employee's approval — and their warnings count and levels appear instantly." },
+  { icon: Briefcase, title: "Recruitment Management", desc: "Create vacancies with full data (profession, grade, salary, type, Saudi/expat requirement) and auto-generate the job description with AI — fully editable to add or remove tasks. Share the posting on WhatsApp, Telegram, LinkedIn, and email with a public apply link that receives applicants and their CVs, shortlist the suitable ones and invite them to interviews, and on hiring the job closes and remaining requests are auto-rejected — with a 90-day hiring report and a probation evaluation (competence, behavior, knowledge, professional field, experience) and a recommendation to confirm or dismiss per Article 53 of the Labor Law." },
+  { icon: GraduationCap, title: "Training & Development", desc: "Build training plans for a specific employee or a whole department under unified criteria: define the employee's skill gaps, the post-plan goal, the execution mechanism, cost and dates, with detailed description fields, and track each plan to completion to raise workforce capability per the organization's needs." },
 ];
 
 const licensesAr = [
