@@ -91,7 +91,7 @@ export default function OwnerPortalPanel({ session, employee }) {
     });
     const res = await Promise.race([
       p,
-      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 18000)),
     ]);
     const d = res?.data || res;
     if (!d?.ok) throw new Error(d?.error || "fail");
@@ -102,14 +102,13 @@ export default function OwnerPortalPanel({ session, employee }) {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      // جلب القائمة والبيانات الثانوية بالتوازي، ثم ضبطها دفعة واحدة لتفادي إعادة التصيير/القفز المزدوج.
-      const [d, ex] = await Promise.all([
-        call("owner_list"),
-        call("owner_extras").catch(() => null),
-      ]);
+      // نُحمّل قائمة العملاء أولاً لتظهر اللوحة فوراً، ثم نجلب البيانات الثانوية
+      // (مدفوعات معلّقة/استبيانات) بالخلفية حتى لا تعلّق الصفحة إن تأخرت.
+      const d = await call("owner_list");
       setData(d);
-      setExtras(ex);
+      setExtras(null);
       setErr("");
+      call("owner_extras").then((ex) => setExtras(ex)).catch(() => {});
     } catch (e) {
       setErr(String(e?.message || e));
     } finally {
