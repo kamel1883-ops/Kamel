@@ -53,6 +53,8 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
       contact_email: tenant.contact_email || "",
       city: tenant.city || "",
       plan: sub?.plan === "monthly" ? (isAr ? "اشتراك شهري" : "Monthly subscription") : (isAr ? "اشتراك سنوي" : "Annual subscription"),
+      pricing_tier: tenant.pricing_tier || (isAr ? "باقة جدارة السنوية" : "Jadara annual plan"),
+      employee_count: tenant.employee_count || 0,
       period_start: sub?.period_start || todayISO(),
       period_end: sub?.period_end || "",
       amount: sub?.amount || 2500,
@@ -67,18 +69,22 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
   const F = isAr ? {
     title: "إنشاء فاتورة", pul: "تُجلب بيانات العميل تلقائياً — راجعها وعدّلها ثم اطبع",
     name: "اسم المنشأة", unified: "الرقم الموحد", contact: "جهة الاتصال",
-    phone: "الهاتف", email: "البريد", city: "المدينة", plan: "الباقة", pstart: "بداية الفترة",
-    pend: "نهاية الفترة", amount: "المبلغ (ر.س)", print: "طباعة / حفظ PDF", close: "إغلاق",
+    phone: "الهاتف", email: "البريد", city: "المدينة", plan: "الباقة",
+    empCount: "عدد الموظفين", pricePer: "سعر الباقة",
+    pstart: "بداية الاشتراك", pend: "نهاية الاشتراك", amount: "المبلغ (ر.س)",
+    print: "طباعة / حفظ PDF", close: "إغلاق",
     docTitle: "فاتورة", billedTo: "فاتورة إلى", desc: "الوصف", period: "الفترة",
-    amt: "المبلغ", total: "الإجمالي",
+    amt: "المبلغ", total: "الإجمالي", subFrom: "من", subTo: "إلى",
     contactFoot: "للاستفسار", subLine: "باقة جدارة السنوية للمنصة",
   } : {
     title: "Create invoice", pul: "Client data is pulled automatically — review, edit, then print",
     name: "Company name", unified: "Unified number", contact: "Contact",
-    phone: "Phone", email: "Email", city: "City", plan: "Plan", pstart: "Period start",
-    pend: "Period end", amount: "Amount (SAR)", print: "Print / Save PDF", close: "Close",
+    phone: "Phone", email: "Email", city: "City", plan: "Plan",
+    empCount: "Employees", pricePer: "Plan price",
+    pstart: "Start date", pend: "End date", amount: "Amount (SAR)",
+    print: "Print / Save PDF", close: "Close",
     docTitle: "Invoice", billedTo: "Billed to", desc: "Description", period: "Period",
-    amt: "Amount", total: "Total",
+    amt: "Amount", total: "Total", subFrom: "From", subTo: "To",
     contactFoot: "Inquiries", subLine: "Jadara annual platform plan",
   };
 
@@ -100,6 +106,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
               <Inp label={F.email} value={f.contact_email} onChange={(v) => set("contact_email", v)} />
               <Inp label={F.city} value={f.city} onChange={(v) => set("city", v)} />
               <Inp label={F.plan} value={f.plan} onChange={(v) => set("plan", v)} />
+              <Inp label={F.empCount} value={f.employee_count} onChange={(v) => set("employee_count", Number(v) || 0)} type="number" />
               <Inp label={F.amount} value={f.amount} onChange={(v) => set("amount", Number(v) || 0)} type="number" />
               <Inp label={F.pstart} value={f.period_start} onChange={(v) => set("period_start", v)} type="date" />
               <Inp label={F.pend} value={f.period_end} onChange={(v) => set("period_end", v)} type="date" />
@@ -134,16 +141,27 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 <div className="text-[10px] text-slate-500 mt-1">{invNum}</div>
               </div>
 
-              {/* بيانات العميل — كاملة ضمن الإطار */}
+              {/* بيانات العميل — كاملة بمسميات واضحة */}
               <div className="bg-slate-50 border border-slate-300 rounded-lg p-4 mb-4 break-inside-avoid">
                 <div className="text-xs font-semibold text-slate-500 mb-2">{F.billedTo}</div>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm break-inside-avoid">
-                  <div className="font-bold text-slate-900 break-words min-w-0">{f.name || "—"}</div>
-                  <div className="text-slate-600 break-words min-w-0">{F.unified}: {f.unified_number || "—"}</div>
-                  <div className="text-slate-600 break-words min-w-0">{f.contact_name || "—"}</div>
-                  <div className="text-slate-600 break-words min-w-0" dir="ltr">{f.contact_phone || "—"}</div>
-                  <div className="text-slate-600 break-words min-w-0" dir="ltr">{f.contact_email || "—"}</div>
-                  <div className="text-slate-600 break-words min-w-0">{f.city || "—"}</div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm break-inside-avoid">
+                  <Row lbl={F.name} val={f.name} bold />
+                  <Row lbl={F.unified} val={f.unified_number} />
+                  <Row lbl={F.contact} val={f.contact_name} />
+                  <Row lbl={F.phone} val={f.contact_phone} ltr />
+                  <Row lbl={F.email} val={f.contact_email} ltr />
+                  <Row lbl={F.city} val={f.city} />
+                  <Row lbl={F.empCount} val={String(f.employee_count || 0)} bold />
+                  <Row lbl={F.plan} val={f.plan} bold />
+                </div>
+              </div>
+
+              {/* ملخص الاشتراك */}
+              <div className="border border-slate-300 rounded-lg p-3 mb-4 break-inside-avoid text-sm">
+                <div className="grid grid-cols-3 gap-x-4 gap-y-1.5">
+                  <Row lbl={F.pstart} val={f.period_start} />
+                  <Row lbl={F.pend} val={f.period_end} />
+                  <Row lbl={F.pricePer} val={`${Number(f.amount).toLocaleString()} ${sar}`} bold accent />
                 </div>
               </div>
 
@@ -159,7 +177,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 <tbody>
                   <tr>
                     <td className="p-2 border-b border-slate-200 break-words">{f.plan} — {F.subLine}</td>
-                    <td className="p-2 border-b border-slate-200 whitespace-nowrap">{f.period_start} → {f.period_end || "—"}</td>
+                    <td className="p-2 border-b border-slate-200 whitespace-nowrap">{F.subFrom} {f.period_start} {F.subTo} {f.period_end || "—"}</td>
                     <td className="p-2 border-b border-slate-200 font-semibold whitespace-nowrap">{Number(f.amount).toLocaleString()} {sar}</td>
                   </tr>
                   <tr>
@@ -198,6 +216,21 @@ function Inp({ label, value, onChange, type = "text" }) {
     <div className="space-y-1">
       <Label className="text-xs text-muted-foreground">{label}</Label>
       <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function Row({ lbl, val, bold, ltr, accent }) {
+  const text = val && String(val).trim() !== "" ? val : "—";
+  return (
+    <div className="flex flex-col min-w-0 break-inside-avoid">
+      <span className="text-[11px] text-slate-500">{lbl}</span>
+      <span
+        className={["break-words min-w-0", bold ? "font-bold" : "", accent ? "text-[#1d3a5f]" : "text-slate-700"].join(" ")}
+        dir={ltr ? "ltr" : undefined}
+      >
+        {text}
+      </span>
     </div>
   );
 }
