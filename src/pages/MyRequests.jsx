@@ -9,6 +9,7 @@ import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
 import EmployeePerformance from "@/components/portal/EmployeePerformance";
 import EmployeeTraining from "@/components/portal/EmployeeTraining";
+import EmployeeDocuments from "@/components/portal/EmployeeDocuments";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -135,6 +136,7 @@ export default function MyRequests() {
   const [warnings, setWarnings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [trainings, setTrainings] = useState([]);
+  const [settlements, setSettlements] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -174,6 +176,7 @@ export default function MyRequests() {
       setWarnings(data.warnings || []);
       setReviews(data.reviews || []);
       setTrainings(data.trainings || []);
+      setSettlements(data.settlements || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -233,7 +236,7 @@ export default function MyRequests() {
     portalSession.clear();
     setSession(null);
     setEmployee(null); setOrg(null);
-    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]);
+    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
     setView("self");
   };
 
@@ -554,6 +557,10 @@ export default function MyRequests() {
 
             <div className="mt-6">
               <EmployeeTraining trainings={trainings} />
+            </div>
+
+            <div className="mt-6">
+              <EmployeeDocuments leaves={leaves} settlements={settlements} org={org} />
             </div>
             <div className="mt-6">
               <EmployeeWarnings employee={employee} warnings={warnings} />

@@ -32,7 +32,7 @@ export default async function (req) {
     const isOwner = (emp.role_level || "employee") === "owner";
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -41,6 +41,7 @@ export default async function (req) {
         base44.asServiceRole.entities.Warning.filter({ employee_id: employeeId }, "-created_date", 100),
         base44.asServiceRole.entities.Performance.filter({ employee_id: employeeId }, "-created_date", 100),
         base44.asServiceRole.entities.TrainingPlan.list("-created_date", 500),
+        base44.asServiceRole.entities.Settlement.filter({ employee_id: employeeId }, "-created_date", 200),
       ]);
       // يظهر للموظف فقط التقييمات التي اعتمدتها الموارد البشرية (مكتملة أو معتمدة)
       const reviews = (performances || []).filter((p) => p?.status === "completed" || p?.status === "acknowledged");
@@ -56,12 +57,15 @@ export default async function (req) {
         if (p?.scope === "department" && p.department && emp?.department && p.department === emp.department) return true;
         return false;
       });
+      // مخالصات نهاية الخدمة المكتملة/المصروفة فقط (لإطلاع الموظف على مستحقاته المحفوظة)
+      const paidSettlements = (settlements || []).filter((s: any) => s?.status === "completed");
       return Response.json({
         ok: true,
         employee: emp,
         org: orgs?.[0] || null,
         leaves, loans, attendance, trips, warnings,
         reviews, trainings,
+        settlements: paidSettlements,
       });
     }
 
