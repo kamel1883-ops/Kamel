@@ -138,7 +138,7 @@ export default function Approvals() {
   const myEmployee = employees.find((e) => e.user_id && e.user_id === me?.id) || null;
   const isAdmin = me?.role === "admin";
   const isHR = isAdmin || !!myEmployee?.is_approver_hr;
-  const isFinance = isAdmin || !!myEmployee?.is_approver_finance;
+  const isFinance = !!myEmployee?.is_approver_finance; // تأكيد الصرف حصري لمعتمد المالية فقط — الأدمن لا يكسر الفصل
   const isManager = isAdmin || !!myEmployee?.is_approver_manager;
   const isManagerOf = (r) => isAdmin || (isManager && !!r.manager_id && r.manager_id === myEmployee?.id);
 
