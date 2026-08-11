@@ -116,7 +116,6 @@ export default function Approvals() {
   const [deductionNote, setDeductionNote] = useState("");
   const [additionAmount, setAdditionAmount] = useState("");
   const [additionNote, setAdditionNote] = useState("");
-  const [grantedDays, setGrantedDays] = useState("");
   const [loanAmount, setLoanAmount] = useState("");
   const [loanInstallments, setLoanInstallments] = useState("");
 
@@ -229,7 +228,7 @@ export default function Approvals() {
     }
     load();
   };
-  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); setGrantedDays(String(r.days_count || "")); };
+  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); };
   const confirmLeaveHr = async () => {
     if (!acting) return;
     setBusy(true);
@@ -241,7 +240,7 @@ export default function Approvals() {
       const annual = getEmployeeAnnualDays(emp, org);
       const used = Number(emp?.prior_used_leave) || 0;
       const before = Math.max(0, annual - used);
-      const granted = Math.max(0, Number(grantedDays) || 0);
+      const granted = Math.max(0, Number(r.days_count) || 0);
       const after = Math.max(0, before - granted);
       const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
       const dailyWage = mw / 30;
@@ -263,7 +262,7 @@ export default function Approvals() {
       try { await generateLeaveSettlement({ ...r, ...patch }, emp, org, leaves); } catch (e) {}
     } catch (e) {}
     setBusy(false); setActing(null); setNote(""); setProofFile(null);
-    setGrantedDays(""); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
+    setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
     load();
   };
   const forwardToFinance = async (r) => {
@@ -578,7 +577,7 @@ export default function Approvals() {
                 const remaining = Math.max(0, annual - used);
                 const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
                 const dailyWage = mw / 30;
-                const granted = Math.max(0, Number(grantedDays) || 0);
+                const granted = Math.max(0, Number(acting.req.days_count) || 0);
                 const ticket = acting.req.is_full_clearance ? leaveTicketAmount(emp, org) : 0;
                 const base = (acting.req.leave_type === "annual" || acting.req.is_full_clearance) ? Math.round(granted * dailyWage * 100) / 100 : 0;
                 const total = Math.max(0, base + ticket + (Number(additionAmount) || 0) - (Number(deductionAmount) || 0));
@@ -592,7 +591,7 @@ export default function Approvals() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-medium text-muted-foreground">{t.grantedLabel}</Label>
-                      <Input type="number" min={0} dir="ltr" value={grantedDays} placeholder={t.grantedHint} onChange={(e) => setGrantedDays(e.target.value)} />
+                      <div className="text-sm font-bold pt-1.5">{granted} {isAr ? "يوم (من التواريخ)" : "days (from dates)"}</div>
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-medium text-muted-foreground">{t.dailyWageLabel}</Label>
