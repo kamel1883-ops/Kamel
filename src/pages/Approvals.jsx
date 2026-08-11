@@ -135,6 +135,12 @@ export default function Approvals() {
   useEffect(() => { load(); }, []);
 
   const empOf = (id) => employees.find((e) => e.id === id);
+  const myEmployee = employees.find((e) => e.user_id && e.user_id === me?.id) || null;
+  const isAdmin = me?.role === "admin";
+  const isHR = isAdmin || !!myEmployee?.is_approver_hr;
+  const isFinance = isAdmin || !!myEmployee?.is_approver_finance;
+  const isManager = isAdmin || !!myEmployee?.is_approver_manager;
+  const isManagerOf = (r) => isAdmin || (isManager && !!r.manager_id && r.manager_id === myEmployee?.id);
 
   // فلترة بالهوية الوطنية
   const query = q.trim();
@@ -149,10 +155,10 @@ export default function Approvals() {
     const s = r.status;
     if (type === "trips") {
       const tb = [];
-      if (s === "pending" || s === "draft") {
+      if ((s === "pending" || s === "draft") && isHR) {
         tb.push({ label: t.hrTripApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openTripApprove(r) });
         tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
-      } else if (s === "awaiting_finance") {
+      } else if (s === "awaiting_finance" && isFinance) {
         tb.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openTripFinance(r) });
       }
       if (r.approval_pdf_url) tb.push({ label: t.tripDocBtn, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.approval_pdf_url, icon: "download" });
@@ -163,14 +169,14 @@ export default function Approvals() {
     // السلف: تتجه مباشرة لمعتمد الموارد البشرية داخل النظام (لا مرور بالمدير المباشر)
     if (type === "loans") {
       const btns = [];
-      if (s === "pending") {
+      if (s === "pending" && isHR) {
         btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLoanHr(r) });
         btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "hr") });
-      } else if (s === "awaiting_finance" || s === "hr_approved") {
+      } else if ((s === "awaiting_finance" || s === "hr_approved") && isFinance) {
         btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("loans", r) });
       }
       const closed = (Number(r.amount) || 0) > 0 && (Number(r.paid_amount) || 0) >= (Number(r.amount) || 0);
-      if (s === "paid" && !closed) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
+      if (s === "paid" && !closed && isFinance) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
       if (r.statement_pdf_url) {
         btns.push({ label: t.statement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.statement_pdf_url, icon: "download" });
       } else {
@@ -181,16 +187,16 @@ export default function Approvals() {
 
     // الإجازات: المدير المباشر ← الموارد البشرية ← المالية
     const btns = [];
-    if (s === "pending_manager" || s === "pending") {
+    if ((s === "pending_manager" || s === "pending") && isManagerOf(r)) {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "manager") });
-    } else if (s === "manager_approved") {
+    } else if (s === "manager_approved" && isHR) {
       btns.push({ label: t.leaveHrBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLeaveHr(r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
-    } else if (s === "hr_settled") {
+    } else if (s === "hr_settled" && isHR) {
       btns.push({ label: t.forwardBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => forwardToFinance(r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
-    } else if (s === "awaiting_finance" || s === "hr_approved") {
+    } else if ((s === "awaiting_finance" || s === "hr_approved") && isFinance) {
       btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance(type, r) });
     }
 
