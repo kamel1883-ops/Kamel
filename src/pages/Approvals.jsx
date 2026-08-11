@@ -140,12 +140,33 @@ export default function Approvals() {
       if (r.finance_proof_url) tb.push({ label: t.finProof, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.finance_proof_url, icon: "download" });
       return tb;
     }
+
+    // السلف: تتجه مباشرة لمعتمد الموارد البشرية داخل النظام (لا مرور بالمدير المباشر)
+    if (type === "loans") {
+      const btns = [];
+      if (s === "pending") {
+        btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => hrApprove("loans", r) });
+        btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "hr") });
+      } else if (s === "awaiting_finance" || s === "hr_approved") {
+        btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("loans", r) });
+      }
+      const closed = (Number(r.amount) || 0) > 0 && (Number(r.paid_amount) || 0) >= (Number(r.amount) || 0);
+      if (!closed) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
+      if (r.statement_pdf_url) {
+        btns.push({ label: t.statement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.statement_pdf_url, icon: "download" });
+      } else {
+        btns.push({ label: t.genStatement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeLoanStatement(r), icon: "refresh", busyKey: "loan" + r.id });
+      }
+      return btns;
+    }
+
+    // الإجازات: المدير المباشر ← الموارد البشرية ← المالية
     const btns = [];
     if (s === "pending_manager" || s === "pending") {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "manager") });
     } else if (s === "manager_approved") {
-      btns.push({ label: type === "leaves" ? t.leaveHrBtn : t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => (type === "leaves" ? openLeaveHr(r) : hrApprove(type, r)) });
+      btns.push({ label: t.leaveHrBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLeaveHr(r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
     } else if (s === "hr_settled") {
       btns.push({ label: t.forwardBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => forwardToFinance(r) });
@@ -154,20 +175,10 @@ export default function Approvals() {
       btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance(type, r) });
     }
 
-    if (type === "leaves") {
-      if (r.settlement_pdf_url) {
-        btns.push({ label: t.printSettle, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.settlement_pdf_url, icon: "download" });
-      } else if (s === "completed" || s === "paid") {
-        btns.push({ label: t.genSettlement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeSettlement(r), icon: "refresh", busyKey: "l" + r.id });
-      }
-    } else {
-      const closed = (Number(r.amount) || 0) > 0 && (Number(r.paid_amount) || 0) >= (Number(r.amount) || 0);
-      if (!closed) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
-      if (r.statement_pdf_url) {
-        btns.push({ label: t.statement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.statement_pdf_url, icon: "download" });
-      } else {
-        btns.push({ label: t.genStatement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeLoanStatement(r), icon: "refresh", busyKey: "loan" + r.id });
-      }
+    if (r.settlement_pdf_url) {
+      btns.push({ label: t.printSettle, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.settlement_pdf_url, icon: "download" });
+    } else if (s === "completed" || s === "paid") {
+      btns.push({ label: t.genSettlement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeSettlement(r), icon: "refresh", busyKey: "l" + r.id });
     }
     return btns;
   };

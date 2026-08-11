@@ -358,7 +358,7 @@ export default function MyRequests() {
     const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
     const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;
 
-    const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance || employee.is_approver_hr);
+    const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
     const isOwner = employee.role_level === "owner";
     content = (
           <div>
