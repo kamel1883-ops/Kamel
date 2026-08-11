@@ -9,6 +9,7 @@ import { formatCurrency, statusEmployeeLabel, leaveTypeLabel } from "@/lib/hr";
 import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { reasonMeta, computeSettlement } from "@/lib/eos";
 import { badge } from "@/lib/approvals";
+import EmployeePaidDocuments from "@/components/EmployeePaidDocuments";
 import { useI18n } from "@/lib/i18n";
 
 function Row({ label, value }) {
@@ -39,6 +40,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
     leaveCash: "تعويض الإجازات", ticket: "تعويض التذكرة", total: "إجمالي المخالصة",
     termination: "معلومات الإنهاء", none: "غير منتهٍ", openTrips: "فتح سجل الانتدابات",
     joinJourney: "رحلة العمل داخل المنشأة",
+    archive: "أرشيف المستندات المالية (مصروفة)",
   } : {
     personal: "Personal", employment: "Employment", salary: "Salary & allowances",
     leave: "Leaves & tickets", eos: "End of service", trips: "Employee trips",
@@ -47,6 +49,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
     leaveCash: "Leave compensation", ticket: "Ticket compensation", total: "Total settlement",
     termination: "Termination info", none: "Active", openTrips: "Open trips log",
     joinJourney: "Employment journey",
+    archive: "Archived paid documents",
   };
   const [trips, setTrips] = useState([]);
   const [leaves, setLeaves] = useState([]);
@@ -153,6 +156,12 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
                 </>
               ) : <div className="text-sm text-emerald-600">{t.none}</div>}
             </Block>
+
+            {(employee?.status === "terminated" || employee?.status === "resigned") && (
+              <Block title={t.archive}>
+                <EmployeePaidDocuments employee={employee} org={org} />
+              </Block>
+            )}
 
             {eos && (
               <Block title={t.eos}>

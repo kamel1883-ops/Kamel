@@ -90,7 +90,7 @@ export default function EndOfService() {
       base44.entities.Organization.list("-created_date", 1),
       base44.entities.Settlement.list("-created_date", 50),
     ]);
-    setEmployees(emps.filter((e) => e.base_salary > 0));
+    setEmployees(emps.filter((e) => e.role_level !== "owner"));
     setOrg(orgs[0]);
     setSettlements(sets);
     try { setMe(await base44.auth.me()); } catch {}
@@ -113,13 +113,22 @@ export default function EndOfService() {
 
   const emp = employees.find((e) => e.id === empId);
 
+  const liveBalance = emp ? (() => {
+    const annualDays = getEmployeeAnnualDays(emp, org);
+    const asOf = lwd ? new Date(lwd) : new Date();
+    const ent = computeEntitlement(emp.hire_date, annualDays, asOf);
+    const used = Math.round((sumUsedDays(empLeaves) + (Number(emp.prior_used_leave) || 0)) * 10) / 10;
+    return { ent, used, remaining: Math.max(0, Math.round((ent - used) * 10) / 10) };
+  })() : null;
+
   const compute = () => {
     if (!emp) return;
     // رصيد الإجازات المتبقي = المستحق (تناسبي حسب نظام الموظف 21/30) − الأيام المستخدمة
     const annualDays = getEmployeeAnnualDays(emp, org);
     const asOf = lwd ? new Date(lwd) : new Date();
     const ent = computeEntitlement(emp.hire_date, annualDays, asOf);
-    const used = Math.round((Number(emp.prior_used_leave) || 0) * 10) / 10;
+    // رصيد الإجازات المتبقي من ملف الموظف: المستحق − المستخدم فعلياً (طلبات الإجازة) − المستخدم سابقاً
+    const used = Math.round((sumUsedDays(empLeaves) + (Number(emp.prior_used_leave) || 0)) * 10) / 10;
     const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
     const record = {
@@ -264,7 +273,20 @@ export default function EndOfService() {
           </div>
         </div>
 
-        {emp && (<div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3 mb-3">{t.empInfo(emp)}</div>)}
+        {emp && (
+          <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3 mb-3 space-y-1">
+            <div>{t.empInfo(emp)}</div>
+            {liveBalance && (
+              <div className="flex items-center gap-1 flex-wrap">
+                <span>{isAr ? "رصيد الإجازات المتبقي:" : "Remaining leave balance:"} </span>
+                <span className="font-bold text-violet-700">{liveBalance.remaining} {isAr ? "يوم" : "days"}</span>
+                {liveBalance.remaining === 0 && (
+                  <span className="text-rose-600"> — {isAr ? "لا توجد أيام متبقية — تصفية الإجازات = صفر" : "no days left — leave cash = 0"}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {loading ? (
