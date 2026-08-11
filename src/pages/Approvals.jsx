@@ -296,7 +296,10 @@ export default function Approvals() {
     await update(type, req.id, patch);
     setActing(null); setNote(""); load();
   };
-  const openFinance = (type, r) => { setActing({ type, req: r, action: "finance" }); setProofFile(null); setNote(""); };
+  const openFinance = (type, r) => {
+    setActing({ type, req: r, action: "finance" }); setProofFile(null); setNote("");
+    if (type === "loans") { setLoanAmount(String(r.amount || "")); setLoanInstallments(String(r.installment_count || 1)); }
+  };
   const confirmFinance = async () => {
     if (!acting) return;
     setBusy(true);
@@ -308,14 +311,22 @@ export default function Approvals() {
       finance_proof_date: todayISO(), finance_note: note,
       status: isLoan ? "paid" : "completed",
     };
-    if (isLoan) patch.paid_amount = 0;
+    if (isLoan) {
+      const amt = Math.max(0, Number(loanAmount) || 0);
+      const inst = Math.max(1, Number(loanInstallments) || 1);
+      patch.paid_amount = 0;
+      patch.amount = amt;
+      patch.installment_count = inst;
+      patch.monthly_installment = amt ? Math.round((amt / inst) * 100) / 100 : 0;
+    }
     await update(acting.type, acting.req.id, patch);
+    if (isLoan) { try { await generateLoanStatement({ ...acting.req, ...patch }, empOf(acting.req.employee_id), org); } catch (e) {} }
     if (acting.type === "leaves" && acting.req.ticket_amount > 0) {
       const emp = empOf(acting.req.employee_id);
       if (emp) await base44.entities.Employee.update(emp.id, { ticket_last_used_year: new Date().getFullYear() });
     }
     if (acting.type === "leaves") { try { await generateLeaveSettlement(acting.req, empOf(acting.req.employee_id), org, leaves); } catch (e) {} }
-    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+    setBusy(false); setActing(null); setNote(""); setProofFile(null); setLoanAmount(""); setLoanInstallments(""); load();
   };
   const update = async (type, id, patch) => {
     if (type === "leaves") await base44.entities.LeaveRequest.update(id, patch);
@@ -337,18 +348,13 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     try {
-      const r = acting.req;
-      const amt = Math.max(0, Number(loanAmount) || 0);
-      const inst = Math.max(1, Number(loanInstallments) || 1);
-      const monthly = amt ? Math.round((amt / inst) * 100) / 100 : 0;
-      await base44.entities.LoanRequest.update(r.id, {
-        amount: amt, installment_count: inst, monthly_installment: monthly,
+      await base44.entities.LoanRequest.update(acting.req.id, {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
         status: "awaiting_finance",
       });
-      try { await generateLoanStatement({ ...r, amount: amt, installment_count: inst, monthly_installment: monthly }, empOf(r.employee_id), org); } catch (e) {}
+      try { await generateLoanStatement(acting.req, empOf(acting.req.employee_id), org); } catch (e) {}
     } catch (e) {}
-    setBusy(false); setActing(null); setNote(""); setLoanAmount(""); setLoanInstallments(""); load();
+    setBusy(false); setActing(null); setNote(""); load();
   };
   const openLoanPay = (r) => { setActing({ type: "loans", req: r, action: "loanpay" }); setLoanPayAmount(String(r.paid_amount || 0)); };
   const confirmLoanPay = async () => {
@@ -510,20 +516,33 @@ export default function Approvals() {
               <div className="text-sm text-muted-foreground">
                 {acting.type === "leaves" ? t.leavePay(acting.req.ticket_amount) : t.loanPay(acting.req.amount)}
               </div>
+              {acting.type === "loans" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">{t.loanAmountL} <span className="text-rose-500">*</span></Label>
+                    <Input type="number" min={0} dir="ltr" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">{t.loanInstL}</Label>
+                    <Input type="number" min={1} dir="ltr" value={loanInstallments} onChange={(e) => setLoanInstallments(e.target.value)} />
+                  </div>
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.finNote}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t.finNotePh} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">{t.proof}</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{t.proof} <span className="text-rose-500">*</span></Label>
                 <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
+                {!proofFile && <span className="text-xs text-rose-500">{isAr ? "إرفاق المستند مطلوب للتأكيد" : "Attachment required to confirm"}</span>}
               </div>
               <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
                 {acting.type === "leaves" ? t.payNoteL : t.payNote}
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setActing(null)}>{t.cancel}</Button>
-                <Button onClick={confirmFinance} disabled={busy} className="gap-1 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={confirmFinance} disabled={busy || !proofFile} className="gap-1 bg-blue-600 hover:bg-blue-700">
                   {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.confirmPay}
                 </Button>
               </DialogFooter>
@@ -641,21 +660,9 @@ export default function Approvals() {
           {acting && (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">{acting.req.employee_name}</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-muted-foreground">{t.loanAmountL}</Label>
-                  <Input type="number" min={0} dir="ltr" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-muted-foreground">{t.loanInstL}</Label>
-                  <Input type="number" min={1} dir="ltr" value={loanInstallments} onChange={(e) => setLoanInstallments(e.target.value)} />
-                </div>
+              <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3">
+                {isAr ? <>المبلغ المطلوب: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · الأقساط: <b className="text-foreground">{acting.req.installment_count || 1}</b></> : <>Requested: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · Inst: <b className="text-foreground">{acting.req.installment_count || 1}</b></>}
               </div>
-              {(Number(loanAmount) || 0) > 0 && (
-                <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3">
-                  {isAr ? <>قسط شهري ≈ <b className="text-foreground">{formatCurrency(Math.round((Number(loanAmount) / Math.max(1, Number(loanInstallments) || 1)) * 100) / 100)}</b> على مدى {Math.max(1, Number(loanInstallments) || 1)} شهر.</> : <>Monthly ≈ <b className="text-foreground">{formatCurrency(Math.round((Number(loanAmount) / Math.max(1, Number(loanInstallments) || 1)) * 100) / 100)}</b> over {Math.max(1, Number(loanInstallments) || 1)} months.</>}
-                </div>
-              )}
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
@@ -730,13 +737,14 @@ export default function Approvals() {
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t.finNotePh} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">{t.proof}</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{t.proof} <span className="text-rose-500">*</span></Label>
                 <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
+                {!proofFile && <span className="text-xs text-rose-500">{isAr ? "إرفاق المستند مطلوب للتأكيد" : "Attachment required to confirm"}</span>}
               </div>
               <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{t.tripFinWarn}</div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
-                <Button onClick={confirmTripFinance} disabled={busy} className="gap-1 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={confirmTripFinance} disabled={busy || !proofFile} className="gap-1 bg-blue-600 hover:bg-blue-700">
                   {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.confirmPay}
                 </Button>
               </DialogFooter>
