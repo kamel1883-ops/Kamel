@@ -124,6 +124,10 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
               <Row label={isAr ? "بدل سكن" : "Housing"} value={formatCurrency(employee.housing_allowance)} />
               <Row label={isAr ? "بدل مواصلات" : "Transport"} value={formatCurrency(employee.transport_allowance)} />
               <Row label={isAr ? "بدلات أخرى" : "Other"} value={formatCurrency(employee.other_allowances)} />
+              <div className="flex justify-between gap-3 pt-2 mt-1 border-t-2 border-violet-200">
+                <span className="text-sm font-bold text-violet-700">{isAr ? "الإجمالي الشهري (أساس الحسابات)" : "Monthly gross (computation basis)"}</span>
+                <span className="text-sm font-bold text-violet-700">{formatCurrency((Number(employee.base_salary)||0) + (Number(employee.housing_allowance)||0) + (Number(employee.transport_allowance)||0) + (Number(employee.other_allowances)||0))}</span>
+              </div>
             </Block>
 
             <Block title={t.leave}>
@@ -152,6 +156,8 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
 
             {eos && (
               <Block title={t.eos}>
+                <Row label={isAr ? "أساس الحساب (الإجمالي الشهري)" : "Basis (monthly gross)"} value={formatCurrency(eos.monthlyWage)} />
+                <Row label={isAr ? "الأجر اليومي (إجمالي ÷ 30)" : "Daily wage (gross ÷ 30)"} value={formatCurrency(eos.dailyWage)} />
                 <Row label={t.eosYears} value={eos.years} />
                 <Row label={t.eosFraction} value={eos.fractionLabel} />
                 <Row label={t.eosAmount} value={formatCurrency(eos.amount)} />
