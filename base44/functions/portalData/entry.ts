@@ -288,14 +288,13 @@ export default async function (req) {
 
     if (action === "create_loan") {
       const p = body.payload || {};
-      const { manager_id, manager_name } = await resolveManager();
+      // السلف لا تمرّ على المدير المباشر — تتجه مباشرة لمعتمد الموارد البشرية ثم المالية.
       const loan: any = await base44.asServiceRole.entities.LoanRequest.create({
         ...p,
         employee_id: employeeId,
         employee_user_id: emp.user_id || null,
         employee_name: empLabel,
-        status: "pending_manager", manager_status: "pending", hr_status: "pending", finance_status: "pending",
-        manager_id, manager_name,
+        status: "pending", manager_status: "pending", hr_status: "pending", finance_status: "pending",
       });
       return Response.json({ ok: true, loan });
     }

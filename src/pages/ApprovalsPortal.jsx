@@ -18,6 +18,7 @@ export default function ApprovalsPortal({ portalSession }) {
   const isAr = lang === "ar";
   const t = isAr ? {
     mTitle: "موافقات الإجازات", mSub: "اعتماد طلبات إجازات مرؤوسيك المباشرين",
+    hTitle: "اعتماد الموارد البشرية", hSub: "اعتماد طلبات السلف والانتدابات قبل الصرف المالي",
     fTitle: "الموافقات المالية", fSub: "اعتماد الصرف النهائي للإجازات والسلف والانتدابات ومخالصات نهاية الخدمة",
     loading: "جارٍ التحميل...", tabLeaves: (n) => `الإجازات (${n})`, tabLoans: (n) => `السلف (${n})`, tabTrips: (n) => `الانتدابات (${n})`,
     tabSettlements: (n) => `نهاية الخدمة (${n})`,
@@ -43,6 +44,7 @@ export default function ApprovalsPortal({ portalSession }) {
     noLink: "لم يتم ربط حسابك بسجل موظف بعد — تواصل مع الموارد البشرية.",
   } : {
     mTitle: "Leave approvals", mSub: "Approve leave requests of your direct subordinates",
+    hTitle: "HR approvals", hSub: "Approve loans and business trips before payment",
     fTitle: "Finance approvals", fSub: "Final payment approval for leaves, loans, trips and end-of-service settlements",
     loading: "Loading...", tabLeaves: (n) => `Leaves (${n})`, tabLoans: (n) => `Loans (${n})`, tabTrips: (n) => `Trips (${n})`,
     tabSettlements: (n) => `End of service (${n})`,
@@ -178,38 +180,18 @@ export default function ApprovalsPortal({ portalSession }) {
   if (!role || (role !== "manager" && role !== "finance"))
     return <div className="p-10 text-center text-muted-foreground">{t.noLink}</div>;
 
-  // ===== المدير المباشر =====
-  if (role === "manager") {
-    const leaves = data?.leaves || [];
+  // ===== معتمد الموارد البشرية =====
+  if (role === "hr") {
     const loans = data?.loans || [];
     const trips = data?.trips || [];
     return (
       <div dir={isAr ? "rtl" : "ltr"} className="animate-fade-in">
-        <PageHeader title={t.mTitle} subtitle={t.mSub} />
-        {data?.message && <div className="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{data.message}</div>}
-        {data?.subordinates?.length > 0 && <div className="mb-3 text-xs text-muted-foreground">{t.subInfo(data.subordinates.length)}</div>}
-        <Tabs defaultValue="leaves">
+        <PageHeader title={t.hTitle} subtitle={t.hSub} />
+        <Tabs defaultValue="loans">
           <TabsList className="mb-4">
-            <TabsTrigger value="leaves">{t.tabLeaves(leaves.length)}</TabsTrigger>
             <TabsTrigger value="loans">{t.tabLoans(loans.length)}</TabsTrigger>
             <TabsTrigger value="trips">{t.tabTrips(trips.length)}</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="leaves">
-            <div className="space-y-3">
-              {leaves.length === 0 ? <Empty /> : leaves.map((r) => (
-                <Card key={r.id} r={r}
-                  actions={[
-                    { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("leaves", r), busyKey: r.id },
-                    { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("leaves", r) },
-                  ]}>
-                  {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
-                  {r.reason && <span className="text-xs text-muted-foreground">{r.reason}</span>}
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
           <TabsContent value="loans">
             <div className="space-y-3">
               {loans.length === 0 ? <Empty /> : loans.map((r) => (
@@ -222,7 +204,6 @@ export default function ApprovalsPortal({ portalSession }) {
               ))}
             </div>
           </TabsContent>
-
           <TabsContent value="trips">
             <div className="space-y-3">
               {trips.length === 0 ? <Empty /> : trips.map((r) => (
@@ -238,6 +219,46 @@ export default function ApprovalsPortal({ portalSession }) {
             </div>
           </TabsContent>
         </Tabs>
+
+        <Dialog open={!!acting} onOpenChange={() => setActing(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader><DialogTitle>{t.rejectTitle}</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <Label className="text-xs font-medium text-muted-foreground">{t.rejectReason}</Label>
+              <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setActing(null)}>{t.cancel}</Button>
+              <Button variant="destructive" onClick={confirmReject} disabled={busy} className="gap-1">
+                {busy ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />} {t.confirmReject}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  // ===== المدير المباشر =====
+  if (role === "manager") {
+    const leaves = data?.leaves || [];
+    return (
+      <div dir={isAr ? "rtl" : "ltr"} className="animate-fade-in">
+        <PageHeader title={t.mTitle} subtitle={t.mSub} />
+        {data?.message && <div className="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{data.message}</div>}
+        {data?.subordinates?.length > 0 && <div className="mb-3 text-xs text-muted-foreground">{t.subInfo(data.subordinates.length)}</div>}
+        <div className="space-y-3">
+          {leaves.length === 0 ? <Empty /> : leaves.map((r) => (
+            <Card key={r.id} r={r}
+              actions={[
+                { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("leaves", r), busyKey: r.id },
+                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("leaves", r) },
+              ]}>
+              {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
+              {r.reason && <span className="text-xs text-muted-foreground">{r.reason}</span>}
+            </Card>
+          ))}
+        </div>
 
         <Dialog open={!!acting} onOpenChange={() => setActing(null)}>
           <DialogContent className="max-w-md">

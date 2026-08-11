@@ -21,7 +21,7 @@ const empty = {
   department: "", branch_id: "", branch_name: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
   contract_type: "full_time", contract_start_date: "", contract_end_date: "", status: "active",
   termination_reason: "none", termination_date: "", manager_id: "",
-  is_approver_manager: false, is_approver_finance: false,
+  is_approver_manager: false, is_approver_finance: false, is_approver_hr: false,
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
   avatar_url: "",
   iqama_expiry: "", passport_number: "", passport_expiry: "",
@@ -46,7 +46,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
     annualLeaveEnt: "رصيد الإجازات السنوي (يحدده الموارد البشرية)", d21: "21 يوم", d30: "30 يوم",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
-    approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)",
+    approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)", approverHr: "معتمد موارد بشرية (سلف وانتدابات)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
     cancel: "إلغاء", save: "حفظ",
   } : {
@@ -62,7 +62,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
     annualLeaveEnt: "Annual leave entitlement (set by HR)", d21: "21 days", d30: "30 days",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
-    approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)",
+    approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)", approverHr: "HR approver (loans & trips)",
     deptHint: "Pick from existing departments or type a new one",
     cancel: "Cancel", save: "Save",
   };
@@ -168,6 +168,9 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             </Field>
             <Field label={t.approverFinance}>
               <label className="flex items-center gap-2 h-9"><input type="checkbox" checked={!!form.is_approver_finance} onChange={(e) => set("is_approver_finance", e.target.checked)} className="w-4 h-4 accent-violet-600" /> <span className="text-sm">{isAr ? "تفعيل صلاحية الصرف المالي" : "Enable finance payment rights"}</span></label>
+            </Field>
+            <Field label={t.approverHr}>
+              <label className="flex items-center gap-2 h-9"><input type="checkbox" checked={!!form.is_approver_hr} onChange={(e) => set("is_approver_hr", e.target.checked)} className="w-4 h-4 accent-violet-600" /> <span className="text-sm">{isAr ? "تفعيل صلاحية اعتماد الموارد البشرية (سلف وانتدابات)" : "Enable HR approval rights (loans & trips)"}</span></label>
             </Field>
             <Field label={t.contract}>
               <Select value={form.contract_type} onValueChange={(v) => set("contract_type", v)}>

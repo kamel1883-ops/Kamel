@@ -68,6 +68,7 @@ export default function MyRequests() {
     orgLabel: "المنشأة",
     delegatedManager: "معتمد إجازات (مدير مباشر)",
     delegatedFinance: "معتمد مالي (صرف)",
+    delegatedHr: "معتمد موارد بشرية (سلف وانتدابات)",
     title: "بوابة الموظف الذاتية", subtitle: "",
     leaveBtn: "طلب إجازة", loanBtn: "طلب سلفة", tripBtn: "طلب رحلة/انتداب",
     yearsLabel: "سنوات الخدمة", yearsVal: (n) => `${n} سنة`, yearsSub: (d) => `من ${d}`,
@@ -100,6 +101,7 @@ export default function MyRequests() {
     orgLabel: "Organization",
     delegatedManager: "Leave approver (direct manager)",
     delegatedFinance: "Finance approver (payment)",
+    delegatedHr: "HR approver (loans & trips)",
     title: "Employee Self‑Service Portal", subtitle: "",
     leaveBtn: "Leave request", loanBtn: "Loan request", tripBtn: "Business trip",
     yearsLabel: "Years of service", yearsVal: (n) => `${n} yr`, yearsSub: (d) => `since ${d}`,
@@ -356,7 +358,7 @@ export default function MyRequests() {
     const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
     const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;
 
-    const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
+    const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance || employee.is_approver_hr);
     const isOwner = employee.role_level === "owner";
     content = (
           <div>
@@ -389,6 +391,11 @@ export default function MyRequests() {
                 {employee.is_approver_finance && (
                   <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                     <BadgeCheck size={14} /> {t.delegatedFinance}
+                  </span>
+                )}
+                {employee.is_approver_hr && (
+                  <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
+                    <BadgeCheck size={14} /> {t.delegatedHr}
                   </span>
                 )}
               </div>

@@ -39,28 +39,29 @@ export default async function (req) {
       const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 500);
       const subs = (allEmployees || []).filter((e) => e.manager_id === myEmp.id);
       const subIds = new Set(subs.map((s) => s.id));
-      const [allLeaves, allLoans, allTrips] = await Promise.all([
-        base44.asServiceRole.entities.LeaveRequest.list("-created_date", 500),
-        base44.asServiceRole.entities.LoanRequest.list("-created_date", 500),
-        base44.asServiceRole.entities.BusinessTrip.list("-created_date", 500),
-      ]);
+      const allLeaves = await base44.asServiceRole.entities.LeaveRequest.list("-created_date", 500);
       const leaves = (allLeaves || []).filter(
         (l) => subIds.has(l.employee_id) && (l.status === "pending_manager" || l.status === "pending")
-      );
-      const loans = (allLoans || []).filter(
-        (l) => subIds.has(l.employee_id) && l.status === "pending_manager"
-      );
-      const trips = (allTrips || []).filter(
-        (t) => subIds.has(t.employee_id) && t.status === "pending"
       );
       return Response.json({
         role: "manager",
         myEmp,
         actorId, actorName,
         subordinates: subs.map((s) => ({ id: s.id, full_name: s.full_name, department: s.department, position: s.position })),
-        leaves, loans, trips,
+        leaves,
         message: subs.length === 0 ? "لا يوجد مرؤوسون مربوطون بك حالياً." : null,
       });
+    }
+
+    // معتمد الموارد البشرية للمنشأة — يرى طلبات السلف والانتدابات قبل الصرف المالي.
+    if (myEmp.is_approver_hr) {
+      const [allLoans, allTrips] = await Promise.all([
+        base44.asServiceRole.entities.LoanRequest.list("-created_date", 500),
+        base44.asServiceRole.entities.BusinessTrip.list("-created_date", 500),
+      ]);
+      const loans = (allLoans || []).filter((l) => l.status === "pending");
+      const trips = (allTrips || []).filter((t) => t.status === "pending");
+      return Response.json({ role: "hr", myEmp, actorId, actorName, loans, trips });
     }
 
     if (myEmp.is_approver_finance) {
