@@ -75,7 +75,8 @@ export default function CompanyLogin() {
       });
       if (!res?.data?.valid) { setError(t.errCreds); return; }
       await base44.auth.loginViaEmailPassword(em, password);
-      window.location.href = returnTo;
+      // بعد الدخول: ادخل التطبيق (وليس صفحة الهبوط العامة) ما لم يوجد returnTo صريح.
+      window.location.href = returnTo && returnTo !== "/" ? returnTo : "/app";
     } catch (err) {
       setError(err?.message || t.errLogin);
     } finally {
