@@ -17,7 +17,7 @@ export default function CompanyRegister() {
   const t = isAr
     ? {
         title: "تسجيل حساب منشأة",
-        subtitle: "سجّل بالبريد والرقم الوطني الموحد المقدّم في طلب التجربة أو عرض السعر لإنشاء كلمة مرورك",
+        subtitle: "سجّل بالبريد والرقم الوطني الموحد المقدّم في طلب التجربة أو اشتراكك السنوي المفعّل لإنشاء كلمة مرورك",
         email: "البريد الإلكتروني المسجّل في الطلب",
         unified: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7)",
         password: "كلمة المرور",
@@ -29,7 +29,7 @@ export default function CompanyRegister() {
         errExists: "هذا البريد مسجّل مسبقاً — استخدم الدخول أو استعادة كلمة المرور.",
         creating: "جارٍ إنشاء الحساب...",
         create: "إنشاء الحساب",
-        note: "التسجيل متاح فقط للمنشآت التي قدّمت طلب تجربة أو عرض سعر. يجب تطابق البريد والرقم الموحد المستخدم في طلبك.",
+        note: "التسجيل متاح فقط للمنشآت التي قدّمت طلب تجربة أو لديها اشتراك سنوي مفعّل من جدارة لإدارة الموارد البشرية. يجب تطابق البريد والرقم الموحد المستخدم في طلبك.",
         otpTitle: "تأكيد بريدك الإلكتروني",
         otpSub: "أرسلنا رمزاً إلى",
         verifying: "جارٍ التحقق وتفعيل الحساب...",
@@ -47,7 +47,7 @@ export default function CompanyRegister() {
       }
     : {
         title: "Register company account",
-        subtitle: "Register with the email and National Unified Number you submitted in your trial or quote request to set your password",
+        subtitle: "Register with the email and National Unified Number you submitted in your trial request or activated annual subscription to set your password",
         email: "Email registered with your request",
         unified: "National Unified Number (10 digits, starts with 7)",
         password: "Password",
@@ -59,7 +59,7 @@ export default function CompanyRegister() {
         errExists: "This email is already registered — use sign-in or password recovery.",
         creating: "Creating account...",
         create: "Create account",
-        note: "Registration is available only for organizations that submitted a trial or quote request. Your email and unified number must match your request.",
+        note: "Registration is available only for organizations that submitted a trial request or have an annual subscription activated by Jadara. Your email and unified number must match your request.",
         otpTitle: "Verify your email",
         otpSub: "We sent a code to",
         verifying: "Verifying and activating...",
