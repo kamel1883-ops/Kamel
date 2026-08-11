@@ -21,6 +21,29 @@ export default async function (req) {
     if (!captchaToken) return Response.json({ ok: false, error: "captcha_required" }, { status: 400 });
     if (!(await verifyTurnstile(captchaToken))) return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
 
+    // المالك — دخول بوابة المالك مستقل عن جدول الموظفين لتفادي ظهور مالك كموظف للعملاء.
+    // يُطابق رقم الإقامة + تاريخ الميلاد مع أسرار OWNER_IQAMA / OWNER_BIRTH_DATE.
+    const ownerIqama = (Deno.env.get("OWNER_IQAMA") || "").trim();
+    const ownerBirth = (Deno.env.get("OWNER_BIRTH_DATE") || "").trim();
+    if (ownerIqama && ownerBirth && nid === ownerIqama && birthDate === ownerBirth) {
+      const token = await signToken("owner");
+      let org = null;
+      try {
+        const orgs = await base44.asServiceRole.entities.Organization.list("-created_date", 1);
+        org = orgs?.[0] || null;
+      } catch {}
+      return Response.json({
+        ok: true, token, expires_at: Date.now() + 30 * 24 * 3600 * 1000,
+        employee: {
+          id: "owner",
+          full_name: Deno.env.get("OWNER_FULL_NAME") || "مالك النظام",
+          employee_number: "", position: "المالك", department: "الإدارة",
+          role_level: "owner", is_approver_manager: false, is_approver_finance: false,
+        },
+        org: org ? { name: org.name, logo_url: org.logo_url } : null,
+      });
+    }
+
     const emps = await base44.asServiceRole.entities.Employee.filter({ national_id: nid });
     const emp = (emps || []).find((e) => (e.birth_date || "").slice(0, 10) === birthDate);
     if (!emp) return Response.json({ ok: false, error: "not_linked" });

@@ -22,8 +22,13 @@ export default async function (req) {
     if (!session.ok || session.employeeId !== employeeId)
       return Response.json({ ok: false, error: "invalid_session" }, { status: 401 });
 
-    const emp = await base44.asServiceRole.entities.Employee.get(employeeId);
-    const empLabel = `${emp.employee_number} - ${emp.position}`;
+    // المالك — جلسة مستقلة عن جدول الموظفين (employee_id = "owner")،
+    // فلا يحتاج المالك سجل موظف ولا يظهر للعملاء في قوائم الموظفين.
+    const isOwnerSession = employeeId === "owner";
+    const emp = isOwnerSession
+      ? { id: "owner", full_name: Deno.env.get("OWNER_FULL_NAME") || "مالك النظام", employee_number: "", position: "المالك", department: "الإدارة", role_level: "owner", user_id: null }
+      : await base44.asServiceRole.entities.Employee.get(employeeId);
+    const empLabel = isOwnerSession ? "مالك النظام" : `${emp.employee_number} - ${emp.position}`;
     const isOwner = (emp.role_level || "employee") === "owner";
 
     if (action === "fetch") {
