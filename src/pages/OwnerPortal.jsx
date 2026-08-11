@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Crown, ShieldCheck, Loader2, LogOut, ArrowRight, LogIn } from "lucide-react";
+import { Crown, ShieldCheck, Loader2, LogOut, ArrowRight, LogIn, KeyRound, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { portalSession } from "@/lib/portalSession";
 
@@ -84,37 +84,103 @@ export default function OwnerPortal() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [signingIn, setSigningIn] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
+  const [mode, setMode] = useState("login"); // login | forgot | reset
+  const [password, setPassword] = useState("");
+  const [fEmail, setFEmail] = useState("");
+  const [rCode, setRCode] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [newPw2, setNewPw2] = useState("");
+
+  const pt = isAr ? {
+    pwLabel: "كلمة المرور", pwPh: "••••••••",
+    forgot: "نسيت كلمة المرور؟",
+    back: "العودة للدخول",
+    forgotDesc: "أدخل رقم إقامتك وتاريخ ميلادك وبريدك الإلكتروني، وسنرسل رمز تحقق إلى بريدك.",
+    emailLabel: "البريد الإلكتروني", emailPh: "owner@example.com",
+    sendCode: "إرسال الرمز", codeSent: "تم إرسال رمز التحقق إلى بريدك الإلكتروني.",
+    resetDesc: "أدخل الرمز الذي وصلك وكلمة المرور الجديدة.",
+    codeLabel: "رمز التحقق (6 أرقام)", codePh: "123456",
+    newPwLabel: "كلمة المرور الجديدة", newPwPh: "6 أحرف على الأقل",
+    confirmPwLabel: "تأكيد كلمة المرور",
+    mismatch: "كلمتا المرور غير متطابقتين.", weakPw: "كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
+    resetBtn: "تعيين كلمة المرور",
+    resetOk: "تم تعيين كلمة المرور بنجاح. يمكنك الدخول الآن.",
+    setupHint: "أول مرة؟ استخدم «نسيت كلمة المرور» لضبط كلمة المرور الأولى.",
+    setupRequired: "لم تُضبط كلمة المرور بعد. استخدم «نسيت كلمة المرور» لضبطها.",
+    wrongPw: "كلمة المرور غير صحيحة.",
+    codeExpired: "انتهت صلاحية الرمز.", codeInvalid: "رمز غير صحيح.",
+  } : {
+    pwLabel: "Password", pwPh: "••••••••",
+    forgot: "Forgot password?", back: "Back to sign in",
+    forgotDesc: "Enter your Iqama, birth date and email — we'll send a verification code.",
+    emailLabel: "Email", emailPh: "owner@example.com",
+    sendCode: "Send code", codeSent: "Verification code sent to your email.",
+    resetDesc: "Enter the code you received and your new password.",
+    codeLabel: "Verification code (6 digits)", codePh: "123456",
+    newPwLabel: "New password", newPwPh: "At least 6 characters",
+    confirmPwLabel: "Confirm password",
+    mismatch: "Passwords don't match.", weakPw: "Password must be at least 6 characters.",
+    resetBtn: "Set password",
+    resetOk: "Password set successfully. You can sign in now.",
+    setupHint: "First time? Use \"Forgot password\" to set your initial password.",
+    setupRequired: "No password set yet. Use \"Forgot password\" to set it.",
+    wrongPw: "Incorrect password.", codeExpired: "Code expired.", codeInvalid: "Invalid code.",
+  };
+
+  const apiErrText = (err, fallback) => err?.response?.data?.error || err?.message || fallback;
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const id = nid.trim(), bd = birth.trim();
-    if (!id || !bd) return;
+    if (!id || !bd || !password) return;
     if (!captchaToken) { setMsg({ type: "err", text: t.gCaptcha }); return; }
     setSigningIn(true); setMsg({ type: "", text: "" });
     try {
-      const res = await base44.functions.invoke("verifyEmployeePortal", {
-        national_id: id, birth_date: bd, captcha_token: captchaToken,
+      const res = await base44.functions.invoke("verifyOwnerLogin", {
+        iqama: id, birth_date: bd, password, captcha_token: captchaToken,
       });
       const data = res?.data || res;
       if (data?.ok) {
-        portalSession.save({
-          token: data.token,
-          employee_id: data.employee.id,
-          employee: data.employee,
-          org: data.org,
-          expires_at: data.expires_at,
-        });
-        setSession(portalSession.load());
-        setEmployee(data.employee);
-        setNid(""); setBirth(""); setCaptchaToken("");
+        portalSession.save({ token: data.token, employee_id: data.employee.id, employee: data.employee, org: data.org, expires_at: data.expires_at });
+        setSession(portalSession.load()); setEmployee(data.employee);
+        setNid(""); setBirth(""); setPassword(""); setCaptchaToken("");
       } else {
-        setMsg({ type: "err", text: data?.error === "inactive" ? t.gInactive : t.gFail });
+        const m = data?.error === "setup_required" ? pt.setupRequired : data?.error === "wrong_password" ? pt.wrongPw : t.gFail;
+        setMsg({ type: "err", text: m });
       }
-    } catch (err) {
-      setMsg({ type: "err", text: err?.response?.data?.error || err?.message || t.gFail });
-    } finally {
-      setSigningIn(false);
-    }
+    } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); }
+    finally { setSigningIn(false); }
+  };
+
+  const handleForgot = async (e) => {
+    e.preventDefault();
+    const id = nid.trim(), bd = birth.trim();
+    if (!id || !bd || !fEmail.trim()) return;
+    if (!captchaToken) { setMsg({ type: "err", text: t.gCaptcha }); return; }
+    setSigningIn(true); setMsg({ type: "", text: "" });
+    try {
+      const res = await base44.functions.invoke("ownerForgotPassword", {
+        iqama: id, birth_date: bd, email: fEmail.trim(), captcha_token: captchaToken,
+      });
+      const data = res?.data || res;
+      if (data?.ok) { setMsg({ type: "ok", text: pt.codeSent }); setMode("reset"); }
+      else setMsg({ type: "err", text: t.gFail });
+    } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); }
+    finally { setSigningIn(false); }
+  };
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    if (newPw.length < 6) { setMsg({ type: "err", text: pt.weakPw }); return; }
+    if (newPw !== newPw2) { setMsg({ type: "err", text: pt.mismatch }); return; }
+    setSigningIn(true); setMsg({ type: "", text: "" });
+    try {
+      const res = await base44.functions.invoke("ownerResetPassword", { reset_code: rCode.trim(), new_password: newPw });
+      const data = res?.data || res;
+      if (data?.ok) { setMsg({ type: "ok", text: pt.resetOk }); setMode("login"); setRCode(""); setNewPw(""); setNewPw2(""); setPassword(""); }
+      else setMsg({ type: "err", text: data?.error === "expired_code" ? pt.codeExpired : pt.codeInvalid });
+    } catch (err) { setMsg({ type: "err", text: apiErrText(err, isAr ? "خطأ." : "Error.") }); }
+    finally { setSigningIn(false); }
   };
 
   const handleLogout = () => {
@@ -162,27 +228,85 @@ export default function OwnerPortal() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-5">{t.gDesc}</p>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label>{t.gIdLabel}</Label>
-                <Input value={nid} onChange={(e) => setNid(e.target.value)} placeholder={t.gIdPh} required disabled={signingIn} dir="ltr" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t.gBirthLabel}</Label>
-                <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
-              </div>
-              <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
-              {msg.text && (
-                <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
-                  {msg.text}
+            {mode === "login" && (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>{t.gIdLabel}</Label>
+                  <Input value={nid} onChange={(e) => setNid(e.target.value)} placeholder={t.gIdPh} required disabled={signingIn} dir="ltr" />
                 </div>
-              )}
-              <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2">
-                {signingIn ? <Loader2 size={16} className="animate-spin" /> : <LogIn size={16} />}
-                {t.gBtn}
-              </Button>
-              <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
-            </form>
+                <div className="space-y-1.5">
+                  <Label>{t.gBirthLabel}</Label>
+                  <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{pt.pwLabel}</Label>
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={pt.pwPh} required disabled={signingIn} dir="ltr" />
+                </div>
+                <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
+                {msg.text && (
+                  <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
+                )}
+                <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2 w-full">
+                  {signingIn ? <Loader2 size={16} className="animate-spin" /> : <LogIn size={16} />} {t.gBtn}
+                </Button>
+                <div className="flex items-center justify-between">
+                  <button type="button" onClick={() => { setMode("forgot"); setMsg({ type: "", text: "" }); }} className="text-xs text-violet-600 hover:underline">{pt.forgot}</button>
+                </div>
+                <p className="text-xs text-amber-600 leading-relaxed">{pt.setupHint}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
+              </form>
+            )}
+
+            {mode === "forgot" && (
+              <form onSubmit={handleForgot} className="space-y-4">
+                <div className="rounded-lg bg-violet-50 text-violet-700 text-xs p-3 leading-relaxed">{pt.forgotDesc}</div>
+                <div className="space-y-1.5">
+                  <Label>{t.gIdLabel}</Label>
+                  <Input value={nid} onChange={(e) => setNid(e.target.value)} placeholder={t.gIdPh} required disabled={signingIn} dir="ltr" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t.gBirthLabel}</Label>
+                  <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{pt.emailLabel}</Label>
+                  <Input type="email" value={fEmail} onChange={(e) => setFEmail(e.target.value)} placeholder={pt.emailPh} required disabled={signingIn} dir="ltr" />
+                </div>
+                <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
+                {msg.text && (
+                  <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
+                )}
+                <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2 w-full">
+                  {signingIn ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />} {pt.sendCode}
+                </Button>
+                <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>
+              </form>
+            )}
+
+            {mode === "reset" && (
+              <form onSubmit={handleReset} className="space-y-4">
+                <div className="rounded-lg bg-violet-50 text-violet-700 text-xs p-3 leading-relaxed">{pt.resetDesc}</div>
+                <div className="space-y-1.5">
+                  <Label>{pt.codeLabel}</Label>
+                  <Input value={rCode} onChange={(e) => setRCode(e.target.value)} placeholder={pt.codePh} required disabled={signingIn} dir="ltr" inputMode="numeric" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{pt.newPwLabel}</Label>
+                  <Input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder={pt.newPwPh} required disabled={signingIn} dir="ltr" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{pt.confirmPwLabel}</Label>
+                  <Input type="password" value={newPw2} onChange={(e) => setNewPw2(e.target.value)} required disabled={signingIn} dir="ltr" />
+                </div>
+                {msg.text && (
+                  <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
+                )}
+                <Button type="submit" disabled={signingIn} className="gap-2 w-full">
+                  {signingIn ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />} {pt.resetBtn}
+                </Button>
+                <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>
+              </form>
+            )}
           </div>
         </div>
       </div>
