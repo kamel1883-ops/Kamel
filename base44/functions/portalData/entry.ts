@@ -143,6 +143,45 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    // ====== استبيانات تجربة العميل — إدارة كاملة من بوابة المالك ======
+    if (action === "owner_survey_list") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const surveys = await base44.asServiceRole.entities.CustomerSurvey.list("-created_date", 200);
+      const respAll = await base44.asServiceRole.entities.CustomerSurveyResponse.list("-created_date", 1000);
+      const counts: any = {};
+      for (const r of respAll || []) counts[r.survey_id] = (counts[r.survey_id] || 0) + 1;
+      return Response.json({ ok: true, surveys: surveys || [], responses_count: counts, responses: respAll || [] });
+    }
+    if (action === "owner_survey_save") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      const payload: any = {
+        title: String(body.title || "").trim(),
+        description: String(body.description || "").trim(),
+        questions: String(body.questions || "[]"),
+        status: String(body.status || "active"),
+        notes: String(body.notes || ""),
+      };
+      if (!payload.title) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      if (id) await base44.asServiceRole.entities.CustomerSurvey.update(id, payload);
+      else await base44.asServiceRole.entities.CustomerSurvey.create(payload);
+      return Response.json({ ok: true });
+    }
+    if (action === "owner_survey_delete") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.CustomerSurvey.delete(id);
+      return Response.json({ ok: true });
+    }
+    if (action === "owner_survey_responses") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const survey_id = String(body.survey_id || "");
+      if (!survey_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const responses = await base44.asServiceRole.entities.CustomerSurveyResponse.filter({ survey_id }, "-created_date", 1000);
+      return Response.json({ ok: true, responses: responses || [] });
+    }
+
     // ====== كودات الخصم — إدارة كاملة من بوابة المالك ======
     if (action === "discount_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
