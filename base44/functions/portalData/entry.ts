@@ -260,8 +260,20 @@ export default async function (req) {
     }
 
     // ====== إنشاء الطلبات — بوابة الموظف ======
+    // يحلّ المدير المباشر للموظف (المعرّف بـ manager_id على نفس المنشأة) لربط الطلب به.
+    const resolveManager = async () => {
+      if (!emp?.manager_id) return { manager_id: null, manager_name: "" };
+      try {
+        const mgr = await base44.asServiceRole.entities.Employee.get(emp.manager_id);
+        return { manager_id: mgr?.id || emp.manager_id, manager_name: mgr?.full_name || "" };
+      } catch {
+        return { manager_id: emp.manager_id, manager_name: "" };
+      }
+    };
+
     if (action === "create_leave") {
       const p = body.payload || {};
+      const { manager_id, manager_name } = await resolveManager();
       const created = await base44.asServiceRole.entities.LeaveRequest.create({
         ...p,
         employee_id: employeeId,
@@ -269,20 +281,23 @@ export default async function (req) {
         employee_name: empLabel,
         status: "pending_manager",
         manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        manager_id, manager_name,
       });
       return Response.json({ ok: true, leave: created });
     }
 
     if (action === "create_loan") {
       const p = body.payload || {};
-      const list: any = await base44.asServiceRole.entities.LoanRequest.create({
+      const { manager_id, manager_name } = await resolveManager();
+      const loan: any = await base44.asServiceRole.entities.LoanRequest.create({
         ...p,
         employee_id: employeeId,
         employee_user_id: emp.user_id || null,
         employee_name: empLabel,
-        status: "manager_approved", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        status: "pending_manager", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        manager_id, manager_name,
       });
-      return Response.json({ ok: true, loan: list });
+      return Response.json({ ok: true, loan });
     }
 
     if (action === "create_trip") {

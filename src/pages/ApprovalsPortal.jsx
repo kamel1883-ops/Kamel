@@ -124,9 +124,9 @@ export default function ApprovalsPortal({ portalSession }) {
     finally { setBusy(false); }
   };
 
-  const managerApprove = async (r) => {
+  const managerApprove = async (type, r) => {
     setBusy(r.id);
-    try { await call({ type: "leaves", action: "approve", id: r.id }); }
+    try { await call({ type, action: "approve", id: r.id }); }
     finally { setBusy(false); }
   };
 
@@ -181,23 +181,63 @@ export default function ApprovalsPortal({ portalSession }) {
   // ===== المدير المباشر =====
   if (role === "manager") {
     const leaves = data?.leaves || [];
+    const loans = data?.loans || [];
+    const trips = data?.trips || [];
     return (
       <div dir={isAr ? "rtl" : "ltr"} className="animate-fade-in">
         <PageHeader title={t.mTitle} subtitle={t.mSub} />
         {data?.message && <div className="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{data.message}</div>}
         {data?.subordinates?.length > 0 && <div className="mb-3 text-xs text-muted-foreground">{t.subInfo(data.subordinates.length)}</div>}
-        <div className="space-y-3">
-          {leaves.length === 0 ? <Empty /> : leaves.map((r) => (
-            <Card key={r.id} r={r}
-              actions={[
-                { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(r), busyKey: r.id },
-                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("leaves", r) },
-              ]}>
-              {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
-              {r.reason && <span className="text-xs text-muted-foreground">{r.reason}</span>}
-            </Card>
-          ))}
-        </div>
+        <Tabs defaultValue="leaves">
+          <TabsList className="mb-4">
+            <TabsTrigger value="leaves">{t.tabLeaves(leaves.length)}</TabsTrigger>
+            <TabsTrigger value="loans">{t.tabLoans(loans.length)}</TabsTrigger>
+            <TabsTrigger value="trips">{t.tabTrips(trips.length)}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="leaves">
+            <div className="space-y-3">
+              {leaves.length === 0 ? <Empty /> : leaves.map((r) => (
+                <Card key={r.id} r={r}
+                  actions={[
+                    { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("leaves", r), busyKey: r.id },
+                    { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("leaves", r) },
+                  ]}>
+                  {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
+                  {r.reason && <span className="text-xs text-muted-foreground">{r.reason}</span>}
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="loans">
+            <div className="space-y-3">
+              {loans.length === 0 ? <Empty /> : loans.map((r) => (
+                <Card key={r.id} r={r}
+                  actions={[
+                    { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("loans", r), busyKey: r.id },
+                    { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r) },
+                  ]}>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="trips">
+            <div className="space-y-3">
+              {trips.length === 0 ? <Empty /> : trips.map((r) => (
+                <Card key={r.id} r={r}
+                  kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 flex items-center gap-1"><Plane size={11} /> {r.trip_type === "external" ? t.tripExt : t.tripInt}</span>}
+                  actions={[
+                    { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("trips", r), busyKey: r.id },
+                    { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("trips", r) },
+                  ]}>
+                  {Number(r.total_cost) > 0 && <span className="text-xs text-muted-foreground">{t.tripCost(r.total_cost)}</span>}
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={!!acting} onOpenChange={() => setActing(null)}>
           <DialogContent className="max-w-md">

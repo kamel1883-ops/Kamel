@@ -47,6 +47,49 @@ export default async function (req) {
 
     const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 500);
 
+    // ===== المدير المباشر — سلف =====
+    if (myEmp.is_approver_manager && type === "loans" && (action === "approve" || action === "reject")) {
+      const r = await base44.asServiceRole.entities.LoanRequest.get(id);
+      const emp = (allEmployees || []).find((e) => e.id === r.employee_id);
+      if (!emp || emp.manager_id !== myEmp.id)
+        return Response.json({ error: "هذا الطلب خارج نطاق مرؤوسيك" }, { status: 403 });
+      if (r.status !== "pending_manager")
+        return Response.json({ error: "الطلب ليس في مرحلة موافقة المدير المباشر" }, { status: 400 });
+      if (action === "approve") {
+        await base44.asServiceRole.entities.LoanRequest.update(id, {
+          manager_status: "approved", manager_id: actorId, manager_name: actorName,
+          manager_date: today(), status: "awaiting_finance",
+        });
+      } else {
+        await base44.asServiceRole.entities.LoanRequest.update(id, {
+          manager_status: "rejected", manager_id: actorId, manager_name: actorName,
+          manager_date: today(), manager_note: note, status: "rejected",
+        });
+      }
+      return Response.json({ ok: true });
+    }
+
+    // ===== المدير المباشر — انتداب =====
+    if (myEmp.is_approver_manager && type === "trips" && (action === "approve" || action === "reject")) {
+      const r = await base44.asServiceRole.entities.BusinessTrip.get(id);
+      const emp = (allEmployees || []).find((e) => e.id === r.employee_id);
+      if (!emp || emp.manager_id !== myEmp.id)
+        return Response.json({ error: "هذا الطلب خارج نطاق مرؤوسيك" }, { status: 403 });
+      if (r.status !== "pending")
+        return Response.json({ error: "الطلب ليس في مرحلة موافقة المدير المباشر" }, { status: 400 });
+      if (action === "approve") {
+        await base44.asServiceRole.entities.BusinessTrip.update(id, {
+          approver_id: actorId, approver_name: actorName, approved_date: today(),
+          status: "awaiting_finance",
+        });
+      } else {
+        await base44.asServiceRole.entities.BusinessTrip.update(id, {
+          status: "rejected", notes: note,
+        });
+      }
+      return Response.json({ ok: true });
+    }
+
     // ===== المدير المباشر =====
     if (myEmp.is_approver_manager && type === "leaves" && (action === "approve" || action === "reject")) {
       const leave = await base44.asServiceRole.entities.LeaveRequest.get(id);

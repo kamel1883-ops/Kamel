@@ -231,7 +231,8 @@ export default function MyRequests() {
 
   const exitToLanding = () => {
     portalSession.clear();
-    window.location.href = "/";
+    // نبقى داخل بوابة الموظف (شاشة الدخول) دون العودة لصفحة الهبوط العامة.
+    window.location.href = "/portal";
   };
 
   const portalArgs = session
