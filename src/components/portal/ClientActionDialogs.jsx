@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus } from "lucide-react";
+import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown } from "lucide-react";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -164,6 +164,153 @@ export function ExtendTrialDialog({ open, onClose, tenant, isAr, t, onDone }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// ——— بطاقة العميل القابلة للطباعة PDF + لوحة التحكم الكاملة ———
+export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, busyId }) {
+  const [days, setDays] = useState("7");
+  const [amount, setAmount] = useState("");
+  const [end, setEnd] = useState("");
+  useEffect(() => {
+    if (open && tenant) {
+      setDays("7");
+      setAmount(String(tenant.quoted_amount || ""));
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setFullYear(d.getFullYear() + 1);
+      setEnd(d.toISOString().slice(0, 10));
+    }
+  }, [open, tenant]);
+  if (!open || !tenant) return null;
+  const status = tenant.status;
+  const busy = busyId === tenant.id;
+  const rows = [
+    [isAr ? "اسم المنشأة / الشركة" : "Company", tenant.name],
+    [isAr ? "الرقم الوطني الموحد للمنشآت" : "National Unified No.", tenant.unified_number],
+    [isAr ? "الشخص المسؤول" : "Responsible person", tenant.contact_name],
+    [isAr ? "رقم الجوال" : "Phone", tenant.contact_phone],
+    [isAr ? "البريد الإلكتروني" : "Email", tenant.contact_email],
+    [isAr ? "المدينة" : "City", tenant.city],
+    [isAr ? "القطاع / النشاط" : "Industry", tenant.industry],
+    [isAr ? "عدد الموظفين" : "Employees", tenant.employee_count],
+    [isAr ? "شريحة الاشتراك" : "Pricing tier", tenant.pricing_tier],
+    [isAr ? "المبلغ المعروض" : "Quoted amount", tenant.quoted_amount ? `${Number(tenant.quoted_amount).toLocaleString()} ${isAr ? "ر.س" : "SAR"}` : "—"],
+    [isAr ? "كود الخصم" : "Discount", tenant.discount_code ? `${tenant.discount_code} (${tenant.discount_percent || 0}%)` : "—"],
+    [isAr ? "نوع الطلب" : "Lead", tenant.lead_source === "quote" ? (isAr ? "طلب عرض سعر" : "Quote request") : (isAr ? "تسجيل تجربة" : "Trial sign-up")],
+    [isAr ? "الحالة" : "Status", status],
+    [isAr ? "بداية التجربة" : "Trial start", tenant.trial_start || "—"],
+    [isAr ? "نهاية التجربة" : "Trial end", tenant.trial_end || "—"],
+    [isAr ? "نهاية الاشتراك" : "Subscription end", tenant.subscription_end || "—"],
+    [isAr ? "تأكيد التعاقد" : "Contract", tenant.contract_confirmed ? (isAr ? "مؤكّد" : "Confirmed") : (isAr ? "غير مؤكد" : "Not confirmed")],
+    [isAr ? "تاريخ التسجيل" : "Registered", (tenant.created_date || "").slice(0, 10)],
+  ];
+  return (
+    <div className="fixed inset-0 z-50 overflow-auto bg-black/50">
+      <div className="max-w-3xl mx-auto my-6 bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="no-print flex items-center justify-between gap-3 p-4 border-b border-border bg-white">
+          <div className="flex items-center gap-2 font-semibold">{isAr ? "بيانات العميل" : "Client info"} — {tenant.name}</div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1.5"><Printer size={14} /> {isAr ? "طباعة PDF" : "Print PDF"}</Button>
+            <Button size="sm" variant="ghost" onClick={onClose} className="h-9 w-9 p-0"><X size={16} /></Button>
+          </div>
+        </div>
+        <div className="print-client p-8">
+          <div className="flex items-center justify-between gap-3 pb-5 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center"><Crown className="text-violet-700" size={22} /></div>
+              <div>
+                <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة — بإدارة الموارد البشرية</div>
+                <div className="text-xs text-slate-500">{isAr ? "بيانات العميل المسجّل" : "Registered client info"}</div>
+              </div>
+            </div>
+            <div className="text-xs text-slate-500 text-left">{new Date().toISOString().slice(0, 10)}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm py-6">
+            {rows.map(([k, v], i) => (
+              <div key={i} className="flex items-center justify-between gap-3 border-b border-dashed border-slate-200 pb-1">
+                <span className="text-slate-500">{k}</span>
+                <span className="font-medium text-slate-800 truncate max-w-[60%]" dir="ltr">{v == null || v === "" ? "—" : v}</span>
+              </div>
+            ))}
+          </div>
+          <div className="pt-4 border-t border-slate-200 text-xs text-slate-400 text-center">
+            {isAr ? "تم استلام هذه البيانات عبر بوابة تسجيل التجربة أو طلب عرض سعر في منصة جدارة" : "Data received via Jadara trial sign-up or quote request portal"}
+          </div>
+        </div>
+        <div className="no-print p-5 border-t border-border bg-slate-50 space-y-4">
+          {status === "trial" && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-medium me-1">{isAr ? "تمديد التجربة:" : "Extend trial:"}</span>
+              <Input type="number" value={days} onChange={(e) => setDays(e.target.value)} className="w-24 h-9" min={1} />
+              <span className="text-xs text-muted-foreground">{isAr ? "يوم" : "days"}</span>
+              <Button size="sm" onClick={() => onAction(tenant.id, "owner_extend_trial", { days: Number(days) })} disabled={busy} className="gap-1.5">
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <CalendarPlus size={14} />} {isAr ? "تمديد" : "Extend"}
+              </Button>
+            </div>
+          )}
+          {(status === "trial" || status === "expired") && (
+            <div className="space-y-2 rounded-xl border border-violet-200 bg-violet-50/50 p-3">
+              <div className="text-sm font-medium">{isAr ? "تأكيد التعاقد وتفعيل الاشتراك" : "Confirm contract & activate"}</div>
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">{isAr ? "المبلغ (ر.س)" : "Amount"}</Label>
+                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-32 h-9" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">{isAr ? "نهاية الاشتراك" : "Sub end"}</Label>
+                  <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="w-40 h-9" dir="ltr" />
+                </div>
+                <Button size="sm" onClick={() => onAction(tenant.id, "owner_activate", { subscription_end: end, amount: Number(amount) })} disabled={busy || !amount || !end} className="gap-1.5">
+                  {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />} {isAr ? "تأكيد وتفعيل" : "Confirm & activate"}
+                </Button>
+              </div>
+            </div>
+          )}
+          {status === "active" && (
+            <div className="space-y-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
+              <div className="text-sm font-medium">{isAr ? "تجديد الاشتراك السنوي" : "Renew annual subscription"}</div>
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">{isAr ? "المبلغ (ر.س)" : "Amount"}</Label>
+                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-32 h-9" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">{isAr ? "نهاية الاشتراك الجديد" : "New sub end"}</Label>
+                  <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="w-40 h-9" dir="ltr" />
+                </div>
+                <Button size="sm" onClick={() => onAction(tenant.id, "owner_activate", { subscription_end: end, amount: Number(amount) })} disabled={busy || !amount || !end} className="gap-1.5">
+                  {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />} {isAr ? "تجديد وتفعيل" : "Renew"}
+                </Button>
+              </div>
+            </div>
+          )}
+          {(status === "trial" || status === "active") && (
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => onAction(tenant.id, "owner_suspend")} disabled={busy} className="gap-1.5 text-amber-700 border-amber-200 hover:bg-amber-50">
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />} {isAr ? "إيقاف مؤقت" : "Suspend"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => onAction(tenant.id, "owner_cancel")} disabled={busy} className="gap-1.5 text-rose-600">
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />} {isAr ? "إلغاء" : "Cancel"}
+              </Button>
+            </div>
+          )}
+          {status === "expired" && (
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => onAction(tenant.id, "owner_restore")} disabled={busy} className="gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} {isAr ? "استرجاع من الإيقاف" : "Restore"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => onAction(tenant.id, "owner_cancel")} disabled={busy} className="gap-1.5 text-rose-600">
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />} {isAr ? "إلغاء" : "Cancel"}
+              </Button>
+            </div>
+          )}
+          {status === "cancelled" && (
+            <Button size="sm" variant="outline" onClick={() => onAction(tenant.id, "owner_restore")} disabled={busy} className="gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} {isAr ? "استرجاع العميل" : "Restore client"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

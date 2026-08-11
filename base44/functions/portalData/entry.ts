@@ -78,6 +78,19 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    if (action === "owner_suspend") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      if (t.status !== "trial" && t.status !== "active") return Response.json({ ok: false, error: "invalid_status" }, { status: 400 });
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        status: "expired",
+        suspended_from: t.status,
+      });
+      return Response.json({ ok: true });
+    }
+
     if (action === "owner_activate") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
       const tenant_id = String(body.tenant_id || "");

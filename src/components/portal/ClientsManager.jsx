@@ -8,49 +8,49 @@ import { Input } from "@/components/ui/input";
 import {
   Crown, Building2, FlaskConical, FileText, BadgeCheck, Pause, CalendarClock,
   Wallet, Loader2, AlertTriangle, RefreshCw, MessageCircle, Search, Users,
-  Check, Sparkles, Ban, RotateCcw, ShieldCheck,
+  Check, Sparkles, Ban, RotateCcw, Eye, Bell,
 } from "lucide-react";
-import {
-  ActivateDialog, ExtendTrialDialog, waLink, daysLeft, isOwnerTenant,
-} from "./ClientActionDialogs";
+import { ClientInfoDialog, waLink, daysLeft, isOwnerTenant } from "./ClientActionDialogs";
 
 export default function ClientsManager({ session }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "إدارة العملاء والعقود",
-    welcome: (n) => `أهلاً ${n || ""} — تابع طلبات التجربة وعرض السعر، استلم التحويل بالواتساب، وأكّد التعاقد وفعّل الاشتراك.`,
+    welcome: "تابع طلبات التجربة وعرض السعر، استلم التحويل بالواتساب، وأكّد التعاقد وفعّل الاشتراك.",
     sTotal: "إجمالي العملاء", sTrials: "تجارب جارية", sQuotes: "طلبات عرض سعر",
     sPaid: "مُشتركون فعّالون", sSuspended: "موقوفون", sCancelled: "ملغيات", sRevenue: "الإيرادات (ر.س/سنة)",
+    alertTitle: "تنبيهات قرب الانتهاء", alertTrial: (n) => `تنتهي تجربة «${n}»`, alertSub: (n) => `ينتهي اشتراك «${n}» السنوي`,
+    alertOpen: "فتح وإجراء", noAlerts: "لا تنبيهات الآن.",
     filterAll: "الكل", filterTrial: "تجارب", filterQuote: "طلبات عرض سعر",
     filterActive: "فعّال", filterSuspended: "موقوف", filterExpiring: "قارب الانتهاء", filterCancelled: "ملغيات",
     searchPh: "ابحث باسم المنشأة أو جهة الاتصال أو الرقم الموحد…",
     thCustomer: "العميل", thContact: "جهة التواصل", thSource: "المصدر", thStatus: "الحالة",
     thContract: "التعاقد", thEnd: "نهاية الفترة", thActions: "إجراءات",
     srcTrial: "تجربة", srcQuote: "عرض سعر",
-    wa: "واتساب", confirm: "تأكيد وتفعيل", extend: "تمديد التجربة", cancel: "إلغاء", restore: "استرجاع",
-    confirmed: "مؤكّد", notConfirmed: "غير مؤكد", noClients: "لا يوجد عملاء بعد — يُسجّلون تلقائياً من صفحة الهبوط أو طلب عرض السعر.",
+    wa: "واتساب", view: "عرض وطباعة", confirmed: "مؤكّد", notConfirmed: "غير مؤكد",
+    noClients: "لا يوجد عملاء بعد — يُسجّلون تلقائياً من صفحة الهبوط أو طلب عرض السعر.",
     loading: "جارٍ تحميل البيانات…", fail: "تعذّر تحميل البيانات. أعد المحاولة.", retry: "إعادة المحاولة",
     sent: "تم تنفيذ العملية بنجاح.",
-    daysLeft: (n) => `متبقي ${n} يوم`, ended: "انتهت",
-    lifetime: "مدى الحياة", noPhone: "لا رقم",
+    daysLeft: (n) => `يبقى ${n} يوم`, ended: "انتهت — راجع الحساب", lifetime: "مدى الحياة",
   } : {
     title: "Clients & Contracts",
-    welcome: (n) => `Welcome ${n || ""} — follow up trial & quote requests, receive transfers via WhatsApp, confirm contracts and activate subscriptions.`,
+    welcome: "Follow up trials & quote requests, receive transfers via WhatsApp, confirm contracts and activate subscriptions.",
     sTotal: "Total clients", sTrials: "Active trials", sQuotes: "Quote requests",
     sPaid: "Active subscribers", sSuspended: "Suspended", sCancelled: "Cancelled", sRevenue: "Revenue (SAR/yr)",
+    alertTitle: "Expiry alerts", alertTrial: (n) => `Trial ending for “${n}”`, alertSub: (n) => `Annual sub ending for “${n}”`,
+    alertOpen: "Open & act", noAlerts: "No alerts right now.",
     filterAll: "All", filterTrial: "Trials", filterQuote: "Quotes",
     filterActive: "Active", filterSuspended: "Suspended", filterExpiring: "Expiring", filterCancelled: "Cancelled",
     searchPh: "Search by company, contact or unified number…",
     thCustomer: "Customer", thContact: "Contact", thSource: "Source", thStatus: "Status",
     thContract: "Contract", thEnd: "Period end", thActions: "Actions",
     srcTrial: "Trial", srcQuote: "Quote",
-    wa: "WhatsApp", confirm: "Confirm & activate", extend: "Extend trial", cancel: "Cancel", restore: "Restore",
-    confirmed: "Confirmed", notConfirmed: "Not confirmed", noClients: "No clients yet — auto-registered from landing or quote requests.",
+    wa: "WhatsApp", view: "View & print", confirmed: "Confirmed", notConfirmed: "Not confirmed",
+    noClients: "No clients yet — auto-registered from landing or quote requests.",
     loading: "Loading…", fail: "Failed to load. Retry.", retry: "Retry",
     sent: "Done successfully.",
-    daysLeft: (n) => `${n} days left`, ended: "Ended",
-    lifetime: "Lifetime", noPhone: "No phone",
+    daysLeft: (n) => `${n} days left`, ended: "Ended — review", lifetime: "Lifetime",
   };
 
   const [data, setData] = useState(null);
@@ -60,8 +60,7 @@ export default function ClientsManager({ session }) {
   const [q, setQ] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [toast, setToast] = useState("");
-  const [activate, setActivate] = useState(null);
-  const [extend, setExtend] = useState(null);
+  const [info, setInfo] = useState(null);
 
   const call = useCallback(async (action, extra = {}) => {
     const p = base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra });
@@ -82,15 +81,32 @@ export default function ClientsManager({ session }) {
   useEffect(() => { if (didMount.current) return; didMount.current = true; loadAll(); }, [loadAll]);
 
   const flash = (m) => { setToast(m); setTimeout(() => setToast(""), 2500); };
-  const act = async (id, action, extra = {}) => {
+  const act = useCallback(async (id, action, extra = {}) => {
     setBusyId(id || action);
     try { await call(action, { tenant_id: id, ...extra }); flash(t.sent); await loadAll(); }
     catch (e) { alert(e?.message || "fail"); }
     finally { setBusyId(null); }
-  };
+  }, [call, loadAll, t.sent]);
 
   const tenants = data?.tenants || [];
   const stats = data?.stats || {};
+
+  const alerts = useMemo(() => {
+    const out = [];
+    for (const x of tenants) {
+      if (isOwnerTenant(x)) continue;
+      if (x.status === "trial" && x.trial_end) {
+        const dl = daysLeft(x.trial_end);
+        if (dl <= 30 && dl >= -30) out.push({ x, kind: "trial", dl });
+      }
+      if (x.status === "active" && x.subscription_end) {
+        const dl = daysLeft(x.subscription_end);
+        if (dl <= 30 && dl >= -30) out.push({ x, kind: "sub", dl });
+      }
+    }
+    out.sort((a, b) => a.dl - b.dl);
+    return out;
+  }, [tenants]);
 
   const filtered = useMemo(() => {
     let list = tenants;
@@ -100,10 +116,9 @@ export default function ClientsManager({ session }) {
     else if (filter === "suspended") list = list.filter((x) => x.status === "expired");
     else if (filter === "cancelled") list = list.filter((x) => x.status === "cancelled");
     else if (filter === "expiring") list = list.filter((x) => {
-      const owner = isOwnerTenant(x);
-      if (owner) return false;
+      if (isOwnerTenant(x)) return false;
       const dl = x.status === "active" ? daysLeft(x.subscription_end) : x.status === "trial" ? daysLeft(x.trial_end) : null;
-      return dl != null && dl <= 7;
+      return dl != null && dl <= 30;
     });
     else list = list.filter((x) => x.status !== "cancelled");
     const s = q.trim().toLowerCase();
@@ -123,7 +138,7 @@ export default function ClientsManager({ session }) {
               <Sparkles size={12} /> {isAr ? "مالك النظام" : "System Owner"}
             </span>
             <h2 className="text-2xl font-bold mt-1.5">{t.title}</h2>
-            <p className="text-white/70 text-sm mt-1 leading-relaxed">{t.welcome("")}</p>
+            <p className="text-white/70 text-sm mt-1 leading-relaxed">{t.welcome}</p>
           </div>
         </div>
       </div>
@@ -145,6 +160,29 @@ export default function ClientsManager({ session }) {
         </div>
       ) : (
         <>
+          {alerts.length > 0 && (
+            <div className="bg-white rounded-2xl border border-rose-200 p-5">
+              <div className="flex items-center gap-2 mb-3.5">
+                <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center"><Bell size={18} /></div>
+                <h3 className="font-semibold">{t.alertTitle}</h3>
+              </div>
+              <div className="space-y-2">
+                {alerts.map(({ x, kind, dl }) => (
+                  <div key={x.id} className="flex items-center justify-between gap-3 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{kind === "trial" ? t.alertTrial(x.name) : t.alertSub(x.name)}</div>
+                        <div className="text-xs text-rose-700">{dl <= 0 ? t.ended : t.daysLeft(dl)} · {kind === "trial" ? (isAr ? "تجربة" : "Trial") : (isAr ? "سنوي" : "Annual")}</div>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => setInfo(x)} className="shrink-0 gap-1.5 h-8"><Eye size={14} /> {t.alertOpen}</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             <Stat icon={Building2} label={t.sTotal} value={stats.total ?? 0} tint="violet" />
             <Stat icon={FlaskConical} label={t.sTrials} value={stats.trials ?? 0} tint="amber" />
@@ -234,7 +272,7 @@ export default function ClientsManager({ session }) {
                           {owner ? (
                             <span className="text-xs text-emerald-700 font-medium inline-flex items-center gap-1"><Check size={13} /> {t.lifetime}</span>
                           ) : x.contract_confirmed ? (
-                            <span className="text-xs text-emerald-700 inline-flex items-center gap-1"><ShieldCheck size={13} /> {t.confirmed}</span>
+                            <span className="text-xs text-emerald-700 inline-flex items-center gap-1"><BadgeCheck size={13} /> {t.confirmed}</span>
                           ) : (
                             <span className="text-xs text-muted-foreground inline-flex items-center gap-1"><AlertTriangle size={12} /> {t.notConfirmed}</span>
                           )}
@@ -255,26 +293,9 @@ export default function ClientsManager({ session }) {
                                 <MessageCircle size={13} /> {t.wa}
                               </a>
                             )}
-                            {!owner && x.status !== "active" && x.status !== "cancelled" && (
-                              <Button size="sm" onClick={() => setActivate(x)} className="gap-1.5 h-8" disabled={busyId === x.id}>
-                                {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <BadgeCheck size={13} />} {t.confirm}
-                              </Button>
-                            )}
-                            {!owner && x.status === "trial" && (
-                              <Button size="sm" variant="outline" onClick={() => setExtend(x)} className="gap-1.5 h-8" disabled={busyId === x.id}>
-                                <CalendarClock size={13} /> {t.extend}
-                              </Button>
-                            )}
-                            {!owner && x.status !== "cancelled" && (
-                              <Button size="sm" variant="ghost" onClick={() => act(x.id, "owner_cancel")} disabled={busyId === x.id} className="gap-1.5 h-8 text-rose-600">
-                                {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <Ban size={13} />} {t.cancel}
-                              </Button>
-                            )}
-                            {!owner && x.status === "cancelled" && (
-                              <Button size="sm" variant="ghost" onClick={() => act(x.id, "owner_restore")} disabled={busyId === x.id} className="gap-1.5 h-8 text-emerald-600">
-                                {busyId === x.id ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />} {t.restore}
-                              </Button>
-                            )}
+                            <Button size="sm" variant="outline" onClick={() => setInfo(x)} className="gap-1.5 h-8">
+                              <Eye size={14} /> {t.view}
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -298,10 +319,8 @@ export default function ClientsManager({ session }) {
         </div>
       )}
 
-      <ActivateDialog open={!!activate} onClose={() => setActivate(null)} tenant={activate} isAr={isAr} t={t}
-        onDone={(payload) => act(activate?.id, "owner_activate", payload)} />
-      <ExtendTrialDialog open={!!extend} onClose={() => setExtend(null)} tenant={extend} isAr={isAr} t={t}
-        onDone={(payload) => act(extend?.id, "owner_extend_trial", payload)} />
+      <ClientInfoDialog open={!!info} onClose={() => setInfo(null)} tenant={info} isAr={isAr} t={t}
+        onAction={act} busyId={busyId} />
     </div>
   );
 }

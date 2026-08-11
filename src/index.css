@@ -173,6 +173,11 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-invoice, .print-invoice * { visibility: visible !important; }
   .print-invoice { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-invoice .no-print { display: none !important; }
+
+  .print-client, .print-client * { visibility: visible !important; }
+  .print-client { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 20px; background: #fff; color: #111; }
+  .print-client .no-print { display: none !important; }
+  .no-print { display: none !important; }
 }
 
 /* === Native WebView / mobile enhancements === */
