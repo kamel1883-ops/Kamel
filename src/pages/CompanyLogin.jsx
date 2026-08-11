@@ -26,8 +26,10 @@ export default function CompanyLogin() {
         errUnified: "الرقم الوطني الموحد للمنشآت يجب أن تكون 10 خانات تبدأ بـ7",
         errCreds: "بيانات المنشأة غير مطابقة. تأكد من البريد والرقم الوطني الموحد للمنشآت.",
         errLogin: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-        noAccount: "ليس لديك حساب منشأة؟",
-        create: "سجّل تجربتك المجانية",
+        noAccount: "ليس لديك حساب منشأة بعد؟",
+        register: "سجّل حسابك",
+        noTrialYet: "لم تطلب عرض سعر؟",
+        create: "اطلب عرض سعر",
         back: "العودة للرئيسية",
       }
     : {
@@ -42,8 +44,10 @@ export default function CompanyLogin() {
         errUnified: "National Unified Number must be 10 digits starting with 7",
         errCreds: "Organization credentials do not match. Verify email and National Unified Number.",
         errLogin: "Invalid email or password",
-        noAccount: "No company account?",
-        create: "Start your free trial",
+        noAccount: "Don't have a company account?",
+        register: "Register your account",
+        noTrialYet: "Haven't requested a quote?",
+        create: "Request a quote",
         back: "Back to home",
       };
 
@@ -85,9 +89,12 @@ export default function CompanyLogin() {
       title={t.title}
       subtitle={t.subtitle}
       footer={
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1.5">
           <span>{t.noAccount}{" "}
-            <Link to="/quote" className="text-primary font-medium hover:underline">{t.create}</Link>
+            <Link to="/company-register" className="text-primary font-medium hover:underline">{t.register}</Link>
+          </span>
+          <span className="text-sm">{t.noTrialYet}{" "}
+            <Link to="/quote" className="text-primary hover:underline">{t.create}</Link>
           </span>
           <Link to="/" className="text-xs text-muted-foreground hover:underline">{t.back}</Link>
         </div>
