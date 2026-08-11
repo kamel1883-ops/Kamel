@@ -271,8 +271,17 @@ export default async function (req) {
       }
     };
 
+    const pick = (obj: any, keys: string[]) => {
+      const out: Record<string, any> = {};
+      for (const k of keys) if (obj && obj[k] !== undefined) out[k] = obj[k];
+      return out;
+    };
+
     if (action === "create_leave") {
-      const p = body.payload || {};
+      const p = pick(body.payload || {}, [
+        "leave_type", "start_date", "end_date", "days_count", "reason",
+        "medical_report_url", "is_full_clearance", "description",
+      ]);
       const { manager_id, manager_name } = await resolveManager();
       const created = await base44.asServiceRole.entities.LeaveRequest.create({
         ...p,
@@ -287,7 +296,7 @@ export default async function (req) {
     }
 
     if (action === "create_loan") {
-      const p = body.payload || {};
+      const p = pick(body.payload || {}, ["amount", "reason", "installment_count", "description"]);
       // السلف لا تمرّ على المدير المباشر — تتجه مباشرة لمعتمد الموارد البشرية ثم المالية.
       const loan: any = await base44.asServiceRole.entities.LoanRequest.create({
         ...p,
@@ -295,12 +304,16 @@ export default async function (req) {
         employee_user_id: emp.user_id || null,
         employee_name: empLabel,
         status: "pending", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        paid_amount: 0,
       });
       return Response.json({ ok: true, loan });
     }
 
     if (action === "create_trip") {
-      const p = body.payload || {};
+      const p = pick(body.payload || {}, [
+        "trip_type", "destination", "purpose", "start_date", "end_date", "days_count",
+        "transport_mode", "employee_note", "employee_document_url", "description",
+      ]);
       const created = await base44.asServiceRole.entities.BusinessTrip.create({
         ...p,
         employee_id: employeeId,
