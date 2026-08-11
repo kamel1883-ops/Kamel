@@ -8,6 +8,7 @@ import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
 import EmployeePerformance from "@/components/portal/EmployeePerformance";
+import EmployeeTraining from "@/components/portal/EmployeeTraining";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -133,6 +134,7 @@ export default function MyRequests() {
   const [trips, setTrips] = useState([]);
   const [warnings, setWarnings] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [trainings, setTrainings] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -171,6 +173,7 @@ export default function MyRequests() {
       setAttendance(data.attendance || []); setTrips(data.trips || []);
       setWarnings(data.warnings || []);
       setReviews(data.reviews || []);
+      setTrainings(data.trainings || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -230,7 +233,7 @@ export default function MyRequests() {
     portalSession.clear();
     setSession(null);
     setEmployee(null); setOrg(null);
-    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]);
+    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]);
     setView("self");
   };
 
@@ -547,6 +550,10 @@ export default function MyRequests() {
 
             <div className="mt-6">
               <EmployeePerformance reviews={reviews} />
+            </div>
+
+            <div className="mt-6">
+              <EmployeeTraining trainings={trainings} />
             </div>
             <div className="mt-6">
               <EmployeeWarnings employee={employee} warnings={warnings} />

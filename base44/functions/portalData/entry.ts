@@ -32,7 +32,7 @@ export default async function (req) {
     const isOwner = (emp.role_level || "employee") === "owner";
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -40,15 +40,28 @@ export default async function (req) {
         base44.asServiceRole.entities.BusinessTrip.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.Warning.filter({ employee_id: employeeId }, "-created_date", 100),
         base44.asServiceRole.entities.Performance.filter({ employee_id: employeeId }, "-created_date", 100),
+        base44.asServiceRole.entities.TrainingPlan.list("-created_date", 500),
       ]);
       // يظهر للموظف فقط التقييمات التي اعتمدتها الموارد البشرية (مكتملة أو معتمدة)
       const reviews = (performances || []).filter((p) => p?.status === "completed" || p?.status === "acknowledged");
+      // خطط التدريب المشمولة للموظف: ضمن employee_ids (JSON) أو employee_id القديم،
+      // أو خطة على مستوى قسمه. تُستثنى المسودات والملغيات.
+      const sid = String(employeeId);
+      const trainings = (allPlans || []).filter((p: any) => {
+        if (p?.status === "draft" || p?.status === "cancelled") return false;
+        let ids: any[] = [];
+        try { ids = JSON.parse(p.employee_ids || "[]"); if (!Array.isArray(ids)) ids = []; } catch { ids = []; }
+        if (ids.includes(sid)) return true;
+        if (p.employee_id === sid) return true;
+        if (p?.scope === "department" && p.department && emp?.department && p.department === emp.department) return true;
+        return false;
+      });
       return Response.json({
         ok: true,
         employee: emp,
         org: orgs?.[0] || null,
         leaves, loans, attendance, trips, warnings,
-        reviews,
+        reviews, trainings,
       });
     }
 
