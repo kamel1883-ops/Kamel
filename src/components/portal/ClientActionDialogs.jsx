@@ -181,8 +181,10 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
     }
   }, [open, tenant]);
   if (!open || !tenant) return null;
+  const owner = isOwnerTenant(tenant);
   const status = tenant.status;
   const busy = busyId === tenant.id;
+  const lifetime = isAr ? "مدى الحياة" : "Lifetime";
   const rows = [
     [isAr ? "اسم المنشأة / الشركة" : "Company", tenant.name],
     [isAr ? "الرقم الوطني الموحد للمنشآت" : "National Unified No.", tenant.unified_number],
@@ -196,11 +198,11 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
     [isAr ? "المبلغ المعروض" : "Quoted amount", tenant.quoted_amount ? `${Number(tenant.quoted_amount).toLocaleString()} ${isAr ? "ر.س" : "SAR"}` : "—"],
     [isAr ? "كود الخصم" : "Discount", tenant.discount_code ? `${tenant.discount_code} (${tenant.discount_percent || 0}%)` : "—"],
     [isAr ? "نوع الطلب" : "Lead", tenant.lead_source === "quote" ? (isAr ? "طلب عرض سعر" : "Quote request") : (isAr ? "تسجيل تجربة" : "Trial sign-up")],
-    [isAr ? "الحالة" : "Status", status],
-    [isAr ? "بداية التجربة" : "Trial start", tenant.trial_start || "—"],
-    [isAr ? "نهاية التجربة" : "Trial end", tenant.trial_end || "—"],
-    [isAr ? "نهاية الاشتراك" : "Subscription end", tenant.subscription_end || "—"],
-    [isAr ? "تأكيد التعاقد" : "Contract", tenant.contract_confirmed ? (isAr ? "مؤكّد" : "Confirmed") : (isAr ? "غير مؤكد" : "Not confirmed")],
+    [isAr ? "الحالة" : "Status", owner ? lifetime : status],
+    [isAr ? "بداية التجربة" : "Trial start", owner ? lifetime : (tenant.trial_start || "—")],
+    [isAr ? "نهاية التجربة" : "Trial end", owner ? lifetime : (tenant.trial_end || "—")],
+    [isAr ? "نهاية الاشتراك" : "Subscription end", owner ? lifetime : (tenant.subscription_end || "—")],
+    [isAr ? "تأكيد التعاقد" : "Contract", owner ? lifetime : (tenant.contract_confirmed ? (isAr ? "مؤكّد" : "Confirmed") : (isAr ? "غير مؤكد" : "Not confirmed"))],
     [isAr ? "تاريخ التسجيل" : "Registered", (tenant.created_date || "").slice(0, 10)],
   ];
   return (
@@ -236,6 +238,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
             {isAr ? "تم استلام هذه البيانات عبر بوابة تسجيل التجربة أو طلب عرض سعر في منصة جدارة" : "Data received via Jadara trial sign-up or quote request portal"}
           </div>
         </div>
+        {!owner && (
         <div className="no-print p-5 border-t border-border bg-slate-50 space-y-4">
           {status === "trial" && (
             <div className="flex items-center gap-2 flex-wrap">
@@ -309,6 +312,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
             </Button>
           )}
         </div>
+        )}
       </div>
     </div>
   );
