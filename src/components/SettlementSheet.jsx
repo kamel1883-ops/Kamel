@@ -18,7 +18,7 @@ export default function SettlementSheet({ record, org }) {
     eos: "مكافأة نهاية الخدمة", leaveCash: "تصفية رصيد الإجازات", leaveD: (n) => `${n} يوم × الأجر اليومي`,
     ticket: "تعويض التذكرة", ticketD: "لا يستحق", total: "إجمالي المخالصة",
     empSign: "توقيع الموظف", hrSign: "مدير الموارد البشرية", adminSign: "المعتمد من الإدارة",
-    footer: (d) => `تم إصدار هذه المخالصة بواسطة نظام جدارة — ${d || ""}`,
+    footer: (d) => `تم إصدار هذه المخالصة بواسطة منصة جدارة لإدارة الموارد البشرية — ${d || ""}`,
   } : {
     orgNameFallback: "Organization name", cr: "CR", vat: "VAT no", title: "End-of-service settlement", no: "No.",
     emp: "Employee name", empNo: "Employee no", natId: "ID/Iqama", nationality: "Nationality", dept: "Department", position: "Job title",

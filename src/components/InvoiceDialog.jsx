@@ -24,7 +24,7 @@ function Stamp() {
         <textPath href="#stampArc" startOffset="3%">JADARA · HR PLATFORM · SAUDI ARABIA · </textPath>
       </text>
       <text x="70" y="62" textAnchor="middle" fontSize="22" fontWeight="800" fill="#1d3a5f" fontFamily="var(--font-display)">جدارة</text>
-      <text x="70" y="78" textAnchor="middle" fontSize="8" fill="#1d3a5f">نظام الموارد البشرية</text>
+      <text x="70" y="78" textAnchor="middle" fontSize="8" fill="#1d3a5f">لإدارة الموارد البشرية</text>
       <path d="M30 90 H 110" stroke="#1d3a5f" strokeWidth="0.8" />
       <text x="70" y="103" textAnchor="middle" fontSize="7" fill="#1d3a5f">وثيقة رسمية</text>
     </svg>
@@ -125,7 +125,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                   <div className="w-10 h-10 rounded-lg bg-[#1d3a5f] text-white flex items-center justify-center font-extrabold text-lg">ج</div>
                   <div>
                     <div className="text-lg font-extrabold text-[#1d3a5f]">جدارة</div>
-                    <div className="text-[10px] text-slate-500">{isAr ? "منصة الموارد البشرية" : "HR Platform"} · jadara-hr.com</div>
+                    <div className="text-[10px] text-slate-500">{isAr ? "لإدارة الموارد البشرية" : "HR Platform"} · jadara-hr.com</div>
                   </div>
                 </div>
                 <div className="text-left">

@@ -13,7 +13,7 @@ export default function AppointmentLetterDoc({ applicant, job, org }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #6d28d9", paddingBottom: "18px", marginBottom: "26px" }}>
         <div>
           <div style={{ fontSize: "26px", fontWeight: 800, color: "#4c1d95" }}>جدارة</div>
-          <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>منصة الموارد البشرية — Jadara HR</div>
+          <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>لإدارة الموارد البشرية — Jadara HR</div>
         </div>
         {org?.logo_url
           ? <img src={org.logo_url} alt="logo" style={{ height: "60px", objectFit: "contain" }} />
