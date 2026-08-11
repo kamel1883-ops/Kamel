@@ -6,7 +6,7 @@ import { reasonMeta } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 
 // مستنداتي المالية في بوابة الموظف — مخالصات تصفية الإجازات + مخالصات نهاية الخدمة المصروفة
-export default function EmployeeDocuments({ leaves, settlements, org }) {
+export default function EmployeeDocuments({ loans, leaves, settlements, org }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const [printing, setPrinting] = useState(null);
@@ -15,20 +15,25 @@ export default function EmployeeDocuments({ leaves, settlements, org }) {
     (l) => (l.status === "completed" || l.status === "paid") && l.settlement_pdf_url
   );
   const paidSets = (settlements || []).filter((s) => s.status === "completed");
+  const paidLoans = (loans || []).filter(
+    (l) => (l.status === "paid" || l.status === "completed") && l.statement_pdf_url
+  );
 
   const t = isAr ? {
     title: "مستنداتي المالية",
-    desc: "تظهر هنا مخالصات تصفية الإجازات ومخالصات نهاية الخدمة المُصدرة والمصروفة لك — حفظاً لحقوق الطرفين.",
+    desc: "تظهر هنا مخالصات تصفية الإجازات وكشوفات السلف ومخالصات نهاية الخدمة المُصدرة والمصروفة لك — حفظاً لحقوق الطرفين.",
     empty: "لا توجد مستندات مالية مصروفة لك حالياً.",
-    leaveDoc: "مخالصة تصفية إجازة", eosDoc: "مخالصة نهاية الخدمة",
+    leaveDoc: "مخالصة تصفية إجازة", eosDoc: "مخالصة نهاية الخدمة", loansDoc: "كشف سلفة",
+    paid: "المسدد", remaining: "المتبقي", installments: (n) => `${n} قسط`,
     proof: "إثبات التحويل", print: "معاينة/طباعة المخالصة", settle: "تحميل المخالصة",
     days: (n) => `${n} يوم`, lwd: "آخر يوم عمل", issued: "تاريخ الإصدار",
     rights: "حقوق مالية محفوظة",
   } : {
     title: "My Financial Documents",
-    desc: "Your settled leave clearances and paid end-of-service settlements — preserving both parties' rights.",
+    desc: "Your settled leave clearances, loan statements and paid end-of-service settlements — preserving both parties' rights.",
     empty: "No paid financial documents for you yet.",
-    leaveDoc: "Leave settlement", eosDoc: "End-of-service settlement",
+    leaveDoc: "Leave settlement", eosDoc: "End-of-service settlement", loansDoc: "Loan statement",
+    paid: "Paid", remaining: "Remaining", installments: (n) => `${n} installments`,
     proof: "Transfer proof", print: "View/Print settlement", settle: "Download settlement",
     days: (n) => `${n} days`, lwd: "Last working day", issued: "Issued",
     rights: "Preserved rights",
@@ -39,7 +44,7 @@ export default function EmployeeDocuments({ leaves, settlements, org }) {
     setTimeout(() => { window.print(); setPrinting(null); }, 250);
   };
 
-  const hasAny = paidLeaves.length > 0 || paidSets.length > 0;
+  const hasAny = paidLeaves.length > 0 || paidLoans.length > 0 || paidSets.length > 0;
 
   return (
     <div className="bg-white rounded-2xl border border-border p-5">
@@ -64,6 +69,24 @@ export default function EmployeeDocuments({ leaves, settlements, org }) {
               </a>
             </div>
           ))}
+
+          {paidLoans.map((l) => {
+            const paid = Number(l.paid_amount) || 0;
+            const total = Number(l.amount) || 0;
+            const rem = Math.max(0, total - paid);
+            return (
+              <div key={"ln" + l.id} className="rounded-lg border border-border p-3 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">{t.loansDoc} — {total.toLocaleString()} {isAr ? "ر.س" : "SAR"}</div>
+                  <div className="text-xs text-muted-foreground">{t.paid}: {paid.toLocaleString()} · {t.remaining}: {rem.toLocaleString()} · {t.installments(l.installment_count || 0)}</div>
+                </div>
+                <a href={l.statement_pdf_url} target="_blank" rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium shrink-0">
+                  <Download size={14} /> {t.settle}
+                </a>
+              </div>
+            );
+          })}
 
           {paidSets.map((s) => (
             <div key={"s" + s.id} className="rounded-lg border border-border p-3 flex items-center justify-between gap-2 flex-wrap">

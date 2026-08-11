@@ -560,7 +560,7 @@ export default function MyRequests() {
             </div>
 
             <div className="mt-6">
-              <EmployeeDocuments leaves={leaves} settlements={settlements} org={org} />
+              <EmployeeDocuments loans={loans} leaves={leaves} settlements={settlements} org={org} />
             </div>
             <div className="mt-6">
               <EmployeeWarnings employee={employee} warnings={warnings} />
