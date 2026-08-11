@@ -13,6 +13,7 @@ import { ClipboardCheck, Check, X, Loader2, Search, Download, RefreshCw, Wallet,
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, todayISO } from "@/lib/hr";
 import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
+import { getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
 
@@ -50,6 +51,10 @@ export default function Approvals() {
     forwardBtn: "اعتماد وتحويل للمالية", printSettle: "معاينة/طباعة المخالصة",
     deductionLabel: "مستحقات دائنة (تُخصم)", deductionPh: "بيان الخصم",
     additionLabel: "مستحقات إضافية (تُضاف للموظف)", additionPh: "بيان الإضافة", settleTotal: "إجمالي التصفية المتوقع",
+    entitledLabel: "إجمالي المستحق", usedLabel: "المستخدم", remainingLabel: "المتبقي",
+    grantedLabel: "الأيام الممنوحة", dailyWageLabel: "الأجر اليومي (راتب ÷ 30)", grantedHint: "عدد الأيام التي تعتمدها لهذه الإجازة",
+    loanHrTitle: "اعتماد السلفة — الموارد البشرية", loanAmountL: "مبلغ السلفة (ر.س)", loanInstL: "عدد الأقساط",
+    loanHrWarn: "عند الاعتماد يُحدّث المبلغ/الأقساط ويُحوّل الطلب للمالية للصرف. يبقى نشطاً حتى يكتمل السداد لاحقاً.", loanHrBtn: "اعتماد وتحويل للمالية",
     finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
     tripFinTitle: "صرف الانتداب — المالية/المحاسبة", tripFinWarn: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل ويصبح الطلب مكتملًا.",
     finProof: "إثبات التحويل",
@@ -84,6 +89,10 @@ export default function Approvals() {
     forwardBtn: "Approve & forward to finance", printSettle: "Preview/print settlement",
     deductionLabel: "Debit dues (deducted)", deductionPh: "Deduction note",
     additionLabel: "Additional dues (added)", additionPh: "Addition note", settleTotal: "Expected settlement total",
+    entitledLabel: "Total entitled", usedLabel: "Used", remainingLabel: "Remaining",
+    grantedLabel: "Granted days", dailyWageLabel: "Daily wage (salary ÷ 30)", grantedHint: "Days to grant for this leave",
+    loanHrTitle: "Loan approval — HR", loanAmountL: "Loan amount (SAR)", loanInstL: "Installments",
+    loanHrWarn: "On approval the amount/installments update and the request moves to finance for disbursement. It stays active until fully repaid.", loanHrBtn: "Approve & forward to finance",
     finNote: "Finance notes/description", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
     tripFinTitle: "Trip payout — Finance/Accounting", tripFinWarn: "On confirmation the process closes, the transfer proof is recorded and the request is completed.",
     finProof: "Transfer proof",
@@ -107,6 +116,9 @@ export default function Approvals() {
   const [deductionNote, setDeductionNote] = useState("");
   const [additionAmount, setAdditionAmount] = useState("");
   const [additionNote, setAdditionNote] = useState("");
+  const [grantedDays, setGrantedDays] = useState("");
+  const [loanAmount, setLoanAmount] = useState("");
+  const [loanInstallments, setLoanInstallments] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -153,7 +165,7 @@ export default function Approvals() {
     if (type === "loans") {
       const btns = [];
       if (s === "pending") {
-        btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => hrApprove("loans", r) });
+        btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLoanHr(r) });
         btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "hr") });
       } else if (s === "awaiting_finance" || s === "hr_approved") {
         btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("loans", r) });
@@ -217,7 +229,7 @@ export default function Approvals() {
     }
     load();
   };
-  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); };
+  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); setGrantedDays(String(r.days_count || "")); };
   const confirmLeaveHr = async () => {
     if (!acting) return;
     setBusy(true);
@@ -226,17 +238,22 @@ export default function Approvals() {
     try {
       const r = acting.req;
       const emp = empOf(r.employee_id);
-      const balance = Number(emp?.leave_balance) || 0;
-      const deduct = Math.min(r.days_count, balance);
-      const after = Math.max(0, balance - deduct);
-      const ticket = leaveTicketAmount(emp, org);
+      const annual = getEmployeeAnnualDays(emp, org);
+      const used = Number(emp?.prior_used_leave) || 0;
+      const before = Math.max(0, annual - used);
+      const granted = Math.max(0, Number(grantedDays) || 0);
+      const after = Math.max(0, before - granted);
+      const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
+      const dailyWage = mw / 30;
+      const ticket = r.is_full_clearance ? leaveTicketAmount(emp, org) : 0;
+      const base = (r.leave_type === "annual" || r.is_full_clearance) ? Math.round(granted * dailyWage * 100) / 100 : 0;
       const ded = Math.max(0, Number(deductionAmount) || 0);
       const add = Math.max(0, Number(additionAmount) || 0);
-      const total = Math.max(0, ticket + add - ded);
+      const total = Math.max(0, base + ticket + add - ded);
       const patch = {
         hr_status: "settled", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
         hr_note: note, hr_document_url: url,
-        balance_before: balance, balance_after: after, balance_deducted: deduct,
+        balance_before: before, balance_after: after, balance_deducted: granted,
         ticket_amount: ticket,
         deduction_amount: ded, deduction_note: deductionNote,
         addition_amount: add, addition_note: additionNote,
@@ -246,21 +263,28 @@ export default function Approvals() {
       try { await generateLeaveSettlement({ ...r, ...patch }, emp, org, leaves); } catch (e) {}
     } catch (e) {}
     setBusy(false); setActing(null); setNote(""); setProofFile(null);
-    setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
+    setGrantedDays(""); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
     load();
   };
   const forwardToFinance = async (r) => {
     try {
       const emp = empOf(r.employee_id);
-      const balance = Number(emp?.leave_balance) || 0;
-      const deduct = Math.min(r.days_count, balance);
+      const annual = getEmployeeAnnualDays(emp, org);
+      const used = Number(emp?.prior_used_leave) || 0;
+      const consume = (r.leave_type === "annual" || r.is_full_clearance);
+      const granted = consume ? (Number(r.balance_deducted) || 0) : 0;
+      const newUsed = used + granted;
       const fin = needsFinance(r, emp, org);
       const finalStatus = fin ? "awaiting_finance" : "completed";
       await base44.entities.LeaveRequest.update(r.id, {
-        hr_status: "approved", status: finalStatus, finance_status: "pending", balance_deducted: deduct,
+        hr_status: "approved", status: finalStatus, finance_status: "pending",
       });
       if (emp) {
-        await base44.entities.Employee.update(emp.id, { leave_balance: Math.max(0, balance - deduct), status: "on_leave" });
+        await base44.entities.Employee.update(emp.id, {
+          prior_used_leave: newUsed,
+          leave_balance: Math.max(0, annual - newUsed),
+          status: "on_leave",
+        });
       }
     } catch (e) {}
     load();
@@ -279,9 +303,13 @@ export default function Approvals() {
     setBusy(true);
     let url = "";
     if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
-    const patch = { finance_status: "paid", finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(), status: "completed" };
-    if (acting.type === "loans") patch.paid_amount = Number(acting.req.amount) || 0;
-    if (acting.type === "leaves") patch.finance_note = note;
+    const isLoan = acting.type === "loans";
+    const patch = {
+      finance_status: "paid", finance_paid_date: todayISO(), finance_proof_url: url,
+      finance_proof_date: todayISO(), finance_note: note,
+      status: isLoan ? "paid" : "completed",
+    };
+    if (isLoan) patch.paid_amount = 0;
     await update(acting.type, acting.req.id, patch);
     if (acting.type === "leaves" && acting.req.ticket_amount > 0) {
       const emp = empOf(acting.req.employee_id);
@@ -304,6 +332,24 @@ export default function Approvals() {
     setGenBusy("loan" + r.id);
     try { await generateLoanStatement(r, empOf(r.employee_id), org); } catch (e) {}
     finally { setGenBusy(null); load(); }
+  };
+  const openLoanHr = (r) => { setActing({ type: "loans", req: r, action: "loanhr" }); setNote(""); setLoanAmount(String(r.amount || "")); setLoanInstallments(String(r.installment_count || 1)); };
+  const confirmLoanHr = async () => {
+    if (!acting) return;
+    setBusy(true);
+    try {
+      const r = acting.req;
+      const amt = Math.max(0, Number(loanAmount) || 0);
+      const inst = Math.max(1, Number(loanInstallments) || 1);
+      const monthly = amt ? Math.round((amt / inst) * 100) / 100 : 0;
+      await base44.entities.LoanRequest.update(r.id, {
+        amount: amt, installment_count: inst, monthly_installment: monthly,
+        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
+        status: "awaiting_finance",
+      });
+      try { await generateLoanStatement({ ...r, amount: amt, installment_count: inst, monthly_installment: monthly }, empOf(r.employee_id), org); } catch (e) {}
+    } catch (e) {}
+    setBusy(false); setActing(null); setNote(""); setLoanAmount(""); setLoanInstallments(""); load();
   };
   const openLoanPay = (r) => { setActing({ type: "loans", req: r, action: "loanpay" }); setLoanPayAmount(String(r.paid_amount || 0)); };
   const confirmLoanPay = async () => {
@@ -527,30 +573,49 @@ export default function Approvals() {
               {acting.req.medical_report_url && <a href={acting.req.medical_report_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
               {(() => {
                 const emp = empOf(acting.req.employee_id);
-                const ticket = leaveTicketAmount(emp, org);
-                const balance = Number(emp?.leave_balance) || 0;
-                const deduct = Math.min(acting.req.days_count, balance);
+                const annual = getEmployeeAnnualDays(emp, org);
+                const used = Number(emp?.prior_used_leave) || 0;
+                const remaining = Math.max(0, annual - used);
+                const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
+                const dailyWage = mw / 30;
+                const granted = Math.max(0, Number(grantedDays) || 0);
+                const ticket = acting.req.is_full_clearance ? leaveTicketAmount(emp, org) : 0;
+                const base = (acting.req.leave_type === "annual" || acting.req.is_full_clearance) ? Math.round(granted * dailyWage * 100) / 100 : 0;
+                const total = Math.max(0, base + ticket + (Number(additionAmount) || 0) - (Number(deductionAmount) || 0));
                 return (
+                  <>
                   <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="rounded-lg bg-slate-50 p-2.5"><div className="text-xs text-muted-foreground">{isAr ? "رصيد الإجازات" : "Balance"}</div><div className="font-bold">{balance}</div></div>
-                    <div className="rounded-lg bg-violet-50 p-2.5"><div className="text-xs text-muted-foreground">{isAr ? "المخصوم" : "Deducted"}</div><div className="font-bold">{deduct}</div></div>
-                    <div className="rounded-lg bg-blue-50 p-2.5"><div className="text-xs text-muted-foreground">{isAr ? "تعويض التذكرة" : "Ticket"}</div><div className="font-bold">{formatCurrency(ticket)}</div></div>
+                    <div className="rounded-lg bg-slate-50 p-2.5"><div className="text-xs text-muted-foreground">{t.entitledLabel}</div><div className="font-bold">{annual}</div></div>
+                    <div className="rounded-lg bg-amber-50 p-2.5"><div className="text-xs text-muted-foreground">{t.usedLabel}</div><div className="font-bold">{used}</div></div>
+                    <div className="rounded-lg bg-emerald-50 p-2.5"><div className="text-xs text-muted-foreground">{t.remainingLabel}</div><div className="font-bold text-emerald-700">{remaining}</div></div>
                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-muted-foreground">{t.grantedLabel}</Label>
+                      <Input type="number" min={0} dir="ltr" value={grantedDays} placeholder={t.grantedHint} onChange={(e) => setGrantedDays(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-muted-foreground">{t.dailyWageLabel}</Label>
+                      <div className="text-sm font-bold pt-1.5">{formatCurrency(dailyWage)}</div>
+                    </div>
+                  </div>
+                  {ticket > 0 && <div className="text-xs text-muted-foreground">{isAr ? "تعويض التذكرة" : "Ticket"}: <b className="text-foreground">{formatCurrency(ticket)}</b></div>}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-muted-foreground">{t.deductionLabel}</Label>
+                      <Input type="number" dir="ltr" value={deductionAmount} placeholder="0" onChange={(e) => setDeductionAmount(e.target.value)} />
+                      <Input value={deductionNote} placeholder={t.deductionPh} onChange={(e) => setDeductionNote(e.target.value)} className="text-xs" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-muted-foreground">{t.additionLabel}</Label>
+                      <Input type="number" dir="ltr" value={additionAmount} placeholder="0" onChange={(e) => setAdditionAmount(e.target.value)} />
+                      <Input value={additionNote} placeholder={t.additionPh} onChange={(e) => setAdditionNote(e.target.value)} className="text-xs" />
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{t.settleTotal}: <b className="text-foreground">{formatCurrency(total)}</b></div>
+                  </>
                 );
               })()}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-muted-foreground">{t.deductionLabel}</Label>
-                  <Input type="number" dir="ltr" value={deductionAmount} placeholder="0" onChange={(e) => setDeductionAmount(e.target.value)} />
-                  <Input value={deductionNote} placeholder={t.deductionPh} onChange={(e) => setDeductionNote(e.target.value)} className="text-xs" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-muted-foreground">{t.additionLabel}</Label>
-                  <Input type="number" dir="ltr" value={additionAmount} placeholder="0" onChange={(e) => setAdditionAmount(e.target.value)} />
-                  <Input value={additionNote} placeholder={t.additionPh} onChange={(e) => setAdditionNote(e.target.value)} className="text-xs" />
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground">{t.settleTotal}: <b className="text-foreground">{formatCurrency(Math.max(0, (leaveTicketAmount(empOf(acting.req.employee_id), org) || 0) + (Number(additionAmount) || 0) - (Number(deductionAmount) || 0)))}</b></div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} placeholder={t.leaveHrNotePh} />
@@ -564,6 +629,43 @@ export default function Approvals() {
                 <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
                 <Button onClick={confirmLeaveHr} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
                   {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.leaveHrBtn}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={acting?.action === "loanhr"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.loanHrTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">{acting.req.employee_name}</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.loanAmountL}</Label>
+                  <Input type="number" min={0} dir="ltr" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.loanInstL}</Label>
+                  <Input type="number" min={1} dir="ltr" value={loanInstallments} onChange={(e) => setLoanInstallments(e.target.value)} />
+                </div>
+              </div>
+              {(Number(loanAmount) || 0) > 0 && (
+                <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3">
+                  {isAr ? <>قسط شهري ≈ <b className="text-foreground">{formatCurrency(Math.round((Number(loanAmount) / Math.max(1, Number(loanInstallments) || 1)) * 100) / 100)}</b> على مدى {Math.max(1, Number(loanInstallments) || 1)} شهر.</> : <>Monthly ≈ <b className="text-foreground">{formatCurrency(Math.round((Number(loanAmount) / Math.max(1, Number(loanInstallments) || 1)) * 100) / 100)}</b> over {Math.max(1, Number(loanInstallments) || 1)} months.</>}
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+              </div>
+              <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.loanHrWarn}</div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmLoanHr} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.loanHrBtn}
                 </Button>
               </DialogFooter>
             </div>

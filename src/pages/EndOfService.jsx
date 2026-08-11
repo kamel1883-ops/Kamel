@@ -119,8 +119,7 @@ export default function EndOfService() {
     const annualDays = getEmployeeAnnualDays(emp, org);
     const asOf = lwd ? new Date(lwd) : new Date();
     const ent = computeEntitlement(emp.hire_date, annualDays, asOf);
-    const prior = Number(emp.prior_used_leave) || 0;
-    const used = Math.round((sumUsedDays(empLeaves) + prior) * 10) / 10;
+    const used = Math.round((Number(emp.prior_used_leave) || 0) * 10) / 10;
     const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
     const record = {

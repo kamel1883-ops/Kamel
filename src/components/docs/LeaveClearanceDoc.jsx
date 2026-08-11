@@ -2,7 +2,7 @@ import React from "react";
 import BrandHeader from "@/components/docs/BrandHeader";
 import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 
-export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore, balanceAfter }) {
+export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore, balanceAfter, daysCash, dailyWage }) {
   const rows = [
     ["اسم الموظف", employee?.full_name],
     ["الرقم الوظيفي", employee?.employee_number],
@@ -55,8 +55,10 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
         const ticket = Number(leave?.ticket_amount) || 0;
         const ded = Number(leave?.deduction_amount) || 0;
         const add = Number(leave?.addition_amount) || 0;
-        const total = Number(leave?.settlement_amount) || Math.max(0, ticket + add - ded);
-        if (!(ticket > 0 || ded > 0 || add > 0)) return null;
+        const daysC = Number(daysCash) || 0;
+        const dw = Number(dailyWage) || 0;
+        const total = Number(leave?.settlement_amount) || Math.max(0, daysC + ticket + add - ded);
+        if (!(ticket > 0 || ded > 0 || add > 0 || daysC > 0)) return null;
         const FinRow = ({ label, value, strong }) => (
           <tr style={{ borderBottom: "1px solid #eceef2", fontWeight: strong ? 800 : 600 }}>
             <td style={{ padding: "9px 6px", width: "62%", color: strong ? "#0b1120" : "#667085" }}>{label}</td>
@@ -72,6 +74,7 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
               </tr>
             </thead>
             <tbody>
+              {daysC > 0 && <FinRow label={`تعويض الأيام الممنوحة (${leave?.balance_deducted || 0} يوم × ${formatCurrency(dw)})`} value={daysC} />}
               {ticket > 0 && <FinRow label="تعويض التذكرة" value={ticket} />}
               {add > 0 && <FinRow label={`مستحقات إضافية (تُضاف للموظف)${leave?.addition_note ? " — " + leave.addition_note : ""}`} value={add} />}
               {ded > 0 && <FinRow label={`مستحقات دائنة (تُخصم)${leave?.deduction_note ? " — " + leave.deduction_note : ""}`} value={-ded} />}

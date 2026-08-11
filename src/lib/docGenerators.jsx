@@ -9,15 +9,16 @@ import BusinessTripApprovalDoc from "@/components/docs/BusinessTripApprovalDoc";
 // مخالصة تصفية إجازة — تُولّد PDF، تُرفع، وتُخزّن على الطلب + تُرجع الرابط
 export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) {
   const annualDays = getEmployeeAnnualDays(emp, org);
-  const asOf = leave?.end_date ? new Date(leave.end_date) : new Date();
-  const entitlement = computeEntitlement(emp?.hire_date, annualDays, asOf);
-  const others = (allLeavesForEmp || []).filter((l) => l.id !== leave.id);
-  const usedBefore = sumUsedDays(others);
-  const bBefore = Math.max(0, Math.round((entitlement - usedBefore) * 10) / 10);
-  const bAfter = Math.max(0, Math.round((bBefore - (Number(leave.days_count) || 0)) * 10) / 10);
+  const usedBefore = Number(emp?.prior_used_leave) || 0;
+  const bBefore = Math.max(0, Math.round((annualDays - usedBefore) * 10) / 10);
+  const granted = Number(leave?.balance_deducted) || 0;
+  const bAfter = Math.max(0, Math.round((bBefore - granted) * 10) / 10);
+  const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
+  const dailyWage = mw / 30;
+  const daysCash = (leave?.leave_type === "annual" || leave?.is_full_clearance) ? Math.round(granted * dailyWage * 100) / 100 : 0;
 
   const blob = await renderToPdfBlob(
-    <LeaveClearanceDoc employee={emp} leave={leave} org={org} balanceBefore={bBefore} balanceAfter={bAfter} />
+    <LeaveClearanceDoc employee={emp} leave={leave} org={org} balanceBefore={bBefore} balanceAfter={bAfter} daysCash={daysCash} dailyWage={dailyWage} />
   );
   const url = await uploadPdfBlob(blob, `leave-settlement-${leave.id}.pdf`);
   await base44.entities.LeaveRequest.update(leave.id, {

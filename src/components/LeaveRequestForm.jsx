@@ -11,7 +11,6 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { differenceInDays, parseISO } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 
 export default function LeaveRequestForm({ open, onClose, onSaved, employees, currentUserEmployee, portalCreate }) {
@@ -19,7 +18,8 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "طلب إجازة جديد", emp: "الموظف", choose: "اختر الموظف",
-    type: "نوع الإجازة", days: "عدد الأيام", start: "تاريخ البداية", end: "تاريخ النهاية",
+    type: "نوع الإجازة", days: "عدد الأيام", start: "تاريخ المغادرة (آخر يوم عمل)", end: "تاريخ العودة (استئناف العمل)",
+    daysHint: "أدخل عدد الأيام التي تريد طلبها (حر)، والتاريخان هيا تاريخ المغادرة والعودة",
     annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "إجازة بدون راتب", maternity: "إجازة أمومة",
     med: "التقرير الطبي", medReq: "(إلزامي)", medNote: "يجب إرفاق صورة من التقرير الطبي للإجازة المرضية.",
     requireMed: "إرفاق التقرير الطبي إلزامي للإجازة المرضية.", reason: "السبب",
@@ -27,7 +27,8 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
     cancel: "إلغاء", submit: "تقديم الطلب", fail: "تعذر تقديم الطلب",
   } : {
     title: "New leave request", emp: "Employee", choose: "Select employee",
-    type: "Leave type", days: "Days", start: "Start date", end: "End date",
+    type: "Leave type", days: "Days", start: "Departure date (last work day)", end: "Return date (resume work)",
+    daysHint: "Enter the days you request (free); the two dates are departure and return",
     annual: "Annual", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity",
     med: "Medical report", medReq: "(required)", medNote: "Attach a copy of the medical report for sick leave.",
     requireMed: "A medical report is required for sick leave.", reason: "Reason",
@@ -37,7 +38,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
 
   const [form, setForm] = useState({
     employee_id: "", leave_type: "annual",
-    start_date: "", end_date: "", reason: "", is_full_clearance: false,
+    start_date: "", end_date: "", days_count: "", reason: "", is_full_clearance: false,
   });
   const [medicalFile, setMedicalFile] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -47,7 +48,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
     if (open) {
       setForm({
         employee_id: currentUserEmployee?.id || employees?.[0]?.id || "",
-        leave_type: "annual", start_date: "", end_date: "", reason: "", is_full_clearance: false,
+        leave_type: "annual", start_date: "", end_date: "", days_count: "", reason: "", is_full_clearance: false,
       });
       setMedicalFile(null); setErr("");
     }
@@ -55,7 +56,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const isSick = form.leave_type === "sick";
-  const days = form.start_date && form.end_date ? differenceInDays(parseISO(form.end_date), parseISO(form.start_date)) + 1 : 0;
+  const days = Math.max(0, Number(form.days_count) || 0);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -119,7 +120,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">{t.days}</Label>
-              <Input value={days > 0 ? days : ""} disabled />
+              <Input type="number" min={1} dir="ltr" value={form.days_count} placeholder={t.daysHint} onChange={(e) => set("days_count", e.target.value)} required />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">{t.start}</Label>

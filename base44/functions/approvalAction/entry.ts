@@ -53,10 +53,19 @@ export default async function (req) {
       if (r.status !== "pending")
         return Response.json({ error: "الطلب ليس في مرحلة اعتماد الموارد البشرية" }, { status: 400 });
       if (action === "approve") {
-        await base44.asServiceRole.entities.LoanRequest.update(id, {
+        const newAmount = Number(body.amount);
+        const newInst = Number(body.installment_count);
+        const patch = {
           hr_status: "approved", hr_id: actorId, hr_name: actorName, hr_date: today(), hr_note: note,
           status: "awaiting_finance",
-        });
+        };
+        if (Number.isFinite(newAmount) && newAmount > 0) {
+          const inst = (Number.isFinite(newInst) && newInst >= 1) ? newInst : (Number(r.installment_count) || 1);
+          patch.amount = newAmount;
+          patch.installment_count = inst;
+          patch.monthly_installment = Math.round((newAmount / inst) * 100) / 100;
+        }
+        await base44.asServiceRole.entities.LoanRequest.update(id, patch);
       } else {
         await base44.asServiceRole.entities.LoanRequest.update(id, {
           hr_status: "rejected", hr_id: actorId, hr_name: actorName, hr_date: today(), hr_note: note,
@@ -137,7 +146,7 @@ export default async function (req) {
         if (action === "confirm") {
           await base44.asServiceRole.entities.LoanRequest.update(id, {
             finance_status: "paid", finance_paid_date: today(), finance_proof_url: proofUrl,
-            finance_proof_date: today(), paid_amount: Number(r.amount) || 0, status: "completed",
+            finance_proof_date: today(), finance_note: note, paid_amount: 0, status: "paid",
           });
         } else {
           await base44.asServiceRole.entities.LoanRequest.update(id, {
