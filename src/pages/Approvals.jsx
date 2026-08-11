@@ -30,7 +30,7 @@ export default function Approvals() {
     settlement: "المخالصة", genSettlement: "توليد المخالصة",
     statement: "كشف السلفة", genStatement: "توليد الكشف",
     loanPayBtn: "سداد / إغلاق", loanPayTitle: "تسجيل سداد السلفة",
-    paidLabel: "تم سداد (ريال)", paidHint: "أدخل إجمالي المبلغ المُسدَّد حتى الآن. عند بلوغ قيمة السلفة تُغلقة تلقائياً.",
+    paidLabel: "مبلغ السداد هذه المرة (ر.س)", paidHint: "يُضاف هذا المبلغ إلى المسدَّد مسبقاً. عند بلوغ إجمالي السلفة تُغلق تلقائياً.", alreadyPaidLabel: "تم سداد مسبقاً",
     remaining: "المتبقي", totalLoan: "إجمالي السلفة", save: "حفظ",
     empty: "لا توجد طلبات", rejectTitle: "رفض الطلب", rejectReason: "سبب الرفض", cancel: "إلغاء", confirmReject: "تأكيد الرفض",
     payTitle: "تأكيد الصرف — المالية/المحاسبة", leavePay: (v) => <>تصفية إجازة كاملة — تعويض التذكرة: <b className="text-foreground">{formatCurrency(v)}</b></>,
@@ -68,7 +68,7 @@ export default function Approvals() {
     settlement: "Settlement", genSettlement: "Generate settlement",
     statement: "Loan statement", genStatement: "Generate statement",
     loanPayBtn: "Payment / close", loanPayTitle: "Record loan payment",
-    paidLabel: "Amount paid (SAR)", paidHint: "Enter total paid so far. When it reaches the loan value it closes automatically.",
+    paidLabel: "This payment (SAR)", paidHint: "This amount adds to what's already paid. When it reaches the loan total it closes automatically.", alreadyPaidLabel: "Already paid",
     remaining: "Remaining", totalLoan: "Loan total", save: "Save",
     empty: "No requests", rejectTitle: "Reject request", rejectReason: "Rejection reason", cancel: "Cancel", confirmReject: "Confirm rejection",
     payTitle: "Confirm payment — Finance/Accounting", leavePay: (v) => <>Full leave clearance — ticket compensation: <b className="text-foreground">{formatCurrency(v)}</b></>,
@@ -362,16 +362,18 @@ export default function Approvals() {
     } catch (e) {}
     setBusy(false); setActing(null); setNote(""); load();
   };
-  const openLoanPay = (r) => { setActing({ type: "loans", req: r, action: "loanpay" }); setLoanPayAmount(String(r.paid_amount || 0)); };
+  const openLoanPay = (r) => { setActing({ type: "loans", req: r, action: "loanpay" }); setLoanPayAmount(""); };
   const confirmLoanPay = async () => {
     if (!acting) return;
     setBusy(true);
     const amt = Math.max(0, Number(loanPayAmount) || 0);
+    const alreadyPaid = Number(acting.req.paid_amount) || 0;
     const total = Number(acting.req.amount) || 0;
-    const closed = total > 0 && amt >= total;
+    const totalPaid = Math.min(total, alreadyPaid + amt);
+    const closed = total > 0 && totalPaid >= total;
     await update("loans", acting.req.id, {
-      paid_amount: amt,
-      finance_status: closed ? "paid" : (amt > 0 ? "pending" : "pending"),
+      paid_amount: totalPaid,
+      finance_status: "paid",
       status: closed ? "completed" : acting.req.status,
     });
     setBusy(false); setActing(null); setLoanPayAmount(""); load();
@@ -562,19 +564,23 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.loanPayTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-3 gap-3 text-sm">
                 <div className="rounded-lg bg-slate-50 p-2.5">
                   <div className="text-xs text-muted-foreground">{t.totalLoan}</div>
                   <div className="font-bold">{formatCurrency(acting.req.amount)}</div>
                 </div>
+                <div className="rounded-lg bg-emerald-50 p-2.5">
+                  <div className="text-xs text-muted-foreground">{t.alreadyPaidLabel}</div>
+                  <div className="font-bold text-emerald-700">{formatCurrency(Number(acting.req.paid_amount) || 0)}</div>
+                </div>
                 <div className="rounded-lg bg-amber-50 p-2.5">
                   <div className="text-xs text-muted-foreground">{t.remaining}</div>
-                  <div className="font-bold text-amber-700">{formatCurrency(Math.max(0, (Number(acting.req.amount)||0) - (Number(loanPayAmount)||0)))}</div>
+                  <div className="font-bold text-amber-700">{formatCurrency(Math.max(0, (Number(acting.req.amount) || 0) - (Number(acting.req.paid_amount) || 0) - (Number(loanPayAmount) || 0)))}</div>
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.paidLabel}</Label>
-                <Input type="number" value={loanPayAmount} onChange={(e) => setLoanPayAmount(e.target.value)} />
+                <Input type="number" min={0} dir="ltr" value={loanPayAmount} onChange={(e) => setLoanPayAmount(e.target.value)} placeholder="0" />
               </div>
               <div className="text-xs text-muted-foreground bg-slate-50 border border-border rounded-lg p-2.5">{t.paidHint}</div>
               <DialogFooter>
