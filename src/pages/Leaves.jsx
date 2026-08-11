@@ -8,9 +8,11 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Trash2, CalendarDays, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Trash2, CalendarDays, Clock, CheckCircle2, XCircle, Download, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
+import { generateLeaveSettlement } from "@/lib/docGenerators";
+import { getOrgOnce } from "@/lib/leaveBalance";
 
 export default function Leaves() {
   const { lang } = useI18n();
@@ -57,12 +59,14 @@ export default function Leaves() {
     search: "بحث بالموظف أو السبب", type: "نوع الإجازة", allTypes: "كل الأنواع", status: "الحالة", allStatus: "كل الحالات",
     loading: "جارٍ التحميل...", empty: "لا توجد طلبات إجازات بعد — أنشئ طلباً جديداً",
     thEmp: "الموظف", thType: "النوع", thFrom: "من", thTo: "إلى", thDays: "الأيام", thReason: "السبب", thStatus: "الحالة",
+    clearance: "معاينة/طباعة المخالصة", genClear: "توليد المخالصة",
   } : {
     title: "Leaves", subtitle: "Track leave requests, balances and statuses",
     sTotal: "Total requests", sPending: "In progress", sApproved: "Approved", sRejected: "Rejected",
     search: "Search by employee or reason", type: "Leave type", allTypes: "All types", status: "Status", allStatus: "All statuses",
     loading: "Loading...", empty: "No leave requests yet — create a new request",
     thEmp: "Employee", thType: "Type", thFrom: "From", thTo: "To", thDays: "Days", thReason: "Reason", thStatus: "Status",
+    clearance: "View/Print Clearance", genClear: "Generate clearance",
   };
 
   const [requests, setRequests] = useState([]);
@@ -71,18 +75,30 @@ export default function Leaves() {
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [org, setOrg] = useState(null);
+  const [busy, setBusy] = useState(null);
 
   const load = async () => {
     setLoading(true);
-    const [r, e] = await Promise.all([
+    const [r, e, o] = await Promise.all([
       base44.entities.LeaveRequest.list("-created_date", 500),
       base44.entities.Employee.list("-created_date", 500),
+      getOrgOnce(),
     ]);
-    setRequests(r); setEmployees(e); setLoading(false);
+    setRequests(r); setEmployees(e); setOrg(o); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
   const remove = async (id) => { await base44.entities.LeaveRequest.delete(id); load(); };
+
+  const genClearance = async (leave) => {
+    const emp = employees.find((x) => x.id === leave.employee_id);
+    setBusy("l" + leave.id);
+    try {
+      await generateLeaveSettlement(leave, emp, org, requests.filter((x) => x.employee_id === leave.employee_id));
+      await load();
+    } finally { setBusy(null); }
+  };
 
   const filtered = requests.filter((r) => {
     const text = `${r.employee_name || ""} ${r.reason || ""}`;
@@ -164,7 +180,21 @@ export default function Leaves() {
                     <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate">{r.reason || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
                     <TableCell>
-                      <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
+                      {r.status === "completed" ? (
+                        r.settlement_pdf_url ? (
+                          <a href={r.settlement_pdf_url} target="_blank" rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium">
+                            <Download size={15} /> {t.clearance}
+                          </a>
+                        ) : (
+                          <button onClick={() => genClearance(r)} disabled={busy === "l" + r.id}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-medium disabled:opacity-50">
+                            {busy === "l" + r.id ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />} {t.genClear}
+                          </button>
+                        )
+                      ) : (
+                        <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
