@@ -164,6 +164,7 @@ export default function OwnerPortal() {
       });
       const data = res?.data || res;
       if (data?.ok) { setMsg({ type: "ok", text: pt.codeSent }); setMode("reset"); }
+      else if (data?.error === "email_failed") setMsg({ type: "err", text: isAr ? "تعذّر إرسال الرمز — تأكد أن بريد المالك مسجّل كمستخدم في التطبيق، ثم أعد المحاولة." : "Could not send the code — ensure the owner email is a registered app user, then retry." });
       else setMsg({ type: "err", text: t.gFail });
     } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); }
     finally { setSigningIn(false); }

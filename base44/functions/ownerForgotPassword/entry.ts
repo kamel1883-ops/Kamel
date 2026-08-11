@@ -34,13 +34,18 @@ export default async function (req) {
     else
       await base44.asServiceRole.entities.OwnerCredential.create({ email, reset_code: code, reset_code_expires_at: expiresAt });
 
+    let sent = false;
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: ownerEmail || email,
         subject: "رمز استعادة كلمة مرور بوابة المالك — جدارة",
         body: `رمز التحقق الخاص بك هو: ${code}\nالرمز صالح لمدة 15 دقيقة.\nإن لم تطلب تغيير كلمة المرور فتجاهل هذه الرسالة.`,
       });
+      sent = true;
     } catch {}
+
+    // SendEmail يصل فقط لمستخدمين مسجّلين في التطبيق — إذا فشل الإرسال نُبلّغ المالك بوضوح.
+    if (!sent) return Response.json({ ok: false, error: "email_failed" }, { status: 502 });
 
     return Response.json({ ok: true, sent: true });
   } catch (error) {
