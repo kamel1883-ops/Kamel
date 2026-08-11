@@ -125,7 +125,7 @@ export default function Quote() {
     if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^7\d{7,11}$/.test(unified) || !Number(form.employee_count) || Number(form.employee_count) <= 0) { setErr(t.errForm); return; }
     setSubmitting(true);
     try {
-      const res = await base44.functions.invoke("createTrial", { ...form, discount_code: form.discount_code?.trim() || undefined });
+      const res = await base44.functions.invoke("createTrial", { ...form, lead_source: "quote", discount_code: form.discount_code?.trim() || undefined });
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setRegistered(true);

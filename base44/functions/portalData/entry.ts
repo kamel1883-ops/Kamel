@@ -43,6 +43,93 @@ export default async function (req) {
       });
     }
 
+    // ====== إدارة العملاء — بوابة المالك ======
+    if (action === "owner_list") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenants = await base44.asServiceRole.entities.Tenant.list("-created_date", 500);
+      const stats = { total: 0, trials: 0, quotes: 0, paid: 0, suspended: 0, cancelled: 0, revenue: 0 };
+      for (const x of tenants || []) {
+        if (/\(المالك\)|\(owner\)/i.test(x?.name || "")) continue;
+        stats.total++;
+        if (x.status === "trial") stats.trials++;
+        if (x.lead_source === "quote") stats.quotes++;
+        if (x.status === "active") { stats.paid++; stats.revenue += Number(x.quoted_amount) || 0; }
+        if (x.status === "expired") stats.suspended++;
+        if (x.status === "cancelled") stats.cancelled++;
+      }
+      return Response.json({ ok: true, tenants: tenants || [], stats });
+    }
+
+    if (action === "owner_extend_trial") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      const days = Number(body.days) || 0;
+      if (!tenant_id || days <= 0) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const base = t.trial_end ? new Date(t.trial_end) : new Date(today);
+      const start = base < today ? new Date(today) : base;
+      start.setDate(start.getDate() + days);
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        trial_end: start.toISOString().slice(0, 10),
+        status: "trial",
+        suspended_from: null,
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_activate") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const amount = Number(body.amount) || 0;
+      const next = new Date(); next.setHours(0, 0, 0, 0); next.setFullYear(next.getFullYear() + 1);
+      const subscription_end = String(body.subscription_end || next.toISOString().slice(0, 10));
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const todayStr = new Date().toISOString().slice(0, 10);
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        status: "active",
+        plan: "annual",
+        subscription_end,
+        contract_confirmed: true,
+        suspended_from: null,
+        quoted_amount: amount || Number(t.quoted_amount) || 0,
+      });
+      await base44.asServiceRole.entities.Subscription.create({
+        tenant_id, tenant_name: t.name, plan: "annual",
+        amount: amount || Number(t.quoted_amount) || 0,
+        period_start: todayStr, period_end: subscription_end,
+        payment_method: "direct", status: "paid", paid_date: todayStr,
+        notes: "تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك",
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_cancel") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        status: "cancelled",
+        suspended_from: t.status === "trial" || t.status === "active" ? t.status : "active",
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "owner_restore") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const prev = t.suspended_from === "trial" ? "trial" : "active";
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        status: prev,
+        suspended_from: null,
+      });
+      return Response.json({ ok: true });
+    }
+
     // ====== كودات الخصم — إدارة كاملة من بوابة المالك ======
     if (action === "discount_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });

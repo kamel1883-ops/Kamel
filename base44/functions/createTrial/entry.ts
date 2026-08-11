@@ -77,6 +77,7 @@ export default async function (req) {
       quoted_amount,
       employee_count: employeeCount,
       pricing_tier: pricingTier,
+      lead_source: String(body.lead_source || 'trial').trim() === 'quote' ? 'quote' : 'trial',
       notes: String(body.notes || '').trim(),
     });
 

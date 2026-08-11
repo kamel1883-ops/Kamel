@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import DiscountManager from "@/components/portal/DiscountManager";
+import ClientsManager from "@/components/portal/ClientsManager";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -22,7 +23,7 @@ export default function OwnerPortal() {
     brandSub: "بوابة المالك الذاتية",
     back: "العودة للموقع", logout: "خروج",
     gTitle: "دخول بوابة المالك", gSubtitle: "بوابة خاصة بمالك منصة جدارة فقط",
-    gDesc: "أدخل رقم إقامتك وتاريخ ميلادك للتحقق. خاص بالمالك لإدارة كودات الخصم، دون أي خدمات الموظف.",
+    gDesc: "أدخل رقم إقامتك وتاريخ ميلادك للتحقق. خاص بالمالك لإدارة العملاء والعقود وكودات الخصم، دون أي خدمات الموظف.",
     gIdLabel: "رقم الإقامة / الهوية الوطنية", gIdPh: "مثال: 2345678901",
     gBirthLabel: "تاريخ الميلاد", gBtn: "دخول البوابة",
     gFail: "البيانات غير مطابقة لسجل مالك مسجّل في النظام.",
@@ -37,7 +38,7 @@ export default function OwnerPortal() {
     brandSub: "Owner Self‑Service Portal",
     back: "Back to site", logout: "Sign out",
     gTitle: "Owner portal sign-in", gSubtitle: "For the Jadara platform owner only",
-    gDesc: "Enter your Iqama/National ID number and your date of birth. Owner-only portal to manage discount codes, no employee services.",
+    gDesc: "Enter your Iqama/National ID number and your date of birth. Owner-only portal to manage clients, contracts and discount codes, no employee services.",
     gIdLabel: "Iqama / National ID number", gIdPh: "e.g. 2345678901",
     gBirthLabel: "Date of birth", gBtn: "Sign in",
     gFail: "These credentials do not match a registered owner.",
@@ -53,6 +54,7 @@ export default function OwnerPortal() {
   const [session, setSession] = useState(() => portalSession.load());
   const [employee, setEmployee] = useState(session?.employee || null);
   const [refreshing, setRefreshing] = useState(false);
+  const [tab, setTab] = useState("clients");
 
   // عند وجود جلسة محفوظة، نُتحقق منها خادمياً ونُحدّث بيانات المالك (role_level)
   // من المصدر — الجلسات القديمة قد تفتقد role_level أو تكون منتهية/بسرّ مُستبدل.
@@ -223,12 +225,18 @@ export default function OwnerPortal() {
     );
   }
 
-  // ——— لوحة المالك ——— إدارة كودات الخصم فقط
+  // ——— لوحة المالك ——— العملاء والعقود + كودات الخصم
+  const tabCls = (k) => cn("px-4 py-2 rounded-full text-sm font-medium border transition",
+    tab === k ? "bg-[#2e2448] text-white border-[#2e2448]" : "bg-white border-border text-muted-foreground hover:bg-slate-50");
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
       <div className="max-w-6xl mx-auto px-5 py-8">
-        <DiscountManager session={session} />
+        <div className="flex flex-wrap gap-2 mb-5">
+          <button onClick={() => setTab("clients")} className={tabCls("clients")}>{isAr ? "العملاء والعقود" : "Clients & Contracts"}</button>
+          <button onClick={() => setTab("discounts")} className={tabCls("discounts")}>{isAr ? "كودات الخصم" : "Discount Codes"}</button>
+        </div>
+        {tab === "clients" ? <ClientsManager session={session} /> : <DiscountManager session={session} />}
       </div>
     </div>
   );
