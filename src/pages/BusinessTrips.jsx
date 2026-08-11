@@ -10,9 +10,11 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Pencil, Trash2, Plane, MapPin, Wallet } from "lucide-react";
+import { Pencil, Trash2, Plane, MapPin, Wallet, Download, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
+import { generateBusinessTripApproval } from "@/lib/docGenerators";
+import { getOrgOnce } from "@/lib/leaveBalance";
 
 export default function BusinessTrips() {
   const { lang } = useI18n();
@@ -48,12 +50,14 @@ export default function BusinessTrips() {
     search: "بحث بالموظف أو الوجهة أو الغرض", type: "نوع الرحلة", allTypes: "كل الأنواع", status: "الحالة", allStatus: "كل الحالات",
     loading: "جارٍ التحميل...", empty: "لا توجد رحلات عمل بعد — ابدأ بإنشاء رحلة جديدة",
     thEmp: "الموظف", thType: "النوع", thDest: "الوجهة", thPeriod: "الفترة", thDays: "الأيام", thTransport: "التنقل", thCost: "التكلفة", thStatus: "الحالة",
+    doc: "مستند الانتداب", genDoc: "توليد المستند",
   } : {
     title: "Business Trips & Deputation", subtitle: "Manage internal and external employee trips and related costs",
     sTotal: "Total trips", sInternal: "Internal", sExternal: "External", sCost: "Total costs",
     search: "Search by employee, destination or purpose", type: "Trip type", allTypes: "All types", status: "Status", allStatus: "All statuses",
     loading: "Loading...", empty: "No business trips yet — create a new one",
     thEmp: "Employee", thType: "Type", thDest: "Destination", thPeriod: "Period", thDays: "Days", thTransport: "Transport", thCost: "Cost", thStatus: "Status",
+    doc: "Trip document", genDoc: "Generate document",
   };
 
   const [trips, setTrips] = useState([]);
@@ -64,18 +68,28 @@ export default function BusinessTrips() {
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [org, setOrg] = useState(null);
+  const [busy, setBusy] = useState(null);
 
   const load = async () => {
     setLoading(true);
-    const [tr, e] = await Promise.all([
+    const [tr, e, o] = await Promise.all([
       base44.entities.BusinessTrip.list("-created_date", 500),
       base44.entities.Employee.list("-created_date", 500),
+      getOrgOnce(),
     ]);
-    setTrips(tr); setEmployees(e); setLoading(false);
+    setTrips(tr); setEmployees(e); setOrg(o); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
   const remove = async (id) => { await base44.entities.BusinessTrip.delete(id); load(); };
+
+  const genDoc = async (trip) => {
+    const emp = employees.find((x) => x.id === trip.employee_id);
+    setBusy("t" + trip.id);
+    try { await generateBusinessTripApproval(trip, emp, org); await load(); }
+    finally { setBusy(null); }
+  };
 
   const filtered = trips.filter((tr) => {
     const emp = employees.find((x) => x.id === tr.employee_id);
@@ -161,9 +175,23 @@ export default function BusinessTrips() {
                     <TableCell className="font-medium">{(Number(tr.total_cost) || 0).toLocaleString()}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 items-center">
                         <button onClick={() => { setEditing(tr); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>
-                        <button onClick={() => remove(tr.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
+                        {tr.status === "completed" ? (
+                          tr.approval_pdf_url ? (
+                            <a href={tr.approval_pdf_url} target="_blank" rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium">
+                              <Download size={15} /> {t.doc}
+                            </a>
+                          ) : (
+                            <button onClick={() => genDoc(tr)} disabled={busy === "t" + tr.id}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-medium disabled:opacity-50">
+                              {busy === "t" + tr.id ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />} {t.genDoc}
+                            </button>
+                          )
+                        ) : (
+                          <button onClick={() => remove(tr.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
