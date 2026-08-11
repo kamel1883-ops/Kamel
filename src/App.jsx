@@ -35,7 +35,6 @@ import JobApply from "@/pages/public/JobApply";
 import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import Landing from "@/pages/Landing";
-import OwnerAdmin from "@/pages/OwnerAdmin";
 import Discounts from "@/pages/Discounts";
 import ImportAttendance from "@/pages/ImportAttendance";
 import Login from "@/pages/Login";
@@ -133,7 +132,6 @@ const AuthenticatedApp = () => {
         <Route path="/warnings" element={<Warnings />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
-        <Route path="/owner" element={<OwnerAdmin />} />
         <Route path="/customer-surveys" element={<CustomerSurveys />} />
         <Route path="/discounts" element={<Discounts />} />
         <Route path="/settings" element={<SettingsPage />} />

@@ -214,6 +214,36 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    // ====== كودات الخصم — إدارة كاملة من بوابة المالك ======
+    if (action === "discount_list") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const codes = await base44.asServiceRole.entities.DiscountCode.list("-created_date", 200);
+      return Response.json({ ok: true, codes: codes || [] });
+    }
+    if (action === "discount_save") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      const payload: any = {
+        code: String(body.code || "").trim(),
+        discount_percent: Number(body.discount_percent || 0),
+        label: String(body.label || ""),
+        max_uses: Number(body.max_uses || 0),
+        status: String(body.status || "active"),
+        notes: String(body.notes || ""),
+      };
+      if (!payload.code) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      if (id) await base44.asServiceRole.entities.DiscountCode.update(id, payload);
+      else await base44.asServiceRole.entities.DiscountCode.create(payload);
+      return Response.json({ ok: true });
+    }
+    if (action === "discount_delete") {
+      if ((emp.role_level || "employee") !== "owner") return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.DiscountCode.delete(id);
+      return Response.json({ ok: true });
+    }
+
     // owner_resume يُعيد التفعيل من حالة «موقوف (expired)» أو «ملغي (cancelled)» باستعادة suspended_from.
     if (action === "today_attendance") {
       const recs = await base44.asServiceRole.entities.Attendance.filter(
