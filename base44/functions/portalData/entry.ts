@@ -32,19 +32,23 @@ export default async function (req) {
     const isOwner = (emp.role_level || "employee") === "owner";
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.Attendance.filter({ employee_id: employeeId }, "-date", 10),
         base44.asServiceRole.entities.BusinessTrip.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.Warning.filter({ employee_id: employeeId }, "-created_date", 100),
+        base44.asServiceRole.entities.Performance.filter({ employee_id: employeeId }, "-created_date", 100),
       ]);
+      // يظهر للموظف فقط التقييمات التي اعتمدتها الموارد البشرية (مكتملة أو معتمدة)
+      const reviews = (performances || []).filter((p) => p?.status === "completed" || p?.status === "acknowledged");
       return Response.json({
         ok: true,
         employee: emp,
         org: orgs?.[0] || null,
         leaves, loans, attendance, trips, warnings,
+        reviews,
       });
     }
 

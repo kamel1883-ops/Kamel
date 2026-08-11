@@ -7,6 +7,7 @@ import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
+import EmployeePerformance from "@/components/portal/EmployeePerformance";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -131,6 +132,7 @@ export default function MyRequests() {
   const [attendance, setAttendance] = useState([]);
   const [trips, setTrips] = useState([]);
   const [warnings, setWarnings] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -168,6 +170,7 @@ export default function MyRequests() {
       setLeaves(data.leaves || []); setLoans(data.loans || []);
       setAttendance(data.attendance || []); setTrips(data.trips || []);
       setWarnings(data.warnings || []);
+      setReviews(data.reviews || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -227,7 +230,7 @@ export default function MyRequests() {
     portalSession.clear();
     setSession(null);
     setEmployee(null); setOrg(null);
-    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]);
+    setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]);
     setView("self");
   };
 
@@ -542,6 +545,9 @@ export default function MyRequests() {
             <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={() => load(session)} employee={employee} portalCreate={portalCreateLoan} />
             <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateTrip} />
 
+            <div className="mt-6">
+              <EmployeePerformance reviews={reviews} />
+            </div>
             <div className="mt-6">
               <EmployeeWarnings employee={employee} warnings={warnings} />
             </div>
