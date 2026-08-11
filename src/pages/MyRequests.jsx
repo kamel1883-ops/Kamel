@@ -24,6 +24,7 @@ import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr"
 import { badge } from "@/lib/approvals";
 import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { portalSession } from "@/lib/portalSession";
+import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 
 const localToday = () => {
   const d = new Date();
@@ -226,6 +227,11 @@ export default function MyRequests() {
     setEmployee(null); setOrg(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]);
     setView("self");
+  };
+
+  const exitToLanding = () => {
+    portalSession.clear();
+    window.location.href = "/";
   };
 
   const portalArgs = session
@@ -539,6 +545,7 @@ export default function MyRequests() {
 
   return (
     <div className="min-h-screen bg-background" dir={t.dir}>
+      {session && <IdleSessionGuard onTimeout={exitToLanding} />}
       <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -560,7 +567,7 @@ export default function MyRequests() {
             </Link>
             <LanguageToggle />
             {session && (
-              <button onClick={handlePortalLogout} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+              <button onClick={exitToLanding} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
                 <LogOut size={18} /> {t.logout}
               </button>
             )}

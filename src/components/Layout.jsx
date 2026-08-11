@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationsBell from "@/components/NotificationsBell";
+import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import { useI18n } from "@/lib/i18n";
 
 const appNav = [
@@ -62,14 +63,15 @@ export default function Layout() {
   if (restricted) return null;
 
   const handleLogout = async () => {
-    await base44.auth.logout();
-    navigate("/login");
+    try { await base44.auth.logout(); } catch {}
+    window.location.href = "/";
   };
 
   const isActive = (path) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
     <div className="min-h-screen bg-background flex">
+      {user && <IdleSessionGuard onTimeout={handleLogout} />}
       <aside
         className={cn(
           "fixed lg:sticky top-0 right-0 h-screen w-72 bg-[#0b1120] text-white z-40 transition-transform duration-300 flex flex-col",
