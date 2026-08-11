@@ -220,7 +220,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center"><Crown className="text-violet-700" size={22} /></div>
               <div>
-                <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة — بإدارة الموارد البشرية</div>
+                <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة لإدارة الموارد البشرية</div>
                 <div className="text-xs text-slate-500">{isAr ? "بيانات العميل المسجّل" : "Registered client info"}</div>
               </div>
             </div>
