@@ -48,6 +48,8 @@ export default function Approvals() {
     leaveHrDoc: "مرفقات الموارد البشرية (تذاكر طيران/حجوزات)", leaveHrBtn: "احتساب وحفظ كمسودة",
     leaveHrWarn: "عند الحفظ يُحسب تعويض التذكرة/التصفية ويُولّد مستند المخالصة (PDF) للمعاينة والطباعة لأخذ الموافقة الورقية أولاً. يُحفظ الطلب كمسودة ولن يُحوّل للمالية حتى تعتمده لاحقاً من القائمة.",
     forwardBtn: "اعتماد وتحويل للمالية", printSettle: "معاينة/طباعة المخالصة",
+    deductionLabel: "مستحقات دائنة (تُخصم)", deductionPh: "بيان الخصم",
+    additionLabel: "مستحقات إضافية (تُضاف للموظف)", additionPh: "بيان الإضافة", settleTotal: "إجمالي التصفية المتوقع",
     finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
     tripFinTitle: "صرف الانتداب — المالية/المحاسبة", tripFinWarn: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل ويصبح الطلب مكتملًا.",
     finProof: "إثبات التحويل",
@@ -80,6 +82,8 @@ export default function Approvals() {
     leaveHrDoc: "HR attachments (tickets/bookings)", leaveHrBtn: "Calculate & save as draft",
     leaveHrWarn: "On save the ticket/settlement is calculated and a clearance PDF is generated for preview/print to get the paper approval first. The request is saved as draft and won't be sent to finance until you approve it later.",
     forwardBtn: "Approve & forward to finance", printSettle: "Preview/print settlement",
+    deductionLabel: "Debit dues (deducted)", deductionPh: "Deduction note",
+    additionLabel: "Additional dues (added)", additionPh: "Addition note", settleTotal: "Expected settlement total",
     finNote: "Finance notes/description", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
     tripFinTitle: "Trip payout — Finance/Accounting", tripFinWarn: "On confirmation the process closes, the transfer proof is recorded and the request is completed.",
     finProof: "Transfer proof",
@@ -99,6 +103,10 @@ export default function Approvals() {
   const [q, setQ] = useState("");
   const [loanPayAmount, setLoanPayAmount] = useState("");
   const [genBusy, setGenBusy] = useState(null);
+  const [deductionAmount, setDeductionAmount] = useState("");
+  const [deductionNote, setDeductionNote] = useState("");
+  const [additionAmount, setAdditionAmount] = useState("");
+  const [additionNote, setAdditionNote] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -209,7 +217,7 @@ export default function Approvals() {
     }
     load();
   };
-  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); };
+  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); };
   const confirmLeaveHr = async () => {
     if (!acting) return;
     setBusy(true);
@@ -222,16 +230,24 @@ export default function Approvals() {
       const deduct = Math.min(r.days_count, balance);
       const after = Math.max(0, balance - deduct);
       const ticket = leaveTicketAmount(emp, org);
+      const ded = Math.max(0, Number(deductionAmount) || 0);
+      const add = Math.max(0, Number(additionAmount) || 0);
+      const total = Math.max(0, ticket + add - ded);
       const patch = {
         hr_status: "settled", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
         hr_note: note, hr_document_url: url,
         balance_before: balance, balance_after: after, balance_deducted: deduct,
-        ticket_amount: ticket, settlement_amount: ticket, status: "hr_settled",
+        ticket_amount: ticket,
+        deduction_amount: ded, deduction_note: deductionNote,
+        addition_amount: add, addition_note: additionNote,
+        settlement_amount: total, status: "hr_settled",
       };
       await base44.entities.LeaveRequest.update(r.id, patch);
       try { await generateLeaveSettlement({ ...r, ...patch }, emp, org, leaves); } catch (e) {}
     } catch (e) {}
-    setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
+    setBusy(false); setActing(null); setNote(""); setProofFile(null);
+    setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
+    load();
   };
   const forwardToFinance = async (r) => {
     try {
@@ -522,6 +538,19 @@ export default function Approvals() {
                   </div>
                 );
               })()}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.deductionLabel}</Label>
+                  <Input type="number" dir="ltr" value={deductionAmount} placeholder="0" onChange={(e) => setDeductionAmount(e.target.value)} />
+                  <Input value={deductionNote} placeholder={t.deductionPh} onChange={(e) => setDeductionNote(e.target.value)} className="text-xs" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.additionLabel}</Label>
+                  <Input type="number" dir="ltr" value={additionAmount} placeholder="0" onChange={(e) => setAdditionAmount(e.target.value)} />
+                  <Input value={additionNote} placeholder={t.additionPh} onChange={(e) => setAdditionNote(e.target.value)} className="text-xs" />
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">{t.settleTotal}: <b className="text-foreground">{formatCurrency(Math.max(0, (leaveTicketAmount(empOf(acting.req.employee_id), org) || 0) + (Number(additionAmount) || 0) - (Number(deductionAmount) || 0)))}</b></div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} placeholder={t.leaveHrNotePh} />

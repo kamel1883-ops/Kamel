@@ -17,6 +17,7 @@ export default function SettlementSheet({ record, org }) {
     monthly: "الأجر الشهري", monthlyD: (b) => `أساس: ${b === "gross" ? "إجمالي" : "أساسي فقط"}`, daily: "الأجر اليومي", dailyD: "الأجر الشهري ÷ 30",
     eos: "مكافأة نهاية الخدمة", leaveCash: "تصفية رصيد الإجازات", leaveD: (n) => `${n} يوم × الأجر اليومي`,
     ticket: "تعويض التذكرة", ticketD: "لا يستحق", total: "إجمالي المخالصة",
+    deductionLabel: "مستحقات دائنة (تُخصم)", additionLabel: "مستحقات إضافية (تُضاف للموظف)",
     empSign: "توقيع الموظف", hrSign: "مدير الموارد البشرية", adminSign: "المعتمد من الإدارة",
     footer: (d) => `تم إصدار هذه المخالصة بواسطة منصة جدارة لإدارة الموارد البشرية — ${d || ""}`,
   } : {
@@ -27,6 +28,7 @@ export default function SettlementSheet({ record, org }) {
     monthly: "Monthly wage", monthlyD: (b) => `Basis: ${b === "gross" ? "Gross" : "Base only"}`, daily: "Daily wage", dailyD: "Monthly wage ÷ 30",
     eos: "EOS award", leaveCash: "Leave balance settlement", leaveD: (n) => `${n} days × daily wage`,
     ticket: "Ticket compensation", ticketD: "Not entitled", total: "Total settlement",
+    deductionLabel: "Debit dues (deducted)", additionLabel: "Additional dues (added to employee)",
     empSign: "Employee signature", hrSign: "HR manager", adminSign: "Approved by management",
     footer: (d) => `Issued by Jadara system — ${d || ""}`,
   };
@@ -80,6 +82,12 @@ export default function SettlementSheet({ record, org }) {
           <Row label={t.leaveCash} detail={t.leaveD(r.leave_balance_days)} value={r.leave_cash} />
           {Number(r.ticket_amount) > 0 && (
             <Row label={t.ticket} detail={r.ticket_entitlement === "none" ? t.ticketD : r.ticket_entitlement || ""} value={r.ticket_amount} />
+          )}
+          {Number(r.addition_amount) > 0 && (
+            <Row label={`${t.additionLabel}${r.addition_note ? " — " + r.addition_note : ""}`} detail="" value={Number(r.addition_amount)} />
+          )}
+          {Number(r.deduction_amount) > 0 && (
+            <Row label={`${t.deductionLabel}${r.deduction_note ? " — " + r.deduction_note : ""}`} detail="" value={-Number(r.deduction_amount)} />
           )}
           <tr className="bg-slate-100 font-bold">
             <td className="p-2 border-t-2 border-slate-900">{t.total}</td>

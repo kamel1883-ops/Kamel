@@ -40,6 +40,7 @@ export default function EndOfService() {
     noteLabel: "ملاحظات", proof: "إثبات التحويل (صورة/ملف)", proofLink: "إثبات التحويل",
     hrWarn: "عند الاعتماد تُحوّل المخالصة إلى المالية لإثبات السداد ثم الإقفال النهائي.",
     payWarn: "عند التأكيد يُسجّل إثبات التحويل ويُقفل الموظف نهائياً (حالته تُحدّث إلى منتهي/مستقيل).",
+    deductionLabel: "مستحقات دائنة (تُخصم)", deductionPh: "بيان الخصم", additionLabel: "مستحقات إضافية (تُضاف للموظف)", additionPh: "بيان الإضافة", settleTotal: "الإجمالي بعد الخصم/الإضافة",
   } : {
     title: "End of service", subtitle: "EOS award calculator per Saudi Labor Law (Art. 74 to 85) — all termination reasons and matching articles, with leave balance and ticket compensation",
     chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date",
@@ -58,6 +59,7 @@ export default function EndOfService() {
     noteLabel: "Notes", proof: "Transfer proof (image/file)", proofLink: "Transfer proof",
     hrWarn: "On approval the settlement moves to finance for payment proof and final closure.",
     payWarn: "On confirmation the transfer proof is recorded and the employee is closed permanently (status set to terminated/resigned).",
+    deductionLabel: "Debit dues (deducted)", deductionPh: "Deduction note", additionLabel: "Additional dues (added)", additionPh: "Addition note", settleTotal: "Total after deduction/addition",
   };
 
   const [employees, setEmployees] = useState([]);
@@ -76,6 +78,10 @@ export default function EndOfService() {
   const [note, setNote] = useState("");
   const [proofFile, setProofFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [deductionAmount, setDeductionAmount] = useState("");
+  const [deductionNote, setDeductionNote] = useState("");
+  const [additionAmount, setAdditionAmount] = useState("");
+  const [additionNote, setAdditionNote] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -155,18 +161,27 @@ export default function EndOfService() {
     return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
   };
 
-  const openEosHr = (s) => { setActing({ req: s, action: "eoshr" }); setNote(""); };
+  const openEosHr = (s) => { setActing({ req: s, action: "eoshr" }); setNote(""); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); };
   const confirmEosHr = async () => {
     if (!acting) return;
     setBusy(true);
     try {
       const s = acting.req;
+      const ded = Math.max(0, Number(deductionAmount) || 0);
+      const add = Math.max(0, Number(additionAmount) || 0);
+      const baseTotal = (Number(s.eos_amount) || 0) + (Number(s.leave_cash) || 0) + (Number(s.ticket_amount) || 0);
+      const total = Math.max(0, baseTotal + add - ded);
       await base44.entities.Settlement.update(s.id, {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
+        deduction_amount: ded, deduction_note: deductionNote,
+        addition_amount: add, addition_note: additionNote,
+        total_settlement: total,
         status: "awaiting_finance", finance_status: "pending",
       });
     } catch (e) {}
-    setBusy(false); setActing(null); setNote(""); load();
+    setBusy(false); setActing(null); setNote("");
+    setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
+    load();
   };
 
   const openEosFin = (s) => { setActing({ req: s, action: "eosfin" }); setNote(""); setProofFile(null); };
@@ -330,6 +345,19 @@ export default function EndOfService() {
                 <Label className="text-xs font-medium text-muted-foreground">{t.noteLabel}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.deductionLabel}</Label>
+                  <Input type="number" dir="ltr" value={deductionAmount} placeholder="0" onChange={(e) => setDeductionAmount(e.target.value)} />
+                  <Input value={deductionNote} placeholder={t.deductionPh} onChange={(e) => setDeductionNote(e.target.value)} className="text-xs" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.additionLabel}</Label>
+                  <Input type="number" dir="ltr" value={additionAmount} placeholder="0" onChange={(e) => setAdditionAmount(e.target.value)} />
+                  <Input value={additionNote} placeholder={t.additionPh} onChange={(e) => setAdditionNote(e.target.value)} className="text-xs" />
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">{t.settleTotal}: <b className="text-foreground">{formatCurrency(Math.max(0, (Number(acting.req.total_settlement) || 0) + (Number(additionAmount) || 0) - (Number(deductionAmount) || 0)))}</b></div>
               <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.hrWarn}</div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>

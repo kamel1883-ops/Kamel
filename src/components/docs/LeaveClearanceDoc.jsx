@@ -1,6 +1,6 @@
 import React from "react";
 import BrandHeader from "@/components/docs/BrandHeader";
-import { leaveTypeLabel } from "@/lib/hr";
+import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 
 export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore, balanceAfter }) {
   const rows = [
@@ -50,6 +50,39 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
           </tr>
         </tbody>
       </table>
+
+      {(() => {
+        const ticket = Number(leave?.ticket_amount) || 0;
+        const ded = Number(leave?.deduction_amount) || 0;
+        const add = Number(leave?.addition_amount) || 0;
+        const total = Number(leave?.settlement_amount) || Math.max(0, ticket + add - ded);
+        if (!(ticket > 0 || ded > 0 || add > 0)) return null;
+        const FinRow = ({ label, value, strong }) => (
+          <tr style={{ borderBottom: "1px solid #eceef2", fontWeight: strong ? 800 : 600 }}>
+            <td style={{ padding: "9px 6px", width: "62%", color: strong ? "#0b1120" : "#667085" }}>{label}</td>
+            <td style={{ padding: "9px 6px", textAlign: "left", color: value < 0 ? "#b42318" : "#0b1120" }}>{formatCurrency(value)}</td>
+          </tr>
+        );
+        return (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 18 }}>
+            <thead>
+              <tr style={{ background: "#f3f4f6" }}>
+                <th style={{ textAlign: "right", padding: "9px 6px", width: "62%" }}>الملخص المالي للتصفية</th>
+                <th style={{ textAlign: "left", padding: "9px 6px" }}>المبلغ (ر.س)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ticket > 0 && <FinRow label="تعويض التذكرة" value={ticket} />}
+              {add > 0 && <FinRow label={`مستحقات إضافية (تُضاف للموظف)${leave?.addition_note ? " — " + leave.addition_note : ""}`} value={add} />}
+              {ded > 0 && <FinRow label={`مستحقات دائنة (تُخصم)${leave?.deduction_note ? " — " + leave.deduction_note : ""}`} value={-ded} />}
+              <tr style={{ borderTop: "2px solid #0b1120" }}>
+                <td style={{ padding: "10px 6px", fontWeight: 800, fontSize: 15 }}>إجمالي التصفية</td>
+                <td style={{ padding: "10px 6px", textAlign: "left", fontWeight: 800, fontSize: 15, color: "#0b1120" }}>{formatCurrency(total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        );
+      })()}
 
       <div style={{ marginTop: 26, display: "flex", justifyContent: "space-between", fontSize: 11 }}>
         <div>تاريخ المخالصة: {new Date().toISOString().slice(0, 10)}</div>
