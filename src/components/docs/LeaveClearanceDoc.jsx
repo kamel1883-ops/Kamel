@@ -11,6 +11,7 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
     ["المسمى الوظيفي", employee?.position || "—"],
     ["تاريخ المباشرة", employee?.hire_date || "—"],
     ["نوع الإجازة", leaveTypeLabel(leave?.leave_type)],
+    ["عنوان الإجازة / السبب", leave?.description || leave?.reason || "—"],
     ["من تاريخ", leave?.start_date || "—"],
     ["إلى تاريخ", leave?.end_date || "—"],
   ];
@@ -26,7 +27,8 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
       }}
     >
       <BrandHeader org={org} />
-      <h2 style={{ textAlign: "center", fontSize: 22, margin: "4px 0 18px" }}>مخالصة تصفية إجازة</h2>
+      <h2 style={{ textAlign: "center", fontSize: 22, margin: "4px 0 4px" }}>مخالصة تصفية إجازة</h2>
+      <div style={{ textAlign: "center", fontSize: 14, color: "#6d28d9", fontWeight: 700, marginBottom: 16 }}>{leaveTypeLabel(leave?.leave_type)}{leave?.is_full_clearance ? " — تصفية كاملة" : ""}</div>
 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <tbody>

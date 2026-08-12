@@ -12,10 +12,10 @@ import EmployeeTraining from "@/components/portal/EmployeeTraining";
 import EmployeeDocuments from "@/components/portal/EmployeeDocuments";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
-import LanguageToggle from "@/components/LanguageToggle";
+import PortalLanguageSelector from "@/components/portal/PortalLanguageSelector";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { Image } from "@/components/ui/image";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,8 +39,9 @@ const nowHM = () => {
 };
 
 export default function MyRequests() {
-  const { lang } = useI18n();
+  const { lang } = usePortalI18n();
   const isAr = lang === "ar";
+  const t = usePortalT("portal");
   const tripStatus = isAr ? {
     draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
     pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
@@ -57,73 +58,6 @@ export default function MyRequests() {
     completed: { label: "Completed", cls: "bg-emerald-50 text-emerald-600" },
     cancelled: { label: "Cancelled", cls: "bg-rose-50 text-rose-600" },
     rejected: { label: "Rejected", cls: "bg-rose-50 text-rose-600" },
-  };
-  const t = isAr ? {
-    dir: "rtl", brandSub: "بوابة الموظف الذاتية", brandOnly: "خاص بالموظف", logout: "خروج",
-    loading: "جارٍ التحميل...",
-    gTitle: "تسجيل الدخول للبوابة", gSubtitle: "بوابة الموظف الذاتية — خاص بالموظفين المسجّلين والمنتمين لمنشأة",
-    gDesc: "أدخل رقم هويتك الوطنية أو رقم إقامتك مع تاريخ ميلادك للتحقق. متاح فقط للموظفين المسجّلين لدى المنشآت.",
-    gIdLabel: "رقم الهوية الوطنية / الإقامة", gIdPh: "مثال: 1234567890",
-    gBirthLabel: "تاريخ الميلاد", gBtn: "تسجيل الدخول",
-    gFail: "البيانات غير مطابقة لسجل موظف مسجّل في المنشأة.",
-    gInactive: "حالتك الوظيفية لا تسمح بالدخول للبوابة.",
-    gNote: "لا يمكن إنشاء حساب جديد من هنا؛ يتم إضافة الموظفين من الموارد البشرية فقط.",
-    orgLabel: "المنشأة",
-    delegatedManager: "معتمد إجازات (مدير مباشر)",
-    delegatedFinance: "معتمد مالي (صرف)",
-    delegatedHr: "معتمد موارد بشرية (سلف وانتدابات)",
-    title: "بوابة الموظف الذاتية", subtitle: "",
-    leaveBtn: "طلب إجازة", loanBtn: "طلب سلفة", tripBtn: "طلب رحلة/انتداب",
-    yearsLabel: "سنوات الخدمة", yearsVal: (n) => `${n} سنة`, yearsSub: (d) => `من ${d}`,
-    leaveLabel: "رصيد الإجازات", leaveVal: (n) => `${n} يوم`, leaveSub: (e, u) => `مستحق: ${e} · مستخدم: ${u}`,
-    grossLabel: "الراتب الإجمالي", grossSub: (b) => `أساسي ${formatCurrency(b)}`,
-    ticketLabel: "استحقاق التذكرة", ticketYearly: "سنوي", ticketBiennial: "كل سنتين", ticketNone: "لا يستحق", ticketSaudi: "سعودي", ticketExpat: "مقيم",
-    detailTitle: "تفاصيل الخدمة والراتب",
-    dPosition: "المسمى الوظيفي", dDept: "الإدارة", dHire: "تاريخ التعيين", dService: "مدة الخدمة",
-    dContract: "نوع العقد", contractFT: "دوام كامل", contractPT: "جزئي", contractC: "عقد",
-    dBase: "الراتب الأساسي", dHousing: "بدل السكن", dTransport: "بدل المواصلات", dOther: "بدلات أخرى", dTotal: "الإجمالي",
-    attTitle: "سجل الحضور والانصراف (آخر 10)", attEmpty: "لا توجد سجلات حضور.",
-    thDate: "التاريخ", thIn: "الحضور", thOut: "الانصراف", thHours: "الساعات", thStatus: "الحالة",
-    leavesTitle: "طلبات الإجازات", loansTitle: "طلبات السلف", tripsTitle: "رحلات العمل والانتداب",
-    noLeaves: "لا توجد طلبات إجازات", noLoans: "لا توجد طلبات سلف", noTrips: "لا توجد طلبات رحلات",
-    fullClear: "تصفية كاملة", medReport: "تقرير طبي",
-    rejectReason: "سبب الرفض", rejectByMgr: "المدير المباشر", rejectByHr: "الموارد البشرية", rejectByFin: "المالية", resubmitHint: "يمكنك رفع طلب جديد من الأزرار بالأعلى.",
-    days: (n) => `${n} يوم`, loanMonthly: (m) => `${m} ر.س شهرياً`, loanInst: (n) => `${n} قسط`,
-    tripExternal: "خارجية", tripInternal: "داخلية", sar: "ر.س",
-    selfTab: "خدماتي", approvalsTab: "الاعتمادات",
-  } : {
-    dir: "ltr", brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
-    loading: "Loading...",
-    gTitle: "Portal sign‑in", gSubtitle: "Employee Self‑Service Portal — for registered employees only",
-    gDesc: "Enter your national ID / Iqama number and your birth date to sign in. Available only to employees registered with an organization.",
-    gIdLabel: "National ID / Iqama number", gIdPh: "e.g. 1234567890",
-    gBirthLabel: "Date of birth", gBtn: "Sign in",
-    gFail: "These credentials do not match any registered employee.",
-    gInactive: "Your employment status does not allow portal access.",
-    gNote: "New accounts can't be created here; employees are added by HR only.",
-    orgLabel: "Organization",
-    delegatedManager: "Leave approver (direct manager)",
-    delegatedFinance: "Finance approver (payment)",
-    delegatedHr: "HR approver (loans & trips)",
-    title: "Employee Self‑Service Portal", subtitle: "",
-    leaveBtn: "Leave request", loanBtn: "Loan request", tripBtn: "Business trip",
-    yearsLabel: "Years of service", yearsVal: (n) => `${n} yr`, yearsSub: (d) => `since ${d}`,
-    leaveLabel: "Leave balance", leaveVal: (n) => `${n} days`, leaveSub: (e, u) => `Entitled: ${e} · Used: ${u}`,
-    grossLabel: "Gross salary", grossSub: (b) => `Base ${formatCurrency(b)}`,
-    ticketLabel: "Ticket entitlement", ticketYearly: "Yearly", ticketBiennial: "Biennial", ticketNone: "None", ticketSaudi: "Saudi", ticketExpat: "Expat",
-    detailTitle: "Service & Salary Details",
-    dPosition: "Job title", dDept: "Department", dHire: "Hire date", dService: "Length of service",
-    dContract: "Contract type", contractFT: "Full time", contractPT: "Part time", contractC: "Contract",
-    dBase: "Base salary", dHousing: "Housing allowance", dTransport: "Transport allowance", dOther: "Other allowances", dTotal: "Total",
-    attTitle: "Attendance log (last 10)", attEmpty: "No attendance records.",
-    thDate: "Date", thIn: "Check in", thOut: "Check out", thHours: "Hours", thStatus: "Status",
-    leavesTitle: "Leave requests", loansTitle: "Loan requests", tripsTitle: "Business Trips & Deputation",
-    noLeaves: "No leave requests", noLoans: "No loan requests", noTrips: "No trip requests",
-    fullClear: "Full clearance", medReport: "Medical report",
-    rejectReason: "Rejection reason", rejectByMgr: "Direct manager", rejectByHr: "Human Resources", rejectByFin: "Finance", resubmitHint: "You can submit a new request using the buttons above.",
-    days: (n) => `${n} days`, loanMonthly: (m) => `${formatCurrency(m)} / month`, loanInst: (n) => `${n} installments`,
-    tripExternal: "External", tripInternal: "Internal", sar: "SAR",
-    selfTab: "My Services", approvalsTab: "Approvals",
   };
 
   const [session, setSession] = useState(() => portalSession.load());
@@ -201,7 +135,7 @@ export default function MyRequests() {
     e.preventDefault();
     const id = nid.trim(), bd = birth.trim();
     if (!id || !bd) return;
-    if (!captchaToken) { setSignInMsg({ type: "err", text: isAr ? "يرجى إكمال التحقق البشري أولاً." : "Please complete the human verification first." }); return; }
+    if (!captchaToken) { setSignInMsg({ type: "err", text: t.gCaptcha }); return; }
     setSigningIn(true); setSignInMsg({ type: "", text: "" });
     try {
       const res = await base44.functions.invoke("verifyEmployeePortal", {
@@ -352,7 +286,7 @@ export default function MyRequests() {
     content = (
       <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
         <Loader2 className="animate-spin" size={24} />
-        <p className="text-sm">{isAr ? "جارٍ تحويلك إلى بوابة المالك الذاتية…" : "Redirecting to owner portal…"}</p>
+        <p className="text-sm">{t.redirectingOwner}</p>
       </div>
     );
   } else {
@@ -439,7 +373,7 @@ export default function MyRequests() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <InfoCard icon={Clock} label={t.yearsLabel} value={t.yearsVal(serviceYears)} sub={employee.hire_date ? t.yearsSub(employee.hire_date) : ""} />
               <InfoCard icon={CalendarCheck} label={t.leaveLabel} value={t.leaveVal(remaining)} sub={t.leaveSub(entitled, used)} />
-              <InfoCard icon={Banknote} label={t.grossLabel} value={formatCurrency(gross)} sub={t.grossSub(employee.base_salary || 0)} />
+              <InfoCard icon={Banknote} label={t.grossLabel} value={formatCurrency(gross)} sub={t.grossSub(formatCurrency(employee.base_salary || 0))} />
               <InfoCard icon={BadgeCheck} label={t.ticketLabel} value={ticketLabel} sub={employee.is_saudi ? t.ticketSaudi : t.ticketExpat} />
             </div>
 
@@ -520,7 +454,7 @@ export default function MyRequests() {
                   <Row key={r.id}>
                     <div>
                       <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(r.monthly_installment)}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(formatCurrency(r.monthly_installment))}</div>
                       {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                     </div>
                     <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
@@ -572,7 +506,7 @@ export default function MyRequests() {
   }
 
   return (
-    <div className="min-h-screen bg-background" dir={t.dir}>
+    <div className="min-h-screen bg-background" dir={portalDir(lang)}>
       {session && <IdleSessionGuard onTimeout={exitToLanding} />}
       <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -591,9 +525,9 @@ export default function MyRequests() {
           </div>
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
-              <ArrowRight size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {isAr ? "العودة للموقع" : "Back to site"}
+              <ArrowRight size={16} style={{ transform: portalDir(lang) === "rtl" ? "none" : "scaleX(-1)" }} /> {t.backToSite}
             </Link>
-            <LanguageToggle />
+            <PortalLanguageSelector />
             {session && (
               <button onClick={exitToLanding} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
                 <LogOut size={18} /> {t.logout}
