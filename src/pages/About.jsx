@@ -80,7 +80,6 @@ export default function About() {
           <nav className="flex items-center gap-3 text-sm text-white/70">
             <LanguageToggle />
             <Link to="/contact" className="hover:text-white transition">{t.navContact}</Link>
-            <Link to="/login?returnTo=/app" className="hover:text-white transition">{t.navLogin}</Link>
           </nav>
         </div>
       </header>
