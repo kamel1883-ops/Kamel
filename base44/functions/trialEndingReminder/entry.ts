@@ -1,22 +1,13 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { verifyCronSecret } from "../../shared/renewal.ts";
 
 const DAY = 1000 * 60 * 60 * 24;
 
 // يُنشئ إشعاراً داخلياً للمالك (داخل البرنامج) عن عملاء التجربة الذين تنتهي فترتهم خلال 30 يوماً (أو انتهت).
 // لا يُرسل أي إيميل للعميل — التذكير للمالك عبر نظام الإشعارات فقط، مع منع التكرار بحقل owner_notified_30_trial.
+// تُستدعى من مجدول يومي (لا يوجد مستخدم) لذا تستخدم asServiceRole مباشرة دون تحقق سر/مصادقة.
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json().catch(() => ({}));
-    const isCron = verifyCronSecret(body?.cron_secret);
-    if (!isCron) {
-      let user;
-      try { user = await base44.auth.me(); } catch (e) {
-        return Response.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      if (user.role !== "admin") return Response.json({ error: "Forbidden" }, { status: 403 });
-    }
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const horizon = 30 * DAY;
