@@ -81,36 +81,41 @@ export default async function (req) {
       notes: String(body.notes || '').trim(),
     });
 
-    const ownerEmail = secrets.get('OWNER_EMAIL');
-    if (ownerEmail) {
-      try {
-        let emailBody =
-          'عميل جديد سجّل الفترة التجريبية عبر الموقع:\n\n' +
-          'المنشأة: ' + name + '\n' +
-          'القطاع: ' + (body.industry || '-') + '\n' +
-          'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
-          'البريد: ' + email + '\n' +
-          'الهاتف: ' + phone + '\n' +
-          'الرقم الوطني الموحّد للمنشآت: ' + unified + '\n' +
-          'المدينة: ' + (body.city || '-') + '\n' +
-          'عدد الموظفين: ' + employeeCount + '\n' +
-          'الشريحة: ' + pricingTier + '\n' +
-          'السعر السنوي للباقة: ' + basePrice + ' ر.س\n\n' +
-          'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n';
-        if (discount_percent > 0) {
-          emailBody +=
-            'كود الخصم: ' + discount_code + ' — نسبة الخصم: ' + discount_percent + '%\n' +
-            'المبلغ المعروض بعد الخصم: ' + quoted_amount + ' ر.س (بدلاً من ' + basePrice + ' ر.س)\n';
-        }
-        emailBody += '\nيرجى التواصل مع العميل خلال فترة التجربة لإتمام التحويل للاشتراك السنوي.';
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: ownerEmail,
-          subject: 'اشتراك تجريبي جديد — ' + name,
-          body: emailBody + EMAIL_FOOTER,
-        });
-      } catch (_e) {
-        // رسالة تسجيل الإنشاء لا يجب أن تفشل كل العملية إذا تعطل البريد
+    const officialEmail = 'info@jadara-hr.com';
+    const isQuote = String(body.lead_source || 'trial').trim() === 'quote';
+    try {
+      let emailBody =
+        (isQuote
+          ? 'عميل جديد طلب عرض سعر عبر الموقع:\n\n'
+          : 'عميل جديد سجّل الفترة التجريبية عبر الموقع:\n\n') +
+        'المنشأة: ' + name + '\n' +
+        'القطاع: ' + (body.industry || '-') + '\n' +
+        'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
+        'البريد: ' + email + '\n' +
+        'الهاتف: ' + phone + '\n' +
+        'الرقم الوطني الموحّد للمنشآت: ' + unified + '\n' +
+        'المدينة: ' + (body.city || '-') + '\n' +
+        'عدد الموظفين: ' + employeeCount + '\n' +
+        'الشريحة: ' + pricingTier + '\n' +
+        'السعر السنوي للباقة: ' + basePrice + ' ر.س\n\n' +
+        'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n' +
+        'السجل التجاري: ' + (body.commercial_register || '-') + '\n' +
+        'الرقم الضريبي: ' + (body.vat_number || '-') + '\n';
+      if (discount_percent > 0) {
+        emailBody +=
+          'كود الخصم: ' + discount_code + ' — نسبة الخصم: ' + discount_percent + '%\n' +
+          'المبلغ المعروض بعد الخصم: ' + quoted_amount + ' ر.س (بدلاً من ' + basePrice + ' ر.س)\n';
       }
+      emailBody += '\n' + (isQuote
+        ? 'يرجى التواصل مع العميل لإتمام التحويل وتفعيل الاشتراك السنوي.'
+        : 'يرجى التواصل مع العميل خلال فترة التجربة لإتمام التحويل للاشتراك السنوي.');
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: officialEmail,
+        subject: (isQuote ? 'طلب عرض سعر جديد — ' : 'اشتراك تجريبي جديد — ') + name,
+        body: emailBody + EMAIL_FOOTER,
+      });
+    } catch (_e) {
+      // رسالة تسجيل الإنشاء لا يجب أن تفشل كل العملية إذا تعطل البريد
     }
 
     return Response.json({ ok: true, tenant_id: tenant.id, discount_percent, quoted_amount, pricing_tier: pricingTier, employee_count: employeeCount });
