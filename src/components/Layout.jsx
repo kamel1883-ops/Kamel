@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
+import CompanyAssistant from "@/components/CompanyAssistant";
 import { useI18n } from "@/lib/i18n";
 
 const appNav = [
@@ -175,6 +176,7 @@ export default function Layout() {
           })}
         </nav>
       </div>
+      <CompanyAssistant />
     </div>
   );
 }
