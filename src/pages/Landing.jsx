@@ -176,7 +176,7 @@ export default function Landing() {
     doneCta: "تسجيل الدخول للمنصة",
     form: { company: "اسم المنشأة *", industry: "القطاع / النشاط", city: "المدينة", contact: "اسم الشخص المسؤول", phone: "الهاتف *", unified: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7) *", email: "البريد الإلكتروني *", headcount: "عدد الموظفين المتوقع *", pricePreview: (tier, price) => `شريحتك: ${tier} — السعر السنوي للباقة: ${price.toLocaleString()} ر.س`, submit: "تفعيل التجربة المجانية لمدة شهر", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث" },
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
-    wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية",
+    wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية - الرياض - المركز المالي KAFD",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
     footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2027 جدارة — جميع الحقوق محفوظة",
   } : {
@@ -225,7 +225,7 @@ export default function Landing() {
     doneCta: "Sign in to the platform",
     form: { company: "Company name *", industry: "Sector / Activity", city: "City", contact: "Responsible person", phone: "Phone *", unified: "National Unified Number (10 digits, starts with 7) *", email: "Email *", headcount: "Expected employees count *", pricePreview: (tier, price) => `Your tier: ${tier} — Annual package price: ${price.toLocaleString()} SAR`, submit: "Activate the free trial for a month", secure: "Your data is safe and will never be sold to third parties" },
     contactTag: "We’re here to help", contactTitle: "Contact us",
-    wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia",
+    wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia — Riyadh — KAFD Financial Center",
     footerDesc: "The integrated Saudi HR platform — one place bringing together everything you need to manage human capital.",
     footContact: "Contact us", footPlatform: "Platform", copy: "© 2027 Jadara — All rights reserved",
   };
