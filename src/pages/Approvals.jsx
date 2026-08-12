@@ -219,7 +219,8 @@ export default function Approvals() {
       const deduct = Math.min(r.days_count, balance);
       const fin = needsFinance(r, emp, org);
       const ticket = fin ? leaveTicketAmount(emp, org) : 0;
-      const finalStatus = fin ? "awaiting_finance" : "completed";
+      // جميع أنواع الإجازات تنتقل لبانتظار المالية — لا تكتمل إلا بعد اعتماد معتمد المالية.
+      const finalStatus = "awaiting_finance";
       await base44.entities.LeaveRequest.update(r.id, {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
         balance_deducted: deduct, ticket_amount: ticket, settlement_amount: ticket,
@@ -279,10 +280,9 @@ export default function Approvals() {
       const consume = (r.leave_type === "annual" || r.is_full_clearance);
       const granted = consume ? (Number(r.balance_deducted) || 0) : 0;
       const newUsed = used + granted;
-      const fin = needsFinance(r, emp, org);
-      const finalStatus = fin ? "awaiting_finance" : "completed";
+      // جميع الإجازات تنتقل لبانتظار المالية بعد اعتماد الموارد البشرية — لا تكتمل إلا باعتماد المالية.
       await base44.entities.LeaveRequest.update(r.id, {
-        hr_status: "approved", status: finalStatus, finance_status: "pending",
+        hr_status: "approved", status: "awaiting_finance", finance_status: "pending",
       });
       if (emp) {
         await base44.entities.Employee.update(emp.id, {
