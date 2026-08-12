@@ -99,7 +99,9 @@
     font-family: var(--font-display);
     letter-spacing: -0.015em;
     font-weight: 700;
+    unicode-bidi: plaintext;
   }
+  th { unicode-bidi: plaintext; }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }

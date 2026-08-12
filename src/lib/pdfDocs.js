@@ -32,10 +32,30 @@ function drawPaidStamp(pdf, pageW, pageH) {
   try { pdf.setGState(new pdf.GState({ opacity: 1 })); } catch (e) {}
 }
 
+// يعزل كل جملة بين قوسين تحتوي عربيةً بعلامات عزل ثنائي الاتجاه (RLI/PDI)
+// حتى تظهر الأقواس محيطةً بالنص العربي بشكل صحيح داخل ملفات PDF
+function normalizeArabicParenthesis(root) {
+  try {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const texts = [];
+    while (walker.nextNode()) texts.push(walker.currentNode);
+    for (const tn of texts) {
+      const v = tn.nodeValue;
+      if (!v || v.indexOf("(") === -1) continue;
+      const nv = v.replace(/\(([^()]{0,120})\)/g, (m, inner) =>
+        /[\u0600-\u06FF]/.test(inner) ? `\u2067(${inner})\u2069` : m
+      );
+      if (nv !== v) tn.nodeValue = nv;
+    }
+  } catch (e) {}
+}
+
 // يحوّل عنصر DOM إلى Blob PDF (A4، عربي RTL عبر html2canvas)
 // options.stamp = true يضع ختم "تم الدفع / PAID" كبير على كل صفحة
+// options.landscape = true يجعل الصفحة أفقية (A4 landscape) للجداول العريضة ككشوف الرواتب
 export async function elementToPdfBlob(node, options = {}) {
   await waitForImages(node);
+  normalizeArabicParenthesis(node);
   // html2canvas يفكّك أحرف العربية (أشكال معزولة) عند أي letter-spacing غير صفري،
   // لذا نصفّر المسافة لكل العناصر داخل العنصر المُلتقط (يُصلح عناوين <h3> ... إلخ)
   // كما نضمن خطاً عربياً مدعوماً ليُطبَّق التشكيل/الوصل بصورة صحيحة.
@@ -50,8 +70,9 @@ export async function elementToPdfBlob(node, options = {}) {
   } catch (e) {}
   const canvas = await html2canvas(node, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
   const img = canvas.toDataURL("image/jpeg", 0.95);
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pageW = 210, pageH = 297;
+  const landscape = !!options.landscape;
+  const pdf = new jsPDF(landscape ? "l" : "p", "mm", "a4");
+  const pageW = landscape ? 297 : 210, pageH = landscape ? 210 : 297;
   const imgH = (canvas.height * pageW) / canvas.width;
   let heightLeft = imgH;
   let position = 0;

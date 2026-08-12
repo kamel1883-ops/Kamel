@@ -166,8 +166,11 @@ export default function Payroll() {
       await printReport(sheetRef.current, {
         org,
         title: isAr ? `كشف رواتب ${t.months[month - 1]} ${year}` : `Payroll sheet ${t.months[month - 1]} ${year}`,
-        subtitle: isAr ? `إجمالي الصافي: ${formatCurrency(totalNet)} — ${payrolls.length} موظف` : `Total net: ${formatCurrency(totalNet)} — ${payrolls.length} employees`,
+        subtitle: isAr
+          ? `إجمالي الصافي: ${formatCurrency(totalNet)} — إجمالي المدفوع: ${formatCurrency(totalPaid)} — ${payrolls.length} موظف`
+          : `Total net: ${formatCurrency(totalNet)} — Paid total: ${formatCurrency(totalPaid)} — ${payrolls.length} employees`,
         stamp: monthStatus === "paid" && payrolls.length > 0,
+        landscape: true,
       });
     } finally { setExporting(false); }
   };
@@ -247,6 +250,7 @@ export default function Payroll() {
   const totalDed = payrolls.reduce((s, p) => s + (p.deductions || 0), 0);
   const totalGosiEmployee = payrolls.reduce((s, p) => s + (p.gosi_employee || 0), 0);
   const paidCount = payrolls.filter((p) => p.status === "paid").length;
+  const totalPaid = payrolls.filter((p) => p.status === "paid").reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
   const anyDraft = payrolls.some((p) => p.status === "draft");
   const anyApproved = payrolls.some((p) => p.status === "approved");
   const monthStatus = payrolls.length && payrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";

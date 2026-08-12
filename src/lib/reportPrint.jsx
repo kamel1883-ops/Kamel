@@ -68,9 +68,11 @@ function buildTitle(title, subtitle) {
   return c;
 }
 
-export async function printReport(node, { org, title, subtitle, stamp } = {}) {
+export async function printReport(node, { org, title, subtitle, stamp, landscape } = {}) {
   if (!node) return;
-  const width = Math.min(900, node.offsetWidth || 900);
+  const useLandscape = !!landscape;
+  // عرض مطابق لنسب صفحة A4 ليملأ الصفحة كاملة دون هوامش جانبية كبيرة
+  const width = useLandscape ? 1123 : 794;
   const wrapper = document.createElement("div");
   wrapper.dir = "rtl";
   Object.assign(wrapper.style, {
@@ -88,10 +90,12 @@ export async function printReport(node, { org, title, subtitle, stamp } = {}) {
     el.style.overflow = "visible";
     el.style.maxWidth = "none";
   });
+  // تأكيد أن كل الجداول تملأ عرض الصفحة المطبوعة بالكامل
+  clone.querySelectorAll("table").forEach((el) => { el.style.width = "100%"; el.style.minWidth = "100%"; });
   wrapper.appendChild(clone);
 
   try {
-    const blob = await elementToPdfBlob(wrapper, { stamp: !!stamp });
+    const blob = await elementToPdfBlob(wrapper, { stamp: !!stamp, landscape: useLandscape });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
     setTimeout(() => URL.revokeObjectURL(url), 60000);
