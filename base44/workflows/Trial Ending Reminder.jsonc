@@ -29,7 +29,9 @@
           "call": "invoke_backend_function",
           "with": {
             "function_name": "trialEndingReminder",
-            "args": {}
+            "args": {
+              "cron_secret": "${ env.CRON_SECRET }"
+            }
           },
           "then": "end",
           "x-base44": {
