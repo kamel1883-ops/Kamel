@@ -132,7 +132,7 @@ export default function Landing() {
 
   const t = isAr ? {
     nav: { features: "المميزات", licenses: "التراخيص", integrations: "التكاملات", about: "عن المؤسس", pricing: "الباقات", contact: "تواصل" },
-    portal: "بوابة الموظف الذاتية", ownerPortal: "بوابة المالك الذاتية", login: "بوابة الشركات", start: "ابدأ الآن",
+    portal: "بوابة دخول الموظفين الذاتية", ownerPortal: "بوابة المالك الذاتية", login: "بوابة دخول الشركات", start: "ابدأ الآن",
     badge: "منصة الموارد البشرية السعودية لعام 2027",
     titlePre: "نظام موارد بشرية",
     titleHi: "خارق ومتكامل",
