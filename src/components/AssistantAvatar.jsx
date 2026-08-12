@@ -192,7 +192,6 @@ export default function AssistantAvatar({ mode = "public", session = null, tone 
 
             {/* شريط الإدخال */}
             <div className="border-t bg-background p-2.5 flex items-end gap-2 shrink-0">
-              {micSupported && (
                 <button
                   onClick={toggleMic}
                   className={"shrink-0 h-10 w-10 rounded-xl flex items-center justify-center border " + (listening ? "bg-rose-50 border-rose-200 text-rose-600 animate-pulse" : "bg-violet-50 border-violet-200 text-violet-600 hover:bg-violet-100")}
@@ -200,7 +199,6 @@ export default function AssistantAvatar({ mode = "public", session = null, tone 
                 >
                   {listening ? <Square size={16} /> : <Mic size={18} />}
                 </button>
-              )}
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
