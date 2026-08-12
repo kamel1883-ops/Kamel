@@ -160,7 +160,7 @@ export default function CompanyAssistant() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-muted/30">
               {messages.length === 0 && !sending && (
                 <div className="text-center text-muted-foreground text-sm mt-8 px-4 leading-relaxed">
-                  أهلاً 👋 اسألني عن الموظفين، الإجازات، الموافقات، الحضور، الرواتب… أو اطلب اعتماد طلب ما.
+                  أهلاً 👋 أنا مرشدك للنظام فقط — أسألني أين توجد الخدمة وكيف تستخدمها (الموافقات، الإجازات، الرواتب، التقارير...) وسأشرح لك الخطوات. لا أنفّذ عنك، بل أوجّهك للأزرار والصفحات الصحيحة.
                 </div>
               )}
               {messages.map((m, i) => <Bubble key={i} message={m} onSpeak={speak} />)}

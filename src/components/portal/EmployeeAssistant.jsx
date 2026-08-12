@@ -91,7 +91,7 @@ export default function EmployeeAssistant({ session }) {
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-muted/30">
               {messages.length === 0 && !sending && (
                 <div className="text-center text-muted-foreground text-sm mt-8 px-4 leading-relaxed">
-                  أهلاً 👋 اسألني عن رصيد إجازاتك، حالة طلباتك، حضورك، أو كيف تطلب إجازة/سلفة/انتداب.
+                  أهلاً 👋 أنا مرشدك في البوابة فقط — اسألني كيف تطلب إجازة/سلفة/انتداب، أين تتابع طلباتك، كيف تسجّل حضورك أو تطبع مخالصتك. أشرح لك الخطوات والأزرار، ولا أنفّذ عنك شيئاً.
                 </div>
               )}
               {messages.map((m, i) => <Bubble key={i} message={m} onSpeak={speak} />)}

@@ -1,13 +1,9 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyToken } from "../../shared/portalToken.ts";
 
-// مساعد بوابة الموظف الذاتية — يستقبل رسالة + رمز الجلسة الموقّع، يتحقق منه،
-// يجمع سياق الموظف (بياناته وطلباته وحضوره ورواتبه) ويسأل بوابة الذكاء سؤالاً واحداً
-// لإجابة الموظف. لا ينفذ إجراءات إنشاء/تعديل (هذه عبر أزرار البوابة) — يكتفي بالإجابة والإرشاد.
-
-const dir = (v: any) => (v == null ? "" : String(v));
-const fmt = (arr: any[], fn: (x: any) => string) =>
-  (arr || []).map(fn).join(" | ") || "—";
+// مساعد بوابة الموظف الذاتية — مرشد إرشادي فقط.
+// يتحقق من جلسة الموظف، ثم يوجّهه كيف يستخدم البوابة بنفسه (أين يطلب، أي زر، كيف يملأ،
+// كيف يتابع، كيف يطبع). لا ينفذ أي إجراء ولا يجلب بيانات — إرشاد صرف.
 
 export default async function (req) {
   try {
@@ -24,37 +20,8 @@ export default async function (req) {
     if (!session.ok || session.employeeId !== employeeId)
       return Response.json({ ok: false, error: "invalid_session" }, { status: 401 });
 
-    const isOwner = employeeId === "owner";
-    const emp: any = isOwner
-      ? { full_name: Deno.env.get("OWNER_FULL_NAME") || "المالك", position: "المالك", department: "الإدارة", employee_number: "" }
-      : await base44.asServiceRole.entities.Employee.get(employeeId);
-
-    const [leaves, loans, trips, attendance, payroll, settlements] = await Promise.all([
-      base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 10),
-      base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 10),
-      base44.asServiceRole.entities.BusinessTrip.filter({ employee_id: employeeId }, "-created_date", 10),
-      base44.asServiceRole.entities.Attendance.filter({ employee_id: employeeId }, "-date", 7),
-      base44.asServiceRole.entities.Payroll.filter({ employee_id: employeeId }, "-created_date", 5).catch(() => []),
-      base44.asServiceRole.entities.Settlement.filter({ employee_id: employeeId }, "-created_date", 5).catch(() => []),
-    ]);
-
-    const ctx = [
-      "الاسم: " + dir(emp.full_name),
-      "المسمى/الإدارة/الرقم: " + dir(emp.position) + " / " + dir(emp.department) + " / " + dir(emp.employee_number),
-      "تاريخ التعيين: " + dir(emp.hire_date) + " | نوع العقد: " + dir(emp.contract_type),
-      "الجوال: " + dir(emp.phone) + " | البريد: " + dir(emp.email) + " | العنوان: " + dir(emp.address),
-      "جهة الطوارئ: " + dir(emp.emergency_contact),
-      "رصيد الإجازات المستحق: " + dir(emp.leave_balance) + " يوم | الاستحقاق السنوي: " + dir(emp.annual_leave_entitlement) + " يوم",
-      "استحقاق التذكرة: " + dir(emp.ticket_entitlement),
-      "إجازاتي الأخيرة: " + fmt(leaves, (x) => `${x.leave_type} ${x.start_date}→${x.end_date} (${dir(x.days_count)}ي) [${x.status}]`),
-      "طلبات السلف الأخيرة: " + fmt(loans, (x) => `${dir(x.amount)}ر ${x.status} أقساط:${dir(x.installment_count)}`),
-      "الانتدابات الأخيرة: " + fmt(trips, (x) => `${dir(x.destination)} ${x.start_date}→${x.end_date} [${x.status}]`),
-      "آخر حضور: " + fmt(attendance, (x) => `${x.date} دخول:${dir(x.check_in)} خروج:${dir(x.check_out)}`),
-      "آخر رواتب: " + fmt(payroll, (x) => `${dir(x.month)}/${dir(x.year)} صافي:${dir(x.net_salary)}`),
-    ].join("\n");
-
     const sys =
-      "أنت «مساعد جدارة» للموظف داخل البوابة الذاتية. تجيب بالعربية الفصحى البسيطة، مختصراً وودوداً، اعتماداً على بيانات الموظف المقدّمة فقط. لا تخترع أرقاماً غير موجودة في السياق. إن طلب الموظف إنشاء إجازة/سلفة/انتداب أو تعديل بياناته، أرشدهم لاستخدام الأزرار داخل البوابة لهذا الغرض (لا تنفذ عنهم). إن سأل عن رصيده أو حالة طلباته، أجب من البيانات. لا تطلب معلومات حساسة. كن مهنياً.\n\nبيانات الموظف:\n" + ctx;
+      "أنت «مساعد جدارة» للموظف داخل البوابة الذاتية. مهمتك الإرشاد والتوجيه فقط — تشرح للموظف كيف ينجز خدمته بنفسه عبر أزرار وصفحات البوابة. لست مفوّضاً بتنفيذ أي إجراء (لا إنشاء طلب، لا تعديل، لا اعتماد، لا حذف، لا جلب بيانات) نيابة عنه.\n\nقواعد صارمة:\n- لا تخترع بيانات أو أرقاماً. لا تدّعِ معرفة رصيده أو حالة طلباته؛ بدلاً من ذلك أرشده إلى مكانها في البوابة ليراها بنفسه.\n- حين يطلب إنشاء إجازة/سلفة/انتداب أو تعديل بياناته، اشرح له الخطوات ليفعلها بنفسه (أي زر، أي خانات، ما يحدث بعدها). لا تتنفّذ عنه.\n- حين يسأل عن رصيده أو حالة طلباته، أرشده إلى البطاقة/القائمة المعنية في البوابة (مثلاً: «رصيد إجازاتك يظهر في بطاقة الرصيد أعلى الصفحة» — دون ذكر رقم).\n- لا تطلب معلومات حساسة (كلمة مرور، رموز تحقق، حساب بنكي).\n- كن مختصراً وودوداً، بالعربية الفصحى البسيطة.\n\nخريطة بوابة الموظف الذاتية التي تُرشد إليها:\n- الدخول: بالهوية الوطنية + تاريخ الميلاد.\n- أعلى الصفحة: بطاقات رصيد الإجازات وملخّص الحالة.\n- تسجيل الحضور: زر «تسجيل الدخول/الخروج» (بصمة الموقع) — يظهر آخر تسجيل.\n- طلب جديد: زر «طلب جديد» في كل قسم (إجازة/سلفة/انتداب) —— يفتح نموذجاً تملأه (النوع، التواريخ، السبب، المرفقات إن لزم) ثم ترسله.\n- متابعة الطلبات: قائمة الطلبات في كل قسم تعرض الحالة (بانتظار المدير/الموارد/المالية/مكتمل/مرفوض).\n- الأداء: قسم «تقييمات الأداء» لعرض آخر تقييم.\n- التدريب: قسم «خطط التدريب» لمتابعة الخطة المخصصة.\n- المستندات: قسم «المستندات» لعرض المخالصات ومستندات نهاية الخدمة بعد اعتمادها.\n- الخروج: زر «تسجيل الخروج» للخروج من البوابة.";
 
     const msgs = [
       { role: "system", content: sys },
