@@ -29,10 +29,7 @@ export default async function(req) {
     }
 
     const base44 = createClientFromRequest(req);
-    const ownerEmail = secrets.get('OWNER_EMAIL');
-    if (!ownerEmail) {
-      return Response.json({ error: 'لم يتم ضبط بريد الاستلام' }, { status: 500 });
-    }
+    const officialEmail = 'info@jadara-hr.com';
 
     const subject = `رسالة جديدة من ${name} عبر موقع جدارة`;
     const mailBody = `لقد تلقيت رسالة جديدة عبر نموذج التواصل في موقع جدارة:
@@ -45,12 +42,17 @@ ${message}
 
 — تم إرسال هذه الرسالة تلقائياً من نموذج صفحة «تواصل معنا».`;
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: ownerEmail,
-      subject,
-      body: mailBody,
-      from_name: 'بوابة جدارة',
-    });
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: officialEmail,
+        subject,
+        body: mailBody,
+        from_name: 'بوابة جدارة',
+      });
+    } catch (mailErr) {
+      // البريد الرسمي قد لا يكون مستخدماً مسجّلاً — نعيد الخطأ للواجهة كي يُعالَج
+      return Response.json({ error: 'تعذّر تسليم الرسالة للبريد الرسمي' }, { status: 502 });
+    }
 
     return Response.json({ ok: true });
   } catch (error) {
