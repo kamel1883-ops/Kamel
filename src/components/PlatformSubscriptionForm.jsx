@@ -19,13 +19,14 @@ const empty = {
   not_applicable: false, notes: "", document_url: "",
 };
 
-export default function PlatformSubscriptionForm({ open, onClose, onSaved, editing, fixedKey }) {
+export default function PlatformSubscriptionForm({ open, onClose, onSaved, editing, fixedKey, renewing }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr
     ? {
         edit: "تعديل اشتراك منصة",
         add: "تعبئة بيانات الاشتراك",
+        renew: "تجديد اشتراك منصة",
         type: "نوع المنصة",
         choose: "اختر المنصة",
         custom: "اسم المنصة المخصص",
@@ -46,6 +47,7 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
     : {
         edit: "Edit subscription",
         add: "Fill subscription data",
+        renew: "Renew platform subscription",
         type: "Platform",
         choose: "Select platform",
         custom: "Custom platform name",
@@ -70,9 +72,10 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
   useEffect(() => {
     if (open) {
       if (editing) setForm({ ...empty, ...editing });
+      else if (renewing) setForm({ ...empty, ...renewing, start_date: "", expiry_date: "", duration_months: "", document_url: "", not_applicable: false, id: undefined });
       else setForm({ ...empty, platform_key: fixedKey || "" });
     }
-  }, [open, editing, fixedKey]);
+  }, [open, editing, fixedKey, renewing]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const computedDuration =
@@ -93,7 +96,7 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
         auto_renewal: !!form.auto_renewal,
       };
       if (editing?.id) await base44.entities.PlatformSubscription.update(editing.id, payload);
-      else await base44.entities.PlatformSubscription.create(payload);
+      else await base44.entities.PlatformSubscription.create(payload); // includes renewing → new record
       onSaved?.();
       onClose?.();
     } finally {
@@ -105,7 +108,7 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editing ? t.edit : t.add}</DialogTitle>
+          <DialogTitle>{editing ? t.edit : renewing ? t.renew : t.add}</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">

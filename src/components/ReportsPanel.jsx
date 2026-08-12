@@ -4,11 +4,12 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/hr";
 import { turnoverWindow, attendanceRate, statusSplit, CHART_PALETTE } from "@/lib/analytics";
-import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users, ShieldCheck, Truck, TrendingDown, Clock, AlertTriangle, Target, DoorOpen, ClipboardList, Sparkles, Loader2, Printer, Wallet } from "lucide-react";
+import { BarChart3, FileText, FileSpreadsheet, Car, Plane, CalendarCheck, Users, ShieldCheck, Truck, TrendingDown, Clock, AlertTriangle, Target, DoorOpen, ClipboardList, Sparkles, Loader2, Printer, Wallet, Globe } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { printReport } from "@/lib/reportPrint";
 import PayrollReport from "@/components/reports/PayrollReport";
+import PlatformSubscriptionsReport from "@/components/reports/PlatformSubscriptionsReport";
 
 const daysUntil = (d) => { if (!d) return null; const t = new Date(d).getTime(); if (isNaN(t)) return null; return Math.ceil((t - Date.now()) / 86400000); };
 const addMonths = (n) => { const d = new Date(); d.setMonth(d.getMonth() + n); return d; };
@@ -49,6 +50,10 @@ export default function ReportsPanel({ employees, attendance }) {
     payExport: "تحميل PDF (مع ختم تم الدفع)", payNone: "لا توجد كشوف رواتب مصروفة بعد",
     payThEmp: "الموظف", payThBase: "أساسي", payThNet: "الصافي", payThStatus: "الحالة", payPaid: "مدفوع", payDate: "تاريخ الصرف",
     monthsList: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
+    rPlatforms: "اشتراك المنصات الحكومية", platPlatform: "المنصة", platAccount: "رقم الحساب", platStart: "البداية",
+    platExpiry: "الانتهاء", platRemaining: "المتبقي", platCost: "التكلفة السنوية", platTotalCost: "إجمالي التكلفة السنوية",
+    platAuto: "تجديد تلقائي", platNA: "لا ينطبق", platStatus: "حالة التغطية", platCostByPlatform: "التكلفة حسب المنصة",
+    platExpiringSoon: "اشتراكات قاربت الانتهاء",
   } : {
     section: "Reports Center", sectionSub: "Reports & charts for decision support — inside Analytics",
     pick: "Pick a report",
@@ -81,6 +86,10 @@ export default function ReportsPanel({ employees, attendance }) {
     payExport: "Download PDF (with PAID stamp)", payNone: "No paid payroll sheets yet",
     payThEmp: "Employee", payThBase: "Base", payThNet: "Net", payThStatus: "Status", payPaid: "Paid", payDate: "Paid date",
     monthsList: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    rPlatforms: "Government platforms subscriptions", platPlatform: "Platform", platAccount: "Account", platStart: "Start",
+    platExpiry: "Expiry", platRemaining: "Remaining", platCost: "Annual cost", platTotalCost: "Total annual cost",
+    platAuto: "Auto renewal", platNA: "N/A", platStatus: "Coverage status", platCostByPlatform: "Cost by platform",
+    platExpiringSoon: "Expiring soon subscriptions",
   };
 
   const REPORTS = [
@@ -96,6 +105,7 @@ export default function ReportsPanel({ employees, attendance }) {
     { id: "exit", label: t.rExit, icon: DoorOpen },
     { id: "surveys", label: t.rSurveys, icon: ClipboardList },
     { id: "payroll", label: t.rPayroll, icon: Wallet },
+    { id: "platforms", label: t.rPlatforms, icon: Globe },
   ];
 
   const [rid, setRid] = useState("contracts");
@@ -118,7 +128,7 @@ export default function ReportsPanel({ employees, attendance }) {
 
   useEffect(() => {
     (async () => {
-      const [lic, veh, trp, wrn, rev, exi, srv, sres, orgs, prl] = await Promise.all([
+      const [lic, veh, trp, wrn, rev, exi, srv, sres, orgs, prl, psub] = await Promise.all([
         base44.entities.License.list("-expiry_date", 500).catch(() => []),
         base44.entities.Vehicle.list("-created_date", 500).catch(() => []),
         base44.entities.BusinessTrip.list("-start_date", 500).catch(() => []),
@@ -129,8 +139,9 @@ export default function ReportsPanel({ employees, attendance }) {
         base44.entities.SurveyResponse.list("-submitted_date", 1000).catch(() => []),
         base44.entities.Organization.list("-created_date", 1).catch(() => []),
         base44.entities.Payroll.filter({ status: "paid" }, "-created_date", 2000).catch(() => []),
+        base44.entities.PlatformSubscription.list("-created_date", 500).catch(() => []),
       ]);
-      setExtra({ lic, veh, trp, warnings: wrn, reviews: rev, exits: exi, surveys: srv, sresponses: sres, payroll: prl });
+      setExtra({ lic, veh, trp, warnings: wrn, reviews: rev, exits: exi, surveys: srv, sresponses: sres, payroll: prl, platforms: psub });
       setOrg(orgs?.[0] || null);
     })();
   }, []);
@@ -174,6 +185,7 @@ export default function ReportsPanel({ employees, attendance }) {
         {rid === "exit" && <ExitReport records={extra.exits || []} t={t} />}
         {rid === "surveys" && <SurveysReport surveys={extra.surveys || []} responses={extra.sresponses || []} t={t} />}
         {rid === "payroll" && <PayrollReport org={org} records={extra.payroll || []} t={t} />}
+        {rid === "platforms" && <PlatformSubscriptionsReport records={extra.platforms || []} t={t} />}
       </div>
     </div>
   );

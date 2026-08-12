@@ -18,13 +18,14 @@ const empty = {
   duration_months: "", not_applicable: false, notes: "", document_url: "",
 };
 
-export default function LicenseForm({ open, onClose, onSaved, editing, fixedType }) {
+export default function LicenseForm({ open, onClose, onSaved, editing, fixedType, renewing }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr
     ? {
         edit: "تعديل الترخيص",
         add: "تعبئة بيانات الترخيص",
+        renew: "تجديد الترخيص",
         type: "نوع الترخيص",
         choose: "اختر النوع",
         custom: "اسم الترخيص المخصص",
@@ -43,6 +44,7 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
     : {
         edit: "Edit license",
         add: "Fill license data",
+        renew: "Renew license",
         type: "License type",
         choose: "Select type",
         custom: "Custom license name",
@@ -66,6 +68,8 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
     if (open) {
       if (editing) {
         setForm({ ...empty, ...editing });
+      } else if (renewing) {
+        setForm({ ...empty, ...renewing, issue_date: "", expiry_date: "", duration_months: "", document_url: "", not_applicable: false, id: undefined });
       } else {
         setForm({
           ...empty,
@@ -74,7 +78,7 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
         });
       }
     }
-  }, [open, editing, fixedType]);
+  }, [open, editing, fixedType, renewing]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const computedDuration =
@@ -93,7 +97,7 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
         not_applicable: !!form.not_applicable,
       };
       if (editing?.id) await base44.entities.License.update(editing.id, payload);
-      else await base44.entities.License.create(payload);
+      else await base44.entities.License.create(payload); // includes renewing → new record
       onSaved?.();
       onClose?.();
     } finally {
@@ -111,7 +115,7 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editing ? t.edit : t.add}</DialogTitle>
+          <DialogTitle>{editing ? t.edit : renewing ? t.renew : t.add}</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
