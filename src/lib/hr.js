@@ -1,26 +1,63 @@
-import { isAr } from "@/lib/lang";
+import { activeLang } from "@/lib/lang";
 
-const SAR = () => (isAr() ? "ر.س" : "SAR");
+// رمز العملة حسب اللغة
+const SAR_BY_LANG = {
+  ar: "ر.س", en: "SAR", hi: "SAR", ne: "SAR", bn: "SAR", fil: "SAR", ur: "SAR",
+};
+export const sarSymbol = () => SAR_BY_LANG[activeLang()] || SAR_BY_LANG.en;
 
 export function formatCurrency(n) {
-  return `${(Number(n) || 0).toLocaleString("en-US")} ${SAR()}`;
+  return `${(Number(n) || 0).toLocaleString("en-US")} ${sarSymbol()}`;
 }
 
 export function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// أسماء أنواع الإجازات — 7 لغات
+const LEAVE_TYPES = {
+  ar: { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "بدون راتب", maternity: "إجازة أمومة" },
+  en: { annual: "Annual", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity" },
+  hi: { annual: "वार्षिक अवकाश", sick: "बीमारी अवकाश", emergency: "आपातकालीन अवकाश", unpaid: "बिना वेतन", maternity: "मातृत्व अवकाश" },
+  ne: { annual: "वार्षिक बिदा", sick: "बिरामी बिदा", emergency: "आपतकालीन बिदा", unpaid: "बिना तलब बिदा", maternity: "मातृत्व बिदा" },
+  bn: { annual: "বার্ষিক ছুটি", sick: "অসুস্থতার ছুটি", emergency: "জরুরি ছুটি", unpaid: "বেতনহীন ছুটি", maternity: "মাতৃত্ব ছুটি" },
+  fil: { annual: "Taon-taon", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity" },
+  ur: { annual: "سالانہ چھٹی", sick: "بیماری کی چھٹی", emergency: "ایمرجنسی", unpaid: "بلا تنخواہ", maternity: "مادرناٹی" },
+};
+
 export function leaveTypeLabel(type) {
-  const ar = {
-    annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة",
-    unpaid: "بدون راتب", maternity: "إجازة أمومة",
-  };
-  const en = {
-    annual: "Annual", sick: "Sick", emergency: "Emergency",
-    unpaid: "Unpaid", maternity: "Maternity",
-  };
-  const map = isAr() ? ar : en;
+  const lang = activeLang();
+  const map = LEAVE_TYPES[lang] || LEAVE_TYPES.en;
   return map[type] || type;
+}
+
+// النوع الكامل مع بيان الراتب (براتب / بدون راتب) — 7 لغات
+const LEAVE_FULL = {
+  ar: { annual: "إجازة سنوية براتب", sick: "إجازة مرضية براتب", emergency: "إجازة طارئة براتب", unpaid: "إجازة بدون راتب", maternity: "إجازة أمومة براتب" },
+  en: { annual: "Annual leave (paid)", sick: "Sick leave (paid)", emergency: "Emergency leave (paid)", unpaid: "Unpaid leave", maternity: "Maternity leave (paid)" },
+  hi: { annual: "वार्षिक अवकाश (paid)", sick: "बीमारी अवकाश (paid)", emergency: "आपातकालीन अवकाश (paid)", unpaid: "बिना वेतन अवकाश", maternity: "मातृत्व अवकाश (paid)" },
+  ne: { annual: "वार्षिक बिदा (paid)", sick: "बिरामी बिदा (paid)", emergency: "आपतकालीन बिदा (paid)", unpaid: "बिना तलब बिदा", maternity: "मातृत्व बिदा (paid)" },
+  bn: { annual: "বার্ষিক ছুটি (paid)", sick: "অসুস্থতার ছুটি (paid)", emergency: "জরুরি ছুটি (paid)", unpaid: "বেতনহীন ছুটি", maternity: "মাতৃত্ব ছুটি (paid)" },
+  fil: { annual: "Annual leave (paid)", sick: "Sick leave (paid)", emergency: "Emergency leave (paid)", unpaid: "Unpaid leave", maternity: "Maternity leave (paid)" },
+  ur: { annual: "سالانہ چھٹی (مع تنخواہ)", sick: "بیماری کی چھٹی (مع تنخواہ)", emergency: "ایمرجنسی چھٹی (مع تنخواہ)", unpaid: "بلا تنخواہ چھٹی", maternity: "مادرناٹی چھٹی (مع تنخواہ)" },
+};
+
+export function leaveFullTypeLabel(type) {
+  const lang = activeLang();
+  const map = LEAVE_FULL[lang] || LEAVE_FULL.en;
+  return map[type] || leaveTypeLabel(type);
+}
+
+export function leaveIsPaid(type) {
+  return type !== "unpaid";
+}
+
+export function leavePayStatusLabel(type) {
+  const lang = activeLang();
+  const paid = { ar: "براتب", en: "Paid", hi: "Paid", ne: "Paid", bn: "Paid", fil: "Paid", ur: "مع تنخواہ" };
+  const unpaid = { ar: "بدون راتب", en: "Unpaid", hi: "Unpaid", ne: "Unpaid", bn: "Unpaid", fil: "Unpaid", ur: "بلا تنخواہ" };
+  const m = type === "unpaid" ? unpaid : paid;
+  return m[lang] || m.en;
 }
 
 export function statusColors(status) {
@@ -30,6 +67,7 @@ export function statusColors(status) {
 }
 
 export function statusEmployeeLabel(status) {
+  const lang = activeLang();
   const ar = {
     active: { label: "على رأس العمل", cls: "bg-emerald-50 text-emerald-600" },
     on_leave: { label: "في إجازة", cls: "bg-amber-50 text-amber-600" },
@@ -42,11 +80,17 @@ export function statusEmployeeLabel(status) {
     terminated: { label: "Terminated", cls: "bg-rose-50 text-rose-600" },
     resigned: { label: "Resigned", cls: "bg-slate-100 text-slate-500" },
   };
-  const map = isAr() ? ar : en;
+  const hi = { active: { label: "कार्यरत", cls: "bg-emerald-50 text-emerald-600" }, on_leave: { label: "अवकाश पर", cls: "bg-amber-50 text-amber-600" }, terminated: { label: "समाप्त", cls: "bg-rose-50 text-rose-600" }, resigned: { label: "इस्तीफा", cls: "bg-slate-100 text-slate-500" } };
+  const ne = { active: { label: "कार्यरत", cls: "bg-emerald-50 text-emerald-600" }, on_leave: { label: "बिदामा", cls: "bg-amber-50 text-amber-600" }, terminated: { label: "समाप्त", cls: "bg-rose-50 text-rose-600" }, resigned: { label: "राजिनामा", cls: "bg-slate-100 text-slate-500" } };
+  const bn = { active: { label: "কর্মরত", cls: "bg-emerald-50 text-emerald-600" }, on_leave: { label: "ছুটিতে", cls: "bg-amber-50 text-amber-600" }, terminated: { label: "সমাপ্ত", cls: "bg-rose-50 text-rose-600" }, resigned: { label: "পদত্যাগ", cls: "bg-slate-100 text-slate-500" } };
+  const fil = { active: { label: "Aktibo", cls: "bg-emerald-50 text-emerald-600" }, on_leave: { label: "Nasa leave", cls: "bg-amber-50 text-amber-600" }, terminated: { label: "Itinapos", cls: "bg-rose-50 text-rose-600" }, resigned: { label: "Nagbitiw", cls: "bg-slate-100 text-slate-500" } };
+  const ur = { active: { label: "ملازم", cls: "bg-emerald-50 text-emerald-600" }, on_leave: { label: "چھٹی پر", cls: "bg-amber-50 text-amber-600" }, terminated: { label: "ختم شدہ", cls: "bg-rose-50 text-rose-600" }, resigned: { label: "استعفیٰ", cls: "bg-slate-100 text-slate-500" } };
+  const map = { ar, en, hi, ne, bn, fil, ur }[lang] || en;
   return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
 }
 
 export function attendanceStatusLabel(status) {
+  const lang = activeLang();
   const ar = {
     present: { label: "حاضر", cls: "bg-emerald-50 text-emerald-600" },
     late: { label: "متأخر", cls: "bg-amber-50 text-amber-600" },
@@ -61,11 +105,17 @@ export function attendanceStatusLabel(status) {
     leave: { label: "Leave", cls: "bg-blue-50 text-blue-600" },
     holiday: { label: "Holiday", cls: "bg-violet-50 text-violet-600" },
   };
-  const map = isAr() ? ar : en;
+  const hi = { present: { label: "उपस्थित", cls: "bg-emerald-50 text-emerald-600" }, late: { label: "देर से", cls: "bg-amber-50 text-amber-600" }, absent: { label: "अनुपस्थित", cls: "bg-rose-50 text-rose-600" }, leave: { label: "अवकाश", cls: "bg-blue-50 text-blue-600" }, holiday: { label: "छुट्टी", cls: "bg-violet-50 text-violet-600" } };
+  const ne = { present: { label: "उपस्थित", cls: "bg-emerald-50 text-emerald-600" }, late: { label: "ढिलो", cls: "bg-amber-50 text-amber-600" }, absent: { label: "अनुपस्थित", cls: "bg-rose-50 text-rose-600" }, leave: { label: "बिदा", cls: "bg-blue-50 text-blue-600" }, holiday: { label: "बिदा/छुट्टी", cls: "bg-violet-50 text-violet-600" } };
+  const bn = { present: { label: "উপস্থিত", cls: "bg-emerald-50 text-emerald-600" }, late: { label: "দেরি", cls: "bg-amber-50 text-amber-600" }, absent: { label: "অনুপস্থিত", cls: "bg-rose-50 text-rose-600" }, leave: { label: "ছুটি", cls: "bg-blue-50 text-blue-600" }, holiday: { label: "ছুটির দিন", cls: "bg-violet-50 text-violet-600" } };
+  const fil = { present: { label: "Present", cls: "bg-emerald-50 text-emerald-600" }, late: { label: "Late", cls: "bg-amber-50 text-amber-600" }, absent: { label: "Absent", cls: "bg-rose-50 text-rose-600" }, leave: { label: "Leave", cls: "bg-blue-50 text-blue-600" }, holiday: { label: "Holiday", cls: "bg-violet-50 text-violet-600" } };
+  const ur = { present: { label: "حاضر", cls: "bg-emerald-50 text-emerald-600" }, late: { label: "دیر", cls: "bg-amber-50 text-amber-600" }, absent: { label: "غیر حاضر", cls: "bg-rose-50 text-rose-600" }, leave: { label: "چھٹی", cls: "bg-blue-50 text-blue-600" }, holiday: { label: "چھٹی کا دن", cls: "bg-violet-50 text-violet-600" } };
+  const map = { ar, en, hi, ne, bn, fil, ur }[lang] || en;
   return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
 }
 
 export function payrollStatusLabel(status) {
+  const lang = activeLang();
   const ar = {
     draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
     approved: { label: "معتمد", cls: "bg-blue-50 text-blue-600" },
@@ -76,6 +126,11 @@ export function payrollStatusLabel(status) {
     approved: { label: "Approved", cls: "bg-blue-50 text-blue-600" },
     paid: { label: "Paid", cls: "bg-emerald-50 text-emerald-600" },
   };
-  const map = isAr() ? ar : en;
+  const hi = { draft: { label: "ड्राफ्ट", cls: "bg-slate-100 text-slate-600" }, approved: { label: "स्वीकृत", cls: "bg-blue-50 text-blue-600" }, paid: { label: "भुगतान", cls: "bg-emerald-50 text-emerald-600" } };
+  const ne = { draft: { label: "ड्राफ्ट", cls: "bg-slate-100 text-slate-600" }, approved: { label: "स्वीकृत", cls: "bg-blue-50 text-blue-600" }, paid: { label: "भुक्तानी", cls: "bg-emerald-50 text-emerald-600" } };
+  const bn = { draft: { label: "খসড়া", cls: "bg-slate-100 text-slate-600" }, approved: { label: "অনুমোদিত", cls: "bg-blue-50 text-blue-600" }, paid: { label: "পরিশোধিত", cls: "bg-emerald-50 text-emerald-600" } };
+  const fil = { draft: { label: "Draft", cls: "bg-slate-100 text-slate-600" }, approved: { label: "Na-apruba", cls: "bg-blue-50 text-blue-600" }, paid: { label: "Nabayaran", cls: "bg-emerald-50 text-emerald-600" } };
+  const ur = { draft: { label: "مسودہ", cls: "bg-slate-100 text-slate-600" }, approved: { label: "منظور شدہ", cls: "bg-blue-50 text-blue-600" }, paid: { label: "ادا شدہ", cls: "bg-emerald-50 text-emerald-600" } };
+  const map = { ar, en, hi, ne, bn, fil, ur }[lang] || en;
   return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
 }

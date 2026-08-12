@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Clock, LogOut } from "lucide-react";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 
 // حارس انتهاء الجلسة: بعد 15 دقيقة من الخمول تظهر نافذة عدّ تنازلي 60 ثانية،
 // يختار المستخدم المتابعة وإلا يُسجَّل خروجه تلقائياً.
@@ -10,8 +10,8 @@ const IDLE_MS = 15 * 60 * 1000;
 const COUNT_S = 60;
 
 export default function IdleSessionGuard({ onTimeout, enabled = true }) {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
+  const { lang } = usePortalI18n();
+  const t = usePortalT("idle");
   const [show, setShow] = useState(false);
   const [left, setLeft] = useState(COUNT_S);
   const lastAct = useRef(Date.now());
@@ -57,24 +57,22 @@ export default function IdleSessionGuard({ onTimeout, enabled = true }) {
 
   return (
     <Dialog open={show} onOpenChange={(o) => { if (o) return; cont(); }}>
-      <DialogContent className="max-w-sm text-center" dir={isAr ? "rtl" : "ltr"}>
+      <DialogContent className="max-w-sm text-center" dir={portalDir(lang) === "rtl" ? "rtl" : "ltr"}>
         <DialogHeader className="items-center text-center">
           <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
             <Clock className="text-amber-600" size={28} />
           </div>
-          <DialogTitle>{isAr ? "هل تود المتابعة؟" : "Still there?"}</DialogTitle>
+          <DialogTitle>{t.stay}</DialogTitle>
           <DialogDescription className="leading-relaxed">
-            {isAr
-              ? `لم يُسجَّل أي نشاط منذ 15 دقيقة. سيتم تسجيل خروجك تلقائياً خلال ${left} ثانية.`
-              : `You've been inactive for 15 minutes. You'll be signed out automatically in ${left} seconds.`}
+            {t.body(left)}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-center gap-2 pt-2">
           <Button onClick={cont} className="gap-2">
-            <Clock size={16} /> {isAr ? "متابعة" : "Continue"}
+            <Clock size={16} /> {t.cont}
           </Button>
           <Button variant="outline" onClick={() => { setShow(false); try { onTimeoutRef.current?.(); } catch {} }} className="gap-2 text-rose-600 border-rose-200 hover:bg-rose-50">
-            <LogOut size={16} /> {isAr ? "تسجيل الخروج الآن" : "Sign out now"}
+            <LogOut size={16} /> {t.outNow}
           </Button>
         </DialogFooter>
       </DialogContent>

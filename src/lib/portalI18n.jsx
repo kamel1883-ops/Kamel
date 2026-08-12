@@ -1,0 +1,399 @@
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { setPortalLangStore, activeLang } from "@/lib/lang";
+
+// دعم اللغات في بوابة الموظف الذاتية فقط (مستقل عن لغة الواجهة الرئيسية)
+// اللغات المدعومة: ar, en, hi, ne, bn, fil, ur
+export const PORTAL_LANGS = [
+  { code: "ar", label: "العربية", dir: "rtl" },
+  { code: "en", label: "English", dir: "ltr" },
+  { code: "hi", label: "हिन्दी", dir: "ltr" },
+  { code: "ne", label: "नेपाली", dir: "ltr" },
+  { code: "bn", label: "বাংলা", dir: "ltr" },
+  { code: "fil", label: "Filipino", dir: "ltr" },
+  { code: "ur", label: "اردو", dir: "rtl" },
+];
+const STORAGE_KEY = "jadara_portal_lang";
+export const portalDir = (lang) => (PORTAL_LANGS.find((l) => l.code === lang)?.dir) || (lang === "ar" ? "rtl" : "ltr");
+
+const PortalLangCtx = createContext(null);
+
+export function PortalLangProvider({ children }) {
+  const [lang, setLang] = useState(() => {
+    let l = "ar";
+    try { l = localStorage.getItem(STORAGE_KEY) || "ar"; } catch (e) {}
+    setPortalLangStore(l);
+    return l;
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+    setPortalLangStore(lang);
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+    }
+  }, [lang]);
+
+  // عند مغادرة البوابة: تنظيف لغة البوابة حتى لا تتسرب لتطبيق الإدارة
+  useEffect(() => () => setPortalLangStore(null), []);
+
+  return (
+    <PortalLangCtx.Provider value={{ lang, setLang }}>
+      {children}
+    </PortalLangCtx.Provider>
+  );
+}
+
+export function usePortalI18n() {
+  const ctx = useContext(PortalLangCtx);
+  if (!ctx) {
+    // خارج نطاق البوابة: نعود للغة الفعّالة (عربية/إنجليزية من الواجهة العامة)
+    return { lang: activeLang() || "ar", setLang: () => {} };
+  }
+  return ctx;
+}
+
+export function portalLang() {
+  try { return localStorage.getItem(STORAGE_KEY) || "ar"; } catch (e) { return "ar"; }
+}
+
+// ============================================================
+// قاموس الترجمة لكل شاشات البوابة — 7 لغات
+// ============================================================
+const DICT = {
+  portal: {
+    ar: {
+      brandSub: "بوابة الموظف الذاتية", brandOnly: "خاص بالموظف", logout: "خروج",
+      backToSite: "العودة للموقع", redirectingOwner: "جارٍ تحويلك إلى بوابة المالك الذاتية…",
+      loading: "جارٍ التحميل...",
+      gTitle: "تسجيل الدخول للبوابة", gSubtitle: "بوابة الموظف الذاتية — خاص بالموظفين المسجّلين والمنتمين لمنشأة",
+      gDesc: "أدخل رقم هويتك الوطنية أو رقم إقامتك مع تاريخ ميلادك للتحقق. متاح فقط للموظفين المسجّلين لدى المنشآت.",
+      gIdLabel: "رقم الهوية الوطنية / الإقامة", gIdPh: "مثال: 1234567890",
+      gBirthLabel: "تاريخ الميلاد", gBtn: "تسجيل الدخول",
+      gFail: "البيانات غير مطابقة لسجل موظف مسجّل في المنشأة.",
+      gInactive: "حالتك الوظيفية لا تسمح بالدخول للبوابة.",
+      gNote: "لا يمكن إنشاء حساب جديد من هنا؛ يتم إضافة الموظفين من الموارد البشرية فقط.",
+      gCaptcha: "يرجى إكمال التحقق البشري أولاً.",
+      orgLabel: "المنشأة",
+      delegatedManager: "معتمد إجازات (مدير مباشر)", delegatedFinance: "معتمد مالي (صرف)", delegatedHr: "معتمد موارد بشرية (سلف وانتدابات)",
+      title: "بوابة الموظف الذاتية",
+      leaveBtn: "طلب إجازة", loanBtn: "طلب سلفة", tripBtn: "طلب رحلة/انتداب",
+      yearsLabel: "سنوات الخدمة", yearsVal: (n) => `${n} سنة`, yearsSub: (d) => `من ${d}`,
+      leaveLabel: "رصيد الإجازات", leaveVal: (n) => `${n} يوم`, leaveSub: (e, u) => `مستحق: ${e} · مستخدم: ${u}`,
+      grossLabel: "الراتب الإجمالي", grossSub: (b) => `أساسي ${b}`,
+      ticketLabel: "استحقاق التذكرة", ticketYearly: "سنوي", ticketBiennial: "كل سنتين", ticketNone: "لا يستحق", ticketSaudi: "سعودي", ticketExpat: "مقيم",
+      detailTitle: "تفاصيل الخدمة والراتب",
+      dPosition: "المسمى الوظيفي", dDept: "الإدارة", dHire: "تاريخ التعيين", dService: "مدة الخدمة",
+      dContract: "نوع العقد", contractFT: "دوام كامل", contractPT: "جزئي", contractC: "عقد",
+      dBase: "الراتب الأساسي", dHousing: "بدل السكن", dTransport: "بدل المواصلات", dOther: "بدلات أخرى", dTotal: "الإجمالي",
+      attTitle: "سجل الحضور والانصراف (آخر 10)", attEmpty: "لا توجد سجلات حضور.",
+      thDate: "التاريخ", thIn: "الحضور", thOut: "الانصراف", thHours: "الساعات", thStatus: "الحالة",
+      leavesTitle: "طلبات الإجازات", loansTitle: "طلبات السلف", tripsTitle: "رحلات العمل والانتداب",
+      noLeaves: "لا توجد طلبات إجازات", noLoans: "لا توجد طلبات سلف", noTrips: "لا توجد طلبات رحلات",
+      fullClear: "تصفية كاملة", medReport: "تقرير طبي",
+      rejectReason: "سبب الرفض", rejectByMgr: "المدير المباشر", rejectByHr: "الموارد البشرية", rejectByFin: "المالية", resubmitHint: "يمكنك رفع طلب جديد من الأزرار بالأعلى.",
+      days: (n) => `${n} يوم`, loanMonthly: (m) => `${m} ر.س شهرياً`, loanInst: (n) => `${n} قسط`,
+      tripExternal: "خارجية", tripInternal: "داخلية", sar: "ر.س",
+      selfTab: "خدماتي", approvalsTab: "الاعتمادات",
+    },
+    en: {
+      brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
+      backToSite: "Back to site", redirectingOwner: "Redirecting to owner portal…",
+      loading: "Loading...",
+      gTitle: "Portal sign‑in", gSubtitle: "Employee Self‑Service Portal — for registered employees only",
+      gDesc: "Enter your national ID / Iqama number and your birth date to sign in. Available only to employees registered with an organization.",
+      gIdLabel: "National ID / Iqama number", gIdPh: "e.g. 1234567890",
+      gBirthLabel: "Date of birth", gBtn: "Sign in",
+      gFail: "These credentials do not match any registered employee.",
+      gInactive: "Your employment status does not allow portal access.",
+      gNote: "New accounts can't be created here; employees are added by HR only.",
+      gCaptcha: "Please complete the human verification first.",
+      orgLabel: "Organization",
+      delegatedManager: "Leave approver (direct manager)", delegatedFinance: "Finance approver (payment)", delegatedHr: "HR approver (loans & trips)",
+      title: "Employee Self‑Service Portal",
+      leaveBtn: "Leave request", loanBtn: "Loan request", tripBtn: "Business trip",
+      yearsLabel: "Years of service", yearsVal: (n) => `${n} yr`, yearsSub: (d) => `since ${d}`,
+      leaveLabel: "Leave balance", leaveVal: (n) => `${n} days`, leaveSub: (e, u) => `Entitled: ${e} · Used: ${u}`,
+      grossLabel: "Gross salary", grossSub: (b) => `Base ${b}`,
+      ticketLabel: "Ticket entitlement", ticketYearly: "Yearly", ticketBiennial: "Biennial", ticketNone: "None", ticketSaudi: "Saudi", ticketExpat: "Expat",
+      detailTitle: "Service & Salary Details",
+      dPosition: "Job title", dDept: "Department", dHire: "Hire date", dService: "Length of service",
+      dContract: "Contract type", contractFT: "Full time", contractPT: "Part time", contractC: "Contract",
+      dBase: "Base salary", dHousing: "Housing allowance", dTransport: "Transport allowance", dOther: "Other allowances", dTotal: "Total",
+      attTitle: "Attendance log (last 10)", attEmpty: "No attendance records.",
+      thDate: "Date", thIn: "Check in", thOut: "Check out", thHours: "Hours", thStatus: "Status",
+      leavesTitle: "Leave requests", loansTitle: "Loan requests", tripsTitle: "Business Trips & Deputation",
+      noLeaves: "No leave requests", noLoans: "No loan requests", noTrips: "No trip requests",
+      fullClear: "Full clearance", medReport: "Medical report",
+      rejectReason: "Rejection reason", rejectByMgr: "Direct manager", rejectByHr: "Human Resources", rejectByFin: "Finance", resubmitHint: "You can submit a new request using the buttons above.",
+      days: (n) => `${n} days`, loanMonthly: (m) => `${m} SAR / month`, loanInst: (n) => `${n} installments`,
+      tripExternal: "External", tripInternal: "Internal", sar: "SAR",
+      selfTab: "My Services", approvalsTab: "Approvals",
+    },
+    hi: {
+      brandSub: "कर्मचारी स्व-सेवा पोर्टल", brandOnly: "केवल कर्मचारी", logout: "साइन आउट",
+      backToSite: "साइट पर वापस", redirectingOwner: "आपको स्वामी पोर्टल पर भेजा जा रहा है…",
+      loading: "लोड हो रहा है...",
+      gTitle: "पोर्टल लॉगिन", gSubtitle: "कर्मचारी स्व-सेवा पोर्टल — केवल पंजीकृत कर्मचारियों के लिए",
+      gDesc: "अपनी राष्ट्रीय पहचान / इकामा संख्या और जन्म तिथि दर्ज करें। केवल पंजीकृत कर्मचारियों के लिए उपलब्ध।",
+      gIdLabel: "राष्ट्रीय पहचान / इकामा संख्या", gIdPh: "उदा. 1234567890",
+      gBirthLabel: "जन्म तिथि", gBtn: "लॉगिन करें",
+      gFail: "ये विवरण किसी पंजीकृत कर्मचारी से मेल नहीं खाते।",
+      gInactive: "आपकी रोजगार स्थिति पोर्टल एक्सेस की अनुमति नहीं देती।",
+      gNote: "यहाँ नया खाता नहीं बनाया जा सकता; कर्मचारी केवल HR द्वारा जोड़े जाते हैं।",
+      gCaptcha: "कृपया पहले मानव सत्यापन पूरा करें।",
+      orgLabel: "संगठन",
+      delegatedManager: "अवकाश स्वीकृति (प्रत्यक्ष प्रबंधक)", delegatedFinance: "वित्त स्वीकृति (भुगतान)", delegatedHr: "HR स्वीकृति (अग्रिम और दौरे)",
+      title: "कर्मचारी स्व-सेवा पोर्टल",
+      leaveBtn: "अवकाश अनुरोध", loanBtn: "अग्रिम अनुरोध", tripBtn: "कार्य यात्रा",
+      yearsLabel: "सेवा वर्ष", yearsVal: (n) => `${n} वर्ष`, yearsSub: (d) => `से ${d}`,
+      leaveLabel: "अवकाश शेष", leaveVal: (n) => `${n} दिन`, leaveSub: (e, u) => `अधिकार: ${e} · उपयोग: ${u}`,
+      grossLabel: "सकल वेतन", grossSub: (b) => `आधार ${b}`,
+      ticketLabel: "टिकट अधिकार", ticketYearly: "वार्षिक", ticketBiennial: "द्विवार्षिक", ticketNone: "कोई नहीं", ticketSaudi: "सऊदी", ticketExpat: "प्रवासी",
+      detailTitle: "सेवा और वेतन विवरण",
+      dPosition: "पदनाम", dDept: "विभाग", dHire: "नियुक्ति तिथि", dService: "सेवा अवधि",
+      dContract: "अनुबंध प्रकार", contractFT: "पूर्णकालिक", contractPT: "अंशकालिक", contractC: "अनुबंध",
+      dBase: "आधार वेतन", dHousing: "आवास भत्ता", dTransport: "यातायात भत्ता", dOther: "अन्य भत्ते", dTotal: "कुल",
+      attTitle: "उपस्थिति रिकॉर्ड (अंतिम 10)", attEmpty: "कोई उपस्थिति रिकॉर्ड नहीं।",
+      thDate: "तिथि", thIn: "चेक इन", thOut: "चेक आउट", thHours: "घंटे", thStatus: "स्थिति",
+      leavesTitle: "अवकाश अनुरोध", loansTitle: "अग्रिम अनुरोध", tripsTitle: "कार्य यात्राएँ",
+      noLeaves: "कोई अवकाश अनुरोध नहीं", noLoans: "कोई अग्रिम अनुरोध नहीं", noTrips: "कोई यात्रा अनुरोध नहीं",
+      fullClear: "पूर्ण निपटान", medReport: "चिकित्सा रिपोर्ट",
+      rejectReason: "अस्वीकृति कारण", rejectByMgr: "प्रत्यक्ष प्रबंधक", rejectByHr: "मानव संसाधन", rejectByFin: "वित्त", resubmitHint: "आप ऊपर के बटन से नया अनुरोध कर सकते हैं।",
+      days: (n) => `${n} दिन`, loanMonthly: (m) => `${m} SAR / माह`, loanInst: (n) => `${n} किस्तें`,
+      tripExternal: "बाहरी", tripInternal: "आंतरिक", sar: "SAR",
+      selfTab: "मेरी सेवाएँ", approvalsTab: "स्वीकृतियाँ",
+    },
+    ne: {
+      brandSub: "कर्मचारी स्व-सेवा पोर्टल", brandOnly: "कर्मचारी मात्र", logout: "साइन आउट",
+      backToSite: "साइटमा फर्कनुहोस्", redirectingOwner: "तपाईंलाई स्वामी पोर्टलमा पठाइँदै…",
+      loading: "लोड हुँदै...",
+      gTitle: "पोर्टल लगइन", gSubtitle: "कर्मचारी स्व-सेवा पोर्टल — पंजीकृत कर्मचारीहरूको लागि मात्र",
+      gDesc: "आफ्नो राष्ट्रिय परिचय / इकामा नम्बर र जन्म मिति प्रविष्ट गर्नुहोस्। पंजीकृत कर्मचारीहरूको लागि मात्र उपलब्ध।",
+      gIdLabel: "राष्ट्रिय परिचय / इकामा नम्बर", gIdPh: "उदा. 1234567890",
+      gBirthLabel: "जन्म मिति", gBtn: "लगइन गर्नुहोस्",
+      gFail: "यी विवरणहरू कुनै पंजीकृत कर्मचारीसँग मेल खाँदैनन्।",
+      gInactive: "तपाईंको रोजगार स्थितिले पोर्टल प्रवेश दिँदैन।",
+      gNote: "यहाँ नयाँ खाता बनाउन सकिँदैन; कर्मचारी HR द्वारा मात्र थपिन्छन्।",
+      gCaptcha: "कृपया पहिले मानव प्रमाणीकरण पूरा गर्नुहोस्।",
+      orgLabel: "संस्था",
+      delegatedManager: "बिदा स्वीकृति (प्रत्यक्ष प्रबन्धक)", delegatedFinance: "वित्त स्वीकृति (भुक्तानी)", delegatedHr: "HR स्वीकृति (ऋण र भ्रमण)",
+      title: "कर्मचारी स्व-सेवा पोर्टल",
+      leaveBtn: "बिदा अनुरोध", loanBtn: "अग्रिम अनुरोध", tripBtn: "कार्य भ्रमण",
+      yearsLabel: "सेवा वर्ष", yearsVal: (n) => `${n} वर्ष`, yearsSub: (d) => `देखि ${d}`,
+      leaveLabel: "बिदा शेष", leaveVal: (n) => `${n} दिन`, leaveSub: (e, u) => `हक: ${e} · प्रयोग: ${u}`,
+      grossLabel: "कूल तलब", grossSub: (b) => `आधार ${b}`,
+      ticketLabel: "टिकट हक", ticketYearly: "वार्षिक", ticketBiennial: "द्विवार्षिक", ticketNone: "छैन", ticketSaudi: "साउदी", ticketExpat: "प्रवासी",
+      detailTitle: "सेवा र तलब विवरण",
+      dPosition: "पदनाम", dDept: "विभाग", dHire: "नियुक्ति मिति", dService: "सेवा अवधि",
+      dContract: "अनुबन्ध प्रकार", contractFT: "पूर्णकालिक", contractPT: "अंशकालिक", contractC: "अनुबन्ध",
+      dBase: "आधार तलब", dHousing: "आवास भत्ता", dTransport: "यातायात भत्ता", dOther: "अन्य भत्ता", dTotal: "कूल",
+      attTitle: "उपस्थिति रेकर्ड (अन्तिम १०)", attEmpty: "उपस्थिति रेकर्ड छैन।",
+      thDate: "मिति", thIn: "चेक इन", thOut: "चेक आउट", thHours: "घण्टा", thStatus: "स्थिति",
+      leavesTitle: "बिदा अनुरोध", loansTitle: "अग्रिम अनुरोध", tripsTitle: "कार्य भ्रमण",
+      noLeaves: "बिदा अनुरोध छैन", noLoans: "अग्रिम अनुरोध छैन", noTrips: "भ्रमण अनुरोध छैन",
+      fullClear: "पूर्ण निपटान", medReport: "चिकित्सा रिपोर्ट",
+      rejectReason: "अस्वीकृति कारण", rejectByMgr: "प्रत्यक्ष प्रबन्धक", rejectByHr: "मानव संसाधन", rejectByFin: "वित्त", resubmitHint: "तपाईंले माथिका बटनबाट नयाँ अनुरोध गर्न सक्नुहुन्छ।",
+      days: (n) => `${n} दिन`, loanMonthly: (m) => `${m} SAR / महिना`, loanInst: (n) => `${n} किस्त`,
+      tripExternal: "बाह्य", tripInternal: "आन्तरिक", sar: "SAR",
+      selfTab: "मेरो सेवा", approvalsTab: "स्वीकृतिहरू",
+    },
+    bn: {
+      brandSub: "কর্মচারী স্ব-সেবা পোর্টাল", brandOnly: "শুধু কর্মচারী", logout: "সাইন আউট",
+      backToSite: "সাইটে ফিরে যান", redirectingOwner: "আপনাকে মালিক পোর্টালে পাঠানো হচ্ছে…",
+      loading: "লোড হচ্ছে...",
+      gTitle: "পোর্টাল লগইন", gSubtitle: "কর্মচারী স্ব-সেবা পোর্টাল — শুধু নিবন্ধিত কর্মচারীদের জন্য",
+      gDesc: "আপনার জাতীয় পরিচয়পত্র / ইকামা নম্বর এবং জন্ম তারিখ লিখুন। শুধু নিবন্ধিত কর্মচারীদের জন্য উপলব্ধ।",
+      gIdLabel: "জাতীয় পরিচয়পত্র / ইকামা নম্বর", gIdPh: "যেমন 1234567890",
+      gBirthLabel: "জন্ম তারিখ", gBtn: "লগইন",
+      gFail: "এই তথ্যগুলো কোনো নিবন্ধিত কর্মচারীর সাথে মেলে না।",
+      gInactive: "আপনার চাকরির অবস্থা পোর্টাল অ্যাক্সেসের অনুমতি দেয় না।",
+      gNote: "এখানে নতুন অ্যাকাউন্ট তৈরি করা যায় না; কর্মচারী শুধু HR দ্বারা যোগ করা হয়।",
+      gCaptcha: "অনুগ্রহ করে আগে মানব যাচাই সম্পন্ন করুন।",
+      orgLabel: "প্রতিষ্ঠান",
+      delegatedManager: "ছুটি অনুমোদন (সরাসরি ব্যবস্থাপক)", delegatedFinance: "অর্থ অনুমোদন (পরিশোধ)", delegatedHr: "HR অনুমোদন (ঋণ ও সফর)",
+      title: "কর্মচারী স্ব-সেবা পোর্টাল",
+      leaveBtn: "ছুটির অনুরোধ", loanBtn: "অগ্রিমের অনুরোধ", tripBtn: "কর্ম সফর",
+      yearsLabel: "চাকরির বছর", yearsVal: (n) => `${n} বছর`, yearsSub: (d) => `থেকে ${d}`,
+      leaveLabel: "ছুটির ব্যালেন্স", leaveVal: (n) => `${n} দিন`, leaveSub: (e, u) => `স্বত্ব: ${e} · ব্যবহৃত: ${u}`,
+      grossLabel: "মোট বেতন", grossSub: (b) => `মূল ${b}`,
+      ticketLabel: "টিকিট স্বত্ব", ticketYearly: "বার্ষিক", ticketBiennial: "দ্বিবার্ষিক", ticketNone: "নেই", ticketSaudi: "সৌদি", ticketExpat: "অভিবাসী",
+      detailTitle: "চাকরি ও বেতনের বিবরণ",
+      dPosition: "পদবি", dDept: "বিভাগ", dHire: "নিয়োগের তারিখ", dService: "চাকরির মেয়াদ",
+      dContract: "চুক্তির ধরন", contractFT: "পূর্ণকালীন", contractPT: "খণ্ডকালীন", contractC: "চুক্তি",
+      dBase: "মূল বেতন", dHousing: "আবাস ভাতা", dTransport: "যাতায়াত ভাতা", dOther: "অন্যান্য ভাতা", dTotal: "মোট",
+      attTitle: "উপস্থিতি রেকর্ড (শেষ ১০টি)", attEmpty: "কোনো উপস্থিতি রেকর্ড নেই।",
+      thDate: "তারিখ", thIn: "চেক ইন", thOut: "চেক আউট", thHours: "ঘণ্টা", thStatus: "অবস্থা",
+      leavesTitle: "ছুটির অনুরোধ", loansTitle: "অগ্রিমের অনুরোধ", tripsTitle: "কর্ম সফর",
+      noLeaves: "কোনো ছুটির অনুরোধ নেই", noLoans: "কোনো অগ্রিমের অনুরোধ নেই", noTrips: "কোনো সফরের অনুরোধ নেই",
+      fullClear: "সম্পূর্ণ নিষ্পত্তি", medReport: "চিকিৎসা রিপোর্ট",
+      rejectReason: "প্রত্যাখ্যানের কারণ", rejectByMgr: "সরাসরি ব্যবস্থাপক", rejectByHr: "মানব সম্পদ", rejectByFin: "অর্থ", resubmitHint: "আপনি উপরের বোতাম থেকে নতুন অনুরোধ করতে পারেন।",
+      days: (n) => `${n} দিন`, loanMonthly: (m) => `${m} SAR / মাস`, loanInst: (n) => `${n} কিস্তি`,
+      tripExternal: "বাহ্যিক", tripInternal: "অভ্যন্তরীণ", sar: "SAR",
+      selfTab: "আমার পরিষেবা", approvalsTab: "অনুমোদন",
+    },
+    fil: {
+      brandSub: "Employee Self‑Service Portal", brandOnly: "Employees only", logout: "Sign out",
+      backToSite: "Bumalik sa site", redirectingOwner: "Iinilipat ka sa owner portal…",
+      loading: "Naglo-load...",
+      gTitle: "Portal sign-in", gSubtitle: "Employee Self‑Service Portal — for registered employees only",
+      gDesc: "Ilagay ang iyong National ID / Iqama number at birth date. Available lamang sa mga nakarehistrong empleyado.",
+      gIdLabel: "National ID / Iqama number", gIdPh: "hal. 1234567890",
+      gBirthLabel: "Petsa ng kapanganakan", gBtn: "Mag-sign in",
+      gFail: "Hindi tumugma ang mga detalye sa anumang nakarehistrong empleyado.",
+      gInactive: "Hindi pinapayagan ng iyong katayuan sa trabaho ang portal access.",
+      gNote: "Hindi makakagawa ng bagong account dito; empleyado ay idinadagdag lamang ng HR.",
+      gCaptcha: "Pakisagutan muna ang human verification.",
+      orgLabel: "Organisasyon",
+      delegatedManager: "Leave approver (direct manager)", delegatedFinance: "Finance approver (payment)", delegatedHr: "HR approver (loans & trips)",
+      title: "Employee Self‑Service Portal",
+      leaveBtn: "Hiling ng leave", loanBtn: "Hiling ng loan", tripBtn: "Business trip",
+      yearsLabel: "Taon ng serbisyo", yearsVal: (n) => `${n} taon`, yearsSub: (d) => `mula ${d}`,
+      leaveLabel: "Leave balance", leaveVal: (n) => `${n} araw`, leaveSub: (e, u) => `Karapatan: ${e} · Nagamit: ${u}`,
+      grossLabel: "Gross salary", grossSub: (b) => `Base ${b}`,
+      ticketLabel: "Ticket entitlement", ticketYearly: "Taon-taon", ticketBiennial: "Kada 2 taon", ticketNone: "Wala", ticketSaudi: "Saudi", ticketExpat: "Expat",
+      detailTitle: "Service & Salary Details",
+      dPosition: "Job title", dDept: "Department", dHire: "Hire date", dService: "Length of service",
+      dContract: "Contract type", contractFT: "Full time", contractPT: "Part time", contractC: "Contract",
+      dBase: "Base salary", dHousing: "Housing allowance", dTransport: "Transport allowance", dOther: "Other allowances", dTotal: "Total",
+      attTitle: "Attendance log (last 10)", attEmpty: "Walang attendance record.",
+      thDate: "Petsa", thIn: "Check in", thOut: "Check out", thHours: "Oras", thStatus: "Status",
+      leavesTitle: "Mga hiling ng leave", loansTitle: "Mga hiling ng loan", tripsTitle: "Mga business trip",
+      noLeaves: "Walang leave request", noLoans: "Walang loan request", noTrips: "Walang trip request",
+      fullClear: "Full clearance", medReport: "Medical report",
+      rejectReason: "Dahilan ng pagtanggi", rejectByMgr: "Direct manager", rejectByHr: "Human Resources", rejectByFin: "Finance", resubmitHint: "Maaari kang magsumite ng bagong request gamit ang mga button sa itaas.",
+      days: (n) => `${n} araw`, loanMonthly: (m) => `${m} SAR / buwan`, loanInst: (n) => `${n} installment`,
+      tripExternal: "External", tripInternal: "Internal", sar: "SAR",
+      selfTab: "Aking serbisyo", approvalsTab: "Mga pag-apruba",
+    },
+    ur: {
+      brandSub: "ملازم سلف سروس پورٹل", brandOnly: "صرف ملازمین", logout: "سائن آؤٹ",
+      backToSite: "سائٹ پر واپس", redirectingOwner: "آپ کو مالک پورٹل پر بھیجا جا رہا ہے…",
+      loading: "لوڈ ہو رہا ہے...",
+      gTitle: "پورٹل لاگ ان", gSubtitle: "ملازم سلف سروس پورٹل — صرف رجسٹرڈ ملازمین کے لیے",
+      gDesc: "اپنا قومی شناختی / اقامہ نمبر اور پیدائش کی تاریخ درج کریں۔ صرف رجسٹرڈ ملازمین کے لیے دستیاب۔",
+      gIdLabel: "قومی شناختی / اقامہ نمبر", gIdPh: "مثال 1234567890",
+      gBirthLabel: "پیدائش کی تاریخ", gBtn: "لاگ ان",
+      gFail: "یہ تفصیلات کسی رجسٹرڈ ملازم سے مطابقت نہیں رکھتیں۔",
+      gInactive: "آپ کی ملازمت کی حالت پورٹل رسائی کی اجازت نہیں دیتی۔",
+      gNote: "یہاں نیا اکاؤنٹ نہیں بنایا جا سکتا؛ ملازمین صرف HR کے ذریعے شامل کیے جاتے ہیں۔",
+      gCaptcha: "براہ کرم پہلے انسانی تصدیق مکمل کریں۔",
+      orgLabel: "ادارہ",
+      delegatedManager: "اجازت منظور (براہ راست مینیجر)", delegatedFinance: "فنانس منظور (ادائیگی)", delegatedHr: "HR منظور (قرض اور دورے)",
+      title: "ملازم سلف سروس پورٹل",
+      leaveBtn: "چھٹی کی درخواست", loanBtn: "قرض کی درخواست", tripBtn: "کام کا سفر",
+      yearsLabel: "خدمت کے سال", yearsVal: (n) => `${n} سال`, yearsSub: (d) => `سے ${d}`,
+      leaveLabel: "چھٹی بیلنس", leaveVal: (n) => `${n} دن`, leaveSub: (e, u) => `حق: ${e} · استعمال: ${u}`,
+      grossLabel: "کُل تنخواہ", grossSub: (b) => `بنیادی ${b}`,
+      ticketLabel: "ٹکٹ کا حق", ticketYearly: "سالانہ", ticketBiennial: "ہر دو سال", ticketNone: "کوئی نہیں", ticketSaudi: "سعودی", ticketExpat: "تارکین وطن",
+      detailTitle: "خدمت اور تنخواہ کی تفصیلات",
+      dPosition: "عہدہ", dDept: "محکمہ", dHire: "تقرری کی تاریخ", dService: "خدمت کی مدت",
+      dContract: "معاہدے کی قسم", contractFT: "فل ٹائم", contractPT: "پارٹ ٹائم", contractC: "معاہدہ",
+      dBase: "بنیادی تنخواہ", dHousing: "رہائش الاؤنس", dTransport: "نقل و حمل الاؤنس", dOther: "دیگر الاؤنس", dTotal: "کُل",
+      attTitle: "حاضری ریکارڈ (آخری 10)", attEmpty: "کوئی حاضری ریکارڈ نہیں۔",
+      thDate: "تاریخ", thIn: "چیک ان", thOut: "چیک آؤٹ", thHours: "گھنٹے", thStatus: "حالت",
+      leavesTitle: "چھٹی کی درخواستیں", loansTitle: "قرض کی درخواستیں", tripsTitle: "کام کے سفر",
+      noLeaves: "کوئی چھٹی درخواست نہیں", noLoans: "کوئی قرض درخواست نہیں", noTrips: "کوئی سفر درخواست نہیں",
+      fullClear: "مکمل تصفیہ", medReport: "طبی رپورٹ",
+      rejectReason: "رد کی وجہ", rejectByMgr: "براہ راست مینیجر", rejectByHr: "انسانی وسائل", rejectByFin: "فنانس", resubmitHint: "آپ اوپر کے بٹن سے نئی درخواست جمع کرا سکتے ہیں۔",
+      days: (n) => `${n} دن`, loanMonthly: (m) => `${m} SAR / ماہ`, loanInst: (n) => `${n} قسطیں`,
+      tripExternal: "بیرونی", tripInternal: "داخلی", sar: "SAR",
+      selfTab: "میری خدمات", approvalsTab: "منظوریاں",
+    },
+  },
+
+  leaveForm: {
+    ar: { title: "طلب إجازة جديد", emp: "الموظف", choose: "اختر الموظف", type: "نوع الإجازة", days: "عدد الأيام", start: "تاريخ المغادرة (آخر يوم عمل)", end: "تاريخ العودة (استئناف العمل)", daysHint: "تُحسب الأيام تلقائياً من تاريخ المغادرة إلى تاريخ العودة", med: "التقرير الطبي", medReq: "(إلزامي)", medNote: "يجب إرفاق صورة من التقرير الطبي للإجازة المرضية.", requireMed: "إرفاق التقرير الطبي إلزامي للإجازة المرضية.", reason: "السبب", full: "إجازة كاملة (تصفية + تذاكر) — تتطلب تصفية مالية ودفع تعويض التذكرة", cancel: "إلغاء", submit: "تقديم الطلب", fail: "تعذر تقديم الطلب" },
+    en: { title: "New leave request", emp: "Employee", choose: "Select employee", type: "Leave type", days: "Days", start: "Departure date (last work day)", end: "Return date (resume work)", daysHint: "Days are auto-calculated from the departure and return dates", med: "Medical report", medReq: "(required)", medNote: "Attach a copy of the medical report for sick leave.", requireMed: "A medical report is required for sick leave.", reason: "Reason", full: "Full clearance (settlement + tickets) — requires financial settlement and ticket compensation", cancel: "Cancel", submit: "Submit request", fail: "Could not submit the request" },
+    hi: { title: "नया अवकाश अनुरोध", emp: "कर्मचारी", choose: "कर्मचारी चुनें", type: "अवकाश प्रकार", days: "दिन", start: "प्रस्थान तिथि (अंतिम कार्य दिन)", end: "वापसी तिथि (कार्य फिर से शुरू)", daysHint: "दिन प्रस्थान और वापसी तिथियों से स्वतः गणना होते हैं", med: "चिकित्सा रिपोर्ट", medReq: "(अनिवार्य)", medNote: "बीमारी के अवकाश के लिए चिकित्सा रिपोर्ट की प्रति संलग्न करें।", requireMed: "बीमारी के अवकाश के लिए चिकित्सा रिपोर्ट अनिवार्य है।", reason: "कारण", full: "पूर्ण निपटान (निपटान + टिकट) — वित्तीय निपटान और टिकट भत्ता आवश्यक", cancel: "रद्द करें", submit: "अनुरोध सबमिट करें", fail: "अनुरोध सबमिट नहीं हो सका" },
+    ne: { title: "नया बिदा अनुरोध", emp: "कर्मचारी", choose: "कर्मचारी छान्नुहोस्", type: "बिदा प्रकार", days: "दिन", start: "प्रस्थान मिति (अन्तिम कार्य दिन)", end: "फिर्ता मिति (कार्य पुनः सुरु)", daysHint: "दिन प्रस्थान र फिर्ता मितिबाट स्वतः गणना हुन्छ", med: "चिकित्सा रिपोर्ट", medReq: "(अनिवार्य)", medNote: "बिरामी बिदाको लागि चिकित्सा रिपोर्टको प्रति संलग्न गर्नुहोस्।", requireMed: "बिरामी बिदाको लागि चिकित्सा रिपोर्ट अनिवार्य छ।", reason: "कारण", full: "पूर्ण निपटान (निपटान + टिकट) — वित्तीय निपटान र टिकट भत्ता आवश्यक", cancel: "रद्द गर्नुहोस्", submit: "अनुरोध सबमिट गर्नुहोस्", fail: "अनुरोध सबमिट गर्न सकिएन" },
+    bn: { title: "নতুন ছুটির অনুরোধ", emp: "কর্মচারী", choose: "কর্মচারী নির্বাচন করুন", type: "ছুটির ধরন", days: "দিন", start: "প্রস্থানের তারিখ (শেষ কাজের দিন)", end: "প্রত্যাবর্তনের তারিখ (কাজ পুনরায় শুরু)", daysHint: "দিন প্রস্থান ও প্রত্যাবর্তন তারিখ থেকে স্বয়ংক্রিয়ভাবে গণনা হয়", med: "চিকিৎসা রিপোর্ট", medReq: "(বাধ্যতামূলক)", medNote: "অসুস্থতার ছুটির জন্য চিকিৎসা রিপোর্টের কপি সংযুক্ত করুন।", requireMed: "অসুস্থতার ছুটির জন্য চিকিৎসা রিপোর্ট বাধ্যতামূলক।", reason: "কারণ", full: "সম্পূর্ণ নিষ্পত্তি (নিষ্পত্তি + টিকিট) — আর্থিক নিষ্পত্তি ও টিকিট ক্ষতিপূরণ প্রয়োজন", cancel: "বাতিল", submit: "অনুরোধ জমা দিন", fail: "অনুরোধ জমা দেওয়া যায়নি" },
+    fil: { title: "Bagong leave request", emp: "Empleyado", choose: "Piliin ang empleyado", type: "Uri ng leave", days: "Araw", start: "Petsa ng pag-alis (huling araw ng trabaho)", end: "Petsa ng pagbabalik (ipagpatuloy ang trabaho)", daysHint: "Awtomatikong kinakalkula mula sa pag-alis at pagbabalik na petsa", med: "Medical report", medReq: "(kinakailangan)", medNote: "Maglakip ng kopya ng medical report para sa sick leave.", requireMed: "Kinakailangan ang medical report para sa sick leave.", reason: "Dahilan", full: "Full clearance (settlement + tickets) — nangangailangan ng financial settlement at ticket compensation", cancel: "Kanselahin", submit: "Isumite ang request", fail: "Hindi ma-submit ang request" },
+    ur: { title: "نئی چھٹی کی درخواست", emp: "ملازم", choose: "ملازم منتخب کریں", type: "چھٹی کی قسم", days: "دن", start: "روانگی کی تاریخ (آخری کام کا دن)", end: "واپسی کی تاریخ (کام دوبارہ شروع)", daysHint: "دن روانگی اور واپسی کی توارایخ سے خودکار حساب ہوتے ہیں", med: "طبی رپورٹ", medReq: "(لازمی)", medNote: "بیماری کی چھٹی کے لیے طبی رپورٹ کی کاپی منسلک کریں۔", requireMed: "بیماری کی چھٹی کے لیے طبی رپورٹ لازمی ہے۔", reason: "وجہ", full: "مکمل تصفیہ (تصفیہ + ٹکٹ) — مالی تصفیہ اور ٹکٹ معاوضہ ضروری", cancel: "منسوخ", submit: "درخواست جمع کریں", fail: "درخواست جمع نہیں ہو سکی" },
+  },
+
+  loanForm: {
+    ar: { title: "طلب سلفة", emp: "الموظف", amountL: "مبلغ السلفة (ر.س)", installmentL: "عدد الأقساط الشهرية", note: (m, n) => <>سيُخصم قسط شهري قدره <b className="text-foreground">{m} ر.س</b> من الراتب على مدى {n} شهر.</>, reason: "السبب", cancel: "إلغاء", submit: "تقديم الطلب" },
+    en: { title: "Loan request", emp: "Employee", amountL: "Loan amount (SAR)", installmentL: "Monthly installments count", note: (m, n) => <>A monthly installment of <b className="text-foreground">{m} SAR</b> will be deducted from salary over {n} months.</>, reason: "Reason", cancel: "Cancel", submit: "Submit request" },
+    hi: { title: "अग्रिम अनुरोध", emp: "कर्मचारी", amountL: "अग्रिम राशि (SAR)", installmentL: "मासिक किस्त संख्या", note: (m, n) => <>वेतन से {n} माह में <b className="text-foreground">{m} SAR</b> की मासिक किस्त कटेगी।</>, reason: "कारण", cancel: "रद्द करें", submit: "अनुरोध सबमिट करें" },
+    ne: { title: "अग्रिम अनुरोध", emp: "कर्मचारी", amountL: "अग्रिम रकम (SAR)", installmentL: "मासिक किस्त संख्या", note: (m, n) => <>तलबबाट {n} महिनामा <b className="text-foreground">{m} SAR</b> को मासिक किस्त कट्नेछ।</>, reason: "कारण", cancel: "रद्द गर्नुहोस्", submit: "अनुरोध सबमिट गर्नुहोस्" },
+    bn: { title: "অগ্রিমের অনুরোধ", emp: "কর্মচারী", amountL: "অগ্রিমের পরিমাণ (SAR)", installmentL: "মাসিক কিস্তির সংখ্যা", note: (m, n) => <>বেতন থেকে {n} মাসে <b className="text-foreground">{m} SAR</b> মাসিক কিস্তি কাটা হবে।</>, reason: "কারণ", cancel: "বাতিল", submit: "অনুরোধ জমা দিন" },
+    fil: { title: "Hiling ng loan", emp: "Empleyado", amountL: "Halaga ng loan (SAR)", installmentL: "Bilang ng buwanang installment", note: (m, n) => <>Bawas sa sahod ng <b className="text-foreground">{m} SAR</b> bawat buwan sa loob ng {n} buwan.</>, reason: "Dahilan", cancel: "Kanselahin", submit: "Isumite ang request" },
+    ur: { title: "قرض کی درخواست", emp: "ملازم", amountL: "قرض کی رقم (SAR)", installmentL: "ماہانہ قسطوں کی تعداد", note: (m, n) => <>تنخواہ سے {n} ماہ میں <b className="text-foreground">{m} SAR</b> ماہانہ قسط کٹے گی۔</>, reason: "وجہ", cancel: "منسوخ", submit: "درخواست جمع کریں" },
+  },
+
+  tripForm: {
+    ar: { editT: "تعديل رحلة العمل", newT: "رحلة عمل / انتداب جديد", emp: "الموظف", choose: "اختر الموظف", tripType: "نوع الرحلة", internal: "داخلية", external: "خارجية", dest: "الوجهة", destPh: "المدينة / الدولة", transport: "وسيلة التنقل", plane: "طيران", car: "سيارة", bus: "حافلة", train: "قطار", none: "بدون", start: "تاريخ البداية", end: "تاريخ النهاية", days: "عدد الأيام", perDiem: "بدل الانتداب اليومي", transportCost: "تكلفة التنقل", accommodation: "تكلفة الإقامة", other: "تكاليف أخرى", advance: "سلفة على الحساب", purpose: "الغرض من الرحلة", purposePh: "مهمة الرحلة", perDiemTotal: "إجمالي بدل الانتداب:", total: "إجمالي التكلفة:", notes: "ملاحظات", errEmp: "اختر الموظف", errDates: "تحقق من تواريخ الرحلة", fail: "تعذر الحفظ", cancel: "إلغاء", save: "حفظ التعديلات", create: "إنشاء الرحلة", descLabel: "وصف الانتداب (السبب والخطة)", descPh: "وضّح سبب الانتداب وخطة التنفيذ ومواعيد السفر والعودة…", docsLabel: "مستندات الموظف (تذاكر/حجوزات فندق)", uploading: "جارٍ الرفع…", uploadFail: "تعذر رفع المستند" },
+    en: { editT: "Edit business trip", newT: "New business trip / deputation", emp: "Employee", choose: "Select employee", tripType: "Trip type", internal: "Internal", external: "External", dest: "Destination", destPh: "City / Country", transport: "Transport mode", plane: "Flight", car: "Car", bus: "Bus", train: "Train", none: "None", start: "Start date", end: "End date", days: "Days", perDiem: "Daily per diem", transportCost: "Transport cost", accommodation: "Accommodation cost", other: "Other costs", advance: "Advance on account", purpose: "Trip purpose", purposePh: "Trip purpose", perDiemTotal: "Per diem total:", total: "Total cost:", notes: "Notes", errEmp: "Select an employee", errDates: "Check the trip dates", fail: "Could not save", cancel: "Cancel", save: "Save changes", create: "Create trip", descLabel: "Trip description (reason & plan)", descPh: "Explain reason, plan, travel & return dates…", docsLabel: "Employee documents (tickets/hotel)", uploading: "Uploading…", uploadFail: "Could not upload the document" },
+    hi: { editT: "कार्य यात्रा संपादित करें", newT: "नई कार्य यात्रा / प्रतिनियुक्ति", emp: "कर्मचारी", choose: "कर्मचारी चुनें", tripType: "यात्रा प्रकार", internal: "आंतरिक", external: "बाहरी", dest: "गंतव्य", destPh: "शहर / देश", transport: "यात्रा साधन", plane: "उड़ान", car: "कार", bus: "बस", train: "ट्रेन", none: "कोई नहीं", start: "प्रारंभ तिथि", end: "अंत तिथि", days: "दिन", perDiem: "दैनिक डेली भत्ता", transportCost: "यात्रा लागत", accommodation: "आवास लागत", other: "अन्य लागत", advance: "खाते पर अग्रिम", purpose: "यात्रा उद्देश्य", purposePh: "यात्रा उद्देश्य", perDiemTotal: "डेली भत्ता कुल:", total: "कुल लागत:", notes: "टिप्पणियाँ", errEmp: "कर्मचारी चुनें", errDates: "यात्रा तिथियाँ जाँचें", fail: "सहेजा नहीं जा सका", cancel: "रद्द करें", save: "परिवर्तन सहेजें", create: "यात्रा बनाएँ", descLabel: "यात्रा विवरण (कारण और योजना)", descPh: "कारण, योजना, यात्रा और वापसी तिथियाँ बताएँ…", docsLabel: "कर्मचारी दस्तावेज़ (टिकट/होटल)", uploading: "अपलोड हो रहा है…", uploadFail: "दस्तावेज़ अपलोड नहीं हुआ" },
+    ne: { editT: "कार्य भ्रमण सम्पादन", newT: "नया कार्य भ्रमण / प्रतिनियुक्ति", emp: "कर्मचारी", choose: "कर्मचारी छान्नुहोस्", tripType: "भ्रमण प्रकार", internal: "आन्तरिक", external: "बाह्य", dest: "गन्तव्य", destPh: "शहर / देश", transport: "यातायात साधन", plane: "उडान", car: "कार", bus: "बस", train: "रेल", none: "कुनै होइन", start: "सुरु मिति", end: "अन्त्य मिति", days: "दिन", perDiem: "दैनिक भत्ता", transportCost: "यातायात लागत", accommodation: "आवास लागत", other: "अन्य लागत", advance: "खातामा अग्रिम", purpose: "भ्रमण उद्देश्य", purposePh: "भ्रमण उद्देश्य", perDiemTotal: "दैनिक भत्ता कुल:", total: "कुल लागत:", notes: "टिप्पणीहरू", errEmp: "कर्मचारी छान्नुहोस्", errDates: "भ्रमण मितिहरू जाँच्नुहोस्", fail: "बचत गर्न सकिएन", cancel: "रद्द गर्नुहोस्", save: "परिवर्तन बचत गर्नुहोस्", create: "भ्रमण सिर्जना", descLabel: "भ्रमण विवरण (कारण र योजना)", descPh: "कारण, योजना, यात्रा र फिर्ता मितिहरू वर्णन गर्नुहोस्…", docsLabel: "कर्मचारी कागजात (टिकट/होटल)", uploading: "अपलोड हुँदै…", uploadFail: "कागजात अपलोड भएन" },
+    bn: { editT: "কর্ম সফর সম্পাদনা", newT: "নতুন কর্ম সফর / প্রতিনিয়োগ", emp: "কর্মচারী", choose: "কর্মচারী নির্বাচন করুন", tripType: "সফরের ধরন", internal: "অভ্যন্তরীণ", external: "বাহ্যিক", dest: "গন্তব্য", destPh: "শহর / দেশ", transport: "পরিবহন মাধ্যম", plane: "ফ্লাইট", car: "গাড়ি", bus: "বাস", train: "ট্রেন", none: "কোনোটি নয়", start: "শুরুর তারিখ", end: "শেষের তারিখ", days: "দিন", perDiem: "দৈনিক ভাতা", transportCost: "পরিবহন খরচ", accommodation: "আবাস খরচ", other: "অন্যান্য খরচ", advance: "অ্যাকাউন্টে অগ্রিম", purpose: "সফরের উদ্দেশ্য", purposePh: "সফরের উদ্দেশ্য", perDiemTotal: "দৈনিক ভাতা মোট:", total: "মোট খরচ:", notes: "নোট", errEmp: "কর্মচারী নির্বাচন করুন", errDates: "সফরের তারিখ যাচাই করুন", fail: "সংরক্ষণ করা যায়নি", cancel: "বাতিল", save: "পরিবর্তন সংরক্ষণ", create: "সফর তৈরি", descLabel: "সফরের বিবরণ (কারণ ও পরিকল্পনা)", descPh: "কারণ, পরিকল্পনা, যাত্রা ও প্রত্যাবর্তন তারিখ ব্যাখ্যা করুন…", docsLabel: "কর্মচারীর নথি (টিকিট/হোটেল)", uploading: "আপলোড হচ্ছে…", uploadFail: "নথি আপলোড হয়নি" },
+    fil: { editT: "I-edit ang business trip", newT: "Bagong business trip / deputation", emp: "Empleyado", choose: "Piliin ang empleyado", tripType: "Uri ng trip", internal: "Internal", external: "External", dest: "Destinasyon", destPh: "Lungsod / Bansa", transport: "Mode ng transport", plane: "Eroplano", car: "Kotse", bus: "Bus", train: "Tren", none: "Wala", start: "Simula", end: "Wakas", days: "Araw", perDiem: "Pang-araw-araw na allowance", transportCost: "Gastos sa transport", accommodation: "Gastos sa accommodation", other: "Iba pang gastos", advance: "Cash advance", purpose: "Layunin ng trip", purposePh: "Layunin ng trip", perDiemTotal: "Kabuuang allowance:", total: "Kabuuang gastos:", notes: "Mga tala", errEmp: "Pumili ng empleyado", errDates: "Suriin ang petsa ng trip", fail: "Hindi nai-save", cancel: "Kanselahin", save: "I-save ang pagbabago", create: "Gumawa ng trip", descLabel: "Paglalarawan ng trip (dahilan at plano)", descPh: "Ipaliwanag ang dahilan, plano, travel at return dates…", docsLabel: "Mga dokumento (ticket/hotel)", uploading: "Naka-upload…", uploadFail: "Hindi ma-upload ang dokumento" },
+    ur: { editT: "کام کا سفر ترمیم", newT: "نیا کام کا سفر / تفویض", emp: "ملازم", choose: "ملازم منتخب کریں", tripType: "سفر کی قسم", internal: "داخلی", external: "بیرونی", dest: "منزل", destPh: "شہر / ملک", transport: "نقل و حمل", plane: "فلائٹ", car: "گاڑی", bus: "بس", train: "ٹرین", none: "کوئی نہیں", start: "آغاز کی تاریخ", end: "اختتام کی تاریخ", days: "دن", perDiem: "روزانہ الاؤنس", transportCost: "نقل و حمل کی لاگت", accommodation: "قیام کی لاگت", other: "دیگر اخراجات", advance: "اکاؤنٹ پر پیشگی", purpose: "سفر کا مقصد", purposePh: "سفر کا مقصد", perDiemTotal: "الاؤنس کل:", total: "کل لاگت:", notes: "نوٹس", errEmp: "ملازم منتخب کریں", errDates: "سفر کی توارایخ چیک کریں", fail: "محفوظ نہ ہوا", cancel: "منسوخ", save: "تبدیلیاں محفوظ کریں", create: "سفر بنائیں", descLabel: "سفر کی تفصیل (وجہ اور منصوبہ)", descPh: "وجہ، منصوبہ، سفر اور واپسی کی توارایخ بیان کریں…", docsLabel: "ملازم کے کاغذات (ٹکٹ/ہوٹل)", uploading: "اپ لوڈ ہو رہا ہے…", uploadFail: "کاغذات اپ لوڈ نہ ہوئے" },
+  },
+
+  clock: {
+    ar: { noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك — فعّل صلاحية الموقع", noWorkplace: "لم يحدد المقر الرسمي — تواصل مع الموارد البشرية", outRange: (d, r) => `أنت خارج نطاق العمل (المسافة ${Math.round(d)} متر). يُسمح بالبصمة ضمن ${r} متر فقط.`, alreadyIn: "تم تسجيل الحضور مسبقاً اليوم", doneIn: "تم تسجيل الحضور بنجاح", needIn: "يجب تسجيل الحضور أولاً", alreadyOut: "تم تسجيل الانصراف مسبقاً", doneOut: "تم تسجيل الانصراف بنجاح", fail: "تعذر التسجيل", title: "البصمة اليومية", sub: (r, d) => `يُسمح بالبصمة فقط من مقر العمل ضمن ${r} متر — بتاريخ ${d}`, in: "الحضور", out: "الانصراف", btnIn: "تسجيل الحضور", btnOut: "تسجيل الانصراف", complete: (h) => `اكتمل تسجيل اليوم (${h} ساعة)`, noWorkplace2: "لم يحدد المقر الرسمي بعد.", nowLabel: "الوقت الآن", schedLabel: (s, e) => `الدوام الرسمي: ${s} — ${e}` },
+    en: { noGeo: "Device does not support geolocation", noAccess: "Could not access your location — enable location permission", noWorkplace: "Workplace not set — contact HR", outRange: (d, r) => `You're outside the work area (distance ${Math.round(d)} m). Check‑in is allowed within ${r} m only.`, alreadyIn: "Check‑in already recorded today", doneIn: "Check‑in recorded successfully", needIn: "Please check in first", alreadyOut: "Check‑out already recorded", doneOut: "Check‑out recorded successfully", fail: "Could not record", title: "Daily check‑in", sub: (r, d) => `Check‑in is allowed only from the workplace within ${r} m — on ${d}`, in: "Check in", out: "Check out", btnIn: "Check in", btnOut: "Check out", complete: (h) => `Today completed (${h} hours)`, noWorkplace2: "Workplace not set yet.", nowLabel: "Current time", schedLabel: (s, e) => `Official hours: ${s} — ${e}` },
+    hi: { noGeo: "डिवाइस भू-स्थान का समर्थन नहीं करता", noAccess: "आपका स्थान एक्सेस नहीं हो सका — स्थान अनुमति सक्षम करें", noWorkplace: "कार्यस्थल निर्धारित नहीं — HR से संपर्क करें", outRange: (d, r) => `आप कार्य क्षेत्र के बाहर हैं (दूरी ${Math.round(d)} मीटर)। चेक-इन केवल ${r} मीटर के भीतर है।`, alreadyIn: "आज चेक-इन पहले ही दर्ज है", doneIn: "चेक-इन सफलतापूर्वक दर्ज हुआ", needIn: "कृपया पहले चेक-इन करें", alreadyOut: "चेक-आउट पहले ही दर्ज है", doneOut: "चेक-आउट सफलतापूर्वक दर्ज हुआ", fail: "दर्ज नहीं हो सका", title: "दैनिक चेक-इन", sub: (r, d) => `चेक-इन केवल कार्यस्थल से ${r} मीटर के भीतर — तारीख ${d}`, in: "चेक इन", out: "चेक आउट", btnIn: "चेक इन करें", btnOut: "चेक आउट करें", complete: (h) => `आज पूर्ण (${h} घंटे)`, noWorkplace2: "कार्यस्थल अभी निर्धारित नहीं।", nowLabel: "वर्तमान समय", schedLabel: (s, e) => `कार्य समय: ${s} — ${e}` },
+    ne: { noGeo: "उपकरणले भू-स्थान समर्थन गर्दैन", noAccess: "तपाईंको स्थान एक्सेस भएन — स्थान अनुमति सक्षम गर्नुहोस्", noWorkplace: "कार्यस्थल सेट छैन — HR सम्पर्क गर्नुहोस्", outRange: (d, r) => `तपाईं कार्य क्षेत्र बाहिर हुनुहुन्छ (दूरी ${Math.round(d)} मिटर)। चेक-इन केवल ${r} मिटर भित्र।`, alreadyIn: "आज चेक-इन पहिले नै दर्ता भयो", doneIn: "चेक-इन सफलतापूर्वक दर्ता भयो", needIn: "कृपया पहिले चेक-इन गर्नुहोस्", alreadyOut: "चेक-आउट पहिले नै दर्ता भयो", doneOut: "चेक-आउट सफलतापूर्वक दर्ता भयो", fail: "दर्ता गर्न सकिएन", title: "दैनिक चेक-इन", sub: (r, d) => `चेक-इन केवल कार्यस्थलभित्र ${r} मिटर — मिति ${d}`, in: "चेक इन", out: "चेक आउट", btnIn: "चेक इन गर्नुहोस्", btnOut: "चेक आउट गर्नुहोस्", complete: (h) => `आज पूर्ण (${h} घण्टा)`, noWorkplace2: "कार्यस्थल अझै सेट छैन।", nowLabel: "हालको समय", schedLabel: (s, e) => `कार्य समय: ${s} — ${e}` },
+    bn: { noGeo: "ডিভাইস ভূ-অবস্থান সমর্থন করে না", noAccess: "আপনার অবস্থান অ্যাক্সেস করা যায়নি — অবস্থান অনুমতি চালু করুন", noWorkplace: "কর্মস্থল নির্ধারিত নয় — HR-এ যোগাযোগ করুন", outRange: (d, r) => `আপনি কর্মক্ষেত্রের বাইরে (দূরত্ব ${Math.round(d)} মিটার)। চেক-ইন কেবল ${r} মিটারের মধ্যে।`, alreadyIn: "আজ চেক-ইন আগেই রেকর্ড হয়েছে", doneIn: "চেক-ইন সফলভাবে রেকর্ড হয়েছে", needIn: "অনুগ্রহ করে আগে চেক-ইন করুন", alreadyOut: "চেক-আউট আগেই রেকর্ড হয়েছে", doneOut: "চেক-আউট সফলভাবে রেকর্ড হয়েছে", fail: "রেকর্ড করা যায়নি", title: "দৈনিক চেক-ইন", sub: (r, d) => `চেক-ইন কেবল কর্মস্থলের ${r} মিটারের মধ্যে — তারিখ ${d}`, in: "চেক ইন", out: "চেক আউট", btnIn: "চেক ইন করুন", btnOut: "চেক আউট করুন", complete: (h) => `আজ সম্পূর্ণ (${h} ঘণ্টা)`, noWorkplace2: "কর্মস্থল এখনো নির্ধারিত নয়।", nowLabel: "বর্তমান সময়", schedLabel: (s, e) => `কাজের সময়: ${s} — ${e}` },
+    fil: { noGeo: "Hindi sinusuportahan ng device ang geolocation", noAccess: "Hindi ma-access ang lokasyon — i-enable ang location permission", noWorkplace: "Hindi naka-set ang workplace — makipag-ugnayan sa HR", outRange: (d, r) => `Nasa labas ka ng work area (layo ${Math.round(d)} m). Check-in ay allowed sa loob ng ${r} m.`, alreadyIn: "Na-record na ang check-in ngayon", doneIn: "Matagumpay na naitala ang check-in", needIn: "Mangyaring mag-check in muna", alreadyOut: "Na-record na ang check-out", doneOut: "Matagumpay na naitala ang check-out", fail: "Hindi ma-record", title: "Pang-araw-araw na check-in", sub: (r, d) => `Check-in ay allowed sa loob ng ${r} m mula sa workplace — sa ${d}`, in: "Check in", out: "Check out", btnIn: "Mag-check in", btnOut: "Mag-check out", complete: (h) => `Kumpleto ngayon (${h} oras)`, noWorkplace2: "Hindi pa naka-set ang workplace.", nowLabel: "Kasalukuyang oras", schedLabel: (s, e) => `Opisyal na oras: ${s} — ${e}` },
+    ur: { noGeo: "ڈیوائس مقام کی تائید نہیں کرتا", noAccess: "آپ کا مقام ایکسس نہیں ہو سکا — مقام کی اجازت فعال کریں", noWorkplace: "کام کی جگہ مقرر نہیں — HR سے رابطہ کریں", outRange: (d, r) => `آپ کام کے علاقے سے باہر ہیں (فاصلہ ${Math.round(d)} میٹر)۔ چیک اِن صرف ${r} میٹر کے اندر۔`, alreadyIn: "آج چیک اِن پہلے ہی درج ہے", doneIn: "چیک اِن کامیابی سے درج ہوا", needIn: "براہ کرم پہلے چیک اِن کریں", alreadyOut: "چیک آؤٹ پہلے ہی درج ہے", doneOut: "چیک آؤٹ کامیابی سے درج ہوا", fail: "درج نہ ہو سکا", title: "روزانہ چیک اِن", sub: (r, d) => `چیک اِن صرف کام کی جگہ سے ${r} میٹر کے اندر — بتاریخ ${d}`, in: "چیک اِن", out: "چیک آؤٹ", btnIn: "چیک اِن کریں", btnOut: "چیک آؤٹ کریں", complete: (h) => `آج مکمل (${h} گھنٹے)`, noWorkplace2: "کام کی جگہ ابھی مقرر نہیں۔", nowLabel: "موجودہ وقت", schedLabel: (s, e) => `دفتری اوقات: ${s} — ${e}` },
+  },
+
+  warnings: {
+    ar: { title: "الإنذارات", subtitle: "الإنذارات الصادرة بحقك وفق سياسة العمل — تُرسل مباشرة بعد التحقيق ولا تتطلب موافقتك.", no: "لا توجد إنذارات.", session: "الجلسة" },
+    en: { title: "Warnings", subtitle: "Warnings issued to you per labor policy — sent directly after investigation and do not require your approval.", no: "No warnings.", session: "Session" },
+    hi: { title: "चेतावनियाँ", subtitle: "श्रम नीति के अनुसार आपको जारी चेतावनियाँ — जाँच के तुरंत बाद भेजी जाती हैं और आपकी स्वीकृति की आवश्यकता नहीं।", no: "कोई चेतावनी नहीं।", session: "सत्र" },
+    ne: { title: "चेतावनीहरू", subtitle: "श्रम नीति अनुसार जारी चेतावनीहरू — अनुसन्धानपछि तुरुन्तै पठाइन्छ र तपाईंको स्वीकृति आवश्यक पर्दैन।", no: "कुनै चेतावनी छैन।", session: "सत्र" },
+    bn: { title: "সতর্কতা", subtitle: "শ্রম নীতি অনুযায়ী আপনাকে জারি করা সতর্তা — তদন্তের পরপরই পাঠানো হয় এবং আপনার অনুমোদনের প্রয়োজন নেই।", no: "কোনো সতর্কতা নেই।", session: "সেশন" },
+    fil: { title: "Mga babala", subtitle: "Mga babalang inisyu sa iyo ayon sa labor policy — ipinapadala pagkatapos ng imbestigasyon at hindi kailangan ng iyong pag-apruba.", no: "Walang babala.", session: "Session" },
+    ur: { title: "تنبیہات", subtitle: "مزدور پالیسی کے مطابق آپ کو جاری تنبیہات — تحقیقات کے فوراً بعد بھیجی جاتی ہیں اور آپ کی منظوری کی ضرورت نہیں۔", no: "کوئی تنبیہ نہیں۔", session: "نشست" },
+  },
+
+  idle: {
+    ar: { stay: "هل تود المتابعة?", body: (s) => `لم يُسجَّل أي نشاط منذ 15 دقيقة. سيتم تسجيل خروجك تلقائياً خلال ${s} ثانية.`, cont: "متابعة", outNow: "تسجيل الخروج الآن" },
+    en: { stay: "Still there?", body: (s) => `You've been inactive for 15 minutes. You'll be signed out automatically in ${s} seconds.`, cont: "Continue", outNow: "Sign out now" },
+    hi: { stay: "अब भी ऑनलाइन हैं?", body: (s) => `आप 15 मिनट से निष्क्रिय हैं। आप ${s} सेकंड में स्वतः लॉगआउट हो जाएँगे।`, cont: "जारी रखें", outNow: "अभी लॉगआउट करें" },
+    ne: { stay: "अझै उपस्थित?", body: (s) => `तपाईं १५ मिनेटदेखि निष्क्रिय हुनुहुन्छ। तपाईंलाई ${s} सेकेन्डमा स्वतः लगआउट गरिनेछ।`, cont: "जारी राख्नुहोस्", outNow: "अहिले लगआउट गर्नुहोस्" },
+    bn: { stay: "এখনো আছেন?", body: (s) => `আপনি ১৫ মিনিট নিষ্ক্রিয়। ${s} সেকেন্ডে স্বয়ংক্রিয়ভাবে লগআউট হবেন।`, cont: "চালিয়ে যান", outNow: "এখনই লগআউট" },
+    fil: { stay: "Nariyan pa ba?", body: (s) => `15 minutong inactive ka. Awtomatikong mag-sign out sa loob ng ${s} segundo.`, cont: "Magpatuloy", outNow: "Mag-sign out na" },
+    ur: { stay: "ابھی موجود ہیں?", body: (s) => `آپ 15 منٹ سے غیر فعال ہیں۔ ${s} سیکنڈ میں خودکار لاگ آؤٹ ہو جائیں گے۔`, cont: "جاری رکھیں", outNow: "ابھی سائن آؤٹ کریں" },
+  },
+
+  training: {
+    ar: { title: "الخطط التدريبية والتطوير", empty: "لا توجد خطط تدريبية مُسندة إليك حاليا.", mechanism: "آلية التنفيذ", goal: "الهدف بعد الخطة", period: "الفترة", dept: "القسم", status: { draft: "مسودة", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة" } },
+    en: { title: "Training & Development Plans", empty: "No training plans assigned to you yet.", mechanism: "Delivery method", goal: "Goal", period: "Period", dept: "Department", status: { draft: "Draft", in_progress: "In progress", completed: "Completed", cancelled: "Cancelled" } },
+    hi: { title: "प्रशिक्षण और विकास", empty: "आपको असाइन कोई प्रशिक्षण योजना अभी नहीं है।", mechanism: "वितरण विधि", goal: "लक्ष्य", period: "अवधि", dept: "विभाग", status: { draft: "ड्राफ्ट", in_progress: "प्रगति", completed: "पूर्ण", cancelled: "रद्द" } },
+    ne: { title: "प्रशिक्षण र विकास", empty: "तपाईंलाई असाइन गरिएको प्रशिक्षण योजना छैन।", mechanism: "वितरण विधि", goal: "लक्ष्य", period: "अवधि", dept: "विभाग", status: { draft: "ड्राफ्ट", in_progress: "प्रगति", completed: "पूर्ण", cancelled: "रद्द" } },
+    bn: { title: "প্রশিক্ষণ ও উন্নয়ন", empty: "আপনাকে এখনো কোনো প্রশিক্ষণ পরিকল্পনা দেওয়া হয়নি।", mechanism: "বিতরণ পদ্ধতি", goal: "লক্ষ্য", period: "সময়কাল", dept: "বিভাগ", status: { draft: "খসড়া", in_progress: "চলমান", completed: "সম্পূর্ণ", cancelled: "বাতিল" } },
+    fil: { title: "Training at Development", empty: "Wala pang training plan na na-assign sa iyo.", mechanism: "Paraan ng paghatid", goal: "Layunin", period: "Panahon", dept: "Department", status: { draft: "Draft", in_progress: "Kasalukuyang", completed: "Tapos na", cancelled: "Nakansela" } },
+    ur: { title: "تربیت اور ترقی", empty: "آپ کے لیے کوئی تربیتی منصوبہ ابھی مقرر نہیں۔", mechanism: "ترسیل کا طریقہ", goal: "ہدف", period: "مدت", dept: "محکمہ", status: { draft: "مسودہ", in_progress: "جاری", completed: "مکمل", cancelled: "منسوخ" } },
+  },
+
+  performance: {
+    ar: { title: "تقييمات الأداء", empty: "لا توجد تقييمات أداء معتمدة حتى الآن.", overall: "التقييم الكلي", rec: "التوصية", strengths: "نقاط القوة", improvements: "فرص التحسين", reviewDate: "تاريخ التقييم", completed: "مكتملة", acknowledged: "معتمدة", types: { annual: "سنوي", midyear: "نصف سنوي", probation: "فترة التجربة", goal_setting: "تحديد الأهداف" }, recs: { none: "بدون", maintain: "إبقاء على الوضع", promote: "ترقية", bonus: "حافز", warn: "إنذار", terminate: "إنهاء" } },
+    en: { title: "Performance Reviews", empty: "No approved performance reviews yet.", overall: "Overall rating", rec: "Recommendation", strengths: "Strengths", improvements: "Improvements", reviewDate: "Review date", completed: "Completed", acknowledged: "Acknowledged", types: { annual: "Annual", midyear: "Mid-year", probation: "Probation", goal_setting: "Goal setting" }, recs: { none: "None", maintain: "Maintain", promote: "Promote", bonus: "Bonus", warn: "Warn", terminate: "Terminate" } },
+    hi: { title: "प्रदर्शन समीक्षा", empty: "अभी तक कोई स्वीकृत प्रदर्शन समीक्षा नहीं।", overall: "समग्र रेटिंग", rec: "सिफारिश", strengths: "मज़बूतियाँ", improvements: "सुधार अवसर", reviewDate: "समीक्षा तिथि", completed: "पूर्ण", acknowledged: "स्वीकृत", types: { annual: "वार्षिक", midyear: "अर्ध-वार्षिक", probation: "परिवीक्षा", goal_setting: "लक्ष्य निर्धारण" }, recs: { none: "कोई नहीं", maintain: "बनाए रखें", promote: "पदोन्नति", bonus: "बोनस", warn: "चेतावनी", terminate: "समाप्ति" } },
+    ne: { title: "प्रदर्शन समीक्षा", empty: "अहिलेसम्म कुनै स्वीकृत प्रदर्शन समीक्षा छैन।", overall: "समग्र मूल्यांकन", rec: "सिफारिस", strengths: "शक्तिहरू", improvements: "सुधार अवसर", reviewDate: "समीक्षा मिति", completed: "पूर्ण", acknowledged: "स्वीकृत", types: { annual: "वार्षिक", midyear: "अर्ध-वार्षिक", probation: "परिवीक्षा", goal_setting: "लक्ष्य निर्धारण" }, recs: { none: "कुनै पनि छैन", maintain: "कायम राख्ने", promote: "बढुवा", bonus: "बोनस", warn: "चेतावनी", terminate: "समाप्ति" } },
+    bn: { title: "পারফরম্যান্স পর্যালোচনা", empty: "এখনো কোনো অনুমোদিত পারফরম্যান্স পর্যালোচনা নেই।", overall: "সামগ্রিক রেটিং", rec: "সুপারিশ", strengths: "শক্তিগুলো", improvements: "উন্নয়ন সুযোগ", reviewDate: "পর্যালোচনার তারিখ", completed: "সম্পন্ন", acknowledged: "অনুমোদিত", types: { annual: "বার্ষিক", midyear: "অর্ধ-বার্ষিক", probation: "পরীক্ষামূলক", goal_setting: "লক্ষ্য নির্ধারণ" }, recs: { none: "কোনোটি নয়", maintain: "ধরে রাখা", promote: "পদোন্নতি", bonus: "বোনাস", warn: "সতর্কতা", terminate: "সমাপ্তি" } },
+    fil: { title: "Pagsusuri ng performance", empty: "Wala pang aprubadong pagsusuri ng performance.", overall: "Pangkalahatang rating", rec: "Rekomendasyon", strengths: "Mga lakas", improvements: "Mga pagkakataon", reviewDate: "Petsa ng pagsusuri", completed: "Nakumpleto", acknowledged: "Naaprubahan", types: { annual: "Taon-taon", midyear: "Kalagitnaan", probation: "Probasyon", goal_setting: "Pagtatakda ng layunin" }, recs: { none: "Wala", maintain: "Panatilihin", promote: "Itaas", bonus: "Bonus", warn: "Babala", terminate: "Tapusin" } },
+    ur: { title: "کارکردگی کا جائزہ", empty: "ابھی تک کوئی منظور شدہ کارکردگی جائزہ نہیں۔", overall: "مجموعی درجہ بندی", rec: "سفارش", strengths: "مضبوطیاں", improvements: "بہتری کے مواقع", reviewDate: "جائزے کی تاریخ", completed: "مکمل", acknowledged: "منظور شدہ", types: { annual: "سالانہ", midyear: "نصف سالہ", probation: "پروفیشن", goal_setting: "ہدف کا تعین" }, recs: { none: "کوئی نہیں", maintain: "برقرار", promote: "ترقی", bonus: "بونس", warn: "تنبیہ", terminate: "ختم" } },
+  },
+
+  documents: {
+    ar: { title: "مستنداتي المالية", desc: "تظهر هنا مخالصات تصفية الإجازات وكشوفات السلف ومخالصات نهاية الخدمة المُصدرة والمصروفة لك — حفظاً لحقوق الطرفين.", empty: "لا توجد مستندات مالية مصروفة لك حالياً.", leaveDoc: "مخالصة تصفية إجازة", eosDoc: "مخالصة نهاية الخدمة", loansDoc: "كشف سلفة", paid: "المسدد", remaining: "المتبقي", installments: (n) => `${n} قسط`, proof: "إثبات التحويل", print: "معاينة/طباعة المخالصة", settle: "تحميل المخالصة", days: (n) => `${n} يوم`, lwd: "آخر يوم عمل", issued: "تاريخ الإصدار", rights: "حقوق مالية محفوظة" },
+    en: { title: "My Financial Documents", desc: "Your settled leave clearances, loan statements and paid end-of-service settlements — preserving both parties' rights.", empty: "No paid financial documents for you yet.", leaveDoc: "Leave settlement", eosDoc: "End-of-service settlement", loansDoc: "Loan statement", paid: "Paid", remaining: "Remaining", installments: (n) => `${n} installments`, proof: "Transfer proof", print: "View/Print settlement", settle: "Download settlement", days: (n) => `${n} days`, lwd: "Last working day", issued: "Issued", rights: "Preserved rights" },
+    hi: { title: "मेरे वित्तीय दस्तावेज़", desc: "आपकी निपटान अवकाश दस्तावेज़, ऋण विवरण और भुगतान किए गए नोकरी समाप्ति निपटान — दोनों पक्षों के अधिकार सुरक्षित रखते हुए।", empty: "आपके लिए अभी कोई भुगतान दस्तावेज़ नहीं।", leaveDoc: "अवकाश निपटान", eosDoc: "नोकरी समाप्ति निपटान", loansDoc: "ऋण विवरण", paid: "भुगतान किया", remaining: "शेष", installments: (n) => `${n} किस्तें`, proof: "हस्तांतरण प्रमाण", print: "निपटान देखें/प्रिंट करें", settle: "निपटान डाउनलोड करें", days: (n) => `${n} दिन`, lwd: "अंतिम कार्य दिवस", issued: "जारी", rights: "सुरक्षित अधिकार" },
+    ne: { title: "मेरो वित्तीय कागजात", desc: "तपाईंको निपटान बिदा, ऋण विवरण र भुक्तानी गरिएको सेवा समाप्ति निपटान — दुवै पक्षको अधिकार सुरक्षित राख्दै।", empty: "अहिले तपाईंका लागि कुनै भुक्तानी कागजात छैन।", leaveDoc: "बिदा निपटान", eosDoc: "सेवा समाप्ति निपटान", loansDoc: "ऋण विवरण", paid: "भुक्तानी", remaining: "बाँकी", installments: (n) => `${n} किस्त`, proof: "हस्तान्तरण प्रमाण", print: "निपटान हेर्नुहोस्/प्रिन्ट गर्नुहोस्", settle: "निपटान डाउनलोड गर्नुहोस्", days: (n) => `${n} दिन`, lwd: "अन्तिम कार्य दिन", issued: "जारी", rights: "सुरक्षित अधिकार" },
+    bn: { title: "আমার আর্থিক নথি", desc: "আপনার নিষ্পত্তি ছুটি নথি, ঋণ বিবরণ ও পরিশোধিত চাকরি শেষ নিষ্পত্তি — উভয় পক্ষের অধিকার সুরক্ষিত রেখে।", empty: "এখনো আপনার কোনো পরিশোধিত নথি নেই।", leaveDoc: "ছুটি নিষ্পত্তি", eosDoc: "চাকরি শেষ নিষ্পত্তি", loansDoc: "ঋণ বিবরণ", paid: "পরিশোধিত", remaining: "অবশিষ্ট", installments: (n) => `${n} কিস্তি`, proof: "স্থানান্তর প্রমাণ", print: "নিষ্পত্তি দেখুন/প্রিন্ট করুন", settle: "নিষ্পত্তি ডাউনলোড", days: (n) => `${n} দিন`, lwd: "শেষ কর্মদিবস", issued: "ইস্যু", rights: "সুরক্ষিত অধিকার" },
+    fil: { title: "Aking mga pinansyal na dokumento", desc: "Ang iyong settled na leave clearance, loan statement at nabayaran na end-of-service settlement — pinipangalagaan ang karapatan ng parehong panig.", empty: "Wala pang nabayarang dokumento para sa iyo.", leaveDoc: "Leave settlement", eosDoc: "End-of-service settlement", loansDoc: "Loan statement", paid: "Nabayaran", remaining: "Natitira", installments: (n) => `${n} installment`, proof: "Patunay ng transfer", print: "Tingnan/I-print ang settlement", settle: "I-download ang settlement", days: (n) => `${n} araw`, lwd: "Huling araw ng trabaho", issued: "Inisyu", rights: "Pinangangalagaang karapatan" },
+    ur: { title: "میرے مالی کاغذات", desc: "آپ کے تصفیہ شدہ چھٹی کلیئرنس، قرض بیان اور ادائیگی شدہ ملازمت اختتام تصفیے — دونوں فریقوں کے حقوق محفوظ رکھتے ہوئے۔", empty: "ابھی آپ کے لیے کوئی ادائیگی شدہ کاغذات نہیں۔", leaveDoc: "چھٹی تصفیہ", eosDoc: "ملازمت اختتام تصفیہ", loansDoc: "قرض بیان", paid: "ادا شدہ", remaining: "بقید", installments: (n) => `${n} قسطیں`, proof: "تحویل کا ثبوت", print: "تصفیہ دیکھیں/پرنٹ کریں", settle: "تصفیہ ڈاؤن لوڈ کریں", days: (n) => `${n} دن`, lwd: "آخری کام کا دن", issued: "جاری", rights: "محفوظ حقوق" },
+  },
+};
+
+export function usePortalT(namespace) {
+  const { lang } = usePortalI18n();
+  const ns = DICT[namespace];
+  return (ns && (ns[lang] || ns.en || ns.ar)) || {};
+}

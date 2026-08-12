@@ -55,6 +55,7 @@ import Blog from "@/pages/Blog";
 import BlogArticle from "@/pages/BlogArticle";
 import CustomerSurveys from "@/pages/CustomerSurveys";
 import CustomerSurveyTake from "@/pages/public/CustomerSurveyTake";
+import { PortalLangProvider } from "@/lib/portalI18n";
 
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts"];
 
@@ -101,7 +102,7 @@ const AuthenticatedApp = () => {
         <Route path="/blog/:slug" element={<BlogArticle />} />
         <Route path="/jobs/:id" element={<JobApply />} />
         <Route path="/c/:surveyId" element={<CustomerSurveyTake />} />
-        <Route path="/portal" element={<MyRequests />} />
+        <Route path="/portal" element={<PortalLangProvider><MyRequests /></PortalLangProvider>} />
         <Route path="/owner-portal" element={<OwnerPortal />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

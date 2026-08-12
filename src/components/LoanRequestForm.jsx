@@ -8,23 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
 import { formatCurrency } from "@/lib/hr";
 
 const empty = { amount: "", reason: "", installment_count: 1 };
 
 export default function LoanRequestForm({ open, onClose, onSaved, employee, portalCreate }) {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
-  const t = isAr ? {
-    title: "طلب سلفة", emp: "الموظف", amountL: "مبلغ السلفة (ر.س)", installmentL: "عدد الأقساط الشهرية",
-    note: (m, n) => <>سيُخصم قسط شهري قدره <b className="text-foreground">{m} ر.س</b> من الراتب على مدى {n} شهر.</>,
-    reason: "السبب", cancel: "إلغاء", submit: "تقديم الطلب",
-  } : {
-    title: "Loan request", emp: "Employee", amountL: "Loan amount (SAR)", installmentL: "Monthly installments count",
-    note: (m, n) => <>A monthly installment of <b className="text-foreground">{formatCurrency(m)}</b> will be deducted from salary over {n} months.</>,
-    reason: "Reason", cancel: "Cancel", submit: "Submit request",
-  };
+  usePortalI18n();
+  const t = usePortalT("loanForm");
 
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);

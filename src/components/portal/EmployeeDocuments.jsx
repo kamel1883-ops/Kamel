@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { Download, FileText, Printer, ShieldCheck } from "lucide-react";
 import SettlementSheet from "@/components/SettlementSheet";
-import { leaveTypeLabel } from "@/lib/hr";
+import { leaveTypeLabel, sarSymbol } from "@/lib/hr";
 import { reasonMeta } from "@/lib/eos";
-import { useI18n } from "@/lib/i18n";
+import { usePortalT } from "@/lib/portalI18n";
 
 // مستنداتي المالية في بوابة الموظف — مخالصات تصفية الإجازات + مخالصات نهاية الخدمة المصروفة
 export default function EmployeeDocuments({ loans, leaves, settlements, org }) {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
+  const t = usePortalT("documents");
   const [printing, setPrinting] = useState(null);
 
   const paidLeaves = (leaves || []).filter(
@@ -18,26 +17,6 @@ export default function EmployeeDocuments({ loans, leaves, settlements, org }) {
   const paidLoans = (loans || []).filter(
     (l) => (l.status === "paid" || l.status === "completed") && l.statement_pdf_url
   );
-
-  const t = isAr ? {
-    title: "مستنداتي المالية",
-    desc: "تظهر هنا مخالصات تصفية الإجازات وكشوفات السلف ومخالصات نهاية الخدمة المُصدرة والمصروفة لك — حفظاً لحقوق الطرفين.",
-    empty: "لا توجد مستندات مالية مصروفة لك حالياً.",
-    leaveDoc: "مخالصة تصفية إجازة", eosDoc: "مخالصة نهاية الخدمة", loansDoc: "كشف سلفة",
-    paid: "المسدد", remaining: "المتبقي", installments: (n) => `${n} قسط`,
-    proof: "إثبات التحويل", print: "معاينة/طباعة المخالصة", settle: "تحميل المخالصة",
-    days: (n) => `${n} يوم`, lwd: "آخر يوم عمل", issued: "تاريخ الإصدار",
-    rights: "حقوق مالية محفوظة",
-  } : {
-    title: "My Financial Documents",
-    desc: "Your settled leave clearances, loan statements and paid end-of-service settlements — preserving both parties' rights.",
-    empty: "No paid financial documents for you yet.",
-    leaveDoc: "Leave settlement", eosDoc: "End-of-service settlement", loansDoc: "Loan statement",
-    paid: "Paid", remaining: "Remaining", installments: (n) => `${n} installments`,
-    proof: "Transfer proof", print: "View/Print settlement", settle: "Download settlement",
-    days: (n) => `${n} days`, lwd: "Last working day", issued: "Issued",
-    rights: "Preserved rights",
-  };
 
   const printSet = (rec) => {
     setPrinting(rec);
@@ -77,7 +56,7 @@ export default function EmployeeDocuments({ loans, leaves, settlements, org }) {
             return (
               <div key={"ln" + l.id} className="rounded-lg border border-border p-3 flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="text-sm font-medium">{t.loansDoc} — {total.toLocaleString()} {isAr ? "ر.س" : "SAR"}</div>
+                  <div className="text-sm font-medium">{t.loansDoc} — {total.toLocaleString()} {sarSymbol()}</div>
                   <div className="text-xs text-muted-foreground">{t.paid}: {paid.toLocaleString()} · {t.remaining}: {rem.toLocaleString()} · {t.installments(l.installment_count || 0)}</div>
                 </div>
                 <a href={l.statement_pdf_url} target="_blank" rel="noreferrer"

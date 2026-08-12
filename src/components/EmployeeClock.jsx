@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Fingerprint, Loader2, LogIn, LogOut, MapPin, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 
 const localToday = () => {
   const d = new Date();
@@ -32,31 +32,8 @@ const getPosition = (t) =>
   });
 
 export default function EmployeeClock({ employee, org, onChanged, clockApi, initialToday }) {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
-  const t = isAr ? {
-    noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك — فعّل صلاحية الموقع",
-    noWorkplace: "لم يحدد المقر الرسمي — تواصل مع الموارد البشرية",
-    outRange: (d, r) => `أنت خارج نطاق العمل (المسافة ${Math.round(d)} متر). يُسمح بالبصمة ضمن ${r} متر فقط.`,
-    alreadyIn: "تم تسجيل الحضور مسبقاً اليوم", doneIn: "تم تسجيل الحضور بنجاح",
-    needIn: "يجب تسجيل الحضور أولاً", alreadyOut: "تم تسجيل الانصراف مسبقاً", doneOut: "تم تسجيل الانصراف بنجاح",
-    fail: "تعذر التسجيل",
-    title: "البصمة اليومية", sub: (r, d) => `يُسمح بالبصمة فقط من مقر العمل ضمن ${r} متر — بتاريخ ${d}`,
-    in: "الحضور", out: "الانصراف", btnIn: "تسجيل الحضور", btnOut: "تسجيل الانصراف",
-    complete: (h) => `اكتمل تسجيل اليوم (${h} ساعة)`, noWorkplace2: "لم يحدد المقر الرسمي بعد.",
-    nowLabel: "الوقت الآن", schedLabel: (s, e) => `الدوام الرسمي: ${s} — ${e}`,
-  } : {
-    noGeo: "Device does not support geolocation", noAccess: "Could not access your location — enable location permission",
-    noWorkplace: "Workplace not set — contact HR",
-    outRange: (d, r) => `You're outside the work area (distance ${Math.round(d)} m). Check‑in is allowed within ${r} m only.`,
-    alreadyIn: "Check‑in already recorded today", doneIn: "Check‑in recorded successfully",
-    needIn: "Please check in first", alreadyOut: "Check‑out already recorded", doneOut: "Check‑out recorded successfully",
-    fail: "Could not record",
-    title: "Daily check‑in", sub: (r, d) => `Check‑in is allowed only from the workplace within ${r} m — on ${d}`,
-    in: "Check in", out: "Check out", btnIn: "Check in", btnOut: "Check out",
-    complete: (h) => `Today completed (${h} hours)`, noWorkplace2: "Workplace not set yet.",
-    nowLabel: "Current time", schedLabel: (s, e) => `Official hours: ${s} — ${e}`,
-  };
+  const { lang } = usePortalI18n();
+  const t = usePortalT("clock");
 
   const [today, setToday] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -131,10 +108,10 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
 
   const checkedIn = !!today?.check_in;
   const checkedOut = !!today?.check_out;
-  const isArLang = isAr;
+  const isRtl = portalDir(lang) === "rtl";
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 mb-6" dir={isArLang ? "rtl" : "ltr"}>
+    <div className="bg-white rounded-2xl border border-border p-5 mb-6" dir={isRtl ? "rtl" : "ltr"}>
       <div className="flex items-center gap-3 mb-4">
         <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
           <Fingerprint size={22} className="text-violet-600" />
@@ -149,7 +126,7 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
         <div className="text-xs">
           <span className="text-muted-foreground">{t.nowLabel}: </span>
           <span className="font-semibold tabular-nums">
-            {now.toLocaleDateString(isAr ? "ar-EG" : "en-GB")} · {String(now.getHours()).padStart(2,"0")}:{String(now.getMinutes()).padStart(2,"0")}:{String(now.getSeconds()).padStart(2,"0")}
+            {now.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB")} · {String(now.getHours()).padStart(2,"0")}:{String(now.getMinutes()).padStart(2,"0")}:{String(now.getSeconds()).padStart(2,"0")}
           </span>
         </div>
         {org?.work_start_time && org?.work_end_time && (

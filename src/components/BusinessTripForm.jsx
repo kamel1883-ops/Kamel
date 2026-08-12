@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { differenceInDays, parseISO } from "date-fns";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
 
 const empty = {
   employee_id: "", trip_type: "internal", destination: "", purpose: "",
@@ -23,31 +23,8 @@ const empty = {
 };
 
 export default function BusinessTripForm({ open, onClose, onSaved, employees, editing, currentUserEmployee, portalCreate }) {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
-  const t = isAr ? {
-    editT: "تعديل رحلة العمل", newT: "رحلة عمل / انتداب جديد",
-    emp: "الموظف", choose: "اختر الموظف", tripType: "نوع الرحلة", internal: "داخلية", external: "خارجية",
-    dest: "الوجهة", destPh: "المدينة / الدولة", transport: "وسيلة التنقل",
-    plane: "طيران", car: "سيارة", bus: "حافلة", train: "قطار", none: "بدون",
-    start: "تاريخ البداية", end: "تاريخ النهاية", days: "عدد الأيام",
-    perDiem: "بدل الانتداب اليومي", transportCost: "تكلفة التنقل", accommodation: "تكلفة الإقامة",
-    other: "تكاليف أخرى", advance: "سلفة على الحساب", purpose: "الغرض من الرحلة", purposePh: "مهمة الرحلة",
-    perDiemTotal: "إجمالي بدل الانتداب:", total: "إجمالي التكلفة:", notes: "ملاحظات",
-    errEmp: "اختر الموظف", errDates: "تحقق من تواريخ الرحلة", fail: "تعذر الحفظ",
-    cancel: "إلغاء", save: "حفظ التعديلات", create: "إنشاء الرحلة",
-  } : {
-    editT: "Edit business trip", newT: "New business trip / deputation",
-    emp: "Employee", choose: "Select employee", tripType: "Trip type", internal: "Internal", external: "External",
-    dest: "Destination", destPh: "City / Country", transport: "Transport mode",
-    plane: "Flight", car: "Car", bus: "Bus", train: "Train", none: "None",
-    start: "Start date", end: "End date", days: "Days",
-    perDiem: "Daily per diem", transportCost: "Transport cost", accommodation: "Accommodation cost",
-    other: "Other costs", advance: "Advance on account", purpose: "Trip purpose", purposePh: "Trip purpose",
-    perDiemTotal: "Per diem total:", total: "Total cost:", notes: "Notes",
-    errEmp: "Select an employee", errDates: "Check the trip dates", fail: "Could not save",
-    cancel: "Cancel", save: "Save changes", create: "Create trip",
-  };
+  usePortalI18n();
+  const t = usePortalT("tripForm");
 
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
@@ -61,7 +38,7 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       set("employee_document_url", file_url);
     } catch (e) {
-      setErr(e?.message || "تعذر رفع المستند");
+      setErr(e?.message || t.uploadFail);
     } finally {
       setUploading(false);
     }
@@ -178,14 +155,14 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">{isAr ? "وصف الانتداب (السبب والعالية/الخطة)" : "Trip description (reason & plan)"}</Label>
-            <Textarea value={form.employee_note} onChange={(e) => set("employee_note", e.target.value)} rows={3} placeholder={isAr ? "وضّح سبب الانتداب وخطة التنفيذ ومواعيد السفر والعودة…" : "Explain reason, plan, travel & return dates…"} />
+            <Label className="text-xs font-medium text-muted-foreground">{t.descLabel}</Label>
+            <Textarea value={form.employee_note} onChange={(e) => set("employee_note", e.target.value)} rows={3} placeholder={t.descPh} />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">{isAr ? "مستندات الموظف (تذاكر/حجوزات فندق)" : "Employee documents (tickets/hotel)"}</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t.docsLabel}</Label>
             <Input type="file" onChange={(e) => uploadEmpDoc(e.target.files?.[0])} disabled={uploading} />
-            {uploading && <div className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> {isAr ? "جارٍ الرفع…" : "Uploading…"}</div>}
+            {uploading && <div className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> {t.uploading}</div>}
             {form.employee_document_url && <div className="text-xs text-emerald-600 break-all">✓ {form.employee_document_url}</div>}
           </div>
 

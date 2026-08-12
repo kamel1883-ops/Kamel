@@ -2,21 +2,13 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { AlertTriangle } from "lucide-react";
 import { WARNING_LEVELS, categoryById, levelById } from "@/lib/laborPolicy";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
 import { cn } from "@/lib/utils";
 
 export default function EmployeeWarnings({ employee, warnings: propWarnings }) {
-  const { lang } = useI18n();
+  const { lang } = usePortalI18n();
+  const t = usePortalT("warnings");
   const isAr = lang === "ar";
-  const t = isAr ? {
-    title: "الإنذارات",
-    subtitle: "الإنذارات الصادرة بحقك وفق سياسة العمل — تُرسل مباشرة بعد التحقيق ولا تتطلب موافقتك.",
-    no: "لا توجد إنذارات.",
-  } : {
-    title: "Warnings",
-    subtitle: "Warnings issued to you per labor policy — sent directly after investigation and do not require your approval.",
-    no: "No warnings.",
-  };
 
   const [warnings, setWarnings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +42,7 @@ export default function EmployeeWarnings({ employee, warnings: propWarnings }) {
       <div className="flex flex-wrap gap-2 mb-4">
         {counts.map((c) => (
           <span key={c.id} className={cn("text-xs px-3 py-1.5 rounded-full border font-medium", c.cls)}>
-            {(isAr ? c.ar : c.en)}: {c.n}
+            {levelById(c.id, lang)?.label || c.en}: {c.n}
           </span>
         ))}
       </div>
@@ -71,7 +63,7 @@ export default function EmployeeWarnings({ employee, warnings: propWarnings }) {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
                     <div className="font-medium text-sm">{c?.label || w.violation_category}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{w.incident_date || ""} {w.session_date ? `· ${isAr ? "الجلسة" : "Session"}: ${w.session_date}` : ""}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{w.incident_date || ""} {w.session_date ? `· ${t.session}: ${w.session_date}` : ""}</div>
                     {w.description && <p className="text-xs text-foreground mt-1.5 leading-relaxed line-clamp-3">{w.description}</p>}
                     {c?.article && <p className="text-xs text-muted-foreground mt-1">{c.article}</p>}
                   </div>

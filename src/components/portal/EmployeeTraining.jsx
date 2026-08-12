@@ -1,33 +1,18 @@
 import React from "react";
 import { GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useI18n } from "@/lib/i18n";
+import { usePortalT } from "@/lib/portalI18n";
 
 // قسم الخطط التدريبية والتطوير في بوابة الموظف — يعرض خطط الموظف الجارية/المكتملة
+const STATUS_CLS = {
+  draft: "bg-slate-100 text-slate-600",
+  in_progress: "bg-amber-50 text-amber-600",
+  completed: "bg-emerald-50 text-emerald-600",
+  cancelled: "bg-rose-50 text-rose-600",
+};
+
 export default function EmployeeTraining({ trainings }) {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
-  const t = isAr ? {
-    title: "الخطط التدريبية والتطوير", empty: "لا توجد خطط تدريبية مُسندة إليك حالياً.",
-    mechanism: "آلية التنفيذ", goal: "الهدف بعد الخطة", period: "الفترة", dept: "القسم",
-    status: { draft: "مسودة", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة" },
-    cls: {
-      draft: "bg-slate-100 text-slate-600",
-      in_progress: "bg-amber-50 text-amber-600",
-      completed: "bg-emerald-50 text-emerald-600",
-      cancelled: "bg-rose-50 text-rose-600",
-    },
-  } : {
-    title: "Training & Development Plans", empty: "No training plans assigned to you yet.",
-    mechanism: "Delivery method", goal: "Goal", period: "Period", dept: "Department",
-    status: { draft: "Draft", in_progress: "In progress", completed: "Completed", cancelled: "Cancelled" },
-    cls: {
-      draft: "bg-slate-100 text-slate-600",
-      in_progress: "bg-amber-50 text-amber-600",
-      completed: "bg-emerald-50 text-emerald-600",
-      cancelled: "bg-rose-50 text-rose-600",
-    },
-  };
+  const t = usePortalT("training");
 
   const list = (trainings || []).filter((p) => p.status !== "cancelled" && p.status !== "draft");
 
@@ -50,7 +35,7 @@ export default function EmployeeTraining({ trainings }) {
                     {p.department ? ` · ${t.dept}: ${p.department}` : ""}
                   </div>
                 </div>
-                <span className={cn("shrink-0 text-xs px-2 py-1 rounded-full font-medium", t.cls[p.status] || t.cls.draft)}>
+                <span className={cn("shrink-0 text-xs px-2 py-1 rounded-full font-medium", STATUS_CLS[p.status] || STATUS_CLS.draft)}>
                   {t.status[p.status] || p.status}
                 </span>
               </div>
