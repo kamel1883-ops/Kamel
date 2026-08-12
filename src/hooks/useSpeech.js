@@ -37,7 +37,7 @@ export function useSpeechInput({ lang = "ar-SA", onTranscript } = {}) {
 }
 
 // نطق رد المساعد صوتياً عبر توليد الكلام
-export function useSpeechOutput() {
+export function useSpeechOutput({ onEnded } = {}) {
   const [speaking, setSpeaking] = useState(false);
   const audioRef = useRef(null);
 
@@ -51,8 +51,10 @@ export function useSpeechOutput() {
       if (!url) { setSpeaking(false); return; }
       if (!audioRef.current) {
         audioRef.current = new Audio();
-        audioRef.current.onended = () => setSpeaking(false);
-        audioRef.current.onerror = () => setSpeaking(false);
+        audioRef.current.onended = () => { setSpeaking(false); if (onEnded) onEnded(); };
+        audioRef.current.onerror = () => { setSpeaking(false); };
+      } else {
+        audioRef.current.onended = () => { setSpeaking(false); if (onEnded) onEnded(); };
       }
       audioRef.current.src = url;
       await audioRef.current.play().catch(() => setSpeaking(false));
@@ -60,10 +62,10 @@ export function useSpeechOutput() {
       setSpeaking(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onEnded]);
 
   const stopSpeak = useCallback(() => {
-    try { if (audioRef.current) audioRef.current.pause(); } catch {}
+    try { if (audioRef.current) { audioRef.current.pause(); audioRef.current.onended = null; } } catch {}
     setSpeaking(false);
   }, []);
 

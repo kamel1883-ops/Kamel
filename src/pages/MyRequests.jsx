@@ -28,7 +28,7 @@ import { badge } from "@/lib/approvals";
 import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
-import EmployeeAssistant from "@/components/portal/EmployeeAssistant";
+import AssistantAvatar from "@/components/AssistantAvatar";
 
 const localToday = () => {
   const d = new Date();
@@ -545,7 +545,7 @@ export default function MyRequests() {
           <Crown size={400} className="text-amber-500 dark:text-amber-400" strokeWidth={0.8} />
         </div>
         <div className="relative">{content}</div>
-        {session && <EmployeeAssistant session={session} />}
+        <AssistantAvatar mode={session ? "employee" : "public"} session={session} tone="dark" />
       </div>
     </div>
   );

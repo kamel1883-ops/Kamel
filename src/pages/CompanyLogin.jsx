@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, Mail, Lock, Hash, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import AssistantAvatar from "@/components/AssistantAvatar";
 import { useI18n } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
@@ -85,6 +86,8 @@ export default function CompanyLogin() {
   };
 
   return (
+    <>
+    <AssistantAvatar mode="public" tone="light" />
     <AuthLayout
       icon={Building2}
       title={t.title}
@@ -137,5 +140,6 @@ export default function CompanyLogin() {
         </Button>
       </form>
     </AuthLayout>
+    </>
   );
 }
