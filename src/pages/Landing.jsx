@@ -17,7 +17,7 @@ import {
   Briefcase, GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
   Network, ClipboardList, Plane, CalendarPlus, Server, Linkedin, Facebook, Twitter,
-  Send, Music2,
+  Send, Music2, Languages, Share2,
 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
@@ -49,6 +49,8 @@ const featuresAr = [
   { icon: Gavel, title: "سياسة العمل والإنذارات الذكية", desc: "مرجع كامل لسياسة العمل وفق نظام العمل السعودي (الغياب، النوم، إتلاف المنتجات، العصيان، إفشاء الأسرار…). أنشئ إنذاراً تصاعدياً (أول/ثاني/ثالث/فصل) مرتبطاً بالمادة النظامية بعد جلسة تحقيق مع الموظف، ويُرسل تلقائياً إلى بوابة الموظف الذاتية — دون ورق ودون انتظار موافقة الموظف، ويظهر له عدد إنذاراته ودرجاتها فوراً." },
   { icon: Briefcase, title: "إدارة التوظيف", desc: "أنشئ الوظائف الشاغرة ببيانات كاملة (المهنة، الدرجة، الراتب، النوع، المطلوب سعودياً/مقيماً)، وولّد الوصف الوظيفي تلقائياً بالذكاء الاصطناعي — ويمكنك تعديله وإضافة أو حذف المهام. شارك إعلان الوظيفة عبر واتساب وتيليجرام ولينكدإن والبريد مع رابط تقديم عام يستقبل المتقدمين ويرفع السير الذاتية، رشّح المناسبين وادعُهم للمقابلة، وعند التعيين تُغلق الوظيفة وتُرفض بقية الطلبات تلقائياً، مع تقرير الموظفين الذين تم توظيفهم خلال آخر 90 يوماً وتقييم فترة التجربة (الكفاءة، السلوك، المعرفة، المجال المهني، الخبرة) والتوصية بتثبيت الموظف أو استبعاده وفق المادة 53 من نظام العمل." },
   { icon: GraduationCap, title: "التدريب والتطوير", desc: "ضع خططاً تدريبية لموظف محدد أو لجهة/قسم كامل بمعايير موحّدة: حدّد مشاكل النقص لدى الموظف، الهدف بعد الخطة، آلية التنفيذ والتكلفة والتواريخ، مع صناديق شرح ووصف تفصيلية، وتتبّع حالة كل خطة حتى الاكتمال لرفع كفاءة الموارد البشرية وفق احتياج المنشأة." },
+  { icon: Languages, title: "بوابة موظف متعددة اللغات", desc: "بوابة الموظف الذاتية تدعم 7 لغات: العربية، الإنجليزية، الهندية، البنغالية، النيبالية، الفلبينية (Tagalog)، والأردية (الباكستانية) — يستخدمها كل موظف بلغته الأم بضغطة زر. تُرفع الإجازات والسلف والانتدابات والتقييمات من الموظف نفسه، وتُحفظ مشتركة بينه وبين الإدارة، وتظهر للطرفين في أي لحظة مع كل التفاصيل والاعتمادات والوثائق." },
+  { icon: Share2, title: "طلبات مشتركة وشفافة بين الموظف والإدارة", desc: "كل ما يرفعه الموظف (إجازات، سلف، رحلات عمل، مرفقات) يُحفظ في سجل موحّد مشترك بين الموظف والإدارة — يتابع الموظف حالته واعتماداته، وتطّلع الإدارة على أي لحظة، مع مستندات المخالصات وكشوف السلف والتصفية المتاحة في ملف الموظف فور اعتمادها وصرفها مالياً." },
 ];
 
 const featuresEn = [
@@ -72,6 +74,8 @@ const featuresEn = [
   { icon: Gavel, title: "Labor Policy & Smart Warnings", desc: "Full labor policy reference per Saudi Labor Law (absence, sleeping, product damage, insubordination, disclosure of secrets…). Issue a progressive warning (first/second/third/termination) linked to the relevant article after an investigation session with the employee; it is sent automatically to the employee self-service portal — paperless and without waiting for the employee's approval — and their warnings count and levels appear instantly." },
   { icon: Briefcase, title: "Recruitment Management", desc: "Create vacancies with full data (profession, grade, salary, type, Saudi/expat requirement) and auto-generate the job description with AI — fully editable to add or remove tasks. Share the posting on WhatsApp, Telegram, LinkedIn, and email with a public apply link that receives applicants and their CVs, shortlist the suitable ones and invite them to interviews, and on hiring the job closes and remaining requests are auto-rejected — with a 90-day hiring report and a probation evaluation (competence, behavior, knowledge, professional field, experience) and a recommendation to confirm or dismiss per Article 53 of the Labor Law." },
   { icon: GraduationCap, title: "Training & Development", desc: "Build training plans for a specific employee or a whole department under unified criteria: define the employee's skill gaps, the post-plan goal, the execution mechanism, cost and dates, with detailed description fields, and track each plan to completion to raise workforce capability per the organization's needs." },
+  { icon: Languages, title: "Multilingual Employee Portal", desc: "The self-service portal supports 7 languages: Arabic, English, Hindi, Bengali, Nepali, Tagalog (Filipino) and Urdu (Pakistani) — every employee uses it in their native language with one tap. Leaves, loans, business trips and performance reviews are submitted by the employee and saved shared between them and management, visible to both at any moment with all details, approvals and documents." },
+  { icon: Share2, title: "Shared, Transparent Requests", desc: "Everything an employee submits (leaves, loans, business trips, attachments) is kept in one shared record between the employee and management — the employee tracks their status and approvals, while management can review any request at any moment, with settlement, loan-statement and clearance documents available in the employee file as soon as they are approved and paid." },
 ];
 
 const licensesAr = [
@@ -136,7 +140,7 @@ export default function Landing() {
     cta1: "جرّب مجاناً لمدة شهر", cta2: "استكشف المميزات",
     stats: [{ n: "+50", l: "عميل تابع" }, { n: "+15,000", l: "موظف مُدار" }, { n: "99.9%", l: "استمرارية" }],
     portalTitle: "بوابة الموظف الذاتية",
-    portalDesc: "دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. يتم الدخول برقم الهوية/الإقامة وتاريخ الميلاد فقط — بدون بريد أو كلمة مرور.",
+    portalDesc: "دخول خاص بالموظفين فقط — بصمة الحضور والانصراف من الجوال ضمن 50 متراً من مقر العمل (بدون أجهزة)، وعرض الراتب ورصيد الإجازات، ورفع طلبات السلف والإجازات ورحلات العمل مباشرة. تدعم البوابة 7 لغات (العربية، الإنجليزية، الهندية، البنغالية، النيبالية، الفلبينية، الأردية) ليستخدمها كل موظف بلغته، وتُحفظ الطلبات مشتركة بين الموظف والإدارة وتظهر للطرفين في أي لحظة. يتم الدخول برقم الهوية/الإقامة وتاريخ الميلاد فقط — بدون بريد أو كلمة مرور.",
     portalCta: "دخول البوابة",
     approvers: "بوابة المعتمدين",
     approversTitle: "بوابة المعتمدين",
@@ -185,7 +189,7 @@ export default function Landing() {
     cta1: "Try free for a month", cta2: "Explore Features",
     stats: [{ n: "+50", l: "Active Clients" }, { n: "+15,000", l: "Employees Managed" }, { n: "99.9%", l: "Uptime" }],
     portalTitle: "Employee Self‑Service Portal",
-    portalDesc: "Employees only — clock in/out from the phone within 50 meters of the workplace (no devices), view salary and leave balance, and submit loan, leave, and business‑trip requests directly. Sign in with national ID/Iqama and date of birth only — no email or password needed.",
+    portalDesc: "Employees only — clock in/out from the phone within 50 meters of the workplace (no devices), view salary and leave balance, and submit loan, leave, and business‑trip requests directly. The portal supports 7 languages (Arabic, English, Hindi, Bengali, Nepali, Tagalog, Urdu) so every employee uses it in their own language; requests are saved shared between employee and management and visible to both at any moment. Sign in with national ID/Iqama and date of birth only — no email or password needed.",
     portalCta: "Enter Portal",
     approvers: "Approvers Portal",
     approversTitle: "Approvers Portal",
