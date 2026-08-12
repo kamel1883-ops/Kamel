@@ -1,13 +1,21 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
+import { verifyTurnstile, createRateLimiter } from '../../shared/turnstile.ts';
+
+const limiter = createRateLimiter(10 * 60 * 1000, 5); // 5 رسائل / 10 دقائق لكل IP
 
 export default async function(req) {
   try {
-    const base44 = createClientFromRequest(req);
+    const ip = limiter.clientIp(req);
+    if (limiter.rateLimited(ip)) {
+      return Response.json({ error: 'محاولات كثيرة، حاول لاحقاً' }, { status: 429 });
+    }
+
     const body = await req.json();
     const name = (body?.name || '').toString().trim();
     const email = (body?.email || '').toString().trim();
     const message = (body?.message || '').toString().trim();
+    const captcha = (body?.captcha_token || '').toString();
 
     if (!name || !email || !message) {
       return Response.json({ error: 'الحقول مطلوبة' }, { status: 400 });
@@ -15,13 +23,17 @@ export default async function(req) {
     if (message.length > 5000 || name.length > 200 || email.length > 200) {
       return Response.json({ error: 'محتوى طويل جداً' }, { status: 400 });
     }
+    const ok = await verifyTurnstile(captcha);
+    if (!ok) {
+      return Response.json({ error: 'فشل التحقق البشري' }, { status: 400 });
+    }
 
+    const base44 = createClientFromRequest(req);
     const ownerEmail = secrets.get('OWNER_EMAIL');
     if (!ownerEmail) {
       return Response.json({ error: 'لم يتم ضبط بريد الاستلام' }, { status: 500 });
     }
 
-    const isAr = true;
     const subject = `رسالة جديدة من ${name} عبر موقع جدارة`;
     const mailBody = `لقد تلقيت رسالة جديدة عبر نموذج التواصل في موقع جدارة:
 

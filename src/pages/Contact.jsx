@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import { base44 } from "@/api/base44Client";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import { useI18n } from "@/lib/i18n";
 import { Mail, MessageCircle, MapPin, Send, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
 
@@ -37,6 +38,8 @@ export default function Contact() {
 
   const [f, setF] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState("idle"); // idle | sending | sent | failed
+  const [captcha, setCaptcha] = useState("");
+  const [captchaKey, setCaptchaKey] = useState(0);
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
 
   const submit = async (e) => {
@@ -48,11 +51,16 @@ export default function Contact() {
         name: f.name,
         email: f.email,
         message: f.message,
+        captcha_token: captcha,
       });
       setStatus("sent");
       setF({ name: "", email: "", message: "" });
+      setCaptcha("");
+      setCaptchaKey((k) => k + 1);
     } catch (err) {
       setStatus("failed");
+      setCaptcha("");
+      setCaptchaKey((k) => k + 1);
     }
   };
 
@@ -117,7 +125,10 @@ export default function Contact() {
             <textarea value={f.message} onChange={(e) => set("message", e.target.value)} required rows={4}
               className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.msgPh} />
           </div>
-          <button type="submit" disabled={status === "sending"} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 disabled:opacity-60 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition">
+          <div className="flex justify-center">
+            <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
+          </div>
+          <button type="submit" disabled={status === "sending" || !captcha} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 disabled:opacity-60 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition">
             <Send size={18} /> {status === "sending" ? t.sending : t.send}
           </button>
           {status === "sent" && (
