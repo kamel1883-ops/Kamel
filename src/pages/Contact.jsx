@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
-import { Mail, MessageCircle, MapPin, Send, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Mail, MessageCircle, MapPin, Send, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "info@jadara-hr.com";
@@ -16,30 +17,43 @@ export default function Contact() {
     dir: "rtl", navAbout: "من نحن", navLogin: "تسجيل الدخول",
     badge: "نحن هنا لمساعدتك", h1: "تواصل معنا",
     intro: "يسعدنا تواصلك مع فريق جدارة لأي استفسار حول المنصة، الباقات، أو تفعيل تجربتك المجانية. اختر الوسيلة الأنسب لك وسنرد عليك في أقرب وقت.",
-    wa: "واتساب مباشر", email: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية",
+    wa: "واتساب مباشر", email: "البريد الإلكتروني", loc: "الموقع", locVal: "السعودية - الرياض - المركز المالي KAFD",
+    sending: "جارٍ الإرسال…", sent: "تم إرسال رسالتك بنجاح، سنرد عليك قريباً.", failed: "تعذّر الإرسال، حاول مرة أخرى أو راسلنا مباشرة عبر واتساب.",
     name: "الاسم", namePh: "اسمك الكامل", emailL: "البريد الإلكتروني", msg: "رسالتك", msgPh: "كيف يمكننا مساعدتك؟", send: "إرسال الرسالة",
-    note: "ستفتح رسالتك عبر تطبيق البريد الإلكتروني لديك مباشرةً",
+    note: "ستصل رسالتك مباشرةً إلى فريق جدارة وسيتم الرد عليك عبر بريدك الإلكتروني.",
     home: "العودة للرئيسية", copy: "© 2027 جدارة — جميع الحقوق محفوظة",
     subject: (n) => `رسالة من ${n || "زائر"} عبر موقع جدارة`, body: (f) => `${f.message}\n\nالاسم: ${f.name}\nالبريد: ${f.email}`,
   } : {
     dir: "ltr", navAbout: "About", navLogin: "Sign in",
     badge: "We're here to help", h1: "Contact us",
     intro: "We're happy to hear from the Jadara team for any inquiry about the platform, plans, or activating your free trial. Pick the channel that suits you and we'll reply shortly.",
-    wa: "WhatsApp directly", email: "Email", loc: "Location", locVal: "Saudi Arabia",
+    wa: "WhatsApp directly", email: "Email", loc: "Location", locVal: "Saudi Arabia - Riyadh - KAFD Financial Center",
+    sending: "Sending…", sent: "Your message was sent successfully. We'll reply soon.", failed: "Could not send. Please try again or reach us via WhatsApp.",
     name: "Name", namePh: "Your full name", emailL: "Email", msg: "Your message", msgPh: "How can we help?", send: "Send message",
-    note: "Your message will open via your email app directly",
+    note: "Your message will go directly to the Jadara team and we'll reply by email.",
     home: "Back home", copy: "© 2027 Jadara — All rights reserved",
     subject: (n) => `Message from ${n || "a visitor"} via Jadara site`, body: (f) => `${f.message}\n\nName: ${f.name}\nEmail: ${f.email}`,
   };
 
   const [f, setF] = useState({ name: "", email: "", message: "" });
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | failed
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const subject = encodeURIComponent(t.subject(f.name));
-    const body = encodeURIComponent(t.body(f));
-    window.location.href = `mailto:${SALES_EMAIL}?subject=${subject}&body=${body}`;
+    if (status === "sending") return;
+    setStatus("sending");
+    try {
+      await base44.functions.invoke("submitContactMessage", {
+        name: f.name,
+        email: f.email,
+        message: f.message,
+      });
+      setStatus("sent");
+      setF({ name: "", email: "", message: "" });
+    } catch (err) {
+      setStatus("failed");
+    }
   };
 
   return (
@@ -103,9 +117,17 @@ export default function Contact() {
             <textarea value={f.message} onChange={(e) => set("message", e.target.value)} required rows={4}
               className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.msgPh} />
           </div>
-          <button type="submit" className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition">
-            <Send size={18} /> {t.send}
+          <button type="submit" disabled={status === "sending"} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 disabled:opacity-60 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition">
+            <Send size={18} /> {status === "sending" ? t.sending : t.send}
           </button>
+          {status === "sent" && (
+            <div className="flex items-center justify-center gap-2 text-emerald-300 text-sm">
+              <CheckCircle2 size={16} /> {t.sent}
+            </div>
+          )}
+          {status === "failed" && (
+            <div className="flex items-center justify-center gap-2 text-rose-300 text-sm">{t.failed}</div>
+          )}
           <p className="text-white/40 text-xs text-center">{t.note}</p>
         </form>
       </main>
