@@ -117,6 +117,23 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    if (action === "owner_activate_trial") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const end = new Date(); end.setHours(0, 0, 0, 0); end.setDate(end.getDate() + 30);
+      // تفعيل تجربة فقط: يبقى الحساب «تجربة» لمدة 30 يوماً من اليوم دون اشتراك سنوي ولا إيراد.
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        status: "trial",
+        plan: "trial",
+        trial_start: todayStr,
+        trial_end: end.toISOString().slice(0, 10),
+        suspended_from: null,
+      });
+      return Response.json({ ok: true });
+    }
+
     if (action === "owner_activate") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
       const tenant_id = String(body.tenant_id || "");

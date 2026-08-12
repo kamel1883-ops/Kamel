@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown } from "lucide-react";
+import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical } from "lucide-react";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -241,13 +241,22 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
         {!owner && (
         <div className="no-print p-5 border-t border-border bg-slate-50 space-y-4">
           {status === "trial" && (
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+                <FlaskConical size={16} className="text-amber-600 shrink-0" />
+                <span className="text-sm font-medium">{isAr ? "تفعيل تجربة فقط (30 يوم)" : "Activate trial only (30 days)"}</span>
+                <Button size="sm" onClick={() => onAction(tenant.id, "owner_activate_trial")} disabled={busy} className="gap-1.5 ms-auto">
+                  {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {isAr ? "تفعيل" : "Activate"}
+                </Button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-medium me-1">{isAr ? "تمديد التجربة:" : "Extend trial:"}</span>
               <Input type="number" value={days} onChange={(e) => setDays(e.target.value)} className="w-24 h-9" min={1} />
               <span className="text-xs text-muted-foreground">{isAr ? "يوم" : "days"}</span>
-              <Button size="sm" onClick={() => onAction(tenant.id, "owner_extend_trial", { days: Number(days) })} disabled={busy} className="gap-1.5">
-                {busy ? <Loader2 size={14} className="animate-spin" /> : <CalendarPlus size={14} />} {isAr ? "تمديد" : "Extend"}
-              </Button>
+                <Button size="sm" onClick={() => onAction(tenant.id, "owner_extend_trial", { days: Number(days) })} disabled={busy} className="gap-1.5">
+                  {busy ? <Loader2 size={14} className="animate-spin" /> : <CalendarPlus size={14} />} {isAr ? "تمديد" : "Extend"}
+                </Button>
+              </div>
             </div>
           )}
           {(status === "trial" || status === "expired") && (
