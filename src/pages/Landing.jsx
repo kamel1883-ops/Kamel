@@ -94,24 +94,24 @@ const licensesEn = [
 ];
 
 const integrationsAr = [
-  { icon: Bell, t: "إشعارات فورية", d: "تنبيهات استباقية لانتهاء التراخيص والإقامات والتأمينات والوثائق والمركبات." },
-  { icon: Landmark, t: "التراخيص الحكومية", d: "ربط مع بوابات التراخيص الحكومية ومتابعة استصدارها وتجديدها." },
-  { icon: BadgeCheck, t: "مقيم وأبشر (قريباً)", d: "تكاملات قادمة مع منصة مقيم وأبشر لمتابعة هويات وإقامات المقيمين." },
-  { icon: ShieldCheck, t: "التأمينات الاجتماعية (GOSI)", d: "تكامل لاحتساب المساهمات والشهادات وفق نظام التأمينات الاجتماعية." },
-  { icon: HeartPulse, t: "مجلس الضمان الصحي", d: "ربط بيانات التأمين الصحي والمستفيدين والاعتمادات." },
-  { icon: Stethoscope, t: "التعاملات الطبية", d: "ربط التعاملات الطبية والفحوصات لهويات المقيمين." },
-  { icon: Car, t: "إدارة المرور للمركبات", d: "ربط رخص وتأمين وفحوصات المركبات مع إدارة المرور." },
-  { icon: Calculator, t: "أنظمة المحاسبة (Odoo/ERP)", d: "تكامل مع أنظمة محاسبية Odoo وأنظمة ERP لترحيل الرواتب والقيود." },
+  { icon: Bell, t: "إشعارات فورية", d: "تنبيهات استباقية لانتهاء التراخيص والإقامات والتأمينات والوثائق والمركبات.", soon: false },
+  { icon: Landmark, t: "التراخيص الحكومية", d: "ربط مع بوابات التراخيص الحكومية ومتابعة استصدارها وتجديدها.", soon: true },
+  { icon: BadgeCheck, t: "مقيم وأبشر (قريباً)", d: "تكاملات قادمة مع منصة مقيم وأبشر لمتابعة هويات وإقامات المقيمين.", soon: true },
+  { icon: ShieldCheck, t: "التأمينات الاجتماعية (GOSI)", d: "تكامل لاحتساب المساهمات والشهادات وفق نظام التأمينات الاجتماعية.", soon: true },
+  { icon: HeartPulse, t: "مجلس الضمان الصحي", d: "ربط بيانات التأمين الصحي والمستفيدين والاعتمادات.", soon: true },
+  { icon: Stethoscope, t: "التعاملات الطبية", d: "ربط التعاملات الطبية والفحوصات لهويات المقيمين.", soon: true },
+  { icon: Car, t: "إدارة المرور للمركبات", d: "ربط رخص وتأمين وفحوصات المركبات مع إدارة المرور.", soon: true },
+  { icon: Calculator, t: "أنظمة المحاسبة (Odoo/ERP)", d: "تكامل مع أنظمة محاسبية Odoo وأنظمة ERP لترحيل الرواتب والقيود.", soon: true },
 ];
 const integrationsEn = [
-  { icon: Bell, t: "Instant Notifications", d: "Proactive alerts for expiry of licenses, Iqama, insurance, documents, and vehicles." },
-  { icon: Landmark, t: "Government Licenses", d: "Integration with government license portals to track issuance and renewal." },
-  { icon: BadgeCheck, t: "Muqeem & Absher (Soon)", d: "Upcoming integrations with Muqeem and Absher to track expat IDs and Iqama." },
-  { icon: ShieldCheck, t: "GOSI", d: "Integration to calculate contributions and certificates per the social insurance scheme." },
-  { icon: HeartPulse, t: "Health Insurance Council", d: "Link health insurance data, beneficiaries, and approvals." },
-  { icon: Stethoscope, t: "Medical Transactions", d: "Link medical transactions and tests to expat IDs." },
-  { icon: Car, t: "Traffic for Vehicles", d: "Link vehicle licenses, insurance, and inspections with the Traffic Department." },
-  { icon: Calculator, t: "Accounting (Odoo/ERP)", d: "Integration with Odoo and ERP systems to post payroll and journal entries." },
+  { icon: Bell, t: "Instant Notifications", d: "Proactive alerts for expiry of licenses, Iqama, insurance, documents, and vehicles.", soon: false },
+  { icon: Landmark, t: "Government Licenses", d: "Integration with government license portals to track issuance and renewal.", soon: true },
+  { icon: BadgeCheck, t: "Muqeem & Absher (Soon)", d: "Upcoming integrations with Muqeem and Absher to track expat IDs and Iqama.", soon: true },
+  { icon: ShieldCheck, t: "GOSI", d: "Integration to calculate contributions and certificates per the social insurance scheme.", soon: true },
+  { icon: HeartPulse, t: "Health Insurance Council", d: "Link health insurance data, beneficiaries, and approvals.", soon: true },
+  { icon: Stethoscope, t: "Medical Transactions", d: "Link medical transactions and tests to expat IDs.", soon: true },
+  { icon: Car, t: "Traffic for Vehicles", d: "Link vehicle licenses, insurance, and inspections with the Traffic Department.", soon: true },
+  { icon: Calculator, t: "Accounting (Odoo/ERP)", d: "Integration with Odoo and ERP systems to post payroll and journal entries.", soon: true },
 ];
 
 const tiersAr = PRICING_TIERS_AR;
@@ -447,7 +447,7 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="font-semibold">{it.t}</div>
-                  <span className="text-[11px] bg-emerald-400/15 text-emerald-200 border border-emerald-300/25 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>
+                  {it.soon && <span className="text-[11px] bg-emerald-400/15 text-emerald-200 border border-emerald-300/25 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>}
                 </div>
                 <div className="text-white/60 text-sm mt-1.5 leading-relaxed">{it.d}</div>
               </div>
