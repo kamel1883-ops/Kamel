@@ -445,7 +445,10 @@ export default function Landing() {
                 <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500/30 to-teal-500/20 border border-white/10 flex items-center justify-center mb-4">
                   <I size={20} className="text-emerald-200" />
                 </div>
-                <div className="font-semibold">{it.t}</div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="font-semibold">{it.t}</div>
+                  <span className="text-[11px] bg-emerald-400/15 text-emerald-200 border border-emerald-300/25 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>
+                </div>
                 <div className="text-white/60 text-sm mt-1.5 leading-relaxed">{it.d}</div>
               </div>
             );
