@@ -11,62 +11,12 @@ import { ClipboardCheck, Check, X, Loader2, Download, Plane } from "lucide-react
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
-import { useI18n } from "@/lib/i18n";
+import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 
 export default function ApprovalsPortal({ portalSession }) {
-  const { lang } = useI18n();
+  const { lang } = usePortalI18n();
+  const t = usePortalT("approvals");
   const isAr = lang === "ar";
-  const t = isAr ? {
-    mTitle: "موافقات الإجازات", mSub: "اعتماد طلبات إجازات مرؤوسيك المباشرين",
-    fTitle: "الموافقات المالية", fSub: "اعتماد الصرف النهائي للإجازات والسلف والانتدابات ومخالصات نهاية الخدمة",
-    loading: "جارٍ التحميل...", tabLeaves: (n) => `الإجازات (${n})`, tabLoans: (n) => `السلف (${n})`, tabTrips: (n) => `الانتدابات (${n})`,
-    tabSettlements: (n) => `نهاية الخدمة (${n})`,
-    approve: "موافقة", reject: "رفض", pay: "تأكيد الصرف",
-    days: (s, e, n) => `${s} ← ${e} · ${n} يوم`,
-    loan: "سلفة", loanLine: (v, r) => `${formatCurrency(v)} · ${r || ""}`,
-    ticket: (v) => `تعويض تذكرة: ${formatCurrency(v)}`,
-    fullClear: "تصفية كاملة",
-    rejectTitle: "رفض الطلب", rejectReason: "سبب الرفض", cancel: "إلغاء", confirmReject: "تأكيد الرفض",
-    payTitle: "تأكيد الصرف — المالية/المحاسبة",
-    leavePay: (v) => <>تصفية إجازة — تعويض التذكرة: <b className="text-foreground">{formatCurrency(v)}</b></>,
-    loanPay: (v) => <>سلفة بقيمة <b className="text-foreground">{formatCurrency(v)}</b></>,
-    tripPay: () => <>صرف انتداب</>,
-    settlePay: (v) => <>مخالصة نهاية خدمة بقيمة <b className="text-foreground">{formatCurrency(v)}</b></>,
-    payNoteSettle: "عند التأكيد يُسجّل إثبات التحويل ويُقفل الموظف نهائياً (حالته تُحدّث إلى منتهي/مستقيل).",
-    finNote: "ملاحظات/وصف المالية", finNotePh: "تحويل بنكي / سند توقيع / …. يُسجّل على الطلب.",
-    proof: "إثبات التحويل (صورة)",
-    payNote: "عند التأكيد تُقفل العملية ويُسجّل إثبات التحويل على الطلب.", confirmPay: "تأكيد الصرف",
-    settlement: "المخالصة", statement: "كشف السلفة", tripDoc: "مستند الانتداب", finProof: "إثبات التحويل",
-    tripExt: "خارجية", tripInt: "داخلية", tripCost: (c) => `التكلفة: ${formatCurrency(c)}`,
-    empty: "لا توجد طلبات في مرحلتك",
-    subInfo: (n) => `مرؤوسوك: ${n} موظف`,
-    noLink: "لم يتم ربط حسابك بسجل موظف بعد — تواصل مع الموارد البشرية.",
-  } : {
-    mTitle: "Leave approvals", mSub: "Approve leave requests of your direct subordinates",
-    fTitle: "Finance approvals", fSub: "Final payment approval for leaves, loans, trips and end-of-service settlements",
-    loading: "Loading...", tabLeaves: (n) => `Leaves (${n})`, tabLoans: (n) => `Loans (${n})`, tabTrips: (n) => `Trips (${n})`,
-    tabSettlements: (n) => `End of service (${n})`,
-    approve: "Approve", reject: "Reject", pay: "Confirm payment",
-    days: (s, e, n) => `${s} ← ${e} · ${n} days`,
-    loan: "Loan", loanLine: (v, r) => `${formatCurrency(v)} · ${r || ""}`,
-    ticket: (v) => `Ticket compensation: ${formatCurrency(v)}`,
-    fullClear: "Full clearance",
-    rejectTitle: "Reject request", rejectReason: "Rejection reason", cancel: "Cancel", confirmReject: "Confirm rejection",
-    payTitle: "Confirm payment — Finance/Accounting",
-    leavePay: (v) => <>Leave clearance — ticket compensation: <b className="text-foreground">{formatCurrency(v)}</b></>,
-    loanPay: (v) => <>Loan of <b className="text-foreground">{formatCurrency(v)}</b></>,
-    tripPay: () => <>Trip payout</>,
-    settlePay: (v) => <>End-of-service settlement of <b className="text-foreground">{formatCurrency(v)}</b></>,
-    payNoteSettle: "On confirmation the transfer proof is recorded and the employee is closed permanently (status set to terminated/resigned).",
-    finNote: "Finance notes", finNotePh: "Bank transfer / receipt / …. Recorded on the request.",
-    proof: "Transfer proof (image)",
-    payNote: "On confirmation the process closes and the transfer proof is recorded.", confirmPay: "Confirm payment",
-    settlement: "Settlement", statement: "Loan statement", tripDoc: "Trip doc", finProof: "Transfer proof",
-    tripExt: "External", tripInt: "Internal", tripCost: (c) => `Cost: ${formatCurrency(c)}`,
-    empty: "No requests in your stage",
-    subInfo: (n) => `Your subordinates: ${n}`,
-    noLink: "Your account is not linked to an employee record yet — contact HR.",
-  };
 
   const [me, setMe] = useState(null);
   const [data, setData] = useState(null);
@@ -182,7 +132,7 @@ export default function ApprovalsPortal({ portalSession }) {
   if (role === "manager") {
     const leaves = data?.leaves || [];
     return (
-      <div dir={isAr ? "rtl" : "ltr"} className="animate-fade-in">
+      <div dir={portalDir(lang)} className="animate-fade-in">
         <PageHeader title={t.mTitle} subtitle={t.mSub} />
         {data?.message && <div className="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{data.message}</div>}
         {data?.subordinates?.length > 0 && <div className="mb-3 text-xs text-muted-foreground">{t.subInfo(data.subordinates.length)}</div>}
@@ -251,7 +201,7 @@ export default function ApprovalsPortal({ portalSession }) {
   };
 
   return (
-    <div dir={isAr ? "rtl" : "ltr"} className="animate-fade-in">
+    <div dir={portalDir(lang)} className="animate-fade-in">
       <PageHeader title={t.fTitle} subtitle={t.fSub} />
       <Tabs defaultValue="leaves">
         <TabsList className="mb-4">
@@ -299,10 +249,10 @@ export default function ApprovalsPortal({ portalSession }) {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-sm">{r.employee_name || "—"}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{isAr ? "نهاية الخدمة" : "End of service"}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{t.eosBadge}</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {isAr ? "إجمالي المخالصة: " : "Total settlement: "}<b className="text-foreground">{formatCurrency(r.total_settlement)}</b> · {r.last_working_date || ""}
+                      {t.totalSettleLabel}<b className="text-foreground">{formatCurrency(r.total_settlement)}</b> · {r.last_working_date || ""}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
