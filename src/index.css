@@ -103,6 +103,10 @@
   }
   th { unicode-bidi: plaintext; }
 
+  /* عرض احترافي للأقواس العربية داخل كل المستندات المُولّدة (نافذة الطباعة) */
+  .print-settlement, .print-quote, .print-invoice, .print-client,
+  .print-settlement *, .print-quote *, .print-invoice *, .print-client * { unicode-bidi: plaintext; }
+
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 9999px; }
