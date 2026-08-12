@@ -87,7 +87,7 @@ export default function CompanyLogin() {
 
   return (
     <>
-    <AssistantAvatar mode="public" tone="light" />
+    <AssistantAvatar mode="public" tone="dark" lang={lang} />
     <AuthLayout
       icon={Building2}
       title={t.title}

@@ -545,7 +545,7 @@ export default function MyRequests() {
           <Crown size={400} className="text-amber-500 dark:text-amber-400" strokeWidth={0.8} />
         </div>
         <div className="relative">{content}</div>
-        <AssistantAvatar mode={session ? "employee" : "public"} session={session} tone="dark" />
+        <AssistantAvatar mode={session ? "employee" : "public"} session={session} tone="dark" lang={lang} />
       </div>
     </div>
   );

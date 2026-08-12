@@ -37,7 +37,7 @@ export function useSpeechInput({ lang = "ar-SA", onTranscript } = {}) {
 }
 
 // نطق رد المساعد صوتياً عبر توليد الكلام
-export function useSpeechOutput({ onEnded } = {}) {
+export function useSpeechOutput({ onEnded, lang = "ar" } = {}) {
   const [speaking, setSpeaking] = useState(false);
   const audioRef = useRef(null);
 
@@ -46,7 +46,7 @@ export function useSpeechOutput({ onEnded } = {}) {
     try {
       setSpeaking(true);
       const { base44 } = await import("@/api/base44Client");
-      const res = await base44.integrations.Core.GenerateSpeech({ text, language_code: "ar", voice: "storm" });
+      const res = await base44.integrations.Core.GenerateSpeech({ text, language_code: lang, voice: "storm" });
       const url = res?.url || res?.data?.url;
       if (!url) { setSpeaking(false); return; }
       if (!audioRef.current) {
@@ -62,7 +62,7 @@ export function useSpeechOutput({ onEnded } = {}) {
       setSpeaking(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onEnded]);
+  }, [onEnded, lang]);
 
   const stopSpeak = useCallback(() => {
     try { if (audioRef.current) { audioRef.current.pause(); audioRef.current.onended = null; } } catch {}
