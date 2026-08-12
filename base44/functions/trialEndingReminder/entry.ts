@@ -9,10 +9,9 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    // جدول المنصة يستدعي الدالة عبر invoke_backend_function دون تمرير سر (jq في سيرفر العمل لا يستطيع الوصول لـ env)،
-    // لذلك يُعتبر الاستدعاء بدون سر موثوقاً كمكالمة مجدولة. أما الاستدعاء المباشر بسر فيجب أن يطابق CRON_SECRET.
-    const hasSecret = typeof body?.cron_secret === "string" && body.cron_secret.length > 0;
-    const isCron = !hasSecret ? true : verifyCronSecret(body.cron_secret);
+    // الاستدعاء المجدول من سيرفر العمل يمرّر cron_secret عبر jq: ${ env.CRON_SECRET }.
+    // أي استدعاء بلا سر مطابق يُعتبر غير موثوق ويُرفض (أو يتطلب جلسة مدير).
+    const isCron = verifyCronSecret(body?.cron_secret);
     if (!isCron) {
       let user;
       try { user = await base44.auth.me(); } catch (e) {
