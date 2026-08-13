@@ -16,7 +16,8 @@ export default async function (req) {
     const action = body.action;
     const id = body.id;
     const note = String(body.note || "");
-    const proofUrl = String(body.proof_url || "");
+    // يقبل روابط http/https فقط لربط إثبات التحويل — يرفض javascript:/data: لمنع XSS المخزّن
+    const proofUrl = /^https?:\/\//i.test(String(body.proof_url || "").trim()) ? String(body.proof_url).trim() : "";
 
     if (!id || !type || !action)
       return Response.json({ error: "بيانات ناقصة" }, { status: 400 });
