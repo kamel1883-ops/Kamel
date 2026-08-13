@@ -1,6 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
-import { verifyTurnstile } from "../../shared/turnstile.ts";
+import { verifyTurnstile, createRateLimiter } from "../../shared/turnstile.ts";
+
+// تقييد المعدّل لمنع الإنشاء الآلي المكثّف لطلبات التجربة (يُضاف لإغلاق ثغرة الإساءة عند تعطيل الكابتشا)
+const RL = createRateLimiter(10 * 60 * 1000, 5); // 5 طلبات / 10 دقائق لكل IP
 import { tierForCount } from "../../shared/pricing.ts";
 import { signProof } from "../../shared/contractProof.ts";
 import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
@@ -10,6 +13,10 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+
+    // تقييد المعدّل قبل أي معالجة لمنع الإغراق الآلي
+    if (RL.rateLimited(RL.clientIp(req)))
+      return Response.json({ error: 'طلبات كثيرة، يرجى المحاولة لاحقاً' }, { status: 429 });
 
     const name = String(body.name || '').trim();
     const email = String(body.contact_email || '').trim();

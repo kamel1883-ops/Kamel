@@ -4,8 +4,6 @@ import { secrets } from "base44:runtime";
 export async function verifyTurnstile(token: string): Promise<boolean> {
   const t = String(token || "");
   if (!t) return false;
-  // رمز الاختبار الوهمي الرسمي من Cloudflare (عند استخدام مفتاح الموقع 1x00000000000000000000AA) — يمرّر دائماً.
-  if (t === "XXXX.DUMMY.TOKEN.XXXX") return true;
   const secret = String(secrets.get("TURNSTILE_SECRET_KEY") || "");
   if (!secret) return false;
   try {
