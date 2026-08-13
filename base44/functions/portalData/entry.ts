@@ -334,11 +334,18 @@ export default async function (req) {
       return out;
     };
 
+    // يقبل روابط http/https فقط لحقول الملفات المرفوعة — يرفض javascript:/data: لمنع XSS المخزّن في وجه الإدارة
+    const safeUrl = (u: any): string => {
+      const s = String(u || "").trim();
+      return /^https?:\/\//i.test(s) ? s : "";
+    };
+
     if (action === "create_leave") {
       const p = pick(body.payload || {}, [
         "leave_type", "start_date", "end_date", "days_count", "reason",
         "medical_report_url", "is_full_clearance", "description",
       ]);
+      p.medical_report_url = safeUrl(p.medical_report_url);
       const { manager_id, manager_name } = await resolveManager();
       const created = await base44.asServiceRole.entities.LeaveRequest.create({
         ...p,
@@ -371,6 +378,7 @@ export default async function (req) {
         "trip_type", "destination", "purpose", "start_date", "end_date", "days_count",
         "transport_mode", "employee_note", "employee_document_url", "description",
       ]);
+      p.employee_document_url = safeUrl(p.employee_document_url);
       const created = await base44.asServiceRole.entities.BusinessTrip.create({
         ...p,
         employee_id: employeeId,

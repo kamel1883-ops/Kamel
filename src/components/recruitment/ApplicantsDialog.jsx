@@ -126,8 +126,8 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
                   </div>
                   {a.qualifications && <div className="text-sm text-muted-foreground">المؤهلات: {a.qualifications}</div>}
                   <div className="flex flex-wrap items-center gap-2">
-                    {a.cv_url && <a href={a.cv_url} target="_blank" rel="noreferrer" className="text-xs text-violet-700 underline">عرض السيرة الذاتية</a>}
-                    {a.appointment_doc_url && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 underline inline-flex items-center gap-1"><FileCheck size={12} /> قرار التعيين</a>}
+                    {a.cv_url && /^https?:\/\//i.test(a.cv_url) && <a href={a.cv_url} target="_blank" rel="noreferrer" className="text-xs text-violet-700 underline">عرض السيرة الذاتية</a>}
+                    {a.appointment_doc_url && /^https?:\/\//i.test(a.appointment_doc_url) && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 underline inline-flex items-center gap-1"><FileCheck size={12} /> قرار التعيين</a>}
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {a.status === "applied" && <Button size="sm" variant="outline" onClick={() => setStatus(a, "screened")}><UserCheck size={14} /> ترشيح</Button>}
