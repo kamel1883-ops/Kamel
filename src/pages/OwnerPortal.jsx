@@ -163,7 +163,7 @@ export default function OwnerPortal() {
         iqama: id, birth_date: bd, email: fEmail.trim(), captcha_token: captchaToken,
       });
       const data = res?.data || res;
-      if (data?.ok) { setMsg({ type: "ok", text: pt.codeSent }); setMode("reset"); }
+      if (data?.ok) { setMsg({ type: "ok", text: pt.codeSent }); setCaptchaToken(""); setMode("reset"); }
       else if (data?.error === "email_failed") setMsg({ type: "err", text: isAr ? "تعذّر إرسال الرمز — تأكد أن بريد المالك مسجّل كمستخدم في التطبيق، ثم أعد المحاولة." : "Could not send the code — ensure the owner email is a registered app user, then retry." });
       else setMsg({ type: "err", text: t.gFail });
     } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); }
@@ -174,9 +174,10 @@ export default function OwnerPortal() {
     e.preventDefault();
     if (newPw.length < 6) { setMsg({ type: "err", text: pt.weakPw }); return; }
     if (newPw !== newPw2) { setMsg({ type: "err", text: pt.mismatch }); return; }
+    if (!captchaToken) { setMsg({ type: "err", text: t.gCaptcha }); return; }
     setSigningIn(true); setMsg({ type: "", text: "" });
     try {
-      const res = await base44.functions.invoke("ownerResetPassword", { reset_code: rCode.trim(), new_password: newPw });
+      const res = await base44.functions.invoke("ownerResetPassword", { reset_code: rCode.trim(), new_password: newPw, captcha_token: captchaToken });
       const data = res?.data || res;
       if (data?.ok) { setMsg({ type: "ok", text: pt.resetOk }); setMode("login"); setRCode(""); setNewPw(""); setNewPw2(""); setPassword(""); }
       else setMsg({ type: "err", text: data?.error === "expired_code" ? pt.codeExpired : pt.codeInvalid });
@@ -299,10 +300,11 @@ export default function OwnerPortal() {
                   <Label>{pt.confirmPwLabel}</Label>
                   <Input type="password" value={newPw2} onChange={(e) => setNewPw2(e.target.value)} required disabled={signingIn} dir="ltr" />
                 </div>
+                <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
                 {msg.text && (
                   <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
                 )}
-                <Button type="submit" disabled={signingIn} className="gap-2 w-full">
+                <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2 w-full">
                   {signingIn ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />} {pt.resetBtn}
                 </Button>
                 <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>

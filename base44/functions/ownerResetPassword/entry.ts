@@ -1,6 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { hashPassword } from "../../shared/ownerAuth.ts";
-import { createRateLimiter } from "../../shared/turnstile.ts";
+import { createRateLimiter, verifyTurnstile } from "../../shared/turnstile.ts";
 
 // تعيين كلمة مرور جديدة للمالك: يتحقق من رمز الاستعادة (غير منتهٍ) مع تقييد المعدّل
 // وقفل بعد عدد محاولات فاشل، ثم يخزّن تجزئة كلمة المرور الجديدة ويمسح الرمز والمحاولات.
@@ -19,6 +19,11 @@ export default async function (req) {
     const newPass = String(body.new_password || "");
     if (!code || !newPass || newPass.length < 6)
       return Response.json({ ok: false, error: "invalid" }, { status: 400 });
+
+    // كابتشا إلزامي — منع التخمين الآلي لرمز الاستعادة
+    const captchaToken = String(body.captcha_token || "");
+    if (!(await verifyTurnstile(captchaToken)))
+      return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
 
     const creds = await base44.asServiceRole.entities.OwnerCredential.list("-created_date", 1);
     const cred = creds?.[0] || null;
