@@ -10,7 +10,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import { ClipboardCheck, Check, X, Loader2, Search, Download, RefreshCw, Wallet, Plane } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, safeHref } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, todayISO } from "@/lib/hr";
 import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
 import { getEmployeeAnnualDays } from "@/lib/leaveBalance";
@@ -453,8 +453,8 @@ export default function Approvals() {
                     {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
                     {r.ticket_amount > 0 && <span className="text-xs text-muted-foreground">{t.ticket(r.ticket_amount)}</span>}
                     {r.balance_deducted > 0 && <span className="text-xs text-muted-foreground">{t.deduct(r.balance_deducted)}</span>}
-                    {r.hr_document_url && <a href={r.hr_document_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">تذاكر الموارد البشرية</a>}
-                    {r.finance_proof_url && <a href={r.finance_proof_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">إثبات المالية</a>}
+                    {r.hr_document_url && <a href={safeHref(r.hr_document_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">تذاكر الموارد البشرية</a>}
+                    {r.finance_proof_url && <a href={safeHref(r.finance_proof_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">إثبات المالية</a>}
                   </RequestCard>
                 ))}
               </div>
@@ -489,8 +489,8 @@ export default function Approvals() {
                       kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 flex items-center gap-1"><Plane size={11} /> {r.trip_type === "external" ? t.tripExt : t.tripInt}</span>}
                       extra={<div className="text-xs text-muted-foreground mt-1">{t.tripLine(r.destination, r.purpose)} · {t.days(r.start_date, r.end_date, r.days_count)}</div>}>
                       {r.total_cost > 0 && <span className="text-xs text-muted-foreground">{t.tripCost(r.total_cost)}</span>}
-                      {r.employee_document_url && <a href={r.employee_document_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">مرفق الموظف</a>}
-                      {r.hr_document_url && <a href={r.hr_document_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">مرفق المالية</a>}
+                      {r.employee_document_url && <a href={safeHref(r.employee_document_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">مرفق الموظف</a>}
+                      {r.hr_document_url && <a href={safeHref(r.hr_document_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">مرفق المالية</a>}
                     </RequestCard>
                   );
                 })}
@@ -600,7 +600,7 @@ export default function Approvals() {
           {acting && (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">{leaveTypeLabel(acting.req.leave_type)} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}</div>
-              {acting.req.medical_report_url && <a href={acting.req.medical_report_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
+              {acting.req.medical_report_url && <a href={safeHref(acting.req.medical_report_url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
               {(() => {
                 const emp = empOf(acting.req.employee_id);
                 const annual = getEmployeeAnnualDays(emp, org);

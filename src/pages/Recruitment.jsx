@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import JobFormDialog from "@/components/recruitment/JobFormDialog";
 import ApplicantsDialog from "@/components/recruitment/ApplicantsDialog";
 import TrialEvaluationDialog from "@/components/recruitment/TrialEvaluationDialog";
+import { safeHref } from "@/lib/utils";
 import ShareJobDialog from "@/components/recruitment/ShareJobDialog";
 
 const plus90 = (d) => d ? new Date(new Date(d).getTime() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10) : "";
@@ -116,7 +117,7 @@ export default function Recruitment() {
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <Button size="sm" variant="outline" onClick={() => openHiredEval(a)}><ClipboardList size={14} /> التقييم</Button>
-                          {a.appointment_doc_url && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-emerald-700 underline"><FileCheck size={13} /> قرار التعيين</a>}
+                          {a.appointment_doc_url && <a href={safeHref(a.appointment_doc_url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-emerald-700 underline"><FileCheck size={13} /> قرار التعيين</a>}
                         </div>
                       </td>
                     </tr>
