@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { verifyProof } from '../../shared/contractProof.ts';
+import { createRateLimiter } from '../../shared/turnstile.ts';
+
+const limiter = createRateLimiter(10 * 60 * 1000, 15);
 
 // يحفظ نسخة من عقد الاشتراك المُولّد لدى بيانات العميل في بوابة المالك — قابلة للتحميل PDF.
 // مساران مقبولان:
@@ -12,6 +15,8 @@ const ALLOWED_HOSTS = ['media.base44.com', 'static.wixstatic.com'];
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
+    const ip = limiter.clientIp(req);
+    if (limiter.rateLimited(ip)) return Response.json({ error: 'rate_limited' }, { status: 429 });
     const body = await req.json().catch(() => ({}));
     const file_url = String(body.file_url || '').trim();
     const quoteNo = String(body.quoteNo || '').trim();
