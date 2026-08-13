@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Image } from "@/components/ui/image";
 import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Mail, ShieldCheck, AlertTriangle } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
+import { renderToPdfBlob } from "@/lib/pdfDocs";
+import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
+import { FileSignature, Download } from "lucide-react";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -106,6 +109,8 @@ export default function Quote() {
   const [registered, setRegistered] = useState(!!incoming);
   const [copied, setCopied] = useState(false);
   const [discount, setDiscount] = useState(null);
+  const [owner, setOwner] = useState(null);
+  const [contractBusy, setContractBusy] = useState(false);
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
   const matchedTier = company?.employee_count ? tierForCount(company.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
@@ -115,6 +120,20 @@ export default function Quote() {
       base44.functions.invoke("createTrial", incoming).then(() => setRegistered(true)).catch(() => {});
     }
   }, []);
+
+  useEffect(() => {
+    base44.functions.invoke("getOwnerContractProfile").then((r) => setOwner((r?.data) || r || null)).catch(() => {});
+  }, []);
+
+  const openContract = async () => {
+    setContractBusy(true);
+    try {
+      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={company || form} owner={owner || undefined} quoteNo={quoteNo} date={quoteDate} />);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (_) {
+    } finally { setContractBusy(false); }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -202,6 +221,9 @@ export default function Quote() {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">{t.barBack}</Link>
+            <Button onClick={openContract} disabled={contractBusy} variant="outline" className="gap-2">
+              {contractBusy ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />} {isAr ? "العقد الرسمي" : "Official Contract"}
+            </Button>
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
           </div>
         </div>
@@ -323,6 +345,9 @@ export default function Quote() {
           </div>
 
           <div className="no-print mt-8 flex items-center justify-center gap-3">
+            <Button onClick={openContract} disabled={contractBusy} variant="outline" className="gap-2">
+              {contractBusy ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />} {isAr ? "تنزيل العقد الرسمي (PDF)" : "Download Official Contract"}
+            </Button>
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
             <Link to={`/login?returnTo=/app`} className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
               {isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform"}
