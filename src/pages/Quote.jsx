@@ -109,7 +109,6 @@ export default function Quote() {
   const [registered, setRegistered] = useState(!!incoming);
   const [copied, setCopied] = useState(false);
   const [discount, setDiscount] = useState(null);
-  const [owner, setOwner] = useState(null);
   const [tenantId, setTenantId] = useState(null);
   const [contractProof, setContractProof] = useState(null);
   const [contractBusy, setContractBusy] = useState(false);
@@ -123,14 +122,10 @@ export default function Quote() {
     }
   }, []);
 
-  useEffect(() => {
-    base44.functions.invoke("getOwnerContractProfile").then((r) => setOwner((r?.data) || r || null)).catch(() => {});
-  }, []);
-
   const openContract = async () => {
     setContractBusy(true);
     try {
-      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={company || form} owner={owner || undefined} quoteNo={quoteNo} date={quoteDate} />);
+      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={company || form} quoteNo={quoteNo} date={quoteDate} />);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       // احتفظ بنسخة تلقائية عند بيانات العميل في بوابة المالك (قابلة للتحميل PDF لاحقاً)
