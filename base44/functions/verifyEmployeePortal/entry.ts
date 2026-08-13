@@ -44,24 +44,27 @@ export default async function (req) {
     const isApprover = !!(emp.is_approver_manager || emp.is_approver_finance || emp.is_approver_hr);
     const email = String(emp.email || "").trim();
 
-    // معتمدو الصلاحيات — عامل ثانٍ (OTP بالبريد المسجّل) إن أمكن إيصاله فقط
-    if (isApprover && email) {
+    // معتمدو الصلاحيات — عامل ثانٍ (OTP بالبريد المسجّل) إلزامي؛ لا يُخفّض لعامل واحد أبداً
+    if (isApprover) {
+      if (!email)
+        return Response.json({ ok: false, error: "otp_unavailable" }, { status: 400 });
       if (!otp) {
         const code = generateResetCode();
         await base44.asServiceRole.entities.Employee.update(emp.id, {
           login_otp: code, login_otp_expires_at: Date.now() + OTP_TTL_MS, login_otp_attempts: 0,
         });
-        let sent = false;
         try {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: email,
             subject: "رمز الدخول إلى بوابة الموظف — جدارة",
             body: `رمز التحقق الخاص بك للدخول إلى بوابة الموظف هو: ${code}\nالرمز صالح لمدة 10 دقائق.\nإن لم تطلب الدخول فتجاهل هذه الرسالة.`,
           });
-          sent = true;
-        } catch {}
-        if (sent) return Response.json({ ok: false, error: "otp_required" }, { status: 200 });
-        // تعذّر الإيصال (بريد غير مسجّل مثلاً) — لا يقدر المهاجم إجبار ذلك؛ نكمل دون قفل
+        } catch {
+          // تعذّر إيصال OTP (بريد غير مسجّل كمستخدم مثلاً) — لا نُصدر جلسة دون العامل الثاني
+          await base44.asServiceRole.entities.Employee.update(emp.id, { login_otp: "", login_otp_expires_at: 0 });
+          return Response.json({ ok: false, error: "otp_unavailable" }, { status: 400 });
+        }
+        return Response.json({ ok: false, error: "otp_required" }, { status: 200 });
       } else {
         const att = Number(emp.login_otp_attempts) || 0;
         if (att >= OTP_MAX_ATTEMPTS) {
