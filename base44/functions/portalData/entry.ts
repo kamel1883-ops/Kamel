@@ -29,7 +29,9 @@ export default async function (req) {
       ? { id: "owner", full_name: Deno.env.get("OWNER_FULL_NAME") || "مالك النظام", employee_number: "", position: "المالك", department: "الإدارة", role_level: "owner", user_id: null }
       : await base44.asServiceRole.entities.Employee.get(employeeId);
     const empLabel = isOwnerSession ? "مالك النظام" : `${emp.employee_number} - ${emp.position}`;
-    const isOwner = (emp.role_level || "employee") === "owner";
+    // سلطة المالك مرتبطة بجلسة المالك فقط (employeeId === "owner"، Via verifyOwnerLogin) —
+    // لا تُشتق من Employee.role_level القابل للتعديل لمنع التصعيد.
+    const isOwner = isOwnerSession;
 
     if (action === "fetch") {
       const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements] = await Promise.all([

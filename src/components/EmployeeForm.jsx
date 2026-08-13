@@ -138,7 +138,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
             <Field label={t.roleLevel}>
               <Select value={form.role_level || "employee"} onValueChange={(v) => set("role_level", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{ROLE_ORDER.map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[isAr ? "ar" : "en"][r]}</SelectItem>)}</SelectContent>
+                <SelectContent>{ROLE_ORDER.filter((r) => r !== "owner").map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[isAr ? "ar" : "en"][r]}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>

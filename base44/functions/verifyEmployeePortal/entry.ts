@@ -44,8 +44,12 @@ export default async function (req) {
     const isApprover = !!(emp.is_approver_manager || emp.is_approver_finance || emp.is_approver_hr);
     const email = String(emp.email || "").trim();
 
-    // معتمدو الصلاحيات — عامل ثانٍ (OTP بالبريد المسجّل) إلزامي؛ لا يُخفّض لعامل واحد أبداً
-    if (isApprover) {
+    // منع دخول سجل مُعَدّ كـ "owner" عبر بوابة الموظف — المالك يدخل بوابة المالك فقط
+    if ((emp.role_level || "") === "owner")
+      return Response.json({ ok: false, error: "owner_use_owner_portal" }, { status: 403 });
+
+    // عامل ثانٍ (OTP بالبريد المسجّل) إلزامي لكل مستخدمي البوابة — لا يُخفّض لعامل واحد أبداً
+    {
       if (!email)
         return Response.json({ ok: false, error: "otp_unavailable" }, { status: 400 });
       if (!otp) {

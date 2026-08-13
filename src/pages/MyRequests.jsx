@@ -163,6 +163,8 @@ export default function MyRequests() {
         setSignInMsg({ type: "err", text: isAr ? "رمز التحقق غير صحيح" : "Invalid code" });
       } else if (data?.error === "otp_locked") {
         setSignInMsg({ type: "err", text: isAr ? "تجاوزت المحاولات — أعد طلب الرمز" : "Too many attempts — request a new code" });
+      } else if (data?.error === "otp_unavailable") {
+        setSignInMsg({ type: "err", text: isAr ? "لم يُربط بريد إلكتروني صالح بحسابك — تواصل مع الموارد البشرية" : "No valid email linked to your account — contact HR" });
       } else {
         setSignInMsg({
           type: "err",

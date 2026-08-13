@@ -29,7 +29,8 @@ function boolSaudi(v) {
 const lower = (s) => String(s ?? '').trim().toLowerCase();
 const GENDER = { 'ذكر':'male','male':'male','m':'male','أنثى':'female','انثى':'female','female':'female','f':'female' };
 const CONTRACT = { 'دوام كامل':'full_time','full_time':'full_time','full':'full_time','كامل':'full_time','جزئي':'part_time','part_time':'part_time','part':'part_time','عقد':'contract','contract':'contract' };
-const ROLE = { 'owner':'owner','مالك':'owner','executive':'executive','تنفيذي':'executive','manager':'manager','مدير':'manager','supervisor':'supervisor','مشرف':'supervisor','employee':'employee','موظف':'employee','worker':'worker','عامل':'worker' };
+// لا يُسمح بتعيين "owner" عبر الاستيراد — المالك ليس موظف ويُدار ببوابة مستقلة
+const ROLE = { 'executive':'executive','تنفيذي':'executive','manager':'manager','مدير':'manager','supervisor':'supervisor','مشرف':'supervisor','employee':'employee','موظف':'employee','worker':'worker','عامل':'worker' };
 
 function monthDiff(fromISO, toISO) {
   if (!fromISO) return 0;

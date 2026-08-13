@@ -4,6 +4,7 @@ import { verifyTurnstile } from "../../shared/turnstile.ts";
 import { tierForCount } from "../../shared/pricing.ts";
 import { signProof } from "../../shared/contractProof.ts";
 import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
+import { escapeHtml } from "../../shared/escapeHtml.ts";
 
 export default async function (req) {
   try {
@@ -85,23 +86,24 @@ export default async function (req) {
     const officialEmail = 'info@jadara-hr.com';
     const isQuote = String(body.lead_source || 'trial').trim() === 'quote';
     try {
+      const esc = (v) => escapeHtml(v || '-');
       let emailBody =
         (isQuote
           ? 'عميل جديد طلب عرض سعر عبر الموقع:\n\n'
           : 'عميل جديد سجّل الفترة التجريبية عبر الموقع:\n\n') +
-        'المنشأة: ' + name + '\n' +
-        'القطاع: ' + (body.industry || '-') + '\n' +
-        'جهة الاتصال: ' + (body.contact_name || '-') + '\n' +
-        'البريد: ' + email + '\n' +
-        'الهاتف: ' + phone + '\n' +
-        'الرقم الوطني الموحّد للمنشآت: ' + unified + '\n' +
-        'المدينة: ' + (body.city || '-') + '\n' +
+        'المنشأة: ' + escapeHtml(name) + '\n' +
+        'القطاع: ' + esc(body.industry) + '\n' +
+        'جهة الاتصال: ' + esc(body.contact_name) + '\n' +
+        'البريد: ' + escapeHtml(email) + '\n' +
+        'الهاتف: ' + escapeHtml(phone) + '\n' +
+        'الرقم الوطني الموحّد للمنشآت: ' + escapeHtml(unified) + '\n' +
+        'المدينة: ' + esc(body.city) + '\n' +
         'عدد الموظفين: ' + employeeCount + '\n' +
-        'الشريحة: ' + pricingTier + '\n' +
+        'الشريحة: ' + escapeHtml(pricingTier) + '\n' +
         'السعر السنوي للباقة: ' + basePrice + ' ر.س\n\n' +
         'تنتهي التجربة في: ' + trialEnd.toISOString().slice(0, 10) + '\n' +
-        'السجل التجاري: ' + (body.commercial_register || '-') + '\n' +
-        'الرقم الضريبي: ' + (body.vat_number || '-') + '\n';
+        'السجل التجاري: ' + esc(body.commercial_register) + '\n' +
+        'الرقم الضريبي: ' + esc(body.vat_number) + '\n';
       if (discount_percent > 0) {
         emailBody +=
           'كود الخصم: ' + discount_code + ' — نسبة الخصم: ' + discount_percent + '%\n' +

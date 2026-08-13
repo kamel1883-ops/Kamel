@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { verifyTurnstile, createRateLimiter } from '../../shared/turnstile.ts';
+import { escapeHtml } from '../../shared/escapeHtml.ts';
 
 const limiter = createRateLimiter(10 * 60 * 1000, 5); // 5 رسائل / 10 دقائق لكل IP
 
@@ -31,14 +32,17 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const officialEmail = 'info@jadara-hr.com';
 
-    const subject = `رسالة جديدة من ${name} عبر موقع جدارة`;
+    const eName = escapeHtml(name);
+    const eEmail = escapeHtml(email);
+    const eMsg = escapeHtml(message);
+    const subject = `رسالة جديدة من ${eName} عبر موقع جدارة`;
     const mailBody = `لقد تلقيت رسالة جديدة عبر نموذج التواصل في موقع جدارة:
 
-الاسم: ${name}
-البريد الإلكتروني: ${email}
+الاسم: ${eName}
+البريد الإلكتروني: ${eEmail}
 
 الرسالة:
-${message}
+${eMsg}
 
 — تم إرسال هذه الرسالة تلقائياً من نموذج صفحة «تواصل معنا».`;
 
