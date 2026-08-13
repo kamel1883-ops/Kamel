@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Image } from "@/components/ui/image";
 import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Mail, ShieldCheck, AlertTriangle } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
-import { renderToPdfBlob } from "@/lib/pdfDocs";
+import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
 import { FileSignature, Download } from "lucide-react";
 
@@ -110,6 +110,7 @@ export default function Quote() {
   const [copied, setCopied] = useState(false);
   const [discount, setDiscount] = useState(null);
   const [owner, setOwner] = useState(null);
+  const [tenantId, setTenantId] = useState(null);
   const [contractBusy, setContractBusy] = useState(false);
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
@@ -117,7 +118,7 @@ export default function Quote() {
 
   useEffect(() => {
     if (incoming && !registered) {
-      base44.functions.invoke("createTrial", incoming).then(() => setRegistered(true)).catch(() => {});
+      base44.functions.invoke("createTrial", incoming).then((res) => { setRegistered(true); setTenantId(res?.tenant_id || null); }).catch(() => {});
     }
   }, []);
 
@@ -131,6 +132,20 @@ export default function Quote() {
       const blob = await renderToPdfBlob(<SubscriptionContractDoc company={company || form} owner={owner || undefined} quoteNo={quoteNo} date={quoteDate} />);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
+      // احتفظ بنسخة تلقائية عند بيانات العميل في بوابة المالك (قابلة للتحميل PDF لاحقاً)
+      try {
+        const file_url = await uploadPdfBlob(blob, `Jadara-Contract-${quoteNo}.pdf`);
+        if (file_url && (tenantId || (form?.unified_number && form?.contact_email) || (company?.unified_number && company?.contact_email))) {
+          await base44.functions.invoke("saveQuoteContract", {
+            tenant_id: tenantId || undefined,
+            unified_number: (company || form)?.unified_number,
+            contact_email: (company || form)?.contact_email,
+            quoteNo,
+            date: quoteDate,
+            file_url,
+          });
+        }
+      } catch (_) { /* لا تكسر فتح العقد إن تعذّر الحفظ */ }
     } catch (_) {
     } finally { setContractBusy(false); }
   };
@@ -147,6 +162,7 @@ export default function Quote() {
       const res = await base44.functions.invoke("createTrial", { ...form, lead_source: "quote", discount_code: form.discount_code?.trim() || undefined });
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
+      setTenantId(res?.tenant_id || null);
       setRegistered(true);
       setCompany(form);
     } catch (error) {

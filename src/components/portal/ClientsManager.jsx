@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Crown, Building2, FlaskConical, FileText, BadgeCheck, Pause, CalendarClock,
   Wallet, Loader2, AlertTriangle, RefreshCw, MessageCircle, Search, Users,
-  Check, Sparkles, Ban, RotateCcw, Eye, Bell,
+  Check, Sparkles, Ban, RotateCcw, Eye, Bell, Download,
 } from "lucide-react";
 import { ClientInfoDialog, waLink, daysLeft, isOwnerTenant } from "./ClientActionDialogs";
 
@@ -33,6 +33,7 @@ export default function ClientsManager({ session }) {
     loading: "جارٍ تحميل البيانات…", fail: "تعذّر تحميل البيانات. أعد المحاولة.", retry: "إعادة المحاولة",
     sent: "تم تنفيذ العملية بنجاح.",
     daysLeft: (n) => `يبقى ${n} يوم`, ended: "انتهت — راجع الحساب", lifetime: "مدى الحياة",
+    contract: "العقد (PDF)",
   } : {
     title: "Clients & Contracts",
     welcome: "Follow up trials & quote requests, receive transfers via WhatsApp, confirm contracts and activate subscriptions.",
@@ -51,6 +52,7 @@ export default function ClientsManager({ session }) {
     loading: "Loading…", fail: "Failed to load. Retry.", retry: "Retry",
     sent: "Done successfully.",
     daysLeft: (n) => `${n} days left`, ended: "Ended — review", lifetime: "Lifetime",
+    contract: "Contract PDF",
   };
 
   const [data, setData] = useState(null);
@@ -291,6 +293,12 @@ export default function ClientsManager({ session }) {
                               <a href={waLink(x, isAr)} target="_blank" rel="noreferrer"
                                 className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">
                                 <MessageCircle size={13} /> {t.wa}
+                              </a>
+                            )}
+                            {x.contract_pdf_url && (
+                              <a href={x.contract_pdf_url} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100">
+                                <Download size={13} /> {t.contract}
                               </a>
                             )}
                             <Button size="sm" variant="outline" onClick={() => setInfo(x)} className="gap-1.5 h-8">

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical } from "lucide-react";
+import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download } from "lucide-react";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -211,6 +211,12 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
         <div className="no-print flex items-center justify-between gap-3 p-4 border-b border-border bg-white">
           <div className="flex items-center gap-2 font-semibold">{isAr ? "بيانات العميل" : "Client info"} — {tenant.name}</div>
           <div className="flex items-center gap-2">
+            {tenant.contract_pdf_url && (
+              <a href={tenant.contract_pdf_url} target="_blank" rel="noreferrer" download
+                 className="inline-flex items-center gap-1.5 text-sm h-9 px-3 rounded-md border border-input bg-transparent hover:bg-accent text-violet-700">
+                <Download size={14} /> {isAr ? "تنزيل العقد (PDF)" : "Download Contract"}
+              </a>
+            )}
             <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1.5"><Printer size={14} /> {isAr ? "طباعة PDF" : "Print PDF"}</Button>
             <Button size="sm" variant="ghost" onClick={onClose} className="h-9 w-9 p-0"><X size={16} /></Button>
           </div>
