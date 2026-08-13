@@ -49,8 +49,8 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
       {/* الأطراف */}
       <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 18px", marginBottom: 18 }}>
         <div style={{ marginBottom: 10 }}>
-          <b>الطرف الأول:</b> مؤسسة «جدارة» لإدارة الموارد البشرية، ويمثلها الأستاذ/ة <b>{owner?.full_name || "—"}</b>
-          {owner?.national_id ? <span>، يحمل هوية وطنية رقم <b style={{ fontFamily: "ui-monospace, monospace" }}>{owner.national_id}</b></span> : null}. ويُشار إليه فيما يلي بـ«الطرف الأول» أو «جدارة».
+          <b>الطرف الأول:</b> منصة «جدارة» لإدارة الموارد البشرية، ويمثلها الأستاذ/ة <b>{owner?.full_name || "—"}</b>
+          {owner?.national_id ? <span>، يحمل إقامة رقم <b style={{ fontFamily: "ui-monospace, monospace" }}>{owner.national_id}</b></span> : null}. ويُشار إليه فيما يلي بـ«الطرف الأول» أو «جدارة».
         </div>
         <div>
           <b>الطرف الثاني:</b> منشأة <b>{company?.name || "—"}</b>
@@ -109,8 +109,8 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
           </div>
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, lineHeight: 1.9 }}>
             <div><b>الاسم:</b> {owner?.full_name || "—"}</div>
-            {owner?.national_id ? <div><b>الهوية الوطنية:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{owner.national_id}</span></div> : null}
-            <div><b>الممثّل النظامي لمؤسسة جدارة</b></div>
+            {owner?.national_id ? <div><b>الإقامة:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{owner.national_id}</span></div> : null}
+            <div><b>الممثّل النظامي لمنصة جدارة</b></div>
             <div><b>التاريخ:</b> {fmt(cDate)}</div>
           </div>
         </div>
