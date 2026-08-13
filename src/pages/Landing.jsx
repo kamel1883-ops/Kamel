@@ -274,11 +274,11 @@ export default function Landing() {
 
       {/* شريط علوي */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-14 h-20 flex items-center justify-between">
           <Link to="/">
-            <Logo tone="light" size={44} />
+            <Logo tone="light" size={56} />
           </Link>
-          <nav className="hidden md:flex items-center gap-7 text-sm text-white/70">
+          <nav className="hidden md:flex items-center gap-8 text-base text-white/75">
             <button onClick={() => scrollTo("features")} className="hover:text-white transition">{t.nav.features}</button>
             <button onClick={() => scrollTo("licenses")} className="hover:text-white transition">{t.nav.licenses}</button>
             <button onClick={() => scrollTo("integrations")} className="hover:text-white transition">{t.nav.integrations}</button>
@@ -288,15 +288,15 @@ export default function Landing() {
           </nav>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/portal" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
-            <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.login}</Link>
-            <button onClick={() => scrollTo("trial")} className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition">{t.start}</button>
+            <Link to="/portal" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
+            <Link to="/company-login" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.login}</Link>
+            <button onClick={() => scrollTo("trial")} className="text-base bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-violet-500/30 transition">{t.start}</button>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="max-w-7xl mx-auto px-5 pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
         <motion.div initial="hidden" animate="show" variants={fadeUp}>
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-5">
             <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
@@ -327,7 +327,7 @@ export default function Landing() {
       </section>
 
       {/* بوابة الموظف + شبكة الخدمات بمحاذاتها */}
-      <section className="max-w-7xl mx-auto px-5 py-8 grid lg:grid-cols-12 gap-6 items-start">
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-14 py-8 grid lg:grid-cols-12 gap-6 items-start">
         {/* بوابة الموظف الذاتية */}
         <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-blue-600/20 p-8 sm:p-10">
           <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
@@ -372,7 +372,7 @@ export default function Landing() {
       <ClientMarquee />
 
       {/* الرؤية والرسالة والأهداف */}
-      <section id="vmv" className="max-w-6xl mx-auto px-5 py-14">
+      <section id="vmv" className="max-w-[1600px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.vmvTag} title={t.vmvTitle} />
         <div className="grid md:grid-cols-3 gap-5 mt-10">
           {[
@@ -397,7 +397,7 @@ export default function Landing() {
       </section>
 
       {/* المميزات */}
-      <section id="features" className="max-w-7xl mx-auto px-5 py-14">
+      <section id="features" className="max-w-[1600px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.featuresTag} title={t.featuresTitle} />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
           {features.map((f) => {
@@ -418,7 +418,7 @@ export default function Landing() {
       </section>
 
       {/* التراخيص الحكومية */}
-      <section id="licenses" className="max-w-7xl mx-auto px-5 py-14">
+      <section id="licenses" className="max-w-[1600px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.licensesTag} title={t.licensesTitle} />
         <div className="grid lg:grid-cols-3 gap-6 mt-10 items-start">
           <div className="lg:col-span-2 grid sm:grid-cols-2 gap-3">
@@ -436,7 +436,7 @@ export default function Landing() {
       </section>
 
       {/* التكاملات */}
-      <section id="integrations" className="max-w-7xl mx-auto px-5 py-14">
+      <section id="integrations" className="max-w-[1600px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.integTag} title={t.integTitle} />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-10">
           {integrations.map((it) => {
@@ -458,7 +458,7 @@ export default function Landing() {
       </section>
 
       {/* عن المؤسس */}
-      <section id="about" className="max-w-5xl mx-auto px-5 py-14">
+      <section id="about" className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.aboutTag} title={t.aboutTitle} />
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
           className="bg-gradient-to-br from-white/8 to-white/5 border border-white/10 rounded-3xl p-8 mt-8 grid sm:grid-cols-[auto,1fr] gap-7 items-start">
@@ -488,7 +488,7 @@ export default function Landing() {
       </section>
 
       {/* الباقات */}
-      <section id="pricing" className="max-w-5xl mx-auto px-5 py-14">
+      <section id="pricing" className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 bg-sky-400/15 border border-sky-400/25 text-sky-200 rounded-full px-3 py-1 text-xs">{isAr ? "نظام تسعير سنوي / مرن" : "Annual / Flexible pricing system"}</div>
           <h2 className="text-2xl sm:text-3xl font-extrabold mt-4" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "دليل هيكلة واحتساب خطة الأسعار الشرائحية العادلة" : "Fair Tiered Pricing Plan — Structure & Calculation"}</h2>
@@ -530,7 +530,7 @@ export default function Landing() {
       </section>
 
       {/* تجربة / تسجيل */}
-      <section id="trial" className="max-w-3xl mx-auto px-5 py-14">
+      <section id="trial" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.trialTag} title={t.trialTitle} />
         {done ? (
           <div className="bg-white/5 border border-emerald-400/30 rounded-3xl p-10 text-center mt-8">
@@ -569,7 +569,7 @@ export default function Landing() {
       </section>
 
       {/* شارك جدارة */}
-      <section id="share" className="max-w-3xl mx-auto px-5 py-12 text-center">
+      <section id="share" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-12 text-center">
         <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-3" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
         <p className="text-white/60 mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
@@ -577,7 +577,7 @@ export default function Landing() {
       </section>
 
       {/* تواصل */}
-      <section id="contact" className="max-w-5xl mx-auto px-5 py-14">
+      <section id="contact" className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.contactTag} title={t.contactTitle} />
         <div className="grid sm:grid-cols-3 gap-5 mt-8">
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-400/20 rounded-3xl p-6 text-center transition group">
@@ -600,9 +600,9 @@ export default function Landing() {
 
       {/* التذييل */}
       <footer className="border-t border-white/10 mt-10">
-        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm text-white/60">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-14 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-base text-white/70">
           <div>
-            <div className="mb-2"><Logo tone="light" size={36} /></div>
+            <div className="mb-2"><Logo tone="light" size={48} /></div>
             <p>{t.footerDesc}</p>
             <div className="flex items-center gap-2 mt-4">
               <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"
@@ -637,7 +637,7 @@ export default function Landing() {
             <Link to="/company-login?returnTo=/app" className="block hover:text-white">{t.login}</Link>
           </div>
         </div>
-        <div className="text-center text-white/40 text-xs pb-6">{t.copy}</div>
+        <div className="text-center text-white/50 text-sm pb-6">{t.copy}</div>
       </footer>
 
     </div>

@@ -173,17 +173,17 @@ export default function AssistantAvatar({ mode = "public", session = null, tone 
       {/* علامة المساعد — شخصية سعودية في أعلى الصفحة */}
       <button
         onClick={() => setOpen(true)}
-        className={"fixed top-20 left-4 z-40 group flex flex-col items-center gap-1 transition active:scale-95"}
+        className={"fixed top-24 left-5 z-40 group flex flex-col items-center gap-1.5 transition active:scale-95"}
         title={ui.btnTitle}
         aria-label={ui.btnTitle}
       >
-        <span className={"relative flex h-14 w-14 rounded-full overflow-hidden bg-slate-200 " + btnRing}>
+        <span className={"relative flex h-20 w-20 rounded-full overflow-hidden bg-slate-200 " + btnRing}>
           <Image src={AVATAR_URL} fittingType="fill" className="h-full w-full object-cover" />
-          <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center">
-            <span className="h-2 w-2 rounded-full bg-white" />
+          <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center">
+            <span className="h-2.5 w-2.5 rounded-full bg-white" />
           </span>
         </span>
-        <span className={"text-[10px] font-medium px-1.5 rounded-full " + (ringOnLight ? "bg-amber-50/90 text-amber-700" : "bg-white/90 text-violet-700")}>{ui.label}</span>
+        <span className={"text-xs font-semibold px-2 rounded-full " + (ringOnLight ? "bg-amber-50/90 text-amber-700" : "bg-white/90 text-violet-700")}>{ui.label}</span>
       </button>
 
       {open && (
