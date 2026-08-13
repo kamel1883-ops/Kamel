@@ -47,11 +47,48 @@ export default function Blog() {
   }, [cat]);
 
   useEffect(() => {
-    document.title = isAr ? "مدونة الموارد البشرية والقانون العمالي السعودي | جدارة" : "Saudi HR & Labor Law Blog | Jadara";
-    setMeta("description", isAr
-      ? "مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت في السعودية — حماية الأجور (مدد)، نهاية الخدمة، الإجازات، السعودة، والامتثال لنظام العمل السعودي."
-      : "Practical articles for HR managers and business owners in Saudi Arabia — Wage Protection (Mudad), end of service, leave, Saudization, and Saudi Labor Law compliance.");
-  }, [isAr]);
+    const arDesc = "مدونة جدارة للموارد البشرية والقانون العمالي السعودي 2026 — مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت: حماية الأجور (مدد/WPS)، نهاية الخدمة، الإجازات، السعودة ونطاقات، التأمينات الاجتماعية (GOSI)، ودعم المنشآت (هدف/Hadaf)، والعقود واللوائح، والامتثال لنظام العمل السعودي.";
+    const enDesc = "Jadara blog on Saudi HR and labor law (2026): practical guides for HR managers and business owners — Wage Protection (Mudad/WPS), end of service, leave, Saudization (Nitaqat), GOSI, HRDF (Hadaf) subsidies, contracts, and Saudi Labor Law compliance.";
+    const arKeywords = "مدونة الموارد البشرية, القانون العمالي السعودي, نظام العمل السعودي, حماية الأجور, مدد, WPS, نهاية الخدمة, السعودة, نطاقات, التأمينات الاجتماعية, جوسي, GOSI, هدف, هدف, إدارة الموارد البشرية, الإجازات, الرواتب, العقود واللوائح, الامتثال, HR Saudi Arabia, Saudi labor law, HR blog, جدارة";
+    const enKeywords = "Saudi HR blog, Saudi labor law blog, HR Saudi Arabia, WPS, Mudad, end of service Saudi, Saudization, Nitaqat, GOSI Saudi, HRDF, Hadaf, HR compliance KSA, Jadara blog, HR articles Saudi Arabia, Saudi payroll";
+    const url = "https://jadara-hr.com/blog";
+    const img = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png";
+
+    document.title = isAr ? "مدونة الموارد البشرية والقانون العمالي السعودي 2026 | جدارة" : "Saudi HR & Labor Law Blog 2026 | Jadara";
+    setMeta("description", isAr ? arDesc : enDesc);
+    setMeta("keywords", isAr ? arKeywords : enKeywords);
+    setMeta("robots", "index, follow, max-image-preview:large");
+    setMeta("author", "جدارة لإدارة الموارد البشرية");
+    setProp("og:title", document.title);
+    setProp("og:description", isAr ? arDesc : enDesc);
+    setProp("og:type", "website");
+    setProp("og:locale", isAr ? "ar_SA" : "en_US");
+    setProp("og:site_name", "جدارة");
+    setProp("og:url", url);
+    setProp("og:image", img);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", document.title);
+    setMeta("twitter:description", isAr ? arDesc : enDesc);
+    setMeta("twitter:image", img);
+    setLink("canonical", url);
+    setJsonLd("blog-schema", {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      name: isAr ? "مدونة جدارة للموارد البشرية" : "Jadara HR Blog",
+      description: isAr ? arDesc : enDesc,
+      url,
+      inLanguage: isAr ? "ar-SA" : "en-US",
+      publisher: { "@type": "Organization", name: "جدارة", logo: { "@type": "ImageObject", url: img } },
+      blogPost: articles.slice(0, 12).map((a) => ({
+        "@type": "BlogPosting",
+        headline: a.title,
+        description: a.excerpt || "",
+        datePublished: a.published_date || undefined,
+        author: { "@type": "Organization", name: a.author_name || "جدارة" },
+        url: `https://jadara-hr.com/blog/${a.slug}`,
+      })),
+    });
+  }, [isAr, articles]);
 
   const cats = isAr ? CAT_AR : CAT_EN;
   const t = isAr ? {
@@ -69,7 +106,7 @@ export default function Blog() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-[#0a0c14] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/25 blur-[120px]" />
         <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
@@ -100,9 +137,9 @@ export default function Blog() {
 
       <section className="max-w-7xl mx-auto px-5 pb-6">
         <div className="flex flex-wrap justify-center gap-2">
-          <button onClick={() => setCat(null)} className={`text-sm px-4 py-2 rounded-full border transition ${!cat ? "bg-violet-500/20 border-violet-400/40 text-white" : "bg-white/5 border-white/10 text-white/70 hover:text-white"}`}>{t.all}</button>
+          <button onClick={() => setCat(null)} className={`text-sm px-4 py-2 rounded-full border transition ${!cat ? "bg-[#452a7a] text-white border-transparent shadow-lg shadow-violet-900/40" : "bg-[#1a1e2a] text-[#a0a0a0] border-[#2f3342] hover:text-white hover:border-[#452a7a]"}`}>{t.all}</button>
           {Object.entries(cats).map(([k, v]) => (
-            <button key={k} onClick={() => setCat(k)} className={`text-sm px-4 py-2 rounded-full border transition ${cat === k ? "bg-violet-500/20 border-violet-400/40 text-white" : "bg-white/5 border-white/10 text-white/70 hover:text-white"}`}>{v}</button>
+            <button key={k} onClick={() => setCat(k)} className={`text-sm px-4 py-2 rounded-full border transition whitespace-nowrap ${cat === k ? "bg-[#452a7a] text-white border-transparent shadow-lg shadow-violet-900/40" : "bg-[#1a1e2a] text-[#a0a0a0] border-[#2f3342] hover:text-white hover:border-[#452a7a]"}`}>{v}</button>
           ))}
         </div>
       </section>
@@ -181,4 +218,22 @@ function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
   if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
   el.setAttribute("content", content);
+}
+
+function setProp(prop, content) {
+  let el = document.querySelector(`meta[property="${prop}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+
+function setLink(rel, href) {
+  let el = document.querySelector(`link[rel="${rel}"]`);
+  if (!el) { el = document.createElement("link"); el.setAttribute("rel", rel); document.head.appendChild(el); }
+  el.setAttribute("href", href);
+}
+
+function setJsonLd(id, obj) {
+  let el = document.getElementById(id);
+  if (!el) { el = document.createElement("script"); el.id = id; el.setAttribute("type", "application/ld+json"); document.head.appendChild(el); }
+  el.textContent = JSON.stringify(obj);
 }
