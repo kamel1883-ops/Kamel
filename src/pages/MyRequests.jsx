@@ -91,6 +91,8 @@ export default function MyRequests() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [signingIn, setSigningIn] = useState(false);
   const [signInMsg, setSignInMsg] = useState({ type: "", text: "" });
+  const [otpPending, setOtpPending] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
 
   const load = useCallback(async (sess = session) => {
     if (!sess) return;
@@ -153,7 +155,14 @@ export default function MyRequests() {
         };
         portalSession.save(newSession);
         setSession(newSession);
-        setNid(""); setBirth("");
+        setNid(""); setBirth(""); setOtpPending(false); setOtpCode("");
+      } else if (data?.error === "otp_required") {
+        setOtpPending(true);
+        setSignInMsg({ type: "ok", text: isAr ? "أرسلنا رمزاً إلى بريدك الإلكتروني المسجّل." : "We sent a code to your registered email." });
+      } else if (data?.error === "otp_invalid") {
+        setSignInMsg({ type: "err", text: isAr ? "رمز التحقق غير صحيح" : "Invalid code" });
+      } else if (data?.error === "otp_locked") {
+        setSignInMsg({ type: "err", text: isAr ? "تجاوزت المحاولات — أعد طلب الرمز" : "Too many attempts — request a new code" });
       } else {
         setSignInMsg({
           type: "err",
@@ -162,6 +171,39 @@ export default function MyRequests() {
       }
     } catch (err) {
       setSignInMsg({ type: "err", text: err?.response?.data?.error || err?.message || t.gFail });
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const handleOtp = async (e) => {
+    e.preventDefault();
+    if (!otpCode) return;
+    setSigningIn(true); setSignInMsg({ type: "", text: "" });
+    try {
+      const res = await base44.functions.invoke("verifyEmployeePortal", {
+        national_id: nid.trim(), birth_date: birth.trim(), otp: otpCode.trim(),
+      });
+      const data = res?.data || res;
+      if (data?.ok) {
+        const newSession = {
+          token: data.token, employee_id: data.employee.id,
+          employee: data.employee, org: data.org, expires_at: data.expires_at,
+        };
+        portalSession.save(newSession);
+        setSession(newSession);
+        setNid(""); setBirth(""); setOtpPending(false); setOtpCode("");
+      } else if (data?.error === "otp_invalid") {
+        setSignInMsg({ type: "err", text: isAr ? "رمز التحقق غير صحيح" : "Invalid code" });
+      } else if (data?.error === "otp_expired") {
+        setSignInMsg({ type: "err", text: isAr ? "انتهت صلاحية الرمز — أعد طلبه" : "Code expired — request a new one" });
+      } else if (data?.error === "otp_locked") {
+        setSignInMsg({ type: "err", text: isAr ? "تجاوزت المحاولات — أعد طلب الرمز" : "Too many attempts" });
+      } else {
+        setSignInMsg({ type: "err", text: data?.error || t.gFail });
+      }
+    } catch (err) {
+      setSignInMsg({ type: "err", text: err?.message || t.gFail });
     } finally {
       setSigningIn(false);
     }
@@ -267,6 +309,20 @@ export default function MyRequests() {
               <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
             </div>
             <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
+            {otpPending && (
+              <div className="space-y-1.5">
+                <Label>{isAr ? "رمز التحقق (6 أرقام)" : "Verification code (6 digits)"}</Label>
+                <Input value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} required disabled={signingIn} dir="ltr" inputMode="numeric" />
+                <Button type="button" onClick={handleOtp} disabled={signingIn || otpCode.length < 6} className="w-full gap-2">
+                  {signingIn && <Loader2 size={16} className="animate-spin" />}
+                  {isAr ? "تحقّق والدخول" : "Verify & sign in"}
+                </Button>
+                <button type="button" onClick={() => { setOtpPending(false); setOtpCode(""); setSignInMsg({ type: "", text: "" }); }}
+                  className="text-xs text-primary hover:underline">
+                  {isAr ? "إعادة طلب الرمز / العودة" : "Request a new code / back"}
+                </button>
+              </div>
+            )}
             {signInMsg.text && (
               <div className={cn("text-sm rounded-lg p-3 leading-relaxed", signInMsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
                 {signInMsg.text}

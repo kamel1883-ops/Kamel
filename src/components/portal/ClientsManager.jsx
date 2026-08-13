@@ -34,6 +34,7 @@ export default function ClientsManager({ session }) {
     sent: "تم تنفيذ العملية بنجاح.",
     daysLeft: (n) => `يبقى ${n} يوم`, ended: "انتهت — راجع الحساب", lifetime: "مدى الحياة",
     contract: "العقد (PDF)",
+    approveAdmin: "اعتماد الصلاحية", rejectAdmin: "رفض", pendingAdmin: "بانتظار الاعتماد",
   } : {
     title: "Clients & Contracts",
     welcome: "Follow up trials & quote requests, receive transfers via WhatsApp, confirm contracts and activate subscriptions.",
@@ -53,6 +54,7 @@ export default function ClientsManager({ session }) {
     sent: "Done successfully.",
     daysLeft: (n) => `${n} days left`, ended: "Ended — review", lifetime: "Lifetime",
     contract: "Contract PDF",
+    approveAdmin: "Approve admin", rejectAdmin: "Reject", pendingAdmin: "Pending approval",
   };
 
   const [data, setData] = useState(null);
@@ -273,6 +275,8 @@ export default function ClientsManager({ session }) {
                         <td className="px-4 py-3">
                           {owner ? (
                             <span className="text-xs text-emerald-700 font-medium inline-flex items-center gap-1"><Check size={13} /> {t.lifetime}</span>
+                          ) : x.admin_status === "pending" ? (
+                            <span className="text-xs text-amber-700 inline-flex items-center gap-1"><AlertTriangle size={12} /> {t.pendingAdmin}</span>
                           ) : x.contract_confirmed ? (
                             <span className="text-xs text-emerald-700 inline-flex items-center gap-1"><BadgeCheck size={13} /> {t.confirmed}</span>
                           ) : (
@@ -300,6 +304,16 @@ export default function ClientsManager({ session }) {
                                 className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100">
                                 <Download size={13} /> {t.contract}
                               </a>
+                            )}
+                            {!owner && x.admin_status === "pending" && x.admin_user_id && (
+                              <Button size="sm" onClick={() => act(x.id, "owner_approve_admin", { approve: true })} disabled={busyId === x.id} className="gap-1.5 h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
+                                <Check size={14} /> {t.approveAdmin}
+                              </Button>
+                            )}
+                            {!owner && x.admin_status === "pending" && x.admin_user_id && (
+                              <Button size="sm" variant="outline" onClick={() => act(x.id, "owner_approve_admin", { approve: false })} disabled={busyId === x.id} className="gap-1.5 h-8">
+                                <Ban size={14} /> {t.rejectAdmin}
+                              </Button>
                             )}
                             <Button size="sm" variant="outline" onClick={() => setInfo(x)} className="gap-1.5 h-8">
                               <Eye size={14} /> {t.view}

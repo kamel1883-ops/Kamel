@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { verifyTurnstile } from "../../shared/turnstile.ts";
 import { tierForCount } from "../../shared/pricing.ts";
+import { signProof } from "../../shared/contractProof.ts";
 import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
 
 export default async function (req) {
@@ -118,7 +119,8 @@ export default async function (req) {
       // رسالة تسجيل الإنشاء لا يجب أن تفشل كل العملية إذا تعطل البريد
     }
 
-    return Response.json({ ok: true, tenant_id: tenant.id, discount_percent, quoted_amount, pricing_tier: pricingTier, employee_count: employeeCount });
+    const contract_proof = await signProof(tenant.id);
+    return Response.json({ ok: true, tenant_id: tenant.id, contract_proof, discount_percent, quoted_amount, pricing_tier: pricingTier, employee_count: employeeCount });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

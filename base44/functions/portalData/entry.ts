@@ -186,6 +186,23 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    if (action === "owner_approve_admin") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      const approve = body.approve !== false;
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const uid = String(t?.admin_user_id || "");
+      if (approve) {
+        if (!uid) return Response.json({ ok: false, error: "no_pending" }, { status: 400 });
+        await base44.asServiceRole.entities.User.update(uid, { role: "admin" });
+        await base44.asServiceRole.entities.Tenant.update(tenant_id, { admin_status: "approved" });
+      } else {
+        await base44.asServiceRole.entities.Tenant.update(tenant_id, { admin_status: "rejected", admin_user_id: "", admin_email: "" });
+      }
+      return Response.json({ ok: true });
+    }
+
     // ====== استبيانات تجربة العميل — إدارة كاملة من بوابة المالك ======
     if (action === "owner_survey_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });

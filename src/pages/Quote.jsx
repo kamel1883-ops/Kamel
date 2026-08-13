@@ -111,6 +111,7 @@ export default function Quote() {
   const [discount, setDiscount] = useState(null);
   const [owner, setOwner] = useState(null);
   const [tenantId, setTenantId] = useState(null);
+  const [contractProof, setContractProof] = useState(null);
   const [contractBusy, setContractBusy] = useState(false);
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
@@ -118,7 +119,7 @@ export default function Quote() {
 
   useEffect(() => {
     if (incoming && !registered) {
-      base44.functions.invoke("createTrial", incoming).then((res) => { setRegistered(true); setTenantId(res?.tenant_id || null); }).catch(() => {});
+      base44.functions.invoke("createTrial", incoming).then((res) => { setRegistered(true); setTenantId(res?.tenant_id || null); setContractProof(res?.contract_proof || null); }).catch(() => {});
     }
   }, []);
 
@@ -135,14 +136,13 @@ export default function Quote() {
       // احتفظ بنسخة تلقائية عند بيانات العميل في بوابة المالك (قابلة للتحميل PDF لاحقاً)
       try {
         const file_url = await uploadPdfBlob(blob, `Jadara-Contract-${quoteNo}.pdf`);
-        if (file_url && (tenantId || (form?.unified_number && form?.contact_email) || (company?.unified_number && company?.contact_email))) {
+        if (file_url && tenantId && contractProof) {
           await base44.functions.invoke("saveQuoteContract", {
-            tenant_id: tenantId || undefined,
-            unified_number: (company || form)?.unified_number,
-            contact_email: (company || form)?.contact_email,
+            tenant_id: tenantId,
             quoteNo,
             date: quoteDate,
             file_url,
+            proof: contractProof,
           });
         }
       } catch (_) { /* لا تكسر فتح العقد إن تعذّر الحفظ */ }
@@ -163,6 +163,7 @@ export default function Quote() {
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setTenantId(res?.tenant_id || null);
+      setContractProof(res?.contract_proof || null);
       setRegistered(true);
       setCompany(form);
     } catch (error) {

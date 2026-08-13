@@ -20,4 +20,8 @@ export async function verifyPassword(password, saltHex, hashHex) {
   return hash === hashHex;
 }
 
-export const generateResetCode = () => String(Math.floor(100000 + Math.random() * 900000));
+export const RESET_CODE_TTL_MS = 10 * 60 * 1000;
+export const generateResetCode = () => {
+  const n = crypto.getRandomValues(new Uint32Array(1))[0];
+  return String(100000 + (n % 900000));
+};

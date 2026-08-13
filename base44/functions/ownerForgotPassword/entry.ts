@@ -1,6 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyTurnstile } from "../../shared/turnstile.ts";
-import { generateResetCode } from "../../shared/ownerAuth.ts";
+import { generateResetCode, RESET_CODE_TTL_MS } from "../../shared/ownerAuth.ts";
 
 // طلب استعادة كلمة مرور المالك: يطابق الإقامة + الميلاد + البريد،
 // ينشئ رمز 6 أرقام صالح 15 دقيقة ويرسله إلى بريد المالك عبر SendEmail.
@@ -26,13 +26,13 @@ export default async function (req) {
       return Response.json({ ok: true, sent: true });
 
     const code = generateResetCode();
-    const expiresAt = Date.now() + 15 * 60 * 1000;
+    const expiresAt = Date.now() + RESET_CODE_TTL_MS;
     const creds = await base44.asServiceRole.entities.OwnerCredential.list("-created_date", 1);
     const cred = creds?.[0] || null;
     if (cred)
-      await base44.asServiceRole.entities.OwnerCredential.update(cred.id, { email, reset_code: code, reset_code_expires_at: expiresAt });
+      await base44.asServiceRole.entities.OwnerCredential.update(cred.id, { email, reset_code: code, reset_code_expires_at: expiresAt, reset_attempts: 0 });
     else
-      await base44.asServiceRole.entities.OwnerCredential.create({ email, reset_code: code, reset_code_expires_at: expiresAt });
+      await base44.asServiceRole.entities.OwnerCredential.create({ email, reset_code: code, reset_code_expires_at: expiresAt, reset_attempts: 0 });
 
     let sent = false;
     try {

@@ -44,6 +44,8 @@ export default function CompanyRegister() {
         haveAccount: "لديك حساب بالفعل؟",
         signin: "تسجيل الدخول",
         back: "العودة للرئيسية",
+        pendingTitle: "بانتظار اعتماد المالك",
+        pendingMsg: "تم إنشاء حسابك. ينتظر مالك النظام اعتماد صلاحية الإدارة لتتمكن من دخول بوابة الشركات. سنُشعرك عند التفعيل.",
       }
     : {
         title: "Register company account",
@@ -74,6 +76,8 @@ export default function CompanyRegister() {
         haveAccount: "Already have an account?",
         signin: "Sign in",
         back: "Back to home",
+        pendingTitle: "Pending owner approval",
+        pendingMsg: "Your account is created. The system owner will approve your admin access so you can sign in to the company portal. We'll notify you once activated.",
       };
 
   const [email, setEmail] = useState("");
@@ -86,6 +90,7 @@ export default function CompanyRegister() {
   const [otpCode, setOtpCode] = useState("");
   const [captcha, setCaptcha] = useState("");
   const [captchaKey, setCaptchaKey] = useState(0);
+  const [pending, setPending] = useState(false);
 
   const resetCaptcha = () => { setCaptcha(""); setCaptchaKey((k) => k + 1); };
 
@@ -124,11 +129,17 @@ export default function CompanyRegister() {
     try {
       const result = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode });
       if (result?.access_token) base44.auth.setToken(result.access_token);
-      // 3) تفعيل صلاحية الإدارة ليتمكن من دخول بوابة الشركات (/app)
+      // 3) طلب تفعيل صلاحية الإدارة — صار بانتظار اعتماد المالك (لا ترقية ذاتية لـ admin)
+      let promoteRes = null;
       try {
-        await base44.functions.invoke("registerTenantAccount", { unified_number: unified.replace(/\D/g, "") });
+        promoteRes = await base44.functions.invoke("registerTenantAccount", { unified_number: unified.replace(/\D/g, "") });
       } catch (e) {
         setError(t.promoteErr);
+        setLoading(false);
+        return;
+      }
+      if (promoteRes?.data?.pending_approval || promoteRes?.pending_approval) {
+        setPending(true);
         setLoading(false);
         return;
       }
@@ -149,6 +160,17 @@ export default function CompanyRegister() {
       setError(err.message || t.resendFail);
     }
   };
+
+  if (pending) {
+    return (
+      <AuthLayout icon={Mail} title={t.pendingTitle} subtitle={t.pendingMsg}>
+        <div className="flex flex-col items-center gap-3 mt-2">
+          <Button asChild className="w-full h-12 font-medium"><Link to="/company-login">{t.signin}</Link></Button>
+          <Link to="/" className="text-xs text-muted-foreground hover:underline">{t.back}</Link>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (showOtp) {
     return (

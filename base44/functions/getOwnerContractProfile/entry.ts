@@ -5,6 +5,7 @@ import { secrets } from 'base44:runtime';
 export default async function () {
   const raw = secrets.get('OWNER_FULL_NAME') || 'KAMEL ELSHIKH';
   const full_name = /[\u0600-\u06FF]/.test(raw) ? raw : 'كامل إسماعيل';
-  const national_id = secrets.get('OWNER_IQAMA') || '';
-  return Response.json({ full_name, national_id });
+  // لا نُرجع الإقامة (إحدى عوامل دخول المالك وبيانات حساسة) لطالب مجهول — العقد
+  // يُكتفي فيه باسم الممثّل والتوقيع/الختم.
+  return Response.json({ full_name });
 }
