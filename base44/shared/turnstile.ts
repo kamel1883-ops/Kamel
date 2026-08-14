@@ -1,26 +1,23 @@
 import { secrets } from "base44:runtime";
 
-// التحقّق من رمز Cloudflare Turnstile.
-// ملاحظة: التحقّق الخادمي الصارم (fail-closed) معطّل مؤقتاً بسبب تعذّر الدخول بعد تفعيل المفتاح الحقيقي،
-// إذ يلزم إدراج نطاق التطبيق وضبط المفتاح السري المطابق للمفتاح الموقع في لوحة Cloudflare — وهذا لا يمكن ضبطه من الكود.
-// في هذه الأثناء نقبل أي رمز غير فارغ تصدره ودجة Turnstile (التي تعمل في الجهة الأمامية)، بما يحافظ على طبقة التحقق البشرية الأساسية دون حظر الدخول.
+// تحقق خادمي صارم من رمز Cloudflare Turnstile — يستخدم المفتاح السري الحقيقي في TURNSTILE_SECRET_KEY فقط (fail-closed).
+// النطاق مُدرج في إعدادات الودجة بلوحة Cloudflare، والمفتاح السري مضبوط في Secrets.
 export async function verifyTurnstile(token: string): Promise<boolean> {
   const t = String(token || "");
   if (!t) return false;
   const secret = String(secrets.get("TURNSTILE_SECRET_KEY") || "");
-  // محاولة تحقق خادمية (أفضل جهد) — إن نجحت نثق بالرمز، وإن فشلت لا نحجب الدخول طالما الودجة أصدرت رمزاً.
-  if (secret) {
-    try {
-      const vr = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret, response: t }),
-      });
-      const vdata: any = await vr.json();
-      if (vdata && vdata.success) return true;
-    } catch (_e) { /* نكمل إلى القبول الاحتياطي */ }
+  if (!secret) return false;
+  try {
+    const vr = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret, response: t }),
+    });
+    const vdata: any = await vr.json();
+    return Boolean(vdata && vdata.success);
+  } catch (_e) {
+    return false;
   }
-  return true;
 }
 
 // تقييد المعدّل داخل النسخة النشطة (in-memory) — بسيط وبأفضل جهد.
