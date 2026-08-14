@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
-// مفتاح اختبار رسمي من Cloudflare يمرّر دائماً ويعرض "Success!". للإنتاج استبدله بمفتاح موقعك الحقيقي مع المفتاح السري المطابق في TURNSTILE_SECRET_KEY.
-const TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+// مفتاح موقع حقيقي من Cloudflare Turnstile (قطعة: Jadara Employee Portal) — المفتاح السري المطابق في TURNSTILE_SECRET_KEY.
+const TURNSTILE_SITE_KEY = "0x4AAAAAAEMIP2HAccXXBa2n";
 
 let scriptPromise = null;
 function loadScript() {
