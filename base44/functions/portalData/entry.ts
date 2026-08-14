@@ -61,10 +61,15 @@ export default async function (req) {
       });
       // مخالصات نهاية الخدمة المكتملة/المصروفة فقط (لإطلاع الموظف على مستحقاته المحفوظة)
       const paidSettlements = (settlements || []).filter((s: any) => s?.status === "completed");
+      let branch: any = null;
+      if (!isOwnerSession && emp?.branch_id) {
+        try { branch = await base44.asServiceRole.entities.Branch.get(emp.branch_id); } catch { branch = null; }
+      }
       return Response.json({
         ok: true,
         employee: emp,
         org: orgs?.[0] || null,
+        branch,
         leaves, loans, attendance, trips, warnings,
         reviews, trainings,
         settlements: paidSettlements,
@@ -288,16 +293,24 @@ export default async function (req) {
       const recs = await base44.asServiceRole.entities.Attendance.filter(
         { employee_id: employeeId, date }, "-created_date", 5
       );
+      // ربط سجل الحضور بفرع الموظف (للتمييز في تقارير الحضور حسب الفرع)
+      let branchId: any = null, branchName = "";
+      if (!isOwnerSession && emp?.branch_id) {
+        try { const br = await base44.asServiceRole.entities.Branch.get(emp.branch_id); branchId = br?.id || emp.branch_id; branchName = br?.name || emp.branch_name || ""; }
+        catch { branchId = emp.branch_id; branchName = emp.branch_name || ""; }
+      } else if (!isOwnerSession) { branchId = emp?.branch_id || null; branchName = emp?.branch_name || ""; }
       const today = recs[0] || null;
       if (today) {
         const updated = await base44.asServiceRole.entities.Attendance.update(today.id, {
           check_in: checkIn, status: "present", source: "portal", employee_user_id: emp.user_id || null,
+          branch_id: branchId, branch_name: branchName,
         });
         return Response.json({ ok: true, today: updated });
       }
       const created = await base44.asServiceRole.entities.Attendance.create({
         employee_id: employeeId, employee_user_id: emp.user_id || null, employee_name: empLabel,
         date, check_in: checkIn, status: "present", source: "portal", work_hours: 0,
+        branch_id: branchId, branch_name: branchName,
       });
       return Response.json({ ok: true, today: created });
     }

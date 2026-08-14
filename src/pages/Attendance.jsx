@@ -20,13 +20,13 @@ export default function Attendance() {
     date: "التاريخ", status: "الحالة", all: "كل الحالات", present: "حاضر", late: "متأخر", absent: "غائب", leave: "إجازة",
     newH: "تسجيل حضور جديد", emp: "الموظف", choose: "اختر الموظف", in: "الحضور", out: "الانصراف", record: "تسجيل",
     loading: "جارٍ التحميل...", empty: "لا توجد سجلات لهذا اليوم", del: "حذف",
-    thEmp: "الموظف", thIn: "الحضور", thOut: "الانصراف", thStatus: "الحالة", thActions: "إجراءات",
+    allBranches: "كل الفروع", branch: "الفرع", thEmp: "الموظف", thBranch: "الفرع", thIn: "الحضور", thOut: "الانصراف", thStatus: "الحالة", thActions: "إجراءات",
   } : {
     title: "Attendance", subtitle: "Track daily employee attendance",
     date: "Date", status: "Status", all: "All statuses", present: "Present", late: "Late", absent: "Absent", leave: "Leave",
     newH: "New attendance record", emp: "Employee", choose: "Select employee", in: "Check in", out: "Check out", record: "Record",
     loading: "Loading...", empty: "No records for this day", del: "Delete",
-    thEmp: "Employee", thIn: "Check in", thOut: "Check out", thStatus: "Status", thActions: "Actions",
+    allBranches: "All branches", branch: "Branch", thEmp: "Employee", thBranch: "Branch", thIn: "Check in", thOut: "Check out", thStatus: "Status", thActions: "Actions",
   };
 
   const [records, setRecords] = useState([]);
@@ -37,6 +37,8 @@ export default function Attendance() {
   const [newRec, setNewRec] = useState({ employee_id: "", check_in: "08:00", check_out: "16:00", status: "present" });
   const [loading, setLoading] = useState(true);
   const [org, setOrg] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [branchFilter, setBranchFilter] = useState("all");
 
   useEffect(() => {
     (async () => {
@@ -53,22 +55,27 @@ export default function Attendance() {
     setRecords(data);
     const emps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
     setEmployees(emps);
+    try { const brs = await base44.entities.Branch.list("-is_main", 500); setBranches(brs); } catch {}
     setLoading(false);
   };
   useEffect(() => { load(); }, [date]);
 
-  const filtered = statusFilter === "all" ? records : records.filter((r) => r.status === statusFilter);
+  const filtered = records
+    .filter((r) => statusFilter === "all" || r.status === statusFilter)
+    .filter((r) => branchFilter === "all" || r.branch_id === branchFilter);
 
   const addRecord = async (e) => {
     e.preventDefault();
     if (!newRec.employee_id) return;
     setCreating(true);
     const emp = employees.find((x) => x.id === newRec.employee_id);
+    const br = branches.find((b) => b.id === emp?.branch_id);
     await base44.entities.Attendance.create({
       employee_id: newRec.employee_id,
       employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
       date, check_in: newRec.check_in, check_out: newRec.check_out,
       status: newRec.status, work_hours: 8,
+      branch_id: emp?.branch_id || null, branch_name: br?.name || emp?.branch_name || "",
     });
     setNewRec({ employee_id: "", check_in: "08:00", check_out: "16:00", status: "present" });
     setCreating(false);
@@ -97,6 +104,16 @@ export default function Attendance() {
               <SelectItem value="late">{t.late}</SelectItem>
               <SelectItem value="absent">{t.absent}</SelectItem>
               <SelectItem value="leave">{t.leave}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">{t.branch}</label>
+          <Select value={branchFilter} onValueChange={setBranchFilter}>
+            <SelectTrigger className="sm:w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t.allBranches}</SelectItem>
+              {branches.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -140,6 +157,7 @@ export default function Attendance() {
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
                   <th className="text-right px-4 py-3 font-medium">{t.thEmp}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thIn}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thOut}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
@@ -150,6 +168,7 @@ export default function Attendance() {
                 {filtered.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium">{r.employee_name}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{r.branch_name || "—"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_in || "-"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_out || "-"}</td>
                     <td className="px-4 py-3"><StatusBadge status={r.status} /></td>

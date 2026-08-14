@@ -64,6 +64,7 @@ export default function MyRequests() {
   const [session, setSession] = useState(() => portalSession.load());
   const [employee, setEmployee] = useState(null);
   const [org, setOrg] = useState(null);
+  const [branch, setBranch] = useState(null);
   const [leaves, setLeaves] = useState([]);
   const [loans, setLoans] = useState([]);
   const [attendance, setAttendance] = useState([]);
@@ -107,7 +108,7 @@ export default function MyRequests() {
         setSignInMsg({ type: "err", text: data?.error || t.loading });
         setLoading(false); return;
       }
-      setEmployee(data.employee); setOrg(data.org);
+      setEmployee(data.employee); setOrg(data.org); setBranch(data.branch || null);
       setLeaves(data.leaves || []); setLoans(data.loans || []);
       setAttendance(data.attendance || []); setTrips(data.trips || []);
       setWarnings(data.warnings || []);
@@ -214,7 +215,7 @@ export default function MyRequests() {
   const handlePortalLogout = () => {
     portalSession.clear();
     setSession(null);
-    setEmployee(null); setOrg(null);
+    setEmployee(null); setOrg(null); setBranch(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
     setView("self");
   };
@@ -436,7 +437,7 @@ export default function MyRequests() {
               <InfoCard icon={BadgeCheck} label={t.ticketLabel} value={ticketLabel} sub={employee.is_saudi ? t.ticketSaudi : t.ticketExpat} />
             </div>
 
-            <EmployeeClock employee={employee} org={org} onChanged={() => load(session)} clockApi={clockApi} initialToday={todayAtt} />
+            <EmployeeClock employee={employee} org={org} branch={branch} onChanged={() => load(session)} clockApi={clockApi} initialToday={todayAtt} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               <SideCard title={t.detailTitle}>

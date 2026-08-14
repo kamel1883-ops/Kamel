@@ -31,7 +31,19 @@ const getPosition = (t) =>
     );
   });
 
-export default function EmployeeClock({ employee, org, onChanged, clockApi, initialToday }) {
+// يحدد نطاق البصمة من فرع الموظف إن وُجد، ويعود للمقر الرئيسي للمنشأة كبدیل.
+function resolveWorkplace(org, branch) {
+  const has = (x) => x && x.lat != null && x.lat !== "" && x.lng != null && x.lng !== "";
+  if (has(branch)) {
+    return { lat: Number(branch.lat), lng: Number(branch.lng), radius: Number(branch.radius) || Number(org?.workplace_radius) || 50, name: branch.name, isBranch: true };
+  }
+  if (has(org)) {
+    return { lat: Number(org.workplace_lat), lng: Number(org.workplace_lng), radius: Number(org.workplace_radius) || 50, name: org?.name || "", isBranch: false };
+  }
+  return null;
+}
+
+export default function EmployeeClock({ employee, org, branch, onChanged, clockApi, initialToday }) {
   const { lang } = usePortalI18n();
   const t = usePortalT("clock");
 
@@ -47,8 +59,8 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
     setLoading(true);
     try {
       if (clockApi?.today) {
-        const t = await clockApi.today();
-        setToday(t || null);
+        const tt = await clockApi.today();
+        setToday(tt || null);
       } else {
         const recs = await base44.entities.Attendance.filter({ employee_id: employee.id, date: localToday() }, "-created_date", 5);
         setToday(recs[0] || null);
@@ -60,16 +72,16 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
   };
   useEffect(() => { if (employee?.id) loadToday(); }, [employee?.id, clockApi, initialToday]);
 
-  const radius = Number(org?.workplace_radius) || 50;
-  const hasWorkplace = org && org.workplace_lat != null && org.workplace_lat !== "" && org.workplace_lng != null && org.workplace_lng !== "";
+  const wp = resolveWorkplace(org, branch);
+  const radius = wp?.radius || 50;
 
   const run = async (kind) => {
     setMsg({ type: "", text: "" });
-    if (!hasWorkplace) { setMsg({ type: "err", text: t.noWorkplace }); return; }
+    if (!wp) { setMsg({ type: "err", text: t.noWorkplace }); return; }
     setBusy(true);
     try {
       const pos = await getPosition(t);
-      const dist = distanceMeters(pos.lat, pos.lng, Number(org.workplace_lat), Number(org.workplace_lng));
+      const dist = distanceMeters(pos.lat, pos.lng, wp.lat, wp.lng);
       if (dist > radius) { setMsg({ type: "err", text: t.outRange(dist, radius) }); setBusy(false); return; }
       if (kind === "in") {
         if (today && today.check_in) { setMsg({ type: "err", text: t.alreadyIn }); setBusy(false); return; }
@@ -77,10 +89,12 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
           await clockApi.clockIn();
         } else {
           const name = `${employee.employee_number} - ${employee.position}`;
+          const bId = branch?.id || employee.branch_id || null;
+          const bName = branch?.name || employee.branch_name || "";
           if (today) {
-            await base44.entities.Attendance.update(today.id, { check_in: nowHM(), status: "present", source: "portal", employee_user_id: employee.user_id });
+            await base44.entities.Attendance.update(today.id, { check_in: nowHM(), status: "present", source: "portal", employee_user_id: employee.user_id, branch_id: bId, branch_name: bName });
           } else {
-            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: nowHM(), status: "present", source: "portal", work_hours: 0 });
+            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: nowHM(), status: "present", source: "portal", work_hours: 0, branch_id: bId, branch_name: bName });
           }
         }
         setMsg({ type: "ok", text: t.doneIn });
@@ -118,7 +132,9 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
         </div>
         <div>
           <h3 className="font-semibold text-sm">{t.title}</h3>
-          <p className="text-xs text-muted-foreground">{t.sub(radius, localToday())}</p>
+          <p className="text-xs text-muted-foreground">
+            {wp?.isBranch && t.subBranch ? t.subBranch(radius, localToday(), wp.name) : t.sub(radius, localToday())}
+          </p>
         </div>
       </div>
 
@@ -162,7 +178,7 @@ export default function EmployeeClock({ employee, org, onChanged, clockApi, init
         )}
       </div>
 
-      {!hasWorkplace && (
+      {!wp && (
         <div className="mt-3 flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
           <MapPin size={14} /> {t.noWorkplace2}
         </div>
