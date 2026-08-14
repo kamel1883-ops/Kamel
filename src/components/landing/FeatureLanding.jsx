@@ -30,7 +30,47 @@ export default function FeatureLanding({ content }) {
     setMetaProp("og:type", "website");
     setMetaProp("og:url", `https://jadara-hr.com${content.path}`);
     setLink("canonical", `https://jadara-hr.com${content.path}`);
-  }, [c, content.path]);
+
+    // JSON-LD: FAQPage — لتفعيل النتائج الغنية (Rich Results) في جوجل لأسئلة الصفحة.
+    let faq = document.getElementById("fl-faq-jsonld");
+    if (c.faqs && c.faqs.length) {
+      const ld = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: c.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      };
+      if (!faq) {
+        faq = document.createElement("script");
+        faq.id = "fl-faq-jsonld";
+        faq.type = "application/ld+json";
+        document.head.appendChild(faq);
+      }
+      faq.textContent = JSON.stringify(ld);
+    } else if (faq) {
+      faq.remove();
+    }
+
+    // JSON-LD: BreadcrumbList — يثبّت ترتيب الصفحة داخل الموقع (يقوّي توضيح السياق لجوجل).
+    let bc = document.getElementById("fl-breadcrumb-jsonld");
+    if (!bc) {
+      bc = document.createElement("script");
+      bc.id = "fl-breadcrumb-jsonld";
+      bc.type = "application/ld+json";
+      document.head.appendChild(bc);
+    }
+    bc.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: isAr ? "الرئيسية" : "Home", item: "https://jadara-hr.com/" },
+        { "@type": "ListItem", position: 2, name: c.titleHi || c.seo.title, item: `https://jadara-hr.com${content.path}` },
+      ],
+    });
+  }, [c, content.path, isAr]);
 
   return (
     <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
@@ -212,6 +252,10 @@ export default function FeatureLanding({ content }) {
           <div className="space-y-1.5">
             <div className="font-medium text-white mb-1">{isAr ? "روابط المنصة" : "Platform"}</div>
             <Link to="/" className="block hover:text-white">{isAr ? "الرئيسية" : "Home"}</Link>
+            <Link to="/hr-system" className="block hover:text-white">{isAr ? "نظام موارد بشرية" : "HR System"}</Link>
+            <Link to="/payroll-system" className="block hover:text-white">{isAr ? "نظام رواتب" : "Payroll System"}</Link>
+            <Link to="/attendance-system" className="block hover:text-white">{isAr ? "نظام الحضور والانصراف" : "Attendance System"}</Link>
+            <Link to="/performance-system" className="block hover:text-white">{isAr ? "نظام إدارة الأداء" : "Performance System"}</Link>
             <Link to="/quote" className="block hover:text-white">{isAr ? "عرض السعر" : "Quote"}</Link>
             <Link to="/about" className="block hover:text-white">{isAr ? "من نحن" : "About"}</Link>
             <Link to="/contact" className="block hover:text-white">{isAr ? "تواصل" : "Contact"}</Link>

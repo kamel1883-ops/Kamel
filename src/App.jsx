@@ -57,9 +57,13 @@ import BlogArticle from "@/pages/BlogArticle";
 import CustomerSurveys from "@/pages/CustomerSurveys";
 import CustomerSurveyTake from "@/pages/public/CustomerSurveyTake";
 import ContractSample from "@/pages/ContractSample";
+import HrSystemPage from "@/pages/landings/HrSystemPage";
+import PayrollSystemPage from "@/pages/landings/PayrollSystemPage";
+import AttendanceSystemPage from "@/pages/landings/AttendanceSystemPage";
+import PerformanceSystemPage from "@/pages/landings/PerformanceSystemPage";
 import { PortalLangProvider } from "@/lib/portalI18n";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -94,6 +98,10 @@ const AuthenticatedApp = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/quote" element={<Quote />} />
         <Route path="/contract-sample" element={<ContractSample />} />
+        <Route path="/hr-system" element={<HrSystemPage />} />
+        <Route path="/payroll-system" element={<PayrollSystemPage />} />
+        <Route path="/attendance-system" element={<AttendanceSystemPage />} />
+        <Route path="/performance-system" element={<PerformanceSystemPage />} />
         <Route path="/company-login" element={<CompanyLogin />} />
         <Route path="/company-forgot-password" element={<CompanyForgotPassword />} />
         <Route path="/company-register" element={<CompanyRegister />} />

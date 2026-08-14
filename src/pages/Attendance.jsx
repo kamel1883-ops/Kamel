@@ -10,6 +10,7 @@ import { CalendarCheck, Plus, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { todayISO, attendanceStatusLabel } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
+import AttendanceReport from "@/components/reports/AttendanceReport";
 
 export default function Attendance() {
   const { lang } = useI18n();
@@ -35,6 +36,16 @@ export default function Attendance() {
   const [creating, setCreating] = useState(false);
   const [newRec, setNewRec] = useState({ employee_id: "", check_in: "08:00", check_out: "16:00", status: "present" });
   const [loading, setLoading] = useState(true);
+  const [org, setOrg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await base44.entities.Organization.list("-created_date", 1);
+        setOrg(list?.[0] || null);
+      } catch {}
+    })();
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -160,6 +171,13 @@ export default function Attendance() {
             </table>
           </div>
         )}
+      </div>
+
+      <div className="mt-5">
+        <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+          <CalendarCheck size={20} className="text-violet-600" /> تقرير الحضور الشهري (PDF)
+        </h3>
+        <AttendanceReport org={org} />
       </div>
     </div>
   );
