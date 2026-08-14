@@ -46,6 +46,16 @@ export default async function (req) {
       return Response.json({ valid: false, suspended: true });
     }
 
+    // تجربة منتهية: بعد انقضاء 30 يوماً، يُمنع الدخول تلقائياً حتى يتدخل المالك
+    // يدوياً (بتمديد فترة التجربة أو تفعيل الاشتراك السنوي) من بوابة المالك.
+    if (t.status === "trial" && t.trial_end) {
+      const end = new Date(t.trial_end);
+      if (!isNaN(end.getTime()) && end.getTime() < Date.now()) {
+        return Response.json({ valid: false, trial_ended: true });
+      }
+    }
+
+    // الاشتراك السنوي يبقى مفتوحاً طوال السنة — لا توقف تلقائي.
     return Response.json({ valid: true });
   } catch {
     return Response.json({ valid: false });
