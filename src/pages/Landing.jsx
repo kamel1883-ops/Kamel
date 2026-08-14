@@ -302,8 +302,8 @@ export default function Landing() {
             <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-            {t.titlePre}
-            <span className="block bg-gradient-to-l from-violet-300 via-indigo-300 to-blue-300 bg-clip-text text-transparent">{t.titleHi}</span>
+            <span className="block whitespace-nowrap">{t.titlePre}</span>
+            <span className="block whitespace-nowrap bg-gradient-to-l from-violet-300 via-indigo-300 to-blue-300 bg-clip-text text-transparent">{t.titleHi}</span>
           </h1>
           <p className="text-white/70 text-lg mt-5 max-w-xl leading-relaxed">{t.heroDesc}</p>
           <div className="flex flex-wrap gap-3 mt-7">
