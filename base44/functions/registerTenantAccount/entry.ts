@@ -29,13 +29,41 @@ export default async function (req) {
     if (!unified || !/^7\d{7,11}$/.test(unified))
       return Response.json({ ok: false, error: 'invalid_unified' }, { status: 400 });
 
-    const tenants = await base44.asServiceRole.entities.Tenant.filter(
+    // ضمان عدم فقدان عميل من بوابة المالك: إن لم يوجد سجل Tenant بهذا البريد
+    // والرقم الموحّد، نُنشئه تلقائياً كتجربة عاجلة. يغطّي مسارات المستخدمين الذين
+    // تجاوزوا createTrial (أو تعثّرت لهم Turnstile/Rate-limit) فلم يُسجَّل لهم Tenant
+    // لكن أُنشئوا User Base44 وأضافوا موظفين. هذا يضمن ظهور كل عميل في بوابة المالك.
+    let tenants = await base44.asServiceRole.entities.Tenant.filter(
       { unified_number: unified }, undefined, 50
     );
-    const t = (tenants || []).find(
+    let t = (tenants || []).find(
       (tt) => String(tt.contact_email || '').trim().toLowerCase() === email
     );
-    if (!t) return Response.json({ ok: false, error: 'no_match' }, { status: 403 });
+    let autoCreated = false;
+    if (!t) {
+      const today = new Date();
+      const trialEnd = new Date(today);
+      trialEnd.setDate(trialEnd.getDate() + 30);
+      const fallbackName = (me.full_name && me.full_name.trim())
+        ? me.full_name.trim()
+        : email.split('@')[0];
+      t = await base44.asServiceRole.entities.Tenant.create({
+        name: 'منشأة - ' + fallbackName,
+        unified_number: unified,
+        contact_email: email,
+        contact_name: me.full_name || '',
+        plan: 'trial',
+        status: 'trial',
+        lead_source: 'trial',
+        trial_start: today.toISOString().slice(0, 10),
+        trial_end: trialEnd.toISOString().slice(0, 10),
+        contract_confirmed: false,
+        employee_count: 0,
+        discount_percent: 0,
+        notes: 'أُنشئ تلقائياً عبر registerTenantAccount — لم يُعثر على سجل تجربة سابق.',
+      });
+      autoCreated = true;
+    }
     if (!['trial', 'active'].includes(t.status))
       return Response.json({ ok: false, error: 'suspended' }, { status: 403 });
 
