@@ -20,6 +20,11 @@ export default async function (req) {
     if (!code || !newPass || newPass.length < 6)
       return Response.json({ ok: false, error: "invalid" }, { status: 400 });
 
+    // إغلاق صارم: لا يمكن إعادة التعيين ما لم يُضبط بريد المالك المسؤول عن استلام الرمز.
+    const ownerEmail = (Deno.env.get("OWNER_EMAIL") || "").trim().toLowerCase();
+    if (!ownerEmail)
+      return Response.json({ ok: false, error: "owner_not_configured" }, { status: 500 });
+
     // كابتشا إلزامي — منع التخمين الآلي لرمز الاستعادة
     const captchaToken = String(body.captcha_token || "");
     if (!(await verifyTurnstile(captchaToken)))
@@ -28,6 +33,10 @@ export default async function (req) {
     const creds = await base44.asServiceRole.entities.OwnerCredential.list("-created_date", 1);
     const cred = creds?.[0] || null;
     if (!cred) return Response.json({ ok: false, error: "invalid_code" }, { status: 400 });
+
+    // ربط الرمز ببريد المالك المضبوط فقط — لمنع استغلال أي رمز قُدِّم لجهة أخرى.
+    if ((String(cred.email || "").trim().toLowerCase() || "") !== ownerEmail)
+      return Response.json({ ok: false, error: "invalid_code" }, { status: 400 });
 
     // قفل بعد تجاوز المحاولات — يُلغى الرمز نهائياً لمنع التخمين
     const attempts = Number(cred.reset_attempts) || 0;

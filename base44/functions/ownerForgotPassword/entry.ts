@@ -21,23 +21,28 @@ export default async function (req) {
     const ownerBirth = (Deno.env.get("OWNER_BIRTH_DATE") || "").trim();
     const ownerEmail = (Deno.env.get("OWNER_EMAIL") || "").trim().toLowerCase();
 
-    // ردّ نجاح عام لعدم كشف ما إذا كان البريد صحيحاً — إلا للمالك الحقيقي.
-    if (!ownerIqama || !ownerBirth || iqama !== ownerIqama || birth !== ownerBirth || (ownerEmail && email !== ownerEmail))
+    // إغلاق صارم: يجب ضبط جميع أسرار المالك — ومنها OWNER_EMAIL — وإلا فلا يمكن إصدار رمز الاستعادة.
+    if (!ownerIqama || !ownerBirth || !ownerEmail)
+      return Response.json({ ok: false, error: "owner_not_configured" }, { status: 500 });
+
+    // ردّ نجاح عام لعدم كشف ما إذا كانت البيانات صحيحة — إلا للمالك الحقيقي.
+    if (iqama !== ownerIqama || birth !== ownerBirth || email !== ownerEmail)
       return Response.json({ ok: true, sent: true });
 
     const code = generateResetCode();
     const expiresAt = Date.now() + RESET_CODE_TTL_MS;
     const creds = await base44.asServiceRole.entities.OwnerCredential.list("-created_date", 1);
     const cred = creds?.[0] || null;
+    // لا نطيل بريد المالك المخزّن من جسم الطلب — تحديث رمز الاستعادة فقط.
     if (cred)
-      await base44.asServiceRole.entities.OwnerCredential.update(cred.id, { email, reset_code: code, reset_code_expires_at: expiresAt, reset_attempts: 0 });
+      await base44.asServiceRole.entities.OwnerCredential.update(cred.id, { reset_code: code, reset_code_expires_at: expiresAt, reset_attempts: 0 });
     else
-      await base44.asServiceRole.entities.OwnerCredential.create({ email, reset_code: code, reset_code_expires_at: expiresAt, reset_attempts: 0 });
+      await base44.asServiceRole.entities.OwnerCredential.create({ email: ownerEmail, reset_code: code, reset_code_expires_at: expiresAt, reset_attempts: 0 });
 
     let sent = false;
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
-        to: ownerEmail || email,
+        to: ownerEmail,
         subject: "رمز استعادة كلمة مرور بوابة المالك — جدارة",
         body: `رمز التحقق الخاص بك هو: ${code}\nالرمز صالح لمدة 15 دقيقة.\nإن لم تطلب تغيير كلمة المرور فتجاهل هذه الرسالة.`,
       });
