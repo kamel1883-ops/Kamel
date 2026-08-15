@@ -79,19 +79,42 @@ export default async function (req) {
     // ====== إدارة العملاء — بوابة المالك ======
     if (action === "owner_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
-      const [tenants, employees] = await Promise.all([
+      const [tenants, employees, users] = await Promise.all([
         base44.asServiceRole.entities.Tenant.list("-created_date", 500),
         base44.asServiceRole.entities.Employee.list("-created_date", 2000),
+        base44.asServiceRole.entities.User.list(undefined, 500),
       ]);
-      // تفريد موظفي كل منشأة عبر created_by_id (حساب مسؤول المنشأة) — يميّز النشطين
-      // عن غير النشطين لينكشف التلاعب بعدد الموظفين المعلن لدى الترقية للاشتراك السنوي.
-      const byUser: Record<string, { active: number; total: number }> = {};
+      // ربط الموظفين بالمنشأة عبر حساب المنشئ (created_by_id للموظف = حساب المستخدم).
+      // maps: user.id → tenantId عبر admin_user_id مباشرة، أو عبر tacкет admin_email /
+      // contact_email المطابق لبريد المستخدم — يغطّي الحالات التي لم يُضبط فيها
+      // admin_user_id (مثل المنشآت التي أُنشئت قبل اعتماد المالك).
+      const idToTenantId = new Map<string, string>();
+      const emailToTenantId = new Map<string, string>();
+      for (const t of tenants || []) {
+        const tid = String(t.id || "");
+        if (t.admin_user_id) idToTenantId.set(String(t.admin_user_id), tid);
+        for (const em of [t.admin_email, t.contact_email]) {
+          const k = String(em || "").trim().toLowerCase();
+          if (k && !emailToTenantId.has(k)) emailToTenantId.set(k, tid);
+        }
+      }
+      const userIdToTenantId = new Map<string, string>();
+      for (const u of users || []) {
+        if (!u?.id) continue;
+        if (idToTenantId.has(u.id)) { userIdToTenantId.set(u.id, idToTenantId.get(u.id)!); continue; }
+        const k = String(u.email || "").trim().toLowerCase();
+        if (k && emailToTenantId.has(k)) userIdToTenantId.set(u.id, emailToTenantId.get(k)!);
+      }
+      // عدّ الموظفين النشطين/الإجمالي لكل منشأة عبر الربط user.id → tenantId
+      const byTenant: Record<string, { active: number; total: number }> = {};
       for (const e of employees || []) {
         const uid = String(e.created_by_id || "");
         if (!uid) continue;
-        if (!byUser[uid]) byUser[uid] = { active: 0, total: 0 };
-        byUser[uid].total++;
-        if (e.status === "active") byUser[uid].active++;
+        const tid = userIdToTenantId.get(uid) || idToTenantId.get(uid);
+        if (!tid) continue;
+        if (!byTenant[tid]) byTenant[tid] = { active: 0, total: 0 };
+        byTenant[tid].total++;
+        if (e.status === "active") byTenant[tid].active++;
       }
       const stats = { total: 0, trials: 0, quotes: 0, paid: 0, suspended: 0, cancelled: 0, revenue: 0 };
       for (const x of tenants || []) {
@@ -102,8 +125,7 @@ export default async function (req) {
         if (x.status === "active") { stats.paid++; stats.revenue += Number(x.quoted_amount) || 0; }
         if (x.status === "expired") stats.suspended++;
         if (x.status === "cancelled") stats.cancelled++;
-        const uid = String(x.admin_user_id || x.created_by_id || "");
-        const counts = byUser[uid] || { active: 0, total: 0 };
+        const counts = byTenant[String(x.id)] || { active: 0, total: 0 };
         x.employees_active_count = counts.active;
         x.employees_total_count = counts.total;
       }
