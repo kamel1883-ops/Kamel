@@ -1,144 +1,137 @@
 import React from "react";
 import {
-  Sparkles, Gift, Check, Calendar, CreditCard, Users,
-  Building2, Headphones, GraduationCap, Workflow, BarChart3, UserCircle,
+  Sparkles, Gift, Check, Calendar, CreditCard, Users, ChevronLeft,
 } from "lucide-react";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 
-// قسم الباقات كعمودين (بطاقتين جنباً إلى جنب) — تجربة مجانية + الباقة المؤسسية/السنوية.
-// نموذج محدّد: عمودان (columns) وليس صفوف جدول.
-export default function PricingColumns({ isAr = true, onStartTrial, onBuy }) {
+// مميزات تراكمية مختصرة لكل شريحة (3-4 نقاط لكل بطاقة).
+const FEATS_AR = {
+  micro: ["إدارة الموظفين وسجلاتهم", "الحضور والانصراف (GPS)", "إدارة الإجازات والموافقات", "الرواتب والتأمينات (GOSI)"],
+  small: ["إدارة الأداء", "الهيكل التنظيمي", "بوابة الموظف الذاتية"],
+  medium: ["رحلات العمل والانتداب", "التخطيط التعاقبي", "تحليلات الموارد البشرية"],
+  growth: ["تراخيص المنشأة الحكومية", "إدارة الأسطول والمركبات", "تكاملات حكومية ذكية"],
+  enterprise: ["دعم فني مخصص", "ربط API خاص", "مدير حساب مخصص"],
+};
+const FEATS_EN = {
+  micro: ["Employee records", "Attendance (GPS)", "Leaves & approvals", "Payroll & GOSI"],
+  small: ["Performance", "Org structure", "Employee self-service"],
+  medium: ["Business trips", "Succession planning", "HR analytics"],
+  growth: ["Gov. licenses", "Fleet & vehicles", "Smart integrations"],
+  enterprise: ["Dedicated support", "Private API", "Account manager"],
+};
+
+// قسم الباقات: 6 أعمدة (بطاقة تجربة مجانية + 5 بطاقات شرائح) في صف واحد.
+export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier }) {
+  const tiers = isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN;
+  const feats = isAr ? FEATS_AR : FEATS_EN;
+  const currency = isAr ? "ر.س" : "SAR";
+  const perYear = isAr ? "/ سنوياً" : "/year";
+
   const trialPills = isAr
-    ? ["تجربة كاملة لمدة 30 يوماً", "بدون إدخال بيانات دفع", "جميع مزايا نظام جدارة", "دعم فني مخصص"]
-    : ["Full 30-day trial", "No payment details", "All Jadara features", "Dedicated support"];
-
-  const trialTags = isAr
-    ? [{ I: Calendar, t: "30 يوماً مجاناً" }, { I: CreditCard, t: "بدون بطاقة ائتمان" }, { I: Users, t: "فريق كامل" }]
-    : [{ I: Calendar, t: "30 days free" }, { I: CreditCard, t: "No card needed" }, { I: Users, t: "Full team" }];
-
-  const entFeatures = isAr
-    ? [
-        { I: Building2, t: "حلول مخصصة لمؤسستك" },
-        { I: Headphones, t: "دعم فني متقدم على مدار الساعة" },
-        { I: GraduationCap, t: "تدريب شامل للفريق" },
-        { I: Workflow, t: "تكامل مع الأنظمة الحالية" },
-        { I: BarChart3, t: "تقارير وتحليلات متقدمة" },
-        { I: UserCircle, t: "مدير حساب مخصص" },
-      ]
-    : [
-        { I: Building2, t: "Custom solutions" },
-        { I: Headphones, t: "Advanced 24/7 support" },
-        { I: GraduationCap, t: "Comprehensive training" },
-        { I: Workflow, t: "Integrations with existing systems" },
-        { I: BarChart3, t: "Advanced analytics" },
-        { I: UserCircle, t: "Dedicated account manager" },
-      ];
+    ? ["تجربة كاملة 30 يوماً", "بدون بيانات دفع", "جميع مزايا جدارة", "دعم فني مخصص"]
+    : ["Full 30-day trial", "No payment", "All features", "Dedicated support"];
 
   return (
-    <section id="pricing" className="max-w-[1280px] mx-auto px-6 lg:px-14 py-14">
-      <div className="bg-[#F9FAFB] rounded-[2rem] p-7 sm:p-12 text-[#111827] shadow-xl shadow-black/20">
+    <section id="pricing" className="max-w-[1500px] mx-auto px-4 lg:px-10 py-14">
+      <div className="bg-[#F9FAFB] rounded-[2rem] p-6 sm:p-10 text-[#111827] shadow-xl shadow-black/20">
         {/* ترويسة */}
         <div className="text-center max-w-2xl mx-auto">
           <span className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 text-xs font-semibold rounded-full px-4 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
             {isAr ? "الباقات والأسعار" : "Plans & Pricing"}
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold mt-4 mb-3" style={{ fontFamily: "var(--font-display)" }}>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mt-4 mb-2" style={{ fontFamily: "var(--font-display)" }}>
             {isAr ? <>اختر الباقة المناسبة <span className="bg-gradient-to-l from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">لمؤسستك</span></> : <>Choose the plan that fits <span className="bg-gradient-to-l from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">your organization</span></>}
           </h2>
-          <p className="text-[#6B7280] text-sm sm:text-base leading-relaxed">
-            {isAr
-              ? "سواء كنت تريد تجربة النظام مجاناً أو تبحث عن حل مؤسسي متكامل، لدينا ما يناسب احتياجاتك"
-              : "Whether you want to try the system free or need a complete enterprise solution, we have what fits your needs"}
+          <p className="text-[#6B7280] text-sm leading-relaxed">
+            {isAr ? "تجربة مجانية أو حل مؤسسي متكامل — 5 شرائح حسب عدد موظفيك، مع مميزات وزر شراء لكل شريحة." : "Free trial or a full enterprise solution — 5 tiers by headcount, each with features and a buy button."}
           </p>
         </div>
 
-        {/* البطاقتان جنباً إلى جنب */}
-        <div className="grid sm:grid-cols-2 gap-6 mt-10">
-          {/* البطاقة الأولى: التجربة المجانية */}
-          <div className="bg-white border border-slate-100 rounded-3xl p-7 shadow-sm flex flex-col">
+        {/* 6 أعمدة: تجربة مجانية + 5 شرائح */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mt-8 items-stretch">
+          {/* العمود 1: التجربة المجانية */}
+          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col">
             <div className="flex justify-center">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 bg-gradient-to-l from-fuchsia-600 to-violet-600 text-white">
-                <Gift size={13} /> {isAr ? "جرب نظام جدارة مجاناً" : "Try Jadara free"}
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-gradient-to-l from-fuchsia-600 to-violet-600 text-white">
+                <Gift size={12} /> {isAr ? "مجاناً" : "Free"}
               </span>
             </div>
-            <div className="flex items-center justify-center gap-2 mt-4 text-center">
-              <Sparkles size={16} className="text-violet-400 shrink-0" />
-              <h3 className="text-xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-                {isAr ? "تجربة مجانية لمدة 30 يوماً بدون التزام" : "30-day free trial, no commitment"}
+            <div className="text-center mt-3">
+              <div className="text-2xl font-extrabold bg-gradient-to-l from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">0</div>
+              <div className="text-[11px] text-[#6B7280] mt-0.5">{isAr ? "ريال / 30 يوماً" : "SAR / 30 days"}</div>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-center">
+              <Sparkles size={13} className="text-violet-400 shrink-0" />
+              <h3 className="text-sm font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+                {isAr ? "تجربة مجانية 30 يوماً" : "30-day free trial"}
               </h3>
-              <Sparkles size={16} className="text-violet-400 shrink-0" />
             </div>
-            <p className="text-[#6B7280] text-sm leading-relaxed text-center mt-3">
-              {isAr
-                ? "استكشف جميع مزايا نظام جدارة لإدارة الموارد البشرية، من الحضور والانصراف إلى الرواتب والتأمينات ونهاية الخدمة، عبر تجربة مجانية كاملة بدون إدخال بيانات دفع."
-                : "Explore every Jadara HR feature — attendance, payroll, GOSI, end of service — in a full free trial with no payment details."}
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-5">
+            <ul className="grid grid-cols-1 gap-1.5 mt-3 flex-1">
               {trialPills.map((p) => (
-                <div key={p} className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-full px-3 py-2 text-sm">
-                  <span className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                    <Check size={11} className="text-emerald-600" />
-                  </span>
-                  <span className="text-[#374151]">{p}</span>
-                </div>
+                <li key={p} className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-full px-2.5 py-1.5 text-[11px]">
+                  <Check size={11} className="text-emerald-600 shrink-0" />
+                  <span className="text-[#374151] truncate">{p}</span>
+                </li>
               ))}
+            </ul>
+            <div className="flex items-center justify-center gap-2 mt-3 text-[10px] text-[#6B7280]">
+              <span className="inline-flex items-center gap-1"><Calendar size={11} className="text-violet-500" /> {isAr ? "30 يوماً" : "30d"}</span>
+              <span className="inline-flex items-center gap-1"><CreditCard size={11} className="text-violet-500" /> {isAr ? "بدون بطاقة" : "No card"}</span>
+              <span className="inline-flex items-center gap-1"><Users size={11} className="text-violet-500" /> {isAr ? "فريق كامل" : "Team"}</span>
             </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-5 text-xs text-[#6B7280]">
-              {trialTags.map(({ I, t }) => (
-                <span key={t} className="inline-flex items-center gap-1.5"><I size={14} className="text-violet-500" /> {t}</span>
-              ))}
-            </div>
-
             <button
               type="button"
               onClick={onStartTrial}
-              className="mt-6 w-full rounded-2xl py-3.5 font-bold text-white bg-gradient-to-l from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 shadow-lg shadow-fuchsia-500/30 transition"
+              className="mt-4 w-full rounded-xl py-2.5 text-sm font-bold text-white bg-gradient-to-l from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 shadow-md shadow-fuchsia-500/30 transition"
             >
-              {isAr ? "ابدأ التجربة المجانية" : "Start free trial"}
+              {isAr ? "ابدأ التجربة" : "Start free"}
             </button>
           </div>
 
-          {/* البطاقة الثانية: الباقة المؤسسية / السنوية */}
-          <div className="bg-white border border-slate-100 rounded-3xl p-7 shadow-sm flex flex-col">
-            <div className="flex justify-center">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 bg-gradient-to-l from-fuchsia-600 to-violet-600 text-white">
-                {isAr ? "الباقة المؤسسية" : "Enterprise Plan"}
-              </span>
-            </div>
-            <h3 className="text-center mt-4" style={{ fontFamily: "var(--font-display)" }}>
-              <span className="block text-base font-bold text-[#111827]">{isAr ? "الباقة المؤسسية" : "Enterprise Plan"}</span>
-              <span className="block text-2xl font-extrabold mt-1 bg-gradient-to-l from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">
-                {isAr ? "تواصل معنا" : "Contact us"}
-              </span>
-            </h3>
-            <p className="text-[#6B7280] text-sm leading-relaxed text-center mt-3">
-              {isAr
-                ? "حلول متكاملة مصممة خصيصاً لتلبية احتياجات المنشآت الكبيرة والمتوسطة. تبدأ الأسعار من 1,500 ر.س / سنوياً حسب شريحة عدد موظفيك."
-                : "Integrated solutions tailored for medium and large organizations. Pricing starts at 1,500 SAR/year based on your headcount tier."}
-            </p>
-
-            <div className="space-y-2.5 mt-5">
-              {entFeatures.map(({ I, t }) => (
-                <div key={t} className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3">
-                  <span className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0">
-                    <I size={17} className="text-white" />
-                  </span>
-                  <span className="text-sm font-medium text-[#374151]">{t}</span>
+          {/* الأعمدة 2-6: شرائح الاشتراك */}
+          {tiers.map((t) => (
+            <div key={t.id} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col">
+              <div className="flex justify-center">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-gradient-to-l from-fuchsia-600 to-violet-600 text-white">
+                  <Sparkles size={12} /> {t.tier}
+                </span>
+              </div>
+              <div className="text-center mt-3">
+                <div className="flex items-end justify-center gap-1">
+                  <span className="text-2xl font-extrabold bg-gradient-to-l from-fuchsia-600 to-violet-600 bg-clip-text text-transparent">{t.yearly.toLocaleString()}</span>
+                  <span className="text-[11px] text-[#6B7280] mb-1">{currency}</span>
                 </div>
-              ))}
+                <div className="text-[11px] text-[#6B7280] mt-0.5">{perYear}</div>
+              </div>
+              <div className="text-center mt-2">
+                <div className="text-[10px] text-[#9CA3AF]">{isAr ? "نطاق الموظفين" : "Headcount"}</div>
+                <div className="text-xs font-bold text-[#111827] leading-tight">{t.range}</div>
+              </div>
+              <ul className="grid grid-cols-1 gap-1.5 mt-3 flex-1">
+                {(feats[t.id] || []).map((f) => (
+                  <li key={f} className="flex items-center gap-1.5 text-[11px]">
+                    <span className="w-3.5 h-3.5 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                      <Check size={9} className="text-violet-600" />
+                    </span>
+                    <span className="text-[#374151]">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => onBuyTier?.(t)}
+                className="mt-4 w-full rounded-xl py-2.5 text-sm font-bold text-white bg-gradient-to-l from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 shadow-md shadow-fuchsia-500/30 transition inline-flex items-center justify-center gap-1"
+              >
+                {isAr ? "شراء الباقة" : "Buy plan"} <ChevronLeft size={14} />
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={onBuy}
-              className="mt-6 w-full rounded-2xl py-3.5 font-bold text-white bg-gradient-to-l from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 shadow-lg shadow-fuchsia-500/30 transition"
-            >
-              {isAr ? "شراء الباقة المناسبة لك" : "Buy the plan that suits you"}
-            </button>
-          </div>
+          ))}
         </div>
+
+        <p className="text-center text-[11px] text-[#9CA3AF] mt-5">
+          {isAr ? "جميع الأسعار سنوية شاملة الضريبة. تُحدّد الشريحة وفق عدد الموظفين." : "All prices annual, tax-inclusive. Tier determined by headcount."}
+        </p>
       </div>
     </section>
   );
