@@ -97,9 +97,6 @@ export default function CompanyLogin() {
           <span>{t.noAccount}{" "}
             <Link to="/company-register" className="text-primary font-medium hover:underline">{t.register}</Link>
           </span>
-          <span className="text-sm">{t.noTrialYet}{" "}
-            <Link to="/quote" className="text-primary hover:underline">{t.create}</Link>
-          </span>
           <Link to="/" className="text-xs text-muted-foreground hover:underline">{t.back}</Link>
         </div>
       }
