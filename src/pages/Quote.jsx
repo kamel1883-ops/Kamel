@@ -14,9 +14,8 @@ import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
 import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
 import PayPalCheckout from "@/components/checkout/PayPalCheckout";
-import PricingTiers from "@/components/checkout/PricingTiers";
 import TurnstileWidget from "@/components/TurnstileWidget";
-import { FileSignature, Download, CheckCircle2, UserPlus } from "lucide-react";
+import { FileSignature, Download, CheckCircle2, UserPlus, Sparkles } from "lucide-react";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -85,6 +84,14 @@ export default function Quote() {
     activateBtn: "إنشاء الحساب والدخول للبوابة",
     activateHint: "بوابة الشركات تتيح: إدارة الموظفين، الحضور والرواتب، الإجازات والسلف، نهاية الخدمة، التحليلات، وكل ميزات جدارة.",
     portalNote: "العميل يُجلب تلقائياً في بوابة المالك حيث يمكنك تمديد التجربة أو تأكيد الاشتراك أو الإيقاف أو إدارة حسابه.",
+    trialFormSub: "أدخل بيانات منشأتك لإطلاق فترة التجربة المجانية 30 يوماً — بدون أي رسوم أو بطاقة ائتمان.",
+    buyFormSub: "أدخل بيانات منشأتك ثم انتقل للخطوة التالية: الدفع وتأكيد الاشتراك السنوي.",
+    trialSubmit: "تأكيد إرسال طلب التجربة",
+    buySubmit: "الانتقال للدفع",
+    trialHeadcountNote: "عدد الموظفين يُساعدنا على تجهيز بيئة تجربتك — لن تُفرض أي رسوم خلال الـ 30 يوماً.",
+    step1Badge: "الخطوة 1 من 2",
+    trialDoneTitle: "تم تأكيد طلب تجربتك بنجاح",
+    trialDoneNote: "تم إنشاء تجربتك المجانية لمدة 30 يوماً بالرقم الوطني الموحد المسجّل. أنشئ حسابك وكلمة مرورك الآن للدخول إلى بوابة الشركات والاستفادة من كل مميزات المنصة — بينما يتابع فريقنا تفعيل اشتراكك السنوي لاحقاً.",
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -119,6 +126,14 @@ export default function Quote() {
     activateBtn: "Create account & enter the portal",
     activateHint: "The company portal gives you: employee management, attendance & payroll, leaves & loans, end of service, analytics, and every Jadara feature.",
     portalNote: "The customer is pulled automatically into the owner portal where you can extend the trial, confirm the subscription, suspend, or manage the account.",
+    trialFormSub: "Enter your company data to launch your 30-day free trial — no fees, no credit card.",
+    buyFormSub: "Enter your company data, then proceed to step two: payment and confirming your annual subscription.",
+    trialSubmit: "Confirm trial request",
+    buySubmit: "Proceed to payment",
+    trialHeadcountNote: "The employee count helps us set up your trial environment — no fees during the 30 days.",
+    step1Badge: "Step 1 of 2",
+    trialDoneTitle: "Your trial request is confirmed",
+    trialDoneNote: "Your 30-day free trial was created with your registered National Unified Number. Create your account and password now to enter the company portal and enjoy every platform feature — while our team processes your annual subscription later.",
   };
 
   const incoming = location.state?.company || null;
@@ -138,6 +153,7 @@ export default function Quote() {
   const [contractSaving, setContractSaving] = useState(false);
   const [captcha, setCaptcha] = useState("");
   const [selectedTier, setSelectedTier] = useState(null);
+  const [mode] = useState(() => (new URLSearchParams(location.search).get("tier") ? "buy" : "trial"));
   const [invoiceNo] = useState(() => "INV" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
 
   const pickTier = (tier) => {
@@ -259,9 +275,14 @@ export default function Quote() {
           </div>
         </div>
         <div className="max-w-2xl mx-auto px-5 py-10">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#8E24AA] bg-violet-100 rounded-full px-3 py-1 mb-3"><span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]" /> {t.step1Badge}</div>
           <h1 className="text-2xl sm:text-3xl font-bold">{t.formTitle}</h1>
-          <p className="text-muted-foreground mt-2">{t.formSub}</p>
-          <PricingTiers selectedId={selectedTier?.id} onBuy={pickTier} lang={isAr ? "ar" : "en"} />
+          <p className="text-muted-foreground mt-2">{mode === "trial" ? t.trialFormSub : t.buyFormSub}</p>
+          {mode === "buy" && selectedTier && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-violet-50 border border-violet-200 text-[#8E24AA] px-4 py-2 text-sm">
+              <Sparkles size={14} /> {isAr ? `${selectedTier.tier} — ${selectedTier.yearly.toLocaleString()} ريال / سنوياً` : `${selectedTier.tier} — ${selectedTier.yearly.toLocaleString()} SAR / year`}
+            </div>
+          )}
           <form id="quote-company-form" onSubmit={submit} className="bg-white border border-border rounded-2xl p-6 mt-6 space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label={t.company} value={form.name} onChange={(v) => set("name", v)} required />
@@ -273,7 +294,9 @@ export default function Quote() {
             </div>
             <Field label={t.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
             <Field label={t.headcountLabel} value={form.employee_count} onChange={(v) => set("employee_count", v.replace(/\D/g, ""))} required />
-            {(() => { const pt = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt ? <div className="text-sm rounded-xl bg-violet-50 border border-violet-200 text-violet-700 px-4 py-3">{t.headcountHint(pt.tier, pt.yearly)}</div> : <div className="text-xs text-muted-foreground">{t.headcountRequired}</div>; })()}
+            {mode === "trial" ? (
+              <div className="text-xs text-muted-foreground flex items-start gap-2"><Sparkles size={13} className="text-[#8E24AA] mt-0.5 shrink-0" /> {t.trialHeadcountNote}</div>
+            ) : (() => { const pt2 = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt2 ? <div className="text-sm rounded-xl bg-violet-50 border border-violet-200 text-[#8E24AA] px-4 py-3">{t.headcountHint(pt2.tier, pt2.yearly)}</div> : <div className="text-xs text-muted-foreground">{t.headcountRequired}</div>; })()}
             <div className="text-xs flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               <div><b>{t.emailNotice}:</b> {t.emailNoticeBody}</div>
@@ -284,9 +307,9 @@ export default function Quote() {
             </div>
             <TurnstileWidget onToken={setCaptcha} className="flex justify-center" />
             {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
-            <Button type="submit" disabled={submitting || !captcha} className="gap-2 min-w-[180px]">
-              {submitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-              {t.generate}
+            <Button type="submit" disabled={submitting || !captcha} className="gap-2 min-w-[200px] bg-[#8E24AA] hover:bg-[#7E22CE]">
+              {submitting ? <Loader2 size={16} className="animate-spin" /> : mode === "trial" ? <ShieldCheck size={16} /> : <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />}
+              {mode === "trial" ? t.trialSubmit : t.buySubmit}
             </Button>
             <p className="text-xs text-muted-foreground flex items-center gap-1.5"><ShieldCheck size={13} /> {t.secure}</p>
           </form>
@@ -310,6 +333,35 @@ export default function Quote() {
         </div>
       </div>
 
+      {mode === "trial" ? (
+        <div className="max-w-2xl mx-auto px-5 py-10">
+          <div className="print-quote bg-white border border-border rounded-2xl p-8 sm:p-10 shadow-sm">
+            <div className="flex items-center gap-2 text-emerald-700 font-bold">
+              <CheckCircle2 size={20} /> {t.trialDoneTitle}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">{t.trialDoneNote}</p>
+            <div className="mt-5 grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+              <Row k={t.company} v={company.name} />
+              <Row k={t.unified} v={company.unified_number} mono />
+              <Row k={t.email} v={company.contact_email} />
+              <Row k={t.phone} v={company.contact_phone} />
+            </div>
+            <div className="mt-6 pt-5 border-t border-border">
+              <div className="flex items-center gap-2 text-[#8E24AA] font-bold">
+                <UserPlus size={18} /> {t.activateTitle}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">{t.activateNote}</p>
+              <div className="mt-3">
+                <Link to={`/company-register?email=${encodeURIComponent(company.contact_email || "")}&unified=${encodeURIComponent(company.unified_number || "")}`} className="inline-flex items-center gap-2 rounded-2xl bg-[#8E24AA] hover:bg-[#7E22CE] text-white px-5 py-3 font-bold shadow-md shadow-[#8E24AA]/30 transition">
+                  {t.activateBtn} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">{t.activateHint}</p>
+              <div className="mt-3 text-xs text-slate-500 bg-violet-50/60 border border-violet-100 rounded-lg px-3 py-2">{t.portalNote}</div>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="max-w-4xl mx-auto px-5 py-8">
         <div className="print-quote bg-white border border-border rounded-2xl p-8 sm:p-12 shadow-sm">
           {/* رأس العرض */}
@@ -381,8 +433,8 @@ export default function Quote() {
             </div>
           </div>
 
-          {/* تنشيط الحساب للدخول لبوابة الشركات والاستفادة من كل المميزات */}
-          {company?.unified_number && (
+          {/* تنشيط الحساب للدخول لبوابة الشركات (بعد إتمام الدفع) */}
+          {paid && company?.unified_number && (
             <div className="py-6 border-t border-border">
               <div className="rounded-2xl border border-violet-200 bg-gradient-to-l from-violet-50 to-fuchsia-50 p-5">
                 <div className="flex items-center gap-2 text-violet-700 font-bold">
@@ -473,13 +525,18 @@ export default function Quote() {
               </Button>
             )}
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
-            <Link to={paid ? `/login?returnTo=/app` : `/company-register?email=${encodeURIComponent(company?.contact_email || "")}&unified=${encodeURIComponent(company?.unified_number || "")}`} className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
-              {paid ? (isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform") : t.activateBtn}
-              <ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
-            </Link>
+            {paid ? (
+              <Link to="/login?returnTo=/app" className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
+                {isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform"}
+                <ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+              </Link>
+            ) : (
+              <span className="text-sm text-muted-foreground">{isAr ? "↑ أكمل خطوة الدفع بالأعلى لتفعيل اشتراكك وإنشاء حسابك" : "↑ Complete payment above to activate your subscription and account"}</span>
+            )}
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
