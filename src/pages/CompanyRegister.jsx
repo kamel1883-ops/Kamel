@@ -80,8 +80,9 @@ export default function CompanyRegister() {
         pendingMsg: "Your account is created. The system owner will approve your admin access so you can sign in to the company portal. We'll notify you once activated.",
       };
 
-  const [email, setEmail] = useState("");
-  const [unified, setUnified] = useState("");
+  const sp = new URLSearchParams(window.location.search);
+  const [email, setEmail] = useState(sp.get("email") || "");
+  const [unified, setUnified] = useState((sp.get("unified") || "").replace(/\D/g, ""));
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");

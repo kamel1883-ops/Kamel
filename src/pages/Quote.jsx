@@ -16,7 +16,7 @@ import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
 import PayPalCheckout from "@/components/checkout/PayPalCheckout";
 import PricingTiers from "@/components/checkout/PricingTiers";
 import TurnstileWidget from "@/components/TurnstileWidget";
-import { FileSignature, Download, CheckCircle2 } from "lucide-react";
+import { FileSignature, Download, CheckCircle2, UserPlus } from "lucide-react";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -80,6 +80,11 @@ export default function Quote() {
     emailNotice: "تنويه مهم",
     emailNoticeBody: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7) هو معرّف منشأتكم الرسمي في المنصة. عند إتمام التحويل، سجّلوا في بوابة الشركات بهذا الرقم الوطني الموحّد وبنفس البريد المسجل هنا لتفعيل اشتراككم وإدارة حسابكم.",
     quoteEmailNote: (e, u) => `الرقم الوطني الموحّد للمنشآت لمنشأتكم في هذه المنصة هو: ${u} — عند إتمام التحويل يرجى التوجه إلى بوابة الشركات والتسجيل بنفس هذا الرقم الوطني الموحّد والمسجل بالبريد ${e} لتفعيل اشتراككم وإدارة حسابكم.`,
+    activateTitle: "أنشئ حسابك وكلمة مرورك للدخول لبوابة الشركات",
+    activateNote: "تجربتك المجانية مفعّلة بالرقم الموحّد المسجّل. أنشئ حسابك بنفس البريد والرقم الموحّد لطلبك لتدخل بوابة الشركات وتستفيد من كل مميزات المنصة الآن — بينما يتابع فريقنا تفعيل اشتراكك السنوي.",
+    activateBtn: "إنشاء الحساب والدخول للبوابة",
+    activateHint: "بوابة الشركات تتيح: إدارة الموظفين، الحضور والرواتب، الإجازات والسلف، نهاية الخدمة، التحليلات، وكل ميزات جدارة.",
+    portalNote: "العميل يُجلب تلقائياً في بوابة المالك حيث يمكنك تمديد التجربة أو تأكيد الاشتراك أو الإيقاف أو إدارة حسابه.",
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -109,6 +114,11 @@ export default function Quote() {
     emailNotice: "Important",
     emailNoticeBody: "The National Unified Number (10 digits starting with 7) is your organization's official identifier on the platform. After the transfer, register in the Companies portal with this National Unified Number and the same email entered here to activate your subscription and manage your account.",
     quoteEmailNote: (e, u) => `Your organization's National Unified Number for this platform is: ${u} — after the transfer, go to the Companies portal and register with this National Unified Number and the registered email ${e} to activate your subscription and manage your account.`,
+    activateTitle: "Create your account & password to enter the company portal",
+    activateNote: "Your free trial is active with your registered unified number. Create your account with the same email and unified number to enter the company portal and enjoy every platform feature now — while we process your annual subscription.",
+    activateBtn: "Create account & enter the portal",
+    activateHint: "The company portal gives you: employee management, attendance & payroll, leaves & loans, end of service, analytics, and every Jadara feature.",
+    portalNote: "The customer is pulled automatically into the owner portal where you can extend the trial, confirm the subscription, suspend, or manage the account.",
   };
 
   const incoming = location.state?.company || null;
@@ -371,6 +381,28 @@ export default function Quote() {
             </div>
           </div>
 
+          {/* تنشيط الحساب للدخول لبوابة الشركات والاستفادة من كل المميزات */}
+          {company?.unified_number && (
+            <div className="py-6 border-t border-border">
+              <div className="rounded-2xl border border-violet-200 bg-gradient-to-l from-violet-50 to-fuchsia-50 p-5">
+                <div className="flex items-center gap-2 text-violet-700 font-bold">
+                  <UserPlus size={18} /> {t.activateTitle}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{t.activateNote}</p>
+                <div className="mt-3">
+                  <Link
+                    to={`/company-register?email=${encodeURIComponent(company.contact_email || "")}&unified=${encodeURIComponent(company.unified_number || "")}`}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-l from-violet-600 to-fuchsia-600 text-white px-5 py-3 font-bold shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-fuchsia-500 transition"
+                  >
+                    {t.activateBtn} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+                  </Link>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">{t.activateHint}</p>
+                <div className="mt-3 text-xs text-slate-500 bg-white/60 border border-violet-100 rounded-lg px-3 py-2">{t.portalNote}</div>
+              </div>
+            </div>
+          )}
+
           {/* الدفع عبر PayPal + توليد العقد تلقائياً بعد الدفع */}
           <div className="py-6 border-t border-border">
             <div className="text-lg font-bold mb-1">{t.payTitle}</div>
@@ -441,8 +473,8 @@ export default function Quote() {
               </Button>
             )}
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
-            <Link to={`/login?returnTo=/app`} className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
-              {isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform"}
+            <Link to={paid ? `/login?returnTo=/app` : `/company-register?email=${encodeURIComponent(company?.contact_email || "")}&unified=${encodeURIComponent(company?.unified_number || "")}`} className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
+              {paid ? (isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform") : t.activateBtn}
               <ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
