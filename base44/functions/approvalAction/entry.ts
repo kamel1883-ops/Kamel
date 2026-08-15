@@ -46,11 +46,21 @@ export default async function (req) {
       actorName = user.full_name;
     }
 
-    const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 500);
+    const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 2000);
+    // خريطة موظف → رقمه الموحد لفحص انتماء السجل لمنشأة المعتمد (منع العبور بين المنشآت)
+    const idToUn = new Map();
+    for (const e of allEmployees || []) {
+      const un = String(e.unified_number || "").trim();
+      if (un && e.id) idToUn.set(e.id, un);
+    }
+    const myUn = String(myEmp.unified_number || "").trim();
+    const sameTenant = (employeeId) => !!myUn && idToUn.get(employeeId) === myUn;
 
     // ===== معتمد الموارد البشرية — سلف =====
     if (myEmp.is_approver_hr && type === "loans" && (action === "approve" || action === "reject")) {
       const r = await base44.asServiceRole.entities.LoanRequest.get(id);
+      if (!sameTenant(r.employee_id))
+        return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
       if (r.status !== "pending")
         return Response.json({ error: "الطلب ليس في مرحلة اعتماد الموارد البشرية" }, { status: 400 });
       if (action === "approve") {
@@ -79,6 +89,8 @@ export default async function (req) {
     // ===== معتمد الموارد البشرية — انتداب =====
     if (myEmp.is_approver_hr && type === "trips" && (action === "approve" || action === "reject")) {
       const r = await base44.asServiceRole.entities.BusinessTrip.get(id);
+      if (!sameTenant(r.employee_id))
+        return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
       if (r.status !== "pending")
         return Response.json({ error: "الطلب ليس في مرحلة اعتماد الموارد البشرية" }, { status: 400 });
       if (action === "approve") {
@@ -121,6 +133,8 @@ export default async function (req) {
     if (myEmp.is_approver_finance && (action === "confirm" || action === "reject")) {
       if (type === "leaves") {
         const r = await base44.asServiceRole.entities.LeaveRequest.get(id);
+        if (!sameTenant(r.employee_id))
+          return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
         if (!["awaiting_finance", "hr_approved"].includes(r.status))
           return Response.json({ error: "الطلب ليس في مرحلة الصرف" }, { status: 400 });
         if (action === "confirm") {
@@ -142,6 +156,8 @@ export default async function (req) {
 
       if (type === "loans") {
         const r = await base44.asServiceRole.entities.LoanRequest.get(id);
+        if (!sameTenant(r.employee_id))
+          return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
         if (!["awaiting_finance", "hr_approved"].includes(r.status))
           return Response.json({ error: "الطلب ليس في مرحلة الصرف" }, { status: 400 });
         if (action === "confirm") {
@@ -159,6 +175,8 @@ export default async function (req) {
 
       if (type === "trips") {
         const r = await base44.asServiceRole.entities.BusinessTrip.get(id);
+        if (!sameTenant(r.employee_id))
+          return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
         if (r.status !== "awaiting_finance")
           return Response.json({ error: "الطلب ليس في مرحلة الصرف" }, { status: 400 });
         if (action === "confirm") {
@@ -176,6 +194,8 @@ export default async function (req) {
 
       if (type === "settlements") {
         const r = await base44.asServiceRole.entities.Settlement.get(id);
+        if (!sameTenant(r.employee_id))
+          return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
         if (r.status !== "awaiting_finance")
           return Response.json({ error: "الطلب ليس في مرحلة الصرف" }, { status: 400 });
         if (action === "confirm") {

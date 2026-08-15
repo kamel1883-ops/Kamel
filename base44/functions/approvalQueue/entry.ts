@@ -35,8 +35,17 @@ export default async function (req) {
       actorName = user.full_name;
     }
 
+    // خريطة موظف → رقمه الموحد لتحديد نطاق منشأة المعتمد (منع العبور بين المنشآت)
+    const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 2000);
+    const idToUn = new Map();
+    for (const e of allEmployees || []) {
+      const un = String(e.unified_number || "").trim();
+      if (un && e.id) idToUn.set(e.id, un);
+    }
+    const myUn = String(myEmp.unified_number || "").trim();
+    const sameTenant = (rec) => !!myUn && idToUn.get(rec.employee_id) === myUn;
+
     if (myEmp.is_approver_manager) {
-      const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 500);
       const subs = (allEmployees || []).filter((e) => e.manager_id === myEmp.id);
       const subIds = new Set(subs.map((s) => s.id));
       const allLeaves = await base44.asServiceRole.entities.LeaveRequest.list("-created_date", 500);
@@ -59,8 +68,8 @@ export default async function (req) {
         base44.asServiceRole.entities.LoanRequest.list("-created_date", 500),
         base44.asServiceRole.entities.BusinessTrip.list("-created_date", 500),
       ]);
-      const loans = (allLoans || []).filter((l) => l.status === "pending");
-      const trips = (allTrips || []).filter((t) => t.status === "pending");
+      const loans = (allLoans || []).filter((l) => l.status === "pending" && sameTenant(l));
+      const trips = (allTrips || []).filter((t) => t.status === "pending" && sameTenant(t));
       return Response.json({ role: "hr", myEmp, actorId, actorName, loans, trips });
     }
 
@@ -72,10 +81,10 @@ export default async function (req) {
         base44.asServiceRole.entities.Settlement.list("-created_date", 500),
       ]);
       const finStatuses = ["awaiting_finance", "hr_approved"];
-      const leaves = (allLeaves || []).filter((l) => finStatuses.includes(l.status));
-      const loans = (allLoans || []).filter((l) => finStatuses.includes(l.status));
-      const trips = (allTrips || []).filter((t) => t.status === "awaiting_finance");
-      const settlements = (allSettlements || []).filter((s) => s.status === "awaiting_finance");
+      const leaves = (allLeaves || []).filter((l) => finStatuses.includes(l.status) && sameTenant(l));
+      const loans = (allLoans || []).filter((l) => finStatuses.includes(l.status) && sameTenant(l));
+      const trips = (allTrips || []).filter((t) => t.status === "awaiting_finance" && sameTenant(t));
+      const settlements = (allSettlements || []).filter((s) => s.status === "awaiting_finance" && sameTenant(s));
       return Response.json({ role: "finance", myEmp, actorId, actorName, leaves, loans, trips, settlements });
     }
 
