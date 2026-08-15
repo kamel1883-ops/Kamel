@@ -8,6 +8,7 @@ import TurnstileWidget from "@/components/TurnstileWidget";
 import ShareBar from "@/components/ShareBar";
 import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
+import PricingColumns from "@/components/landing/PricingColumns";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -488,46 +489,7 @@ export default function Landing() {
       </section>
 
       {/* الباقات */}
-      <section id="pricing" className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 bg-sky-400/15 border border-sky-400/25 text-sky-200 rounded-full px-3 py-1 text-xs">{isAr ? "نظام تسعير سنوي / مرن" : "Annual / Flexible pricing system"}</div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mt-4" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "دليل هيكلة واحتساب خطة الأسعار الشرائحية العادلة" : "Fair Tiered Pricing Plan — Structure & Calculation"}</h2>
-        </div>
-
-        <div className="mt-8 rounded-3xl border border-white/10 overflow-hidden bg-[#0b1426]/70">
-          <div className="px-6 py-4 border-b border-white/10 bg-[#161c2d]/80">
-            <div className="font-bold text-white/90">{isAr ? "1. جدول شرائح الأسعار الرسمية" : "1. Official Pricing Tiers Table"}</div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[#161c2d] text-white/80">
-                <tr>
-                  <th className="text-right font-semibold px-4 py-3">{isAr ? "الفئة / الشريحة" : "Tier"}</th>
-                  <th className="text-right font-semibold px-4 py-3">{isAr ? "نطاق أعداد العمال / الموظفين" : "Headcount range"}</th>
-                  <th className="text-right font-semibold px-4 py-3">{isAr ? "السعر السنوي (ر.س)" : "Annual (SAR)"}</th>
-                  <th className="text-right font-semibold px-4 py-3">{isAr ? "ملاحظات القيمة والتغطية" : "Coverage notes"}</th>
-                </tr>
-              </thead>
-              <tbody className="text-white/80">
-                {(isAr ? tiersAr : tiersEn).map((row, i) => (
-                  <tr key={row.id || i} className={i % 2 ? "bg-white/[0.03]" : "bg-transparent"}>
-                    <td className="px-4 py-3 font-semibold text-white whitespace-nowrap">{row.tier}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{row.range}</td>
-                    <td className="px-4 py-3 whitespace-nowrap"><span className="font-extrabold text-sky-300">{row.yearly.toLocaleString()} {isAr ? "ر.س / سنوياً" : "SAR/yr"}</span></td>
-                    <td className="px-4 py-3 text-white/65">{row.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-6 py-4 border-t border-white/10 text-xs text-white/50">{isAr ? "جميع الأسعار سنوية شاملة الضريبة. تُحدّد الشريحة المناسبة وفق عدد الموظفين." : "All prices are annual, tax-inclusive. The applicable tier is determined by employee headcount."}</div>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-4 mt-6">
-          <button onClick={() => scrollTo("trial")} className="bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3.5 font-medium transition">{isAr ? "جرّب مجاناً 30 يوماً" : "Try free for 30 days"}</button>
-          <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 rounded-2xl py-3.5 font-semibold shadow-xl shadow-fuchsia-500/30 transition">{isAr ? "شراء الباقة المناسبة لك" : "Buy the plan that suits you"}</button>
-        </div>
-      </section>
+      <PricingColumns isAr={isAr} onStartTrial={() => scrollTo("trial")} onBuy={() => navigate("/quote")} />
 
       {/* تجربة / تسجيل */}
       <section id="trial" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-14">
