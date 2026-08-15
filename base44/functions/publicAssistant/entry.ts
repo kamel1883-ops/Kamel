@@ -1,4 +1,8 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { createRateLimiter } from "../../shared/turnstile.ts";
+
+// تقييد المعدّل لكل IP لمنع الإجهاد الآلي واستنزاف أرصدة الذكاء الاصطناعي (5 رسائل / 10 د)
+const limiter = createRateLimiter(10 * 60 * 1000, 5);
 
 // مساعد جدارة العام — مرشد إرشادي فقط، مخصص للصفحات العامة (صفحة الهبوط، بوابة دخول الشركات،
 // بوابة دخول الموظفين قبل الجلسة). لا يتطلب جلسة ولا يجلب بيانات. يجيب عن الأسئلة العامة حول
@@ -9,7 +13,14 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    const message = String(body.message || "").trim();
+
+    // حماية تقييد المعدّل قبل استدعاء LLM — تحقق آجل من IP لمنع استنزاف الأرصدة
+    const ip = limiter.clientIp(req);
+    if (limiter.rateLimited(ip)) {
+      return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
+    }
+
+    const message = String(body.message || "").trim().slice(0, 500);
     const history: any[] = Array.isArray(body.history) ? body.history.slice(-10) : [];
     const lang = String(body.lang || "ar").slice(0, 5);
     const LANG_NAME: Record<string, string> = { ar: "العربية الفصحى", en: "English", hi: "हिन्दी", ne: "नेपाली", bn: "বাংলা", fil: "Filipino", ur: "اردو" };
