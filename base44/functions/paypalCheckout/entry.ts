@@ -86,14 +86,14 @@ export default async function (req) {
         body: JSON.stringify({
           intent: 'CAPTURE',
           purchase_units: [{
-            amount: { currency_code: 'SAR', value: String(amount) },
+            amount: { currency_code: 'SAR', value: amount.toFixed(2) },
             description: `Jadara annual subscription — ${tier.tier}`,
           }],
         }),
       });
       const order = await orderRes.json();
       if (!orderRes.ok)
-        return Response.json({ error: order?.message || 'paypal_create_failed' }, { status: 502 });
+        return Response.json({ error: order?.message || 'paypal_create_failed', details: order?.details, debug_id: order?.debug_id }, { status: 502 });
 
       return Response.json({
         ok: true, id: order.id, amount, currency: 'SAR',
