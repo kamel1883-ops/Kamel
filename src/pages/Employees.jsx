@@ -63,14 +63,18 @@ export default function Employees() {
   const [profileEmp, setProfileEmp] = useState(null);
   const [termOpen, setTermOpen] = useState(false);
   const [termEmp, setTermEmp] = useState(null);
+  const [myUnified, setMyUnified] = useState("");
 
   const load = async () => {
-    const [data, orgs] = await Promise.all([
+    const [data, orgs, tenantRes] = await Promise.all([
       base44.entities.Employee.list("-created_date", 500),
       base44.entities.Organization.list("-created_date", 1),
+      base44.functions.invoke("getMyTenant", {}).catch(() => null),
     ]);
     setEmployees(data);
     setOrg(orgs[0] || null);
+    const td = tenantRes?.data || tenantRes;
+    setMyUnified(String(td?.tenant?.unified_number || "").trim());
     setLoading(false);
   };
   useEffect(() => { load(); }, [editTarget, formOpen, branchOpen]);
@@ -282,7 +286,7 @@ export default function Employees() {
         </div>
       )}
 
-      <EmployeeForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={load} employee={editTarget} />
+      <EmployeeForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={load} employee={editTarget} unifiedNumber={myUnified} />
       <EmployeeImport open={importOpen} onClose={() => setImportOpen(false)} onSaved={load} />
       <BranchManager open={branchOpen} onClose={() => setBranchOpen(false)} onSaved={load} />
       <EmployeeTripsDialog open={tripsOpen} onClose={() => setTripsOpen(false)} employee={tripsEmp} />

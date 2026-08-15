@@ -88,10 +88,13 @@ export default async function (req) {
       // maps: user.id → tenantId عبر admin_user_id مباشرة، أو عبر tacкет admin_email /
       // contact_email المطابق لبريد المستخدم — يغطّي الحالات التي لم يُضبط فيها
       // admin_user_id (مثل المنشآت التي أُنشئت قبل اعتماد المالك).
+      const unifiedToTenantId = new Map<string, string>();
       const idToTenantId = new Map<string, string>();
       const emailToTenantId = new Map<string, string>();
       for (const t of tenants || []) {
         const tid = String(t.id || "");
+        const un = String(t.unified_number || "").trim();
+        if (un) unifiedToTenantId.set(un, tid);
         if (t.admin_user_id) idToTenantId.set(String(t.admin_user_id), tid);
         for (const em of [t.admin_email, t.contact_email]) {
           const k = String(em || "").trim().toLowerCase();
@@ -105,16 +108,29 @@ export default async function (req) {
         const k = String(u.email || "").trim().toLowerCase();
         if (k && emailToTenantId.has(k)) userIdToTenantId.set(u.id, emailToTenantId.get(k)!);
       }
-      // عدّ الموظفين النشطين/الإجمالي لكل منشأة عبر الربط user.id → tenantId
+      // عدّ الموظفين لكل منشأة عبر unified_number أولاً ثم fallback عبر user.id
+      // مع تعبئة رجعية لمن يفتقد unified_number (ربط دائم بالعميل)
       const byTenant: Record<string, { active: number; total: number }> = {};
+      const backfill: { id: string; unified_number: string }[] = [];
       for (const e of employees || []) {
-        const uid = String(e.created_by_id || "");
-        if (!uid) continue;
-        const tid = userIdToTenantId.get(uid) || idToTenantId.get(uid);
+        const empUn = String(e.unified_number || "").trim();
+        let tid: string | undefined = empUn ? unifiedToTenantId.get(empUn) : undefined;
+        if (!tid) {
+          const uid = String(e.created_by_id || "");
+          tid = userIdToTenantId.get(uid) || idToTenantId.get(uid);
+          if (tid && !empUn) {
+            const tMatch = (tenants || []).find((tt: any) => String(tt.id) === tid);
+            const un2 = String(tMatch?.unified_number || "").trim();
+            if (un2 && e.id) backfill.push({ id: String(e.id), unified_number: un2 });
+          }
+        }
         if (!tid) continue;
         if (!byTenant[tid]) byTenant[tid] = { active: 0, total: 0 };
         byTenant[tid].total++;
         if (e.status === "active") byTenant[tid].active++;
+      }
+      if (backfill.length) {
+        try { await base44.asServiceRole.entities.Employee.bulkUpdate(backfill); } catch {}
       }
       const stats = { total: 0, trials: 0, quotes: 0, paid: 0, suspended: 0, cancelled: 0, revenue: 0 };
       for (const x of tenants || []) {

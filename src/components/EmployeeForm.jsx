@@ -28,9 +28,10 @@ const empty = {
   health_insurance_number: "", health_insurance_expiry: "",
   bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null, ticket_value: "",
   annual_leave_entitlement: 21,
+  unified_number: "",
 };
 
-export default function EmployeeForm({ open, onClose, onSaved, employee }) {
+export default function EmployeeForm({ open, onClose, onSaved, employee, unifiedNumber }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
@@ -87,6 +88,8 @@ export default function EmployeeForm({ open, onClose, onSaved, employee }) {
     e.preventDefault(); setSaving(true);
     try {
       const payload = { ...form, base_salary: Number(form.base_salary) || 0, housing_allowance: Number(form.housing_allowance) || 0, transport_allowance: Number(form.transport_allowance) || 0, other_allowances: Number(form.other_allowances) || 0, ticket_value: Number(form.ticket_value) || 0 };
+      // ربط دائم بالرقم الموحّد للمنشأة — يبقى الموظف مربوطاً بالعميل حتى لو حُذف الحساب
+      if (!employee && unifiedNumber && !payload.unified_number) payload.unified_number = String(unifiedNumber).trim();
       if (employee) await base44.entities.Employee.update(employee.id, payload);
       else await base44.entities.Employee.create(payload);
       onSaved?.(); onClose?.();

@@ -93,6 +93,15 @@ export default async function (req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
+    // اجلب الرقم الموحد للمنشأة الحالية (ربط دائم للموظفين بالعميل) — عبر بريد المستخدم
+    const meEmail = String(user.email || '').trim().toLowerCase();
+    const myTenants = await base44.asServiceRole.entities.Tenant.filter({}, undefined, 100);
+    const myTenant = (myTenants || []).find(
+      (tt) => String(tt.admin_email || '').trim().toLowerCase() === meEmail
+        || String(tt.contact_email || '').trim().toLowerCase() === meEmail
+    );
+    const myUnified = String(myTenant?.unified_number || '').trim();
+
     const body = await req.json().catch(() => ({}));
     const fileUrl = String(body.file_url || '').trim();
     if (!fileUrl) return Response.json({ error: 'ملف مطلوب' }, { status: 400 });
@@ -208,6 +217,8 @@ export default async function (req) {
       const ent = computeEntitlement(r.hire_date, annualDays);
       r.prior_used_leave = r.prior_used_leave || 0;
       r.leave_balance = Math.max(0, Math.round((ent - r.prior_used_leave) * 10) / 10);
+      // ربط دائم بالرقم الموحد للمنشأة — يبقى الموظفون وطلباتهم مربوطين بالعميل حتى لو حُذف الحساب
+      r.unified_number = myUnified;
       toCreate.push(r);
     }
 
