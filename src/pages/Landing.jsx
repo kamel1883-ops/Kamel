@@ -489,7 +489,7 @@ export default function Landing() {
       </section>
 
       {/* الباقات */}
-      <PricingColumns isAr={isAr} onStartTrial={() => scrollTo("trial")} onBuyTier={() => navigate("/quote")} />
+      <PricingColumns isAr={isAr} onStartTrial={() => scrollTo("trial")} onBuyTier={(tier) => navigate(`/quote?tier=${tier.id}`)} />
 
       {/* تجربة / تسجيل */}
       <section id="trial" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-14">

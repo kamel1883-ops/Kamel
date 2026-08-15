@@ -17,6 +17,24 @@ export const PRICING_TIERS_EN = [
   { id: "enterprise", min: 701, tier: "Tier 5 (Enterprise)", range: "701 – 1,000+ employees", yearly: 8500, note: "Unlimited coverage, dedicated technical support, and API integration for large enterprises." },
 ];
 
+// المميزات الموحّدة — نفس القائمة الكاملة في كل باقة (بدون استثناء)
+export const FULL_FEATURES_AR = [
+  "إدارة الموظفين", "الحضور والانصراف (بصمة ذاتية)", "إدارة الإجازات والموافقات",
+  "رحلات العمل والانتداب", "إدارة الرواتب", "التأمينات الاجتماعية (GOSI)",
+  "نهاية الخدمة", "إدارة الأداء", "التخطيط التعاقبي", "الهيكل التنظيمي",
+  "تخطيط القوة العاملة", "تحليلات الموارد البشرية", "إدارة الأسطول والمركبات",
+  "تراخيص المنشأة الحكومية", "التكاملات الذكية", "بوابة تجربة العميل",
+  "سياسة العمل والإنذارات الذكية", "بوابة الموظف الذاتية",
+];
+export const FULL_FEATURES_EN = [
+  "Employee Management", "Attendance & Self Check-in", "Leaves & Approvals",
+  "Business Trips & Deputation", "Payroll", "GOSI (Social Insurance)",
+  "End of Service", "Performance Management", "Succession Planning",
+  "Organization Structure", "Workforce Planning", "HR Analytics",
+  "Fleet & Vehicles", "Government Licenses", "Smart Integrations",
+  "Client Trial Portal", "Labor Policy & Smart Warnings", "Employee Self-Service Portal",
+];
+
 // إرجاع الشريحة المطابقة لعدد الموظفين
 export function tierForCount(count, tiers = PRICING_TIERS_AR) {
   const n = Number(count);

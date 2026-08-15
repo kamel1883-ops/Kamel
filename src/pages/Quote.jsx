@@ -143,6 +143,19 @@ export default function Quote() {
     }
   }, []);
 
+  // عند القدوم من صفحة الهبوط بزر "شراء الباقة" — تحديد الشريحة المختارة مسبقاً وتعبئة عددها ليعكس السعر.
+  useEffect(() => {
+    if (company) return;
+    const tierId = new URLSearchParams(location.search).get("tier");
+    if (!tierId) return;
+    const found = (isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN).find((tt) => tt.id === tierId);
+    if (found) {
+      setSelectedTier(found);
+      setForm((f) => (f.employee_count ? f : { ...f, employee_count: String(found.min) }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // يُستدعى تلقائياً بعد نجاح دفع PayPal — يولّد العقد ويُحمّله ويحفظ نسخة في بوابة المالك.
   const onPaid = async (res) => {
     setPaid(res);
