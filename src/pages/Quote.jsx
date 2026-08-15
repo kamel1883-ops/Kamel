@@ -12,7 +12,9 @@ import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Ma
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
-import { FileSignature, Download } from "lucide-react";
+import PayPalCheckout from "@/components/checkout/PayPalCheckout";
+import TurnstileWidget from "@/components/TurnstileWidget";
+import { FileSignature, Download, CheckCircle2 } from "lucide-react";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -61,7 +63,10 @@ export default function Quote() {
     renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك (حسب عدد الموظفين وقت التجديد).",
     headcountLabel: "عدد الموظفين المتوقع *", headcountHint: (tier, price) => `شريحتك: ${tier} — السعر السنوي: ${price.toLocaleString()} ريال`,
     headcountRequired: "أدخل عدد الموظفين المتوقع لحساب سعر الباقة تلقائياً",
-    payTitle: "بيانات التحويل البنكي", payNote: "يُرجى إجراء التحويل إلى الحساب التالي وإرسال إثبات التحويل لتفعيل اشتراكك:",
+    payTitle: "الدفع عبر PayPal", payNote: "ادفع الآن عبر PayPal أو ببطاقة فيزا / ماستر كارد / مدى — يُحسب المبلغ تلقائياً وفق شريحة عدد موظفيك. عند إتمام الدفع يُولَّد عقد الاشتراك الرسمي تلقائياً وتُفعَّل منشأتك.",
+    amountDue: "المبلغ المستحق", paidTitle: "تم الدفع وتفعيل الاشتراك", paidNote: "تم تأكيد الدفع وتوليد عقد الاشتراك الرسمي. يمكنك تحميل نسختك أدناه — كما حُفظت نسخة في بوابة مالك المنصة.",
+    downloadContract: "تحميل العقد (PDF)", paySecure: "الدفع آمن ومشفّر عبر PayPal. لن نطلب بيانات بطاقتك.",
+    errCaptcha: "أكّد أنك لست روبوت",
     beneficiary: "المستفيد", bank: "البنك", iban: "رقم الآيبان", account: "رقم الحساب",
     copy: "نسخ الآيبان", copied: "تم النسخ", proofTitle: "بعد التحويل",
     proof: "أرسل إثبات التحويل عبر واتساب أو البريد، وسيتم تفعيل اشتراكك خلال 24 ساعة.",
@@ -87,7 +92,10 @@ export default function Quote() {
     renewNote: "The subscription renews annually at your tier's value (based on headcount at renewal).",
     headcountLabel: "Expected employees count *", headcountHint: (tier, price) => `Your tier: ${tier} — Annual: ${price.toLocaleString()} SAR`,
     headcountRequired: "Enter the expected employee count to auto-calculate the package price",
-    payTitle: "Bank Transfer Details", payNote: "Please transfer to the account below and send proof to activate your subscription:",
+    payTitle: "Pay via PayPal", payNote: "Pay now via PayPal or a Visa / Mastercard / mada card — the amount is auto-calculated from your employee-count tier. On payment your official subscription contract generates automatically and your account activates.",
+    amountDue: "Amount due", paidTitle: "Payment confirmed & subscription active", paidNote: "Your payment is confirmed and the official subscription contract has been generated. Download your copy below — a copy is also saved in the platform owner portal.",
+    downloadContract: "Download contract (PDF)", paySecure: "Secure, encrypted checkout via PayPal. We never ask for your card details.",
+    errCaptcha: "Please verify you're human",
     beneficiary: "Beneficiary", bank: "Bank", iban: "IBAN", account: "Account number",
     copy: "Copy IBAN", copied: "Copied", proofTitle: "After transfer",
     proof: "Send the transfer proof via WhatsApp or email; your subscription activates within 24 hours.",
@@ -112,9 +120,14 @@ export default function Quote() {
   const [tenantId, setTenantId] = useState(null);
   const [contractProof, setContractProof] = useState(null);
   const [contractBusy, setContractBusy] = useState(false);
+  const [paid, setPaid] = useState(null);
+  const [contractPdfUrl, setContractPdfUrl] = useState(null);
+  const [contractSaving, setContractSaving] = useState(false);
+  const [captcha, setCaptcha] = useState("");
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
   const matchedTier = company?.employee_count ? tierForCount(company.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
+  const amount = discount ? discount.amount : (matchedTier ? matchedTier.yearly : 0);
 
   useEffect(() => {
     if (incoming && !registered) {
@@ -122,16 +135,17 @@ export default function Quote() {
     }
   }, []);
 
-  const openContract = async () => {
-    setContractBusy(true);
+  // يُستدعى تلقائياً بعد نجاح دفع PayPal — يولّد العقد ويُحمّله ويحفظ نسخة في بوابة المالك.
+  const onPaid = async (res) => {
+    setPaid(res);
+    if (contractPdfUrl) return; // تجرى مرة واحدة فقط
+    setContractSaving(true);
     try {
       const blob = await renderToPdfBlob(<SubscriptionContractDoc company={company || form} quoteNo={quoteNo} date={quoteDate} />);
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      // احتفظ بنسخة تلقائية عند بيانات العميل في بوابة المالك (قابلة للتحميل PDF لاحقاً)
-      try {
-        const file_url = await uploadPdfBlob(blob, `Jadara-Contract-${quoteNo}.pdf`);
-        if (file_url && tenantId && contractProof) {
+      const file_url = await uploadPdfBlob(blob, `Jadara-Contract-${quoteNo}.pdf`);
+      setContractPdfUrl(file_url);
+      if (tenantId && contractProof) {
+        try {
           await base44.functions.invoke("saveQuoteContract", {
             tenant_id: tenantId,
             quoteNo,
@@ -139,10 +153,12 @@ export default function Quote() {
             file_url,
             proof: contractProof,
           });
-        }
-      } catch (_) { /* لا تكسر فتح العقد إن تعذّر الحفظ */ }
+        } catch (_) {}
+      }
     } catch (_) {
-    } finally { setContractBusy(false); }
+    } finally {
+      setContractSaving(false);
+    }
   };
 
   const submit = async (e) => {
@@ -152,9 +168,10 @@ export default function Quote() {
     const email = form.contact_email.trim();
     const unified = form.unified_number.trim();
     if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^7\d{7,11}$/.test(unified) || !Number(form.employee_count) || Number(form.employee_count) <= 0) { setErr(t.errForm); return; }
+    if (!captcha) { setErr(t.errCaptcha); return; }
     setSubmitting(true);
     try {
-      const res = await base44.functions.invoke("createTrial", { ...form, lead_source: "quote", discount_code: form.discount_code?.trim() || undefined });
+      const res = await base44.functions.invoke("createTrial", { ...form, lead_source: "quote", discount_code: form.discount_code?.trim() || undefined, captcha_token: captcha });
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setTenantId(res?.tenant_id || null);
@@ -211,8 +228,9 @@ export default function Quote() {
               <Label>{t.discCode}</Label>
               <Input value={form.discount_code || ""} onChange={(e) => set("discount_code", e.target.value.toUpperCase())} placeholder="JADARA100" />
             </div>
+            <TurnstileWidget onToken={setCaptcha} className="flex justify-center" />
             {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
-            <Button type="submit" disabled={submitting} className="gap-2 min-w-[180px]">
+            <Button type="submit" disabled={submitting || !captcha} className="gap-2 min-w-[180px]">
               {submitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
               {t.generate}
             </Button>
@@ -233,9 +251,6 @@ export default function Quote() {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">{t.barBack}</Link>
-            <Button onClick={openContract} disabled={contractBusy} variant="outline" className="gap-2">
-              {contractBusy ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />} {isAr ? "العقد الرسمي" : "Official Contract"}
-            </Button>
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
           </div>
         </div>
@@ -312,39 +327,42 @@ export default function Quote() {
             </div>
           </div>
 
-          {/* بيانات التحويل البنكي */}
+          {/* الدفع عبر PayPal + توليد العقد تلقائياً بعد الدفع */}
           <div className="py-6 border-t border-border">
             <div className="text-lg font-bold mb-1">{t.payTitle}</div>
             <p className="text-sm text-muted-foreground mb-4">{t.payNote}</p>
-            <div className="rounded-2xl border border-border bg-slate-50/60 p-5 grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-              <Row k={t.beneficiary} v={isAr ? BANK.beneficiaryAr : BANK.beneficiaryEn} />
-              <Row k={t.bank} v={isAr ? BANK.bankAr : BANK.bankEn} />
-              <Row k={t.account} v={BANK.account} mono />
-              <div className="sm:col-span-2 flex items-center justify-between gap-3 flex-wrap">
-                <div><span className="text-muted-foreground">{t.iban}: </span><span className="font-mono font-bold tracking-wide">{BANK.iban}</span></div>
-                <button type="button" onClick={copyIban} className="no-print text-xs inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-white hover:bg-muted transition">
-                  {copied ? <><Check size={13} className="text-emerald-600" /> {t.copied}</> : <><Copy size={13} /> {t.copy}</>}
-                </button>
+            {paid ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+                <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                  <CheckCircle2 size={18} /> {t.paidTitle}
+                </div>
+                <p className="text-sm text-emerald-700/80 mt-1">{t.paidNote}</p>
+                <Button
+                  onClick={() => contractPdfUrl && window.open(contractPdfUrl, "_blank")}
+                  disabled={!contractPdfUrl || contractSaving}
+                  className="gap-2 mt-4"
+                >
+                  {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                  {t.downloadContract}
+                </Button>
               </div>
-            </div>
-          </div>
-
-          {/* بعد التحويل */}
-          <div className="py-6 border-t border-border text-sm">
-            <div className="font-semibold mb-1">{t.proofTitle}</div>
-            <p className="text-muted-foreground">{t.proof}</p>
-            <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 mt-3">
-              <div className="flex gap-2 text-sm text-amber-900">
-                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-                <div><b>{t.emailNotice}: </b>{t.quoteEmailNote(company.contact_email, company.unified_number)}</div>
+            ) : (
+              <div className="rounded-2xl border border-violet-200 bg-violet-50/40 p-5">
+                <div className="flex items-center justify-between gap-3 mb-3 text-sm">
+                  <span className="text-muted-foreground">{t.amountDue}</span>
+                  <span className="font-extrabold text-violet-700 text-xl">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</span>
+                </div>
+                <PayPalCheckout
+                  employeeCount={Number(company.employee_count) || 0}
+                  discountCode={discount?.code}
+                  tenantId={tenantId}
+                  contractProof={contractProof}
+                  amount={amount}
+                  onPaid={onPaid}
+                  lang={isAr ? "ar" : "en"}
+                />
               </div>
-              <div className="mt-2 text-base font-bold text-amber-900 break-all" dir="ltr">{company.unified_number} — {company.contact_email}</div>
-            </div>
-            <div className="flex flex-wrap gap-3 mt-3">
-              <a href={WHATSAPP} target="_blank" rel="noreferrer" className="no-print inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200"><MessageCircle size={14} /> WhatsApp</a>
-              <a href={`mailto:${SALES_EMAIL}`} className="no-print inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 border border-violet-200"><Mail size={14} /> {SALES_EMAIL}</a>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">{t.afterNote}</p>
+            )}
           </div>
 
           {/* التوقيع والختم */}
@@ -357,9 +375,11 @@ export default function Quote() {
           </div>
 
           <div className="no-print mt-8 flex items-center justify-center gap-3">
-            <Button onClick={openContract} disabled={contractBusy} variant="outline" className="gap-2">
-              {contractBusy ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />} {isAr ? "تنزيل العقد الرسمي (PDF)" : "Download Official Contract"}
-            </Button>
+            {paid && contractPdfUrl && (
+              <Button onClick={() => window.open(contractPdfUrl, "_blank")} className="gap-2">
+                {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} {t.downloadContract}
+              </Button>
+            )}
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
             <Link to={`/login?returnTo=/app`} className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
               {isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform"}
