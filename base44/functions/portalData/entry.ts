@@ -127,8 +127,8 @@ export default async function (req) {
         if (!tid) continue;
         if (!byTenant[tid]) byTenant[tid] = { active: 0, total: 0 };
         byTenant[tid].total++;
-        // الموظف «النشط» = العامل على رأس العمل أو في إجازة (لا يزال على رأس العمل)
-        if (e.status === "active" || e.status === "on_leave") byTenant[tid].active++;
+        // الموظف «النشط» = كل موظف فعلي لا يزال على رأس العمل (يشمل كل أنواع الإجازات: سنوية/مرضية/طارئة...)
+        if (e.status !== "terminated" && e.status !== "resigned") byTenant[tid].active++;
       }
       if (backfill.length) {
         try { await base44.asServiceRole.entities.Employee.bulkUpdate(backfill); } catch {}
