@@ -1,21 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
-import TurnstileWidget from "@/components/TurnstileWidget";
 import ShareBar from "@/components/ShareBar";
 import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import { useI18n } from "@/lib/i18n";
-import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
-  Calculator, Target, Car, BarChart3, Lock, Zap, Phone, Mail, Building2,
-  Loader2, BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
+  Calculator, Target, Car, BarChart3, Zap, Phone, Mail, Building2,
+  BadgeCheck, Star, Clock, TrendingUp, Bell, CreditCard,
   Briefcase, GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
   Network, ClipboardList, Plane, CalendarPlus, Server, Linkedin, Facebook, Twitter,
@@ -232,36 +230,6 @@ export default function Landing() {
     footContact: "Contact us", footPlatform: "Platform", copy: "© 2027 Jadara — All rights reserved",
   };
 
-  const [form, setForm] = useState({
-    name: "", commercial_register: "", industry: "",
-    contact_name: "", contact_email: "", contact_phone: "", unified_number: "", city: "",
-    employee_count: "",
-  });
-  const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(false);
-  const [err, setErr] = useState("");
-  const [captcha, setCaptcha] = useState("");
-  const [captchaKey, setCaptchaKey] = useState(0);
-
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!captcha) { setErr(isAr ? "أكمل التحقق البشري أولاً" : "Please complete the human check first"); return; }
-    if (!form.employee_count || Number(form.employee_count) <= 0) { setErr(isAr ? "أدخل عدد الموظفين المتوقع" : "Please enter the expected employee count"); return; }
-    setSaving(true); setErr("");
-    try {
-      await base44.functions.invoke("createTrial", { ...form, captcha_token: captcha });
-      setDone(true);
-    } catch (error) {
-      setErr(error?.response?.data?.error || error?.message || (isAr ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again"));
-      setCaptcha("");
-      setCaptchaKey((k) => k + 1);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
@@ -291,7 +259,7 @@ export default function Landing() {
             <LanguageToggle />
             <Link to="/portal" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
             <Link to="/company-login" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.login}</Link>
-            <button onClick={() => scrollTo("trial")} className="text-base bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-violet-500/30 transition">{t.start}</button>
+            <button onClick={() => navigate("/quote")} className="text-base bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-violet-500/30 transition">{t.start}</button>
           </div>
         </div>
       </header>
@@ -308,7 +276,7 @@ export default function Landing() {
           </h1>
           <p className="text-white/70 text-lg mt-5 max-w-xl leading-relaxed">{t.heroDesc}</p>
           <div className="flex flex-wrap gap-3 mt-7">
-            <button onClick={() => scrollTo("trial")} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-500/30 flex items-center gap-2 transition">
+            <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-500/30 flex items-center gap-2 transition">
               <Zap size={18} /> {t.cta1}
             </button>
             <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium transition">{t.cta2}</button>
@@ -489,46 +457,7 @@ export default function Landing() {
       </section>
 
       {/* الباقات */}
-      <PricingColumns isAr={isAr} onStartTrial={() => scrollTo("trial")} onBuyTier={(tier) => navigate(`/quote?tier=${tier.id}`)} />
-
-      {/* تجربة / تسجيل */}
-      <section id="trial" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-14">
-        <SectionHead tag={t.trialTag} title={t.trialTitle} />
-        {done ? (
-          <div className="bg-white/5 border border-emerald-400/30 rounded-3xl p-10 text-center mt-8">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-              <BadgeCheck size={32} className="text-emerald-300" />
-            </div>
-            <div className="text-2xl font-bold">{t.doneTitle}</div>
-            <p className="text-white/70 mt-2">{t.doneDesc}</p>
-            <Link to="/company-login?returnTo=/app" className="inline-flex items-center gap-2 mt-6 text-violet-300 hover:text-violet-200">
-              {t.doneCta} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-7 mt-8 space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Field label={t.form.company} value={form.name} onChange={(v) => set("name", v)} required />
-              <Field label={t.form.industry} value={form.industry} onChange={(v) => set("industry", v)} />
-              <Field label={t.form.city} value={form.city} onChange={(v) => set("city", v)} />
-              <Field label={t.form.contact} value={form.contact_name} onChange={(v) => set("contact_name", v)} />
-              <Field label={t.form.unified} value={form.unified_number} onChange={(v) => set("unified_number", v.replace(/\D/g, ""))} required />
-              <Field label={t.form.phone} value={form.contact_phone} onChange={(v) => set("contact_phone", v)} required />
-            </div>
-            <Field label={t.form.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
-            <Field label={t.form.headcount} value={form.employee_count} onChange={(v) => set("employee_count", v.replace(/\D/g, ""))} required />
-            {(() => { const pt = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt ? <div className="text-sm rounded-xl bg-violet-500/10 border border-violet-400/20 text-violet-200 px-4 py-3">{t.form.pricePreview(pt.tier, pt.yearly)}</div> : null; })()}
-            <div className="flex justify-center">
-              <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
-            </div>
-            {err && <div className="text-rose-300 text-sm bg-rose-500/10 border border-rose-400/20 rounded-xl p-3">{err}</div>}
-            <button type="submit" disabled={saving || !captcha} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition disabled:opacity-60">
-              {saving ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} />} {t.form.submit}
-            </button>
-            <p className="text-white/50 text-xs text-center flex items-center justify-center gap-1.5"><Lock size={13} /> {t.form.secure}</p>
-          </form>
-        )}
-      </section>
+      <PricingColumns isAr={isAr} onStartTrial={() => navigate("/quote")} onBuyTier={(tier) => navigate(`/quote?tier=${tier.id}`)} />
 
       {/* شارك جدارة */}
       <section id="share" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-12 text-center">
@@ -620,16 +549,6 @@ function Stat({ n, l }) {
     <div>
       <div className="text-2xl font-extrabold bg-gradient-to-l from-violet-300 to-blue-300 bg-clip-text text-transparent">{n}</div>
       <div className="text-white/50 text-xs mt-0.5">{l}</div>
-    </div>
-  );
-}
-
-function Field({ label, value, onChange, type = "text", required }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="text-xs text-white/60">{label}</label>
-      <input type={type} value={value} required={required} onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-400/50" />
     </div>
   );
 }

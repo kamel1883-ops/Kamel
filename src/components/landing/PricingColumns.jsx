@@ -59,8 +59,8 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
               <div className="text-[11px] font-bold text-[#111827] mb-2">{includes}</div>
               <ul className="grid grid-cols-1 gap-1">
                 {feats.map((f, i) => (
-                  <li key={i} className="flex items-start gap-1.5 text-[11px] leading-tight">
-                    <Check size={10} className="text-violet-600 mt-0.5 shrink-0" />
+                  <li key={i} className="flex items-start gap-2 text-[13px] leading-relaxed">
+                    <Check size={12} className="text-violet-600 mt-0.5 shrink-0" />
                     <span className="text-[#374151]">{f}</span>
                   </li>
                 ))}
