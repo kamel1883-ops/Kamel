@@ -9,11 +9,9 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    // jq ضمن تعريف الـ workflow لا يستطيع الوصول إلى env (مقيّد بـ payload فقط)،
-    // لذا يُمرّر وسم ثابت "base44_workflow_cron" من المجدول ويُعامل الاستدعاء كـcron موثوق
-    // عند مطابقته، أو عند تمرير سرّ cron الحقيقي. الطلبات اليدوية الخارجية محمية عبر صلاحية admin.
-    const WORKFLOW_MARKER = "base44_workflow_cron";
-    const isCron = body?.cron_secret === WORKFLOW_MARKER || verifyCronSecret(body?.cron_secret);
+    // الـ workflow لا يستطيع حقن سرّ عبر jq، فيُمرّر قيمة سرّية حقيقية فقط (CRON_SECRET)
+    // من المجدول أو استدعاء المالك اليدوي — تُرفض الوسوم الثابتة. الطلبات الخارجية محمية عبر صلاحية admin.
+    const isCron = verifyCronSecret(body?.cron_secret);
     if (!isCron) {
       let user;
       try { user = await base44.auth.me(); } catch (e) {
