@@ -12,6 +12,7 @@ import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Ma
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
+import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
 import PayPalCheckout from "@/components/checkout/PayPalCheckout";
 import PricingTiers from "@/components/checkout/PricingTiers";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -65,8 +66,8 @@ export default function Quote() {
     headcountLabel: "عدد الموظفين المتوقع *", headcountHint: (tier, price) => `شريحتك: ${tier} — السعر السنوي: ${price.toLocaleString()} ريال`,
     headcountRequired: "أدخل عدد الموظفين المتوقع لحساب سعر الباقة تلقائياً",
     payTitle: "الدفع عبر PayPal", payNote: "ادفع الآن عبر PayPal أو ببطاقة فيزا / ماستر كارد / مدى — يُحسب المبلغ تلقائياً وفق شريحة عدد موظفيك. عند إتمام الدفع يُولَّد عقد الاشتراك الرسمي تلقائياً وتُفعَّل منشأتك.",
-    amountDue: "المبلغ المستحق", paidTitle: "تم الدفع وتفعيل الاشتراك", paidNote: "تم تأكيد الدفع وتوليد عقد الاشتراك الرسمي. يمكنك تحميل نسختك أدناه — كما حُفظت نسخة في بوابة مالك المنصة.",
-    downloadContract: "تحميل العقد (PDF)", paySecure: "الدفع آمن ومشفّر عبر PayPal. لن نطلب بيانات بطاقتك.",
+    amountDue: "المبلغ المستحق", paidTitle: "تم الدفع وتفعيل الاشتراك", paidNote: "تم تأكيد الدفع وتوليد عقد الاشتراك الرسمي والفاتورة غير الضريبية ببيانات منشأتك وباقتك ومميزاتها. يمكنك تحميل نسختك أدناه — كما حُفظت نسخة في بوابة مالك المنصة.",
+    downloadContract: "تحميل العقد (PDF)", downloadInvoice: "تحميل الفاتورة (PDF)", paySecure: "الدفع آمن ومشفّر عبر PayPal. لن نطلب بيانات بطاقتك.",
     errCaptcha: "أكّد أنك لست روبوت",
     beneficiary: "المستفيد", bank: "البنك", iban: "رقم الآيبان", account: "رقم الحساب",
     copy: "نسخ الآيبان", copied: "تم النسخ", proofTitle: "بعد التحويل",
@@ -94,8 +95,8 @@ export default function Quote() {
     headcountLabel: "Expected employees count *", headcountHint: (tier, price) => `Your tier: ${tier} — Annual: ${price.toLocaleString()} SAR`,
     headcountRequired: "Enter the expected employee count to auto-calculate the package price",
     payTitle: "Pay via PayPal", payNote: "Pay now via PayPal or a Visa / Mastercard / mada card — the amount is auto-calculated from your employee-count tier. On payment your official subscription contract generates automatically and your account activates.",
-    amountDue: "Amount due", paidTitle: "Payment confirmed & subscription active", paidNote: "Your payment is confirmed and the official subscription contract has been generated. Download your copy below — a copy is also saved in the platform owner portal.",
-    downloadContract: "Download contract (PDF)", paySecure: "Secure, encrypted checkout via PayPal. We never ask for your card details.",
+    amountDue: "Amount due", paidTitle: "Payment confirmed & subscription active", paidNote: "Your payment is confirmed and the official subscription contract and non-tax invoice (with your company data, plan, and features) have been generated. Download your copies below — copies are also saved in the platform owner portal.",
+    downloadContract: "Download contract (PDF)", downloadInvoice: "Download invoice (PDF)", paySecure: "Secure, encrypted checkout via PayPal. We never ask for your card details.",
     errCaptcha: "Please verify you're human",
     beneficiary: "Beneficiary", bank: "Bank", iban: "IBAN", account: "Account number",
     copy: "Copy IBAN", copied: "Copied", proofTitle: "After transfer",
@@ -123,9 +124,11 @@ export default function Quote() {
   const [contractBusy, setContractBusy] = useState(false);
   const [paid, setPaid] = useState(null);
   const [contractPdfUrl, setContractPdfUrl] = useState(null);
+  const [invoicePdfUrl, setInvoicePdfUrl] = useState(null);
   const [contractSaving, setContractSaving] = useState(false);
   const [captcha, setCaptcha] = useState("");
   const [selectedTier, setSelectedTier] = useState(null);
+  const [invoiceNo] = useState(() => "INV" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
 
   const pickTier = (tier) => {
     setSelectedTier(tier);
@@ -156,13 +159,16 @@ export default function Quote() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // يُستدعى تلقائياً بعد نجاح دفع PayPal — يولّد العقد ويُحمّله ويحفظ نسخة في بوابة المالك.
+  // يُستدعى تلقائياً بعد نجاح دفع PayPal — يولّد العقد والفاتورة غير الضريبية ويحمّلهما.
   const onPaid = async (res) => {
     setPaid(res);
     if (contractPdfUrl) return; // تجرى مرة واحدة فقط
     setContractSaving(true);
+    const comp = company || form;
+    const tier = comp?.employee_count ? tierForCount(comp.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : selectedTier;
+    const total = discount ? discount.amount : tier ? tier.yearly : 0;
     try {
-      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={company || form} quoteNo={quoteNo} date={quoteDate} />);
+      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={comp} quoteNo={quoteNo} date={quoteDate} />);
       const file_url = await uploadPdfBlob(blob, `Jadara-Contract-${quoteNo}.pdf`);
       setContractPdfUrl(file_url);
       if (tenantId && contractProof) {
@@ -176,6 +182,22 @@ export default function Quote() {
           });
         } catch (_) {}
       }
+      // توليد الفاتورة غير الضريبية ببيانات العميل والباقة والمميزات
+      try {
+        const invBlob = await renderToPdfBlob(
+          <SubscriptionInvoiceDoc
+            company={comp}
+            tier={tier}
+            invNo={invoiceNo}
+            date={quoteDate}
+            amount={total}
+            employeeCount={Number(comp?.employee_count) || 0}
+            isAr={isAr}
+          />
+        );
+        const inv_url = await uploadPdfBlob(invBlob, `Jadara-Invoice-${invoiceNo}.pdf`);
+        setInvoicePdfUrl(inv_url);
+      } catch (_) {}
     } catch (_) {
     } finally {
       setContractSaving(false);
@@ -359,14 +381,25 @@ export default function Quote() {
                   <CheckCircle2 size={18} /> {t.paidTitle}
                 </div>
                 <p className="text-sm text-emerald-700/80 mt-1">{t.paidNote}</p>
-                <Button
-                  onClick={() => contractPdfUrl && window.open(contractPdfUrl, "_blank")}
-                  disabled={!contractPdfUrl || contractSaving}
-                  className="gap-2 mt-4"
-                >
-                  {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                  {t.downloadContract}
-                </Button>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <Button
+                    onClick={() => contractPdfUrl && window.open(contractPdfUrl, "_blank")}
+                    disabled={!contractPdfUrl || contractSaving}
+                    className="gap-2"
+                  >
+                    {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                    {t.downloadContract}
+                  </Button>
+                  <Button
+                    onClick={() => invoicePdfUrl && window.open(invoicePdfUrl, "_blank")}
+                    disabled={!invoicePdfUrl || contractSaving}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />}
+                    {t.downloadInvoice}
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="rounded-2xl border border-violet-200 bg-violet-50/40 p-5">
@@ -400,6 +433,11 @@ export default function Quote() {
             {paid && contractPdfUrl && (
               <Button onClick={() => window.open(contractPdfUrl, "_blank")} className="gap-2">
                 {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} {t.downloadContract}
+              </Button>
+            )}
+            {paid && invoicePdfUrl && (
+              <Button onClick={() => window.open(invoicePdfUrl, "_blank")} variant="outline" className="gap-2">
+                {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />} {t.downloadInvoice}
               </Button>
             )}
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
