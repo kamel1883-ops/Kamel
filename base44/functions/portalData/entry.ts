@@ -79,7 +79,20 @@ export default async function (req) {
     // ====== إدارة العملاء — بوابة المالك ======
     if (action === "owner_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
-      const tenants = await base44.asServiceRole.entities.Tenant.list("-created_date", 500);
+      const [tenants, employees] = await Promise.all([
+        base44.asServiceRole.entities.Tenant.list("-created_date", 500),
+        base44.asServiceRole.entities.Employee.list("-created_date", 2000),
+      ]);
+      // تفريد موظفي كل منشأة عبر created_by_id (حساب مسؤول المنشأة) — يميّز النشطين
+      // عن غير النشطين لينكشف التلاعب بعدد الموظفين المعلن لدى الترقية للاشتراك السنوي.
+      const byUser: Record<string, { active: number; total: number }> = {};
+      for (const e of employees || []) {
+        const uid = String(e.created_by_id || "");
+        if (!uid) continue;
+        if (!byUser[uid]) byUser[uid] = { active: 0, total: 0 };
+        byUser[uid].total++;
+        if (e.status === "active") byUser[uid].active++;
+      }
       const stats = { total: 0, trials: 0, quotes: 0, paid: 0, suspended: 0, cancelled: 0, revenue: 0 };
       for (const x of tenants || []) {
         if (/\(المالك\)|\(owner\)/i.test(x?.name || "")) continue;
@@ -89,6 +102,10 @@ export default async function (req) {
         if (x.status === "active") { stats.paid++; stats.revenue += Number(x.quoted_amount) || 0; }
         if (x.status === "expired") stats.suspended++;
         if (x.status === "cancelled") stats.cancelled++;
+        const uid = String(x.admin_user_id || x.created_by_id || "");
+        const counts = byUser[uid] || { active: 0, total: 0 };
+        x.employees_active_count = counts.active;
+        x.employees_total_count = counts.total;
       }
       return Response.json({ ok: true, tenants: tenants || [], stats });
     }

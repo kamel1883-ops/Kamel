@@ -26,7 +26,8 @@ export default function ClientsManager({ session }) {
     filterActive: "فعّال", filterSuspended: "موقوف", filterExpiring: "قارب الانتهاء", filterCancelled: "ملغيات",
     searchPh: "ابحث باسم المنشأة أو جهة الاتصال أو الرقم الموحد…",
     thCustomer: "العميل", thContact: "جهة التواصل", thSource: "المصدر", thStatus: "الحالة",
-    thContract: "التعاقد", thEnd: "نهاية الفترة", thActions: "إجراءات",
+    thContract: "التعاقد", thEnd: "نهاية الفترة", thActual: "الموظفون الفعليون", thActions: "إجراءات",
+    lblActive: "نشط", lblTotal: "إجمالي", lblDeclared: "المعلن", overFlag: "تجاوز العدد المعلن",
     srcTrial: "تجربة", srcQuote: "عرض سعر",
     wa: "واتساب", view: "عرض وطباعة", confirmed: "مؤكّد", notConfirmed: "غير مؤكد",
     noClients: "لا يوجد عملاء بعد — يُسجّلون تلقائياً من صفحة الهبوط أو طلب عرض السعر.",
@@ -46,7 +47,8 @@ export default function ClientsManager({ session }) {
     filterActive: "Active", filterSuspended: "Suspended", filterExpiring: "Expiring", filterCancelled: "Cancelled",
     searchPh: "Search by company, contact or unified number…",
     thCustomer: "Customer", thContact: "Contact", thSource: "Source", thStatus: "Status",
-    thContract: "Contract", thEnd: "Period end", thActions: "Actions",
+    thContract: "Contract", thEnd: "Period end", thActual: "Actual employees", thActions: "Actions",
+    lblActive: "active", lblTotal: "total", lblDeclared: "declared", overFlag: "Over declared",
     srcTrial: "Trial", srcQuote: "Quote",
     wa: "WhatsApp", view: "View & print", confirmed: "Confirmed", notConfirmed: "Not confirmed",
     noClients: "No clients yet — auto-registered from landing or quote requests.",
@@ -227,6 +229,7 @@ export default function ClientsManager({ session }) {
                     <th className="text-start font-medium px-4 py-3">{t.thStatus}</th>
                     <th className="text-start font-medium px-4 py-3">{t.thContract}</th>
                     <th className="text-start font-medium px-4 py-3">{t.thEnd}</th>
+                    <th className="text-start font-medium px-4 py-3">{t.thActual}</th>
                     <th className="text-start font-medium px-4 py-3">{t.thActions}</th>
                   </tr>
                 </thead>
@@ -292,6 +295,31 @@ export default function ClientsManager({ session }) {
                           )}
                         </td>
                         <td className="px-4 py-3">
+                          {owner ? (
+                            <span className="text-xs text-emerald-700 font-medium">{t.lifetime}</span>
+                          ) : (() => {
+                            const a = Number(x.employees_active_count) || 0;
+                            const tot = Number(x.employees_total_count) || 0;
+                            const decl = Number(x.employee_count) || 0;
+                            const over = decl > 0 && a > decl;
+                            return (
+                              <div className="leading-tight">
+                                <span className={cn("font-bold", over ? "text-rose-600" : "text-emerald-700")}>{a}</span>
+                                <span className="text-muted-foreground text-xs"> {t.lblActive}</span>
+                                <span className="text-muted-foreground mx-1">·</span>
+                                <span className="font-medium">{tot}</span>
+                                <span className="text-muted-foreground text-xs"> {t.lblTotal}</span>
+                                {decl > 0 && (
+                                  <div className={cn("text-[11px] mt-0.5", over ? "text-rose-600 font-medium" : "text-muted-foreground")}>
+                                    {t.lblDeclared}: {decl}
+                                    {over && <span className="ms-1">· {t.overFlag}</span>}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </td>
+                        <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-1.5">
                             {!owner && x.contact_phone && (
                               <a href={waLink(x, isAr)} target="_blank" rel="noreferrer"
@@ -324,7 +352,7 @@ export default function ClientsManager({ session }) {
                     );
                   })}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={7} className="p-12 text-center text-muted-foreground">{t.noClients}</td></tr>
+                    <tr><td colSpan={8} className="p-12 text-center text-muted-foreground">{t.noClients}</td></tr>
                   )}
                 </tbody>
               </table>
