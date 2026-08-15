@@ -248,6 +248,43 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    // تغيير بريد المنشأة — عند فقدان البريد الأصلي. يدعو بريداً جديداً كمسؤول،
+    // يربط المنشأة به، ويُعيد تفعيل الحساب. كل البيانات تبقى عبر الرقم الموحد.
+    if (action === "owner_change_email") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      const new_email = String(body.new_email || "").trim().toLowerCase();
+      if (!tenant_id || !new_email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(new_email))
+        return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const oldUserId = String(t.admin_user_id || "");
+      const currentEmail = String(t.admin_email || t.contact_email || "").trim().toLowerCase();
+      if (currentEmail === new_email && oldUserId) return Response.json({ ok: true, same: true });
+      // ادعُ البريد الجديد كمسؤول منشأة
+      try { await base44.asServiceRole.users.inviteUser(new_email, "admin"); } catch {
+        return Response.json({ ok: false, error: "invite_failed" }, { status: 500 });
+      }
+      // ابحث عن المستخدم الجديد لربط admin_user_id به
+      const found = await base44.asServiceRole.entities.User.filter({}, undefined, 500);
+      const newUser = (found || []).find((u) => String(u.email || "").toLowerCase() === new_email);
+      const newUserId = String(newUser?.id || "");
+      // أَنسِ المالك القديم (إسقاط صلاحية المسؤول) لمنع الدخول بالبريد المفقود
+      if (oldUserId && oldUserId !== newUserId) {
+        try { await base44.asServiceRole.entities.User.update(oldUserId, { role: "user" }); } catch {}
+      }
+      // أعد ربط المنشأة بالبريد/الحساب الجديد وأعد تفعيلها إن كانت موقوفة/ملغاة
+      const wasInactive = t.status === "expired" || t.status === "cancelled";
+      const restoreStatus = wasInactive ? (t.suspended_from === "trial" ? "trial" : "active") : t.status;
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        admin_email: new_email,
+        contact_email: new_email,
+        admin_user_id: newUserId,
+        status: restoreStatus,
+        suspended_from: wasInactive ? null : t.suspended_from,
+      });
+      return Response.json({ ok: true, reactivated: wasInactive });
+    }
+
     if (action === "owner_approve_admin") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
       const tenant_id = String(body.tenant_id || "");

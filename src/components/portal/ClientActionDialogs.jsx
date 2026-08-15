@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download } from "lucide-react";
+import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail } from "lucide-react";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -172,10 +172,12 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
   const [days, setDays] = useState("7");
   const [amount, setAmount] = useState("");
   const [end, setEnd] = useState("");
+  const [newEmail, setNewEmail] = useState("");
   useEffect(() => {
     if (open && tenant) {
       setDays("7");
       setAmount(String(tenant.quoted_amount || ""));
+      setNewEmail("");
       const d = new Date(); d.setHours(0, 0, 0, 0); d.setFullYear(d.getFullYear() + 1);
       setEnd(d.toISOString().slice(0, 10));
     }
@@ -246,6 +248,20 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
         </div>
         {!owner && (
         <div className="no-print p-5 border-t border-border bg-slate-50 space-y-4">
+          {/* تغيير بريد المنشأة — عند فقدان البريد الأصلي — يبقى الحساب وكل البيانات عبر الرقم الموحد */}
+          <div className="space-y-2 rounded-xl border border-blue-200 bg-blue-50/50 p-3">
+            <div className="text-sm font-medium flex items-center gap-1.5"><Mail size={15} className="text-blue-600" /> {isAr ? "تغيير بريد المنشأة (عند فقدان البريد)" : "Change tenant email (lost email)"}</div>
+            <div className="text-xs text-muted-foreground leading-relaxed">{isAr ? "يدعو بريداً جديداً كمسؤول، يربط المنشأة به، ويُعيد تفعيل الحساب. كل البيانات تبقى محفوظة عبر الرقم الموحد." : "Invites a new admin email, re-links the tenant to it, reactivates the account. All data stays via the unified number."}</div>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="space-y-1 flex-1 min-w-[180px]">
+                <Label className="text-xs text-muted-foreground">{isAr ? "البريد الجديد" : "New email"}</Label>
+                <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="h-9" placeholder="new@company.com" dir="ltr" />
+              </div>
+              <Button size="sm" onClick={() => onAction(tenant.id, "owner_change_email", { new_email: newEmail.trim().toLowerCase() })} disabled={busy || !newEmail.trim()} className="gap-1.5">
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />} {isAr ? "ربط البريد الجديد" : "Re-link email"}
+              </Button>
+            </div>
+          </div>
           {status === "trial" && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap rounded-xl border border-amber-200 bg-amber-50/60 p-3">
