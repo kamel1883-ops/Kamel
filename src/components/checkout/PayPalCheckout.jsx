@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, ShieldCheck } from "lucide-react";
+import PaymentMethods from "@/components/checkout/PaymentMethods";
 
 // يحمّل PayPal SDK مرة واحدة (Singleton) ثم يعرض أزرار PayPal + بطاقة الفيزا/الماستر كارد/مدى.
 // createOrder/onApprove يطلبان دالة paypalCheckout الخلفية. عند النجاح يُستدعى onPaid(results).
@@ -91,6 +92,7 @@ export default function PayPalCheckout({ employeeCount, discountCode, tenantId, 
 
   return (
     <div className="w-full">
+      <PaymentMethods lang={lang} />
       <div ref={containerRef} className="paypal-buttons min-h-[120px]" />
       {busy && (
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-3">
