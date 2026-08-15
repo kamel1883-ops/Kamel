@@ -13,7 +13,7 @@ import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing"
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
 import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
-import PayPalCheckout from "@/components/checkout/PayPalCheckout";
+import StripeCheckout from "@/components/checkout/StripeCheckout";
 import BankTransferPayment from "@/components/checkout/BankTransferPayment";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { FileSignature, Download, CheckCircle2, UserPlus, Sparkles } from "lucide-react";
@@ -65,9 +65,9 @@ export default function Quote() {
     renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك (حسب عدد الموظفين وقت التجديد).",
     headcountLabel: "عدد الموظفين المتوقع *", headcountHint: (tier, price) => `شريحتك: ${tier} — السعر السنوي: ${price.toLocaleString()} ريال`,
     headcountRequired: "أدخل عدد الموظفين المتوقع لحساب سعر الباقة تلقائياً",
-    payTitle: "الدفع عبر PayPal", payNote: "ادفع الآن عبر PayPal أو ببطاقة فيزا / ماستر كارد / مدى — يُحسب المبلغ تلقائياً وفق شريحة عدد موظفيك. عند إتمام الدفع يُولَّد عقد الاشتراك الرسمي تلقائياً وتُفعَّل منشأتك.",
+    payTitle: "الدفع ببطاقة أو أبل باي", payNote: "ادفع الآن ببطاقة (مدى / فيزا / ماستركارد) أو أبل باي مباشرةً — يُحسب المبلغ تلقائياً وفق شريحة عدد موظفيك. عند إتمام الدفع يُولَّد عقد الاشتراك الرسمي تلقائياً وتُفعَّل منشأتك.",
     amountDue: "المبلغ المستحق", paidTitle: "تم الدفع وتفعيل الاشتراك", paidNote: "تم تأكيد الدفع وتوليد عقد الاشتراك الرسمي والفاتورة غير الضريبية ببيانات منشأتك وباقتك ومميزاتها. يمكنك تحميل نسختك أدناه — كما حُفظت نسخة في بوابة مالك المنصة.",
-    downloadContract: "تحميل العقد (PDF)", downloadInvoice: "تحميل الفاتورة (PDF)", paySecure: "الدفع آمن ومشفّر عبر PayPal. لن نطلب بيانات بطاقتك.",
+    downloadContract: "تحميل العقد (PDF)", downloadInvoice: "تحميل الفاتورة (PDF)", paySecure: "الدفع آمن ومشفّر عبر Stripe — بطاقة أو أبل باي مباشرة، دون تسجيل دخول PayPal.",
     errCaptcha: "أكّد أنك لست روبوت",
     beneficiary: "المستفيد", bank: "البنك", iban: "رقم الآيبان", account: "رقم الحساب",
     copy: "نسخ الآيبان", copied: "تم النسخ", proofTitle: "بعد التحويل",
@@ -107,9 +107,9 @@ export default function Quote() {
     renewNote: "The subscription renews annually at your tier's value (based on headcount at renewal).",
     headcountLabel: "Expected employees count *", headcountHint: (tier, price) => `Your tier: ${tier} — Annual: ${price.toLocaleString()} SAR`,
     headcountRequired: "Enter the expected employee count to auto-calculate the package price",
-    payTitle: "Pay via PayPal", payNote: "Pay now via PayPal or a Visa / Mastercard / mada card — the amount is auto-calculated from your employee-count tier. On payment your official subscription contract generates automatically and your account activates.",
+    payTitle: "Pay by card or Apple Pay", payNote: "Pay now by card (mada / Visa / Mastercard) or Apple Pay directly — the amount is auto-calculated from your employee-count tier. On payment your official subscription contract generates automatically and your account activates.",
     amountDue: "Amount due", paidTitle: "Payment confirmed & subscription active", paidNote: "Your payment is confirmed and the official subscription contract and non-tax invoice (with your company data, plan, and features) have been generated. Download your copies below — copies are also saved in the platform owner portal.",
-    downloadContract: "Download contract (PDF)", downloadInvoice: "Download invoice (PDF)", paySecure: "Secure, encrypted checkout via PayPal. We never ask for your card details.",
+    downloadContract: "Download contract (PDF)", downloadInvoice: "Download invoice (PDF)", paySecure: "Secure encrypted Stripe checkout — your card or Apple Pay directly, no PayPal login.",
     errCaptcha: "Please verify you're human",
     beneficiary: "Beneficiary", bank: "Bank", iban: "IBAN", account: "Account number",
     copy: "Copy IBAN", copied: "Copied", proofTitle: "After transfer",
@@ -507,7 +507,7 @@ export default function Quote() {
                         className="rounded-2xl border border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-50 p-4 text-right transition"
                       >
                         <div className="flex items-center gap-2 text-violet-700 font-bold">
-                          <span>💳</span> {isAr ? "PayPal / بطاقات (فيزا، ماستر، مدى، أبل باي)" : "PayPal / Cards (Visa, Mastercard, mada, Apple Pay)"}
+                          <span>💳</span> {isAr ? "بطاقات (مدى، فيزا، ماستر) + أبل باي" : "Cards (mada, Visa, Mastercard) + Apple Pay"}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">{isAr ? "دفع فوري وتلقائي" : "Instant automated payment"}</div>
                       </button>
@@ -525,7 +525,7 @@ export default function Quote() {
                   </>
                 ) : payMethod === "paypal" ? (
                   <div>
-                    <PayPalCheckout
+                    <StripeCheckout
                       employeeCount={Number(company.employee_count) || 0}
                       discountCode={discount?.code}
                       tenantId={tenantId}
