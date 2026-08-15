@@ -1,7 +1,6 @@
 import React from "react";
 
-// شريط خيارات الدفع المعتمدة — كلها تُحصّل عبر حساب PayPal (بطاقات مدى/فيزا/ماستركارد أو رصيد PayPal).
-// الشعارات SVG مبسّطة عالية الوضوح، بدون اعتماد على مصادر خارجية.
+// شريط خيارات الدفع المعتمدة — كلها تُحصّل عبر حساب PayPal (أبل باي / مدى / فيزا / ماستركارد / رصيد PayPal).
 export default function PaymentMethods({ lang = "ar" }) {
   const isAr = lang === "ar";
   return (
@@ -10,6 +9,7 @@ export default function PaymentMethods({ lang = "ar" }) {
         {isAr ? "طرق الدفع المقبولة (كلها عبر PayPal)" : "Accepted payment methods (all via PayPal)"}
       </div>
       <div className="flex items-center justify-center gap-2 flex-wrap">
+        <ApplePayLogo />
         <MadaLogo />
         <VisaLogo />
         <MastercardLogo />
@@ -17,14 +17,14 @@ export default function PaymentMethods({ lang = "ar" }) {
       </div>
       <p className="text-[11px] text-muted-foreground text-center mt-2">
         {isAr
-          ? "اختر زر PayPal بالأسفل، ثم ادفع ببطاقتك (مدى/فيزا/ماستركارد) أو حساب PayPal — المبلغ يُحوّل لحسابنا تلقائياً."
-          : "Tap the PayPal button below, then pay with your card (mada/Visa/Mastercard) or PayPal balance — funds settle to our account automatically."}
+          ? "اختر زر الدفع بالأسفل — أبل باي أو بطاقتك (مدى/فيزا/ماستركارد) أو حساب PayPal — وسيدخل المبلغ في حسابنا مباشرة."
+          : "Pick a button below — Apple Pay, your card (mada/Visa/Mastercard), or PayPal balance — funds settle to our account directly."}
       </p>
     </div>
   );
 }
 
-function Chip({ children, bg, border }) {
+function Chip({ children, border }) {
   return (
     <div
       className="inline-flex items-center justify-center h-9 px-3 rounded-lg border bg-white shadow-sm"
@@ -35,8 +35,18 @@ function Chip({ children, bg, border }) {
   );
 }
 
+function ApplePayLogo() {
+  return (
+    <Chip border="#000000">
+      <svg width="60" height="20" viewBox="0 0 60 20" aria-label="Apple Pay">
+        <path d="M9 7c1.2 0 2-0.9 2-2 0-1.2-0.9-2-2-2-1.1 0-2 0.9-2 2 0 1.1 0.9 2 2 2zM4 8c-1.4 0-2.5 1.1-2.5 2.7 0 1.9 1.7 4.6 3.4 4.6 0.8 0 1.2-0.5 2.1-0.5 0.9 0 1.3 0.5 2.1 0.5 1.7 0 3.4-2.7 3.4-4.6 0-1.6-1.1-2.7-2.5-2.7-0.9 0-1.8 0.6-2.1 0.6-0.3 0-1.2-0.6-2-0.6z" transform="translate(1 0)" fill="#000" />
+        <text x="34" y="15" fontSize="12" fontWeight="800" fontFamily="-apple-system, 'Helvetica Neue', sans-serif" fill="#000">Pay</text>
+      </svg>
+    </Chip>
+  );
+}
+
 function MadaLogo() {
-  // شعار مدى — أخضر (اللون الرسمي) مع كلمة mada
   return (
     <Chip bg="#fff" border="#16a34a33">
       <svg width="52" height="18" viewBox="0 0 52 18" aria-label="mada">

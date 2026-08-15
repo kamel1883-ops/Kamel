@@ -13,6 +13,7 @@ import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing"
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
 import PayPalCheckout from "@/components/checkout/PayPalCheckout";
+import PricingTiers from "@/components/checkout/PricingTiers";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { FileSignature, Download, CheckCircle2 } from "lucide-react";
 
@@ -124,6 +125,13 @@ export default function Quote() {
   const [contractPdfUrl, setContractPdfUrl] = useState(null);
   const [contractSaving, setContractSaving] = useState(false);
   const [captcha, setCaptcha] = useState("");
+  const [selectedTier, setSelectedTier] = useState(null);
+
+  const pickTier = (tier) => {
+    setSelectedTier(tier);
+    set("employee_count", String(tier.min));
+    setTimeout(() => document.getElementById("quote-company-form")?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
+  };
   const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
   const matchedTier = company?.employee_count ? tierForCount(company.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
@@ -208,7 +216,8 @@ export default function Quote() {
         <div className="max-w-2xl mx-auto px-5 py-10">
           <h1 className="text-2xl sm:text-3xl font-bold">{t.formTitle}</h1>
           <p className="text-muted-foreground mt-2">{t.formSub}</p>
-          <form onSubmit={submit} className="bg-white border border-border rounded-2xl p-6 mt-6 space-y-4">
+          <PricingTiers selectedId={selectedTier?.id} onBuy={pickTier} lang={isAr ? "ar" : "en"} />
+          <form id="quote-company-form" onSubmit={submit} className="bg-white border border-border rounded-2xl p-6 mt-6 space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label={t.company} value={form.name} onChange={(v) => set("name", v)} required />
               <Field label={t.industry} value={form.industry} onChange={(v) => set("industry", v)} />

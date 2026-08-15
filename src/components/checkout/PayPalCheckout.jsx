@@ -3,8 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, ShieldCheck } from "lucide-react";
 import PaymentMethods from "@/components/checkout/PaymentMethods";
 
-// يحمّل PayPal SDK مرة واحدة (Singleton) ثم يعرض أزرار PayPal + بطاقة الفيزا/الماستر كارد/مدى.
-// createOrder/onApprove يطلبان دالة paypalCheckout الخلفية. عند النجاح يُستدعى onPaid(results).
+// يحمّل PayPal SDK (Singleton) ثم يعرض أزرار الدفع المتاحة: أبل باي + بطاقة (مدى/فيزا/ماستركارد) + PayPal.
+// كل الأزرار تُكمل عبر paypalCheckout الخلفية، والمبلغ يُحصّل في حساب PayPal.
 let sdkPromise = null;
 function loadPayPalSdk(clientId, currency) {
   if (window.paypal) return Promise.resolve(window.paypal);
@@ -14,7 +14,7 @@ function loadPayPalSdk(clientId, currency) {
     s.src =
       "https://www.paypal.com/sdk/js?client-id=" + encodeURIComponent(clientId) +
       "&currency=" + encodeURIComponent(currency) +
-      "&intent=capture&components=buttons&enable-funding=card,venmo,paylater";
+      "&intent=capture&components=buttons&enable-funding=applepay,card,venmo,paylater";
     s.onload = () => {
       if (window.paypal) resolve(window.paypal);
       else { sdkPromise = null; reject(new Error("sdk_load_failed")); }
@@ -28,13 +28,14 @@ function loadPayPalSdk(clientId, currency) {
 export default function PayPalCheckout({ employeeCount, discountCode, tenantId, contractProof, amount, onPaid, lang = "ar" }) {
   const isAr = lang === "ar";
   const containerRef = useRef(null);
-  const buttonsRef = useRef(null);
+  const instancesRef = useRef([]);
   const [state, setState] = useState("loading"); // loading | ready | error
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       try {
         const res = await base44.functions.invoke("paypalCheckout", { action: "config" });
@@ -45,48 +46,77 @@ export default function PayPalCheckout({ employeeCount, discountCode, tenantId, 
         }
         const paypal = await loadPayPalSdk(cfg.client_id, cfg.currency || "SAR");
         if (cancelled || !containerRef.current) return;
-        if (buttonsRef.current) { try { buttonsRef.current.close(); } catch (_) {} }
-        buttonsRef.current = paypal.Buttons({
-          style: { layout: "vertical", color: "gold", shape: "rect", label: "pay", height: 48 },
-          createOrder: async () => {
+        containerRef.current.innerHTML = "";
+        instancesRef.current = [];
+
+        const createOrder = async () => {
+          const r = await base44.functions.invoke("paypalCheckout", {
+            action: "create",
+            employee_count: employeeCount,
+            discount_code: discountCode || undefined,
+          });
+          if (!r?.data?.ok) throw new Error(r?.data?.error || "create_failed");
+          return r.data.id;
+        };
+
+        const onApprove = async (data) => {
+          setBusy(true);
+          try {
             const r = await base44.functions.invoke("paypalCheckout", {
-              action: "create",
+              action: "capture",
+              order_id: data.orderID,
+              tenant_id: tenantId,
+              contract_proof: contractProof,
               employee_count: employeeCount,
-              discount_code: discountCode || undefined,
+              amount: amount,
             });
-            if (!r?.data?.ok) throw new Error(r?.data?.error || "create_failed");
-            return r.data.id;
-          },
-          onApprove: async (data) => {
-            setBusy(true);
-            try {
-              const r = await base44.functions.invoke("paypalCheckout", {
-                action: "capture",
-                order_id: data.orderID,
-                tenant_id: tenantId,
-                contract_proof: contractProof,
-                employee_count: employeeCount,
-                amount: amount,
-              });
-              if (!r?.data?.ok) throw new Error(r?.data?.error || "capture_failed");
-              onPaid?.(r.data);
-            } catch (e) {
-              setErr(e?.message === "forbidden" ? (isAr ? "تعذّر التحقق من جلستك، أعد المحاولة" : "Session error, retry") : (isAr ? "تعذّر تأكيد الدفع" : "Capture failed"));
-              setState("error");
-            } finally { setBusy(false); }
-          },
-          onError: () => { setErr(isAr ? "حدث خطأ أثناء الدفع، حاول مرة أخرى" : "Payment error, retry"); setState("error"); },
-        });
-        try { containerRef.current.innerHTML = ""; } catch (_) {}
-        buttonsRef.current.render(containerRef.current);
-        if (!cancelled) setState("ready");
+            if (!r?.data?.ok) throw new Error(r?.data?.error || "capture_failed");
+            onPaid?.(r.data);
+          } catch (e) {
+            setErr(e?.message === "forbidden" ? (isAr ? "تعذّر التحقق من جلستك، أعد المحاولة" : "Session error, retry") : (isAr ? "تعذّر تأكيد الدفع" : "Capture failed"));
+            setState("error");
+          } finally {
+            setBusy(false);
+          }
+        };
+
+        const onError = () => { setErr(isAr ? "حدث خطأ أثناء الدفع، حاول مرة أخرى" : "Payment error, retry"); setState("error"); };
+
+        // أزرار الدفع بالترتيب: أبل باي ثم البطاقة ثم PayPal — كل ما هو مؤهل (eligible) فقط يُعرض.
+        const sources = [paypal.FUNDING.APPLEPAY, paypal.FUNDING.CARD, paypal.FUNDING.PAYPAL];
+        let rendered = 0;
+        for (const fs of sources) {
+          try {
+            const btn = paypal.Buttons({
+              fundingSource: fs,
+              style: { layout: "vertical", color: "gold", shape: "rect", height: 48 },
+              createOrder,
+              onApprove,
+              onError,
+            });
+            const eligible = typeof btn.isEligible === "function" ? btn.isEligible() : true;
+            if (!eligible) continue;
+            const holder = document.createElement("div");
+            holder.className = "paypal-funding-btn mb-2";
+            containerRef.current.appendChild(holder);
+            await btn.render(holder);
+            if (cancelled) { try { btn.close(); } catch (_) {} return; }
+            instancesRef.current.push(btn);
+            rendered++;
+          } catch (_) { /* skip ineligible */ }
+        }
+
+        if (!cancelled) setState(rendered > 0 ? "ready" : "error");
       } catch (e) {
         if (!cancelled) { setErr(e?.message || "init_failed"); setState("error"); }
       }
     })();
+
     return () => {
       cancelled = true;
-      if (buttonsRef.current) { try { buttonsRef.current.close(); } catch (_) {} buttonsRef.current = null; }
+      instancesRef.current.forEach((b) => { try { b.close(); } catch (_) {} });
+      instancesRef.current = [];
+      if (containerRef.current) { try { containerRef.current.innerHTML = ""; } catch (_) {} }
     };
   }, [employeeCount, discountCode, tenantId, contractProof, amount, onPaid, isAr]);
 
@@ -112,7 +142,7 @@ export default function PayPalCheckout({ employeeCount, discountCode, tenantId, 
       )}
       {state === "ready" && !busy && (
         <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
-          <ShieldCheck size={13} /> {isAr ? "الدفع آمن ومشفّر عبر PayPal — يمكنك الدفع ببطاقة فيزا/ماستر كارد/مدى أو حساب PayPal." : "Secure checkout via PayPal — Visa/Mastercard/mada or PayPal account."}
+          <ShieldCheck size={13} /> {isAr ? "الدفع آمن ومشفّر عبر PayPal — اختر أبل باي أو بطاقتك (مدى/فيزا/ماستركارد) أو حساب PayPal." : "Secure checkout via PayPal — Apple Pay, your card (mada/Visa/Mastercard), or PayPal account."}
         </p>
       )}
     </div>

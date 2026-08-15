@@ -525,7 +525,7 @@ export default function Landing() {
 
         <div className="grid sm:grid-cols-2 gap-4 mt-6">
           <button onClick={() => scrollTo("trial")} className="bg-white/10 hover:bg-white/15 border border-white/15 rounded-2xl py-3.5 font-medium transition">{isAr ? "جرّب مجاناً 30 يوماً" : "Try free for 30 days"}</button>
-          <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 rounded-2xl py-3.5 font-semibold shadow-xl shadow-violet-500/30 transition">{isAr ? "اطلب عرض سعر" : "Request a quote"}</button>
+          <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 rounded-2xl py-3.5 font-semibold shadow-xl shadow-fuchsia-500/30 transition">{isAr ? "شراء الباقة المناسبة لك" : "Buy the plan that suits you"}</button>
         </div>
       </section>
 
