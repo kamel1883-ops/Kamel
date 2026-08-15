@@ -42,16 +42,21 @@ export default async function (req) {
     if (RL.rateLimited(RL.clientIp(req)))
       return Response.json({ error: 'rate_limited' }, { status: 429 });
 
-    // —— إعداد علني للواجهة (Client ID ليس سرّاً ؛ يُستخدم لتحميل PayPal SDK)
+    // إعداد علني للواجهة (Client ID ليس سرّاً ؛ يُستخدم لتحميل PayPal SDK)
     if (action === 'config') {
       const cid = secrets.get('PAYPAL_CLIENT_ID');
       return Response.json({
         client_id: cid || '',
         // تعرض الواجهة نمط البيئة الفعلي بعد التطبيع (livE/sandbox)
         mode: baseApi().includes('sandbox') ? 'sandbox' : 'live',
-        currency: 'SAR',
+        // نحصّل بالدولار (حساب PayPal لا يدعم SAR) ونعرض للعميل بالريال في صفحة السعر.
+        currency: 'USD',
+        display_currency: 'SAR',
       });
     }
+
+    // سعر التحويل الثابت: 1 دولار = 3.75 ريال. نعرض السعر للعميل بالريال ونحصّل بالدولار.
+    const SAR_PER_USD = 3.75;
 
     // —— إنشاء طلب دفع — المبلغ يُحسب خادمياً من شريحة عدد الموظفين
     if (action === 'create') {
@@ -76,8 +81,11 @@ export default async function (req) {
 
       const tier = tierForCount(employeeCount);
       if (!tier) return Response.json({ error: 'invalid_tier' }, { status: 400 });
+      // amount = المبلغ بالريال (ما يراه العميل في عرض السعر)
       const amount = Math.round(tier.yearly * (1 - discount_percent / 100));
       if (amount <= 0) return Response.json({ error: 'invalid_amount' }, { status: 400 });
+      // نحوّل إلى دولار لإرساله لـ PayPal (حساب Live لا يدعم SAR)
+      const amountUsd = amount / SAR_PER_USD;
 
       const token = await accessToken();
       const orderRes = await fetch(`${baseApi()}/v2/checkout/orders`, {
@@ -86,7 +94,7 @@ export default async function (req) {
         body: JSON.stringify({
           intent: 'CAPTURE',
           purchase_units: [{
-            amount: { currency_code: 'SAR', value: amount.toFixed(2) },
+            amount: { currency_code: 'USD', value: amountUsd.toFixed(2) },
             description: `Jadara annual subscription — ${tier.tier}`,
           }],
         }),
@@ -96,7 +104,9 @@ export default async function (req) {
         return Response.json({ error: order?.message || 'paypal_create_failed', details: order?.details, debug_id: order?.debug_id }, { status: 502 });
 
       return Response.json({
-        ok: true, id: order.id, amount, currency: 'SAR',
+        ok: true, id: order.id,
+        amount, currency: 'SAR',            // المعروض للعميل (ريال)
+        amount_usd: amountUsd, charge_currency: 'USD', // المُحصّل فعلياً (دولار)
         tier: tier.tier, discount_percent, discount_code,
       });
     }
@@ -128,9 +138,13 @@ export default async function (req) {
       if (!capture || capture.status !== 'COMPLETED')
         return Response.json({ error: 'payment_not_completed' }, { status: 402 });
 
-      const paid = Number(capture.amount?.value) || 0;
-      if (expected_amount > 0 && paid !== expected_amount)
+      // paid = المُحصّل بالدولار. expected_amount (من الواجهة) بالريال — نحوّله للمقارنة.
+      const paidUsd = Number(capture.amount?.value) || 0;
+      const expectedUsd = expected_amount > 0 ? expected_amount / SAR_PER_USD : 0;
+      if (expectedUsd > 0 && Math.abs(paidUsd - expectedUsd) > 0.05)
         return Response.json({ error: 'amount_mismatch' }, { status: 400 });
+      // المبلغ بالريال للتخزين/العرض للعميل والإشعارات
+      const paid = expected_amount > 0 ? expected_amount : Math.round(paidUsd * SAR_PER_USD);
 
       const captureId = String(capture.id || order_id);
 
