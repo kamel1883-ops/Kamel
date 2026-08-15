@@ -79,11 +79,13 @@ export default async function (req) {
     // ====== إدارة العملاء — بوابة المالك ======
     if (action === "owner_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
-      const [tenants, employees, users] = await Promise.all([
+      const [allTenants, employees, users] = await Promise.all([
         base44.asServiceRole.entities.Tenant.list("-created_date", 500),
         base44.asServiceRole.entities.Employee.list("-created_date", 2000),
         base44.asServiceRole.entities.User.list(undefined, 500),
       ]);
+      // إخفاء المنشآت التي لم تُكمل الدفع بعد (pending_payment) عن قائمة المالك والإحصاءات.
+      const tenants = (allTenants || []).filter((t: any) => t.status !== "pending_payment");
       // ربط الموظفين بالمنشأة عبر حساب المنشئ (created_by_id للموظف = حساب المستخدم).
       // maps: user.id → tenantId عبر admin_user_id مباشرة، أو عبر tacкет admin_email /
       // contact_email المطابق لبريد المستخدم — يغطّي الحالات التي لم يُضبط فيها

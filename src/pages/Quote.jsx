@@ -192,6 +192,10 @@ export default function Quote() {
     setPaid(res);
     if (contractPdfUrl) return; // تجرى مرة واحدة فقط
     setContractSaving(true);
+    // لتحويل بنكي: نقل حالة المنشأة من pending_payment إلى تجربة قبل إتاحة إنشاء الحساب.
+    if (res?.method === "bank_transfer" && res?.proof_url && tenantId && contractProof) {
+      try { await base44.functions.invoke("activateBankTransfer", { tenant_id: tenantId, contract_proof: contractProof, proof_url: res.proof_url }); } catch (_) {}
+    }
     const comp = company || form;
     const tier = comp?.employee_count ? tierForCount(comp.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : selectedTier;
     const total = discount ? discount.amount : tier ? tier.yearly : 0;
@@ -242,7 +246,7 @@ export default function Quote() {
     if (!captcha) { setErr(t.errCaptcha); return; }
     setSubmitting(true);
     try {
-      const res = await base44.functions.invoke("createTrial", { ...form, lead_source: "quote", discount_code: form.discount_code?.trim() || undefined, captcha_token: captcha });
+      const res = await base44.functions.invoke("createTrial", { ...form, lead_source: mode === "trial" ? "trial" : "quote", discount_code: form.discount_code?.trim() || undefined, captcha_token: captcha });
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setTenantId(res?.tenant_id || null);
