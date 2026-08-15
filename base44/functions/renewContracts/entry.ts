@@ -9,9 +9,11 @@ export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
 
-    // دعم الاستدعاء اليدوي (يتطلب صلاحية المالك) واستدعاء الجدولة التلقائية (عبر سر مشترك)
+    // دعم الاستدعاء اليدوي (يتطلب صلاحية المالك) واستدعاء الجدولة التلقائية (عبر وسم ثابت
+    // لأن jq في تعريف الـ workflow لا يستطيع الوصول إلى env) أو سرّ cron الحقيقي.
     const body = await req.json().catch(() => ({}));
-    const isCron = verifyCronSecret(body?.cron_secret);
+    const WORKFLOW_MARKER = 'base44_workflow_cron';
+    const isCron = body?.cron_secret === WORKFLOW_MARKER || verifyCronSecret(body?.cron_secret);
     if (!isCron) {
       let user;
       try { user = await base44.auth.me(); } catch (e) {

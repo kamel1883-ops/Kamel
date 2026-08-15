@@ -32,7 +32,7 @@
           "with": {
             "function_name": "renewContracts",
             "args": {
-              "cron_secret": "${ env.CRON_SECRET }"
+              "cron_secret": "base44_workflow_cron"
             }
           },
           "then": "end",
