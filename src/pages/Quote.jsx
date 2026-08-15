@@ -14,6 +14,7 @@ import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
 import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
 import PayPalCheckout from "@/components/checkout/PayPalCheckout";
+import BankTransferPayment from "@/components/checkout/BankTransferPayment";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { FileSignature, Download, CheckCircle2, UserPlus, Sparkles } from "lucide-react";
 
@@ -148,6 +149,7 @@ export default function Quote() {
   const [contractProof, setContractProof] = useState(null);
   const [contractBusy, setContractBusy] = useState(false);
   const [paid, setPaid] = useState(null);
+  const [payMethod, setPayMethod] = useState(null);
   const [contractPdfUrl, setContractPdfUrl] = useState(null);
   const [invoicePdfUrl, setInvoicePdfUrl] = useState(null);
   const [contractSaving, setContractSaving] = useState(false);
@@ -491,15 +493,59 @@ export default function Quote() {
                   <span className="text-muted-foreground">{t.amountDue}</span>
                   <span className="font-extrabold text-violet-700 text-xl">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</span>
                 </div>
-                <PayPalCheckout
-                  employeeCount={Number(company.employee_count) || 0}
-                  discountCode={discount?.code}
-                  tenantId={tenantId}
-                  contractProof={contractProof}
-                  amount={amount}
-                  onPaid={onPaid}
-                  lang={isAr ? "ar" : "en"}
-                />
+                {payMethod === null ? (
+                  <>
+                    <div className="text-sm font-medium text-foreground mb-3">{isAr ? "اختر طريقة الدفع:" : "Choose payment method:"}</div>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPayMethod("paypal")}
+                        className="rounded-2xl border border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-50 p-4 text-right transition"
+                      >
+                        <div className="flex items-center gap-2 text-violet-700 font-bold">
+                          <span>💳</span> {isAr ? "PayPal / بطاقات (فيزا، ماستر، مدى، أبل باي)" : "PayPal / Cards (Visa, Mastercard, mada, Apple Pay)"}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">{isAr ? "دفع فوري وتلقائي" : "Instant automated payment"}</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPayMethod("bank")}
+                        className="rounded-2xl border border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-50 p-4 text-right transition"
+                      >
+                        <div className="flex items-center gap-2 text-violet-700 font-bold">
+                          <span>🏦</span> {isAr ? "تحويل بنكي" : "Bank transfer"}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">{isAr ? "أرفق إثبات التحويل وسنفعّل اشتراكك" : "Attach proof and we'll activate your subscription"}</div>
+                      </button>
+                    </div>
+                  </>
+                ) : payMethod === "paypal" ? (
+                  <div>
+                    <PayPalCheckout
+                      employeeCount={Number(company.employee_count) || 0}
+                      discountCode={discount?.code}
+                      tenantId={tenantId}
+                      contractProof={contractProof}
+                      amount={amount}
+                      onPaid={onPaid}
+                      lang={isAr ? "ar" : "en"}
+                    />
+                    <div className="mt-3 text-center">
+                      <button type="button" onClick={() => setPayMethod(null)} className="text-xs text-muted-foreground hover:text-foreground underline">
+                        {isAr ? "تغيير طريقة الدفع" : "Change payment method"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <BankTransferPayment
+                    amount={amount}
+                    isAr={isAr}
+                    t={t}
+                    bank={BANK}
+                    onPaid={onPaid}
+                    onBack={() => setPayMethod(null)}
+                  />
+                )}
               </div>
             )}
           </div>
