@@ -4,6 +4,7 @@ import { tierForCount } from '../../shared/pricing.ts';
 import { verifyProof } from '../../shared/contractProof.ts';
 import { createRateLimiter } from '../../shared/turnstile.ts';
 import { EMAIL_FOOTER } from '../../shared/emailFooter.ts';
+import { escapeHtml } from '../../shared/escapeHtml.ts';
 
 // بوابة دفع PayPal (REST v2): إعداد علني للواجهة + إنشاء طلب دفع + التقاط الدفع وتأكيد الاشتراك.
 // المبلغ يُحسب تلقائياً من شريحة عدد الموظفين (المرجع المشترك shared/pricing.ts)؟
@@ -116,14 +117,24 @@ export default async function (req) {
       const order_id = String(body.order_id || '').trim();
       const tenant_id = String(body.tenant_id || '').trim();
       const contract_proof = String(body.contract_proof || '').trim();
-      const employee_count = Number(body.employee_count) || 0;
-      const expected_amount = Number(body.amount) || 0;
       if (!order_id || !tenant_id || !contract_proof)
         return Response.json({ error: 'missing' }, { status: 400 });
 
       // إثبات HMAC يربط الالتقاط بنفس سجل المنشأة الذي نشأ في createTrial (منع IDOR)
       if (!(await verifyProof(tenant_id, contract_proof)))
         return Response.json({ error: 'forbidden' }, { status: 403 });
+
+      // نعتمد على بيانات المنشأة المُسجَّلة خادمياً في createTrial (الشريحة/العدد/السعر)
+      // ولا نثق بقيم employee_count/amount المُرسَلة من الواجهة لاستخراج الشريحة أو المبلغ.
+      const tenant = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      if (!tenant)
+        return Response.json({ error: 'tenant_not_found' }, { status: 404 });
+      const employee_count = Number(tenant.employee_count) || 0;
+      const tier = tierForCount(employee_count);
+      const tierLabel = tier ? tier.tier : (tenant.pricing_tier || '');
+      const expected_amount = Number(tenant.quoted_amount) > 0
+        ? Number(tenant.quoted_amount)
+        : (tier ? tier.yearly : 0);
 
       const token = await accessToken();
       const capRes = await fetch(`${baseApi()}/v2/checkout/orders/${encodeURIComponent(order_id)}/capture`, {
@@ -138,14 +149,14 @@ export default async function (req) {
       if (!capture || capture.status !== 'COMPLETED')
         return Response.json({ error: 'payment_not_completed' }, { status: 402 });
 
-      // paid = المُحصّل بالدولار. expected_amount (من الواجهة) بالريال — نحوّله للمقارنة.
+      // قارن المبلغ المُحصّل من PayPal بالسعر المتوقّع المُسجَّل خادمياً (لا يثق بقيمة من الواجهة).
       const paidUsd = Number(capture.amount?.value) || 0;
-      const expectedUsd = expected_amount > 0 ? expected_amount / SAR_PER_USD : 0;
-      if (expectedUsd > 0 && Math.abs(paidUsd - expectedUsd) > 0.05)
+      const expectedUsd = expected_amount / SAR_PER_USD;
+      if (expectedUsd <= 0) return Response.json({ error: 'invalid_amount' }, { status: 400 });
+      if (Math.abs(paidUsd - expectedUsd) > 0.05)
         return Response.json({ error: 'amount_mismatch' }, { status: 400 });
-      // المبلغ بالريال للتخزين/العرض للعميل والإشعارات
-      const paid = expected_amount > 0 ? expected_amount : Math.round(paidUsd * SAR_PER_USD);
-
+      // المبلغ بالريال (مأخوذ من السجل الخادمي) للتخزين/العرض للعميل والإشعارات
+      const paid = expected_amount;
       const captureId = String(capture.id || order_id);
 
       // منع التكرار: إن وُجد اشتراك بنفس معرّف عملية PayPal، لا نعيد الفعّل
@@ -159,10 +170,7 @@ export default async function (req) {
       const todayStr = today.toISOString().slice(0, 10);
       const subEndStr = subEnd.toISOString().slice(0, 10);
 
-      const tenant = await base44.asServiceRole.entities.Tenant.get(tenant_id);
-      const tier = tierForCount(employee_count);
-      const tierLabel = tier ? tier.tier : (tenant?.pricing_tier || '');
-      const name = tenant?.name || '';
+      const name = tenant.name || '';
 
       await base44.asServiceRole.entities.Tenant.update(tenant_id, {
         status: 'active',
@@ -171,7 +179,7 @@ export default async function (req) {
         suspended_from: null,
         quoted_amount: paid,
         pricing_tier: tierLabel,
-        employee_count: employee_count || tenant?.employee_count || 0,
+        employee_count,
         subscription_end: subEndStr,
       });
 
@@ -198,13 +206,13 @@ export default async function (req) {
             subject: 'اشتراك سنوي مدفوع عبر PayPal — ' + name,
             body:
               'تم تفعيل اشتراك عميل جديد ودفع ' + paid.toLocaleString() + ' ر.س عبر PayPal:\n\n' +
-              'المنشأة: ' + name + '\n' +
-              'الشريحة: ' + tierLabel + '\n' +
+              'المنشأة: ' + escapeHtml(name) + '\n' +
+              'الشريحة: ' + escapeHtml(tierLabel) + '\n' +
               'عدد الموظفين: ' + employee_count + '\n' +
-              'البريد: ' + clientEmail + '\n' +
+              'البريد: ' + escapeHtml(clientEmail) + '\n' +
               'تاريخ الدفع: ' + todayStr + '\n' +
               'ينتهي الاشتراك في: ' + subEndStr + '\n' +
-              'رقم عملية PayPal: ' + captureId + EMAIL_FOOTER,
+              'رقم عملية PayPal: ' + escapeHtml(captureId) + EMAIL_FOOTER,
           });
         }
       } catch (_e) {}
@@ -218,7 +226,7 @@ export default async function (req) {
             body:
               'السلام عليكم ورحمة الله وبركاته،\n\n' +
               'تم بنجاح تفعيل اشتراككم السنوي في منصة «جدارة» وإطلاق حساب منشأتكم.\n\n' +
-              'المنشأة: ' + name + '\n' +
+              'المنشأة: ' + escapeHtml(name) + '\n' +
               'تاريخ الدفع: ' + todayStr + '\n' +
               'المبلغ المدفوع: ' + paid.toLocaleString() + ' ر.س (عبر PayPal)\n' +
               'ينتهي الاشتراك في: ' + subEndStr + '\n\n' +
@@ -230,7 +238,7 @@ export default async function (req) {
 
       try {
         await base44.asServiceRole.entities.Notification.create({
-          title: 'اشتراك سنوي مدفوع — ' + name,
+          title: 'اشتراك سنوي مدفوع — ' + escapeHtml(name),
           body: 'تم الدفع ' + paid + ' ر.س عبر PayPal. ينتهي الاشتراك في ' + subEndStr,
           type: 'paypal_payment', link: '', is_read: false,
         });
