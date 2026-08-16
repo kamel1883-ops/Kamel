@@ -82,6 +82,9 @@ function normalizeRecord(r) {
     health_insurance_expiry: parseDate(r.health_insurance_expiry),
     bank_account: String(r.bank_account ?? '').trim(),
     prior_used_leave: num(r.prior_used_leave),
+    leave_total_entitled: num(r.leave_total_entitled),
+    leave_used: num(r.leave_used),
+    leave_remaining: num(r.leave_remaining),
     manager_employee_number: String(r.manager_employee_number ?? '').trim(),
   };
 }
@@ -145,6 +148,9 @@ export default async function (req) {
               health_insurance_expiry: { type: 'string', title: 'تاريخ انتهاء التأمين الطبي' },
               bank_account: { type: 'string', title: 'الحساب البنكي' },
               prior_used_leave: { type: 'number', title: 'أيام الإجازات المستخدمة سابقاً' },
+              leave_total_entitled: { type: 'number', title: 'إجمالي رصيد الإجازات المستحق' },
+              leave_used: { type: 'number', title: 'رصيد الإجازات المستخدم' },
+              leave_remaining: { type: 'number', title: 'رصيد الإجازات المتبقي (تلقائي)' },
               manager_employee_number: { type: 'string', title: 'الرقم الوظيفي للمدير المباشر' },
             },
           },
@@ -195,6 +201,8 @@ export default async function (req) {
     const errors = [];
     for (const rawRow of raw) {
       const r = normalizeRecord(rawRow);
+      // تخطٍّ صامت للصفوف الفارغة (صفوف الصيغة الجاهزة في القالب بلا بيانات تعريفية)
+      if (!r.employee_number && !r.full_name && !r.national_id) continue;
       if (!r.employee_number || !r.department || !r.position || !r.hire_date || !r.base_salary) {
         failed++;
         errors.push(`صف ناقص حقول إلزامية: ${r.employee_number || r.full_name || '—'}`);
@@ -214,8 +222,11 @@ export default async function (req) {
       const br = await resolveBranch(r.branch_name);
       r.branch_id = br.id;
       r.branch_name = br.name;
-      const ent = computeEntitlement(r.hire_date, annualDays);
-      r.prior_used_leave = r.prior_used_leave || 0;
+      // رصيد الإجازات: إن قدّم العميل «إجمالي الرصيد المستحق» نعتمده، وإلا نحسبه من تاريخ المباشرة
+      r.prior_used_leave = r.leave_used || r.prior_used_leave || 0;
+      const ent = (r.leave_total_entitled && r.leave_total_entitled > 0)
+        ? r.leave_total_entitled
+        : computeEntitlement(r.hire_date, annualDays);
       r.leave_balance = Math.max(0, Math.round((ent - r.prior_used_leave) * 10) / 10);
       // ربط دائم بالرقم الموحد للمنشأة — يبقى الموظفون وطلباتهم مربوطين بالعميل حتى لو حُذف الحساب
       r.unified_number = myUnified;
