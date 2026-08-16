@@ -14,6 +14,7 @@ import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import PortalLanguageSelector from "@/components/portal/PortalLanguageSelector";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import PortalAuthCard from "@/components/portal/PortalAuthCard";
 import { Image } from "@/components/ui/image";
 import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 import { Button } from "@/components/ui/button";
@@ -86,11 +87,7 @@ export default function MyRequests() {
     setView("self");
   }, [employee]);
 
-  // نموذج الدخول
-  const [nid, setNid] = useState("");
-  const [birth, setBirth] = useState("");
-  const [captchaToken, setCaptchaToken] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
+  // رسالة الحالة (تُستخدم في load أيضاً)
   const [signInMsg, setSignInMsg] = useState({ type: "", text: "" });
 
 
@@ -133,41 +130,6 @@ export default function MyRequests() {
       window.location.href = "/owner-portal";
     }
   }, [employee]);
-
-  const handlePortalLogin = async (e) => {
-    e.preventDefault();
-    const id = nid.trim(), bd = birth.trim();
-    if (!id || !bd) return;
-    if (!captchaToken) { setSignInMsg({ type: "err", text: t.gCaptcha }); return; }
-    setSigningIn(true); setSignInMsg({ type: "", text: "" });
-    try {
-      const res = await base44.functions.invoke("verifyEmployeePortal", {
-        national_id: id, birth_date: bd, captcha_token: captchaToken,
-      });
-      const data = res?.data || res;
-      if (data?.ok) {
-        const newSession = {
-          token: data.token,
-          employee_id: data.employee.id,
-          employee: data.employee,
-          org: data.org,
-          expires_at: data.expires_at,
-        };
-        portalSession.save(newSession);
-        setSession(newSession);
-        setNid(""); setBirth("");
-      } else {
-        setSignInMsg({
-          type: "err",
-          text: data?.error === "inactive" ? t.gInactive : t.gFail,
-        });
-      }
-    } catch (err) {
-      setSignInMsg({ type: "err", text: err?.response?.data?.error || err?.message || t.gFail });
-    } finally {
-      setSigningIn(false);
-    }
-  };
 
   const handlePortalLogout = () => {
     portalSession.clear();
@@ -249,38 +211,9 @@ export default function MyRequests() {
     content = (
       <div>
         <PageHeader title={t.title} subtitle={t.gSubtitle} />
-        <div className="max-w-xl mx-auto bg-white rounded-2xl border border-border p-8">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
-              <ShieldCheck size={22} className="text-violet-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold">{t.gTitle}</h3>
-              <p className="text-xs text-muted-foreground">{t.gDesc}</p>
-            </div>
-          </div>
-          <form onSubmit={handlePortalLogin} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>{t.gIdLabel}</Label>
-              <Input value={nid} onChange={(e) => setNid(e.target.value)} placeholder={t.gIdPh} required disabled={signingIn} dir="ltr" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t.gBirthLabel}</Label>
-              <Input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} required disabled={signingIn} dir="ltr" />
-            </div>
-            <TurnstileWidget onToken={setCaptchaToken} className="origin-top-right" />
-            {signInMsg.text && (
-              <div className={cn("text-sm rounded-lg p-3 leading-relaxed", signInMsg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
-                {signInMsg.text}
-              </div>
-            )}
-            <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2">
-              {signingIn && <Loader2 size={16} className="animate-spin" />}
-              {t.gBtn}
-            </Button>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
-          </form>
-        </div>
+        <PortalAuthCard
+          onAuthenticated={(s) => { portalSession.save(s); setSession(s); }}
+        />
       </div>
     );
   } else if (loading || !employee) {
