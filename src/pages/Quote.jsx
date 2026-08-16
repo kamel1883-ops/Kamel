@@ -153,7 +153,7 @@ export default function Quote() {
     set("employee_count", String(tier.min));
     setTimeout(() => document.getElementById("quote-company-form")?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
   };
-  const [quoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
+  const [quoteNo, setQuoteNo] = useState(() => "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
   const quoteDate = new Date().toISOString().slice(0, 10);
   const matchedTier = company?.employee_count ? tierForCount(company.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
   const amount = discount ? discount.amount : (matchedTier ? matchedTier.yearly : 0);
@@ -192,6 +192,7 @@ export default function Quote() {
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setTenantId(res?.tenant_id || null);
       setContractProof(res?.contract_proof || null);
+      if (res?.contract_quote_no) setQuoteNo(res.contract_quote_no);
       setRegistered(true);
       setCompany(form);
     } catch (error) {

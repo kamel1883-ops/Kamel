@@ -65,6 +65,10 @@ export default async function (req) {
     const today = new Date();
     const trialEnd = new Date(today);
     trialEnd.setDate(today.getDate() + 30);
+    // رقم عرض سعر دائم يُحفظ مع المنشأة — يُستخدم في صفحة العميل وبوابة المالك لإنتاج نفس النسخة.
+    const stamp = today.toISOString().slice(0, 10).replace(/-/g, "");
+    const rand = Math.floor(100 + Math.random() * 900);
+    const contract_quote_no = `JQ${stamp}${rand}`;
 
     const tenant = await base44.asServiceRole.entities.Tenant.create({
       name,
@@ -89,6 +93,7 @@ export default async function (req) {
       employee_count: employeeCount,
       pricing_tier: pricingTier,
       lead_source: String(body.lead_source || 'trial').trim() === 'quote' ? 'quote' : 'trial',
+      contract_quote_no,
       notes: String(body.notes || '').trim(),
     });
 
@@ -134,7 +139,7 @@ export default async function (req) {
     }
 
     const contract_proof = await signProof(tenant.id);
-    return Response.json({ ok: true, tenant_id: tenant.id, contract_proof, discount_percent, quoted_amount, pricing_tier: pricingTier, employee_count: employeeCount });
+    return Response.json({ ok: true, tenant_id: tenant.id, contract_proof, contract_quote_no, discount_percent, quoted_amount, pricing_tier: pricingTier, employee_count: employeeCount });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

@@ -175,7 +175,8 @@ export default function ConfirmSubscriptionDialog({ open, onClose, tenant, isAr,
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">{isAr ? "المبلغ (ر.س)" : "Amount (SAR)"}</Label>
-              <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={busy} />
+              <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={busy} readOnly className="bg-slate-50 font-semibold text-violet-700" />
+              <p className="text-[11px] text-emerald-700">{isAr ? "مطابق لسعر عرض السعر المُرسل للعميل — لا يُعدَّل" : "Matches the price quoted to the client — locked"}</p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">{isAr ? "نهاية الاشتراك" : "Subscription end"}</Label>

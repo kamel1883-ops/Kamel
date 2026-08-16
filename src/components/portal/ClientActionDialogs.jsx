@@ -5,8 +5,11 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature } from "lucide-react";
+import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature, FileText } from "lucide-react";
 import ConfirmSubscriptionDialog from "./ConfirmSubscriptionDialog";
+import { renderToPdfBlob } from "@/lib/pdfDocs";
+import QuoteDoc from "@/components/docs/QuoteDoc";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -175,6 +178,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
   const [end, setEnd] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [quoteBusy, setQuoteBusy] = useState(false);
   useEffect(() => {
     if (open && tenant) {
       setDays("7");
@@ -186,6 +190,38 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
     }
   }, [open, tenant]);
   if (!open || !tenant) return null;
+
+  // توليد نسخة من عرض السعر المُقدَّم للعميل وتنزيلها كـ PDF — مطابقة لما رآه العميل.
+  const downloadQuote = async () => {
+    if (!tenant) return;
+    setQuoteBusy(true);
+    try {
+      const tier = tenant.employee_count ? tierForCount(tenant.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
+      const blob = await renderToPdfBlob(
+        <QuoteDoc
+          company={tenant}
+          quoteNo={tenant.contract_quote_no || ""}
+          date={(tenant.created_date || "").slice(0, 10)}
+          tier={tier}
+          amount={Number(tenant.quoted_amount) || 0}
+          discountPercent={Number(tenant.discount_percent) || 0}
+          discountCode={tenant.discount_code || ""}
+          isAr={isAr}
+        />
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Jadara-Quote-${tenant.contract_quote_no || tenant.unified_number || "quote"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); try { a.remove(); } catch (e) {} }, 1200);
+    } catch (e) {
+      // تجاهل
+    } finally {
+      setQuoteBusy(false);
+    }
+  };
   const owner = isOwnerTenant(tenant);
   const status = tenant.status;
   const busy = busyId === tenant.id;
@@ -216,6 +252,12 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
         <div className="no-print flex items-center justify-between gap-3 p-4 border-b border-border bg-white">
           <div className="flex items-center gap-2 font-semibold">{isAr ? "بيانات العميل" : "Client info"} — {tenant.name}</div>
           <div className="flex items-center gap-2">
+            {Number(tenant.quoted_amount) > 0 && (
+              <button type="button" onClick={downloadQuote} disabled={quoteBusy}
+                className="inline-flex items-center gap-1.5 text-sm h-9 px-3 rounded-md border border-input bg-transparent hover:bg-accent text-emerald-700 disabled:opacity-60">
+                {quoteBusy ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} {isAr ? "تنزيل عرض السعر (PDF)" : "Download Quote"}
+              </button>
+            )}
             {tenant.contract_pdf_url && (
               <a href={tenant.contract_pdf_url} target="_blank" rel="noreferrer" download
                  className="inline-flex items-center gap-1.5 text-sm h-9 px-3 rounded-md border border-input bg-transparent hover:bg-accent text-violet-700">
