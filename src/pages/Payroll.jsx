@@ -30,7 +30,7 @@ export default function Payroll() {
     pdf: "تحميل / طباعة PDF", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
     wps: "ملف WPS لمدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
-    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
+    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
   } : {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
     gen: "Generate month sheet", gening: "Generating...",
@@ -43,7 +43,7 @@ export default function Payroll() {
     pdf: "Download / Print PDF", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
     wps: "WPS file (Mudad)", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
-    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
+    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
   };
 
   const [payrolls, setPayrolls] = useState([]);
@@ -102,7 +102,7 @@ export default function Payroll() {
         month, year, base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: absentDeduction, loan_installment: 0,
         gosi_employee: Number(gosi.gosi_employee.toFixed(2)), gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
-        overtime_hours: 0, absent_days: absentDays, net_salary: net, status: "draft",
+        overtime_hours: 0, overtime_amount: 0, absent_days: absentDays, net_salary: net, status: "draft",
       });
     }
     if (created.length > 0) await base44.entities.Payroll.bulkCreate(created);
@@ -114,7 +114,7 @@ export default function Payroll() {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
     updated.gross_salary = (updated.base_salary || 0) + (updated.housing_allowance || 0) + (updated.transport_allowance || 0) + (updated.other_allowances || 0);
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) - (updated.deductions || 0) - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - (updated.deductions || 0) - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
     updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
@@ -127,7 +127,7 @@ export default function Payroll() {
     const daily = gross / 30;
     const deductions = Number((daily * abs).toFixed(2));
     const updated = { ...rec, absent_days: abs, deductions };
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) - deductions - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - deductions - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
     updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
@@ -176,10 +176,10 @@ export default function Payroll() {
   };
 
   const exportExcel = () => {
-    const headers = [t.thEmp, t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
+    const headers = [t.thEmp, t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
     const rows = payrolls.map((p) => [
       p.employee_name || "", p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
-      p.bonus || 0, p.gosi_employee || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
+      p.bonus || 0, p.overtime_amount || 0, p.gosi_employee || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
       p.net_salary || 0, payrollStatusLabel(p.status).label,
     ]);
     const csv = [headers, ...rows]
@@ -206,7 +206,7 @@ export default function Payroll() {
     const end = `${year}-${mm}-${String(lastDay).padStart(2, "0")}`;
     const headers = [
       "رقم الهوية/الإقامة", "اسم الموظف", "رقم الآيبان (IBAN)",
-      "الراتب الأساسي", "بدل السكن", "بدل المواصلات", "بدلات أخرى", "حوافز",
+      "الراتب الأساسي", "بدل السكن", "بدل المواصلات", "بدلات أخرى", "حوافز", "مبلغ العمل الإضافي (Overtime)",
       "إجمالي الراتب", "خصومات (غياب/أخرى)", "تأمينات الموظف (GOSI)", "قسط السلفة",
       "صافي الراتب", "تاريخ بداية الفترة", "تاريخ نهاية الفترة", "عدد أيام العمل",
     ];
@@ -224,6 +224,7 @@ export default function Payroll() {
         p.transport_allowance || 0,
         p.other_allowances || 0,
         p.bonus || 0,
+        p.overtime_amount || 0,
         p.gross_salary || 0,
         p.deductions || 0,
         p.gosi_employee || 0,
@@ -336,6 +337,7 @@ export default function Payroll() {
                   <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thTrans}</th>
                   <th className="text-right px-3 py-3 font-medium text-emerald-600">{t.thBonus}</th>
+                  <th className="text-right px-3 py-3 font-medium text-blue-600">{t.thOvertime}</th>
                   <th className="text-right px-3 py-3 font-medium text-amber-600">{t.thGosi}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thAbsent}</th>
                   <th className="text-right px-3 py-3 font-medium text-rose-600">{t.thDed}</th>
@@ -352,6 +354,7 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
+                    <td className="px-3 py-2"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
                     <td className="px-3 py-2 text-xs tabular-nums text-amber-700">{formatCurrency(p.gosi_employee || 0)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
