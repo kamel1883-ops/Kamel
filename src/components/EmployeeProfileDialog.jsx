@@ -10,6 +10,7 @@ import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/le
 import { reasonMeta, computeSettlement } from "@/lib/eos";
 import { badge } from "@/lib/approvals";
 import EmployeePaidDocuments from "@/components/EmployeePaidDocuments";
+import EmployeePortalPasswordAdmin from "@/components/portal/EmployeePortalPasswordAdmin";
 import { useI18n } from "@/lib/i18n";
 
 function Row({ label, value }) {
@@ -156,6 +157,8 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
                 </>
               ) : <div className="text-sm text-emerald-600">{t.none}</div>}
             </Block>
+
+            <EmployeePortalPasswordAdmin employee={employee} />
 
             {(employee?.status === "terminated" || employee?.status === "resigned") && (
               <Block title={t.archive}>
