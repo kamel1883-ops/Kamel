@@ -11,7 +11,7 @@ const WHATSAPP = "https://wa.me/966594700782";
 
 const CAT_AR = {
   labor_law: "القانون العمالي", payroll: "الرواتب وحماية الأجور", attendance: "الحضور والإجازات",
-  eos: "نهاية الخدمة", hr_management: "إدارة الموارد البشرية", saudization: "السعودة",
+  eos: "نهاية الخدمة", hr_management: "إدارة الموارد البشرية", saudization: "التوطين",
   contracts: "العقود واللوائح", general: "عام",
 };
 const CAT_EN = {
@@ -47,9 +47,9 @@ export default function Blog() {
   }, [cat]);
 
   useEffect(() => {
-    const arDesc = "مدونة جدارة للموارد البشرية والقانون العمالي السعودي 2026 — مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت: حماية الأجور (مدد/WPS)، نهاية الخدمة، الإجازات، السعودة ونطاقات، التأمينات الاجتماعية (GOSI)، ودعم المنشآت (هدف/Hadaf)، والعقود واللوائح، والامتثال لنظام العمل السعودي.";
+    const arDesc = "مدونة جدارة للموارد البشرية والقانون العمالي السعودي 2026 — مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت: حماية الأجور (مدد/WPS)، نهاية الخدمة، الإجازات، التوطين ونطاقات، التأمينات الاجتماعية (GOSI)، ودعم المنشآت (هدف/Hadaf)، والعقود واللوائح، والامتثال لنظام العمل السعودي.";
     const enDesc = "Jadara blog on Saudi HR and labor law (2026): practical guides for HR managers and business owners — Wage Protection (Mudad/WPS), end of service, leave, Saudization (Nitaqat), GOSI, HRDF (Hadaf) subsidies, contracts, and Saudi Labor Law compliance.";
-    const arKeywords = "مدونة الموارد البشرية, القانون العمالي السعودي, نظام العمل السعودي, حماية الأجور, مدد, WPS, نهاية الخدمة, السعودة, نطاقات, التأمينات الاجتماعية, جوسي, GOSI, هدف, هدف, إدارة الموارد البشرية, الإجازات, الرواتب, العقود واللوائح, الامتثال, HR Saudi Arabia, Saudi labor law, HR blog, جدارة";
+    const arKeywords = "مدونة الموارد البشرية, القانون العمالي السعودي, نظام العمل السعودي, حماية الأجور, مدد, WPS, نهاية الخدمة, التوطين, نطاقات, التأمينات الاجتماعية, جوسي, GOSI, هدف, هدف, إدارة الموارد البشرية, الإجازات, الرواتب, العقود واللوائح, الامتثال, HR Saudi Arabia, Saudi labor law, HR blog, جدارة";
     const enKeywords = "Saudi HR blog, Saudi labor law blog, HR Saudi Arabia, WPS, Mudad, end of service Saudi, Saudization, Nitaqat, GOSI Saudi, HRDF, Hadaf, HR compliance KSA, Jadara blog, HR articles Saudi Arabia, Saudi payroll";
     const url = "https://jadara-hr.com/blog";
     const img = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png";

@@ -8,7 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { base44 } from "@/api/base44Client";
 
 const WHATSAPP = "https://wa.me/966594700782";
-const CAT_AR = { labor_law: "القانون العمالي", payroll: "الرواتب وحماية الأجور", attendance: "الحضور والإجازات", eos: "نهاية الخدمة", hr_management: "إدارة الموارد البشرية", saudization: "السعودة", contracts: "العقود واللوائح", general: "عام" };
+const CAT_AR = { labor_law: "القانون العمالي", payroll: "الرواتب وحماية الأجور", attendance: "الحضور والإجازات", eos: "نهاية الخدمة", hr_management: "إدارة الموارد البشرية", saudization: "التوطين", contracts: "العقود واللوائح", general: "عام" };
 const CAT_EN = { labor_law: "Labor Law", payroll: "Payroll & WPS", attendance: "Attendance & Leave", eos: "End of Service", hr_management: "HR Management", saudization: "Saudization", contracts: "Contracts & Policies", general: "General" };
 
 export default function BlogArticle() {

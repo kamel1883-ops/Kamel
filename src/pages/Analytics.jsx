@@ -26,15 +26,15 @@ export default function Analytics() {
   const t = isAr ? {
     title: "تحليلات الموارد البشرية", subtitle: "مؤشرات قياسية عميقة لاتخاذ قرارات قائمة على البيانات",
     loading: "جارٍ تحميل التحليلات...",
-    sHeadcount: "إجمالي القوى العاملة", sSaudization: "نسبة السعودة", sTurnover: "معدل الدوران", sAtt: "معدل الحضور",
+    sHeadcount: "إجمالي القوى العاملة", sSaudization: "نسبة التوطين", sTurnover: "معدل الدوران", sAtt: "معدل الحضور",
     period: "الفترة:", yearL: "سنوي", halfL: "نصف سنوي", quarterL: "ربع سنوي",
     hires: "تعيينات", exits: "مغادرات", activeNow: "على رأس العمل", retention: "معدل الاحتفاظ", tenureExit: "متوسط خدمة المغادر (يوم)", riskDept: "إدارات عالية المخاطر",
-    dept: "توزيع القوى العاملة حسب الإدارة", saudi: "السعودة (سعوديون / مقيمون)", saudiL: "سعوديون", expatL: "مقيمون",
+    dept: "توزيع القوى العاملة حسب الإدارة", saudi: "التوطين (سعوديون / مقيمون)", saudiL: "سعوديون", expatL: "مقيمون",
     gender: "التوزيع حسب الجنس", status: "توزيع الحالات الوظيفية", tenure: "توزيع مدة الخدمة",
     salary: "متوسط الراتب حسب الإدارة", perf: "متوسط الأداء حسب الإدارة (من 5)",
     turnByDept: "معدل الدوران حسب الإدارة (%)", retByDept: "معدل الاستبقاء حسب الإدارة (%)", exitReasons: "أسباب المغادرة", exitSat: "متوسط رضا المغادرين عند الخروج",
     stratsH: "توصيات لخفض معدل الدوران", satSal: "الراتب", satBen: "المزايا", satEnv: "البيئة", satMng: "الإدارة", recommend: "توصية بالعمل",
-    deepKpis: "مؤشرات قرار متقدمة", avgPerf: "متوسط الأداء", saudiRatio: "نسبة السعودة", payrollCost: "تكلفة الرواتب الشهرية",
+    deepKpis: "مؤشرات قرار متقدمة", avgPerf: "متوسط الأداء", saudiRatio: "نسبة التوطين", payrollCost: "تكلفة الرواتب الشهرية",
   } : {
     title: "HR analytics", subtitle: "Deep KPIs for data-driven decisions",
     loading: "Loading analytics...",
