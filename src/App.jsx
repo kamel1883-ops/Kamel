@@ -35,7 +35,6 @@ import JobApply from "@/pages/public/JobApply";
 import Analytics from "@/pages/Analytics";
 import Licenses from "@/pages/Licenses";
 import PlatformSubscriptions from "@/pages/PlatformSubscriptions";
-import GovIntegrations from "@/pages/GovIntegrations";
 import Landing from "@/pages/Landing";
 import Discounts from "@/pages/Discounts";
 import ImportAttendance from "@/pages/ImportAttendance";
@@ -148,7 +147,6 @@ const AuthenticatedApp = () => {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/platform-subscriptions" element={<PlatformSubscriptions />} />
-        <Route path="/gov-integrations" element={<GovIntegrations />} />
         <Route path="/customer-surveys" element={<CustomerSurveys />} />
         <Route path="/discounts" element={<Discounts />} />
         <Route path="/settings" element={<SettingsPage />} />

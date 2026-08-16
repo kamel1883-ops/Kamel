@@ -1,0 +1,200 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>خارطة الربط الحكومي الذكي - جدارة</title>
+<style>
+@page { size: A4 landscape; margin: 1cm; }
+body { font-family: 'Times New Roman', 'Simplified Arabic', Tahoma; direction: rtl; font-size: 11pt; color: #1f2937; }
+h1 { font-size: 18pt; color: #4c1d95; text-align: center; margin-bottom: 4px; }
+.sub { text-align: center; color: #6b7280; font-size: 11pt; margin-bottom: 18px; }
+table { border-collapse: collapse; width: 100%; font-size: 10.5pt; }
+th { background: #f1ecff; color: #4c1d95; font-weight: bold; border: 1px solid #c4b5fd; padding: 8px 6px; text-align: right; }
+td { border: 1px solid #d1d5db; padding: 8px 6px; vertical-align: top; text-align: right; }
+tr:nth-child(even) { background: #faf5ff; }
+.ent { font-weight: bold; color: #1f2937; }
+.auth { font-size: 9.5pt; color: #6b7280; margin-top: 2px; }
+.cred { font-size: 10pt; background: #f9fafb; padding: 5px; border: 1px solid #e5e7eb; border-radius: 3px; }
+.status { color: #b45309; font-weight: bold; font-size: 9.5pt; }
+.actions { font-size: 9.5pt; color: #4b5563; line-height: 1.6; }
+.foot { margin-top: 16px; font-size: 9pt; color: #6b7280; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 8px; }
+</style>
+</head>
+<body>
+<h1>خارطة الربط الحكومي الذكي – منصة جدارة</h1>
+<div class="sub">كل جهة حكومية، غرض الربط، المنصة المصدر، بيانات الاعتماد المطلوبة، وأعمال الأتمتة — بانتظار اتفاقيات/اعتمادات رسمية للتفعيل الآلي الكامل</div>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>الجهة الحكومية</th>
+<th>غرض الربط</th>
+<th>المنصة المصدر</th>
+<th>بيانات الاعتماد المطلوبة</th>
+<th>أعمال الأتمتة</th>
+<th>الحالة</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td>1</td>
+<td><div class="ent">السجل التجاري</div><div class="auth">وزارة التجارة (واثق)</div></td>
+<td>التحقق من تجديد السجل التجاري وتاريخ انتهائه</td>
+<td>واثق (Ministry of Commerce)</td>
+<td><div class="cred">مفاتيح API من واثق للأعمال (P_ID + Client Key) + الرقم الوطني الموحد للمنشأة</div></td>
+<td class="actions">• تحديث تاريخ انتهاء السجل<br>• إشعار قبل الانتهاء بـ 30/15/7 أيام</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>2</td>
+<td><div class="ent">أمانة/بلدية</div><div class="auth">وزارة البلديات والإسكان</div></td>
+<td>تجديد الترخيص البلدي والتحقق من حالته</td>
+<td>بلدي (Balady)</td>
+<td><div class="cred">مفاتيح API من منصة بلد + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>3</td>
+<td><div class="ent">وزارة الصناعة والثروة المعدنية</div><div class="auth">وزارة الصناعة</div></td>
+<td>تجديد الترخيص الصناعي للمنشأة</td>
+<td>بوابة وزارة الصناعة</td>
+<td><div class="cred">مفاتيح API من بوابة الصناعة + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>4</td>
+<td><div class="ent">هيئة مدن (MODON)</div><div class="auth">الهيئة السعودية للمدن الصناعية</div></td>
+<td>تجديد عقد/ترخيص المدينة الصناعية</td>
+<td>بوابة هيئة مدن (MODON)</td>
+<td><div class="cred">مفاتيح API من بوابة هيئة مدن + رقم العقد</div></td>
+<td class="actions">• تجديد العقد<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>5</td>
+<td><div class="ent">الدفاع المدني</div><div class="auth">المديرية العامة للدفاع المدني</div></td>
+<td>تجديد ترخيص السلامة</td>
+<td>بوابة الدفاع المدني للمنشآت</td>
+<td><div class="cred">مفاتيح API من البوابة + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>6</td>
+<td><div class="ent">الهيئة العامة للغذاء والدواء (SFDA)</div><div class="auth">SFDA</div></td>
+<td>تجديد الترخيص الغذائي/الدوائي والتحقق من حالته</td>
+<td>بوابة SFDA للأعمال</td>
+<td><div class="cred">مفاتيح API من بوابة SFDA + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>7</td>
+<td><div class="ent">الرخصة الصحية / العيادات</div><div class="auth">وزارة الصحة (بوابة مُوفِّر)</div></td>
+<td>تجديد الترخيص الصحي للمنشآت الصحية</td>
+<td>بوابة مُوفِّر – وزارة الصحة</td>
+<td><div class="cred">مفاتيح API من بوابة مُوفِّر + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>8</td>
+<td><div class="ent">التأمينات الاجتماعية (GOSI)</div><div class="auth">المؤسسة العامة للتأمينات</div></td>
+<td>إرسال بيانات الاشتراك الشهري وجلب كشف الاشتراك</td>
+<td>بوابة التأمينات الاجتماعية (GOSI)</td>
+<td><div class="cred">مفاتيح API من بوابة التأمينات + رقم المنشأة في GOSI</div></td>
+<td class="actions">• إرسال بيانات الموظفين الشهرية<br>• جلب كشف الاشتراك<br>• حساب حصة الموظف/صاحب العمل</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>9</td>
+<td><div class="ent">الهيئة السعودية للسياحة</div><div class="auth">وزارة السياحة</div></td>
+<td>تجديد الترخيص السياحي (فنادق/معارض/أنشطة سياحية)</td>
+<td>بوابة السياحة</td>
+<td><div class="cred">مفاتيح API من بوابة السياحة + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>10</td>
+<td><div class="ent">هيئة النقل</div><div class="auth">الهيئة العامة للنقل</div></td>
+<td>تجديد ترخيص نقل (منشآت نقل/سفريات)</td>
+<td>بوابة هيئة النقل</td>
+<td><div class="cred">مفاتيح API من بوابة هيئة النقل + رقم الترخيص</div></td>
+<td class="actions">• تجديد الترخيص<br>• إشعار قبل الانتهاء</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>11</td>
+<td><div class="ent">الزكاة والضريبة والجمارك (ZATCA)</div><div class="auth">هيئة الزكاة والضريبة والجمارك</div></td>
+<td>ربط الفوترة الإلكترونية (فاتورة) وإرسال الفواتير الآمنة</td>
+<td>بوابة فاتورة من ZATCA</td>
+<td><div class="cred">Client ID و Client Secret من ZATCA API + رقم VAT</div></td>
+<td class="actions">• إصدار/إرسال فواتير ضريبية<br>• مزامنة API مع ZATCA</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>12</td>
+<td><div class="ent">الإقامات (أبشر أعمال / مقيم)</div><div class="auth">مقيم + أبشر أعمال (SDAIA)</div></td>
+<td>تحديث تاريخ انتهاء إقامة كل مقيم تلقائياً بعد التجديد أو إصدارها</td>
+<td>مقيم + أبشر أعمال (Absher Business)</td>
+<td><div class="cred">اعتماد موفّر خدمة مع أبشر أعمال + مفاتيح API + الرقم الموحد للمنشأة</div></td>
+<td class="actions">• جلب آخر تاريخ إقامة لكل مقيم<br>• تحديث حقل iqama_expiry<br>• إشعار قبل انتهاء الإقامة بـ 60/30/7 أيام</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>13</td>
+<td><div class="ent">المرور للمركبات</div><div class="auth">الإدارة العامة للمرور / أبشر</div></td>
+<td>تحديث تجديد استمارات مركبات المنشأة ومعرفة حالتها الزمنية</td>
+<td>بوابة المرور / أبشر (وزارة الداخلية)</td>
+<td><div class="cred">مفاتيح API من بوابة المرور/أبشر + لوحة مركبة + رقم منشأة</div></td>
+<td class="actions">• جلب حالة استمارة المركبة<br>• تحديث تاريخ انتهاء الاستمارة<br>• إشعار قبل انتهاء الاستمارة</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>14</td>
+<td><div class="ent">مدد (حماية الأجور WPS)</div><div class="auth">وزارة الموارد البشرية</div></td>
+<td>إرسال كشف الرواتب المعتمد تلقائياً لحماية الأجور WPS</td>
+<td>منصة مدد (Mudad)</td>
+<td><div class="cred">اعتماد موفّر خدمة رواتب مع مدد + Client ID/Secret + الرقم الموحد للمنشأة</div></td>
+<td class="actions">• توليد ملف WPS بصيغة مدّد المعيارية<br>• إرسال الكشف عند الاعتماد<br>• جلب حالة القبول/الرفض</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+<tr>
+<td>15</td>
+<td><div class="ent">قوى / عاجل (MHRSD)</div><div class="auth">وزارة الموارد البشرية</div></td>
+<td>نقل وتعديل بيانات الموظفين وخدمات العمالة وإصدار رخص العمل</td>
+<td>منصة قوى (Qiwa) + عاجل (Ajeer)</td>
+<td><div class="cred">مفاتيح API من قوى/عاجل + الرقم الموحد للمنشأة</div></td>
+<td class="actions">• نقل/تعديل بيانات موظف<br>• إصدار رخصة عمل<br>• جلب وضع العامل</td>
+<td><span class="status">يحتاج اعتماد رسمي</span></td>
+</tr>
+
+</tbody>
+</table>
+
+<div class="foot">
+منصة جدارة للموارد البشرية — جميع عمليات الربط ستكون آلية 100% بمجرد تزويد بيانات الاعتماد الرسمية من كل جهة. مكتب العمل مستثنى من خارطة الربط.
+</div>
+
+</body>
+</html>
