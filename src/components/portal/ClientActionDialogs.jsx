@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail } from "lucide-react";
+import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature } from "lucide-react";
+import ConfirmSubscriptionDialog from "./ConfirmSubscriptionDialog";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -168,11 +169,12 @@ export function ExtendTrialDialog({ open, onClose, tenant, isAr, t, onDone }) {
 }
 
 // ——— بطاقة العميل القابلة للطباعة PDF + لوحة التحكم الكاملة ———
-export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, busyId }) {
+export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, busyId, session, onRefresh }) {
   const [days, setDays] = useState("7");
   const [amount, setAmount] = useState("");
   const [end, setEnd] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   useEffect(() => {
     if (open && tenant) {
       setDays("7");
@@ -180,6 +182,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
       setNewEmail("");
       const d = new Date(); d.setHours(0, 0, 0, 0); d.setFullYear(d.getFullYear() + 1);
       setEnd(d.toISOString().slice(0, 10));
+      setConfirmOpen(false);
     }
   }, [open, tenant]);
   if (!open || !tenant) return null;
@@ -217,6 +220,12 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
               <a href={tenant.contract_pdf_url} target="_blank" rel="noreferrer" download
                  className="inline-flex items-center gap-1.5 text-sm h-9 px-3 rounded-md border border-input bg-transparent hover:bg-accent text-violet-700">
                 <Download size={14} /> {isAr ? "تنزيل العقد (PDF)" : "Download Contract"}
+              </a>
+            )}
+            {tenant.invoice_pdf_url && (
+              <a href={tenant.invoice_pdf_url} target="_blank" rel="noreferrer" download
+                 className="inline-flex items-center gap-1.5 text-sm h-9 px-3 rounded-md border border-input bg-transparent hover:bg-accent text-indigo-700">
+                <FileSignature size={14} /> {isAr ? "تنزيل الفاتورة (PDF)" : "Invoice"}
               </a>
             )}
             <Button size="sm" variant="outline" onClick={() => window.print()} className="gap-1.5"><Printer size={14} /> {isAr ? "طباعة PDF" : "Print PDF"}</Button>
@@ -281,38 +290,17 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
               </div>
             </div>
           )}
-          {(status === "trial" || status === "expired") && (
+          {(status === "trial" || status === "expired" || status === "active") && (
             <div className="space-y-2 rounded-xl border border-violet-200 bg-violet-50/50 p-3">
-              <div className="text-sm font-medium">{isAr ? "تأكيد التعاقد وتفعيل الاشتراك" : "Confirm contract & activate"}</div>
-              <div className="flex flex-wrap items-end gap-2">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isAr ? "المبلغ (ر.س)" : "Amount"}</Label>
-                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-32 h-9" />
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <div className="text-sm font-medium">{status === "active" ? (isAr ? "تجديد الاشتراك السنوي" : "Renew annual subscription") : (isAr ? "تأكيد اشتراك — رفع إيصال وتوليد عقد وفاتورة" : "Confirm subscription — upload receipt & generate documents")}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {isAr ? "ارفع صورة الإيصال المُستلَم عبر واتساب، ثم يُفعَّل الاشتراك ويُولَّد العقد والفاتورة تلقائياً ويُحفظان." : "Upload the WhatsApp receipt, the subscription activates and contract+invoice generate automatically and save."}
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isAr ? "نهاية الاشتراك" : "Sub end"}</Label>
-                  <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="w-40 h-9" dir="ltr" />
-                </div>
-                <Button size="sm" onClick={() => onAction(tenant.id, "owner_activate", { subscription_end: end, amount: Number(amount) })} disabled={busy || !amount || !end} className="gap-1.5">
-                  {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />} {isAr ? "تأكيد وتفعيل" : "Confirm & activate"}
-                </Button>
-              </div>
-            </div>
-          )}
-          {status === "active" && (
-            <div className="space-y-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
-              <div className="text-sm font-medium">{isAr ? "تجديد الاشتراك السنوي" : "Renew annual subscription"}</div>
-              <div className="flex flex-wrap items-end gap-2">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isAr ? "المبلغ (ر.س)" : "Amount"}</Label>
-                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-32 h-9" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">{isAr ? "نهاية الاشتراك الجديد" : "New sub end"}</Label>
-                  <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="w-40 h-9" dir="ltr" />
-                </div>
-                <Button size="sm" onClick={() => onAction(tenant.id, "owner_activate", { subscription_end: end, amount: Number(amount) })} disabled={busy || !amount || !end} className="gap-1.5">
-                  {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />} {isAr ? "تجديد وتفعيل" : "Renew"}
+                <Button size="sm" onClick={() => setConfirmOpen(true)} disabled={busy} className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white">
+                  <BadgeCheck size={14} /> {status === "active" ? (isAr ? "تجديد وتوليد" : "Renew & generate") : (isAr ? "تأكيد وتوليد" : "Confirm & generate")}
                 </Button>
               </div>
             </div>
@@ -345,6 +333,14 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
         </div>
         )}
       </div>
+      <ConfirmSubscriptionDialog
+        open={confirmOpen}
+        onClose={() => { setConfirmOpen(false); if (onRefresh) onRefresh(); }}
+        tenant={tenant}
+        isAr={isAr}
+        session={session}
+        onSaved={() => { if (onRefresh) onRefresh(); }}
+      />
     </div>
   );
 }

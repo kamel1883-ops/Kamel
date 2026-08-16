@@ -205,7 +205,10 @@ export default async function (req) {
       if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
       const amount = Number(body.amount) || 0;
       const next = new Date(); next.setHours(0, 0, 0, 0); next.setFullYear(next.getFullYear() + 1);
+      const subscription_start = String(body.subscription_start || new Date().toISOString().slice(0, 10));
       const subscription_end = String(body.subscription_end || next.toISOString().slice(0, 10));
+      const proof_raw = String(body.proof_url || "").trim();
+      const proof_url_safe = /^https?:\/\//i.test(proof_raw) ? proof_raw : "";
       const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
       const todayStr = new Date().toISOString().slice(0, 10);
       await base44.asServiceRole.entities.Tenant.update(tenant_id, {
@@ -213,16 +216,33 @@ export default async function (req) {
         plan: "annual",
         subscription_end,
         contract_confirmed: true,
+        contract_generated_date: todayStr,
         suspended_from: null,
         quoted_amount: amount || Number(t.quoted_amount) || 0,
+        activation_proof_url: proof_url_safe || null,
       });
       await base44.asServiceRole.entities.Subscription.create({
         tenant_id, tenant_name: t.name, plan: "annual",
         amount: amount || Number(t.quoted_amount) || 0,
-        period_start: todayStr, period_end: subscription_end,
+        period_start: subscription_start, period_end: subscription_end,
         payment_method: "direct", status: "paid", paid_date: todayStr,
-        notes: "تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك",
+        notes: proof_url_safe ? ("تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك — إيصال: " + proof_url_safe) : "تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك",
       });
+      return Response.json({ ok: true, subscription_start, subscription_end });
+    }
+
+    // حفظ روابط العقد والفاتورة المُولَّدين من الواجهة بعد تأكيد الاشتراك.
+    if (action === "owner_save_documents") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      if (!tenant_id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const isUrl = (u: any): string => { const s = String(u || "").trim(); return /^https?:\/\//i.test(s) ? s : ""; };
+      const payload: any = {};
+      const cp = isUrl(body.contract_pdf_url); if (cp) payload.contract_pdf_url = cp;
+      const iv = isUrl(body.invoice_pdf_url); if (iv) payload.invoice_pdf_url = iv;
+      if (body.contract_quote_no) payload.contract_quote_no = String(body.contract_quote_no).slice(0, 60);
+      if (Object.keys(payload).length === 0) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, payload);
       return Response.json({ ok: true });
     }
 

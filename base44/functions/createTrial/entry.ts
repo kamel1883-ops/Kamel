@@ -78,7 +78,9 @@ export default async function (req) {
       city: String(body.city || '').trim(),
       country: String(body.country || 'السعودية').trim(),
       plan: 'trial',
-      status: (String(body.lead_source || 'trial').trim() === 'quote') ? 'pending_payment' : 'trial',
+      // الآلية الجديدة: طلبات عرض السعر تصبح تجربة مرئية للمالك (status=trial) وتميّز بـ lead_source=quote،
+      // ولا تُحجب — ينتظر المالك وصول إيصال التحويل عبر واتساب ثم يؤكد الاشتراك من البوابة.
+      status: 'trial',
       trial_start: today.toISOString().slice(0, 10),
       trial_end: trialEnd.toISOString().slice(0, 10),
       discount_code,
@@ -92,9 +94,10 @@ export default async function (req) {
 
     const officialEmail = 'info@jadara-hr.com';
     const isQuote = String(body.lead_source || 'trial').trim() === 'quote';
-    // للشراء (lead_source=quote) لا نُعلِم المالك ولا نُسجّل بياناته في بوابة المالك
-    // حتى يُكمل الدفع فعلياً — يبقى السجل بحالة pending_payment (مخفي عن المالك).
-    if (!isQuote) try {
+    // في الآلية الجديدة: طلبات عرض السعر (quote) تأخذ حالة تجربة مرئية للمالك وتبقى مميّزة بـ lead_source=quote،
+    // فينتظر المالك وصول إيصال التحويل عبر واتساب ثم يؤكد الاشتراك من بوابة المالك.
+    // نُعلِم المالك دائماً بكلا النوعين (تجربة مباشرة أو طلب عرض سعر) ليستقبل إيصال العميل ويتواصل معه.
+    try {
       const esc = (v) => escapeHtml(v || '-');
       let emailBody =
         (isQuote

@@ -4,18 +4,22 @@ import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 
-// فاتورة غير ضريبية (Simplified / non-tax invoice) تُولَّد تلقائياً بعد إتمام الدفع.
-// تشمل بيانات العميل، نوع الباقة (الشريحة)، السعر، وقائمة المميزات الكاملة.
+// فاتورة غير ضريبية (Simplified / non-tax invoice). تُولَّد من بوابة المالك بعد تأكيد الاشتراك.
+// تشمل بيانات العميل، نوع الخدمة (برمجيات اشتراك سنوي في منصة جدارة)، الباقة/الشريحة، فترة الاشتراك،
+// الباركود الرقمي، وقيمة الضريبة (0%) مع شرح حالة الضريبة الصفرية.
 export default function SubscriptionInvoiceDoc({
   company = {},
   tier = null,
   invNo = "",
   date = "",
+  startDate = "",
+  endDate = "",
   amount = 0,
   employeeCount = 0,
   isAr = true,
 }) {
   const cDate = date || new Date().toISOString().slice(0, 10);
+  const subStart = startDate || cDate;
   const fmt = (d) => {
     try {
       const dt = new Date(d);
@@ -43,14 +47,22 @@ export default function SubscriptionInvoiceDoc({
         pkg: "الباقة / الشريحة",
         range: "نطاق الموظفين",
         desc: "الوصف",
+        qty: "المدة",
         amt: "المبلغ",
+        serviceType: "نوع الخدمة",
+        serviceTypeValue: "برمجيات اشتراك سنوي في منصة جدارة",
+        subPeriod: "فترة الاشتراك",
+        subStartLabel: "بداية الاشتراك",
+        subEndLabel: "نهاية الاشتراك",
+        subtotal: "المبلغ الصافي",
+        taxRow: "رسوم الضريبة (0%)",
         total: "الإجمالي المستحق",
         features: "تشمل الباقة جميع المميزات التالية",
-        notTax: "هذه فاتورة غير ضريبية ولا تخضع لضريبة القيمة المضافة.",
+        notTax: "هذه فاتورة غير ضريبية ولا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% (صفر). المبلغ الإجمالي = المبلغ الصافي.",
         subLine: "اشتراك سنوي — منصة جدارة لإدارة الموارد البشرية",
         perYear: "/ سنوياً",
         currency: "ر.س",
-        sigName: "المدير العام — كامل إسماعيل",
+        sigName: "الإدارة المالية",
         contactFoot: "للاستفسار",
       }
     : {
@@ -69,20 +81,29 @@ export default function SubscriptionInvoiceDoc({
         pkg: "Plan / Tier",
         range: "Headcount range",
         desc: "Description",
+        qty: "Term",
         amt: "Amount",
+        serviceType: "Service type",
+        serviceTypeValue: "Annual subscription software — Jadara platform",
+        subPeriod: "Subscription period",
+        subStartLabel: "Start",
+        subEndLabel: "End",
+        subtotal: "Net amount",
+        taxRow: "Tax (0%)",
         total: "Total due",
         features: "The plan includes every feature below",
-        notTax: "This is a non-tax invoice and is not subject to VAT.",
+        notTax: "This is a non-tax invoice and is not subject to VAT. Tax: 0% (zero). Total = Net amount.",
         subLine: "Annual subscription — Jadara HR platform",
         perYear: "/ year",
         currency: "SAR",
-        sigName: "General Manager — Kamel Ismail",
+        sigName: "Finance Department",
         contactFoot: "Inquiries",
       };
 
   const sar = L.currency;
   const num = (n) => Number(n || 0).toLocaleString();
   const v = (x) => (x && String(x).trim() !== "" ? x : "—");
+  const taxAmount = 0;
 
   return (
     <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
@@ -120,12 +141,17 @@ export default function SubscriptionInvoiceDoc({
         </div>
       </div>
 
-      {/* ملخص الباقة */}
-      <div style={{ border: "1px solid #e2e8f0", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 12.5 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 20px", lineHeight: 1.8 }}>
-          <KV k={L.pkg} vv={v(tier?.tier)} bold />
+      {/* ملخص الباقة + نوع الخدمة + فترة الاشتراك */}
+      <div style={{ border: "1px solid #e2e8f0", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 12.5, background: "#fbfaff" }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#475569", marginBottom: 8 }}>{L.subPeriod}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 20px", lineHeight: 1.8, marginBottom: 10 }}>
+          <KV k={L.subStartLabel} vv={fmt(subStart)} bold />
+          <KV k={L.subEndLabel} vv={fmt(endDate)} bold />
           <KV k={L.range} vv={v(tier?.range)} />
-          <KV k={L.amt} vv={`${num(amount)} ${sar}`} bold accent />
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, borderTop: "1px dashed #cbd5e1", paddingTop: 8 }}>
+          <span style={{ color: "#64748b", fontWeight: 700 }}>{L.serviceType}:</span>
+          <span style={{ fontWeight: 800, color: "#1A237E", fontSize: 13.5 }}>{L.serviceTypeValue} — {v(tier?.tier)}</span>
         </div>
       </div>
 
@@ -134,19 +160,27 @@ export default function SubscriptionInvoiceDoc({
         <thead>
           <tr style={{ background: "#f1f5f9", color: "#334155" }}>
             <th style={{ textAlign: "right", padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>{L.desc}</th>
-            <th style={{ textAlign: "right", padding: "8px 10px", borderBottom: "1px solid #cbd5e1", whiteSpace: "nowrap" }}>{L.range}</th>
+            <th style={{ textAlign: "right", padding: "8px 10px", borderBottom: "1px solid #cbd5e1", whiteSpace: "nowrap" }}>{L.qty}</th>
             <th style={{ textAlign: "right", padding: "8px 10px", borderBottom: "1px solid #cbd5e1", whiteSpace: "nowrap" }}>{L.amt}</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.subLine} — {v(tier?.tier)}</td>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{v(tier?.range)}</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.serviceTypeValue} — {v(tier?.tier)} ({v(tier?.range)})</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.perYear}</td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{num(amount)} {sar}</td>
           </tr>
           <tr>
-            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 800, color: "#0f172a" }}>{L.total}</td>
-            <td style={{ padding: "8px 10px", fontWeight: 800, fontSize: 15, color: "#1A237E", whiteSpace: "nowrap" }}>{num(amount)} {sar}</td>
+            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0" }}>{L.subtotal}</td>
+            <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", borderBottom: "1px solid #e2e8f0" }}>{num(amount)} {sar}</td>
+          </tr>
+          <tr>
+            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", color: "#475569", borderBottom: "1px solid #e2e8f0" }}>{L.taxRow}</td>
+            <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", color: "#16a34a", borderBottom: "1px solid #e2e8f0" }}>{num(taxAmount)} {sar}</td>
+          </tr>
+          <tr>
+            <td colSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#0f172a", background: "#f8fafc" }}>{L.total}</td>
+            <td style={{ padding: "10px 10px", fontWeight: 800, fontSize: 15.5, color: "#1A237E", whiteSpace: "nowrap", background: "#eef2ff" }}>{num(amount)} {sar}</td>
           </tr>
         </tbody>
       </table>
@@ -166,9 +200,15 @@ export default function SubscriptionInvoiceDoc({
         </div>
       </div>
 
-      {/* تنويه عدم الخضوع للضريبة */}
-      <div style={{ fontSize: 11, color: "#b45309", background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 10, padding: "8px 12px", marginBottom: 18 }}>
-        {L.notTax}
+      {/* تنويه عدم الخضوع للضريبة + الباركود */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 18, marginBottom: 16 }}>
+        <div style={{ flex: 1, fontSize: 11, color: "#b45309", background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 10, padding: "8px 12px" }}>
+          {L.notTax}
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <Barcode value={invNo} />
+          <div style={{ marginTop: 4, fontSize: 10.5, color: "#475569", fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{invNo || "—"}</div>
+        </div>
       </div>
 
       {/* التوقيع والتذييل */}
@@ -219,15 +259,50 @@ function Stamp({ label }) {
       <defs>
         <path id="invTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
       </defs>
-      <circle cx="100" cy="100" r="92" fill="none" stroke="#1A237E" strokeWidth="3" />
-      <circle cx="100" cy="100" r="84" fill="none" stroke="#1A237E" strokeWidth="1.4" />
-      <circle cx="100" cy="100" r="46" fill="none" stroke="#1A237E" strokeWidth="1.6" />
+      <circle cx="100" cy="100" r="92" fill="none" stroke="#1A237E" strokeWidth={3} />
+      <circle cx="100" cy="100" r="84" fill="none" stroke="#1A237E" strokeWidth={1.4} />
+      <circle cx="100" cy="100" r={46} fill="none" stroke="#1A237E" strokeWidth={1.6} />
       <text fill="#1A237E" fontSize="15" fontWeight="700" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">
         <textPath href="#invTop" startOffset="50%" textAnchor="middle">{label}</textPath>
       </text>
       <text x="100" y="98" textAnchor="middle" fill="#1A237E" fontSize="22" fontWeight="800" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">جدارة</text>
       <text x="100" y="118" textAnchor="middle" fill="#1A237E" fontSize="9" fontWeight="600" fontFamily="sans-serif">JADARA HR</text>
       <text x="100" y="132" textAnchor="middle" fill="#1A237E" fontSize="14">✦</text>
+    </svg>
+  );
+}
+
+// باركود مرئي مبسّط يُولّد من الأرقام في رقم الفاتورة (تبديل بسيط بأسلوب EAN-L) — مرجع بصري للرقم التسلسلي.
+const EAN_L = {
+  '0': '0001101', '1': '0011001', '2': '0010011', '3': '0111101',
+  '4': '0100011', '5': '0110001', '6': '0101111', '7': '0111011',
+  '8': '0110111', '9': '0001011',
+};
+
+function Barcode({ value, barWidth = 2, height = 46 }) {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 14);
+  if (!digits) return <div style={{ minHeight: height + 16 }} />;
+  // 9 modules quiet zone + guard 101 + L-codes digits + guard 01010 + L-codes digits + guard 101 + 9 modules quiet
+  const first = digits.slice(0, Math.ceil(digits.length / 2));
+  const second = digits.slice(Math.ceil(digits.length / 2));
+  let pattern = "000000000" + "101";
+  for (const d of first) pattern += EAN_L[d] || "0001101";
+  pattern += "01010";
+  for (const d of second) pattern += EAN_L[d] || "0001101";
+  pattern += "101" + "000000000";
+
+  const bars = [];
+  let x = 4;
+  for (let i = 0; i < pattern.length; i++) {
+    if (pattern[i] === "1") {
+      bars.push(<rect key={i} x={x} y={0} width={barWidth} height={height} fill="#0b1120" />);
+    }
+    x += barWidth;
+  }
+  const totalW = pattern.length * barWidth + 8;
+  return (
+    <svg width={totalW} height={height + 4} viewBox={`0 0 ${totalW} ${height + 4}`}>
+      {bars}
     </svg>
   );
 }

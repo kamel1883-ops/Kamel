@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Crown, Building2, FlaskConical, FileText, BadgeCheck, Pause, CalendarClock,
   Wallet, Loader2, AlertTriangle, RefreshCw, MessageCircle, Search, Users,
-  Check, Sparkles, Ban, RotateCcw, Eye, Bell, Download,
+  Check, Sparkles, Ban, RotateCcw, Eye, Bell, Download, FileSignature,
 } from "lucide-react";
 import { ClientInfoDialog, waLink, daysLeft, isOwnerTenant } from "./ClientActionDialogs";
 
@@ -34,7 +34,7 @@ export default function ClientsManager({ session }) {
     loading: "جارٍ تحميل البيانات…", fail: "تعذّر تحميل البيانات. أعد المحاولة.", retry: "إعادة المحاولة",
     sent: "تم تنفيذ العملية بنجاح.",
     daysLeft: (n) => `يبقى ${n} يوم`, ended: "انتهت — راجع الحساب", lifetime: "مدى الحياة",
-    contract: "العقد (PDF)",
+    contract: "العقد (PDF)", invoice: "الفاتورة (PDF)",
     approveAdmin: "اعتماد الصلاحية", rejectAdmin: "رفض", pendingAdmin: "بانتظار الاعتماد",
   } : {
     title: "Clients & Contracts",
@@ -55,7 +55,7 @@ export default function ClientsManager({ session }) {
     loading: "Loading…", fail: "Failed to load. Retry.", retry: "Retry",
     sent: "Done successfully.",
     daysLeft: (n) => `${n} days left`, ended: "Ended — review", lifetime: "Lifetime",
-    contract: "Contract PDF",
+    contract: "Contract PDF", invoice: "Invoice PDF",
     approveAdmin: "Approve admin", rejectAdmin: "Reject", pendingAdmin: "Pending approval",
   };
 
@@ -312,6 +312,12 @@ export default function ClientsManager({ session }) {
                                 <Download size={13} /> {t.contract}
                               </a>
                             )}
+                            {x.invoice_pdf_url && (
+                              <a href={x.invoice_pdf_url} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100">
+                                <FileSignature size={13} /> {t.invoice}
+                              </a>
+                            )}
                             {!owner && x.admin_status === "pending" && x.admin_user_id && (
                               <Button size="sm" onClick={() => act(x.id, "owner_approve_admin", { approve: true })} disabled={busyId === x.id} className="gap-1.5 h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
                                 <Check size={14} /> {t.approveAdmin}
@@ -349,7 +355,7 @@ export default function ClientsManager({ session }) {
       )}
 
       <ClientInfoDialog open={!!info} onClose={() => setInfo(null)} tenant={info} isAr={isAr} t={t}
-        onAction={act} busyId={busyId} />
+        onAction={act} busyId={busyId} session={session} onRefresh={loadAll} />
     </div>
   );
 }

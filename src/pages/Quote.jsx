@@ -8,15 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Image } from "@/components/ui/image";
-import { Printer, Loader2, ArrowRight, ArrowLeft, Copy, Check, MessageCircle, Mail, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Printer, Loader2, ArrowLeft, Copy, Check, MessageCircle, ShieldCheck, AlertTriangle, Building2, Sparkles, UserPlus, Banknote } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
-import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
-import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
-import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
-import StripeCheckout from "@/components/checkout/StripeCheckout";
-import BankTransferPayment from "@/components/checkout/BankTransferPayment";
 import TurnstileWidget from "@/components/TurnstileWidget";
-import { FileSignature, Download, CheckCircle2, UserPlus, Sparkles } from "lucide-react";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -25,7 +19,8 @@ const BANK = {
   iban: "SA75780000000001285607287",
   account: "1285607287",
 };
-const WHATSAPP = "https://wa.me/966594700782";
+const WHATSAPP_NUMBER = "0594700782";
+const WHATSAPP_LINK = "https://wa.me/966594700782";
 const SALES_EMAIL = "info@jadara-hr.com";
 
 const featuresAr = [
@@ -65,34 +60,35 @@ export default function Quote() {
     renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك (حسب عدد الموظفين وقت التجديد).",
     headcountLabel: "عدد الموظفين المتوقع *", headcountHint: (tier, price) => `شريحتك: ${tier} — السعر السنوي: ${price.toLocaleString()} ريال`,
     headcountRequired: "أدخل عدد الموظفين المتوقع لحساب سعر الباقة تلقائياً",
-    payTitle: "الدفع ببطاقة أو أبل باي", payNote: "ادفع الآن ببطاقة (مدى / فيزا / ماستركارد) أو أبل باي مباشرةً — يُحسب المبلغ تلقائياً وفق شريحة عدد موظفيك. عند إتمام الدفع يُولَّد عقد الاشتراك الرسمي تلقائياً وتُفعَّل منشأتك.",
-    amountDue: "المبلغ المستحق", paidTitle: "تم الدفع وتفعيل الاشتراك", paidNote: "تم تأكيد الدفع وتوليد عقد الاشتراك الرسمي والفاتورة غير الضريبية ببيانات منشأتك وباقتك ومميزاتها. يمكنك تحميل نسختك أدناه — كما حُفظت نسخة في بوابة مالك المنصة.",
-    downloadContract: "تحميل العقد (PDF)", downloadInvoice: "تحميل الفاتورة (PDF)", paySecure: "الدفع آمن ومشفّر عبر Stripe — بطاقة أو أبل باي مباشرة، دون تسجيل دخول PayPal.",
     errCaptcha: "أكّد أنك لست روبوت",
-    beneficiary: "المستفيد", bank: "البنك", iban: "رقم الآيبان", account: "رقم الحساب",
-    copy: "نسخ الآيبان", copied: "تم النسخ", proofTitle: "بعد التحويل",
-    proof: "أرسل إثبات التحويل عبر واتساب أو البريد، وسيتم تفعيل اشتراكك خلال 24 ساعة.",
-    afterNote: "صلاحية هذا العرض 30 يوماً من تاريخ إصداره. يبدأ عملك بالمنصة فور تفعيل الاشتراك، مع فترة تجربة مجانية 30 يوماً قابلة للتشغيل الفوري بانتظار التحويل.",
-    sigName: "المدير العام — كامل إسماعيل",
+    beneficiary: "اسم المستفيد", bank: "البنك", iban: "رقم الآيبان (IBAN)", account: "رقم الحساب",
+    copy: "نسخ الآيبان", copied: "تم النسخ",
+    transferTitle: "تفعيل الاشتراك عبر التحويل البنكي",
+    transferNote: "حول المبلغ الموضّح أعلاه إلى حسابنا البنكي في بنك STC، ثم أرسل صورة إيصال التحويل عبر واتساب إلى رقم الدعم الفني. سيتم تأكيد اشتراكك وتفعيل الحساب خلال 24 ساعة.",
+    sendReceipt: "أرسل إيصال التحويل على واتساب لتفعيل الحساب",
+    waSupport: "الدعم الفني (واتساب)",
+    openWhatsApp: "إرسال عبر واتساب الآن",
+    bankSection: "بيانات التحويل البنكي",
+    amountDue: "المبلغ المستحق (سنوياً)",
+    sigName: "الإدارة المالية",
     stamp: "جدارة لإدارة الموارد البشرية",
     discCode: "كود الخصم (اختياري)",
-    discBadge: "خصم", discApplied: "بعد تطبيق الكود", firstAfter: "السنة الأولى (بعد الخصم)",
+    discBadge: "خصم", discApplied: "بعد تطبيق الكود",
     emailNotice: "تنويه مهم",
     emailNoticeBody: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7) هو معرّف منشأتكم الرسمي في المنصة. عند إتمام التحويل، سجّلوا في بوابة الشركات بهذا الرقم الوطني الموحّد وبنفس البريد المسجل هنا لتفعيل اشتراككم وإدارة حسابكم.",
-    quoteEmailNote: (e, u) => `الرقم الوطني الموحّد للمنشآت لمنشأتكم في هذه المنصة هو: ${u} — عند إتمام التحويل يرجى التوجه إلى بوابة الشركات والتسجيل بنفس هذا الرقم الوطني الموحّد والمسجل بالبريد ${e} لتفعيل اشتراككم وإدارة حسابكم.`,
     activateTitle: "أنشئ حسابك وكلمة مرورك للدخول لبوابة الشركات",
-    activateNote: "تجربتك المجانية مفعّلة بالرقم الموحّد المسجّل. أنشئ حسابك بنفس البريد والرقم الموحّد لطلبك لتدخل بوابة الشركات وتستفيد من كل مميزات المنصة الآن — بينما يتابع فريقنا تفعيل اشتراكك السنوي.",
+    activateNote: "تجربتك المجانية مفعّلة بالرقم الموحّد المسجّل وأنتقل المبلغ بانتظار تأكيد التحويل. أنشئ حسابك بنفس البريد والرقم الموحّد الآن لتدخل بوابة الشركات وتستفيد من كل المميزات — حتى يصلك تأكيد الاشتراك السنوي مع العقد والفاتورة من فريقنا.",
     activateBtn: "إنشاء الحساب والدخول للبوابة",
     activateHint: "بوابة الشركات تتيح: إدارة الموظفين، الحضور والرواتب، الإجازات والسلف، نهاية الخدمة، التحليلات، وكل ميزات جدارة.",
-    portalNote: "العميل يُجلب تلقائياً في بوابة المالك حيث يمكنك تمديد التجربة أو تأكيد الاشتراك أو الإيقاف أو إدارة حسابه.",
+    portalNote: "العميل يظهر تلقائياً في بوابة المالك، وعند وصول إيصال التحويل عبر واتساب يؤكد المالك الاشتراك ويولّد العقد والفاتورة ويُرسلهما لك.",
     trialFormSub: "أدخل بيانات منشأتك لإطلاق فترة التجربة المجانية 30 يوماً — بدون أي رسوم أو بطاقة ائتمان.",
-    buyFormSub: "أدخل بيانات منشأتك ثم انتقل للخطوة التالية: الدفع وتأكيد الاشتراك السنوي.",
+    buyFormSub: "أدخل بيانات منشأتك لتوليد عرض سعر رسمي مع بيانات التحويل البنكي ورقم الدعم لتفعيل الاشتراك.",
     trialSubmit: "تأكيد إرسال طلب التجربة",
-    buySubmit: "الانتقال للدفع",
+    buySubmit: "توليد عرض السعر",
     trialHeadcountNote: "عدد الموظفين يُساعدنا على تجهيز بيئة تجربتك — لن تُفرض أي رسوم خلال الـ 30 يوماً.",
     step1Badge: "الخطوة 1 من 2",
     trialDoneTitle: "تم تأكيد طلب تجربتك بنجاح",
-    trialDoneNote: "تم إنشاء تجربتك المجانية لمدة 30 يوماً بالرقم الوطني الموحد المسجّل. أنشئ حسابك وكلمة مرورك الآن للدخول إلى بوابة الشركات والاستفادة من كل مميزات المنصة — بينما يتابع فريقنا تفعيل اشتراكك السنوي لاحقاً.",
+    trialDoneNote: "تم إنشاء تجربتك المجانية لمدة 30 يوماً بالرقم الوطني الموحد المسجّل. أنشئ حسابك وكلمة مرورك الآن للدخول إلى بوابة الشركات والاستفادة من كل مميزات المنصة.",
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -107,34 +103,35 @@ export default function Quote() {
     renewNote: "The subscription renews annually at your tier's value (based on headcount at renewal).",
     headcountLabel: "Expected employees count *", headcountHint: (tier, price) => `Your tier: ${tier} — Annual: ${price.toLocaleString()} SAR`,
     headcountRequired: "Enter the expected employee count to auto-calculate the package price",
-    payTitle: "Pay by card or Apple Pay", payNote: "Pay now by card (mada / Visa / Mastercard) or Apple Pay directly — the amount is auto-calculated from your employee-count tier. On payment your official subscription contract generates automatically and your account activates.",
-    amountDue: "Amount due", paidTitle: "Payment confirmed & subscription active", paidNote: "Your payment is confirmed and the official subscription contract and non-tax invoice (with your company data, plan, and features) have been generated. Download your copies below — copies are also saved in the platform owner portal.",
-    downloadContract: "Download contract (PDF)", downloadInvoice: "Download invoice (PDF)", paySecure: "Secure encrypted Stripe checkout — your card or Apple Pay directly, no PayPal login.",
     errCaptcha: "Please verify you're human",
     beneficiary: "Beneficiary", bank: "Bank", iban: "IBAN", account: "Account number",
-    copy: "Copy IBAN", copied: "Copied", proofTitle: "After transfer",
-    proof: "Send the transfer proof via WhatsApp or email; your subscription activates within 24 hours.",
-    afterNote: "This quotation is valid for 30 days from issue date. You can start a free 30-day trial immediately while the transfer is being processed.",
-    sigName: "General Manager — Kamel Ismail",
+    copy: "Copy IBAN", copied: "Copied",
+    transferTitle: "Activate the subscription via bank transfer",
+    transferNote: "Transfer the amount shown above to our STC Bank account, then send the transfer receipt photo via WhatsApp to our support number. Your subscription will be confirmed and account activated within 24 hours.",
+    sendReceipt: "Send the transfer receipt on WhatsApp to activate your account",
+    waSupport: "Support (WhatsApp)",
+    openWhatsApp: "Send via WhatsApp now",
+    bankSection: "Bank transfer details",
+    amountDue: "Amount due (annual)",
+    sigName: "Finance Department",
     stamp: "Jadara HR Management",
     discCode: "Discount code (optional)",
-    discBadge: "OFF", discApplied: "After discount applied", firstAfter: "First year (after discount)",
+    discBadge: "OFF", discApplied: "After discount applied",
     emailNotice: "Important",
     emailNoticeBody: "The National Unified Number (10 digits starting with 7) is your organization's official identifier on the platform. After the transfer, register in the Companies portal with this National Unified Number and the same email entered here to activate your subscription and manage your account.",
-    quoteEmailNote: (e, u) => `Your organization's National Unified Number for this platform is: ${u} — after the transfer, go to the Companies portal and register with this National Unified Number and the registered email ${e} to activate your subscription and manage your account.`,
     activateTitle: "Create your account & password to enter the company portal",
-    activateNote: "Your free trial is active with your registered unified number. Create your account with the same email and unified number to enter the company portal and enjoy every platform feature now — while we process your annual subscription.",
+    activateNote: "Your free trial is active with your registered unified number; the transfer is pending confirmation. Create your account now with the same email and unified number to enter the company portal and enjoy every feature until you receive the subscription contract and invoice from our team.",
     activateBtn: "Create account & enter the portal",
     activateHint: "The company portal gives you: employee management, attendance & payroll, leaves & loans, end of service, analytics, and every Jadara feature.",
-    portalNote: "The customer is pulled automatically into the owner portal where you can extend the trial, confirm the subscription, suspend, or manage the account.",
+    portalNote: "The customer shows up automatically in the owner portal; when the transfer receipt arrives via WhatsApp, the owner confirms the subscription, generates the contract and invoice, and sends them to you.",
     trialFormSub: "Enter your company data to launch your 30-day free trial — no fees, no credit card.",
-    buyFormSub: "Enter your company data, then proceed to step two: payment and confirming your annual subscription.",
+    buyFormSub: "Enter your company data to generate an official quotation with bank transfer details and support number for activation.",
     trialSubmit: "Confirm trial request",
-    buySubmit: "Proceed to payment",
+    buySubmit: "Generate quotation",
     trialHeadcountNote: "The employee count helps us set up your trial environment — no fees during the 30 days.",
     step1Badge: "Step 1 of 2",
     trialDoneTitle: "Your trial request is confirmed",
-    trialDoneNote: "Your 30-day free trial was created with your registered National Unified Number. Create your account and password now to enter the company portal and enjoy every platform feature — while our team processes your annual subscription later.",
+    trialDoneNote: "Your 30-day free trial was created with your registered National Unified Number. Create your account and password now to enter the company portal and enjoy every platform feature.",
   };
 
   const incoming = location.state?.company || null;
@@ -147,16 +144,9 @@ export default function Quote() {
   const [discount, setDiscount] = useState(null);
   const [tenantId, setTenantId] = useState(null);
   const [contractProof, setContractProof] = useState(null);
-  const [contractBusy, setContractBusy] = useState(false);
-  const [paid, setPaid] = useState(null);
-  const [payMethod, setPayMethod] = useState(null);
-  const [contractPdfUrl, setContractPdfUrl] = useState(null);
-  const [invoicePdfUrl, setInvoicePdfUrl] = useState(null);
-  const [contractSaving, setContractSaving] = useState(false);
   const [captcha, setCaptcha] = useState("");
   const [selectedTier, setSelectedTier] = useState(null);
   const [mode] = useState(() => (new URLSearchParams(location.search).get("tier") ? "buy" : "trial"));
-  const [invoiceNo] = useState(() => "INV" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + Math.floor(100 + Math.random() * 900));
 
   const pickTier = (tier) => {
     setSelectedTier(tier);
@@ -186,55 +176,6 @@ export default function Quote() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // يُستدعى تلقائياً بعد نجاح دفع PayPal — يولّد العقد والفاتورة غير الضريبية ويحمّلهما.
-  const onPaid = async (res) => {
-    setPaid(res);
-    if (contractPdfUrl) return; // تجرى مرة واحدة فقط
-    setContractSaving(true);
-    // لتحويل بنكي: نقل حالة المنشأة من pending_payment إلى تجربة قبل إتاحة إنشاء الحساب.
-    if (res?.method === "bank_transfer" && res?.proof_url && tenantId && contractProof) {
-      try { await base44.functions.invoke("activateBankTransfer", { tenant_id: tenantId, contract_proof: contractProof, proof_url: res.proof_url }); } catch (_) {}
-    }
-    const comp = company || form;
-    const tier = comp?.employee_count ? tierForCount(comp.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : selectedTier;
-    const total = discount ? discount.amount : tier ? tier.yearly : 0;
-    try {
-      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={comp} quoteNo={quoteNo} date={quoteDate} />);
-      const file_url = await uploadPdfBlob(blob, `Jadara-Contract-${quoteNo}.pdf`);
-      setContractPdfUrl(file_url);
-      if (tenantId && contractProof) {
-        try {
-          await base44.functions.invoke("saveQuoteContract", {
-            tenant_id: tenantId,
-            quoteNo,
-            date: quoteDate,
-            file_url,
-            proof: contractProof,
-          });
-        } catch (_) {}
-      }
-      // توليد الفاتورة غير الضريبية ببيانات العميل والباقة والمميزات
-      try {
-        const invBlob = await renderToPdfBlob(
-          <SubscriptionInvoiceDoc
-            company={comp}
-            tier={tier}
-            invNo={invoiceNo}
-            date={quoteDate}
-            amount={total}
-            employeeCount={Number(comp?.employee_count) || 0}
-            isAr={isAr}
-          />
-        );
-        const inv_url = await uploadPdfBlob(invBlob, `Jadara-Invoice-${invoiceNo}.pdf`);
-        setInvoicePdfUrl(inv_url);
-      } catch (_) {}
-    } catch (_) {
-    } finally {
-      setContractSaving(false);
-    }
-  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -327,7 +268,6 @@ export default function Quote() {
   // —— عرض السعر القابل للطباعة
   return (
     <div className="min-h-screen bg-muted" dir={isAr ? "rtl" : "ltr"}>
-      {/* شريط علوي غير قابل للطباعة */}
       <div className="no-print sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border">
         <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link to="/"><Logo size={40} /></Link>
@@ -343,7 +283,7 @@ export default function Quote() {
         <div className="max-w-2xl mx-auto px-5 py-10">
           <div className="print-quote bg-white border border-border rounded-2xl p-8 sm:p-10 shadow-sm">
             <div className="flex items-center gap-2 text-emerald-700 font-bold">
-              <CheckCircle2 size={20} /> {t.trialDoneTitle}
+              <Check size={20} /> {t.trialDoneTitle}
             </div>
             <p className="text-sm text-muted-foreground mt-1">{t.trialDoneNote}</p>
             <div className="mt-5 grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
@@ -439,8 +379,57 @@ export default function Quote() {
             </div>
           </div>
 
-          {/* تنشيط الحساب للدخول لبوابة الشركات (بعد إتمام الدفع) */}
-          {paid && company?.unified_number && (
+          {/* تفعيل الاشتراك عبر التحويل البنكي + الواتساب */}
+          <div className="py-6 border-t border-border">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-6 space-y-4">
+              <div className="flex items-center gap-2 text-emerald-800 font-bold text-lg">
+                <Banknote size={20} /> {t.transferTitle}
+              </div>
+              <p className="text-sm text-emerald-900/80">{t.transferNote}</p>
+
+              {/* المبلغ المستحق */}
+              <div className="flex items-center justify-between gap-3 bg-white/70 border border-emerald-200 rounded-xl px-4 py-3 text-sm">
+                <span className="text-muted-foreground">{t.amountDue}</span>
+                <span className="font-extrabold text-emerald-700 text-2xl">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</span>
+              </div>
+
+              {/* بيانات البنك */}
+              <div className="bg-white/80 border border-violet-200 rounded-xl p-4">
+                <div className="text-sm font-semibold text-violet-700 mb-3 flex items-center gap-2"><Building2 size={15} /> {t.bankSection}</div>
+                <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                  <Row k={t.beneficiary} v={isAr ? BANK.beneficiaryAr : BANK.beneficiaryEn} />
+                  <Row k={t.bank} v={isAr ? BANK.bankAr : BANK.bankEn} />
+                  <Row k={t.account} v={BANK.account} mono />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-muted-foreground">{t.iban}:</span>
+                      <span className="font-mono font-semibold tracking-wide break-all">{BANK.iban}</span>
+                    </div>
+                    <button type="button" onClick={copyIban}
+                      className="inline-flex items-center gap-1 text-xs text-violet-700 border border-violet-200 rounded-lg px-2.5 py-1.5 hover:bg-violet-50 transition">
+                      {copied ? <Check size={13} /> : <Copy size={13} />}
+                      {copied ? t.copied : t.copy}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* واتساب الدعم الفني */}
+              <div className="rounded-xl bg-[#25D366]/10 border border-[#25D366]/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 font-bold text-emerald-800"><MessageCircle size={18} /> {t.waSupport}</div>
+                  <div className="text-xl font-mono font-bold mt-1 tracking-wide" dir="ltr">{WHATSAPP_NUMBER}</div>
+                  <div className="text-sm text-emerald-900/80 mt-1">{t.sendReceipt}</div>
+                </div>
+                <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold px-5 py-3 shadow-md transition shrink-0">
+                  <MessageCircle size={18} /> {t.openWhatsApp}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* تنشيط الحساب للدخول لبوابة الشركات (العميل قادر على الاستفادة من التجربة فوراً) */}
+          {company?.unified_number && (
             <div className="py-6 border-t border-border">
               <div className="rounded-2xl border border-violet-200 bg-gradient-to-l from-violet-50 to-fuchsia-50 p-5">
                 <div className="flex items-center gap-2 text-violet-700 font-bold">
@@ -461,99 +450,6 @@ export default function Quote() {
             </div>
           )}
 
-          {/* الدفع عبر PayPal + توليد العقد تلقائياً بعد الدفع */}
-          <div className="py-6 border-t border-border">
-            <div className="text-lg font-bold mb-1">{t.payTitle}</div>
-            <p className="text-sm text-muted-foreground mb-4">{t.payNote}</p>
-            {paid ? (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
-                <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                  <CheckCircle2 size={18} /> {t.paidTitle}
-                </div>
-                <p className="text-sm text-emerald-700/80 mt-1">{t.paidNote}</p>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <Button
-                    onClick={() => contractPdfUrl && window.open(contractPdfUrl, "_blank")}
-                    disabled={!contractPdfUrl || contractSaving}
-                    className="gap-2"
-                  >
-                    {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                    {t.downloadContract}
-                  </Button>
-                  <Button
-                    onClick={() => invoicePdfUrl && window.open(invoicePdfUrl, "_blank")}
-                    disabled={!invoicePdfUrl || contractSaving}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />}
-                    {t.downloadInvoice}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-violet-200 bg-violet-50/40 p-5">
-                <div className="flex items-center justify-between gap-3 mb-3 text-sm">
-                  <span className="text-muted-foreground">{t.amountDue}</span>
-                  <span className="font-extrabold text-violet-700 text-xl">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</span>
-                </div>
-                {payMethod === null ? (
-                  <>
-                    <div className="text-sm font-medium text-foreground mb-3">{isAr ? "اختر طريقة الدفع:" : "Choose payment method:"}</div>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setPayMethod("paypal")}
-                        className="rounded-2xl border border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-50 p-4 text-right transition"
-                      >
-                        <div className="flex items-center gap-2 text-violet-700 font-bold">
-                          <span>💳</span> {isAr ? "بطاقات (مدى، فيزا، ماستر) + أبل باي" : "Cards (mada, Visa, Mastercard) + Apple Pay"}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">{isAr ? "دفع فوري وتلقائي" : "Instant automated payment"}</div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPayMethod("bank")}
-                        className="rounded-2xl border border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-50 p-4 text-right transition"
-                      >
-                        <div className="flex items-center gap-2 text-violet-700 font-bold">
-                          <span>🏦</span> {isAr ? "تحويل بنكي" : "Bank transfer"}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">{isAr ? "أرفق إثبات التحويل وسنفعّل اشتراكك" : "Attach proof and we'll activate your subscription"}</div>
-                      </button>
-                    </div>
-                  </>
-                ) : payMethod === "paypal" ? (
-                  <div>
-                    <StripeCheckout
-                      employeeCount={Number(company.employee_count) || 0}
-                      discountCode={discount?.code}
-                      tenantId={tenantId}
-                      contractProof={contractProof}
-                      amount={amount}
-                      onPaid={onPaid}
-                      lang={isAr ? "ar" : "en"}
-                    />
-                    <div className="mt-3 text-center">
-                      <button type="button" onClick={() => setPayMethod(null)} className="text-xs text-muted-foreground hover:text-foreground underline">
-                        {isAr ? "تغيير طريقة الدفع" : "Change payment method"}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <BankTransferPayment
-                    amount={amount}
-                    isAr={isAr}
-                    t={t}
-                    bank={BANK}
-                    onPaid={onPaid}
-                    onBack={() => setPayMethod(null)}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-
           {/* التوقيع والختم */}
           <div className="pt-8 border-t border-border flex items-end justify-between gap-6 flex-wrap">
             <div>
@@ -564,25 +460,7 @@ export default function Quote() {
           </div>
 
           <div className="no-print mt-8 flex items-center justify-center gap-3">
-            {paid && contractPdfUrl && (
-              <Button onClick={() => window.open(contractPdfUrl, "_blank")} className="gap-2">
-                {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} {t.downloadContract}
-              </Button>
-            )}
-            {paid && invoicePdfUrl && (
-              <Button onClick={() => window.open(invoicePdfUrl, "_blank")} variant="outline" className="gap-2">
-                {contractSaving ? <Loader2 size={16} className="animate-spin" /> : <FileSignature size={16} />} {t.downloadInvoice}
-              </Button>
-            )}
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
-            {paid ? (
-              <Link to="/login?returnTo=/app" className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
-                {isAr ? "تسجيل الدخول للمنصة" : "Sign in to platform"}
-                <ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
-              </Link>
-            ) : (
-              <span className="text-sm text-muted-foreground">{isAr ? "↑ أكمل خطوة الدفع بالأعلى لتفعيل اشتراكك وإنشاء حسابك" : "↑ Complete payment above to activate your subscription and account"}</span>
-            )}
           </div>
         </div>
       </div>
@@ -616,9 +494,9 @@ function JadaraStamp({ ar, label }) {
         <defs>
           <path id="stampTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
         </defs>
-        <circle cx="100" cy="100" r="92" fill="none" stroke="#1A237E" strokeWidth="3" />
-        <circle cx="100" cy="100" r="84" fill="none" stroke="#1A237E" strokeWidth="1.4" />
-        <circle cx="100" cy="100" r="46" fill="none" stroke="#1A237E" strokeWidth="1.6" />
+        <circle cx="100" cy="100" r={92} fill="none" stroke="#1A237E" strokeWidth={3} />
+        <circle cx="100" cy="100" r={84} fill="none" stroke="#1A237E" strokeWidth={1.4} />
+        <circle cx="100" cy="100" r={46} fill="none" stroke="#1A237E" strokeWidth={1.6} />
         <text fill="#1A237E" fontSize="16" fontWeight="700" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif" style={{ letterSpacing: "1px" }}>
           <textPath href="#stampTop" startOffset="50%" textAnchor="middle">{label}</textPath>
         </text>
