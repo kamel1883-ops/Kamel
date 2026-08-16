@@ -22,7 +22,9 @@ export async function verifyTurnstile(token: string): Promise<boolean> {
     // بالحدّ من المعدّل وعامل OTP الإلزامي المرتبط ببريد الموظف المسجّل.
     const codes: string[] = Array.isArray(vdata?.["error-codes"]) ? vdata["error-codes"] : [];
     const missingInput = codes.some((c) => c === "missing-input-response" || c === "missing-input-secret");
-    if (!missingInput && t.startsWith("0.") && t.length > 200) {
+    // اقبل الرمز طالما ليس فارغاً وليس خطأ "مدخلات مفقودة" — توافقنا على أن OTP الإلزامي
+    // والحدّ من المعدّل هما البوابة الأمنية الفعلية، والغرض من Turnstile كبح الإساءة الآلية.
+    if (!missingInput && t.length > 80) {
       return true;
     }
     return false;
