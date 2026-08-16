@@ -16,8 +16,8 @@ import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
 
 const empty = {
   full_name: "",
-  employee_number: "", national_id: "", email: "", nationality: "", gender: "male", is_saudi: false,
-  birth_date: "", phone: "", address: "", emergency_contact: "",
+  employee_number: "", national_id: "", email: "", gender: "male", is_saudi: false,
+  birth_date: "", phone: "",
   department: "", branch_id: "", branch_name: "", position: "", job_grade: "", role_level: "employee", hire_date: "",
   contract_type: "full_time", contract_start_date: "", contract_end_date: "", status: "active",
   termination_reason: "none", termination_date: "", manager_id: "",
@@ -25,7 +25,7 @@ const empty = {
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
   avatar_url: "",
   iqama_expiry: "", passport_number: "", passport_expiry: "",
-  health_insurance_number: "", health_insurance_expiry: "",
+  health_insurance_expiry: "",
   bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null, ticket_value: "",
   annual_leave_entitlement: 21,
   unified_number: "",
@@ -36,14 +36,15 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
   const isAr = lang === "ar";
   const t = isAr ? {
     edit: "تعديل بيانات الموظف", add: "إضافة موظف جديد",
-    fullName: "الاسم الكامل", empNo: "الرقم الوظيفي",     natId: "الهوية الوطنية", email: "بريد العمل (لربط الحساب)", nationality: "الجنسية", gender: "الجنس", male: "ذكر", female: "أنثى",
+    fullName: "الاسم الكامل", empNo: "الرقم الوظيفي",
+    natIdSaudi: "الهوية الوطنية", natIdExpat: "رقم الإقامة",
+    email: "بريد العمل (لربط الحساب)", gender: "الجنس", male: "ذكر", female: "أنثى",
     birth: "تاريخ الميلاد", phone: "رقم الجوال", dept: "الإدارة", branch: "الفرع", noBranch: "بدون فرع", position: "المسمى الوظيفي", jobGrade: "الدرجة الوظيفية", hireDate: "تاريخ المباشرة (ثابت — مرجع نهاية الخدمة والإجازات)", contractStart: "تاريخ بدء العقد", contractEnd: "تاريخ نهاية العقد",
     contract: "نوع العقد", full: "دوام كامل", part: "دوام جزئي", cont: "عقد",
     status: "الحالة الوظيفية", active: "على رأس العمل", onLeave: "في إجازة", terminated: "منهي", resigned: "مستقيل",
     base: "الراتب الأساسي (ريال)", housing: "بدل السكن", transport: "بدل المواصلات", other: "بدلات أخرى",
-    address: "العنوان", emergency: "جهة اتصال الطوارئ",
     saudi: "سعودي؟", saudiY: "سعودي", saudiN: "مقيم", iqama: "انتهاء الإقامة/الهوية",
-    passNo: "رقم الجواز", passExp: "انتهاء الجواز", medNo: "رقم التأمين الطبي", medExp: "انتهاء التأمين الطبي",
+    passNo: "رقم الجواز", passExp: "انتهاء الجواز", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
     annualLeaveEnt: "رصيد الإجازات السنوي (يحدده الموارد البشرية)", d21: "21 يوم", d30: "30 يوم",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
@@ -52,14 +53,15 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     cancel: "إلغاء", save: "حفظ",
   } : {
     edit: "Edit employee", add: "Add new employee",
-    fullName: "Full name", empNo: "Employee number",     natId: "National ID", email: "Work email (account linking)", nationality: "Nationality", gender: "Gender", male: "Male", female: "Female",
+    fullName: "Full name", empNo: "Employee number",
+    natIdSaudi: "National ID", natIdExpat: "Iqama number",
+    email: "Work email (account linking)", gender: "Gender", male: "Male", female: "Female",
     birth: "Birth date", phone: "Phone", dept: "Department", branch: "Branch", noBranch: "No branch", position: "Job title", jobGrade: "Job grade", hireDate: "Commencement date (fixed — EOS & leave reference)", contractStart: "Contract start date", contractEnd: "Contract end date",
     contract: "Contract type", full: "Full-time", part: "Part-time", cont: "Contract",
     status: "Employment status", active: "Active", onLeave: "On leave", terminated: "Terminated", resigned: "Resigned",
     base: "Base salary (SAR)", housing: "Housing allowance", transport: "Transport allowance", other: "Other allowances",
-    address: "Address", emergency: "Emergency contact",
     saudi: "Saudi?", saudiY: "Saudi", saudiN: "Expat", iqama: "Iqama/ID expiry",
-    passNo: "Passport number", passExp: "Passport expiry", medNo: "Health insurance no", medExp: "Insurance expiry",
+    passNo: "Passport number", passExp: "Passport expiry", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
     annualLeaveEnt: "Annual leave entitlement (set by HR)", d21: "21 days", d30: "30 days",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
@@ -109,9 +111,8 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
           <div className="grid grid-cols-2 gap-4">
             <Field label={t.fullName}><Input value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder={isAr ? "مثال: محمد عبدالله" : "e.g. Mohammed Alharbi"} /></Field>
             <Field label={t.empNo}><Input value={form.employee_number} onChange={(e) => set("employee_number", e.target.value)} required /></Field>
-            <Field label={t.natId}><Input value={form.national_id} onChange={(e) => set("national_id", e.target.value)} /></Field>
+            <Field label={form.is_saudi ? t.natIdSaudi : t.natIdExpat}><Input value={form.national_id} onChange={(e) => set("national_id", e.target.value)} /></Field>
             <Field label={t.email}><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder={isAr ? "name@company.sa" : "name@company.sa"} /></Field>
-            <Field label={t.nationality}><Input value={form.nationality} onChange={(e) => set("nationality", e.target.value)} /></Field>
             <Field label={t.gender}>
               <Select value={form.gender} onValueChange={(v) => set("gender", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -192,8 +193,6 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.transport}><Input type="number" value={form.transport_allowance} onChange={(e) => set("transport_allowance", e.target.value)} /></Field>
             <Field label={t.other}><Input type="number" value={form.other_allowances} onChange={(e) => set("other_allowances", e.target.value)} /></Field>
           </div>
-          <Field label={t.address}><Input value={form.address} onChange={(e) => set("address", e.target.value)} /></Field>
-          <Field label={t.emergency}><Input value={form.emergency_contact} onChange={(e) => set("emergency_contact", e.target.value)} /></Field>
 
           <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
             <Field label={t.saudi}>
@@ -205,7 +204,6 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.iqama}><Input type="date" value={form.iqama_expiry} onChange={(e) => set("iqama_expiry", e.target.value)} /></Field>
             <Field label={t.passNo}><Input value={form.passport_number} onChange={(e) => set("passport_number", e.target.value)} /></Field>
             <Field label={t.passExp}><Input type="date" value={form.passport_expiry} onChange={(e) => set("passport_expiry", e.target.value)} /></Field>
-            <Field label={t.medNo}><Input value={form.health_insurance_number} onChange={(e) => set("health_insurance_number", e.target.value)} /></Field>
             <Field label={t.medExp}><Input type="date" value={form.health_insurance_expiry} onChange={(e) => set("health_insurance_expiry", e.target.value)} /></Field>
             <Field label={t.ticket}>
               <Select value={form.ticket_entitlement} onValueChange={(v) => set("ticket_entitlement", v)}>

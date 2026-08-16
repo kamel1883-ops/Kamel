@@ -103,13 +103,10 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
           <div className="space-y-3">
             <div className="text-xs text-muted-foreground">{t.joinJourney}</div>
             <Block title={t.personal}>
-              <Row label={isAr ? "الجنسية" : "Nationality"} value={employee.nationality} />
-              <Row label={isAr ? "الهوية/الإقامة" : "National ID"} value={employee.national_id} />
+              <Row label={employee.is_saudi ? (isAr ? "الهوية الوطنية" : "National ID") : (isAr ? "رقم الإقامة" : "Iqama number")} value={employee.national_id} />
               <Row label={isAr ? "تاريخ الميلاد" : "Birth date"} value={employee.birth_date} />
               <Row label={isAr ? "الجوال" : "Phone"} value={employee.phone} />
               <Row label={isAr ? "البريد" : "Email"} value={employee.email} />
-              <Row label={isAr ? "العنوان" : "Address"} value={employee.address} />
-              <Row label={isAr ? "جهة الطوارئ" : "Emergency"} value={employee.emergency_contact} />
             </Block>
 
             <Block title={t.employment}>
