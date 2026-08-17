@@ -29,8 +29,8 @@ export default function Approvals() {
     loan: "سلفة", days: (s, e, n) => `${s} ← ${e} · ${n} يوم`, loanLine: (v, r) => `${formatCurrency(v)} · ${r}`,
     settlement: "المخالصة", genSettlement: "توليد المخالصة",
     statement: "كشف السلفة", genStatement: "توليد الكشف",
-    loanPayBtn: "سداد / إغلاق", loanPayTitle: "تسجيل سداد السلفة",
-    paidLabel: "مبلغ السداد هذه المرة (ر.س)", paidHint: "يُضاف هذا المبلغ إلى المسدَّد مسبقاً. عند بلوغ إجمالي السلفة تُغلق تلقائياً.", alreadyPaidLabel: "تم سداد مسبقاً",
+    loanPayBtn: "سداد جزئي", loanPayTitle: "تسجيل سداد السلفة — الموارد البشرية",
+    paidLabel: "مبلغ السداد هذه المرة (ر.س)", paidHint: "يُسجّل مدير الموارد البشرية المبالغ التي استلمها من الموظف لسداد السلفة. يُضاف هذا المبلغ إلى المسدَّد مسبقاً ويُحدّث المتبقي، وعند بلوغ إجمالي السلفة تُغلق تلقائياً ويتحدّث كشف السلفة فوراً.", alreadyPaidLabel: "تم سداد مسبقاً",
     remaining: "المتبقي", totalLoan: "إجمالي السلفة", save: "حفظ",
     empty: "لا توجد طلبات", rejectTitle: "رفض الطلب", rejectReason: "سبب الرفض", cancel: "إلغاء", confirmReject: "تأكيد الرفض",
     payTitle: "تأكيد الصرف — المالية/المحاسبة", leavePay: (v) => <>تصفية إجازة كاملة — تعويض التذكرة: <b className="text-foreground">{formatCurrency(v)}</b></>,
@@ -67,8 +67,8 @@ export default function Approvals() {
     loan: "Loan", days: (s, e, n) => `${s} ← ${e} · ${n} days`, loanLine: (v, r) => `${formatCurrency(v)} · ${r}`,
     settlement: "Settlement", genSettlement: "Generate settlement",
     statement: "Loan statement", genStatement: "Generate statement",
-    loanPayBtn: "Payment / close", loanPayTitle: "Record loan payment",
-    paidLabel: "This payment (SAR)", paidHint: "This amount adds to what's already paid. When it reaches the loan total it closes automatically.", alreadyPaidLabel: "Already paid",
+    loanPayBtn: "Partial payment", loanPayTitle: "Record loan payment — HR",
+    paidLabel: "This payment (SAR)", paidHint: "HR records amounts received from the employee. This adds to what's already paid and updates the remaining balance. When it reaches the loan total it closes automatically and the statement refreshes instantly.", alreadyPaidLabel: "Already paid",
     remaining: "Remaining", totalLoan: "Loan total", save: "Save",
     empty: "No requests", rejectTitle: "Reject request", rejectReason: "Rejection reason", cancel: "Cancel", confirmReject: "Confirm rejection",
     payTitle: "Confirm payment — Finance/Accounting", leavePay: (v) => <>Full leave clearance — ticket compensation: <b className="text-foreground">{formatCurrency(v)}</b></>,
@@ -178,7 +178,7 @@ export default function Approvals() {
         btns.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("loans", r) });
       }
       const closed = (Number(r.amount) || 0) > 0 && (Number(r.paid_amount) || 0) >= (Number(r.amount) || 0);
-      if (s === "paid" && !closed && isFinance) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
+      if (s === "paid" && !closed && isHR) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
       if (r.statement_pdf_url) {
         btns.push({ label: t.statement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.statement_pdf_url, icon: "download" });
       } else {
@@ -376,11 +376,13 @@ export default function Approvals() {
     const total = Number(acting.req.amount) || 0;
     const totalPaid = Math.min(total, alreadyPaid + amt);
     const closed = total > 0 && totalPaid >= total;
+    const updated = { ...acting.req, paid_amount: totalPaid, status: closed ? "completed" : acting.req.status };
     await update("loans", acting.req.id, {
       paid_amount: totalPaid,
       finance_status: "paid",
       status: closed ? "completed" : acting.req.status,
     });
+    try { await generateLoanStatement(updated, empOf(acting.req.employee_id), org); } catch (e) {}
     setBusy(false); setActing(null); setLoanPayAmount(""); load();
   };
   const openTripApprove = (r) => { setActing({ type: "trips", req: r, action: "tripapprove" }); setNote(""); setProofFile(null); };
