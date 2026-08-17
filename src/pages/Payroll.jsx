@@ -8,7 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { computeGOSI } from "@/lib/eos";
@@ -27,7 +27,7 @@ export default function Payroll() {
     months: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
-    pdf: "تحميل / طباعة PDF", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
+    pdf: "تحميل / طباعة PDF", printDraft: "طباعة كمسودة", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
     wps: "ملف WPS لمدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
     thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
@@ -40,7 +40,7 @@ export default function Payroll() {
     months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
-    pdf: "Download / Print PDF", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
+    pdf: "Download / Print PDF", printDraft: "Print draft", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
     wps: "WPS file (Mudad)", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
     thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
@@ -159,7 +159,7 @@ export default function Payroll() {
     setBatching(false); load();
   };
 
-  const exportPdf = async () => {
+  const exportPdf = async (opts = {}) => {
     if (!sheetRef.current) return;
     setExporting(true);
     try {
@@ -169,10 +169,19 @@ export default function Payroll() {
         subtitle: isAr
           ? `إجمالي الصافي: ${formatCurrency(totalNet)} — إجمالي المدفوع: ${formatCurrency(totalPaid)} — ${payrolls.length} موظف`
           : `Total net: ${formatCurrency(totalNet)} — Paid total: ${formatCurrency(totalPaid)} — ${payrolls.length} employees`,
-        stamp: monthStatus === "paid" && payrolls.length > 0,
+        stamp: monthStatus === "paid" && payrolls.length > 0 && !opts.draft,
+        draft: !!opts.draft,
         landscape: true,
       });
     } finally { setExporting(false); }
+  };
+
+  const deleteRow = async (id) => {
+    if (!confirm(isAr ? "حذف هذا الموظف من كشف الشهر؟" : "Remove this employee from the month sheet?")) return;
+    try {
+      await base44.entities.Payroll.delete(id);
+      setPayrolls((p) => p.filter((x) => x.id !== id));
+    } catch (e) { alert(isAr ? "تعذّر الحذف" : "Delete failed"); }
   };
 
   const exportExcel = () => {
@@ -312,7 +321,8 @@ export default function Payroll() {
             {anyDraft && (<Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2"><FileCheck size={16} /> {t.approve}</Button>)}
             {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
             {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
-            <Button onClick={exportPdf} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
+            <Button onClick={() => exportPdf({ draft: true })} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printDraft}</Button>
+            <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
             <Button onClick={() => exportWps()} disabled={paidCount === 0} variant="outline" className="gap-2"><Shield size={16} /> {t.wps}</Button>
             <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
           </div>
@@ -360,7 +370,17 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
-                    <td className="px-3 py-2"><span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span></td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>
+                        {p.status === "draft" && (
+                          <button onClick={() => deleteRow(p.id)} title={isAr ? "حذف من الكشف لهذا الشهر" : "Remove from sheet"}
+                            className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500">
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

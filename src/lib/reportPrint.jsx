@@ -52,6 +52,18 @@ function buildBrandHeader(org) {
   return wrap;
 }
 
+function buildDraftBanner() {
+  const b = document.createElement("div");
+  Object.assign(b.style, {
+    textAlign: "center", padding: "10px 16px", marginBottom: "16px",
+    border: "2px dashed #b45309", borderRadius: "10px",
+    background: "#fffbeb", color: "#b45309",
+    fontWeight: "700", fontSize: "12px",
+  });
+  b.textContent = "هذه نسخة مسودة — كشف رواتب غير معتمد. لا يُعتمد إلا بعد مراجعة الإدارة وضغط زر «اعتماد كشف الشهر».";
+  return b;
+}
+
 function buildTitle(title, subtitle) {
   const c = document.createElement("div");
   Object.assign(c.style, { textAlign: "center", marginBottom: "18px" });
@@ -68,7 +80,7 @@ function buildTitle(title, subtitle) {
   return c;
 }
 
-export async function printReport(node, { org, title, subtitle, stamp, landscape } = {}) {
+export async function printReport(node, { org, title, subtitle, stamp, landscape, draft } = {}) {
   if (!node) return;
   const useLandscape = !!landscape;
   // عرض مطابق لنسب صفحة A4 ليملأ الصفحة كاملة دون هوامش جانبية كبيرة
@@ -83,6 +95,7 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
 
   wrapper.appendChild(buildBrandHeader(org));
   if (title) wrapper.appendChild(buildTitle(title, subtitle));
+  if (draft) wrapper.appendChild(buildDraftBanner());
 
   const clone = node.cloneNode(true);
   clone.style.width = "100%";
