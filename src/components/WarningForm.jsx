@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Loader2, AlertTriangle } from "lucide-react";
-import { VIOLATION_CATEGORIES, WARNING_LEVELS, suggestLevel, categoryById, levelById } from "@/lib/laborPolicy";
+import { VIOLATION_CATEGORIES, VIOLATION_CHAPTERS, WARNING_LEVELS, suggestLevel, categoryById, levelById } from "@/lib/laborPolicy";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -119,10 +119,22 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
               <Label>{t.cat}</Label>
               <Select value={form.violation_category} onValueChange={(v) => set("violation_category", v)}>
                 <SelectTrigger><SelectValue placeholder={t.catPh} /></SelectTrigger>
-                <SelectContent>
-                  {VIOLATION_CATEGORIES.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{isAr ? c.ar : c.en}</SelectItem>
-                  ))}
+                <SelectContent className="max-h-80">
+                  {VIOLATION_CHAPTERS.map((chapter) => {
+                    const items = VIOLATION_CATEGORIES.filter((c) => c.chapter === chapter.id);
+                    return (
+                      <React.Fragment key={chapter.id}>
+                        <div className="px-2 py-1.5 text-xs font-bold text-muted-foreground bg-muted/60 sticky top-0">
+                          {isAr ? chapter.ar : chapter.en}
+                        </div>
+                        {items.map((c) => (
+                          <SelectItem key={c.id} value={c.id} className="pr-6">
+                            {isAr ? c.ar : c.en}
+                          </SelectItem>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
