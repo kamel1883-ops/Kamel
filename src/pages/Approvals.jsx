@@ -118,6 +118,8 @@ export default function Approvals() {
   const [additionNote, setAdditionNote] = useState("");
   const [loanAmount, setLoanAmount] = useState("");
   const [loanInstallments, setLoanInstallments] = useState("");
+  // عدد الأيام التي اعتمدتها الموارد البشرية — يتيح الموافقة على جزء من الأيام فقط وخصمها من الرصيد.
+  const [grantedDays, setGrantedDays] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -235,7 +237,7 @@ export default function Approvals() {
     }
     load();
   };
-  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); };
+  const openLeaveHr = (r) => { setActing({ type: "leaves", req: r, action: "leavehr" }); setNote(""); setProofFile(null); setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote(""); setGrantedDays(String(r.days_count || 0)); };
   const confirmLeaveHr = async () => {
     if (!acting) return;
     setBusy(true);
@@ -247,7 +249,10 @@ export default function Approvals() {
       const annual = getEmployeeAnnualDays(emp, org);
       const used = Number(emp?.prior_used_leave) || 0;
       const before = Math.max(0, annual - used);
-      const granted = Math.max(0, Number(r.days_count) || 0);
+      // الموارد البشرية قد تعتمد جزءاً من الأيام المطلوبة فقط — ما يُخصم من الرصيد هو ما اعتمدته.
+      const requested = Math.max(0, Number(r.days_count) || 0);
+      const gr = Number(grantedDays);
+      const granted = Math.max(0, Math.min(Number.isFinite(gr) && gr > 0 ? gr : requested, requested));
       const after = Math.max(0, before - granted);
       const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
       const dailyWage = mw / 30;
@@ -608,7 +613,9 @@ export default function Approvals() {
                 const remaining = Math.max(0, annual - used);
                 const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
                 const dailyWage = mw / 30;
-                const granted = Math.max(0, Number(acting.req.days_count) || 0);
+                const requested = Math.max(0, Number(acting.req.days_count) || 0);
+                const gr = Number(grantedDays);
+                const granted = Math.max(0, Math.min(Number.isFinite(gr) && gr > 0 ? gr : requested, requested));
                 const ticket = acting.req.is_full_clearance ? leaveTicketAmount(emp, org) : 0;
                 const base = (acting.req.leave_type === "annual" || acting.req.is_full_clearance) ? Math.round(granted * dailyWage * 100) / 100 : 0;
                 const total = Math.max(0, base + ticket + (Number(additionAmount) || 0) - (Number(deductionAmount) || 0));
@@ -621,8 +628,16 @@ export default function Approvals() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-muted-foreground">{t.grantedLabel}</Label>
-                      <div className="text-sm font-bold pt-1.5">{granted} {isAr ? "يوم (من التواريخ)" : "days (from dates)"}</div>
+                      <Label className="text-xs font-medium text-muted-foreground">{isAr ? "عدد الأيام الموافق عليها" : "Approved days"}</Label>
+                      <div className="flex items-center gap-2">
+                        <Input type="number" min={1} max={Math.max(1, acting.req.days_count || 1)} dir="ltr"
+                          value={grantedDays} onChange={(e) => setGrantedDays(e.target.value)}
+                          className="w-24 font-bold text-violet-700" />
+                        <div className="flex flex-col text-[11px] leading-tight text-muted-foreground">
+                          {isAr ? "اكتب عدداً أقل من المطلوب لحصر الموافقة على جزء — لا يُخصم من الرصيد إلا هذا العدد فقط." : "Enter fewer days to approve only part — only these days are deducted."}
+                        </div>
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">{isAr ? "الأيام المطلوبة من الموظف" : "Requested"}: <b className="text-foreground">{acting.req.days_count} {isAr ? "يوم" : "days"}</b></div>
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-medium text-muted-foreground">{t.dailyWageLabel}</Label>
