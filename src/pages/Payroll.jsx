@@ -100,7 +100,7 @@ export default function Payroll() {
       const absentDeduction = Number((dailyWage * absentDays).toFixed(2));
       const net = gross - gosi.gosi_employee - absentDeduction;
       created.push({
-        employee_id: emp.id, employee_name: `${emp.employee_number} - ${emp.position}`,
+        employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "",
         month, year, base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: absentDeduction, loan_installment: 0,
         gosi_employee: Number(gosi.gosi_employee.toFixed(2)), gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
@@ -197,9 +197,9 @@ export default function Payroll() {
   };
 
   const exportExcel = () => {
-    const headers = [t.thEmp, t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
+    const headers = [t.thEmp, t.natId || "الهوية/الإقامة", t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
     const rows = includedPayrolls.map((p) => [
-      p.employee_name || "", p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
+      p.employee_name || "", p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || ""), p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
       p.bonus || 0, p.overtime_amount || 0, p.gosi_employee || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
       p.net_salary || 0, payrollStatusLabel(p.status).label,
     ]);
@@ -373,6 +373,7 @@ export default function Payroll() {
                 <tr>
                   <th className="text-center px-3 py-3 font-medium">{t.thIncl}</th>
                   <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">{t.thEmp}</th>
+                  <th className="text-right px-3 py-3 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thBase}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thTrans}</th>
@@ -401,6 +402,7 @@ export default function Payroll() {
                       </button>
                     </td>
                     <td className="px-4 py-2 font-medium sticky right-0 bg-white">{p.employee_name}</td>
+                    <td className="px-3 py-2 tabular-nums text-xs text-muted-foreground" dir="ltr">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>

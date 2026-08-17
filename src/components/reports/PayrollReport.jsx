@@ -86,18 +86,23 @@ export default function PayrollReport({ org, records, t }) {
 
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>{t.payThEmp}</TableHead>
-                <TableHead className="text-center">{t.payThBase}</TableHead>
-                <TableHead className="text-center">{t.payThNet}</TableHead>
-                <TableHead className="text-center">{t.payThStatus}</TableHead>
-                <TableHead className="text-center">{t.payDate}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sel.rows.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
+                <TableRow>
+                  <TableHead>{t.payThEmp}</TableHead>
+                  <TableHead className="text-center">{t.natId || "الهوية/الإقامة"}</TableHead>
+                  <TableHead className="text-center">{t.payThBase}</TableHead>
+                  <TableHead className="text-center">{t.payThNet}</TableHead>
+                  <TableHead className="text-center">{t.payThStatus}</TableHead>
+                  <TableHead className="text-center">{t.payDate}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sel.rows.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">
+                      {r.employee_name || "—"}
+                      <span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{r.national_id || "—"}</span>
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums" dir="ltr">{r.national_id || "—"}</TableCell>
                   <TableCell className="text-center">{formatCurrency(r.base_salary)}</TableCell>
                   <TableCell className="text-center font-semibold">{formatCurrency(r.net_salary)}</TableCell>
                   <TableCell className="text-center">

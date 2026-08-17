@@ -179,7 +179,7 @@ export default function ReportsPanel({ employees, attendance }) {
         {rid === "attOne" && <AttOneReport employees={employees} attendance={attendance} empId={empId} setEmpId={setEmpId} statusLabel={statusLabel} t={t} />}
         {rid === "licenses" && <LicensesReport records={extra.lic || []} t={t} />}
         {rid === "vehicles" && <VehiclesReport records={extra.veh || []} t={t} />}
-        {rid === "trips" && <TripsReport records={extra.trp || []} tripM={tripM} setTripM={setTripM} t={t} />}
+        {rid === "trips" && <TripsReport records={extra.trp || []} employees={employees} tripM={tripM} setTripM={setTripM} t={t} />}
         {rid === "warningsOne" && <WarningsReport records={extra.warnings || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
         {rid === "performance" && <PerformanceReport records={extra.reviews || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
         {rid === "exit" && <ExitReport records={extra.exits || []} t={t} />}
@@ -316,6 +316,7 @@ function AttAllReport({ employees, attendance, statusLabel, t }) {
 
 function AttOneReport({ employees, attendance, empId, setEmpId, statusLabel, t }) {
   const { lang } = useI18n(); const isAr = lang === "ar";
+  const selEmp = employees.find((e) => e.id === empId) || null;
   const [rangeM, setRangeM] = useState(6);
   const rows = useMemo(() => empId ? attendance.filter((a) => {
     if (a.employee_id !== empId) return false;
@@ -346,6 +347,14 @@ function AttOneReport({ employees, attendance, empId, setEmpId, statusLabel, t }
           ))}
         </div>
       </div>
+      {empId && selEmp ? (
+        <div className="mb-4 rounded-xl bg-muted/60 border border-border p-3 flex flex-wrap items-center gap-4">
+          <div><div className="text-xs text-muted-foreground">{t.tripEmp}</div><div className="text-sm font-bold">{selEmp.full_name}</div></div>
+          <div><div className="text-xs text-muted-foreground">{t.nationalId}</div><div className="text-sm font-bold tabular-nums" dir="ltr">{selEmp.national_id || "—"}</div></div>
+          <div><div className="text-xs text-muted-foreground">{isAr ? "الإدارة" : "Department"}</div><div className="text-sm font-bold">{selEmp.department || "—"}</div></div>
+          <div><div className="text-xs text-muted-foreground">{isAr ? "المسمى" : "Position"}</div><div className="text-sm font-bold">{selEmp.position || "—"}</div></div>
+        </div>
+      ) : null}
       {empId ? (
         <>
           <Card title={t.rAttOne}>
@@ -458,9 +467,10 @@ function VehiclesReport({ records, t }) {
 }
 function ExpCell({ d, t }) { if (d == null) return <span>—</span>; return <span className={cn("text-xs px-2 py-0.5 rounded-full", d < 0 ? "bg-rose-100 text-rose-700" : d <= 30 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700")}>{d} {t.days}</span>; }
 
-function TripsReport({ records, tripM, setTripM, t }) {
+function TripsReport({ records, employees, tripM, setTripM, t }) {
   const since = addMonths(-tripM);
   const rows = records.filter((r) => r.start_date && new Date(r.start_date) >= since);
+  const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "—";
   const byMonth = useMemo(() => { const m = {}; rows.forEach((r) => { const k = monthKey(r.start_date); m[k] = (m[k]||0)+1; }); return Object.entries(m).sort().map(([name, value]) => ({ name, value })); }, [rows]);
   return (
     <div>
@@ -477,8 +487,8 @@ function TripsReport({ records, tripM, setTripM, t }) {
       <Card title={t.tripTable}>
         {rows.length ? (
           <div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
-            <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}</td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
+            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
+             <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}<span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{empNat(r.employee_id)}</span></td><td className="py-2 tabular-nums" dir="ltr">{empNat(r.employee_id)}</td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
           </table></div>
         ) : <NoRows text={t.noData} />}
       </Card>
@@ -534,6 +544,7 @@ function AIInsights({ reportType, summary, t }) {
 function WarningsReport({ records, employees, empId, setEmpId, t }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const selEmp = employees.find((e) => e.id === empId) || null;
   const [rangeM, setRangeM] = useState(6);
   const rows = useMemo(() => (empId ? records.filter((w) => {
     if (w.employee_id !== empId) return false;
@@ -557,6 +568,14 @@ function WarningsReport({ records, employees, empId, setEmpId, t }) {
         </div>
       </div>
       <Card title={t.warnCount}>
+        {empId && selEmp ? (
+          <div className="mb-4 rounded-xl bg-muted/60 border border-border p-3 flex flex-wrap items-center gap-4">
+            <div><div className="text-xs text-muted-foreground">{t.tripEmp}</div><div className="text-sm font-bold">{selEmp.full_name}</div></div>
+            <div><div className="text-xs text-muted-foreground">{t.nationalId}</div><div className="text-sm font-bold tabular-nums" dir="ltr">{selEmp.national_id || "—"}</div></div>
+            <div><div className="text-xs text-muted-foreground">{isAr ? "الإدارة" : "Department"}</div><div className="text-sm font-bold">{selEmp.department || "—"}</div></div>
+            <div><div className="text-xs text-muted-foreground">{isAr ? "المسمى" : "Position"}</div><div className="text-sm font-bold">{selEmp.position || "—"}</div></div>
+          </div>
+        ) : null}
         {empId ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {byLevel.length ? (
@@ -583,6 +602,7 @@ function WarningsReport({ records, employees, empId, setEmpId, t }) {
 function PerformanceReport({ records, employees, empId, setEmpId, t }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const selEmp = employees.find((e) => e.id === empId) || null;
   if (!empId) {
     const m = {};
     records.forEach((r) => { if (!r.employee_id) return; const e = (m[r.employee_id] || (m[r.employee_id] = { name: r.employee_name || r.employee_id, sum: 0, n: 0 })); e.sum += (Number(r.overall_rating) || 0); e.n++; });
@@ -603,6 +623,14 @@ function PerformanceReport({ records, employees, empId, setEmpId, t }) {
   const recLabel = latest ? (isAr ? (recLevelMap[latest.recommendation]?.ar || latest.recommendation) : (recLevelMap[latest.recommendation]?.en || latest.recommendation)) : "—";
   return (
     <div>
+      {selEmp ? (
+        <div className="mb-4 rounded-xl bg-muted/60 border border-border p-3 flex flex-wrap items-center gap-4">
+          <div><div className="text-xs text-muted-foreground">{t.tripEmp}</div><div className="text-sm font-bold">{selEmp.full_name}</div></div>
+          <div><div className="text-xs text-muted-foreground">{t.nationalId}</div><div className="text-sm font-bold tabular-nums" dir="ltr">{selEmp.national_id || "—"}</div></div>
+          <div><div className="text-xs text-muted-foreground">{isAr ? "الإدارة" : "Department"}</div><div className="text-sm font-bold">{selEmp.department || "—"}</div></div>
+          <div><div className="text-xs text-muted-foreground">{isAr ? "المسمى" : "Position"}</div><div className="text-sm font-bold">{selEmp.position || "—"}</div></div>
+        </div>
+      ) : null}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className={cn("rounded-xl border p-3", ready ? "bg-emerald-50 border-emerald-100" : "bg-slate-50 border-slate-200")}>
           <div className="text-xs text-muted-foreground">{t.promotionReady}</div>

@@ -50,7 +50,11 @@ export default function Warnings() {
 
   const empName = (w) => {
     const e = employees.find((x) => x.id === w.employee_id);
-    return e ? `${e.employee_number} — ${e.position}` : (w.employee_name || w.employee_id);
+    return e ? e.full_name : (w.employee_name || w.employee_id);
+  };
+  const empNat = (w) => {
+    const e = employees.find((x) => x.id === w.employee_id);
+    return e ? (e.national_id || "") : (w.national_id || "");
   };
 
   const filtered = warnings.filter((w) => {
@@ -132,6 +136,7 @@ export default function Warnings() {
           <thead className="bg-slate-50">
             <tr className="text-xs text-muted-foreground">
               <th className="text-right font-medium px-4 py-3">{t.thEmp}</th>
+              <th className="text-right font-medium px-4 py-3">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
               <th className="text-right font-medium px-4 py-3">{t.thCat}</th>
               <th className="text-right font-medium px-4 py-3">{t.thLevel}</th>
               <th className="text-right font-medium px-4 py-3 hidden md:table-cell">{t.thArticle}</th>
@@ -142,15 +147,16 @@ export default function Warnings() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">—</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">—</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{t.no}</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{t.no}</td></tr>
             ) : filtered.map((w) => {
               const c = categoryById(w.violation_category, lang);
               const lv = levelById(w.warning_level, lang);
               return (
                 <tr key={w.id} className="border-t border-border">
                   <td className="px-4 py-3">{empName(w)}<div className="text-xs text-muted-foreground">{w.department || ""}</div></td>
+                  <td className="px-4 py-3 tabular-nums text-xs" dir="ltr">{empNat(w) || "—"}</td>
                   <td className="px-4 py-3">{c?.label || w.violation_category}</td>
                   <td className="px-4 py-3"><span className={cn("text-xs px-2.5 py-1 rounded-full border font-medium", lv.cls)}>{lv.label}</span></td>
                   <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell max-w-[280px] truncate">{c?.article || w.article_reference}</td>

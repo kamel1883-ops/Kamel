@@ -73,7 +73,8 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
       const payload = {
         employee_id: emp.id,
         employee_user_id: emp.user_id || "",
-        employee_name: emp.employee_number ? `${emp.employee_number}` : "",
+        employee_name: emp.full_name || "",
+        national_id: emp.national_id || "",
         department: emp.department || "",
         violation_category: form.violation_category,
         article_reference: cat ? (isAr ? cat.articleAr : cat.articleEn) : "",
@@ -84,8 +85,6 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
         description: form.description || "",
         status: "sent",
       };
-      // اسم الموظف الأفضل
-      payload.employee_name = [emp.position, emp.department].filter(Boolean).join(" - ");
       await base44.entities.Warning.create(payload);
       onSaved && onSaved();
       onClose();

@@ -72,7 +72,8 @@ export default function Attendance() {
     const br = branches.find((b) => b.id === emp?.branch_id);
     await base44.entities.Attendance.create({
       employee_id: newRec.employee_id,
-      employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
+      employee_name: emp ? emp.full_name : "",
+      national_id: emp ? (emp.national_id || "") : "",
       date, check_in: newRec.check_in, check_out: newRec.check_out,
       status: newRec.status, work_hours: 8,
       branch_id: emp?.branch_id || null, branch_name: br?.name || emp?.branch_name || "",
@@ -157,6 +158,7 @@ export default function Attendance() {
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
                   <th className="text-right px-4 py-3 font-medium">{t.thEmp}</th>
+                  <th className="text-right px-4 py-3 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thIn}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thOut}</th>
@@ -167,7 +169,11 @@ export default function Attendance() {
               <tbody className="divide-y divide-border">
                 {filtered.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium">{r.employee_name}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {r.employee_name}
+                      <span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "")}</span>
+                    </td>
+                    <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground" dir="ltr">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "—")}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{r.branch_name || "—"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_in || "-"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_out || "-"}</td>
