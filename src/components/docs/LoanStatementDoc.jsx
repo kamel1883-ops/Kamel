@@ -87,7 +87,37 @@ export default function LoanStatementDoc({ employee, loan, org }) {
         >
           هذه السلفة مغلقة — تم سداد كامل المبلغ
         </div>
-      ) : null}
+      ) : paid > 0 ? (
+        <div
+          style={{
+            marginTop: 24,
+            textAlign: "center",
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#b45309",
+            border: "2px dashed #b45309",
+            borderRadius: 10,
+            padding: "10px",
+          }}
+        >
+          هذه السلفة نشطة — بانتظار السداد (المتبقي: {formatCurrency(remaining)})
+        </div>
+      ) : (
+        <div
+          style={{
+            marginTop: 24,
+            textAlign: "center",
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#0b1120",
+            border: "2px dashed #0b1120",
+            borderRadius: 10,
+            padding: "10px",
+          }}
+        >
+          هذه السلفة نشطة — تم الصرف وبانتظار السداد (المتبقي: {formatCurrency(remaining)})
+        </div>
+      )}
 
       <div style={{ marginTop: 26, display: "flex", justifyContent: "space-between", fontSize: 11 }}>
         <div>تاريخ الكشف: {new Date().toISOString().slice(0, 10)}</div>

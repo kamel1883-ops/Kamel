@@ -410,6 +410,20 @@ export default function MyRequests() {
                     <div>
                       <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
                       <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(formatCurrency(r.monthly_installment))}</div>
+                      {(r.status === "paid" || r.status === "completed") && (() => {
+                        const amt = Number(r.amount) || 0;
+                        const paid = Number(r.paid_amount) || 0;
+                        const remaining = Math.max(0, amt - paid);
+                        const closed = amt > 0 && paid >= amt;
+                        return (
+                          <div className="text-xs mt-1 flex items-center gap-1.5 flex-wrap">
+                            <span className="text-muted-foreground">{isAr ? "الإجمالي" : "Total"}: <b className="text-foreground">{formatCurrency(amt)}</b></span>
+                            <span className="text-emerald-600">{isAr ? "مسدد" : "Paid"}: <b>{formatCurrency(paid)}</b></span>
+                            <span className="text-amber-600">{isAr ? "متبقي" : "Remaining"}: <b>{formatCurrency(remaining)}</b></span>
+                            <span className={cn("px-1.5 py-0.5 rounded-full", closed ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600")}>{closed ? (isAr ? "مغلقة" : "Closed") : (isAr ? "نشطة" : "Active")}</span>
+                          </div>
+                        );
+                      })()}
                       {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                     </div>
                     <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
