@@ -80,7 +80,7 @@ function buildTitle(title, subtitle) {
   return c;
 }
 
-export async function printReport(node, { org, title, subtitle, stamp, landscape, draft } = {}) {
+export async function printReport(node, { org, title, subtitle, stamp, landscape, draft, filterInclude } = {}) {
   if (!node) return;
   const useLandscape = !!landscape;
   // عرض مطابق لنسب صفحة A4 ليملأ الصفحة كاملة دون هوامش جانبية كبيرة
@@ -99,6 +99,10 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
 
   const clone = node.cloneNode(true);
   clone.style.width = "100%";
+  // استبعاد صفوف المستثناة من صرف هذا الشهر (data-include="false") عند الطباعة
+  if (filterInclude) {
+    clone.querySelectorAll('tr[data-include="false"]').forEach((el) => el.remove());
+  }
   clone.querySelectorAll('[class*="overflow-auto"],[class*="overflow-x-auto"]').forEach((el) => {
     el.style.overflow = "visible";
     el.style.maxWidth = "none";

@@ -8,7 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2 } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { computeGOSI } from "@/lib/eos";
@@ -30,7 +30,8 @@ export default function Payroll() {
     pdf: "تحميل / طباعة PDF", printDraft: "طباعة كمسودة", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
     wps: "ملف WPS لمدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
-    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thStatus: "الحالة",
+    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة",
+    totalIncludedLabel: "إجمالي الرواتب للمشمولين بالصرف هذا الشهر", excludedHint: (n) => `${n} موظف مستثنى من صرف هذا الشهر`, allIncluded: "كل الموظفين مشمولون بالصرف",
   } : {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
     gen: "Generate month sheet", gening: "Generating...",
@@ -43,7 +44,8 @@ export default function Payroll() {
     pdf: "Download / Print PDF", printDraft: "Print draft", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
     wps: "WPS file (Mudad)", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
-    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thStatus: "Status",
+    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status",
+    totalIncludedLabel: "Total payroll for employees included in this month's pay", excludedHint: (n) => `${n} employee(s) excluded from this month's pay`, allIncluded: "All employees are included in pay",
   };
 
   const [payrolls, setPayrolls] = useState([]);
@@ -133,21 +135,30 @@ export default function Payroll() {
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
 
+  const toggleInclude = async (id) => {
+    const rec = payrolls.find((p) => p.id === id);
+    const next = rec.include_in_payroll === false ? true : false;
+    setPayrolls((p) => p.map((x) => (x.id === id ? { ...x, include_in_payroll: next } : x)));
+    try { await base44.entities.Payroll.update(id, { include_in_payroll: next }); }
+    catch (e) { load(); }
+  };
+
   const approveAll = async () => {
     setBatching(true);
-    const updates = payrolls.filter((p) => p.status === "draft").map((p) => ({ id: p.id, status: "approved" }));
+    const updates = payrolls.filter((p) => p.status === "draft" && p.include_in_payroll !== false).map((p) => ({ id: p.id, status: "approved" }));
+    if (updates.length) alert(isAr ? `سيتم اعتماد رواتب ${updates.length} موظف مشمول فقط` : `Only ${updates.length} included employees will be approved`);
     if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
     setBatching(false); load();
   };
   const payAll = async () => {
     setBatching(true);
-    const target = payrolls.filter((p) => p.status === "approved");
+    const target = payrolls.filter((p) => p.status === "approved" && p.include_in_payroll !== false);
     const updates = target.map((p) => ({ id: p.id, status: "paid", paid_date: todayISO() }));
     if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
     const updated = payrolls.map((p) => (target.find((tg) => tg.id === p.id) ? { ...p, status: "paid", paid_date: todayISO() } : p));
     setPayrolls(updated);
     setBatching(false);
-    if (updated.some((p) => p.status === "paid")) exportWps(updated);
+    if (updated.some((p) => p.status === "paid" && p.include_in_payroll !== false)) exportWps(updated);
     load();
   };
 
@@ -167,10 +178,11 @@ export default function Payroll() {
         org,
         title: isAr ? `كشف رواتب ${t.months[month - 1]} ${year}` : `Payroll sheet ${t.months[month - 1]} ${year}`,
         subtitle: isAr
-          ? `إجمالي الصافي: ${formatCurrency(totalNet)} — إجمالي المدفوع: ${formatCurrency(totalPaid)} — ${payrolls.length} موظف`
-          : `Total net: ${formatCurrency(totalNet)} — Paid total: ${formatCurrency(totalPaid)} — ${payrolls.length} employees`,
+          ? `إجمالي الصافي للمشمولين: ${formatCurrency(totalNet)} — المشمولون: ${includedCount} موظف — المستثنون: ${excludedCount} موظف`
+          : `Total net (included): ${formatCurrency(totalNet)} — Included: ${includedCount} — Excluded: ${excludedCount}`,
         stamp: monthStatus === "paid" && payrolls.length > 0 && !opts.draft,
         draft: !!opts.draft,
+        filterInclude: true,
         landscape: true,
       });
     } finally { setExporting(false); }
@@ -255,15 +267,19 @@ export default function Payroll() {
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   };
 
-  const totalNet = payrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
-  const totalBonus = payrolls.reduce((s, p) => s + (p.bonus || 0), 0);
-  const totalDed = payrolls.reduce((s, p) => s + (p.deductions || 0), 0);
-  const totalGosiEmployee = payrolls.reduce((s, p) => s + (p.gosi_employee || 0), 0);
-  const paidCount = payrolls.filter((p) => p.status === "paid").length;
-  const totalPaid = payrolls.filter((p) => p.status === "paid").reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
-  const anyDraft = payrolls.some((p) => p.status === "draft");
-  const anyApproved = payrolls.some((p) => p.status === "approved");
-  const monthStatus = payrolls.length && payrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
+  const includedPayrolls = payrolls.filter((p) => p.include_in_payroll !== false);
+  const excludedPayrolls = payrolls.filter((p) => p.include_in_payroll === false);
+  const includedCount = includedPayrolls.length;
+  const excludedCount = excludedPayrolls.length;
+  const totalNet = includedPayrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
+  const totalBonus = includedPayrolls.reduce((s, p) => s + (p.bonus || 0), 0);
+  const totalDed = includedPayrolls.reduce((s, p) => s + (p.deductions || 0), 0);
+  const totalGosiEmployee = includedPayrolls.reduce((s, p) => s + (p.gosi_employee || 0), 0);
+  const paidCount = includedPayrolls.filter((p) => p.status === "paid").length;
+  const totalPaid = includedPayrolls.filter((p) => p.status === "paid").reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
+  const anyDraft = includedPayrolls.some((p) => p.status === "draft");
+  const anyApproved = includedPayrolls.some((p) => p.status === "approved");
+  const monthStatus = includedPayrolls.length && includedPayrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
 
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
@@ -325,11 +341,24 @@ export default function Payroll() {
             <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
             <Button onClick={() => exportWps()} disabled={paidCount === 0} variant="outline" className="gap-2"><Shield size={16} /> {t.wps}</Button>
             <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
-          </div>
-        </div>
-      )}
+            </div>
+            </div>
+            )}
 
-      <div ref={sheetRef} className="relative bg-white rounded-2xl border border-border overflow-hidden">
+            {payrolls.length > 0 && !loading && (
+            <div className="bg-gradient-to-l from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-2xl p-4 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+            <div className="text-sm font-semibold text-emerald-900">{t.totalIncludedLabel}</div>
+            <div className="text-xs text-emerald-700 mt-1">
+             {excludedCount > 0 ? t.excludedHint(excludedCount) : t.allIncluded}
+            </div>
+            <div className="text-xs text-emerald-700 mt-0.5">{isAr ? `المشمولون بالصرف: ${includedCount} — المستثنون: ${excludedCount}` : `Included: ${includedCount} — Excluded: ${excludedCount}`}</div>
+            </div>
+            <div className="text-3xl font-extrabold text-emerald-700 tabular-nums">{formatCurrency(totalNet)}</div>
+            </div>
+            )}
+
+            <div ref={sheetRef} className="relative bg-white rounded-2xl border border-border overflow-hidden">
         {loading ? (
           <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
         ) : payrolls.length === 0 ? (
@@ -342,6 +371,7 @@ export default function Payroll() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
+                  <th className="text-center px-3 py-3 font-medium">{t.thIncl}</th>
                   <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">{t.thEmp}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thBase}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
@@ -357,8 +387,19 @@ export default function Payroll() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {payrolls.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50">
+                {payrolls.map((p) => {
+                  const included = p.include_in_payroll !== false;
+                  return (
+                  <tr key={p.id} data-include={included ? "true" : "false"} className={cn("hover:bg-slate-50", !included && "opacity-60")}>
+                    <td className="px-3 py-2 text-center">
+                      <button
+                        onClick={() => toggleInclude(p.id)}
+                        title={included ? (isAr ? "مشمول — اضغط لاستثنائه من هذا الشهر" : "Included — click to exclude") : (isAr ? "مستثنى — اضغط لإعادة إشراكه" : "Excluded — click to include")}
+                        className={cn("inline-flex items-center justify-center w-7 h-7 rounded-lg border-2 transition-all",
+                          included ? "border-emerald-400 bg-emerald-50 text-emerald-600" : "border-rose-400 bg-rose-50 text-rose-500")}>
+                        {included ? <Check size={16} /> : <X size={16} />}
+                      </button>
+                    </td>
                     <td className="px-4 py-2 font-medium sticky right-0 bg-white">{p.employee_name}</td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
@@ -382,7 +423,8 @@ export default function Payroll() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
