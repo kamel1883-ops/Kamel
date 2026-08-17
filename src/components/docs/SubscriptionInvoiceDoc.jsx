@@ -4,9 +4,9 @@ import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 
-// فاتورة غير ضريبية (Simplified / non-tax invoice). تُولَّد من بوابة المالك بعد تأكيد الاشتراك.
+// فاتورة اشتراك سنوي (Simplified / Annual Subscription Invoice). تُولَّد من بوابة المالك بعد تأكيد الاشتراك.
 // تشمل بيانات العميل، نوع الخدمة (برمجيات اشتراك سنوي في منصة جدارة)، الباقة/الشريحة، فترة الاشتراك،
-// الباركود الرقمي، وقيمة الضريبة (0%) مع شرح حالة الضريبة الصفرية.
+// الباركود الرقمي، وقيمة الضريبة (0%) مع شرح حالة الضريبة الصفرية. لا تحتوي على توقيع أو ختم — باركود فقط.
 export default function SubscriptionInvoiceDoc({
   company = {},
   tier = null,
@@ -32,8 +32,8 @@ export default function SubscriptionInvoiceDoc({
   const feats = isAr ? FULL_FEATURES_AR : FULL_FEATURES_EN;
   const L = isAr
     ? {
-        docTitle: "فاتورة غير ضريبية",
-        subtitle: "Simplified Invoice — غير خاضعة لضريبة القيمة المضافة",
+        docTitle: "فاتورة اشتراك سنوي",
+        subtitle: "فاتورة اشتراك سنوي — منصة جدارة لإدارة الموارد البشرية",
         invNo: "رقم الفاتورة",
         date: "التاريخ",
         billedTo: "فاتورة إلى",
@@ -58,7 +58,7 @@ export default function SubscriptionInvoiceDoc({
         taxRow: "رسوم الضريبة (0%)",
         total: "الإجمالي المستحق",
         features: "تشمل الباقة جميع المميزات التالية",
-        notTax: "هذه فاتورة غير ضريبية ولا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% (صفر). المبلغ الإجمالي = المبلغ الصافي.",
+        notTax: "فاتورة اشتراك سنوي — لا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% (صفر). المبلغ الإجمالي = المبلغ الصافي.",
         subLine: "اشتراك سنوي — منصة جدارة لإدارة الموارد البشرية",
         perYear: "/ سنوياً",
         currency: "ر.س",
@@ -66,8 +66,8 @@ export default function SubscriptionInvoiceDoc({
         contactFoot: "للاستفسار",
       }
     : {
-        docTitle: "Non-Tax Invoice",
-        subtitle: "Simplified Invoice — VAT exempt",
+        docTitle: "Annual Subscription Invoice",
+        subtitle: "Annual Subscription Invoice — Jadara HR Platform",
         invNo: "Invoice No.",
         date: "Date",
         billedTo: "Billed to",
@@ -92,7 +92,7 @@ export default function SubscriptionInvoiceDoc({
         taxRow: "Tax (0%)",
         total: "Total due",
         features: "The plan includes every feature below",
-        notTax: "This is a non-tax invoice and is not subject to VAT. Tax: 0% (zero). Total = Net amount.",
+        notTax: "Annual subscription invoice — VAT exempt. Tax: 0% (zero). Total = Net amount.",
         subLine: "Annual subscription — Jadara HR platform",
         perYear: "/ year",
         currency: "SAR",
@@ -116,6 +116,7 @@ export default function SubscriptionInvoiceDoc({
           <div>
             <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
             <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية · jadara-hr.com</div>
+            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>مؤسسة احمد الشعالي لتقنية المعلومات</div>
           </div>
         </div>
         <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>
@@ -179,7 +180,7 @@ export default function SubscriptionInvoiceDoc({
             <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", color: "#16a34a", borderBottom: "1px solid #e2e8f0" }}>{num(taxAmount)} {sar}</td>
           </tr>
           <tr>
-            <td colSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#0f172a", background: "#f8fafc" }}>{L.total}</td>
+            <td colSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#0b1120", background: "#f8fafc" }}>{L.total}</td>
             <td style={{ padding: "10px 10px", fontWeight: 800, fontSize: 15.5, color: "#1A237E", whiteSpace: "nowrap", background: "#eef2ff" }}>{num(amount)} {sar}</td>
           </tr>
         </tbody>
@@ -211,24 +212,7 @@ export default function SubscriptionInvoiceDoc({
         </div>
       </div>
 
-      {/* التوقيع والتذييل */}
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24 }}>
-        <div style={{ fontSize: 11.5, color: "#64748b", lineHeight: 1.9 }}>
-          <div style={{ fontWeight: 700, color: "#334155" }}>{L.contactFoot}</div>
-          <div dir="ltr">WhatsApp: +966 594700782</div>
-          <div dir="ltr">info@jadara-hr.com</div>
-          <div>jadara-hr.com</div>
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <img src={SIGNATURE_URL} crossOrigin="anonymous" alt="توقيع" style={{ height: 64, objectFit: "contain", display: "block", margin: "0 auto" }} />
-          <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, lineHeight: 1.9, minWidth: 220 }}>
-            <div><b>{L.sigName}</b></div>
-          </div>
-          <div style={{ marginTop: -8 }}>
-            <Stamp label={isAr ? "جدارة لإدارة الموارد البشرية" : "Jadara HR"} />
-          </div>
-        </div>
-      </div>
+      {/* فاتورة اشتراك سنوي — باركود فقط دون توقيع أو ختم أو اسم مُوقِّع */}
     </div>
   );
 }
@@ -240,7 +224,7 @@ function KV({ k, vv, bold, mono, ltr, accent }) {
       <span
         style={{
           fontWeight: bold ? 800 : 600,
-          color: accent ? "#1A237E" : "#0f172a",
+          color: accent ? "#1A237E" : "#0b1120",
           fontFamily: mono ? "ui-monospace, monospace" : undefined,
           direction: ltr ? "ltr" : undefined,
           unicodeBidi: ltr ? "embed" : undefined,
@@ -250,25 +234,6 @@ function KV({ k, vv, bold, mono, ltr, accent }) {
         {vv}
       </span>
     </div>
-  );
-}
-
-function Stamp({ label }) {
-  return (
-    <svg viewBox="0 0 200 200" width={104} height={104} xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <path id="invTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
-      </defs>
-      <circle cx="100" cy="100" r="92" fill="none" stroke="#1A237E" strokeWidth={3} />
-      <circle cx="100" cy="100" r="84" fill="none" stroke="#1A237E" strokeWidth={1.4} />
-      <circle cx="100" cy="100" r={46} fill="none" stroke="#1A237E" strokeWidth={1.6} />
-      <text fill="#1A237E" fontSize="15" fontWeight="700" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">
-        <textPath href="#invTop" startOffset="50%" textAnchor="middle">{label}</textPath>
-      </text>
-      <text x="100" y="98" textAnchor="middle" fill="#1A237E" fontSize="22" fontWeight="800" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">جدارة</text>
-      <text x="100" y="118" textAnchor="middle" fill="#1A237E" fontSize="9" fontWeight="600" fontFamily="sans-serif">JADARA HR</text>
-      <text x="100" y="132" textAnchor="middle" fill="#1A237E" fontSize="14">✦</text>
-    </svg>
   );
 }
 

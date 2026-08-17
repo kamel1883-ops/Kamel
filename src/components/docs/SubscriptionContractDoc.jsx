@@ -1,5 +1,7 @@
 import React from "react";
 import { Crown } from "lucide-react";
+import ProviderStamp from "@/components/docs/ProviderStamp";
+import { PROVIDER } from "@/lib/providerIdentity";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 
@@ -26,6 +28,8 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
           <div>
             <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
             <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية</div>
+            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
+            <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحّد: <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
           </div>
         </div>
         <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>
@@ -49,7 +53,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
       {/* الأطراف */}
       <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 18px", marginBottom: 18 }}>
         <div style={{ marginBottom: 10 }}>
-          <b>الطرف الأول:</b> منصة «جدارة» لإدارة الموارد البشرية، ويمثلها الأستاذ/ة <b>{owner?.full_name || "—"}</b>، بصفته ممثلاً لمنصة جدارة لإدارة الموارد البشرية. ويُشار إليه فيما يلي بـ«الطرف الأول» أو «جدارة».
+          <b>الطرف الأول:</b> مؤسسة احمد الشعالي لتقنية المعلومات (جدارة لإدارة الموارد البشرية)، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لمؤسسة احمد الشعالي لتقنية المعلومات (ممثلاً لمنصة جدارة لإدارة الموارد البشرية). ويُشار إليه فيما يلي بـ«الطرف الأول» أو «المؤسسة/جدارة».
         </div>
         <div>
           <b>الطرف الثاني:</b> منشأة <b>{company?.name || "—"}</b>
@@ -115,16 +119,17 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
       <div style={{ display: "flex", justifyContent: "space-between", gap: 24, marginTop: 26 }}>
         {/* الطرف الأول — موقّع ومختوم */}
         <div style={{ flex: 1, maxWidth: 340 }}>
-          <div style={{ fontWeight: 800, marginBottom: 10, borderBottom: "1.5px solid #0b1120", paddingBottom: 4 }}>الطرف الأول — جدارة</div>
+          <div style={{ fontWeight: 800, marginBottom: 10, borderBottom: "1.5px solid #0b1120", paddingBottom: 4 }}>الطرف الأول — مؤسسة احمد الشعالي لتقنية المعلومات (جدارة)</div>
           <div style={{ position: "relative", height: 96, marginBottom: 6 }}>
             <img src={SIGNATURE_URL} crossOrigin="anonymous" alt="توقيع" style={{ height: 86, objectFit: "contain", display: "block", marginTop: 4 }} />
             <div style={{ position: "absolute", top: 0, left: 0, opacity: 0.85, transform: "rotate(-7deg)", transformOrigin: "top left" }}>
-              <Stamp label="جدارة لإدارة الموارد البشرية" />
+              <ProviderStamp size={104} rotate={false} />
             </div>
           </div>
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, lineHeight: 1.9 }}>
-            <div><b>الاسم:</b> {owner?.full_name || "—"}</div>
-            <div><b>ممثّل لمنصة جدارة لإدارة الموارد البشرية</b></div>
+            <div><b>الاسم:</b> {PROVIDER.signerName}</div>
+            <div><b>{PROVIDER.signerLabel} — مؤسسة احمد الشعالي لتقنية المعلومات</b></div>
+            <div><b>الرقم الموحّد:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
             <div><b>التاريخ:</b> {fmt(cDate)}</div>
           </div>
         </div>
@@ -162,24 +167,5 @@ function Clause({ n, title, children }) {
       </div>
       <p style={{ margin: 0, color: "#1e293b" }}>{children}</p>
     </div>
-  );
-}
-
-function Stamp({ label }) {
-  return (
-    <svg viewBox="0 0 200 200" width={104} height={104} xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <path id="ctrTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
-      </defs>
-      <circle cx="100" cy="100" r="92" fill="none" stroke="#1A237E" strokeWidth="3" />
-      <circle cx="100" cy="100" r="84" fill="none" stroke="#1A237E" strokeWidth="1.4" />
-      <circle cx="100" cy="100" r="46" fill="none" stroke="#1A237E" strokeWidth="1.6" />
-      <text fill="#1A237E" fontSize="15" fontWeight="700" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">
-        <textPath href="#ctrTop" startOffset="50%" textAnchor="middle">{label}</textPath>
-      </text>
-      <text x="100" y="98" textAnchor="middle" fill="#1A237E" fontSize="22" fontWeight="800" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">جدارة</text>
-      <text x="100" y="118" textAnchor="middle" fill="#1A237E" fontSize="9" fontWeight="600" fontFamily="sans-serif">JADARA HR</text>
-      <text x="100" y="132" textAnchor="middle" fill="#1A237E" fontSize="14">✦</text>
-    </svg>
   );
 }

@@ -1,6 +1,8 @@
 import React from "react";
 import { Crown } from "lucide-react";
 import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
+import ProviderStamp from "@/components/docs/ProviderStamp";
+import { PROVIDER } from "@/lib/providerIdentity";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 const BANK = {
@@ -47,7 +49,7 @@ export default function QuoteDoc({
         waSupport: "الدعم الفني (واتساب)", sendReceipt: "أرسل إيصال التحويل على واتساب لتفعيل الحساب",
         openWhatsApp: "إرسال عبر واتساب الآن",
         discBadge: "خصم", discApplied: "بعد تطبيق الكود",
-        sigName: "الإدارة المالية", stamp: "جدارة لإدارة الموارد البشرية",
+        sigName: `${PROVIDER.signerLabel} — ${PROVIDER.signerName}`,
       }
     : {
         pageTitle: "Quotation — Annual Subscription",
@@ -67,7 +69,7 @@ export default function QuoteDoc({
         waSupport: "Support (WhatsApp)", sendReceipt: "Send the transfer receipt on WhatsApp to activate your account",
         openWhatsApp: "Send via WhatsApp now",
         discBadge: "OFF", discApplied: "After discount applied",
-        sigName: "Finance Department", stamp: "Jadara HR Management",
+        sigName: `${PROVIDER.signerLabelEn} — ${PROVIDER.signerNameEn}`,
       };
 
   const v = (x) => (x == null || String(x).trim() === "" ? "—" : x);
@@ -82,8 +84,10 @@ export default function QuoteDoc({
             <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>{L.pageTitle}</div>
+            <div style={{ fontWeight: 800, fontSize: 16, fontFamily: "var(--font-display)" }}>{L.pageTitle}</div>
             <div style={{ fontSize: 11, color: "#666" }}>جدارة — منصة الموارد البشرية السعودية</div>
+            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
+            <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحّد: <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
           </div>
         </div>
         <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>
@@ -188,7 +192,7 @@ export default function QuoteDoc({
           <img src={SIGNATURE_URL} crossOrigin="anonymous" alt="توقيع" style={{ height: 76, objectFit: "contain", display: "block" }} />
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, fontWeight: 700, minWidth: 220 }}>{L.sigName}</div>
         </div>
-        <JadaraStamp label={L.stamp} />
+        <ProviderStamp size={150} />
       </div>
     </div>
   );
@@ -206,27 +210,6 @@ function KV({ k, vv, bold, mono, ltr }) {
         unicodeBidi: ltr ? "embed" : undefined,
         wordBreak: "break-word",
       }}>{vv}</span>
-    </div>
-  );
-}
-
-function JadaraStamp({ label }) {
-  return (
-    <div style={{ transform: "rotate(-7deg)", opacity: 0.85 }}>
-      <svg viewBox="0 0 200 200" width={150} height={150} xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <path id="qTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
-        </defs>
-        <circle cx="100" cy="100" r={92} fill="none" stroke="#1A237E" strokeWidth={3} />
-        <circle cx="100" cy="100" r={84} fill="none" stroke="#1A237E" strokeWidth={1.4} />
-        <circle cx="100" cy="100" r={46} fill="none" stroke="#1A237E" strokeWidth={1.6} />
-        <text fill="#1A237E" fontSize="16" fontWeight="700" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">
-          <textPath href="#qTop" startOffset="50%" textAnchor="middle">{label}</textPath>
-        </text>
-        <text x="100" y="98" textAnchor="middle" fill="#1A237E" fontSize="22" fontWeight="800" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">جدارة</text>
-        <text x="100" y="118" textAnchor="middle" fill="#1A237E" fontSize="9" fontWeight="600" fontFamily="sans-serif">JADARA HR</text>
-        <text x="100" y="132" textAnchor="middle" fill="#1A237E" fontSize="14">✦</text>
-      </svg>
     </div>
   );
 }
