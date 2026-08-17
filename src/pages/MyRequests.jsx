@@ -394,7 +394,10 @@ export default function MyRequests() {
                           <a href={r.medical_report_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{t.medReport}</a>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(r.days_count)}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{r.start_date} ← {r.end_date} · {t.days(Number(r.balance_deducted) > 0 ? Number(r.balance_deducted) : r.days_count)}</div>
+                      {Number(r.balance_deducted) > 0 && Number(r.balance_deducted) < Number(r.days_count) && (
+                        <div className="text-[11px] text-violet-600 mt-0.5">{isAr ? `المعتمد: ${Number(r.balance_deducted)} من ${Number(r.days_count)} يوم` : `Approved: ${Number(r.balance_deducted)} of ${Number(r.days_count)} days`}</div>
+                      )}
                       {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                     </div>
                     <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>

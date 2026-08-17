@@ -176,7 +176,11 @@ export default function Leaves() {
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
                     <TableCell className="text-sm">{r.start_date}</TableCell>
                     <TableCell className="text-sm">{r.end_date}</TableCell>
-                    <TableCell>{r.days_count || 0}</TableCell>
+                    <TableCell>
+                      {Number(r.balance_deducted) > 0 ? (
+                        <span className="font-semibold text-violet-700">{Number(r.balance_deducted)}</span>
+                      ) : (r.days_count || 0)}
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate">{r.reason || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
                     <TableCell>

@@ -38,9 +38,13 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
               <td style={{ padding: "9px 6px", fontWeight: 600 }}>{v || "—"}</td>
             </tr>
           ))}
+          <tr>
+            <td style={{ padding: "9px 6px", color: "#667085", fontWeight: 600 }}>الأيام المطلوبة (الأصلية)</td>
+            <td style={{ padding: "9px 6px", fontWeight: 600 }}>{leave?.days_count || 0} يوم</td>
+          </tr>
           <tr style={{ background: "#f8f9fb" }}>
-            <td style={{ padding: "10px 6px", color: "#667085", fontWeight: 700 }}>عدد الأيام المصفّاة</td>
-            <td style={{ padding: "10px 6px", fontWeight: 800, fontSize: 15 }}>{leave?.days_count || 0} يوم</td>
+            <td style={{ padding: "10px 6px", color: "#667085", fontWeight: 700 }}>عدد الأيام المعتمدة (المُخصومة)</td>
+            <td style={{ padding: "10px 6px", fontWeight: 800, fontSize: 15 }}>{(Number(leave?.balance_deducted) > 0 ? Number(leave?.balance_deducted) : (leave?.days_count || 0))} يوم</td>
           </tr>
           <tr>
             <td style={{ padding: "9px 6px", color: "#667085", fontWeight: 600 }}>رصيد الإجازات قبل التصفية</td>
