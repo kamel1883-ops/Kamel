@@ -177,6 +177,9 @@ export default function CompanyRegister() {
     return (
       <AuthLayout icon={Mail} title={t.otpTitle} subtitle={`${t.otpSub} ${email}`}>
         {error && <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>}
+        <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs leading-relaxed">
+          💡 {isAr ? "لم يصلك الرمز؟ تحقّق أولاً من مجلد «الرسائل غير المرغوبة/السبام» وعلامة التبويب «العروض». أضف بريد المرسِل لقائمة الموثوقين لضمان وصول الرسائل لاحقاً." : "Didn't get the code? First check your Spam/Junk and Promotions folders. Add the sender to your safe senders list so future emails arrive reliably."}
+        </div>
         <div className="flex justify-center mb-6">
           <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode} autoFocus autoComplete="one-time-code">
             <InputOTPGroup>
