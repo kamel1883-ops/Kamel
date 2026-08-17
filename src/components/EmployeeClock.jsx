@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Fingerprint, Loader2, LogIn, LogOut, MapPin, CheckCircle2 } from "lucide-react";
+import { Fingerprint, Loader2, LogIn, LogOut, MapPin, CheckCircle2, Coffee, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 
@@ -98,18 +98,35 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
           }
         }
         setMsg({ type: "ok", text: t.doneIn });
-      } else {
+      } else if (kind === "break") {
         if (!today || !today.check_in) { setMsg({ type: "err", text: t.needIn }); setBusy(false); return; }
         if (today.check_out) { setMsg({ type: "err", text: t.alreadyOut }); setBusy(false); return; }
+        if (onBreak) { setMsg({ type: "err", text: t.alreadyOnBreak }); setBusy(false); return; }
+        if (clockApi?.breakStart) { await clockApi.breakStart(); }
+        else { await base44.entities.Attendance.update(today.id, { break_start: nowHM(), source: "portal" }); }
+        setMsg({ type: "ok", text: t.breakDone });
+      } else if (kind === "resume") {
+        if (!onBreak) { setMsg({ type: "err", text: t.notOnBreak }); setBusy(false); return; }
+        if (clockApi?.breakEnd) { await clockApi.breakEnd(); }
+        else {
+          const [bs, bsm] = today.break_start.split(":").map(Number);
+          const d = new Date();
+          let mins = d.getHours() * 60 + d.getMinutes() - (bs * 60 + bsm); if (mins < 0) mins += 24 * 60;
+          const total = (Number(today.break_minutes) || 0) + Math.max(0, mins);
+          await base44.entities.Attendance.update(today.id, { break_start: "", break_minutes: total, source: "portal" });
+        }
+        setMsg({ type: "ok", text: t.resumeDone });
+      } else { // out
+        if (!today || !today.check_in) { setMsg({ type: "err", text: t.needIn }); setBusy(false); return; }
+        if (today.check_out) { setMsg({ type: "err", text: t.alreadyOut }); setBusy(false); return; }
+        if (onBreak) { setMsg({ type: "err", text: t.breakOnOut }); setBusy(false); return; }
         const [h, m] = today.check_in.split(":").map(Number);
         const d = new Date();
-        const mins = d.getHours() * 60 + d.getMinutes() - (h * 60 + m);
-        const wh = Math.max(0, Math.round((mins / 60) * 100) / 100);
-        if (clockApi?.clockOut) {
-          await clockApi.clockOut(wh);
-        } else {
-          await base44.entities.Attendance.update(today.id, { check_out: nowHM(), work_hours: wh, source: "portal" });
-        }
+        let mins = d.getHours() * 60 + d.getMinutes() - (h * 60 + m); if (mins < 0) mins += 24 * 60;
+        const net = Math.max(0, mins - (Number(today.break_minutes) || 0));
+        const wh = Math.max(0, Math.round((net / 60) * 100) / 100);
+        if (clockApi?.clockOut) { await clockApi.clockOut(wh); }
+        else { await base44.entities.Attendance.update(today.id, { check_out: nowHM(), work_hours: wh, source: "portal" }); }
         setMsg({ type: "ok", text: t.doneOut });
       }
       await loadToday(); onChanged?.();
@@ -122,6 +139,7 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
 
   const checkedIn = !!today?.check_in;
   const checkedOut = !!today?.check_out;
+  const onBreak = !!today?.break_start;
   const isRtl = portalDir(lang) === "rtl";
 
   return (
@@ -161,13 +179,32 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
         </div>
       </div>
 
+      {checkedIn && !checkedOut && (onBreak || (today?.break_minutes || 0) > 0) && (
+        <div className="rounded-xl bg-amber-50/60 border border-amber-100 p-3 mb-4 flex items-center gap-2">
+          <Coffee size={16} className="text-amber-600 shrink-0" />
+          <div className="text-sm font-medium text-amber-700">
+            {onBreak ? t.breakSince(today.break_start) : t.breakTotal(today.break_minutes || 0)}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {!checkedOut ? (
           <>
             <Button onClick={() => run("in")} disabled={busy || loading || checkedIn} className="gap-2">
               {busy ? <Loader2 size={16} className="animate-spin" /> : <LogIn size={16} />} {t.btnIn}
             </Button>
-            <Button onClick={() => run("out")} disabled={busy || loading || !checkedIn} variant="outline" className="gap-2">
+            {checkedIn && !onBreak && (
+              <Button onClick={() => run("break")} disabled={busy || loading} variant="secondary" className="gap-2">
+                <Coffee size={16} /> {t.btnBreak}
+              </Button>
+            )}
+            {checkedIn && onBreak && (
+              <Button onClick={() => run("resume")} disabled={busy || loading} className="gap-2">
+                <Play size={16} /> {t.btnResume}
+              </Button>
+            )}
+            <Button onClick={() => run("out")} disabled={busy || loading || !checkedIn || onBreak} variant="outline" className="gap-2">
               <LogOut size={16} /> {t.btnOut}
             </Button>
           </>

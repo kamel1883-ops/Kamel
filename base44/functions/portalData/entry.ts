@@ -430,16 +430,75 @@ export default async function (req) {
       return Response.json({ ok: true, today: created });
     }
 
-    if (action === "clock_out") {
-      const checkOut = String(body.check_out || "").trim();
-      const workHours = Number(body.work_hours) || 0;
+    const hmToMin = (hm: string) => {
+      const m = /^(\d{1,2}):(\d{2})$/.exec(String(hm || ""));
+      return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+    };
+    const computeNetHours = (checkIn: string, checkOut: string, breakMinutes: number) => {
+      const ci = hmToMin(checkIn), co = hmToMin(checkOut);
+      if (ci == null || co == null) return 0;
+      let gross = co - ci; if (gross < 0) gross += 24 * 60; // عبور منتصف الليل
+      const net = Math.max(0, gross - (breakMinutes || 0));
+      return Math.round((net / 60) * 100) / 100;
+    };
+
+    // بدء استراحة (Break): تتطلب حضوراً مُسجَّلاً وعدم وجود انصراف أو استراحة مفتوحة
+    if (action === "break_start") {
       const recs = await base44.asServiceRole.entities.Attendance.filter(
         { employee_id: employeeId, date: todayISO() }, "-created_date", 5
       );
       const today = recs[0] || null;
-      if (!today) return Response.json({ ok: false, error: "no_check_in" }, { status: 400 });
+      if (!today || !today.check_in) return Response.json({ ok: false, error: "no_check_in" }, { status: 400 });
+      if (today.check_out) return Response.json({ ok: false, error: "already_out" }, { status: 400 });
+      if (today.break_start) return Response.json({ ok: false, error: "already_on_break" }, { status: 400 });
       const updated = await base44.asServiceRole.entities.Attendance.update(today.id, {
-        check_out: checkOut, work_hours: workHours, source: "portal",
+        break_start: String(body.break_start || "").trim(), source: "portal",
+      });
+      return Response.json({ ok: true, today: updated });
+    }
+
+    // إنهاء استراحة ومواصلة الدوام: يحسب دقائق الاستراحة ويضمّها للإجمالي ويُسجّلها في السجل
+    if (action === "break_end") {
+      const breakEnd = String(body.break_end || "").trim();
+      const recs = await base44.asServiceRole.entities.Attendance.filter(
+        { employee_id: employeeId, date: todayISO() }, "-created_date", 5
+      );
+      const today = recs[0] || null;
+      if (!today || !today.break_start) return Response.json({ ok: false, error: "not_on_break" }, { status: 400 });
+      const bs = hmToMin(today.break_start), be = hmToMin(breakEnd);
+      let mins = 0;
+      if (bs != null && be != null) { mins = be - bs; if (mins < 0) mins += 24 * 60; }
+      const total = Math.max(0, Math.round((Number(today.break_minutes) || 0) + Math.max(0, mins)));
+      let log: any[] = [];
+      try { const p = JSON.parse(today.break_log || "[]"); if (Array.isArray(p)) log = p; } catch {}
+      log.push({ start: today.break_start, end: breakEnd, minutes: Math.max(0, mins) });
+      const updated = await base44.asServiceRole.entities.Attendance.update(today.id, {
+        break_start: "", break_minutes: total, break_log: JSON.stringify(log), source: "portal",
+      });
+      return Response.json({ ok: true, today: updated });
+    }
+
+    if (action === "clock_out") {
+      const checkOut = String(body.check_out || "").trim();
+      const recs = await base44.asServiceRole.entities.Attendance.filter(
+        { employee_id: employeeId, date: todayISO() }, "-created_date", 5
+      );
+      const today = recs[0] || null;
+      if (!today || !today.check_in) return Response.json({ ok: false, error: "no_check_in" }, { status: 400 });
+      // إنهاء أي استراحة مفتوحة تلقائياً عند الانصراف وضمها للإجمالي قبل احتساب الصافي
+      let breakMinutes = Number(today.break_minutes) || 0;
+      let break_start = today.break_start || "";
+      let break_log = today.break_log || "";
+      if (break_start) {
+        const bs = hmToMin(break_start), be = hmToMin(checkOut);
+        let mins = 0; if (bs != null && be != null) { mins = be - bs; if (mins < 0) mins += 24 * 60; }
+        breakMinutes = Math.max(0, Math.round(breakMinutes + Math.max(0, mins)));
+        try { const p = JSON.parse(break_log || "[]"); if (Array.isArray(p)) { p.push({ start: break_start, end: checkOut, minutes: Math.max(0, mins) }); break_log = JSON.stringify(p); } } catch {}
+        break_start = "";
+      }
+      const wh = computeNetHours(today.check_in, checkOut, breakMinutes);
+      const updated = await base44.asServiceRole.entities.Attendance.update(today.id, {
+        check_out: checkOut, work_hours: wh, break_minutes: breakMinutes, break_start, break_log, source: "portal",
       });
       return Response.json({ ok: true, today: updated });
     }

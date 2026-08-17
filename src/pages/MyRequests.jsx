@@ -195,6 +195,22 @@ export default function MyRequests() {
       if (!data?.ok) throw new Error(data?.error || "fail");
       setTodayAtt(data.today);
     },
+    breakStart: async () => {
+      const res = await base44.functions.invoke("portalData", {
+        ...portalArgs, action: "break_start", break_start: nowHM(),
+      });
+      const data = res?.data || res;
+      if (!data?.ok) throw new Error(data?.error || "fail");
+      setTodayAtt(data.today);
+    },
+    breakEnd: async () => {
+      const res = await base44.functions.invoke("portalData", {
+        ...portalArgs, action: "break_end", break_end: nowHM(),
+      });
+      const data = res?.data || res;
+      if (!data?.ok) throw new Error(data?.error || "fail");
+      setTodayAtt(data.today);
+    },
   };
 
   const rejectReason = (r) => {
