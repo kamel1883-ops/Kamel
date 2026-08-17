@@ -2,11 +2,11 @@
 export const PROVIDER = {
   shortName: "جدارة",
   brandLine: "لإدارة الموارد البشرية",
-  institutionName: "مؤسسة احمد الشعالي لتقنية المعلومات",
-  institutionNameEn: "Ahmed Al-Shaali IT Foundation",
+  institutionName: "مؤسسة أحمد الشعيلي لتقنية المعلومات",
+  institutionNameEn: "Ahmed Al-Sha'ili IT Foundation",
   unifiedNumber: "7039482281",
-  signerName: "احمد الشعالي",
-  signerNameEn: "Ahmed Al-Shaali",
+  signerName: "أحمد الشعيلي",
+  signerNameEn: "Ahmed Al-Sha'ili",
   signerLabel: "المدير العام",
   signerLabelEn: "General Manager",
 };

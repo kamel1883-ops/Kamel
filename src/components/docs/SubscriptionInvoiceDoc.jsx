@@ -116,7 +116,7 @@ export default function SubscriptionInvoiceDoc({
           <div>
             <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
             <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية · jadara-hr.com</div>
-            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>مؤسسة احمد الشعالي لتقنية المعلومات</div>
+            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>مؤسسة أحمد الشعيلي لتقنية المعلومات</div>
           </div>
         </div>
         <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>
