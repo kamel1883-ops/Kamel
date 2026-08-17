@@ -198,7 +198,7 @@ export default function Payroll() {
 
   const exportExcel = () => {
     const headers = [t.thEmp, t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
-    const rows = payrolls.map((p) => [
+    const rows = includedPayrolls.map((p) => [
       p.employee_name || "", p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
       p.bonus || 0, p.overtime_amount || 0, p.gosi_employee || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
       p.net_salary || 0, payrollStatusLabel(p.status).label,
