@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { todayISO, attendanceStatusLabel } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import AttendanceReport from "@/components/reports/AttendanceReport";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Attendance() {
   const { lang } = useI18n();
@@ -49,8 +50,8 @@ export default function Attendance() {
     })();
   }, []);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     const data = await base44.entities.Attendance.filter({ date }, "-created_date", 500);
     setRecords(data);
     const emps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
@@ -87,6 +88,7 @@ export default function Attendance() {
   const remove = async (rec) => { await base44.entities.Attendance.delete(rec.id); load(); };
 
   return (
+    <PullToRefresh onRefresh={() => load(true)}>
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
 
@@ -205,6 +207,7 @@ export default function Attendance() {
         <AttendanceReport org={org} />
       </div>
     </div>
+    </PullToRefresh>
   );
 }
 

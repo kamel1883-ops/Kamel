@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import CompanyAssistant from "@/components/CompanyAssistant";
+import AnimatedOutlet from "@/components/AnimatedOutlet";
 import { useI18n } from "@/lib/i18n";
 
 const appNav = [
@@ -159,7 +160,7 @@ export default function Layout() {
             <Crown size={440} className="text-amber-500 dark:text-amber-400" strokeWidth={0.8} />
           </div>
           <div className="relative">
-            <Outlet />
+            <AnimatedOutlet />
           </div>
         </main>
 
@@ -168,7 +169,7 @@ export default function Layout() {
             const Icon = item.icon;
             const active = item.to === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.to);
             return (
-              <Link key={item.to} to={item.to} onClick={() => setOpen(false)}
+              <Link key={item.to} to={item.to} state={active ? { refreshKey: Date.now() } : undefined} onClick={() => setOpen(false)}
                 className={cn("flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-[11px] font-medium transition-colors", active ? "text-violet-300" : "text-white/55")}>
                 <Icon size={20} />
                 {isAr ? item.ar : item.en}

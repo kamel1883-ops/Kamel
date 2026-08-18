@@ -3,64 +3,66 @@ import { ThemeProvider } from "next-themes"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from "react";
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LanguageProvider } from '@/lib/i18n';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from "@/components/Layout";
-import Dashboard from "@/pages/Dashboard";
-import Employees from "@/pages/Employees";
-import Attendance from "@/pages/Attendance";
-import Approvals from "@/pages/Approvals";
-import Leaves from "@/pages/Leaves";
-import BusinessTrips from "@/pages/BusinessTrips";
-import MyRequests from "@/pages/MyRequests";
-import OwnerPortal from "@/pages/OwnerPortal";
-import ExitInterviews from "@/pages/ExitInterviews";
-import Surveys from "@/pages/Surveys";
-import Warnings from "@/pages/Warnings";
-import Payroll from "@/pages/Payroll";
-import Gosi from "@/pages/Gosi";
-import SettingsPage from "@/pages/Settings";
-import Fleet from "@/pages/Fleet";
-import EndOfService from "@/pages/EndOfService";
-import Performance from "@/pages/Performance";
-import Succession from "@/pages/Succession";
-import OrgStructure from "@/pages/OrgStructure";
-import WorkforcePlanning from "@/pages/WorkforcePlanning";
-import Recruitment from "@/pages/Recruitment";
-import Training from "@/pages/Training";
-import JobApply from "@/pages/public/JobApply";
-import Analytics from "@/pages/Analytics";
-import Licenses from "@/pages/Licenses";
-import PlatformSubscriptions from "@/pages/PlatformSubscriptions";
-import Landing from "@/pages/Landing";
-import Discounts from "@/pages/Discounts";
-import ImportAttendance from "@/pages/ImportAttendance";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import ForgotPassword from "@/pages/ForgotPassword";
-import ResetPassword from "@/pages/ResetPassword";
-import About from "@/pages/About";
-import Contact from "@/pages/Contact";
-import Quote from "@/pages/Quote";
-import CompanyLogin from "@/pages/CompanyLogin";
-import CompanyForgotPassword from "@/pages/CompanyForgotPassword";
-import CompanyRegister from "@/pages/CompanyRegister";
-import QiwaMudadPage from "@/pages/landings/QiwaMudadPage";
-import WpsMudadPage from "@/pages/landings/WpsMudadPage";
-import EosCalculatorPage from "@/pages/landings/EosCalculatorPage";
-import ContractsPage from "@/pages/landings/ContractsPage";
-import Blog from "@/pages/Blog";
-import BlogArticle from "@/pages/BlogArticle";
-import CustomerSurveys from "@/pages/CustomerSurveys";
-import CustomerSurveyTake from "@/pages/public/CustomerSurveyTake";
-import ContractSample from "@/pages/ContractSample";
-import HrSystemPage from "@/pages/landings/HrSystemPage";
-import PayrollSystemPage from "@/pages/landings/PayrollSystemPage";
-import AttendanceSystemPage from "@/pages/landings/AttendanceSystemPage";
-import PerformanceSystemPage from "@/pages/landings/PerformanceSystemPage";
+import AnimatedOutlet from "@/components/AnimatedOutlet";
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Employees = lazy(() => import("@/pages/Employees"));
+const Attendance = lazy(() => import("@/pages/Attendance"));
+const Approvals = lazy(() => import("@/pages/Approvals"));
+const Leaves = lazy(() => import("@/pages/Leaves"));
+const BusinessTrips = lazy(() => import("@/pages/BusinessTrips"));
+const MyRequests = lazy(() => import("@/pages/MyRequests"));
+const OwnerPortal = lazy(() => import("@/pages/OwnerPortal"));
+const ExitInterviews = lazy(() => import("@/pages/ExitInterviews"));
+const Surveys = lazy(() => import("@/pages/Surveys"));
+const Warnings = lazy(() => import("@/pages/Warnings"));
+const Payroll = lazy(() => import("@/pages/Payroll"));
+const Gosi = lazy(() => import("@/pages/Gosi"));
+const SettingsPage = lazy(() => import("@/pages/Settings"));
+const Fleet = lazy(() => import("@/pages/Fleet"));
+const EndOfService = lazy(() => import("@/pages/EndOfService"));
+const Performance = lazy(() => import("@/pages/Performance"));
+const Succession = lazy(() => import("@/pages/Succession"));
+const OrgStructure = lazy(() => import("@/pages/OrgStructure"));
+const WorkforcePlanning = lazy(() => import("@/pages/WorkforcePlanning"));
+const Recruitment = lazy(() => import("@/pages/Recruitment"));
+const Training = lazy(() => import("@/pages/Training"));
+const JobApply = lazy(() => import("@/pages/public/JobApply"));
+const Analytics = lazy(() => import("@/pages/Analytics"));
+const Licenses = lazy(() => import("@/pages/Licenses"));
+const PlatformSubscriptions = lazy(() => import("@/pages/PlatformSubscriptions"));
+const Landing = lazy(() => import("@/pages/Landing"));
+const Discounts = lazy(() => import("@/pages/Discounts"));
+const ImportAttendance = lazy(() => import("@/pages/ImportAttendance"));
+const Login = lazy(() => import("@/pages/Login"));
+const Register = lazy(() => import("@/pages/Register"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const About = lazy(() => import("@/pages/About"));
+const Contact = lazy(() => import("@/pages/Contact"));
+const Quote = lazy(() => import("@/pages/Quote"));
+const CompanyLogin = lazy(() => import("@/pages/CompanyLogin"));
+const CompanyForgotPassword = lazy(() => import("@/pages/CompanyForgotPassword"));
+const CompanyRegister = lazy(() => import("@/pages/CompanyRegister"));
+const QiwaMudadPage = lazy(() => import("@/pages/landings/QiwaMudadPage"));
+const WpsMudadPage = lazy(() => import("@/pages/landings/WpsMudadPage"));
+const EosCalculatorPage = lazy(() => import("@/pages/landings/EosCalculatorPage"));
+const ContractsPage = lazy(() => import("@/pages/landings/ContractsPage"));
+const Blog = lazy(() => import("@/pages/Blog"));
+const BlogArticle = lazy(() => import("@/pages/BlogArticle"));
+const CustomerSurveys = lazy(() => import("@/pages/CustomerSurveys"));
+const CustomerSurveyTake = lazy(() => import("@/pages/public/CustomerSurveyTake"));
+const ContractSample = lazy(() => import("@/pages/ContractSample"));
+const HrSystemPage = lazy(() => import("@/pages/landings/HrSystemPage"));
+const PayrollSystemPage = lazy(() => import("@/pages/landings/PayrollSystemPage"));
+const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSystemPage"));
+const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSystemPage"));
 import { PortalLangProvider } from "@/lib/portalI18n";
 
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system"];
@@ -89,33 +91,35 @@ const AuthenticatedApp = () => {
   if (isPublicPage) {
     return (
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/quote" element={<Quote />} />
-        <Route path="/contract-sample" element={<ContractSample />} />
-        <Route path="/hr-system" element={<HrSystemPage />} />
-        <Route path="/payroll-system" element={<PayrollSystemPage />} />
-        <Route path="/attendance-system" element={<AttendanceSystemPage />} />
-        <Route path="/performance-system" element={<PerformanceSystemPage />} />
-        <Route path="/company-login" element={<CompanyLogin />} />
-        <Route path="/company-forgot-password" element={<CompanyForgotPassword />} />
-        <Route path="/company-register" element={<CompanyRegister />} />
-        <Route path="/qiwa-mudad" element={<QiwaMudadPage />} />
-        <Route path="/wps-mudad" element={<WpsMudadPage />} />
-        <Route path="/eos-calculator" element={<EosCalculatorPage />} />
-        <Route path="/contracts" element={<ContractsPage />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogArticle />} />
-        <Route path="/jobs/:id" element={<JobApply />} />
-        <Route path="/c/:surveyId" element={<CustomerSurveyTake />} />
-        <Route path="/portal" element={<PortalLangProvider><MyRequests /></PortalLangProvider>} />
-        <Route path="/owner-portal" element={<OwnerPortal />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route element={<AnimatedOutlet />}>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/quote" element={<Quote />} />
+          <Route path="/contract-sample" element={<ContractSample />} />
+          <Route path="/hr-system" element={<HrSystemPage />} />
+          <Route path="/payroll-system" element={<PayrollSystemPage />} />
+          <Route path="/attendance-system" element={<AttendanceSystemPage />} />
+          <Route path="/performance-system" element={<PerformanceSystemPage />} />
+          <Route path="/company-login" element={<CompanyLogin />} />
+          <Route path="/company-forgot-password" element={<CompanyForgotPassword />} />
+          <Route path="/company-register" element={<CompanyRegister />} />
+          <Route path="/qiwa-mudad" element={<QiwaMudadPage />} />
+          <Route path="/wps-mudad" element={<WpsMudadPage />} />
+          <Route path="/eos-calculator" element={<EosCalculatorPage />} />
+          <Route path="/contracts" element={<ContractsPage />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogArticle />} />
+          <Route path="/jobs/:id" element={<JobApply />} />
+          <Route path="/c/:surveyId" element={<CustomerSurveyTake />} />
+          <Route path="/portal" element={<PortalLangProvider><MyRequests /></PortalLangProvider>} />
+          <Route path="/owner-portal" element={<OwnerPortal />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
       </Routes>
     );
   }
@@ -166,7 +170,9 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <AuthenticatedApp />
+          <Suspense fallback={<PageLoader />}>
+            <AuthenticatedApp />
+          </Suspense>
         </Router>
         <Toaster />
       </QueryClientProvider>
@@ -175,5 +181,11 @@ function App() {
     </ThemeProvider>
   )
 }
+
+const PageLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-background">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-violet-600 rounded-full animate-spin"></div>
+  </div>
+);
 
 export default App

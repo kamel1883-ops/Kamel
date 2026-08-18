@@ -11,6 +11,7 @@ import { formatCurrency, leaveTypeLabel, statusColors, todayISO } from "@/lib/hr
 import { cn } from "@/lib/utils";
 import { expirySeverity, daysUntil } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Dashboard() {
   const { lang } = useI18n();
@@ -69,6 +70,7 @@ export default function Dashboard() {
   const expCount = alerts.length;
 
   return (
+    <PullToRefresh onRefresh={load}>
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
 
@@ -138,6 +140,7 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }
 

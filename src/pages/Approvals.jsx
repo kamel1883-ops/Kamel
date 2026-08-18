@@ -223,17 +223,21 @@ export default function Approvals() {
       const ticket = fin ? leaveTicketAmount(emp, org) : 0;
       // جميع أنواع الإجازات تنتقل لبانتظار المالية — لا تكتمل إلا بعد اعتماد معتمد المالية.
       const finalStatus = "awaiting_finance";
-      await base44.entities.LeaveRequest.update(r.id, {
+      const patchL = {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
         balance_deducted: deduct, ticket_amount: ticket, settlement_amount: ticket,
         status: finalStatus, finance_status: "pending",
-      });
+      };
+      setLeaves((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchL } : x)));
+      await base44.entities.LeaveRequest.update(r.id, patchL);
       if (emp) {
         await base44.entities.Employee.update(emp.id, { leave_balance: Math.max(0, balance - deduct), status: "on_leave" });
       }
       if (!fin) { try { await generateLeaveSettlement(r, empOf(r.employee_id), org, leaves); } catch (e) {} }
     } else {
-      await base44.entities.LoanRequest.update(r.id, { hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), status: "awaiting_finance" });
+      const patchLoan = { hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), status: "awaiting_finance" };
+      setLoans((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchLoan } : x)));
+      await base44.entities.LoanRequest.update(r.id, patchLoan);
     }
     load();
   };
@@ -270,9 +274,10 @@ export default function Approvals() {
         addition_amount: add, addition_note: additionNote,
         settlement_amount: total, status: "hr_settled",
       };
+      setLeaves((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patch } : x)));
       await base44.entities.LeaveRequest.update(r.id, patch);
       try { await generateLeaveSettlement({ ...r, ...patch }, emp, org, leaves); } catch (e) {}
-    } catch (e) {}
+    } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); setProofFile(null);
     setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
     load();
@@ -286,9 +291,9 @@ export default function Approvals() {
       const granted = consume ? (Number(r.balance_deducted) || 0) : 0;
       const newUsed = used + granted;
       // جميع الإجازات تنتقل لبانتظار المالية بعد اعتماد الموارد البشرية — لا تكتمل إلا باعتماد المالية.
-      await base44.entities.LeaveRequest.update(r.id, {
-        hr_status: "approved", status: "awaiting_finance", finance_status: "pending",
-      });
+      const patchFin = { hr_status: "approved", status: "awaiting_finance", finance_status: "pending" };
+      setLeaves((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchFin } : x)));
+      await base44.entities.LeaveRequest.update(r.id, patchFin);
       if (emp) {
         await base44.entities.Employee.update(emp.id, {
           prior_used_leave: newUsed,
@@ -339,9 +344,16 @@ export default function Approvals() {
     if (acting.type === "leaves") { try { await generateLeaveSettlement(acting.req, empOf(acting.req.employee_id), org, leaves); } catch (e) {} }
     setBusy(false); setActing(null); setNote(""); setProofFile(null); setLoanAmount(""); setLoanInstallments(""); load();
   };
+  // Optimistic UI: patch local state instantly, then persist; rollback via reload on error.
   const update = async (type, id, patch) => {
-    if (type === "leaves") await base44.entities.LeaveRequest.update(id, patch);
-    else await base44.entities.LoanRequest.update(id, patch);
+    const setter = type === "leaves" ? setLeaves : setLoans;
+    setter((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    try {
+      if (type === "leaves") await base44.entities.LeaveRequest.update(id, patch);
+      else await base44.entities.LoanRequest.update(id, patch);
+    } catch (e) {
+      load(); // rollback to server truth
+    }
   };
 
   const makeSettlement = async (r) => {
@@ -359,12 +371,14 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     try {
-      await base44.entities.LoanRequest.update(acting.req.id, {
+      const patchLh = {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
         status: "awaiting_finance",
-      });
+      };
+      setLoans((prev) => prev.map((x) => (x.id === acting.req.id ? { ...x, ...patchLh } : x)));
+      await base44.entities.LoanRequest.update(acting.req.id, patchLh);
       try { await generateLoanStatement(acting.req, empOf(acting.req.employee_id), org); } catch (e) {}
-    } catch (e) {}
+    } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); load();
   };
   const openLoanPay = (r) => { setActing({ type: "loans", req: r, action: "loanpay" }); setLoanPayAmount(""); };
@@ -400,17 +414,20 @@ export default function Approvals() {
         approver_id: me?.id, approver_name: me?.full_name, approved_date: todayISO(),
         hr_note: note, hr_document_url: url,
       };
+      setTrips((prev) => prev.map((t) => (t.id === r.id ? { ...t, ...patch } : t)));
       await base44.entities.BusinessTrip.update(r.id, patch);
       try { await generateBusinessTripApproval({ ...r, ...patch }, emp, org); } catch (e) {}
-    } catch (e) {}
+    } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
   };
   const confirmTripReject = async () => {
     if (!acting) return;
     setBusy(true);
     try {
-      await base44.entities.BusinessTrip.update(acting.req.id, { status: "rejected", hr_note: note });
-    } catch (e) {}
+      const rejPatch = { status: "rejected", hr_note: note };
+      setTrips((prev) => prev.map((t) => (t.id === acting.req.id ? { ...t, ...rejPatch } : t)));
+      await base44.entities.BusinessTrip.update(acting.req.id, rejPatch);
+    } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); load();
   };
   const openTripFinance = (r) => { setActing({ type: "trips", req: r, action: "tripfinance" }); setNote(""); setProofFile(null); };
@@ -420,11 +437,13 @@ export default function Approvals() {
     let url = "";
     if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
     try {
-      await base44.entities.BusinessTrip.update(acting.req.id, {
+      const finPatch = {
         status: "completed", finance_status: "paid", finance_note: note,
         finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(),
-      });
-    } catch (e) {}
+      };
+      setTrips((prev) => prev.map((t) => (t.id === acting.req.id ? { ...t, ...finPatch } : t)));
+      await base44.entities.BusinessTrip.update(acting.req.id, finPatch);
+    } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
   };
 

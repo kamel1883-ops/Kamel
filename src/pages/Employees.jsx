@@ -19,6 +19,7 @@ import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
 import { reasonMeta } from "@/lib/eos";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const isInactive = (e) => e.status === "terminated" || e.status === "resigned";
 
@@ -96,11 +97,18 @@ export default function Employees() {
 
   const remove = async (emp) => {
     if (!confirm(t.del(emp.employee_number))) return;
-    await base44.entities.Employee.delete(emp.id);
-    load();
+    // Optimistic UI: remove from local state instantly, rollback on error
+    const snapshot = employees;
+    setEmployees((cur) => cur.filter((e) => e.id !== emp.id));
+    try {
+      await base44.entities.Employee.delete(emp.id);
+    } catch (e) {
+      setEmployees(snapshot); // rollback
+    }
   };
 
   return (
+    <PullToRefresh onRefresh={load}>
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader
         title={t.title}
@@ -293,6 +301,7 @@ export default function Employees() {
       <EmployeeProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} employee={profileEmp} org={org} onOpenTrips={() => { setProfileOpen(false); setTripsOpen(true); }} />
       <TerminateEmployeeDialog open={termOpen} onClose={() => setTermOpen(false)} employee={termEmp} onSaved={load} />
     </div>
+    </PullToRefresh>
   );
 }
 
