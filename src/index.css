@@ -131,6 +131,9 @@ main [class~="rounded-2xl"][class~="border"] { box-shadow: 0 1px 2px rgba(16,24,
 main .hover\:bg-slate-50:hover { background-color: hsl(var(--muted)); }
 main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
 
+/* Dark mode: adapt static bg-white surfaces (cards / sections) to the card token so they respond to system dark preference. */
+.dark .bg-white { background-color: hsl(var(--card)); }
+
 /* === Blog Markdown content styling (rendered inside white card) === */
 .blog-content { color: #1e293b; line-height: 1.95; font-size: 1rem; }
 .blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4 {

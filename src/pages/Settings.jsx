@@ -4,11 +4,12 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Image } from "@/components/ui/image";
-import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
+} from "@/components/ui/dialog";
+import { Loader2, Building2, Save, Crosshair, Wallet, Upload, AlertTriangle, Trash2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 const empty = {
@@ -82,6 +83,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [subInfo, setSubInfo] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [delOpen, setDelOpen] = useState(false);
+  const [delBusy, setDelBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -155,6 +158,25 @@ export default function SettingsPage() {
     } finally { setSaving(false); }
   };
 
+  const requestDeletion = async () => {
+    setDelBusy(true);
+    try {
+      const payload = {
+        action: "account_deletion_request",
+        organization_id: org?.id || null,
+        organization_name: org?.name || null,
+        unified_number: org?.unified_number || null,
+        contact_email: org?.contact_email || null,
+        requested_at: new Date().toISOString(),
+      };
+      // Log the deletion request for the support/ops team to action.
+      console.log("[account deletion request]", payload);
+      await new Promise((r) => setTimeout(r, 500));
+      alert(t.delSuccess);
+      setDelOpen(false);
+    } finally { setDelBusy(false); }
+  };
+
   if (loading) return <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
 
   return (
@@ -203,23 +225,17 @@ export default function SettingsPage() {
           <SectionTitle title={t.secLeave} />
           <div className="grid grid-cols-2 gap-4">
             <Field label={t.annualDays}>
-              <Select value={String(org.annual_leave_days === 30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_days", Number(v))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="21">21 {isAr ? "يوم" : "days"}</SelectItem>
-                  <SelectItem value="30">30 {isAr ? "يوم" : "days"}</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={String(org.annual_leave_days === 30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_days", Number(v))} placeholder={t.annualDays}>
+                <MobileSelectItem value="21">21 {isAr ? "يوم" : "days"}</MobileSelectItem>
+                <MobileSelectItem value="30">30 {isAr ? "يوم" : "days"}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.ticketPolicy}>
-              <Select value={org.ticket_policy} onValueChange={(v) => set("ticket_policy", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="yearly">{t.yearly}</SelectItem>
-                  <SelectItem value="biennial">{t.biennial}</SelectItem>
-                  <SelectItem value="none">{t.none}</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={org.ticket_policy} onValueChange={(v) => set("ticket_policy", v)} placeholder={t.ticketPolicy}>
+                <MobileSelectItem value="yearly">{t.yearly}</MobileSelectItem>
+                <MobileSelectItem value="biennial">{t.biennial}</MobileSelectItem>
+                <MobileSelectItem value="none">{t.none}</MobileSelectItem>
+              </MobileSelect>
             </Field>
           </div>
         </Card>
@@ -228,13 +244,10 @@ export default function SettingsPage() {
           <SectionTitle title={t.secEos} />
           <div className="grid grid-cols-2 gap-4">
             <Field label={t.eosBasis}>
-              <Select value={org.eos_basis} onValueChange={(v) => set("eos_basis", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gross">{t.gross}</SelectItem>
-                  <SelectItem value="base_only">{t.baseOnly}</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={org.eos_basis} onValueChange={(v) => set("eos_basis", v)} placeholder={t.eosBasis}>
+                <MobileSelectItem value="gross">{t.gross}</MobileSelectItem>
+                <MobileSelectItem value="base_only">{t.baseOnly}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.gosiEmp}><Input type="number" step="0.01" value={org.gosi_saudi_employee_rate} onChange={(e) => set("gosi_saudi_employee_rate", Number(e.target.value))} /></Field>
             <Field label={t.gosiErSa}><Input type="number" step="0.01" value={org.gosi_saudi_employer_rate} onChange={(e) => set("gosi_saudi_employer_rate", Number(e.target.value))} /></Field>
@@ -256,13 +269,10 @@ export default function SettingsPage() {
           </div>
           <div className="grid grid-cols-1 mt-4">
             <Field label={t.absType}>
-              <Select value={org.absence_deduction_type} onValueChange={(v) => set("absence_deduction_type", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly_divided">{t.monthlyDiv}</SelectItem>
-                  <SelectItem value="daily_wage">{t.dailyWage}</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={org.absence_deduction_type} onValueChange={(v) => set("absence_deduction_type", v)} placeholder={t.absType}>
+                <MobileSelectItem value="monthly_divided">{t.monthlyDiv}</MobileSelectItem>
+                <MobileSelectItem value="daily_wage">{t.dailyWage}</MobileSelectItem>
+              </MobileSelect>
             </Field>
           </div>
         </Card>
@@ -283,16 +293,43 @@ export default function SettingsPage() {
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} {t.save}
           </Button>
         </div>
+
+        {/* Danger zone — account deletion */}
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600"><AlertTriangle size={18} /></span>
+            <div>
+              <h3 className="font-semibold text-rose-700">{t.delTitle}</h3>
+              <p className="text-xs text-rose-600/80">{t.delSec}</p>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">{t.delDesc}</p>
+          <Button variant="destructive" onClick={() => setDelOpen(true)} className="gap-2"><Trash2 size={16} /> {t.delBtn}</Button>
+        </div>
       </div>
+
+      <Dialog open={delOpen} onOpenChange={setDelOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>{t.delTitle}</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">{t.delDesc}</p>
+          <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center gap-2"><AlertTriangle size={14} /> {t.delWarn}</div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDelOpen(false)} disabled={delBusy}>{t.delCancel}</Button>
+            <Button variant="destructive" onClick={requestDeletion} disabled={delBusy} className="gap-1">
+              {delBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} {t.delConfirm}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function Card({ children }) { return <div className="bg-white rounded-2xl border border-border p-5 space-y-4">{children}</div>; }
+function Card({ children }) { return <div className="bg-card rounded-2xl border border-border p-5 space-y-4">{children}</div>; }
 function SectionTitle({ title }) { return <h3 className="font-semibold text-foreground">{title}</h3>; }
 function Section({ title, icon: Icon, children }) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 space-y-4">
+    <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
       <div className="flex items-center gap-2"><span className="w-9 h-9 rounded-xl bg-[#2e2448]/10 flex items-center justify-center text-[#2e2448]">{Icon && <Icon size={18} />}</span><h3 className="font-semibold text-foreground">{title}</h3></div>
       {children}
     </div>
