@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import QuoteDoc from "@/components/docs/QuoteDoc";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
+import SubscriptionInvoiceDoc from "@/components/docs/SubscriptionInvoiceDoc";
 import { renderToPdfBlob } from "@/lib/pdfDocs";
 import { PRICING_TIERS_AR, tierForCount } from "@/lib/pricing";
 import { PROVIDER } from "@/lib/providerIdentity";
@@ -28,12 +29,16 @@ export default function Samples() {
   const tier = tierForCount(SAMPLE_COMPANY.employee_count, PRICING_TIERS_AR);
   const quoteNo = "JQ" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "100";
   const date = new Date().toISOString().slice(0, 10);
+  const end = (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); })();
+  const invNo = quoteNo.replace(/^JQ/, "JI");
 
   const download = async (which) => {
     setBusy(which);
     try {
       const comp = which === "quote"
         ? <QuoteDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} tier={tier} amount={tier.yearly} isAr />
+        : which === "invoice"
+        ? <SubscriptionInvoiceDoc company={SAMPLE_COMPANY} tier={tier} invNo={invNo} date={date} startDate={date} endDate={end} amount={tier.yearly} employeeCount={SAMPLE_COMPANY.employee_count} isAr />
         : <SubscriptionContractDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} />;
       const blob = await renderToPdfBlob(comp);
       const url = URL.createObjectURL(blob);
@@ -78,6 +83,18 @@ export default function Samples() {
           </div>
           <div className="bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex justify-center">
             <SubscriptionContractDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} />
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center justify-between mb-3 gap-3">
+            <h2 className="text-xl font-bold">فاتورة الاشتراك السنوي</h2>
+            <Button onClick={() => download("invoice")} disabled={busy === "invoice"} variant="outline" className="gap-2 shrink-0">
+              {busy === "invoice" ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} تنزيل PDF
+            </Button>
+          </div>
+          <div className="bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex justify-center">
+            <SubscriptionInvoiceDoc company={SAMPLE_COMPANY} tier={tier} invNo={invNo} date={date} startDate={date} endDate={end} amount={tier.yearly} employeeCount={SAMPLE_COMPANY.employee_count} isAr />
           </div>
         </section>
       </div>
