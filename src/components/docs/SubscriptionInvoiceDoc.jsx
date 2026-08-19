@@ -1,6 +1,7 @@
 import React from "react";
 import { Crown } from "lucide-react";
 import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
+import { PROVIDER } from "@/lib/providerIdentity";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 
@@ -116,7 +117,7 @@ export default function SubscriptionInvoiceDoc({
           <div>
             <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
             <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية · jadara-hr.com</div>
-            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>مؤسسة أحمد الشعيلي لتقنية المعلومات</div>
+            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
           </div>
         </div>
         <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>

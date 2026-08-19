@@ -2,14 +2,8 @@ import React from "react";
 import { Crown } from "lucide-react";
 import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 import ProviderStamp from "@/components/docs/ProviderStamp";
-import { PROVIDER } from "@/lib/providerIdentity";
+import { PROVIDER, PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
 
-const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
-const BANK = {
-  beneficiaryAr: "كامل الشيخ", beneficiaryEn: "KAMEL ELSHIKH",
-  bankAr: "بنك إس تي سي (STC Bank)", bankEn: "STC Bank",
-  iban: "SA75780000000001285607287", account: "1285607287",
-};
 const WHATSAPP_NUMBER = "0594700782";
 
 // نسخة عرض السعر القابلة للطباعة PDF — مطابقة لما رآه العميل في صفحة عرض السعر.
@@ -167,10 +161,10 @@ export default function QuoteDoc({
           <div style={{ background: "rgba(255,255,255,0.8)", border: "1px solid #ddd6fe", borderRadius: 12, padding: 14, marginBottom: 14 }}>
             <div style={{ fontWeight: 700, color: "#7c3aed", marginBottom: 10, fontSize: 12.5 }}>{L.bankSection}</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 28px", fontSize: 12.5, lineHeight: 1.8 }}>
-              <KV k={L.beneficiary} vv={isAr ? BANK.beneficiaryAr : BANK.beneficiaryEn} />
-              <KV k={L.bank} vv={isAr ? BANK.bankAr : BANK.bankEn} />
-              <KV k={L.accountNo} vv={BANK.account} mono />
-              <KV k={L.iban} vv={BANK.iban} mono bold />
+              <KV k={L.beneficiary} vv={isAr ? PROVIDER_BANK.beneficiaryAr : PROVIDER_BANK.beneficiaryEn} />
+              <KV k={L.bank} vv={isAr ? PROVIDER_BANK.bankAr : PROVIDER_BANK.bankEn} />
+              <KV k={L.accountNo} vv={PROVIDER_BANK.account} mono />
+              <KV k={L.iban} vv={PROVIDER_BANK.iban} mono bold />
             </div>
           </div>
 
@@ -189,10 +183,22 @@ export default function QuoteDoc({
       {/* التوقيع والختم */}
       <div style={{ paddingTop: 28, borderTop: "1px solid #e2e8f0", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
         <div style={{ textAlign: "center" }}>
-          <img src={SIGNATURE_URL} crossOrigin="anonymous" alt="توقيع" style={{ height: 76, objectFit: "contain", display: "block" }} />
+          <div style={{ height: 76, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#94a3b8" }}>مساحة التوقيع</div>
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, fontWeight: 700, minWidth: 220 }}>{L.sigName}</div>
         </div>
         <ProviderStamp size={150} />
+      </div>
+
+      {/* الصفحة الثانية — شهادة الآيبان الرسمية للمنشأة المُوفِّرة */}
+      <div style={{ marginTop: 48, paddingTop: 30, borderTop: "1px dashed #cbd5e1", minHeight: 1010, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ fontWeight: 800, fontSize: 16, color: "#0b1120", marginBottom: 4 }}>شهادة رقم الآيبان (IBAN) — {PROVIDER.institutionName}</div>
+        <div style={{ fontSize: 11.5, color: "#64748b", marginBottom: 18 }}>الرقم الوطني الموحد للمنشأة: <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{PROVIDER.unifiedNumber}</span> · {PROVIDER_BANK.bankAr}</div>
+        <img src={IBAN_CERT_URL} crossOrigin="anonymous" alt="شهادة الآيبان" style={{ maxWidth: 580, width: "100%", border: "1px solid #e2e8f0", borderRadius: 14, boxShadow: "0 4px 18px -8px rgba(16,24,40,.18)" }} />
+        <div style={{ marginTop: 16, fontSize: 11.5, color: "#475569", textAlign: "center", lineHeight: 1.9, maxWidth: 560 }}>
+          <div><b>المستفيد:</b> {PROVIDER_BANK.beneficiaryAr} · <b>رقم الحساب:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER_BANK.account}</span></div>
+          <div><b>الآيبان (IBAN):</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER_BANK.iban}</span></div>
+          <div style={{ color: "#94a3b8", fontSize: 10.5, marginTop: 6 }}>شهادة رسمية صادرة عن بنك إس تي سي تُثبت ملكية حساب المنشأة لغايات التحويل البنكي لتفعيل الاشتراك.</div>
+        </div>
       </div>
     </div>
   );

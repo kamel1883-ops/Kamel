@@ -1,7 +1,7 @@
 import React from "react";
 import { PROVIDER } from "@/lib/providerIdentity";
 
-// ختم موحّد للمؤسسة المُوفِّرة (مؤسسة احمد الشعالي لتقنية المعلومات) — يحمل اسم المؤسسة
+// ختم موحّد للمنشأة المُوفِّرة — يحمل اسم المنشأة
 // في القوس العلوي واسم منصة جدارة في الوسط والرقم الموحّد للمنشأة تحته.
 export default function ProviderStamp({ size = 150, rotate = true }) {
   return (

@@ -11,14 +11,9 @@ import { Image } from "@/components/ui/image";
 import { Printer, Loader2, ArrowLeft, Copy, Check, MessageCircle, ShieldCheck, AlertTriangle, Building2, Sparkles, UserPlus, Banknote } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
+import ProviderStamp from "@/components/docs/ProviderStamp";
 
-const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
-const BANK = {
-  beneficiaryAr: "كامل الشيخ", beneficiaryEn: "KAMEL ELSHIKH",
-  bankAr: "بنك إس تي سي (STC Bank)", bankEn: "STC Bank",
-  iban: "SA75780000000001285607287",
-  account: "1285607287",
-};
 const WHATSAPP_NUMBER = "0594700782";
 const WHATSAPP_LINK = "https://wa.me/966594700782";
 const SALES_EMAIL = "info@jadara-hr.com";
@@ -71,7 +66,7 @@ export default function Quote() {
     openWhatsApp: "إرسال عبر واتساب الآن",
     bankSection: "بيانات التحويل البنكي",
     amountDue: "المبلغ المستحق (سنوياً)",
-    sigName: "الإدارة المالية",
+    sigName: "المدير العام — وليد حسن القروص",
     stamp: "جدارة لإدارة الموارد البشرية",
     discCode: "كود الخصم (اختياري)",
     discBadge: "خصم", discApplied: "بعد تطبيق الكود",
@@ -115,7 +110,7 @@ export default function Quote() {
     openWhatsApp: "Send via WhatsApp now",
     bankSection: "Bank transfer details",
     amountDue: "Amount due (annual)",
-    sigName: "Finance Department",
+    sigName: "General Manager — Walid Hassan Al-Qarous",
     stamp: "Jadara HR Management",
     discCode: "Discount code (optional)",
     discBadge: "OFF", discApplied: "After discount applied",
@@ -207,7 +202,7 @@ export default function Quote() {
   };
 
   const copyIban = async () => {
-    try { await navigator.clipboard.writeText(BANK.iban); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch (_) {}
+    try { await navigator.clipboard.writeText(PROVIDER_BANK.iban); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch (_) {}
   };
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -402,13 +397,13 @@ export default function Quote() {
               <div className="bg-white/80 border border-violet-200 rounded-xl p-4">
                 <div className="text-sm font-semibold text-violet-700 mb-3 flex items-center gap-2"><Building2 size={15} /> {t.bankSection}</div>
                 <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                  <Row k={t.beneficiary} v={isAr ? BANK.beneficiaryAr : BANK.beneficiaryEn} />
-                  <Row k={t.bank} v={isAr ? BANK.bankAr : BANK.bankEn} />
-                  <Row k={t.account} v={BANK.account} mono />
+                  <Row k={t.beneficiary} v={isAr ? PROVIDER_BANK.beneficiaryAr : PROVIDER_BANK.beneficiaryEn} />
+                  <Row k={t.bank} v={isAr ? PROVIDER_BANK.bankAr : PROVIDER_BANK.bankEn} />
+                  <Row k={t.account} v={PROVIDER_BANK.account} mono />
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-baseline gap-2">
                       <span className="text-muted-foreground">{t.iban}:</span>
-                      <span className="font-mono font-semibold tracking-wide break-all">{BANK.iban}</span>
+                      <span className="font-mono font-semibold tracking-wide break-all">{PROVIDER_BANK.iban}</span>
                     </div>
                     <button type="button" onClick={copyIban}
                       className="inline-flex items-center gap-1 text-xs text-violet-700 border border-violet-200 rounded-lg px-2.5 py-1.5 hover:bg-violet-50 transition">
@@ -457,11 +452,22 @@ export default function Quote() {
 
           {/* التوقيع والختم */}
           <div className="pt-8 border-t border-border flex items-end justify-between gap-6 flex-wrap">
-            <div>
-              <Image src={SIGNATURE_URL} fittingType="fit" className="h-20 w-56" />
-              <div className="text-sm font-semibold mt-2 border-t border-foreground/20 pt-1 w-64">{t.sigName}</div>
+            <div className="w-64">
+              <div className="h-20 flex items-center justify-center text-xs text-muted-foreground/60">مساحة التوقيع</div>
+              <div className="text-sm font-semibold mt-2 border-t border-foreground/20 pt-1">{t.sigName}</div>
             </div>
-            <JadaraStamp ar={isAr} label={t.stamp} />
+            <ProviderStamp size={150} />
+          </div>
+
+          {/* الصفحة الثانية — شهادة الآيبان الرسمية للمنشأة المُوفِّرة */}
+          <div className="break-before-page pt-10 mt-10 border-t border-dashed border-border flex flex-col items-center">
+            <div className="text-base font-bold mb-1">شهادة رقم الآيبان (IBAN) — {isAr ? PROVIDER_BANK.beneficiaryAr : PROVIDER_BANK.beneficiaryEn}</div>
+            <div className="text-xs text-muted-foreground mb-4">الرقم الوطني الموحد للمنشأة: 7054695650 · {PROVIDER_BANK.bankAr}</div>
+            <img src={IBAN_CERT_URL} crossOrigin="anonymous" alt="شهادة الآيبان" className="max-w-[560px] w-full rounded-2xl border border-border shadow-sm" />
+            <div className="mt-4 text-xs text-muted-foreground text-center leading-7 max-w-[560px]">
+              <div><b>المستفيد:</b> {PROVIDER_BANK.beneficiaryAr} · <b>رقم الحساب:</b> <span className="font-mono">{PROVIDER_BANK.account}</span></div>
+              <div><b>الآيبان (IBAN):</b> <span className="font-mono">{PROVIDER_BANK.iban}</span></div>
+            </div>
           </div>
 
           <div className="no-print mt-8 flex items-center justify-center gap-3">

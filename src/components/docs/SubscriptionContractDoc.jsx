@@ -3,8 +3,6 @@ import { Crown } from "lucide-react";
 import ProviderStamp from "@/components/docs/ProviderStamp";
 import { PROVIDER } from "@/lib/providerIdentity";
 
-const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
-
 // عقد اشتراك سنوي رسمي بين جدارة (الطرف الأول — موقّع ومختوم) والعميل (الطرف الثاني — خانات توقيع وختم فارغة)
 // يُولّد من بيانات عرض السعر، ويُطبع/يُصدّر PDF. RTL، عربي، ابتدائي.
 export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "" }) {
@@ -53,7 +51,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
       {/* الأطراف */}
       <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 18px", marginBottom: 18 }}>
         <div style={{ marginBottom: 10 }}>
-          <b>الطرف الأول:</b> مؤسسة أحمد الشعيلي لتقنية المعلومات (جدارة لإدارة الموارد البشرية)، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لمؤسسة أحمد الشعيلي لتقنية المعلومات (ممثلاً لمنصة جدارة لإدارة الموارد البشرية). ويُشار إليه فيما يلي بـ«الطرف الأول» أو «المؤسسة/جدارة».
+          <b>الطرف الأول:</b> {PROVIDER.institutionName} (جدارة لإدارة الموارد البشرية)، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لـ{PROVIDER.institutionName} (ممثلاً لمنصة جدارة لإدارة الموارد البشرية). ويُشار إليه فيما يلي بـ«الطرف الأول» أو «الشركة/جدارة».
         </div>
         <div>
           <b>الطرف الثاني:</b> منشأة <b>{company?.name || "—"}</b>
@@ -119,16 +117,16 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
       <div style={{ display: "flex", justifyContent: "space-between", gap: 24, marginTop: 26 }}>
         {/* الطرف الأول — موقّع ومختوم */}
         <div style={{ flex: 1, maxWidth: 340 }}>
-          <div style={{ fontWeight: 800, marginBottom: 10, borderBottom: "1.5px solid #0b1120", paddingBottom: 4 }}>الطرف الأول — مؤسسة أحمد الشعيلي لتقنية المعلومات (جدارة)</div>
+          <div style={{ fontWeight: 800, marginBottom: 10, borderBottom: "1.5px solid #0b1120", paddingBottom: 4 }}>الطرف الأول — {PROVIDER.institutionName} (جدارة)</div>
           <div style={{ position: "relative", height: 96, marginBottom: 6 }}>
-            <img src={SIGNATURE_URL} crossOrigin="anonymous" alt="توقيع" style={{ height: 86, objectFit: "contain", display: "block", marginTop: 4 }} />
+            <div style={{ height: 86, marginTop: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#94a3b8" }}>مساحة التوقيع</div>
             <div style={{ position: "absolute", top: 0, left: 0, opacity: 0.85, transform: "rotate(-7deg)", transformOrigin: "top left" }}>
               <ProviderStamp size={104} rotate={false} />
             </div>
           </div>
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, lineHeight: 1.9 }}>
             <div><b>الاسم:</b> {PROVIDER.signerName}</div>
-            <div><b>{PROVIDER.signerLabel} — مؤسسة أحمد الشعيلي لتقنية المعلومات</b></div>
+            <div><b>{PROVIDER.signerLabel} — {PROVIDER.institutionName}</b></div>
             <div><b>الرقم الموحّد:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
             <div><b>التاريخ:</b> {fmt(cDate)}</div>
           </div>

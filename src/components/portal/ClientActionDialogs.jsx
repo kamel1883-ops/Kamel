@@ -10,6 +10,7 @@ import ConfirmSubscriptionDialog from "./ConfirmSubscriptionDialog";
 import { renderToPdfBlob } from "@/lib/pdfDocs";
 import QuoteDoc from "@/components/docs/QuoteDoc";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
+import { PROVIDER_BANK } from "@/lib/providerIdentity";
 
 // ——— أدوات مساعدة مشتركة ———
 export function daysLeft(date) {
@@ -42,10 +43,10 @@ export function waLink(t, isAr) {
     `• السعر السنوي للباقة: ${amount.toLocaleString()} ريال${disc > 0 ? ` (بعد خصم ${disc}%)` : ""}`,
     ``,
     `بيانات التحويل البنكي:`,
-    `المستفيد: كامل الشيخ`,
-    `البنك: بنك إس تي سي (STC Bank)`,
-    `الآيبان: SA75780000000001285607287`,
-    `رقم الحساب: 1285607287`,
+    `المستفيد: ${PROVIDER_BANK.beneficiaryAr}`,
+    `البنك: ${PROVIDER_BANK.bankAr}`,
+    `الآيبان: ${PROVIDER_BANK.iban}`,
+    `رقم الحساب: ${PROVIDER_BANK.account}`,
     ``,
     `يرجى إجراء التحويل وإرسال إثباته هنا لتفعيل اشتراككم.`,
     `شاكرين لكم، فريق جدارة.`,
@@ -59,10 +60,10 @@ export function waLink(t, isAr) {
     `• Annual price: ${amount.toLocaleString()} SAR${disc > 0 ? ` (after ${disc}% discount)` : ""}`,
     ``,
     `Bank transfer details:`,
-    `Beneficiary: KAMEL ELSHIKH`,
-    `Bank: STC Bank`,
-    `IBAN: SA75780000000001285607287`,
-    `Account: 1285607287`,
+    `Beneficiary: ${PROVIDER_BANK.beneficiaryEn}`,
+    `Bank: ${PROVIDER_BANK.bankEn}`,
+    `IBAN: ${PROVIDER_BANK.iban}`,
+    `Account: ${PROVIDER_BANK.account}`,
     ``,
     `Please transfer and send the proof here to activate your subscription.`,
   ];
