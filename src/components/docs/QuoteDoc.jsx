@@ -71,22 +71,25 @@ export default function QuoteDoc({
 
   return (
     <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0f172a", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
-      {/* رأس العرض */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, paddingBottom: 22, borderBottom: "1px solid #e2e8f0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 52, height: 52, borderRadius: 16, background: "linear-gradient(135deg,#0b0f19,#2e2448)", boxShadow: "0 0 0 1px rgba(252,211,77,.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 16, fontFamily: "var(--font-display)" }}>{L.pageTitle}</div>
-            <div style={{ fontSize: 11, color: "#666" }}>جدارة — منصة الموارد البشرية السعودية</div>
-            <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
-            <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحّد: <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
-          </div>
-        </div>
+      {/* عنوان العرض */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 14, borderBottom: "1px solid #e2e8f0", marginBottom: 16 }}>
+        <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)" }}>{L.pageTitle}</div>
         <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>
           <div>{L.quoteNo}: <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{quoteNo || "—"}</span></div>
           <div>{L.date}: {cDate}</div>
+        </div>
+      </div>
+
+      {/* رأس هوية المنشأة — مطابق لعقد الاشتراك */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 18, borderBottom: "2px solid #0b1120", marginBottom: 22 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 16, background: "linear-gradient(135deg,#0b0f19,#2e2448)", boxShadow: "0 0 0 1px rgba(252,211,77,.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
+        </div>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
+          <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية</div>
+          <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
+          <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحّد: <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
         </div>
       </div>
 
