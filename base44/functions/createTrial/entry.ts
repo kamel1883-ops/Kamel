@@ -26,7 +26,10 @@ export default async function (req) {
     if (!name) return Response.json({ error: 'اسم المنشأة مطلوب' }, { status: 400 });
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
       return Response.json({ error: 'بريد جهة اتصال صحيح مطلوب' }, { status: 400 });
-    if (!phone) return Response.json({ error: 'رقم الهاتف مطلوب' }, { status: 400 });
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (!phoneDigits) return Response.json({ error: 'رقم الهاتف مطلوب' }, { status: 400 });
+    // إلزام رقم جوال من 10 أرقام على الأقل — لا يُقبَل الطلب ولا يُرسَل بريد إن كان الرقم ناقصاً
+    if (phoneDigits.length < 10) return Response.json({ error: 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل' }, { status: 400 });
     if (!unified || !/^7\d{7,11}$/.test(unified))
       return Response.json({ error: 'الرقم الوطني الموحد للمنشآت مطلوب (10 خانات تبدأ بـ7)' }, { status: 400 });
     if (!Number.isFinite(employeeCount) || employeeCount <= 0)
