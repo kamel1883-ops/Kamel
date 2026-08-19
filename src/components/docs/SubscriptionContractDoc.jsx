@@ -16,7 +16,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
   };
 
   return (
-    <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85, unicodeBidi: "plaintext" }}>
+    <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
       {/* رأس العقد */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", borderBottom: "2px solid #0b1120", paddingBottom: 14, marginBottom: 22 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -45,21 +45,25 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
 
       {/* التمهليد */}
       <p style={{ margin: "0 0 16px" }}>
-        إنه في يوم <b>{fmt(cDate)}</b> الموافق، اتفق الطرفان المذكوران أدناه على إبرام هذا العقد وفقاً للشروط التالية:
+        <Bidify>إنه في يوم <b>{fmt(cDate)}</b> الموافق، اتفق الطرفان المذكوران أدناه على إبرام هذا العقد وفقاً للشروط التالية:</Bidify>
       </p>
 
       {/* الأطراف */}
       <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 18px", marginBottom: 18 }}>
         <div style={{ marginBottom: 10 }}>
-          <b>الطرف الأول:</b> {PROVIDER.institutionName} (جدارة لإدارة الموارد البشرية)، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لـ{PROVIDER.institutionName} (ممثلاً لمنصة جدارة لإدارة الموارد البشرية). ويُشار إليه فيما يلي بـ«الطرف الأول» أو «الشركة/جدارة».
+          <Bidify>
+            <b>الطرف الأول:</b> {PROVIDER.institutionName} (جدارة لإدارة الموارد البشرية)، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لـ{PROVIDER.institutionName} (ممثلاً لمنصة جدارة لإدارة الموارد البشرية). ويُشار إليه فيما يلي بـ«الطرف الأول» أو «الشركة/جدارة».
+          </Bidify>
         </div>
         <div>
-          <b>الطرف الثاني:</b> منشأة <b>{company?.name || "—"}</b>
-          {company?.contact_name ? <span>، يمثلها الأستاذ/ة <b>{company.contact_name}</b></span> : null}
-          {company?.unified_number ? <span>، الرقم الوطني الموحد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{company.unified_number}</b></span> : null}
-          {company?.commercial_register ? <span>، السجل التجاري: <b style={{ fontFamily: "ui-monospace, monospace" }}>{company.commercial_register}</b></span> : null}
-          {company?.contact_phone ? <span>، هاتف: <b dir="ltr">{company.contact_phone}</b></span> : null}
-          {company?.contact_email ? <span>، بريد إلكتروني: <b dir="ltr">{company.contact_email}</b></span> : null}. ويُشار إليه فيما يلي بـ«الطرف الثاني» أو «العميل».
+          <Bidify>
+            <b>الطرف الثاني:</b> منشأة <b>{company?.name || "—"}</b>
+            {company?.contact_name ? <span>، يمثلها الأستاذ/ة <b>{company.contact_name}</b></span> : null}
+            {company?.unified_number ? <span>، الرقم الوطني الموحد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{company.unified_number}</b></span> : null}
+            {company?.commercial_register ? <span>، السجل التجاري: <b style={{ fontFamily: "ui-monospace, monospace" }}>{company.commercial_register}</b></span> : null}
+            {company?.contact_phone ? <span>، هاتف: <b dir="ltr">{company.contact_phone}</b></span> : null}
+            {company?.contact_email ? <span>، بريد إلكتروني: <b dir="ltr">{company.contact_email}</b></span> : null}. ويُشار إليه فيما يلي بـ«الطرف الثاني» أو «العميل».
+          </Bidify>
         </div>
       </div>
 
@@ -157,13 +161,33 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
   );
 }
 
+function Bidify({ children }) {
+  const wrap = (str, key) => {
+    const parts = String(str).split(/(\([^)]*\))/g);
+    return parts.map((p, i) => {
+      if (/^\([^)]*\)$/.test(p)) {
+        const hasArabic = /[\u0600-\u06FF]/.test(p);
+        if (!hasArabic) {
+          return <span key={`${key}-${i}`} style={{ direction: "ltr", unicodeBidi: "embed" }}>{p}</span>;
+        }
+      }
+      return <React.Fragment key={`${key}-${i}`}>{p}</React.Fragment>;
+    });
+  };
+  if (typeof children === "string") return <>{wrap(children, "s")}</>;
+  if (Array.isArray(children)) {
+    return <>{children.map((c, i) => (typeof c === "string" ? wrap(c, `a${i}`) : c))}</>;
+  }
+  return children;
+}
+
 function Clause({ n, title, children }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4, unicodeBidi: "plaintext" }}>
-        المادة ({n}) — {title}:
+      <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>
+        المادة <span style={{ direction: "ltr", unicodeBidi: "embed" }}>({n})</span> — {title}:
       </div>
-      <p style={{ margin: 0, color: "#1e293b", unicodeBidi: "plaintext" }}>{children}</p>
+      <p style={{ margin: 0, color: "#1e293b" }}><Bidify>{children}</Bidify></p>
     </div>
   );
 }
