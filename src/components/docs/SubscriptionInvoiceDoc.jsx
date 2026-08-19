@@ -34,7 +34,7 @@ export default function SubscriptionInvoiceDoc({
   const L = isAr
     ? {
         docTitle: "فاتورة اشتراك سنوي",
-        subtitle: "فاتورة اشتراك سنوي — منصة جدارة لإدارة الموارد البشرية",
+        subtitle: "فاتورة اشتراك سنوي - منصة جدارة لإدارة الموارد البشرية",
         invNo: "رقم الفاتورة",
         date: "التاريخ",
         billedTo: "فاتورة إلى",
@@ -56,19 +56,19 @@ export default function SubscriptionInvoiceDoc({
         subStartLabel: "بداية الاشتراك",
         subEndLabel: "نهاية الاشتراك",
         subtotal: "المبلغ الصافي",
-        taxRow: "رسوم الضريبة (0%)",
+        taxRow: "رسوم الضريبة 0%",
         total: "الإجمالي المستحق",
         features: "تشمل الباقة جميع المميزات التالية",
-        notTax: "فاتورة اشتراك سنوي — لا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% (صفر). المبلغ الإجمالي = المبلغ الصافي.",
-        subLine: "اشتراك سنوي — منصة جدارة لإدارة الموارد البشرية",
-        perYear: "/ سنوياً",
+        notTax: "فاتورة اشتراك سنوي - لا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% صفر. المبلغ الإجمالي = المبلغ الصافي.",
+        subLine: "اشتراك سنوي - منصة جدارة لإدارة الموارد البشرية",
+        perYear: "سنوياً",
         currency: "ر.س",
         sigName: "الإدارة المالية",
         contactFoot: "للاستفسار",
       }
     : {
         docTitle: "Annual Subscription Invoice",
-        subtitle: "Annual Subscription Invoice — Jadara HR Platform",
+        subtitle: "Annual Subscription Invoice - Jadara HR Platform",
         invNo: "Invoice No.",
         date: "Date",
         billedTo: "Billed to",
@@ -90,12 +90,12 @@ export default function SubscriptionInvoiceDoc({
         subStartLabel: "Start",
         subEndLabel: "End",
         subtotal: "Net amount",
-        taxRow: "Tax (0%)",
+        taxRow: "Tax 0%",
         total: "Total due",
         features: "The plan includes every feature below",
-        notTax: "Annual subscription invoice — VAT exempt. Tax: 0% (zero). Total = Net amount.",
-        subLine: "Annual subscription — Jadara HR platform",
-        perYear: "/ year",
+        notTax: "Annual subscription invoice - VAT exempt. Tax: 0% zero. Total = Net amount.",
+        subLine: "Annual subscription - Jadara HR platform",
+        perYear: "year",
         currency: "SAR",
         sigName: "Finance Department",
         contactFoot: "Inquiries",
@@ -153,7 +153,7 @@ export default function SubscriptionInvoiceDoc({
         </div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, borderTop: "1px dashed #cbd5e1", paddingTop: 8 }}>
           <span style={{ color: "#64748b", fontWeight: 700 }}>{L.serviceType}:</span>
-          <span style={{ fontWeight: 800, color: "#1A237E", fontSize: 13.5 }}>{L.serviceTypeValue} — {v(tier?.tier)}</span>
+          <span style={{ fontWeight: 800, color: "#1A237E", fontSize: 13.5 }}>{L.serviceTypeValue} - {v(tier?.tier)}</span>
         </div>
       </div>
 
@@ -168,7 +168,7 @@ export default function SubscriptionInvoiceDoc({
         </thead>
         <tbody>
           <tr>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.serviceTypeValue} — {v(tier?.tier)} <span style={{ direction: "ltr", unicodeBidi: "embed" }}>({v(tier?.range)})</span></td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.serviceTypeValue} - {v(tier?.tier)} <span style={{ direction: "ltr", unicodeBidi: "embed" }}>{v(tier?.range)}</span></td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.perYear}</td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{num(amount)} {sar}</td>
           </tr>

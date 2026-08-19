@@ -28,42 +28,42 @@ export default function QuoteDoc({
     ? {
         pageTitle: "عرض سعر — الاشتراك السنوي",
         quoteNo: "رقم العرض", date: "التاريخ", to: "إلى",
-        company: "اسم المنشأة", industry: "القطاع / النشاط", city: "المدينة",
+        company: "اسم المنشأة", industry: "القطاع - النشاط", city: "المدينة",
         contact: "الشخص المسؤول", phone: "الهاتف", email: "البريد الإلكتروني",
         unified: "الرقم الوطني الموحد للمنشآت", empCount: "عدد الموظفين",
-        planTitle: "الاشتراك السنوي — منصة جدارة",
+        planTitle: "الاشتراك السنوي - منصة جدارة",
         planDesc: "باقة واحدة متكاملة تشمل كل ميزات المنصة:", includes: "تشمل الباقة:",
         planTier: "شريحة الاشتراك", annual: "ريال",
-        renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك (حسب عدد الموظفين وقت التجديد).",
+        renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك حسب عدد الموظفين وقت التجديد.",
         transferTitle: "تفعيل الاشتراك عبر التحويل البنكي",
         transferNote: "حول المبلغ الموضّح أعلاه إلى حسابنا البنكي في بنك STC، ثم أرسل صورة إيصال التحويل عبر واتساب إلى رقم الدعم الفني. سيتم تأكيد اشتراكك وتفعيل الحساب خلال 24 ساعة.",
         bankSection: "بيانات التحويل البنكي",
-        beneficiary: "اسم المستفيد", bank: "البنك", accountNo: "رقم الحساب", iban: "رقم الآيبان (IBAN)",
-        amountDue: "المبلغ المستحق (سنوياً)",
-        waSupport: "الدعم الفني (واتساب)", sendReceipt: "أرسل إيصال التحويل على واتساب لفعيل الحساب",
+        beneficiary: "اسم المستفيد", bank: "البنك", accountNo: "رقم الحساب", iban: "رقم الآيبان IBAN",
+        amountDue: "المبلغ المستحق سنوياً",
+        waSupport: "الدعم الفني واتساب", sendReceipt: "أرسل إيصال التحويل على واتساب لتفعيل الحساب",
         openWhatsApp: "إرسال عبر واتساب الآن",
         discBadge: "خصم", discApplied: "بعد تطبيق الكود",
-        sigName: `${PROVIDER.signerLabel} — ${PROVIDER.signerName}`,
+        sigName: `${PROVIDER.signerLabel} - ${PROVIDER.signerName}`,
       }
     : {
         pageTitle: "Quotation — Annual Subscription",
         quoteNo: "Quote no.", date: "Date", to: "To",
-        company: "Company name", industry: "Sector / Activity", city: "City",
+        company: "Company name", industry: "Sector - Activity", city: "City",
         contact: "Responsible person", phone: "Phone", email: "Email",
         unified: "National Unified Number", empCount: "Expected employees",
-        planTitle: "Annual Subscription — Jadara Platform",
+        planTitle: "Annual Subscription - Jadara Platform",
         planDesc: "One integrated package including every feature of the platform:", includes: "The package includes:",
         planTier: "Subscription tier", annual: "SAR",
-        renewNote: "The subscription renews annually at your tier's value (based on headcount at renewal).",
+        renewNote: "The subscription renews annually at your tier's value based on headcount at renewal.",
         transferTitle: "Activate the subscription via bank transfer",
         transferNote: "Transfer the amount shown above to our STC Bank account, then send the transfer receipt photo via WhatsApp to our support number. Your subscription will be confirmed and account activated within 24 hours.",
         bankSection: "Bank transfer details",
         beneficiary: "Beneficiary", bank: "Bank", accountNo: "Account number", iban: "IBAN",
-        amountDue: "Amount due (annual)",
-        waSupport: "Support (WhatsApp)", sendReceipt: "Send the transfer receipt on WhatsApp to activate your account",
+        amountDue: "Amount due annual",
+        waSupport: "Support WhatsApp", sendReceipt: "Send the transfer receipt on WhatsApp to activate your account",
         openWhatsApp: "Send via WhatsApp now",
         discBadge: "OFF", discApplied: "After discount applied",
-        sigName: `${PROVIDER.signerLabelEn} — ${PROVIDER.signerNameEn}`,
+        sigName: `${PROVIDER.signerLabelEn} - ${PROVIDER.signerNameEn}`,
       };
 
   const v = (x) => (x == null || String(x).trim() === "" ? "—" : x);
@@ -156,7 +156,7 @@ export default function QuoteDoc({
 
           {/* المبلغ المستحق */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "rgba(255,255,255,0.7)", border: "1px solid #a7f3d0", borderRadius: 12, padding: "10px 16px", fontSize: 12.5, marginBottom: 14 }}>
-            <span style={{ color: "#64748b" }}><Bidify>{L.amountDue}</Bidify></span>
+            <span style={{ color: "#64748b" }}>{L.amountDue}</span>
             <span style={{ fontWeight: 800, color: "#047857", fontSize: 22 }}>{num(finalAmount)} {L.annual}</span>
           </div>
 
@@ -174,7 +174,7 @@ export default function QuoteDoc({
           {/* واتساب الدعم */}
           <div style={{ background: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.3)", borderRadius: 12, padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>
-              <div style={{ fontWeight: 700, color: "#065f46" }}><Bidify>{L.waSupport}</Bidify></div>
+              <div style={{ fontWeight: 700, color: "#065f46" }}>{L.waSupport}</div>
               <div style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700, fontSize: 18, marginTop: 2, direction: "ltr", unicodeBidi: "embed" }}>{WHATSAPP_NUMBER}</div>
               <div style={{ fontSize: 12, color: "#065f46", marginTop: 2 }}>{L.sendReceipt}</div>
             </div>
@@ -194,12 +194,12 @@ export default function QuoteDoc({
 
       {/* الصفحة الثانية — شهادة الآيبان الرسمية للمنشأة المُوفِّرة */}
       <div style={{ marginTop: 48, paddingTop: 30, borderTop: "1px dashed #cbd5e1", minHeight: 1010, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ fontWeight: 800, fontSize: 16, color: "#0b1120", marginBottom: 4 }}><Bidify>شهادة رقم الآيبان (IBAN) — {PROVIDER.institutionName}</Bidify></div>
+        <div style={{ fontWeight: 800, fontSize: 16, color: "#0b1120", marginBottom: 4 }}>شهادة رقم الآيبان IBAN - {PROVIDER.institutionName}</div>
         <div style={{ fontSize: 11.5, color: "#64748b", marginBottom: 18 }}>الرقم الوطني الموحد للمنشأة: <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{PROVIDER.unifiedNumber}</span> · {PROVIDER_BANK.bankAr}</div>
         <img src={IBAN_CERT_URL} crossOrigin="anonymous" alt="شهادة الآيبان" style={{ maxWidth: 580, width: "100%", border: "1px solid #e2e8f0", borderRadius: 14, boxShadow: "0 4px 18px -8px rgba(16,24,40,.18)" }} />
         <div style={{ marginTop: 16, fontSize: 11.5, color: "#475569", textAlign: "center", lineHeight: 1.9, maxWidth: 560 }}>
           <div><b>المستفيد:</b> {PROVIDER_BANK.beneficiaryAr} · <b>رقم الحساب:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER_BANK.account}</span></div>
-          <div><b>الآيبان (IBAN):</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER_BANK.iban}</span></div>
+          <div><b>الآيبان IBAN:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER_BANK.iban}</span></div>
           <div style={{ color: "#94a3b8", fontSize: 10.5, marginTop: 6 }}>شهادة رسمية صادرة عن بنك إس تي سي تُثبت ملكية حساب المنشأة لغايات التحويل البنكي لتفعيل الاشتراك.</div>
         </div>
       </div>
@@ -207,30 +207,10 @@ export default function QuoteDoc({
   );
 }
 
-function Bidify({ children }) {
-  const wrap = (str, key) => {
-    const parts = String(str).split(/(\([^)]*\))/g);
-    return parts.map((p, i) => {
-      if (/^\([^)]*\)$/.test(p)) {
-        const hasArabic = /[\u0600-\u06FF]/.test(p);
-        if (!hasArabic) {
-          return <span key={`${key}-${i}`} style={{ direction: "ltr", unicodeBidi: "embed" }}>{p}</span>;
-        }
-      }
-      return <React.Fragment key={`${key}-${i}`}>{p}</React.Fragment>;
-    });
-  };
-  if (typeof children === "string") return <>{wrap(children, "s")}</>;
-  if (Array.isArray(children)) {
-    return <>{children.map((c, i) => (typeof c === "string" ? wrap(c, `a${i}`) : c))}</>;
-  }
-  return children;
-}
-
 function KV({ k, vv, bold, mono, ltr }) {
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: 6, minWidth: 0 }}>
-      <span style={{ color: "#64748b", flexShrink: 0 }}><Bidify>{k}</Bidify>:</span>
+      <span style={{ color: "#64748b", flexShrink: 0 }}>{k}:</span>
       <span style={{
         fontWeight: bold ? 800 : 600,
         color: "#0b1120",
