@@ -16,7 +16,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
   };
 
   return (
-    <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
+    <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85, unicodeBidi: "plaintext" }}>
       {/* رأس العقد */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", borderBottom: "2px solid #0b1120", paddingBottom: 14, marginBottom: 22 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -160,10 +160,10 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
 function Clause({ n, title, children }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>
+      <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4, unicodeBidi: "plaintext" }}>
         المادة ({n}) — {title}:
       </div>
-      <p style={{ margin: 0, color: "#1e293b" }}>{children}</p>
+      <p style={{ margin: 0, color: "#1e293b", unicodeBidi: "plaintext" }}>{children}</p>
     </div>
   );
 }

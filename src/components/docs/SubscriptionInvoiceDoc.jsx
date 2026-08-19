@@ -107,7 +107,7 @@ export default function SubscriptionInvoiceDoc({
   const taxAmount = 0;
 
   return (
-    <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
+    <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85, unicodeBidi: "plaintext" }}>
       {/* رأس الفاتورة */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", borderBottom: "2px solid #0b1120", paddingBottom: 14, marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -168,7 +168,7 @@ export default function SubscriptionInvoiceDoc({
         </thead>
         <tbody>
           <tr>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.serviceTypeValue} — {v(tier?.tier)} ({v(tier?.range)})</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7, unicodeBidi: "plaintext" }}>{L.serviceTypeValue} — {v(tier?.tier)} ({v(tier?.range)})</td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.perYear}</td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{num(amount)} {sar}</td>
           </tr>
