@@ -61,6 +61,7 @@ export default function Quote() {
     headcountLabel: "عدد الموظفين المتوقع *", headcountHint: (tier, price) => `شريحتك: ${tier} — السعر السنوي: ${price.toLocaleString()} ريال`,
     headcountRequired: "أدخل عدد الموظفين المتوقع لحساب سعر الباقة تلقائياً",
     errCaptcha: "أكّد أنك لست روبوت",
+    errPhone: "رقم الهاتف يجب أن يكون 10 أرقام على الأقل (مثال: 05XXXXXXXX)",
     beneficiary: "اسم المستفيد", bank: "البنك", iban: "رقم الآيبان (IBAN)", account: "رقم الحساب",
     copy: "نسخ الآيبان", copied: "تم النسخ",
     transferTitle: "تفعيل الاشتراك عبر التحويل البنكي",
@@ -104,6 +105,7 @@ export default function Quote() {
     headcountLabel: "Expected employees count *", headcountHint: (tier, price) => `Your tier: ${tier} — Annual: ${price.toLocaleString()} SAR`,
     headcountRequired: "Enter the expected employee count to auto-calculate the package price",
     errCaptcha: "Please verify you're human",
+    errPhone: "Phone number must be at least 10 digits (e.g. 05XXXXXXXX)",
     beneficiary: "Beneficiary", bank: "Bank", iban: "IBAN", account: "Account number",
     copy: "Copy IBAN", copied: "Copied",
     transferTitle: "Activate the subscription via bank transfer",
@@ -184,6 +186,8 @@ export default function Quote() {
     const email = form.contact_email.trim();
     const unified = form.unified_number.trim();
     if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^7\d{7,11}$/.test(unified) || !Number(form.employee_count) || Number(form.employee_count) <= 0) { setErr(t.errForm); return; }
+    const phoneDigits = (form.contact_phone || "").replace(/\D/g, "");
+    if (phoneDigits.length < 10) { setErr(t.errPhone); return; }
     if (!captcha) { setErr(t.errCaptcha); return; }
     setSubmitting(true);
     try {
