@@ -4,7 +4,7 @@ import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 import ProviderStamp from "@/components/docs/ProviderStamp";
 import { PROVIDER, PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
 
-const WHATSAPP_NUMBER = "0594700782";
+const SUPPORT_EMAIL = "info@jadara-hr.com";
 
 // نسخة عرض السعر القابلة للطباعة PDF — مطابقة لما رآه العميل في صفحة عرض السعر.
 // تُولَّد من بيانات المنشأة (Tenant) المُرسلة من لدن العميل عند طلب عرض السعر.
@@ -36,12 +36,12 @@ export default function QuoteDoc({
         planTier: "شريحة الاشتراك", annual: "ريال",
         renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك حسب عدد الموظفين وقت التجديد.",
         transferTitle: "تفعيل الاشتراك عبر التحويل البنكي",
-        transferNote: "حول المبلغ الموضّح أعلاه إلى حسابنا البنكي في بنك STC، ثم أرسل صورة إيصال التحويل عبر واتساب إلى رقم الدعم الفني. سيتم تأكيد اشتراكك وتفعيل الحساب خلال 24 ساعة.",
+        transferNote: "حول المبلغ الموضّح أعلاه إلى حسابنا البنكي في بنك STC، ثم أرسل صورة إيصال التحويل عبر البريد الإلكتروني إلى info@jadara-hr.com. سيتم تأكيد اشتراكك وتفعيل الحساب خلال 24 ساعة.",
         bankSection: "بيانات التحويل البنكي",
         beneficiary: "اسم المستفيد", bank: "البنك", accountNo: "رقم الحساب", iban: "رقم الآيبان IBAN",
         amountDue: "المبلغ المستحق سنوياً",
-        waSupport: "الدعم الفني واتساب", sendReceipt: "أرسل إيصال التحويل على واتساب لتفعيل الحساب",
-        openWhatsApp: "إرسال عبر واتساب الآن",
+        waSupport: "الدعم الفني - البريد الإلكتروني", sendReceipt: "أرسل إيصال التحويل إلى info@jadara-hr.com لتفعيل الحساب",
+        openWhatsApp: "مراسلة عبر البريد",
         discBadge: "خصم", discApplied: "بعد تطبيق الكود",
         sigName: `${PROVIDER.signerLabel} - ${PROVIDER.signerName}`,
       }
@@ -56,12 +56,12 @@ export default function QuoteDoc({
         planTier: "Subscription tier", annual: "SAR",
         renewNote: "The subscription renews annually at your tier's value based on headcount at renewal.",
         transferTitle: "Activate the subscription via bank transfer",
-        transferNote: "Transfer the amount shown above to our STC Bank account, then send the transfer receipt photo via WhatsApp to our support number. Your subscription will be confirmed and account activated within 24 hours.",
+        transferNote: "Transfer the amount shown above to our STC Bank account, then send the transfer receipt photo via email to info@jadara-hr.com. Your subscription will be confirmed and account activated within 24 hours.",
         bankSection: "Bank transfer details",
         beneficiary: "Beneficiary", bank: "Bank", accountNo: "Account number", iban: "IBAN",
         amountDue: "Amount due annual",
-        waSupport: "Support WhatsApp", sendReceipt: "Send the transfer receipt on WhatsApp to activate your account",
-        openWhatsApp: "Send via WhatsApp now",
+        waSupport: "Support Email", sendReceipt: "Send the transfer receipt to info@jadara-hr.com to activate your account",
+        openWhatsApp: "Email us",
         discBadge: "OFF", discApplied: "After discount applied",
         sigName: `${PROVIDER.signerLabelEn} - ${PROVIDER.signerNameEn}`,
       };
@@ -171,14 +171,14 @@ export default function QuoteDoc({
             </div>
           </div>
 
-          {/* واتساب الدعم */}
-          <div style={{ background: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.3)", borderRadius: 12, padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          {/* البريد الإلكتروني للدعم */}
+          <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 12, padding: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>
-              <div style={{ fontWeight: 700, color: "#065f46" }}>{L.waSupport}</div>
-              <div style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700, fontSize: 18, marginTop: 2, direction: "ltr", unicodeBidi: "embed" }}>{WHATSAPP_NUMBER}</div>
-              <div style={{ fontSize: 12, color: "#065f46", marginTop: 2 }}>{L.sendReceipt}</div>
+              <div style={{ fontWeight: 700, color: "#5b21b6" }}>{L.waSupport}</div>
+              <div style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700, fontSize: 16, marginTop: 2, direction: "ltr", unicodeBidi: "embed" }}>{SUPPORT_EMAIL}</div>
+              <div style={{ fontSize: 12, color: "#5b21b6", marginTop: 2 }}>{L.sendReceipt}</div>
             </div>
-            <div style={{ background: "#25D366", color: "#fff", fontWeight: 700, borderRadius: 14, padding: "8px 16px", fontSize: 12.5 }}>{L.openWhatsApp}</div>
+            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ background: "#7c3aed", color: "#fff", fontWeight: 700, borderRadius: 14, padding: "8px 16px", fontSize: 12.5, textDecoration: "none" }}>{L.openWhatsApp}</a>
           </div>
         </div>
       </div>
