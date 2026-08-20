@@ -7,6 +7,7 @@ import ShareBar from "@/components/ShareBar";
 import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
+import HostingSpecs from "@/components/landing/HostingSpecs";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -455,6 +456,9 @@ export default function Landing() {
           </div>
         </motion.div>
       </section>
+
+      {/* الاستضافة: سيرفر خاص بأعلى المواصفات */}
+      <HostingSpecs isAr={isAr} />
 
       {/* الباقات */}
       <PricingColumns isAr={isAr} onStartTrial={() => navigate("/quote")} onBuyTier={(tier) => navigate(`/quote?tier=${tier.id}`)} />
