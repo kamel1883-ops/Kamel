@@ -11,6 +11,7 @@ import {
   Check, Sparkles, Ban, RotateCcw, Eye, Bell, Download, FileSignature,
 } from "lucide-react";
 import { ClientInfoDialog, waLink, daysLeft, isOwnerTenant } from "./ClientActionDialogs";
+import RegenerateAllDocumentsDialog from "./RegenerateAllDocumentsDialog";
 
 export default function ClientsManager({ session }) {
   const { lang } = useI18n();
@@ -36,6 +37,7 @@ export default function ClientsManager({ session }) {
     daysLeft: (n) => `يبقى ${n} يوم`, ended: "انتهت — راجع الحساب", lifetime: "مدى الحياة",
     contract: "العقد (PDF)", invoice: "الفاتورة (PDF)",
     approveAdmin: "اعتماد الصلاحية", rejectAdmin: "رفض", pendingAdmin: "بانتظار الاعتماد",
+    regenAll: "إعادة توليد عقود العملاء", regenHint: "لإصلاح الختم ونموذج العقد في كل العقود والفواتير السابقة",
   } : {
     title: "Clients & Contracts",
     welcome: "Follow up trials & quote requests, receive transfers via WhatsApp, confirm contracts and activate subscriptions.",
@@ -57,6 +59,7 @@ export default function ClientsManager({ session }) {
     daysLeft: (n) => `${n} days left`, ended: "Ended — review", lifetime: "Lifetime",
     contract: "Contract PDF", invoice: "Invoice PDF",
     approveAdmin: "Approve admin", rejectAdmin: "Reject", pendingAdmin: "Pending approval",
+    regenAll: "Regenerate client contracts", regenHint: "Fix the stamp & shortened contract across all past contracts and invoices",
   };
 
   const [data, setData] = useState(null);
@@ -67,6 +70,7 @@ export default function ClientsManager({ session }) {
   const [busyId, setBusyId] = useState(null);
   const [toast, setToast] = useState("");
   const [info, setInfo] = useState(null);
+  const [regenOpen, setRegenOpen] = useState(false);
 
   const call = useCallback(async (action, extra = {}) => {
     const p = base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra });
@@ -212,9 +216,21 @@ export default function ClientsManager({ session }) {
                 </button>
               ))}
             </div>
-            <div className="relative w-full sm:w-72">
-              <Search size={15} className="absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.searchPh} className="ps-9" />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:w-72">
+                <Search size={15} className="absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground" />
+                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.searchPh} className="ps-9" />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setRegenOpen(true)}
+                disabled={loading || !!busyId}
+                className="gap-1.5 shrink-0 border-violet-200 text-violet-700 hover:bg-violet-50"
+                title={t.regenHint}
+              >
+                <RefreshCw size={14} /> {t.regenAll}
+              </Button>
             </div>
           </div>
 
@@ -356,6 +372,15 @@ export default function ClientsManager({ session }) {
 
       <ClientInfoDialog open={!!info} onClose={() => setInfo(null)} tenant={info} isAr={isAr} t={t}
         onAction={act} busyId={busyId} session={session} onRefresh={loadAll} />
+
+      <RegenerateAllDocumentsDialog
+        open={regenOpen}
+        onClose={() => setRegenOpen(false)}
+        tenants={tenants}
+        session={session}
+        isAr={isAr}
+        onDone={loadAll}
+      />
     </div>
   );
 }
