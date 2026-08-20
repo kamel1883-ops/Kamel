@@ -53,6 +53,21 @@ export default function PricingTiers({ selectedId, onBuy, lang = "ar" }) {
                 <div className="text-xs text-muted-foreground mt-1">{isAr ? "/ سنوياً" : "/ year"}</div>
               </div>
 
+              <div className="mt-3 rounded-xl bg-violet-50/70 border border-violet-100 px-3 py-2 space-y-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-muted-foreground">{isAr ? "رسوم التأسيس" : "Setup"}</span>
+                  <span className="font-bold text-foreground">
+                    {t.custom ? (isAr ? "حسب الاتفاق" : "Custom") : `${t.setup.toLocaleString()} ${currency}`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-muted-foreground">{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
+                  <span className="font-extrabold text-violet-700">
+                    {t.custom ? (isAr ? "تأطير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
+                  </span>
+                </div>
+              </div>
+
               <div className="mt-4 text-center">
                 <div className="text-xs text-muted-foreground">{isAr ? "نطاق الموظفين" : "Headcount"}</div>
                 <div className="font-bold text-foreground">{t.range}</div>

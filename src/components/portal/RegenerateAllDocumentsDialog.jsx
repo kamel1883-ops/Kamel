@@ -24,7 +24,7 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
   const t = isAr
     ? {
         title: "إعادة توليد العقود والفواتير لجميع العملاء",
-        desc: "يُعيد توليد عقد وفاتورة كل عميل مؤكّد باستخدام نموذج العقد المختصر (صفحتان) والختم المُصحَّح، ثم يرفع الجديد ويستبدل الروابط القديمة في سجل كل عميل. هدية ثانية بين كل عميل لتخفيف الضغط على المتصفح والتخزين.",
+        desc: "أولاً يعيد تصنيف كل العملاء (تجارب ومتعاقدين) وفق الشرائح الجديدة (البداية/الناشئة/المتوسطة/المتقدمة/الكبرى) ويحدّث حقلَي الشريحة والمبلغ السنوي. ثم يُعيد توليد عقد وفاتورة كل عميل متعاقد بالنموذج المختصر (صفحتان) والختم المُصحَّح، يرفع الجديد ويستبدل الروابط القديمة.",
         run: "بدء إعادة التوليد",
         progress: (n, m, name) => `جارٍ التوليد — ${n} من ${m} — ${name}`,
         okCount: (n, m) => `تم تحديث ${n} من ${m} عميل بنجاح`,
@@ -35,7 +35,7 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
       }
     : {
         title: "Regenerate contracts & invoices for all clients",
-        desc: "Regenerates a fresh contract and invoice for each confirmed client using the shortened (2-page) template and the corrected stamp, uploads them and replaces the old links in each client's record. A short pause between clients reduces browser/storage load.",
+        desc: "First re-tiers every client (trials and contracted) against the new segments (Starter/Emerging/Medium/Advanced/Enterprise) and updates the tier name and annual amount fields. Then regenerates a fresh contract and invoice for each contracted client with the shortened template and corrected stamp, uploads them and replaces the old links in each record.",
         run: "Start regeneration",
         progress: (n, m, name) => `Generating — ${n} of ${m} — ${name}`,
         okCount: (n, m) => `Updated ${n} of ${m} clients successfully`,
@@ -103,7 +103,7 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
             date={subStart}
             startDate={subStart}
             endDate={subEnd}
-            amount={Number(tenant.quoted_amount) || 0}
+            amount={newAmount}
             employeeCount={Number(tenant.employee_count) || 0}
             isAr={isAr}
           />
