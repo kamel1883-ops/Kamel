@@ -8,7 +8,7 @@ export default function ProviderStamp({ size = 150, rotate = true }) {
     <div style={rotate ? { transform: "rotate(-7deg)", opacity: 0.85 } : { opacity: 0.85 }}>
       <svg viewBox="0 0 200 200" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <path id="provStampTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
+          <path id="provStampTop" d="M 100,100 m 74,0 a 74,74 0 1,0 -148,0" fill="none" />
         </defs>
         <circle cx="100" cy="100" r={92} fill="none" stroke="#1A237E" strokeWidth={3} />
         <circle cx="100" cy="100" r={84} fill="none" stroke="#1A237E" strokeWidth={1.4} />
