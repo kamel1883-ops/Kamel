@@ -1,20 +1,21 @@
 // شرائح الأسعار الرسمية — مرجع موحّد لصفحة الهبوط ولوحة المالك
 // Official pricing tiers — shared reference for the landing page and owner admin
+// تقسيم جديد بـ 5 شرائح (البداية / الناشئة / المتوسطة / المتقدمة / الكبرى) مع رسوم تأسيس مرة واحدة وإجمالي السنة الأولى.
 
 export const PRICING_TIERS_AR = [
-  { id: "micro", min: 1, tier: "الشريحة الأولى (البداية)", range: "من 1 إلى 30 عامل", yearly: 1500, note: "مناسبة جداً للمنشآت الصغيرة والمشاريع الناشئة، تغطي التكلفة التشغيلية تقريباً من أول اشتراك." },
-  { id: "small", min: 31, tier: "الشريحة الثانية (الناشئة)", range: "من 31 إلى 100 عامل", yearly: 2800, note: "تطلق النمو السريع للمنشآت الصغيرة مع هامش ربحي مرتفع وخدمات." },
-  { id: "medium", min: 101, tier: "الشريحة الثالثة (المتوسطة)", range: "من 101 إلى 300 عامل", yearly: 4200, note: "إدارة متكاملة لفرق العمل المتوسطة مع توفير قيمة عالية مقابل التكلفة." },
-  { id: "growth", min: 301, tier: "الشريحة الرابعة (المتقدمة)", range: "من 301 إلى 700 عامل", yearly: 6000, note: "دعم كامل وإمكانيات ربط متقدمة وميزات تحليلات الموارد البشرية." },
-  { id: "enterprise", min: 701, tier: "الشريحة الخامسة (الكبرى)", range: "من 701 إلى 1,000+ عامل", yearly: 8500, note: "تغطية غير محدودة، دعم فني مختص، وربط خاص بروابط البرمجة (API) للشركات الكبرى." },
+  { id: "starter", min: 1, tier: "البداية", range: "1 - 20 موظف", yearly: 2400, setup: 1000, year1: 3400, note: "مناسبة جداً للمنشآت الصغيرة والمشاريع الناشئة — تغطي التكلفة التشغيلية تقريباً من أول اشتراك." },
+  { id: "emerging", min: 21, tier: "الناشئة", range: "21 - 60 موظف", yearly: 3800, setup: 1500, year1: 5300, note: "تطلق النمو السريع للمنشآت الصغيرة مع هامش ربحي مرتفع وخدمات." },
+  { id: "medium", min: 61, tier: "المتوسطة", range: "61 - 150 موظف", yearly: 5500, setup: 2500, year1: 8000, note: "إدارة متكاملة لفرق العمل المتوسطة مع توفير قيمة عالية مقابل التكلفة." },
+  { id: "advanced", min: 151, tier: "المتقدمة", range: "151 - 400 موظف", yearly: 8000, setup: 3500, year1: 11500, note: "دعم كامل وإمكانيات ربط متقدمة وميزات تحليلات الموارد البشرية." },
+  { id: "enterprise", min: 401, tier: "الكبرى", range: "401 فأكثر", yearly: 12000, setup: 0, year1: null, custom: true, note: "تغطية غير محدودة، دعم فني مختص، وربط خاص بروابط البرمجة (API) للشركات الكبرى. رسوم التأسيس والإجمالي حسب الاتفاق." },
 ];
 
 export const PRICING_TIERS_EN = [
-  { id: "micro", min: 1, tier: "Tier 1 (Micro)", range: "1 – 30 employees", yearly: 1500, note: "Ideal for small businesses and startups — covers operating cost right from the first subscription." },
-  { id: "small", min: 31, tier: "Tier 2 (Small)", range: "31 – 100 employees", yearly: 2800, note: "Drives rapid growth for small firms with a high profit margin and services." },
-  { id: "medium", min: 101, tier: "Tier 3 (Medium)", range: "101 – 300 employees", yearly: 4200, note: "Integrated management for mid-sized teams with great value for cost." },
-  { id: "growth", min: 301, tier: "Tier 4 (Growth)", range: "301 – 700 employees", yearly: 6000, note: "Full support, advanced integrations, and HR analytics features." },
-  { id: "enterprise", min: 701, tier: "Tier 5 (Enterprise)", range: "701 – 1,000+ employees", yearly: 8500, note: "Unlimited coverage, dedicated technical support, and API integration for large enterprises." },
+  { id: "starter", min: 1, tier: "Starter", range: "1 - 20 employees", yearly: 2400, setup: 1000, year1: 3400, note: "Ideal for small businesses and startups — covers operating cost right from the first subscription." },
+  { id: "emerging", min: 21, tier: "Emerging", range: "21 - 60 employees", yearly: 3800, setup: 1500, year1: 5300, note: "Drives rapid growth for small firms with a high profit margin and services." },
+  { id: "medium", min: 61, tier: "Medium", range: "61 - 150 employees", yearly: 5500, setup: 2500, year1: 8000, note: "Integrated management for mid-sized teams with great value for cost." },
+  { id: "advanced", min: 151, tier: "Advanced", range: "151 - 400 employees", yearly: 8000, setup: 3500, year1: 11500, note: "Full support, advanced integrations, and HR analytics features." },
+  { id: "enterprise", min: 401, tier: "Enterprise", range: "401+", yearly: 12000, setup: 0, year1: null, custom: true, note: "Unlimited coverage, dedicated technical support, and API integration. Setup fee and total by agreement." },
 ];
 
 // المميزات الموحّدة — نفس القائمة الكاملة في كل باقة (بدون استثناء)
@@ -39,9 +40,9 @@ export const FULL_FEATURES_EN = [
 export function tierForCount(count, tiers = PRICING_TIERS_AR) {
   const n = Number(count);
   if (!Number.isFinite(n) || n <= 0) return null;
-  if (n <= 30) return tiers[0];
-  if (n <= 100) return tiers[1];
-  if (n <= 300) return tiers[2];
-  if (n <= 700) return tiers[3];
+  if (n <= 20) return tiers[0];
+  if (n <= 60) return tiers[1];
+  if (n <= 150) return tiers[2];
+  if (n <= 400) return tiers[3];
   return tiers[4];
 }

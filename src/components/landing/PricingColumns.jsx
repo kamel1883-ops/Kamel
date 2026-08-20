@@ -99,6 +99,23 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                 </div>
                 <div className="text-[11px] text-[#6B7280] mt-0.5">{perYear}</div>
               </div>
+
+              {/* رسوم التأسيس + إجمالي السنة الأولى */}
+              <div className="mt-2.5 rounded-xl bg-violet-50/60 border border-violet-100 px-2.5 py-2 space-y-1 text-center">
+                <div className="flex items-center justify-between text-[10.5px]">
+                  <span className="text-[#6B7280]">{isAr ? "رسوم التأسيس" : "Setup"}</span>
+                  <span className="font-bold text-[#1F2937]">
+                    {t.custom ? (isAr ? "حسب الاتفاق" : "Custom") : `${t.setup.toLocaleString()} ${currency}`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10.5px]">
+                  <span className="text-[#6B7280]">{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
+                  <span className="font-extrabold text-[#8E24AA]">
+                    {t.custom ? (isAr ? "تأطير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
+                  </span>
+                </div>
+              </div>
+
               <div className="text-center mt-2">
                 <div className="text-[10px] text-[#9CA3AF]">{isAr ? "نطاق الموظفين" : "Headcount"}</div>
                 <div className="text-[11px] font-bold text-[#1F2937] leading-tight">{t.range}</div>

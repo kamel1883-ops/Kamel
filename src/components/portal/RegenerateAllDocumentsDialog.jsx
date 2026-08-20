@@ -55,6 +55,18 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
     setRunning(true); setFinished(false); setDone(0); setErrors([]); setTotal(targets.length);
     let ok = 0;
     const errs = [];
+    // 0) إعادة تصنيف جميع العملاء (trial + contracted) وفق الشرائح الجديدة — تحديث pricing_tier و quoted_amount.
+    setCurrent(isAr ? "جارٍ إعادة تصنيف جميع العملاء…" : "Re-tiering all clients…");
+    try {
+      const rt = await base44.functions.invoke("portalData", {
+        token: session.token, employee_id: session.employee_id,
+        action: "owner_retiert_all",
+      });
+      const rrt = rt?.data || rt;
+      if (!rrt?.ok) throw new Error(rrt?.error || "retier_failed");
+    } catch (e) {
+      errs.push(`re-tier: ${String(e?.message || e)}`);
+    }
     for (let i = 0; i < targets.length; i++) {
       const tenant = targets[i];
       setCurrent(tenant.name || "—");
@@ -73,6 +85,8 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
         const subEnd =
           tenant.subscription_end
           || (() => { const d = new Date(subStart); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); })();
+        // المبلغ الجديد وفق الشريحة المعاد تصنيفها (لا يعتمد على القيمة القديمة)
+        const newAmount = (tier ? Number(tier.yearly) : Number(tenant.quoted_amount)) || 0;
 
         // عقد الاشتراك
         const contractBlob = await renderToPdfBlob(

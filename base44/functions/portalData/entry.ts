@@ -246,6 +246,40 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    // إعادة تصنيف كل العملاء وفق الشرائح الجديدة وفق عدد الموظفين، وتحديث pricing_tier و quoted_amount.
+    // لا يُغيّر الحالة (trial/active/expired...) ولا يُولّد مستندات — يكتفي بتحديث الحقول.
+    if (action === "owner_retiert_all") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      // مرآة خادمية لـ src/lib/pricing.js (شرائح الجديدة)
+      const TIERS = [
+        { min: 1, max: 20, tier: "البداية", yearly: 2400 },
+        { min: 21, max: 60, tier: "الناشئة", yearly: 3800 },
+        { min: 61, max: 150, tier: "المتوسطة", yearly: 5500 },
+        { min: 151, max: 400, tier: "المتقدمة", yearly: 8000 },
+        { min: 401, max: Infinity, tier: "الكبرى", yearly: 12000 },
+      ];
+      const fn = (cnt: number) => {
+        const n = Number(cnt) || 0;
+        if (n <= 0) return null;
+        for (const t of TIERS) if (n <= t.max) return t;
+        return TIERS[TIERS.length - 1];
+      };
+      const all = await base44.asServiceRole.entities.Tenant.list("-created_date", 500);
+      const tenants = (all || []).filter((t: any) => t.status !== "pending_payment");
+      let updated = 0;
+      const skipped: string[] = [];
+      for (const t of tenants) {
+        const seg = fn(t.employee_count);
+        if (!seg) { skipped.push(t.id); continue; }
+        await base44.asServiceRole.entities.Tenant.update(t.id, {
+          pricing_tier: seg.tier,
+          quoted_amount: seg.yearly,
+        });
+        updated++;
+      }
+      return Response.json({ ok: true, updated, skipped: skipped.length });
+    }
+
     if (action === "owner_cancel") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
       const tenant_id = String(body.tenant_id || "");
