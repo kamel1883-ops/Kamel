@@ -137,7 +137,9 @@ export default function CompanyRegister() {
       } catch (e) {
         const em = String(e?.message || e || "");
         if (/unified_taken/i.test(em)) {
-          setError(isAr ? "هذا الرقم الموحد مسجّل لمنشأة أخرى على جدارة. لا يمكن استخدامه لتسجيل حساب جديد." : "This unified number is already registered to another organization on Jadara.");
+          setError(isAr
+            ? "هذا الرقم الموحّد مسجّل مسبقاً لمنشأة أخرى على جدارة — لا يمكن لشركتين أن تتشاركا نفس الرقم الموحّد، ولم يُنشأ حساب جديد. إن كان حسابك موجوداً سابقاً فاستخدم استعادة كلمة المرور من بوابة الشركة. لأي مساعدة لتفعيل حسابك، تواصل مع الدعم الفني عبر واتساب +966 59 470 0782 أو البريد info@jadara-hr.com."
+            : "This unified number is already registered to another organization on Jadara — two companies cannot share the same unified number, and no new account was created. If your account already exists, use password recovery in the company portal. For help activating your account, contact support via WhatsApp +966 59 470 0782 or email info@jadara-hr.com.");
         } else {
           setError(t.promoteErr);
         }

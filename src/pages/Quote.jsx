@@ -85,6 +85,11 @@ export default function Quote() {
     step1Badge: "الخطوة 1 من 2",
     trialDoneTitle: "تم تأكيد طلب تجربتك بنجاح",
     trialDoneNote: "تم إنشاء تجربتك المجانية لمدة 30 يوماً بالرقم الوطني الموحد المسجّل. أنشئ حسابك وكلمة مرورك الآن للدخول إلى بوابة الشركات والاستفادة من كل مميزات المنصة.",
+    crDoc: "صورة من السجل التجاري",
+    crDocHint: "إلزامي: يُرجى إرفاق صورة واضحة من السجل التجاري السعودي. يتم التحقق آلياً من أن الرقم الموحّد في الصورة يطابق الرقم الموحّد المُدخل لتأكيد ملكية المنشأة ومنع التسجيل بأرقام غير صحيحة.",
+    errCrDoc: "إرفاق صورة من السجل التجاري إلزامي للتحقق من ملكية الرقم الموحّد",
+    uploading: "جارٍ رفع السجل التجاري والتحقق منه...",
+    uploadFail: "تعذّر رفع صورة السجل التجاري، حاول مرة أخرى",
   } : {
     pageTitle: "Quotation — Annual Subscription",
     barBack: "Back to home", barPrint: "Print / Save PDF",
@@ -129,6 +134,11 @@ export default function Quote() {
     step1Badge: "Step 1 of 2",
     trialDoneTitle: "Your trial request is confirmed",
     trialDoneNote: "Your 30-day free trial was created with your registered National Unified Number. Create your account and password now to enter the company portal and enjoy every platform feature.",
+    crDoc: "Commercial Register image",
+    crDocHint: "Required: please attach a clear image of the Saudi Commercial Register. The unified number in the image is automatically verified to match the entered number, confirming establishment ownership and preventing registration with incorrect numbers.",
+    errCrDoc: "Attaching a Commercial Register image is required to verify ownership of the unified number",
+    uploading: "Uploading and verifying the Commercial Register...",
+    uploadFail: "Could not upload the Commercial Register image, try again",
   };
 
   const incoming = location.state?.company || null;
@@ -142,6 +152,8 @@ export default function Quote() {
   const [tenantId, setTenantId] = useState(null);
   const [contractProof, setContractProof] = useState(null);
   const [captcha, setCaptcha] = useState("");
+  const [crFile, setCrFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [selectedTier, setSelectedTier] = useState(null);
   const [mode] = useState(() => (new URLSearchParams(location.search).get("tier") ? "buy" : "trial"));
 
@@ -189,9 +201,28 @@ export default function Quote() {
     const phoneDigits = (form.contact_phone || "").replace(/\D/g, "");
     if (phoneDigits.length < 10) { setErr(t.errPhone); return; }
     if (!captcha) { setErr(t.errCaptcha); return; }
+    if (!crFile) { setErr(t.errCrDoc); return; }
     setSubmitting(true);
+    setUploading(true);
     try {
-      const res = await base44.functions.invoke("createTrial", { ...form, lead_source: mode === "trial" ? "trial" : "quote", discount_code: form.discount_code?.trim() || undefined, captcha_token: captcha });
+      // رفع صورة السجل التجاري أولاً للتحقق منها في الخادم
+      let crDocUrl = "";
+      try {
+        const up = await base44.integrations.Core.UploadFile({ file: crFile });
+        crDocUrl = up?.file_url || "";
+      } catch (_) {
+        setErr(t.uploadFail);
+        setUploading(false);
+        setSubmitting(false);
+        return;
+      }
+      if (!crDocUrl) {
+        setErr(t.errCrDoc);
+        setUploading(false);
+        setSubmitting(false);
+        return;
+      }
+      const res = await base44.functions.invoke("createTrial", { ...form, commercial_register_doc_url: crDocUrl, lead_source: mode === "trial" ? "trial" : "quote", discount_code: form.discount_code?.trim() || undefined, captcha_token: captcha });
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setTenantId(res?.tenant_id || null);
@@ -202,6 +233,7 @@ export default function Quote() {
     } catch (error) {
       setErr(error?.response?.data?.error || error?.message || t.errGeneric);
     } finally {
+      setUploading(false);
       setSubmitting(false);
     }
   };
@@ -257,11 +289,26 @@ export default function Quote() {
               <Label>{t.discCode}</Label>
               <Input value={form.discount_code || ""} onChange={(e) => set("discount_code", e.target.value.toUpperCase())} placeholder="JADARA100" />
             </div>
+            {/* إرفاق صورة السجل التجاري — إلزامي للتحقق من ملكية الرقم الموحّد */}
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1">{t.crDoc} <span className="text-rose-600">*</span></Label>
+              <div className="rounded-xl border border-dashed border-violet-300 bg-violet-50/40 p-4">
+                <input
+                  id="cr-doc"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => { const f = e.target.files?.[0] || null; setCrFile(f); setErr(""); }}
+                  className="block w-full text-sm text-muted-foreground file:mr-3 file:ml-0 file:rounded-lg file:border-0 file:bg-[#8E24AA] file:px-4 file:py-2 file:text-white file:font-medium hover:file:bg-[#7E22CE] cursor-pointer"
+                />
+                {crFile && <div className="text-xs text-emerald-700 mt-2 flex items-center gap-1"><Check size={13} /> {crFile.name}</div>}
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{t.crDocHint}</p>
+              </div>
+            </div>
             <TurnstileWidget onToken={setCaptcha} className="flex justify-center" />
-            {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3">{err}</div>}
-            <Button type="submit" disabled={submitting || !captcha} className="gap-2 min-w-[200px] bg-[#8E24AA] hover:bg-[#7E22CE]">
+            {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 whitespace-pre-line">{err}</div>}
+            <Button type="submit" disabled={submitting || uploading || !captcha} className="gap-2 min-w-[200px] bg-[#8E24AA] hover:bg-[#7E22CE]">
               {submitting ? <Loader2 size={16} className="animate-spin" /> : mode === "trial" ? <ShieldCheck size={16} /> : <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />}
-              {mode === "trial" ? t.trialSubmit : t.buySubmit}
+              {submitting ? t.uploading : (mode === "trial" ? t.trialSubmit : t.buySubmit)}
             </Button>
             <p className="text-xs text-muted-foreground flex items-center gap-1.5"><ShieldCheck size={13} /> {t.secure}</p>
           </form>
