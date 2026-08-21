@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
-import { computeGOSI } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 import { printReport } from "@/lib/reportPrint";
 
@@ -74,8 +73,6 @@ export default function Payroll() {
   const generate = async () => {
     setGenerating(true);
     const existing = new Set(payrolls.map((p) => p.employee_id));
-    const orgs = org ? [org] : await base44.entities.Organization.list("-created_date", 1);
-    const cfg = orgs[0];
     const mm = String(month).padStart(2, "0");
     const startDate = `${year}-${mm}-01`;
     const endDay = new Date(year, month, 0).getDate();
@@ -94,16 +91,14 @@ export default function Payroll() {
       const transport = Number(emp.transport_allowance) || 0;
       const other = Number(emp.other_allowances) || 0;
       const gross = base + housing + transport + other;
-      const gosi = computeGOSI({ employee: emp, org: cfg });
       const absentDays = absentByEmp[emp.id] || 0;
       const dailyWage = gross / 30;
       const absentDeduction = Number((dailyWage * absentDays).toFixed(2));
-      const net = gross - gosi.gosi_employee - absentDeduction;
+      const net = gross - absentDeduction;
       created.push({
         employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "",
         month, year, base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: absentDeduction, loan_installment: 0,
-        gosi_employee: Number(gosi.gosi_employee.toFixed(2)), gosi_employer: Number(gosi.gosi_employer.toFixed(2)),
         overtime_hours: 0, overtime_amount: 0, absent_days: absentDays, net_salary: net, status: "draft",
       });
     }
@@ -116,7 +111,7 @@ export default function Payroll() {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
     updated.gross_salary = (updated.base_salary || 0) + (updated.housing_allowance || 0) + (updated.transport_allowance || 0) + (updated.other_allowances || 0);
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - (updated.deductions || 0) - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - (updated.deductions || 0) - (updated.loan_installment || 0);
     updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
@@ -129,7 +124,7 @@ export default function Payroll() {
     const daily = gross / 30;
     const deductions = Number((daily * abs).toFixed(2));
     const updated = { ...rec, absent_days: abs, deductions };
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - deductions - (updated.gosi_employee || 0) - (updated.loan_installment || 0);
+    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - deductions - (updated.loan_installment || 0);
     updated.net_salary = Number(updated.net_salary.toFixed(2));
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
@@ -197,10 +192,10 @@ export default function Payroll() {
   };
 
   const exportExcel = () => {
-    const headers = [t.thEmp, t.natId || "الهوية/الإقامة", t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thGosi, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
+    const headers = [t.thEmp, t.natId || "الهوية/الإقامة", t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
     const rows = includedPayrolls.map((p) => [
       p.employee_name || "", p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || ""), p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
-      p.bonus || 0, p.overtime_amount || 0, p.gosi_employee || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
+      p.bonus || 0, p.overtime_amount || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
       p.net_salary || 0, payrollStatusLabel(p.status).label,
     ]);
     const csv = [headers, ...rows]
@@ -228,7 +223,7 @@ export default function Payroll() {
     const headers = [
       "رقم الهوية/الإقامة", "اسم الموظف", "رقم الآيبان (IBAN)",
       "الراتب الأساسي", "بدل السكن", "بدل المواصلات", "بدلات أخرى", "حوافز", "مبلغ العمل الإضافي (Overtime)",
-      "إجمالي الراتب", "خصومات (غياب/أخرى)", "تأمينات الموظف (GOSI)", "قسط السلفة",
+      "إجمالي الراتب", "خصومات (غياب/أخرى)", "قسط السلفة",
       "صافي الراتب", "تاريخ بداية الفترة", "تاريخ نهاية الفترة", "عدد أيام العمل",
     ];
     const lines = [headers];
@@ -248,7 +243,6 @@ export default function Payroll() {
         p.overtime_amount || 0,
         p.gross_salary || 0,
         p.deductions || 0,
-        p.gosi_employee || 0,
         p.loan_installment || 0,
         p.net_salary || 0,
         start, end, workDays,
@@ -274,7 +268,6 @@ export default function Payroll() {
   const totalNet = includedPayrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
   const totalBonus = includedPayrolls.reduce((s, p) => s + (p.bonus || 0), 0);
   const totalDed = includedPayrolls.reduce((s, p) => s + (p.deductions || 0), 0);
-  const totalGosiEmployee = includedPayrolls.reduce((s, p) => s + (p.gosi_employee || 0), 0);
   const paidCount = includedPayrolls.filter((p) => p.status === "paid").length;
   const totalPaid = includedPayrolls.filter((p) => p.status === "paid").reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
   const anyDraft = includedPayrolls.some((p) => p.status === "draft");
@@ -301,7 +294,6 @@ export default function Payroll() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard icon={Wallet} label={t.sNet} value={formatCurrency(totalNet)} tint="green" />
         <StatCard icon={TrendingUp} label={t.sBonus} value={formatCurrency(totalBonus)} tint="violet" />
-        <StatCard icon={Shield} label={t.sGosi} value={formatCurrency(totalGosiEmployee)} tint="amber" />
         <StatCard icon={Clock} label={t.sDed} value={formatCurrency(totalDed)} tint="rose" />
         <StatCard icon={CheckCircle2} label={t.sPaid} value={paidCount} tint="blue" />
       </div>
@@ -373,13 +365,11 @@ export default function Payroll() {
                 <tr>
                   <th className="text-center px-3 py-3 font-medium">{t.thIncl}</th>
                   <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">{t.thEmp}</th>
-                  <th className="text-right px-3 py-3 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thBase}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thTrans}</th>
                   <th className="text-right px-3 py-3 font-medium text-emerald-600">{t.thBonus}</th>
                   <th className="text-right px-3 py-3 font-medium text-blue-600">{t.thOvertime}</th>
-                  <th className="text-right px-3 py-3 font-medium text-amber-600">{t.thGosi}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thAbsent}</th>
                   <th className="text-right px-3 py-3 font-medium text-rose-600">{t.thDed}</th>
                   <th className="text-right px-3 py-3 font-medium text-violet-600">{t.thLoan}</th>
@@ -401,14 +391,15 @@ export default function Payroll() {
                         {included ? <Check size={16} /> : <X size={16} />}
                       </button>
                     </td>
-                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">{p.employee_name}</td>
-                    <td className="px-3 py-2 tabular-nums text-xs text-muted-foreground" dir="ltr">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
+                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">
+                      <div>{p.employee_name}</div>
+                      <div className="text-[11px] font-normal text-muted-foreground tabular-nums" dir="ltr">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</div>
+                    </td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
-                    <td className="px-3 py-2 text-xs tabular-nums text-amber-700">{formatCurrency(p.gosi_employee || 0)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
