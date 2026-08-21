@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_AR } from "@/lib/pricing";
+import ReportsAnalytics from "@/components/brochure/ReportsAnalytics";
 
 // بروفايل منصة جدارة — نسخة فاخرة موسّعة، عربي صافٍ، RTL، قابل للطباعة
 const NAVY = "#0A1629";
@@ -38,6 +39,7 @@ export default function Brochure() {
         <TwoPortals />
         <DashboardOverview />
         <ModuleShowcase />
+        <ReportsAnalytics Section={Section} Heading={Heading} />
         <EmployeePortal />
         <Infra />
         <Partners />
@@ -77,9 +79,18 @@ function Cover() {
             منظومة سعودية متكاملة تدير رأس المال البشري في مؤسستك<br/>
             من البصمة إلى الراتب، ومن المباشرة إلى نهاية الخدمة، في مكان واحد آمن.
           </p>
-          <div className="flex flex-wrap justify-center gap-2 mt-7">
-            {["إدارة الموظفين", "بصمة بالموقع", "رواتب تلقائية", "نهاية الخدمة", "التوظيف الكامل", "بوابتان منفصلتان"].map((b) => (
-              <span key={b} style={{ fontSize: 12, fontWeight: 600, color: "#e8eef5", padding: "6px 14px", borderRadius: 999, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>{b}</span>
+          <div className="flex flex-wrap justify-center gap-1.5 mt-7" style={{ maxWidth: 760, margin: "20px auto 0" }}>
+            {[
+              "إدارة الموظفين", "إدارة الفروع", "الحضور والانصراف", "البصمة بالموقع",
+              "إدارة الإجازات", "مسار الموافقات", "السلف والقروض", "رحلات العمل والانتداب",
+              "الرواتب الشهرية", "التأمينات الاجتماعية", "نهاية الخدمة", "إدارة الأداء",
+              "تقييم الأداء", "التدريب والتطوير", "التخطيط التعاقبي", "الهيكل التنظيمي",
+              "تخطيط القوى العاملة", "التوظيف الكامل", "المركبات والأسطول", "الرخص الحكومية",
+              "الاشتراكات الحكومية", "الإنذارات والسياسة", "مقابلات نهاية الخدمة", "التقارير والتحليلات",
+              "بوابة المنشآت", "بوابة الموظف الذاتية", "تطبيق الجوال", "المساعد الذكي",
+              "إعدادات المنشأة", "تنبيهات التراخيص", "كشوف المخالصات", "تكامل البصمة الذاتية"
+            ].map((b) => (
+              <span key={b} style={{ fontSize: 10.5, fontWeight: 600, color: "#e8eef5", padding: "5px 11px", borderRadius: 999, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>{b}</span>
             ))}
           </div>
         </div>
@@ -918,34 +929,27 @@ function Infra() {
 /* =================== الشركاء =================== */
 function Partners() {
   const partners = [
-    { n: "أبشر أعمال", t: "أبشر" },
-    { n: "مقيم", t: "مقيم" },
-    { n: "قوة", t: "قوة" },
-    { n: "مدد", t: "مدد" },
-    { n: "التأمينات الاجتماعية", t: "تأمينات" },
-    { n: "وطن", t: "وطن" },
-    { n: "واثق", t: "واثق" },
-    { n: "بلدي", t: "بلدي" },
-    { n: "معروف", t: "معروف" },
-    { n: "اعتماد", t: "اعتماد" },
-    { n: "زاتكا", t: "زاتكا" },
-    { n: "المركز السعودي للأعمال", t: "أعمال" },
-    { n: "مكتب العمل", t: "عمل" },
-    { n: "إيجار", t: "إيجار" },
-    { n: "بنك إس تي سي", t: "بنك" }
+    { n: "شركة قوة العمال", tag: "قوة العمال", sub: "توظيف واستقطاب", c1: "#0A1629", c2: "#0e1f3a", k: "ق" },
+    { n: "شركة الدرز", tag: "الدرز", sub: "خدمات أعمال", c1: "#0A1629", c2: "#1a2b4a", k: "د" },
+    { n: "عيادة دكتور توم", tag: "دكتور توم", sub: "عيادات صحية", c1: "#00B8D4", c2: "#0096b5", k: "ت" }
   ];
   return (
-    <Section tint="light" heading={<Heading icon={<Network />} title="شركاؤنا" sub="تكاملات وتعاملات مع الجهات الحكومية والبنوك الرسمية في المملكة" />}>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <Section tint="light" heading={<Heading icon={<Network />} title="شركاؤنا" sub="الشركات والجهات الفعلية التي نتعامل معها ونخدمها" />}>
+      <div className="grid sm:grid-cols-3 gap-5">
         {partners.map((p, k) => (
-          <div key={k} className="rounded-2xl bg-white border border-slate-200 p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md transition" style={{ minHeight: 110 }}>
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-extrabold" style={{ background: `linear-gradient(135deg, ${NAVY}, ${NAVY2})`, color: GOLD, fontFamily: "var(--font-display)" }}>{p.t[0]}</div>
-            <div className="text-[12px] font-bold text-center" style={{ color: NAVY }}>{p.n}</div>
+          <div key={k} className="rounded-3xl bg-white border border-slate-200 p-6 flex flex-col items-center gap-3 shadow-sm hover:shadow-lg transition" style={{ minHeight: 180 }}>
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})`, boxShadow: "0 8px 24px -12px rgba(10,22,41,.4)", border: "1px solid rgba(255,255,255,.08)" }}>
+              <span style={{ fontSize: 34, fontWeight: 800, fontFamily: "var(--font-display)", color: p.k === "ت" ? "#fff" : "#C9A961" }}>{p.k}</span>
+            </div>
+            <div className="text-center">
+              <div className="text-[15px] font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>{p.n}</div>
+              <div className="text-[12px] text-slate-500 mt-1">{p.sub}</div>
+            </div>
           </div>
         ))}
       </div>
       <p className="text-center text-xs text-slate-500 mt-4">
-        تكامل مع المنصات الحكومية لتسجيل وتتبّع اشتراكات منشأتك ومع بنك إس تي سي للتحويلات البنكية الرسمية
+        شركاء أعمال حقيقيون — لكل منهم خدمات معتمدة واتفاقيات تعاون فعليّة
       </p>
     </Section>
   );
