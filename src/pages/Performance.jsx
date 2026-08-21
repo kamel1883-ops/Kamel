@@ -157,7 +157,7 @@ export default function Performance() {
                     <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">{t.empCount(emps.length)}</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {emps.map((e) => (<span key={e.id} className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-50 border border-border">{e.full_name} <span className="text-muted-foreground tabular-nums" dir="ltr">{e.national_id || "—"}</span></span>))}
+                    {emps.map((e) => (<span key={e.id} className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-50 border border-border"><span className="block">{e.full_name}</span><span className="block text-[10px] text-muted-foreground tabular-nums" dir="ltr">{e.national_id || "—"}</span></span>))}
                   </div>
                 </div>
               ))}

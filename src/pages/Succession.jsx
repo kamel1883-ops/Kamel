@@ -101,7 +101,8 @@ export default function Succession() {
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
                     <div className="font-semibold flex items-center gap-2"><Crown size={16} className="text-amber-500" />{p.position_title}</div>
-                    <div className="text-xs text-muted-foreground">{p.department} • {t.holder(p.current_holder_name)} <span className="tabular-nums" dir="ltr">{(() => { const h = employees.find((e) => e.id === p.current_holder_id); return h?.national_id ? `· ${h.national_id}` : ""; })()}</span></div>
+                    <div className="text-xs text-muted-foreground">{p.department} • {t.holder(p.current_holder_name)}</div>
+                    {(() => { const h = employees.find((e) => e.id === p.current_holder_id); return h?.national_id ? <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{h.national_id}</div> : null; })()}
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button onClick={() => { setEditing(p); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>
@@ -116,7 +117,8 @@ export default function Succession() {
                 </div>
                 <div className="text-sm">
                   <div className="text-xs text-muted-foreground mb-1">{t.succC}</div>
-                  <div className="font-medium">{p.successor_name || t.noSucc}{(() => { const s = employees.find((e) => e.id === p.successor_id); return s?.national_id ? <span className="text-xs text-muted-foreground tabular-nums" dir="ltr"> · {s.national_id}</span> : null; })()}</div>
+                  <div className="font-medium">{p.successor_name || t.noSucc}</div>
+                  {(() => { const s = employees.find((e) => e.id === p.successor_id); return s?.national_id ? <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{s.national_id}</div> : null; })()}
                 </div>
                 {p.development_plan && (
                   <div className="mt-3 pt-3 border-t border-border">

@@ -365,6 +365,7 @@ export default function Payroll() {
                 <tr>
                   <th className="text-center px-3 py-3 font-medium">{t.thIncl}</th>
                   <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">{t.thEmp}</th>
+                  <th className="text-right px-3 py-3 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thBase}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thTrans}</th>
@@ -391,10 +392,8 @@ export default function Payroll() {
                         {included ? <Check size={16} /> : <X size={16} />}
                       </button>
                     </td>
-                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">
-                      <div>{p.employee_name}</div>
-                      <div className="text-[11px] font-normal text-muted-foreground tabular-nums" dir="ltr">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</div>
-                    </td>
+                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">{p.employee_name}</td>
+                    <td className="px-3 py-2 tabular-nums text-xs" dir="ltr">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>

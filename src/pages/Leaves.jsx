@@ -89,6 +89,8 @@ export default function Leaves() {
   };
   useEffect(() => { load(); }, []);
 
+  const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "";
+
   const remove = async (id) => { await base44.entities.LeaveRequest.delete(id); load(); };
 
   const genClearance = async (leave) => {
@@ -157,6 +159,7 @@ export default function Leaves() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t.thEmp}</TableHead>
+                <TableHead>{isAr ? "الهوية/الإقامة" : "National ID"}</TableHead>
                 <TableHead>{t.thType}</TableHead>
                 <TableHead>{t.thFrom}</TableHead>
                 <TableHead>{t.thTo}</TableHead>
@@ -173,6 +176,7 @@ export default function Leaves() {
                 return (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
+                    <TableCell className="text-xs tabular-nums" dir="ltr">{empNat(r.employee_id) || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
                     <TableCell className="text-sm">{r.start_date}</TableCell>
                     <TableCell className="text-sm">{r.end_date}</TableCell>

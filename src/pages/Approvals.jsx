@@ -811,8 +811,10 @@ function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, k
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-sm">{r.employee_name}</span>
-            {emp?.national_id && <span className="text-xs text-muted-foreground">· {emp.national_id}</span>}
+            <div>
+              <div className="font-medium text-sm">{r.employee_name}</div>
+              {emp?.national_id && <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{emp.national_id}</div>}
+            </div>
             {kindBadge || (
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                 {r.leave_type ? leaveTypeLabel(r.leave_type) : t.loan}

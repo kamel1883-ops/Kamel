@@ -82,6 +82,8 @@ export default function BusinessTrips() {
   };
   useEffect(() => { load(); }, []);
 
+  const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "";
+
   const remove = async (id) => { await base44.entities.BusinessTrip.delete(id); load(); };
 
   const genDoc = async (trip) => {
@@ -150,6 +152,7 @@ export default function BusinessTrips() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t.thEmp}</TableHead>
+                <TableHead>{isAr ? "الهوية/الإقامة" : "National ID"}</TableHead>
                 <TableHead>{t.thType}</TableHead>
                 <TableHead>{t.thDest}</TableHead>
                 <TableHead>{t.thPeriod}</TableHead>
@@ -167,6 +170,7 @@ export default function BusinessTrips() {
                 return (
                   <TableRow key={tr.id}>
                     <TableCell className="font-medium">{tr.employee_name || "—"}</TableCell>
+                    <TableCell className="text-xs tabular-nums" dir="ltr">{empNat(tr.employee_id) || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
                     <TableCell>{tr.destination || "—"}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{tr.start_date} ← {tr.end_date}</TableCell>

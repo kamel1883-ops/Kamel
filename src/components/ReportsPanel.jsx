@@ -489,8 +489,8 @@ function TripsReport({ records, employees, tripM, setTripM, t }) {
       <Card title={t.tripTable}>
         {rows.length ? (
           <div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
-             <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}<span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{empNat(r.employee_id)}</span></td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
+            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
+             <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}</td><td className="py-2 tabular-nums text-xs" dir="ltr">{empNat(r.employee_id)}</td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
           </table></div>
         ) : <NoRows text={t.noData} />}
       </Card>

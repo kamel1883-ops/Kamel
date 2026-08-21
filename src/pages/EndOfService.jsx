@@ -133,7 +133,7 @@ export default function EndOfService() {
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
     const record = {
       employee_id: emp.id, employee_number: emp.employee_number,
-      employee_name: `${emp.employee_number} - ${emp.position}`,
+      employee_name: emp.full_name,
       nationality: emp.nationality || (isSaudiNationalId(emp.national_id) ? (isAr ? "سعودي" : "Saudi") : (isAr ? "مقيم" : "Expat")),
       national_id: emp.national_id, department: emp.department, position: emp.position, hire_date: emp.hire_date,
       last_working_date: lwd, years_of_service: set.years, reason, reason_note: reasonMeta(reason).note,
@@ -242,7 +242,7 @@ export default function EndOfService() {
               <SelectTrigger className="w-full"><SelectValue placeholder={t.choosePh} /></SelectTrigger>
               <SelectContent>
                 {employees.map((e) => (
-                  <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position} {e.department ? `(${e.department})` : ""}</SelectItem>
+                  <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"} {e.department ? `(${e.department})` : ""}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -318,6 +318,7 @@ export default function EndOfService() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <div className="font-medium text-sm">{s.employee_name}</div>
+                          <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{s.national_id || "—"}</div>
                           <div className="text-xs text-muted-foreground">{s.last_working_date} • {reasonMeta(s.reason).label} • {formatCurrency(s.total_settlement)}</div>
                           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", b.cls)}>{b.label}</span>
@@ -361,7 +362,7 @@ export default function EndOfService() {
           <DialogHeader><DialogTitle>{t.hrDialogTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">{acting.req.employee_name} • {formatCurrency(acting.req.total_settlement)}</div>
+              <div className="text-sm text-muted-foreground">{acting.req.employee_name} <span className="text-xs tabular-nums" dir="ltr">· {acting.req.national_id || "—"}</span> • {formatCurrency(acting.req.total_settlement)}</div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.noteLabel}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
@@ -396,7 +397,7 @@ export default function EndOfService() {
           <DialogHeader><DialogTitle>{t.finDialogTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">{acting.req.employee_name} • {formatCurrency(acting.req.total_settlement)}</div>
+              <div className="text-sm text-muted-foreground">{acting.req.employee_name} <span className="text-xs tabular-nums" dir="ltr">· {acting.req.national_id || "—"}</span> • {formatCurrency(acting.req.total_settlement)}</div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.noteLabel}</Label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />

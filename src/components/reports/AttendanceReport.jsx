@@ -135,6 +135,7 @@ export default function AttendanceReport({ org }) {
             <TableHeader>
               <TableRow>
                 <TableHead>الموظف</TableHead>
+                <TableHead className="text-center">الهوية/الإقامة</TableHead>
                 <TableHead className="text-center">التاريخ</TableHead>
                 <TableHead className="text-center">الحضور</TableHead>
                 <TableHead className="text-center">الانصراف</TableHead>
@@ -146,10 +147,8 @@ export default function AttendanceReport({ org }) {
                 const s = attendanceStatusLabel(r.status);
                 return (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">
-                      {r.employee_name || "—"}
-                      <span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{r.national_id || "—"}</span>
-                    </TableCell>
+                    <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
+                    <TableCell className="text-center tabular-nums text-xs" dir="ltr">{r.national_id || "—"}</TableCell>
                     <TableCell className="text-center text-xs">{String(r.date || "").slice(0, 10)}</TableCell>
                     <TableCell className="text-center tabular-nums">{r.check_in || "—"}</TableCell>
                     <TableCell className="text-center tabular-nums">{r.check_out || "—"}</TableCell>
