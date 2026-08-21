@@ -66,47 +66,6 @@ export default async function (req) {
       }
     }
 
-    // ——— التحقق الذكي من صورة السجل التجاري: نمرّر المرفق إلى نموذج رؤية لقراءة الرقم
-    // الموحّد الظاهر في السجل التجاري السعودي ومطابقته مع الرقم المُدخل. يمنع إرفاق صور
-    // وهمية أو سجلات لا تطابق المنشأة المُسجّلة، ويضمن أن المُسجّل هو المالك الحقيقي
-    // للرقم الموحّد.
-    const crDocUrl = String(body.commercial_register_doc_url || '').trim();
-    let crCheck;
-    try {
-      crCheck = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt:
-          'هذه صورة لمستند. يُرجى التحديد بدقة:\n' +
-          '1) هل هذه الصورة هي «سجل تجاري سعودي» رسمي صادر من جهة رسمية؟ (is_commercial_register: true/false)\n' +
-          '2) استخرج الرقم الوطني الموحد للمنشأة الظاهر في المستند (يعرف بـ «الرقم الموحد» أو «رقم المنشأة» — غالباً 10 خانات ويبدأ بـ 7). إن لم تجده أعد سلسلة فارغة في unified_number.\n' +
-          '3) مستوى الثقة في القراءة: high / medium / low.\n' +
-          'أعد النتيجة بصيغة JSON فقط.',
-        file_urls: [crDocUrl],
-        model: 'gemini_3_flash',
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            is_commercial_register: { type: 'boolean' },
-            unified_number: { type: 'string' },
-            confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
-          },
-          required: ['is_commercial_register', 'unified_number', 'confidence'],
-        },
-      });
-    } catch (e) {
-      return Response.json({ error: 'تعذّر التحقق من صورة السجل التجاري حالياً، يرجى المحاولة مرة أخرى.' + SUPPORT_CONTACT }, { status: 400 });
-    }
-    const crIsRegister = !!(crCheck && crCheck.is_commercial_register);
-    const crConfidence = String((crCheck && crCheck.confidence) || 'low').toLowerCase();
-    if (!crIsRegister || crConfidence === 'low')
-      return Response.json({ error: 'صورة السجل التجاري غير واضحة أو غير صحيحة. يرجى إرفاق صورة واضحة من السجل التجاري السعودي الرسمي تُظهر الرقم الموحّد بوضوح.' + SUPPORT_CONTACT }, { status: 400 });
-    const crUnified = String((crCheck && crCheck.unified_number) || '').replace(/\D/g, '');
-    if (!crUnified || crUnified !== unified)
-      return Response.json({
-        error: crUnified
-          ? 'الرقم الموحّد الظاهر في صورة السجل التجاري (' + crUnified + ') لا يطابق الرقم الموحّد المُدخل (' + unified + '). يجب أن تتطابق الأرقام تماماً لتأكيد ملكية المنشأة.' + SUPPORT_CONTACT
-          : 'تعذّر قراءة الرقم الموحّد من صورة السجل التجاري. يرجى إرفاق صورة أوضح تُظهر الرقم الموحّد للمنشأة.' + SUPPORT_CONTACT,
-      }, { status: 400 });
-
     // —— كود الخصم (اختياري)
     let discount_percent = 0;
     let discount_code = '';
