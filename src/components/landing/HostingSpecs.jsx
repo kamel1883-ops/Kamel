@@ -9,7 +9,7 @@ export default function HostingSpecs({ isAr = true }) {
     ? {
         tag: "بنية تحتية خاصة",
         title: "سيرفر خاص بأعلى المواصفات — لأداء لا يتأثر بحجم منشأتك",
-        desc: "تعمل منصة «جدارة» على خادم VPS ألماني خاص (غير مشترك) بمعمارية NVMe فائقة السرعة، وتقنيات عزل وتشفير كاملة. سعة هذا السيرفر تكفي لتشغيل النظام بسلاسة تامة حتى مع نمو عدد الموظفين — دون بطء أو توقف.",
+        desc: "تعمل منصة «جدارة» على خادم VPS خاص (غير مشترك) بمعمارية NVMe فائقة السرعة، وتقنيات عزل وتشفير كاملة. سعة هذا السيرفر تكفي لتشغيل النظام بسلاسة تامة حتى مع نمو عدد الموظفين — دون بطء أو توقف.",
         badge: "أعلى المواصفات",
         heading: "سيرفر VPS سحابي خاص",
         savingTag: "بدونLimits",
@@ -23,7 +23,7 @@ export default function HostingSpecs({ isAr = true }) {
           { icon: HardDrive, big: "720 GB", small: "تخزين NVMe فائق السرعة" },
         ],
         features: [
-          "سيرفر ألماني خاص (VPS) غير مشترك مع أي عميل آخر",
+          "سيرفر خاص (VPS) غير مشترك مع أي عميل آخر",
           "تخزين NVMe سريع — فتح الصفحات والتقارير في أجزاء من الثانية",
           "نسخ احتياطي يومي تلقائي وحماية كاملة من فقدان البيانات",
           "تشفير كامل للبيانات أثناء التخزين والنقل (TLS / Isolation)",
@@ -38,7 +38,7 @@ export default function HostingSpecs({ isAr = true }) {
     : {
         tag: "Private Infrastructure",
         title: "A dedicated high-spec server — performance that grows with your headcount",
-        desc: "Jadara runs on a dedicated German VPS (not shared) with blazing-fast NVMe architecture and full isolation and encryption. This server is sized to keep the platform perfectly smooth even as your headcount grows — no slowdowns, no downtime.",
+        desc: "Jadara runs on a dedicated VPS (not shared) with blazing-fast NVMe architecture and full isolation and encryption. This server is sized to keep the platform perfectly smooth even as your headcount grows — no slowdowns, no downtime.",
         badge: "Top specs",
         heading: "Dedicated cloud VPS",
         savingTag: "No Limits",
@@ -52,7 +52,7 @@ export default function HostingSpecs({ isAr = true }) {
           { icon: HardDrive, big: "720 GB", small: "Ultra-fast NVMe storage" },
         ],
         features: [
-          "Dedicated German VPS — not shared with any other client",
+          "Dedicated VPS — not shared with any other client",
           "NVMe storage — pages and reports open in fractions of a second",
           "Automatic daily backups with full data-loss protection",
           "Full encryption at rest and in transit (TLS / isolation)",
@@ -147,7 +147,7 @@ export default function HostingSpecs({ isAr = true }) {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
-              <TrustChip icon={Globe} label={isAr ? "سحابة ألمانية" : "German cloud"} />
+              <TrustChip icon={Globe} label={isAr ? "سحابة خاصة" : "Private cloud"} />
               <TrustChip icon={Lock} label={isAr ? "تشفير كامل" : "Full encryption"} />
               <TrustChip icon={ShieldCheck} label={isAr ? "نسخ احتياطي يومي" : "Daily backup"} />
               <TrustChip icon={Zap} label={isAr ? "NVMe فائق السرعة" : "Ultra-fast NVMe"} />
