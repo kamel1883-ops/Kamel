@@ -34,7 +34,7 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee, port
     try {
       const payload = {
         employee_id: employee.id, employee_user_id: employee.user_id || "",
-        employee_name: `${employee.employee_number} - ${employee.position}`,
+        employee_name: employee.full_name || "",
         amount, reason: form.reason, installment_count: installments, monthly_installment: monthly,
         status: "pending", manager_status: "pending", hr_status: "pending", finance_status: "pending",
       };
@@ -52,7 +52,7 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee, port
         <DialogHeader><DialogTitle>{t.title}</DialogTitle></DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="text-sm text-muted-foreground">
-            {t.emp}: <b className="text-foreground">{employee?.employee_number} - {employee?.position}</b>
+            {t.emp}: <b className="text-foreground">{employee?.full_name}</b>{employee?.national_id ? <><br /><span className="text-xs tabular-nums" dir="ltr">{employee.national_id}</span></> : null}
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">{t.amountL}</Label>

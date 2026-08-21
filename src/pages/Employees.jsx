@@ -31,7 +31,7 @@ export default function Employees() {
     search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", allBranches: "كل الفروع", loading: "جارٍ التحميل...",
     empty: "لا يوجد موظفون مطابقون",
     activeHead: "الموظفون النشطون", inactiveHead: "الموظفون غير النشطون (الأرشيف)",
-    thNum: "الرقم", thPos: "المسمى", thDept: "الإدارة", thBranch: "الفرع", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
+    thNum: "الرقم", thName: "الاسم", thNat: "الهوية/الإقامة", thPos: "المسمى", thDept: "الإدارة", thBranch: "الفرع", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
     thTermReason: "سبب الإنهاء", thTermDate: "تاريخ الإنهاء",
     del: (n) => `حذف الموظف ${n}؟`, terminateTitle: "فسخ عقد", profileTitle: "ملف الموظف", tripsTitle: "انتدابات",
     yearFilter: "السنة", allYears: "كل السنوات", noInactive: "لا يوجد موظفون تركوا العمل",
@@ -40,7 +40,7 @@ export default function Employees() {
     search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", allBranches: "All branches", loading: "Loading...",
     empty: "No matching employees",
     activeHead: "Active employees", inactiveHead: "Inactive employees (archive)",
-    thNum: "Number", thPos: "Title", thDept: "Department", thBranch: "Branch", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
+    thNum: "Number", thName: "Name", thNat: "National ID", thPos: "Title", thDept: "Department", thBranch: "Branch", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
     thTermReason: "Termination reason", thTermDate: "Termination date",
     del: (n) => `Delete employee ${n}?`, terminateTitle: "Terminate", profileTitle: "Profile", tripsTitle: "Trips",
     yearFilter: "Year", allYears: "All years", noInactive: "No terminated employees",
@@ -174,6 +174,8 @@ export default function Employees() {
                     <thead className="bg-slate-50 text-muted-foreground text-xs">
                       <tr>
                         <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thName}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thNat}</th>
                         <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
                         <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
                         <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
@@ -187,6 +189,8 @@ export default function Employees() {
                       {activeList.map((emp) => (
                         <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
+                          <td className="px-4 py-3 font-medium">{emp.full_name}</td>
+                          <td className="px-4 py-3 font-medium tabular-nums" dir="ltr">{emp.national_id || "—"}</td>
                           <td className="px-4 py-3">{emp.position}</td>
                           <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
                           <td className="px-4 py-3">
@@ -248,6 +252,8 @@ export default function Employees() {
                     <thead className="bg-slate-50 text-muted-foreground text-xs">
                       <tr>
                         <th className="text-right px-4 py-3 font-medium">{t.thNum}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thName}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t.thNat}</th>
                         <th className="text-right px-4 py-3 font-medium">{t.thPos}</th>
                         <th className="text-right px-4 py-3 font-medium">{t.thDept}</th>
                         <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
@@ -262,6 +268,8 @@ export default function Employees() {
                         return (
                           <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                             <td className="px-4 py-3 font-medium cursor-pointer" onClick={() => { setProfileEmp(emp); setProfileOpen(true); }}>{emp.employee_number}</td>
+                            <td className="px-4 py-3 font-medium">{emp.full_name}</td>
+                            <td className="px-4 py-3 font-medium tabular-nums" dir="ltr">{emp.national_id || "—"}</td>
                             <td className="px-4 py-3">{emp.position}</td>
                             <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
                             <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>

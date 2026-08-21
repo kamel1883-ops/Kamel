@@ -65,7 +65,7 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
     try {
       const payload = {
         ...form,
-        employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
+        employee_name: emp ? emp.full_name : "",
         employee_user_id: emp?.user_id || currentUserEmployee?.user_id || "",
         transport_cost: Number(form.transport_cost) || 0,
         accommodation_cost: Number(form.accommodation_cost) || 0,
@@ -97,7 +97,7 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
                 <SelectTrigger><SelectValue placeholder={t.choose} /></SelectTrigger>
                 <SelectContent>
                   {(employees || []).map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id}>{emp.employee_number} - {emp.position} - {emp.department}</SelectItem>
+                    <SelectItem key={emp.id} value={emp.id}>{emp.full_name} — {emp.national_id || "—"} {emp.department ? `· ${emp.department}` : ""}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

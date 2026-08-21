@@ -93,7 +93,12 @@ export default function Fleet() {
                   <button onClick={() => remove(v)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={15} /></button>
                 </div>
               </div>
-              {v.assigned_to && <div className="text-sm mb-3 text-muted-foreground">{t.owner}: {employees.find((e) => e.id === v.assigned_to)?.employee_number || v.assigned_to}</div>}
+              {v.assigned_to && (() => { const oe = employees.find((e) => e.id === v.assigned_to); return (
+                <div className="mb-3">
+                  <div className="text-sm font-medium">{oe?.full_name || v.assigned_to}</div>
+                  <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{oe?.national_id || "—"}</div>
+                </div>
+              ); })()}
               <div className="space-y-2 text-sm">
                 <ExpiryRow icon={Shield} label={t.insurance} date={v.insurance_expiry} t={t} />
                 <ExpiryRow icon={FileText} label={t.license} date={v.license_expiry} t={t} />
@@ -126,7 +131,7 @@ export default function Fleet() {
               <In label={t.owner}>
                 <Select value={form.assigned_to} onValueChange={(v) => set("assigned_to", v)}>
                   <SelectTrigger><SelectValue placeholder={t.noneItem} /></SelectTrigger>
-                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}</SelectContent>
+                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"}</SelectItem>)}</SelectContent>
                 </Select>
               </In>
               <In label={t.status}>

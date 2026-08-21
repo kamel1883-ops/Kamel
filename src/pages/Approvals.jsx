@@ -529,6 +529,12 @@ export default function Approvals() {
       <Dialog open={acting?.action === "reject"} onOpenChange={() => setActing(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{t.rejectTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="pb-3">
+              <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+              <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+            </div>
+          )}
           <div className="space-y-3">
             <Label className="text-xs font-medium text-muted-foreground">{t.rejectReason}</Label>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
@@ -547,6 +553,10 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.payTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
+              <div className="pb-1">
+                <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+                <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+              </div>
               <div className="text-sm text-muted-foreground">
                 {acting.type === "leaves" ? t.leavePay(acting.req.ticket_amount) : t.loanPay(acting.req.amount)}
               </div>
@@ -590,6 +600,10 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.loanPayTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
+              <div className="pb-1">
+                <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+                <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+              </div>
               <div className="grid grid-cols-3 gap-3 text-sm">
                 <div className="rounded-lg bg-slate-50 p-2.5">
                   <div className="text-xs text-muted-foreground">{t.totalLoan}</div>
@@ -625,6 +639,10 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.leaveHrTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
+              <div className="pb-1">
+                <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+                <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+              </div>
               <div className="text-sm text-muted-foreground">{leaveTypeLabel(acting.req.leave_type)} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}</div>
               {acting.req.medical_report_url && <a href={safeHref(acting.req.medical_report_url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
               {(() => {
@@ -732,6 +750,10 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.tripApproveTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
+              <div className="pb-1">
+                <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+                <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+              </div>
               <div className="text-sm text-muted-foreground">
                 {acting.req.trip_type === "external" ? t.tripExt : t.tripInt} — {acting.req.destination} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}
               </div>
@@ -758,6 +780,12 @@ export default function Approvals() {
       <Dialog open={acting?.action === "tripreject"} onOpenChange={() => setActing(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{t.tripRejectTitle}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="pb-3">
+              <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+              <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+            </div>
+          )}
           <div className="space-y-3">
             <Label className="text-xs font-medium text-muted-foreground">{t.rejectReason}</Label>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
@@ -776,6 +804,10 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.tripFinTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
+              <div className="pb-1">
+                <div className="font-medium text-sm">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name}</div>
+                <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
+              </div>
               <div className="text-sm text-muted-foreground">
                 {acting.req.destination} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}
                 {acting.req.total_cost > 0 && <> · {t.tripCost(acting.req.total_cost)}</>}

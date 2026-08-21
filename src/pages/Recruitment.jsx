@@ -28,15 +28,18 @@ export default function Recruitment() {
   const [shareJob, setShareJob] = useState(null);
 
   const [evalMap, setEvalMap] = useState({});
+  const [employees, setEmployees] = useState([]);
   const load = async () => {
     setLoading(true);
     try {
-      const [j, apps, evals] = await Promise.all([
+      const [j, apps, evals, emps] = await Promise.all([
         base44.entities.Job.list("-created_date", 200),
         base44.entities.JobApplication.filter({ status: "hired" }, "-hired_date", 500),
         base44.entities.TrialEvaluation.list("-created_date", 500),
+        base44.entities.Employee.list("-created_date", 1000),
       ]);
       setJobs(j || []);
+      setEmployees(emps || []);
       const em = {};
       (evals || []).forEach((t) => {
         const k = t.applicant_id;
@@ -51,6 +54,8 @@ export default function Recruitment() {
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
+
+  const empNat = (a) => employees.find((e) => e.id === a.hired_employee_id)?.national_id || "";
 
   const openNew = () => { setEditingJob(null); setJobDialog(true); };
   const openEdit = (j) => { setEditingJob(j); setJobDialog(true); };
@@ -88,6 +93,7 @@ export default function Recruitment() {
               <thead className="bg-muted/60 text-muted-foreground">
                 <tr>
                   <th className="text-right font-semibold px-3 py-2.5">الموظف</th>
+                  <th className="text-right font-semibold px-3 py-2.5">الهوية/الإقامة</th>
                   <th className="text-right font-semibold px-3 py-2.5">الوظيفة</th>
                   <th className="text-right font-semibold px-3 py-2.5">تاريخ التعيين</th>
                   <th className="text-right font-semibold px-3 py-2.5">نهاية فترة التجربة (٩٠ يوماً)</th>
@@ -104,6 +110,7 @@ export default function Recruitment() {
                   return (
                     <tr key={a.id} className="border-t hover:bg-muted/40">
                       <td className="px-3 py-2.5 font-medium">{a.full_name}</td>
+                      <td className="px-3 py-2.5 text-xs tabular-nums" dir="ltr">{empNat(a) || "—"}</td>
                       <td className="px-3 py-2.5 text-muted-foreground">{a.job_title}</td>
                       <td className="px-3 py-2.5">{a.hired_date}</td>
                       <td className="px-3 py-2.5">{end}</td>

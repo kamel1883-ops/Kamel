@@ -112,11 +112,23 @@ export default function Training() {
                   {p.scope === "department" ? <span>جهة/قسم: {p.department || "—"}</span> : <span>نطاق فردي</span>}
                   {count > 0 && <span className="mx-2">· {count} مشمول</span>}
                 </div>
-                {names && (
-                  <div className="text-xs text-slate-700 bg-muted/40 rounded-lg p-2 max-h-20 overflow-y-auto" dir="rtl">
-                    <span className="font-medium text-muted-foreground">المشمولون: </span>{names}
-                  </div>
-                )}
+                {(() => {
+                  const ids = parseIds(p.employee_ids);
+                  const list = ids.length ? ids : (p.employee_id ? [p.employee_id] : []);
+                  const rows = list.map((id) => employees.find((e) => e.id === id)).filter(Boolean);
+                  if (rows.length === 0 && !names) return null;
+                  return (
+                    <div className="text-xs text-slate-700 bg-muted/40 rounded-lg p-2 max-h-24 overflow-y-auto" dir="rtl">
+                      <div className="font-medium text-muted-foreground mb-1">المشمولون:</div>
+                      {rows.length > 0 ? rows.map((e) => (
+                        <div key={e.id} className="py-0.5">
+                          <div>{e.full_name}</div>
+                          <div className="text-muted-foreground tabular-nums" dir="ltr">{e.national_id || "—"}</div>
+                        </div>
+                      )) : <div>{names}</div>}
+                    </div>
+                  );
+                })()}
                 {p.goal && <div className="text-sm text-muted-foreground line-clamp-2">الهدف: {p.goal}</div>}
                 <div className="flex items-center justify-between mt-2 pt-2 border-t">
                   <span className="text-xs text-muted-foreground">{p.cost ? `${p.cost} ريال` : ""} {p.start_date ? `· ${p.start_date}` : ""}</span>

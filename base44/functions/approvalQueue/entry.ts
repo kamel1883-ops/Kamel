@@ -45,6 +45,17 @@ export default async function (req) {
     const myUn = String(myEmp.unified_number || "").trim();
     const sameTenant = (rec) => !!myUn && idToUn.get(rec.employee_id) === myUn;
 
+    const idToNat = new Map();
+    const idToName = new Map();
+    for (const e of allEmployees || []) {
+      if (e.id) { idToNat.set(e.id, e.national_id || ""); idToName.set(e.id, e.full_name || ""); }
+    }
+    const withNat = (arr) => (arr || []).map((r) => ({
+      ...r,
+      national_id: r.national_id || idToNat.get(r.employee_id) || "",
+      employee_name: r.employee_name || idToName.get(r.employee_id) || "",
+    }));
+
     if (myEmp.is_approver_manager) {
       const subs = (allEmployees || []).filter((e) => e.manager_id === myEmp.id);
       const subIds = new Set(subs.map((s) => s.id));
@@ -56,8 +67,8 @@ export default async function (req) {
         role: "manager",
         myEmp,
         actorId, actorName,
-        subordinates: subs.map((s) => ({ id: s.id, full_name: s.full_name, department: s.department, position: s.position })),
-        leaves,
+        subordinates: subs.map((s) => ({ id: s.id, full_name: s.full_name, department: s.department, position: s.position, national_id: s.national_id || "" })),
+        leaves: withNat(leaves),
         message: subs.length === 0 ? "لا يوجد مرؤوسون مربوطون بك حالياً." : null,
       });
     }
@@ -70,7 +81,7 @@ export default async function (req) {
       ]);
       const loans = (allLoans || []).filter((l) => l.status === "pending" && sameTenant(l));
       const trips = (allTrips || []).filter((t) => t.status === "pending" && sameTenant(t));
-      return Response.json({ role: "hr", myEmp, actorId, actorName, loans, trips });
+      return Response.json({ role: "hr", myEmp, actorId, actorName, loans: withNat(loans), trips: withNat(trips) });
     }
 
     if (myEmp.is_approver_finance) {
@@ -85,7 +96,7 @@ export default async function (req) {
       const loans = (allLoans || []).filter((l) => finStatuses.includes(l.status) && sameTenant(l));
       const trips = (allTrips || []).filter((t) => t.status === "awaiting_finance" && sameTenant(t));
       const settlements = (allSettlements || []).filter((s) => s.status === "awaiting_finance" && sameTenant(s));
-      return Response.json({ role: "finance", myEmp, actorId, actorName, leaves, loans, trips, settlements });
+      return Response.json({ role: "finance", myEmp, actorId, actorName, leaves: withNat(leaves), loans: withNat(loans), trips: withNat(trips), settlements: withNat(settlements) });
     }
 
     return Response.json({ role: "none" });

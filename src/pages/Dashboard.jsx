@@ -42,6 +42,7 @@ export default function Dashboard() {
   const [recentLeaves, setRecentLeaves] = useState([]);
   const [todayAttendance, setTodayAttendance] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -60,6 +61,7 @@ export default function Dashboard() {
     });
     setRecentLeaves(leaves.slice(0, 5));
     setTodayAttendance(attendance);
+    setEmployees(emps);
     setAlerts(buildAlerts(emps, vehicles, isAr, t));
     setLoading(false);
   };
@@ -94,6 +96,7 @@ export default function Dashboard() {
                   <a.icon size={16} className="shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate">{a.title}</div>
+                    {a.nat ? <div className="text-[11px] opacity-70 tabular-nums" dir="ltr">{a.nat}</div> : null}
                     <div className="text-xs opacity-80">{a.label} · {a.date}</div>
                   </div>
                   <span className="text-xs font-bold shrink-0">{sev.label}</span>
@@ -116,6 +119,7 @@ export default function Dashboard() {
               <div key={l.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                 <div className="min-w-0">
                   <div className="text-sm font-medium truncate">{l.employee_name || t.emp}</div>
+                  {(() => { const ee = employees.find((q) => q.id === l.employee_id); return ee?.national_id ? <div className="text-[11px] text-muted-foreground tabular-nums" dir="ltr">{ee.national_id}</div> : null; })()}
                   <div className="text-xs text-muted-foreground">{leaveTypeLabel(l.leave_type)} · {t.day(l.days_count)}</div>
                 </div>
                 <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors(l.status)}`}>
@@ -153,9 +157,9 @@ function buildAlerts(emps, vehicles, isAr, t) {
     return `${plate || ""} - ${brand || ""} ${model || ""}`.trim();
   };
   emps.forEach((e) => {
-    if (e.iqama_expiry) out.push({ id: e.id + "-iqama", icon: IdCard, title: `${e.employee_number} - ${e.position}`, label: t.iqama, date: e.iqama_expiry });
-    if (e.passport_expiry) out.push({ id: e.id + "-pp", icon: IdCard, title: `${e.employee_number} - ${e.position}`, label: t.passp, date: e.passport_expiry });
-    if (e.health_insurance_expiry) out.push({ id: e.id + "-hi", icon: Shield, title: `${e.employee_number} - ${e.position}`, label: t.med, date: e.health_insurance_expiry });
+    if (e.iqama_expiry) out.push({ id: e.id + "-iqama", icon: IdCard, title: `${e.full_name}`, nat: e.national_id || "", label: t.iqama, date: e.iqama_expiry });
+    if (e.passport_expiry) out.push({ id: e.id + "-pp", icon: IdCard, title: `${e.full_name}`, nat: e.national_id || "", label: t.passp, date: e.passport_expiry });
+    if (e.health_insurance_expiry) out.push({ id: e.id + "-hi", icon: Shield, title: `${e.full_name}`, nat: e.national_id || "", label: t.med, date: e.health_insurance_expiry });
   });
   vehicles.forEach((v) => {
     const title = vTitle(v);

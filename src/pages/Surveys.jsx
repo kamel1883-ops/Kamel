@@ -94,7 +94,7 @@ export default function Surveys() {
     const payload = {
       survey_id: s.id, survey_title: s.title,
       employee_id: rForm.anonymous ? "" : rForm.employee_id,
-      employee_name: rForm.anonymous ? "" : (emp ? `${emp.employee_number} - ${emp.position}` : ""),
+      employee_name: rForm.anonymous ? "" : (emp ? emp.full_name : ""),
       department: rForm.anonymous ? "" : (emp?.department || ""),
       is_anonymous: rForm.anonymous, submitted_date: new Date().toISOString().slice(0,10),
       responses: JSON.stringify(rForm.answers), avg_rating: avg, overall_sentiment: sentiment,
@@ -189,7 +189,7 @@ export default function Surveys() {
               <In label={t.dep === "Target department" ? "Employee" : "الموظف"}>
                 <Select value={rForm.employee_id} onValueChange={(v) => setRForm((f) => ({ ...f, employee_id: v }))}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}</SelectContent>
+                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"}</SelectItem>)}</SelectContent>
                 </Select>
               </In>
             )}

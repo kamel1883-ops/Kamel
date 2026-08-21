@@ -56,7 +56,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
       const payload = {
         ...form,
         employee_user_id: emp?.user_id || "",
-        employee_name: emp ? `${emp.employee_number} - ${emp.position}` : "",
+        employee_name: emp ? emp.full_name : "",
         days_count: days, is_full_clearance: form.is_full_clearance,
         medical_report_url: medical_url, status: "pending_manager",
         manager_status: "pending", hr_status: "pending", finance_status: "pending",
@@ -82,7 +82,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
               <SelectTrigger><SelectValue placeholder={t.choose} /></SelectTrigger>
               <SelectContent>
                 {(employees || []).map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>{emp.employee_number} - {emp.position} - {emp.department}</SelectItem>
+                  <SelectItem key={emp.id} value={emp.id}>{emp.full_name} — {emp.national_id || "—"} {emp.department ? `· ${emp.department}` : ""}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

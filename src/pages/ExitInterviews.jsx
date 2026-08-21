@@ -61,7 +61,7 @@ export default function ExitInterviews() {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const onEmployee = (id) => {
     const e = employees.find((x) => x.id === id);
-    setForm((f) => ({ ...f, employee_id: id, employee_name: e ? `${e.employee_number} - ${e.position}` : "", department: e?.department || "", position: e?.position || "" }));
+    setForm((f) => ({ ...f, employee_id: id, employee_name: e ? e.full_name : "", department: e?.department || "", position: e?.position || "" }));
   };
   const startAdd = () => { setEditing(null); setForm(empty); setOpen(true); };
   const startEdit = (x) => { setEditing(x); setForm({ ...empty, ...x }); setOpen(true); };
@@ -92,6 +92,7 @@ export default function ExitInterviews() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-bold truncate">{x.employee_name || t.emp}</div>
+                    {(() => { const ee = employees.find((q) => q.id === x.employee_id); return ee?.national_id ? <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{ee.national_id}</div> : null; })()}
                     <div className="text-xs text-muted-foreground mt-0.5">{xL(x.exit_type)} · {rL(x.primary_reason)} · {x.interview_date}</div>
                   </div>
                   <div className="flex gap-1 shrink-0">
@@ -146,7 +147,7 @@ export default function ExitInterviews() {
               <In label={t.emp}>
                 <Select value={form.employee_id} onValueChange={onEmployee}>
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}</SelectContent>
+                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"}</SelectItem>)}</SelectContent>
                 </Select>
               </In>
               <In label={t.type}>

@@ -130,7 +130,7 @@ export default function Attendance() {
             <Select value={newRec.employee_id} onValueChange={(v) => setNewRec({ ...newRec, employee_id: v })}>
               <SelectTrigger><SelectValue placeholder={t.choose} /></SelectTrigger>
               <SelectContent>
-                {employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}
+                {employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -171,10 +171,7 @@ export default function Attendance() {
               <tbody className="divide-y divide-border">
                 {filtered.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium">
-                      {r.employee_name}
-                      <span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "")}</span>
-                    </td>
+                    <td className="px-4 py-3 font-medium">{r.employee_name}</td>
                     <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground" dir="ltr">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "—")}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{r.branch_name || "—"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_in || "-"}</td>

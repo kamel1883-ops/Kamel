@@ -85,7 +85,10 @@ export default function ApprovalsPortal({ portalSession }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-sm">{r.employee_name || "—"}</span>
+            <div>
+              <div className="font-medium text-sm">{r.employee_name || "—"}</div>
+              {r.national_id && <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{r.national_id}</div>}
+            </div>
             {kindBadge || (
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                 {r.leave_type ? leaveTypeLabel(r.leave_type) : t.loan}
@@ -248,7 +251,10 @@ export default function ApprovalsPortal({ portalSession }) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">{r.employee_name || "—"}</span>
+                      <div>
+                        <div className="font-medium text-sm">{r.employee_name || "—"}</div>
+                        {r.national_id && <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{r.national_id}</div>}
+                      </div>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{t.eosBadge}</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
