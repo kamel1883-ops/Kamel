@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart3, TrendingDown, UserCheck, CalendarCheck, FileBadge, Building2, ShieldAlert, Wallet, ShieldCheck } from "lucide-react";
+import { BarChart3, TrendingDown, UserCheck, CalendarCheck, FileBadge, Building2, ShieldAlert, Wallet, ShieldCheck, FileSignature } from "lucide-react";
 
 const NAVY = "#0A1629";
 const NAVY2 = "#0e1f3a";
@@ -71,8 +71,8 @@ export default function ReportsAnalytics({ Section, Heading }) {
     },
     {
       icon: FileBadge,
-      label: "تراخيص حكومية منتهية",
-      desc: "تنبيه قبل انتهاء الرخص",
+      label: "تراخيص حكومية غاربة على الانتهاء",
+      desc: "تنبيه استباقي قبل انتهاء الرخص",
       render: () => (
         <div className="bg-white rounded-xl p-3 border border-slate-200">
           <div className="text-[10px] text-slate-400 mb-2">تراخيص قاربت الانتهاء</div>
@@ -91,23 +91,41 @@ export default function ReportsAnalytics({ Section, Heading }) {
     },
     {
       icon: Building2,
-      label: "الاشتراكات الحكومية",
-      desc: "حالة كل اشتراك حكومي",
+      label: "الاشتراكات الحكومية غاربة على الانتهاء",
+      desc: "تنبيه استباقي قبل انتهاء الاشتراك",
       render: () => (
         <div className="bg-white rounded-xl p-3 border border-slate-200">
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { n: "أبشر أعمال", s: "نشط", c: "#16a34a" },
-              { n: "مقيم", s: "نشط", c: "#16a34a" },
-              { n: "مدد", s: "تنبيه", c: "#fbbf24" },
-              { n: "قوة", s: "نشط", c: "#16a34a" }
-            ].map((r, i) => (
-              <div key={i} className="rounded-lg p-2 text-center" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-                <div className="text-[10px] font-bold text-slate-700">{r.n}</div>
-                <div className="text-[9px] mt-0.5" style={{ color: r.c }}>{r.s}</div>
-              </div>
-            ))}
-          </div>
+          <div className="text-[10px] text-slate-400 mb-2">اشتراكات قاربت الانتهاء</div>
+          {[
+            { n: "مقيم", d: "بعد 8 أيام", warn: true },
+            { n: "مدد", d: "بعد 15 يوم", warn: true },
+            { n: "أبشر أعمال", d: "بعد 21 يوم", warn: true }
+          ].map((r, i) => (
+            <div key={i} className="flex items-center justify-between text-[11px] py-1.5 border-b border-slate-100 last:border-0">
+              <span className="text-slate-700 font-medium">{r.n}</span>
+              <span className="font-bold" style={{ color: "#fbbf24" }}>{r.d}</span>
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      icon: FileSignature,
+      label: "عقود العمل غاربة على الانتهاء",
+      desc: "تنبيه استباقي قبل انتهاء العقود",
+      render: () => (
+        <div className="bg-white rounded-xl p-3 border border-slate-200">
+          <div className="text-[10px] text-slate-400 mb-2">عقود قاربت الانتهاء</div>
+          {[
+            { n: "خالد المغربي", d: "بعد 12 يوم", warn: true },
+            { n: "سارة العتيبي", d: "بعد 30 يوم", warn: true },
+            { n: "فهد النعيمي", d: "بعد 45 يوم", warn: false }
+          ].map((r, i) => (
+            <div key={i} className="flex items-center justify-between text-[11px] py-1.5 border-b border-slate-100 last:border-0">
+              <span className="text-slate-700 font-medium">{r.n}</span>
+              <span className="font-bold" style={{ color: r.warn ? "#dc2626" : "#fbbf24" }}>{r.d}</span>
+            </div>
+          ))}
         </div>
       )
     },
@@ -180,7 +198,7 @@ export default function ReportsAnalytics({ Section, Heading }) {
 
   return (
     <Section tint="light" heading={<Heading icon={<BarChart3 />} title="التقارير والتحليلات" sub="لوحة قيادة تحليلية متكاملة لصانع القرار — صور شاشة فعلية لكل تقرير" />}>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {reports.map((r, k) => {
           const I = r.icon;
           return (
