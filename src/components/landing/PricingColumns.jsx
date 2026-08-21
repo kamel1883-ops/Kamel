@@ -4,16 +4,17 @@ import {
 } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 
-// قسم الباقات — بهوية اللون المرجعية للصورة: سماوي #00B8D4 / كحلي #0A1629 / رمادي فاتح #F7FAFC.
+// قسم الباقات — بهوية جدارة اللونية: كحلي عميق #0B2545 + ذهبي راقٍ #CBA83A.
 // التخطيط: قائمة عمودية واحدة للشرائح الخمس (كل شريحة صف كامل) + بطاقة التجربة المجانية أسفلهم.
 // خطوط أكبر ومساحة عرض أوسع بدل six cramped columns.
-const CYAN = "#00B8D4";
-const CYAN_DARK = "#0E7490";
-const NAVY = "#0A1629";
+const GOLD = "#CBA83A";
+const GOLD_DARK = "#9A741E";
+const GOLD_SOFT = "#FBF7EC";
+const GOLD_LIGHT = "#EBD69E";
+const NAVY = "#0B2545";
 const GREY = "#4A5568";
 const CARD = "#F7FAFC";
 const BORDER = "#E2E8F0";
-const CYAN_SOFT = "#ECFEFF";
 
 export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier }) {
   const tiers = isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN;
@@ -24,15 +25,15 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
 
   return (
     <section id="pricing" className="max-w-[1400px] mx-auto px-4 lg:px-10 py-14">
-      <div className="bg-white rounded-[2rem] p-6 sm:p-10 text-[#0A1629] shadow-xl shadow-black/10 border border-[#E2E8F0]">
+      <div className="bg-white rounded-[2rem] p-6 sm:p-10 text-[#0B2545] shadow-xl shadow-black/10 border border-[#E2E8F0]">
         {/* ترويسة */}
         <div className="text-center max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-1.5" style={{ background: CYAN_SOFT, color: CYAN_DARK }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: CYAN }} />
+          <span className="inline-flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-1.5" style={{ background: GOLD_SOFT, color: GOLD_DARK }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: GOLD }} />
             {isAr ? "• باقات الاشتراك السنوي" : "• Annual subscription plans"}
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold mt-5 mb-3" style={{ fontFamily: "var(--font-display)", color: NAVY }}>
-            {isAr ? <>اختر الباقة المناسبة <span style={{ color: CYAN_DARK }}>لمؤسستك</span></> : <>Choose the plan that fits <span style={{ color: CYAN_DARK }}>your organization</span></>}
+            {isAr ? <>اختر الباقة المناسبة <span style={{ color: GOLD_DARK }}>لمؤسستك</span></> : <>Choose the plan that fits <span style={{ color: GOLD_DARK }}>your organization</span></>}
           </h2>
           <p className="text-base leading-relaxed" style={{ color: GREY }}>
             {isAr ? "كل باقة تشمل جميع ميزات المنصة كاملة — الفرق في شريحة عدد الموظفين والسعر السنوي فقط." : "Every plan includes the full feature set — only the headcount tier and annual price differ."}
@@ -49,14 +50,14 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                 className="rounded-2xl p-5 sm:p-6 flex flex-col lg:flex-row lg:items-stretch gap-5 transition hover:shadow-lg"
                 style={{
                   background: CARD,
-                  border: featured ? `2px solid ${CYAN}` : `1px solid ${BORDER}`,
-                  boxShadow: featured ? "0 10px 30px -12px rgba(0,184,212,.35)" : "0 1px 3px rgba(16,24,40,.04)",
+                  border: featured ? `2px solid ${GOLD}` : `1px solid ${BORDER}`,
+                  boxShadow: featured ? "0 10px 30px -12px rgba(201,168,58,.35)" : "0 1px 3px rgba(16,24,40,.04)",
                 }}
               >
                 {/* Zone 1: هوية الشريحة */}
                 <div className="lg:w-[260px] lg:shrink-0 flex flex-col justify-center">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 text-sm font-bold rounded-full px-3 py-1" style={{ background: CYAN_SOFT, color: CYAN_DARK }}>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-bold rounded-full px-3 py-1" style={{ background: GOLD_SOFT, color: GOLD_DARK }}>
                       <Sparkles size={14} /> {t.tier}
                     </span>
                     {featured && (
@@ -91,7 +92,7 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span style={{ color: GREY }}>{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
-                      <span className="font-extrabold" style={{ color: CYAN_DARK }}>
+                      <span className="font-extrabold" style={{ color: GOLD_DARK }}>
                         {t.custom ? (isAr ? "تأطير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
                       </span>
                     </div>
@@ -104,7 +105,7 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1.5">
                     {feats.map((f, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm leading-relaxed">
-                        <Check size={15} className="mt-0.5 shrink-0" strokeWidth={3} style={{ color: CYAN }} />
+                        <Check size={15} className="mt-0.5 shrink-0" strokeWidth={3} style={{ color: GOLD }} />
                         <span className="font-medium" style={{ color: GREY }}>{f}</span>
                       </li>
                     ))}
@@ -116,8 +117,8 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                   <button
                     type="button"
                     onClick={() => onBuyTier?.(t)}
-                    className="w-full rounded-xl py-3.5 text-base font-bold text-white inline-flex items-center justify-center gap-2 transition hover:brightness-95 shadow-md"
-                    style={{ background: CYAN, boxShadow: `0 8px 20px -8px ${CYAN}` }}
+                    className="w-full rounded-xl py-3.5 text-base font-bold text-white inline-flex items-center justify-center gap-2 transition hover:brightness-110 shadow-md"
+                    style={{ background: NAVY, boxShadow: `0 8px 20px -8px ${NAVY}` }}
                   >
                     <Zap size={18} />
                     {isAr ? "شراء الباقة" : "Buy plan"}
@@ -129,10 +130,10 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
         </div>
 
         {/* بطاقة التجربة المجانية — أسفل القائمة، بعرض كامل بأسلوب الصورة المرجعية */}
-        <div className="mt-6 rounded-2xl overflow-hidden flex flex-col lg:flex-row" style={{ border: `2px solid ${NAVY}`, background: "#fff", boxShadow: "0 18px 40px -18px rgba(10,22,41,.35)" }}>
+        <div className="mt-6 rounded-2xl overflow-hidden flex flex-col lg:flex-row" style={{ border: `2px solid ${NAVY}`, background: "#fff", boxShadow: "0 18px 40px -18px rgba(11,37,69,.35)" }}>
           {/* يمين: هوية التجربة */}
           <div className="lg:w-[320px] p-6 sm:p-8 flex flex-col justify-center" style={{ background: NAVY, color: "#fff" }}>
-            <span className="inline-flex items-center gap-1.5 self-start text-sm font-bold rounded-full px-3 py-1" style={{ background: "rgba(0,184,212,.18)", color: "#67E8F9" }}>
+            <span className="inline-flex items-center gap-1.5 self-start text-sm font-bold rounded-full px-3 py-1" style={{ background: "rgba(201,168,58,.22)", color: GOLD_LIGHT }}>
               <Gift size={14} /> {isAr ? "مجاناً" : "Free"}
             </span>
             <div className="mt-4 flex items-end gap-1.5">
@@ -144,16 +145,16 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
               {isAr ? "تجربة مجانية 30 يوماً" : "30-day free trial"}
             </h3>
             <div className="flex items-center flex-wrap gap-3 mt-3 text-xs" style={{ color: "#CBD5E0" }}>
-              <span className="inline-flex items-center gap-1"><Calendar size={14} style={{ color: "#67E8F9" }} /> {isAr ? "30 يوماً" : "30d"}</span>
-              <span className="inline-flex items-center gap-1"><CreditCard size={14} style={{ color: "#67E8F9" }} /> {isAr ? "بدون بطاقة" : "No card"}</span>
-              <span className="inline-flex items-center gap-1"><Users size={14} style={{ color: "#67E8F9" }} /> {isAr ? "فريق كامل" : "Team"}</span>
+              <span className="inline-flex items-center gap-1"><Calendar size={14} style={{ color: GOLD_LIGHT }} /> {isAr ? "30 يوماً" : "30d"}</span>
+              <span className="inline-flex items-center gap-1"><CreditCard size={14} style={{ color: GOLD_LIGHT }} /> {isAr ? "بدون بطاقة" : "No card"}</span>
+              <span className="inline-flex items-center gap-1"><Users size={14} style={{ color: GOLD_LIGHT }} /> {isAr ? "فريق كامل" : "Team"}</span>
             </div>
           </div>
 
           {/* يسار: المميزات + الزر */}
           <div className="flex-1 p-6 sm:p-8 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles size={18} style={{ color: CYAN }} />
+              <Sparkles size={18} style={{ color: GOLD }} />
               <span className="text-lg font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>
                 {isAr ? "جرّب المنصة كاملة مجاناً" : "Try the full platform free"}
               </span>
@@ -164,7 +165,7 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
             <ul className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-2">
               {feats.slice(0, 9).map((f, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm leading-relaxed">
-                  <Check size={15} className="mt-0.5 shrink-0" strokeWidth={3} style={{ color: CYAN }} />
+                  <Check size={15} className="mt-0.5 shrink-0" strokeWidth={3} style={{ color: GOLD }} />
                   <span className="font-medium" style={{ color: GREY }}>{f}</span>
                 </li>
               ))}
@@ -172,8 +173,8 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
             <button
               type="button"
               onClick={onStartTrial}
-              className="mt-6 self-start inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-bold text-white transition hover:brightness-95 shadow-md"
-              style={{ background: CYAN, boxShadow: `0 8px 20px -8px ${CYAN}` }}
+              className="mt-6 self-start inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-bold text-white transition hover:brightness-110 shadow-md"
+              style={{ background: NAVY, boxShadow: `0 8px 20px -8px ${NAVY}` }}
             >
               <Zap size={18} />
               {isAr ? "ابدأ تجربتك المجانية" : "Start free trial"}

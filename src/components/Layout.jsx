@@ -77,7 +77,7 @@ export default function Layout() {
       {user && <IdleSessionGuard onTimeout={handleLogout} />}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 right-0 h-screen w-72 bg-[#0b1120] text-white z-40 transition-transform duration-300 flex flex-col",
+          "fixed lg:sticky top-0 right-0 h-screen w-72 bg-[#0B2545] text-white z-40 transition-transform duration-300 flex flex-col",
           open ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         )}
       >
@@ -98,7 +98,7 @@ export default function Layout() {
                 onClick={() => setOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border-r-2",
-                  active ? "bg-[#2e2448] border-violet-300 text-white" : "border-transparent text-white/55 hover:text-white hover:bg-white/5"
+                  active ? "bg-[#16355c] border-violet-300 text-white" : "border-transparent text-white/55 hover:text-white hover:bg-white/5"
                 )}
               >
                 <Icon size={19} className={active ? "text-violet-200" : "text-white/50"} />
@@ -131,7 +131,7 @@ export default function Layout() {
       {open && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setOpen(false)} />}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="lg:hidden h-16 bg-[#0b1120] text-white border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-20" style={{ paddingTop: "max(env(safe-area-inset-top), 0px)" }}>
+        <header className="lg:hidden h-16 bg-[#0B2545] text-white border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-20" style={{ paddingTop: "max(env(safe-area-inset-top), 0px)" }}>
           <div className="flex items-center gap-2.5">
             {location.pathname !== "/app" && location.pathname !== "/" && (
               <button onClick={() => navigate(-1)} className="text-white/80 active:scale-95 transition" aria-label="back">
@@ -164,7 +164,7 @@ export default function Layout() {
           </div>
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0b1120]/95 backdrop-blur border-t border-white/10 flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0B2545]/95 backdrop-blur border-t border-white/10 flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           {bottomNav.map((item) => {
             const Icon = item.icon;
             const active = item.to === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.to);

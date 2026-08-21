@@ -73,7 +73,7 @@ export default function FeatureLanding({ content }) {
   }, [c, content.path, isAr]);
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-[#0B2545] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
         <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
@@ -95,7 +95,7 @@ export default function FeatureLanding({ content }) {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{isAr ? "بوابة الشركات" : "Company Portal"}</Link>
-            <Link to="/quote" className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition inline-flex items-center gap-1.5">
+            <Link to="/quote" className="text-sm bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-4 py-2 rounded-xl font-medium text-[#0B2545] shadow-lg shadow-amber-600/30 transition inline-flex items-center gap-1.5">
               <Zap size={15} /> {isAr ? "ابدأ الآن" : "Get Started"}
             </Link>
           </div>
@@ -110,11 +110,11 @@ export default function FeatureLanding({ content }) {
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
             {c.titlePre}{" "}
-            <span className="bg-gradient-to-l from-violet-300 via-indigo-300 to-blue-300 bg-clip-text text-transparent">{c.titleHi}</span>
+            <span className="bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{c.titleHi}</span>
           </h1>
           <p className="text-white/70 text-lg mt-6 max-w-3xl mx-auto leading-relaxed">{c.hero}</p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">
-            <Link to="/quote" className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-500/30 inline-flex items-center gap-2 transition">
+            <Link to="/quote" className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 inline-flex items-center gap-2 transition">
               <Zap size={18} /> {c.ctaPrimary}
             </Link>
             <Link to="/" className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium transition inline-flex items-center gap-1.5">
@@ -125,10 +125,10 @@ export default function FeatureLanding({ content }) {
 
         {c.heroImg && (
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative mt-12 max-w-4xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-blue-500/20 rounded-[2rem] blur-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/30 to-indigo-500/20 rounded-[2rem] blur-2xl" />
             <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
               <img src={c.heroImg} alt={c.titleHi} className="w-full h-[340px] object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0b1120] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-transparent to-transparent" />
             </div>
           </motion.div>
         )}
@@ -162,7 +162,7 @@ export default function FeatureLanding({ content }) {
               const I = f.icon;
               return (
                 <motion.div key={f.t} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                  className="bg-[#13161f] hover:bg-[#171b29] border border-white/10 rounded-3xl p-6 transition-all hover:-translate-y-1">
+                  className="bg-[#14315a] hover:bg-[#173466] border border-white/10 rounded-3xl p-6 transition-all hover:-translate-y-1">
                   <div className="w-12 h-12 rounded-2xl bg-[#37376c] border border-white/10 flex items-center justify-center mb-4 shadow-lg shadow-indigo-950/50">
                     <I size={22} className="text-white" />
                   </div>
@@ -218,12 +218,12 @@ export default function FeatureLanding({ content }) {
 
       {/* دعوة لاتخاذ إجراء */}
       <section className="max-w-5xl mx-auto px-5 py-14">
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/25 via-indigo-600/15 to-blue-600/25 p-8 sm:p-10 text-center">
+        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/25 via-indigo-600/15 to-amber-500/15 p-8 sm:p-10 text-center">
           <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
           <h2 className="relative text-2xl sm:text-3xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{c.ctaTitle}</h2>
           <p className="relative text-white/70 mt-3 max-w-2xl mx-auto">{c.ctaDesc}</p>
           <div className="relative flex flex-wrap justify-center gap-3 mt-7">
-            <Link to="/quote" className="bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl inline-flex items-center gap-2 transition">
+            <Link to="/quote" className="bg-white text-[#0B2545] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl inline-flex items-center gap-2 transition">
               <Zap size={18} /> {c.ctaPrimary}
             </Link>
             <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition">

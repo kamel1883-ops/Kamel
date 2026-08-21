@@ -234,7 +234,7 @@ export default function Landing() {
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-[#0B2545] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
       <AssistantAvatar mode="public" tone="dark" lang={lang} />
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
@@ -260,7 +260,7 @@ export default function Landing() {
             <LanguageToggle />
             <Link to="/portal" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
             <Link to="/company-login" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.login}</Link>
-            <button onClick={() => navigate("/quote")} className="text-base bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-violet-500/30 transition">{t.start}</button>
+            <button onClick={() => navigate("/quote")} className="text-base bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-5 py-2.5 rounded-xl font-semibold text-[#0B2545] shadow-lg shadow-amber-600/30 transition">{t.start}</button>
           </div>
         </div>
       </header>
@@ -273,11 +273,11 @@ export default function Landing() {
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
             <span className="block whitespace-nowrap">{t.titlePre}</span>
-            <span className="block whitespace-nowrap bg-gradient-to-l from-violet-300 via-indigo-300 to-blue-300 bg-clip-text text-transparent">{t.titleHi}</span>
+            <span className="block whitespace-nowrap bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{t.titleHi}</span>
           </h1>
           <p className="text-white/70 text-lg mt-5 max-w-xl leading-relaxed">{t.heroDesc}</p>
           <div className="flex flex-wrap gap-3 mt-7">
-            <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-500/30 flex items-center gap-2 transition">
+            <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
               <Zap size={18} /> {t.cta1}
             </button>
             <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium transition">{t.cta2}</button>
@@ -288,10 +288,10 @@ export default function Landing() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-blue-500/20 rounded-[2rem] blur-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/30 to-indigo-500/20 rounded-[2rem] blur-2xl" />
           <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
             <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png" alt={isAr ? "فريق عمل سعودي يستخدم منصة جدارة" : "Saudi team using Jadara"} fittingType="fill" className="w-full h-[420px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0b1120] via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-transparent to-transparent" />
           </div>
         </motion.div>
       </section>
@@ -299,7 +299,7 @@ export default function Landing() {
       {/* بوابة الموظف + شبكة الخدمات بمحاذاتها */}
       <section className="max-w-[1600px] mx-auto px-6 lg:px-14 py-8 grid lg:grid-cols-12 gap-6 items-start">
         {/* بوابة الموظف الذاتية */}
-        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-blue-600/20 p-8 sm:p-10">
+        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-amber-500/15 p-8 sm:p-10">
           <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
           <div className="relative flex flex-col gap-6">
             <div className="flex items-start gap-4">
@@ -311,7 +311,7 @@ export default function Landing() {
                 <p className="text-white/70 mt-2 leading-relaxed">{t.portalDesc}</p>
               </div>
             </div>
-            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
+            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-white text-[#0B2545] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
               {t.portalCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
@@ -353,7 +353,7 @@ export default function Landing() {
             const I = c.icon;
             return (
               <motion.div key={c.label} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className="relative bg-[#13161f] border border-white/10 rounded-3xl p-7 overflow-hidden">
+                className="relative bg-[#14315a] border border-white/10 rounded-3xl p-7 overflow-hidden">
                 <div className={`absolute -top-10 -left-10 w-40 h-40 rounded-full bg-gradient-to-br ${c.glow} blur-2xl`} />
                 <div className="relative w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mb-4 shadow-lg">
                   <I size={22} className={c.ring} />
@@ -374,9 +374,9 @@ export default function Landing() {
             const I = f.icon;
             return (
               <motion.div key={f.title} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className="group relative bg-[#13161f] hover:bg-[#171b29] border border-white/10 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden">
+                className="group relative bg-[#14315a] hover:bg-[#173466] border border-white/10 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden">
                 <div className="absolute top-7 left-6 h-8 w-8 rounded-full bg-violet-500/0 group-hover:bg-violet-500/10 blur-xl transition-all" />
-                <div className="relative w-12 h-12 rounded-2xl bg-[#37376c] border border-white/10 flex items-center justify-center mb-4 shadow-lg shadow-indigo-950/50">
+                <div className="relative w-12 h-12 rounded-2xl bg-[#1E3B66] border border-white/10 flex items-center justify-center mb-4 shadow-lg shadow-indigo-950/50">
                   <I size={22} className="text-white" />
                 </div>
                 <div className="relative font-semibold text-lg leading-snug">{f.title}</div>
@@ -551,7 +551,7 @@ function SectionHead({ tag, title }) {
 function Stat({ n, l }) {
   return (
     <div>
-      <div className="text-2xl font-extrabold bg-gradient-to-l from-violet-300 to-blue-300 bg-clip-text text-transparent">{n}</div>
+      <div className="text-2xl font-extrabold bg-gradient-to-l from-[#DBC364] to-[#EBD69E] bg-clip-text text-transparent">{n}</div>
       <div className="text-white/50 text-xs mt-0.5">{l}</div>
     </div>
   );
