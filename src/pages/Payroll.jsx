@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { printReport } from "@/lib/reportPrint";
+import { isWpsRajhiTenant, downloadWpsRajhiExcel, downloadWpsRajhiTxt, validateWpsRajhiIbans } from "@/lib/wpsRajhi";
 
 export default function Payroll() {
   const { lang } = useI18n();
@@ -261,6 +262,25 @@ export default function Payroll() {
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   };
 
+  const wpsRajhi = isWpsRajhiTenant(org);
+
+  // تصدير قالب بنك الراجحي WPS — مخصص لشركة آل معيض المحدودة فقط
+  const onRajhiExcel = () => {
+    const paid = payrolls.filter((p) => p.status === "paid" && p.include_in_payroll !== false);
+    if (paid.length === 0) { alert(isAr ? "لا توجد رواتب مصروفة لتعبئة قالب البنك." : "No paid salaries to fill the bank template."); return; }
+    const v = validateWpsRajhiIbans(paid, employees);
+    if (v.fail.length) {
+      alert((isAr ? "يوجد آيبان ناقص/خطأ للموظفين التالية — صحّحها من ملف الموظف قبل التصدير:\n" : "Invalid/missing IBANs — fix them in the employee record before export:\n") + v.fail.map((f) => `• ${f.name} (${f.iban || "—"})`).join("\n"));
+      return;
+    }
+    downloadWpsRajhiExcel({ paidPayrolls: paid, employees, month, year });
+  };
+  const onRajhiFile = () => {
+    const paid = payrolls.filter((p) => p.status === "paid" && p.include_in_payroll !== false);
+    if (paid.length === 0) { alert(isAr ? "لا توجد رواتب مصروفة لإنشاء ملف البنك." : "No paid salaries to create the bank file."); return; }
+    downloadWpsRajhiTxt({ paidPayrolls: paid, employees, month, year });
+  };
+
   const includedPayrolls = payrolls.filter((p) => p.include_in_payroll !== false);
   const excludedPayrolls = payrolls.filter((p) => p.include_in_payroll === false);
   const includedCount = includedPayrolls.length;
@@ -331,8 +351,17 @@ export default function Payroll() {
             {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
             <Button onClick={() => exportPdf({ draft: true })} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printDraft}</Button>
             <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
-            <Button onClick={() => exportWps()} disabled={paidCount === 0} variant="outline" className="gap-2"><Shield size={16} /> {t.wps}</Button>
-            <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
+            {wpsRajhi ? (
+              <>
+                <Button onClick={onRajhiExcel} disabled={paidCount === 0} variant="outline" className="gap-2 border-amber-300 text-amber-800 hover:bg-amber-50"><Shield size={16} /> {isAr ? "قالب بنك الراجحي (Excel)" : "Al Rajhi WPS (Excel)"}</Button>
+                <Button onClick={onRajhiFile} disabled={paidCount === 0} variant="outline" className="gap-2"><FileDown size={16} /> {isAr ? "Create File — ملف البنك" : "Create File — Bank txt"}</Button>
+              </>
+            ) : (
+              <>
+                <Button onClick={() => exportWps()} disabled={paidCount === 0} variant="outline" className="gap-2"><Shield size={16} /> {t.wps}</Button>
+                <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
+              </>
+            )}
             </div>
             </div>
             )}
