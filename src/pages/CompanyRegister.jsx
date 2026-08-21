@@ -135,7 +135,12 @@ export default function CompanyRegister() {
       try {
         promoteRes = await base44.functions.invoke("registerTenantAccount", { unified_number: unified.replace(/\D/g, "") });
       } catch (e) {
-        setError(t.promoteErr);
+        const em = String(e?.message || e || "");
+        if (/unified_taken/i.test(em)) {
+          setError(isAr ? "هذا الرقم الموحد مسجّل لمنشأة أخرى على جدارة. لا يمكن استخدامه لتسجيل حساب جديد." : "This unified number is already registered to another organization on Jadara.");
+        } else {
+          setError(t.promoteErr);
+        }
         setLoading(false);
         return;
       }

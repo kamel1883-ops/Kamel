@@ -41,6 +41,11 @@ export default async function (req) {
     );
     let autoCreated = false;
     if (!t) {
+      // الرقم الموحّد مسجّل لمنشأة أخرى ببريد مختلف — نمنع إنشاء سجل مكرّر لتفادي اندماج
+      // بيانات شركتين (وإلا لتمكّن شركة جديدة بنفس الرقم الموحّد من رؤية بيانات الأخرى).
+      if (tenants && tenants.length) {
+        return Response.json({ ok: false, error: 'unified_taken' }, { status: 409 });
+      }
       const today = new Date();
       const trialEnd = new Date(today);
       trialEnd.setDate(trialEnd.getDate() + 30);

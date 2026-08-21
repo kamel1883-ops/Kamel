@@ -40,6 +40,26 @@ export default async function (req) {
     if (!captchaToken) return Response.json({ error: 'التحقق البشري مطلوب' }, { status: 400 });
     if (!(await verifyTurnstile(captchaToken))) return Response.json({ error: 'فشل التحقق البشري' }, { status: 403 });
 
+    // ——— فحص فريد للرقم الموحّد: لا يمكن لشركتين أن تتشاركا نفس الرقم الوطني الموحّد
+    // داخل جدارة. الرقم الموحّد هو المفتاح الدائم لربط بيانات المنشأة (حتى لو فقد البريد
+    // تُستعاد بيانات الدخول بموجبه). لذا نمنع تسجيل تجربة/عرض سعر برقم موحّد مُستخدم مسبقاً
+    // تفادياً لاندماج بيانات شركتين أو اطلاع شركة على بيانات الأخرى.
+    {
+      const taken = await base44.asServiceRole.entities.Tenant.filter(
+        { unified_number: unified }, undefined, 5
+      );
+      if (taken && taken.length) {
+        const mine = taken.find(
+          (tt) => String(tt.contact_email || '').trim().toLowerCase() === email.toLowerCase()
+        );
+        return Response.json({
+          error: mine
+            ? 'حساب منشأتك مسجّل بالفعل على جدارة بهذا الرقم الموحد. لتجنّب تكرار الحساب، استعد كلمة المرور من بوابة الشركة أو سجّل الدخول بدلاً من إنشاء طلب جديد.'
+            : 'هذا الرقم الموحد مسجّل بالفعل لمنشأة أخرى على جدارة. لا يمكن لشركتين أن تتشاركا نفس الرقم الوطني الموحّد. تحقق من الرقم أو تواصل مع دعم جدارة.',
+        }, { status: 409 });
+      }
+    }
+
     // —— كود الخصم (اختياري)
     let discount_percent = 0;
     let discount_code = '';
