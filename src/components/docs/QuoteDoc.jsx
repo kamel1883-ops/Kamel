@@ -3,6 +3,7 @@ import { Crown } from "lucide-react";
 import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 import ProviderStamp from "@/components/docs/ProviderStamp";
 import { PROVIDER, PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
+import { computeBreakdown } from "@/lib/pricingBreakdown";
 
 const SUPPORT_EMAIL = "info@jadara-hr.com";
 
@@ -23,6 +24,7 @@ export default function QuoteDoc({
   const basePrice = tier ? Number(tier.yearly) || 0 : (discountPercent > 0 && amount ? Math.round(amount / (1 - discountPercent / 100)) : 0);
   const finalAmount = Number(amount) || (tier ? Number(tier.yearly) : 0);
   const hasDiscount = discountPercent > 0 && discountCode;
+  const bd = computeBreakdown({ tier, quotedAmount: finalAmount, discountPercent, discountCode });
   const feats = isAr ? FULL_FEATURES_AR : FULL_FEATURES_EN;
   const L = isAr
     ? {
@@ -39,10 +41,11 @@ export default function QuoteDoc({
         transferNote: "حول المبلغ الموضّح أعلاه إلى حسابنا البنكي في بنك STC، ثم أرسل صورة إيصال التحويل عبر البريد الإلكتروني إلى info@jadara-hr.com. سيتم تأكيد اشتراكك وتفعيل الحساب خلال 24 ساعة.",
         bankSection: "بيانات التحويل البنكي",
         beneficiary: "اسم المستفيد", bank: "البنك", accountNo: "رقم الحساب", iban: "رقم الآيبان IBAN",
-        amountDue: "المبلغ المستحق سنوياً",
+        amountDue: "المبلغ المستحق للسنة الأولى",
         waSupport: "الدعم الفني - البريد الإلكتروني", sendReceipt: "أرسل إيصال التحويل إلى info@jadara-hr.com لتفعيل الحساب",
         openWhatsApp: "مراسلة عبر البريد",
         discBadge: "خصم", discApplied: "بعد تطبيق الكود",
+        netAnnualLabel: "صافي الاشتراك السنوي", setupLabel: "رسوم التأسيس (لمرة واحدة)", year1Label: "إجمالي السنة الأولى", byAgreement: "حسب الاتفاق",
         sigName: `${PROVIDER.signerLabel} - ${PROVIDER.signerName}`,
       }
     : {
@@ -59,10 +62,11 @@ export default function QuoteDoc({
         transferNote: "Transfer the amount shown above to our STC Bank account, then send the transfer receipt photo via email to info@jadara-hr.com. Your subscription will be confirmed and account activated within 24 hours.",
         bankSection: "Bank transfer details",
         beneficiary: "Beneficiary", bank: "Bank", accountNo: "Account number", iban: "IBAN",
-        amountDue: "Amount due annual",
+        amountDue: "Amount due for year 1",
         waSupport: "Support Email", sendReceipt: "Send the transfer receipt to info@jadara-hr.com to activate your account",
         openWhatsApp: "Email us",
         discBadge: "OFF", discApplied: "After discount applied",
+        netAnnualLabel: "Net annual subscription", setupLabel: "Setup fee (one-time)", year1Label: "Year 1 total", byAgreement: "By agreement",
         sigName: `${PROVIDER.signerLabelEn} - ${PROVIDER.signerNameEn}`,
       };
 
@@ -141,9 +145,21 @@ export default function QuoteDoc({
                 <div style={{ fontWeight: 600, fontSize: 13 }}>{L.discBadge} {discountPercent}% — {discountCode}</div>
                 <div style={{ fontSize: 11, color: "#64748b" }}>{L.discApplied}</div>
               </div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: "#7c3aed" }}>{num(finalAmount)} {L.annual}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#dc2626" }}>- {num(bd.discountAmount)} {L.annual}</div>
             </div>
           )}
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12, paddingTop: 12, borderTop: "1px solid #ddd6fe" }}>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>{L.netAnnualLabel}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#7c3aed" }}>{num(bd.finalAnnual)} {L.annual}</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 10, paddingTop: 10, borderTop: "1px dashed #ddd6fe" }}>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>{L.setupLabel}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed" }}>{bd.isCustom && !bd.setup ? L.byAgreement : `${num(bd.setup)} ${L.annual}`}</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12, paddingTop: 12, borderTop: "1.5px solid #c4b5fd", background: "#ede9fe", borderRadius: 12, padding: "12px 16px" }}>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#5b21b6" }}>{L.year1Label}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#5b21b6" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${L.annual}`}</div>
+          </div>
           <div style={{ fontSize: 11, color: "#64748b", marginTop: 12, paddingTop: 10, borderTop: "1px solid #ddd6fe" }}>{L.renewNote}</div>
         </div>
       </div>
@@ -157,7 +173,7 @@ export default function QuoteDoc({
           {/* المبلغ المستحق */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "rgba(255,255,255,0.7)", border: "1px solid #a7f3d0", borderRadius: 12, padding: "10px 16px", fontSize: 12.5, marginBottom: 14 }}>
             <span style={{ color: "#64748b" }}>{L.amountDue}</span>
-            <span style={{ fontWeight: 800, color: "#047857", fontSize: 22 }}>{num(finalAmount)} {L.annual}</span>
+            <span style={{ fontWeight: 800, color: "#047857", fontSize: 22 }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${L.annual}`}</span>
           </div>
 
           {/* بيانات البنك */}

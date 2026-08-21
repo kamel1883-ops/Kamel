@@ -90,7 +90,7 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
 
         // عقد الاشتراك
         const contractBlob = await renderToPdfBlob(
-          <SubscriptionContractDoc company={tenant} quoteNo={quoteNo} date={subStart} />
+          <SubscriptionContractDoc company={tenant} quoteNo={quoteNo} date={subStart} tier={tier} quotedAmount={newAmount} discountPercent={Number(tenant.discount_percent) || 0} discountCode={tenant.discount_code || ""} />
         );
         const contract_url = await uploadPdfBlob(contractBlob, `Jadara-Contract-${quoteNo}.pdf`);
 
@@ -105,6 +105,8 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
             endDate={subEnd}
             amount={newAmount}
             employeeCount={Number(tenant.employee_count) || 0}
+            discountPercent={Number(tenant.discount_percent) || 0}
+            discountCode={tenant.discount_code || ""}
             isAr={isAr}
           />
         );

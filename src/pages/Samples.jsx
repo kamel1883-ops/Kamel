@@ -39,7 +39,7 @@ export default function Samples() {
         ? <QuoteDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} tier={tier} amount={tier.yearly} isAr />
         : which === "invoice"
         ? <SubscriptionInvoiceDoc company={SAMPLE_COMPANY} tier={tier} invNo={invNo} date={date} startDate={date} endDate={end} amount={tier.yearly} employeeCount={SAMPLE_COMPANY.employee_count} isAr />
-        : <SubscriptionContractDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} />;
+        : <SubscriptionContractDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} tier={tier} quotedAmount={tier.yearly} />;
       const blob = await renderToPdfBlob(comp);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
@@ -82,7 +82,7 @@ export default function Samples() {
             </Button>
           </div>
           <div className="bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex justify-center">
-            <SubscriptionContractDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} />
+            <SubscriptionContractDoc company={SAMPLE_COMPANY} quoteNo={quoteNo} date={date} tier={tier} quotedAmount={tier.yearly} />
           </div>
         </section>
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, ArrowRight, Loader2, Download } from "lucide-react";
 import SubscriptionContractDoc from "@/components/docs/SubscriptionContractDoc";
 import { renderToPdfBlob } from "@/lib/pdfDocs";
+import { tierForCount, PRICING_TIERS_AR } from "@/lib/pricing";
 
 // عيّنة عامة من العقد لمعاينته فوراً (يُفتح من المسار /contract-sample)
 const SAMPLE_COMPANY = {
@@ -18,6 +19,7 @@ const SAMPLE_COMPANY = {
   contact_phone: "+966500000000",
   contact_email: "client@example.com",
   unified_number: "7000000000",
+  employee_count: 45,
 };
 
 export default function ContractSample() {
@@ -32,11 +34,12 @@ export default function ContractSample() {
 
   const quoteNo = "JC" + new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const date = new Date().toISOString().slice(0, 10);
+  const tier = tierForCount(SAMPLE_COMPANY.employee_count, PRICING_TIERS_AR);
 
   const download = async () => {
     setBusy(true);
     try {
-      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={SAMPLE_COMPANY} owner={owner || undefined} quoteNo={quoteNo} date={date} />);
+      const blob = await renderToPdfBlob(<SubscriptionContractDoc company={SAMPLE_COMPANY} owner={owner || undefined} quoteNo={quoteNo} date={date} tier={tier} quotedAmount={tier.yearly} />);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } finally { setBusy(false); }
@@ -63,7 +66,7 @@ export default function ContractSample() {
           <ArrowRight size={14} /> هذه عيّنة العقد الرسمي الموقّع والمختوم من «جدارة» — الخانات المخصّصة لتوقيع وختم العميل تُترك فارغة.
         </div>
         <div className="print-contract bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex justify-center">
-          <SubscriptionContractDoc company={SAMPLE_COMPANY} owner={owner || undefined} quoteNo={quoteNo} date={date} />
+          <SubscriptionContractDoc company={SAMPLE_COMPANY} owner={owner || undefined} quoteNo={quoteNo} date={date} tier={tier} quotedAmount={tier.yearly} />
         </div>
       </div>
     </div>

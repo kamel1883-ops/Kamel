@@ -2,6 +2,7 @@ import React from "react";
 import { Crown } from "lucide-react";
 import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 import { PROVIDER } from "@/lib/providerIdentity";
+import { computeBreakdown } from "@/lib/pricingBreakdown";
 
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 
@@ -17,6 +18,8 @@ export default function SubscriptionInvoiceDoc({
   endDate = "",
   amount = 0,
   employeeCount = 0,
+  discountPercent = 0,
+  discountCode = "",
   isAr = true,
 }) {
   const cDate = date || new Date().toISOString().slice(0, 10);
@@ -58,6 +61,11 @@ export default function SubscriptionInvoiceDoc({
         subtotal: "المبلغ الصافي",
         taxRow: "رسوم الضريبة 0%",
         total: "الإجمالي المستحق",
+        discLabel: "خصم",
+        setupLabel: "رسوم التأسيس (لمرة واحدة)",
+        once: "مرة واحدة",
+        year1Label: "إجمالي السنة الأولى",
+        byAgreement: "حسب الاتفاق",
         features: "تشمل الباقة جميع المميزات التالية",
         notTax: "فاتورة اشتراك سنوي - لا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% صفر. المبلغ الإجمالي = المبلغ الصافي.",
         subLine: "اشتراك سنوي - منصة جدارة لإدارة الموارد البشرية",
@@ -92,6 +100,11 @@ export default function SubscriptionInvoiceDoc({
         subtotal: "Net amount",
         taxRow: "Tax 0%",
         total: "Total due",
+        discLabel: "Discount",
+        setupLabel: "Setup fee (one-time)",
+        once: "One-time",
+        year1Label: "Year 1 total",
+        byAgreement: "By agreement",
         features: "The plan includes every feature below",
         notTax: "Annual subscription invoice - VAT exempt. Tax: 0% zero. Total = Net amount.",
         subLine: "Annual subscription - Jadara HR platform",
@@ -105,6 +118,7 @@ export default function SubscriptionInvoiceDoc({
   const num = (n) => Number(n || 0).toLocaleString();
   const v = (x) => (x && String(x).trim() !== "" ? x : "—");
   const taxAmount = 0;
+  const bd = computeBreakdown({ tier, quotedAmount: amount, discountPercent, discountCode });
 
   return (
     <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
@@ -170,11 +184,23 @@ export default function SubscriptionInvoiceDoc({
           <tr>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.serviceTypeValue} - {v(tier?.tier)} <span style={{ direction: "ltr", unicodeBidi: "embed" }}>{v(tier?.range)}</span></td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.perYear}</td>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{num(amount)} {sar}</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{num(bd.baseAnnual)} {sar}</td>
+          </tr>
+          {bd.hasDiscount && (
+            <tr>
+              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7, color: "#dc2626" }}>{L.discLabel}{bd.discountCode ? ` — ${bd.discountCode}` : ""}{bd.discountPercent ? ` ${bd.discountPercent}%` : ""}</td>
+              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>—</td>
+              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap", color: "#dc2626" }}>- {num(bd.discountAmount)} {sar}</td>
+            </tr>
+          )}
+          <tr>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.setupLabel}</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.once}</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{bd.isCustom && !bd.setup ? L.byAgreement : `${num(bd.setup)} ${sar}`}</td>
           </tr>
           <tr>
-            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0" }}>{L.subtotal}</td>
-            <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", borderBottom: "1px solid #e2e8f0" }}>{num(amount)} {sar}</td>
+            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0" }}>{L.subtotal} ({L.year1Label})</td>
+            <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", borderBottom: "1px solid #e2e8f0" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${sar}`}</td>
           </tr>
           <tr>
             <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", color: "#475569", borderBottom: "1px solid #e2e8f0" }}>{L.taxRow}</td>
@@ -182,7 +208,7 @@ export default function SubscriptionInvoiceDoc({
           </tr>
           <tr>
             <td colSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#0b1120", background: "#f8fafc" }}>{L.total}</td>
-            <td style={{ padding: "10px 10px", fontWeight: 800, fontSize: 15.5, color: "#1A237E", whiteSpace: "nowrap", background: "#eef2ff" }}>{num(amount)} {sar}</td>
+            <td style={{ padding: "10px 10px", fontWeight: 800, fontSize: 15.5, color: "#1A237E", whiteSpace: "nowrap", background: "#eef2ff" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${sar}`}</td>
           </tr>
         </tbody>
       </table>

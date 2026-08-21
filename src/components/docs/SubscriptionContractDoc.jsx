@@ -2,12 +2,14 @@ import React from "react";
 import { Crown } from "lucide-react";
 import ProviderStamp from "@/components/docs/ProviderStamp";
 import { PROVIDER } from "@/lib/providerIdentity";
+import { computeBreakdown } from "@/lib/pricingBreakdown";
 
 // عقد اشتراك سنوي رسمي بين جدارة (الطرف الأول — موقّع ومختوم) والعميل (الطرف الثاني — خانات توقيع وختم فارغة)
 // يُولّد من بيانات عرض السعر، ويُطبع/يُصدّر PDF. RTL، عربي، ابتدائي.
 // هيكل صفحتين: الصفحة 1 = الترويسة + الأطراف + المواد 1-5. الصفحة 2 = المواد 6-11 + الإثبات والتوقيعات.
-export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "" }) {
+export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "", tier = null, quotedAmount = 0, discountPercent = 0, discountCode = "" }) {
   const cDate = date || new Date().toISOString().slice(0, 10);
+  const bd = computeBreakdown({ tier, quotedAmount: quotedAmount || company?.quoted_amount || 0, discountPercent: discountPercent || company?.discount_percent || 0, discountCode: discountCode || company?.discount_code || "" });
   const fmt = (d) => {
     try {
       const dt = new Date(d);
@@ -65,6 +67,34 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
             {company?.contact_email ? <span>، بريد إلكتروني: <b dir="ltr">{company.contact_email}</b></span> : null}. ويُشار إليه فيما يلي بـ«الطرف الثاني» أو «العميل».
           </div>
         </div>
+
+        {/* ملخّص قيمة العقد */}
+        {tier && (() => {
+          const num = (n) => Number(n || 0).toLocaleString();
+          const Row = ({ k, v, color }) => (
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+              <span style={{ color: "#64748b" }}>{k}</span>
+              <span style={{ fontWeight: 700, color: color || "#0b1120" }}>{v}</span>
+            </div>
+          );
+          return (
+            <div style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 12, padding: "12px 16px", marginBottom: 16 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: "#3730a3", marginBottom: 8 }}>ملخّص قيمة العقد</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px 24px", fontSize: 12, lineHeight: 1.7 }}>
+                <Row k="الباقة" v={`${tier.tier} — ${tier.range}`} />
+                <Row k="عدد الموظفين" v={company?.employee_count ? `${company.employee_count} موظفاً` : "—"} />
+                <Row k="الاشتراك السنوي" v={`${num(bd.baseAnnual)} ر.س`} />
+                {bd.hasDiscount ? <Row k={`الخصم${bd.discountCode ? ` — ${bd.discountCode}` : ""}${bd.discountPercent ? ` ${bd.discountPercent}%` : ""}`} v={`- ${num(bd.discountAmount)} ر.س`} color="#dc2626" /> : <span />}
+                <Row k="صافي الاشتراك السنوي" v={`${num(bd.finalAnnual)} ر.س`} />
+                <Row k="رسوم التأسيس (لمرة واحدة)" v={bd.isCustom && !bd.setup ? "حسب الاتفاق" : `${num(bd.setup)} ر.س`} />
+                <div style={{ gridColumn: "1 / -1", borderTop: "1px dashed #c7d2fe", marginTop: 4, paddingTop: 6, display: "flex", justifyContent: "space-between", fontWeight: 800, color: "#1A237E", fontSize: 13 }}>
+                  <span>إجمالي السنة الأولى</span>
+                  <span>{bd.isCustom ? `${num(bd.finalAnnual)} ر.س + حسب الاتفاق` : `${num(bd.totalYear1)} ر.س`}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* البنود */}
         <Clause n="1" title="موضوع العقد ومدته">
