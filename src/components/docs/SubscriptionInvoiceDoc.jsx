@@ -21,6 +21,7 @@ export default function SubscriptionInvoiceDoc({
   discountPercent = 0,
   discountCode = "",
   isAr = true,
+  isRenewal = false,
 }) {
   const cDate = date || new Date().toISOString().slice(0, 10);
   const subStart = startDate || cDate;
@@ -118,7 +119,7 @@ export default function SubscriptionInvoiceDoc({
   const num = (n) => Number(n || 0).toLocaleString();
   const v = (x) => (x && String(x).trim() !== "" ? x : "—");
   const taxAmount = 0;
-  const bd = computeBreakdown({ tier, quotedAmount: amount, discountPercent, discountCode });
+  const bd = computeBreakdown({ tier, quotedAmount: amount, discountPercent, discountCode, excludeSetup: isRenewal });
 
   return (
     <div dir="rtl" style={{ width: 794, minHeight: 1123, background: "#fff", color: "#0b1120", fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "40px 44px", boxSizing: "border-box", fontSize: 13, lineHeight: 1.85 }}>
@@ -193,13 +194,15 @@ export default function SubscriptionInvoiceDoc({
               <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap", color: "#dc2626" }}>- {num(bd.discountAmount)} {sar}</td>
             </tr>
           )}
+          {!isRenewal && (
+            <tr>
+              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.setupLabel}</td>
+              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.once}</td>
+              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{bd.isCustom && !bd.setup ? L.byAgreement : `${num(bd.setup)} ${sar}`}</td>
+            </tr>
+          )}
           <tr>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.setupLabel}</td>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.once}</td>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{bd.isCustom && !bd.setup ? L.byAgreement : `${num(bd.setup)} ${sar}`}</td>
-          </tr>
-          <tr>
-            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0" }}>{L.subtotal} ({L.year1Label})</td>
+            <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0" }}>{isRenewal ? (isAr ? "رسوم التجديد السنوي" : "Annual renewal fee") : `${L.subtotal} (${L.year1Label})`}</td>
             <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", borderBottom: "1px solid #e2e8f0" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${sar}`}</td>
           </tr>
           <tr>

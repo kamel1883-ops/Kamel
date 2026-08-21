@@ -7,9 +7,9 @@ import { computeBreakdown } from "@/lib/pricingBreakdown";
 // عقد اشتراك سنوي رسمي بين جدارة (الطرف الأول — موقّع ومختوم) والعميل (الطرف الثاني — خانات توقيع وختم فارغة)
 // يُولّد من بيانات عرض السعر، ويُطبع/يُصدّر PDF. RTL، عربي، ابتدائي.
 // هيكل صفحتين: الصفحة 1 = الترويسة + الأطراف + المواد 1-5. الصفحة 2 = المواد 6-11 + الإثبات والتوقيعات.
-export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "", tier = null, quotedAmount = 0, discountPercent = 0, discountCode = "" }) {
+export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "", tier = null, quotedAmount = 0, discountPercent = 0, discountCode = "", isRenewal = false }) {
   const cDate = date || new Date().toISOString().slice(0, 10);
-  const bd = computeBreakdown({ tier, quotedAmount: quotedAmount || company?.quoted_amount || 0, discountPercent: discountPercent || company?.discount_percent || 0, discountCode: discountCode || company?.discount_code || "" });
+  const bd = computeBreakdown({ tier, quotedAmount: quotedAmount || company?.quoted_amount || 0, discountPercent: discountPercent || company?.discount_percent || 0, discountCode: discountCode || company?.discount_code || "", excludeSetup: isRenewal });
   const fmt = (d) => {
     try {
       const dt = new Date(d);
@@ -86,9 +86,9 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
                 <Row k="الاشتراك السنوي" v={`${num(bd.baseAnnual)} ر.س`} />
                 {bd.hasDiscount ? <Row k={`الخصم${bd.discountCode ? ` — ${bd.discountCode}` : ""}${bd.discountPercent ? ` ${bd.discountPercent}%` : ""}`} v={`- ${num(bd.discountAmount)} ر.س`} color="#dc2626" /> : <span />}
                 <Row k="صافي الاشتراك السنوي" v={`${num(bd.finalAnnual)} ر.س`} />
-                <Row k="رسوم التأسيس (لمرة واحدة)" v={bd.isCustom && !bd.setup ? "حسب الاتفاق" : `${num(bd.setup)} ر.س`} />
+                {!isRenewal && <Row k="رسوم التأسيس (لمرة واحدة)" v={bd.isCustom && !bd.setup ? "حسب الاتفاق" : `${num(bd.setup)} ر.س`} />}
                 <div style={{ gridColumn: "1 / -1", borderTop: "1px dashed #c7d2fe", marginTop: 4, paddingTop: 6, display: "flex", justifyContent: "space-between", fontWeight: 800, color: "#1A237E", fontSize: 13 }}>
-                  <span>إجمالي السنة الأولى</span>
+                  <span>{isRenewal ? "رسوم التجديد السنوي" : "إجمالي السنة الأولى"}</span>
                   <span>{bd.isCustom ? `${num(bd.finalAnnual)} ر.س + حسب الاتفاق` : `${num(bd.totalYear1)} ر.س`}</span>
                 </div>
               </div>

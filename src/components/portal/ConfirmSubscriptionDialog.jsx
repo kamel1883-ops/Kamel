@@ -87,7 +87,7 @@ export default function ConfirmSubscriptionDialog({ open, onClose, tenant, isAr,
       // 3) توليد عقد الاشتراك PDF ورفعه
       setStep(isAr ? "جارٍ توليد عقد الاشتراك PDF…" : "Generating contract PDF…");
       const contractBlob = await renderToPdfBlob(
-        <SubscriptionContractDoc company={tenant} quoteNo={seqns.quoteNo} date={subStart} tier={tier} quotedAmount={Number(tenant.quoted_amount) || 0} discountPercent={Number(tenant.discount_percent) || 0} discountCode={tenant.discount_code || ""} />
+        <SubscriptionContractDoc company={tenant} quoteNo={seqns.quoteNo} date={subStart} tier={tier} quotedAmount={Number(tenant.quoted_amount) || 0} discountPercent={Number(tenant.discount_percent) || 0} discountCode={tenant.discount_code || ""} isRenewal={tenant?.status === "active"} />
       );
       const contract_url = await uploadPdfBlob(contractBlob, `Jadara-Contract-${seqns.quoteNo}.pdf`);
 
@@ -106,6 +106,7 @@ export default function ConfirmSubscriptionDialog({ open, onClose, tenant, isAr,
           discountPercent={Number(tenant.discount_percent) || 0}
           discountCode={tenant.discount_code || ""}
           isAr={isAr}
+          isRenewal={tenant?.status === "active"}
         />
       );
       const invoice_url = await uploadPdfBlob(invoiceBlob, `Jadara-Invoice-${seqns.invoiceNo}.pdf`);
