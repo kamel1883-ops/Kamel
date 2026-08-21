@@ -30,7 +30,7 @@ export default function Approvals() {
     settlement: "المخالصة", genSettlement: "توليد المخالصة",
     statement: "كشف السلفة", genStatement: "توليد الكشف",
     loanPayBtn: "سداد جزئي", loanPayTitle: "تسجيل سداد السلفة — الموارد البشرية",
-    paidLabel: "مبلغ السداد هذه المرة (ر.س)", paidHint: "يُسجّل مدير الموارد البشرية المبالغ التي استلمها من الموظف لسداد السلفة. يُضاف هذا المبلغ إلى المسدَّد مسبقاً ويُحدّث المتبقي، وعند بلوغ إجمالي السلفة تُغلق تلقائياً ويتحدّث كشف السلفة فوراً.", alreadyPaidLabel: "تم سداد مسبقاً",
+    paidLabel: "مبلغ السداد هذه المرة (ر.س)", paidHint: "يُسجّل مدير الموارد البشرية المبالغ التي استلمها من الموظف لسداد السلفة. يُضاف هذا المبلغ إلى المسدَّد مسبقاً ويُحدّث المتبقي، وعند بلوغ إجمالي السلفة تُغلق تلقائياً (الحالة: مغلقة) ويتحدّث كشف السلفة فوراً ليعكس نفس الوضع كما هو في سجل الموارد البشرية — المسدد = قيمة السلفة والمتبقي 0.", alreadyPaidLabel: "تم سداد مسبقاً",
     remaining: "المتبقي", totalLoan: "إجمالي السلفة", save: "حفظ",
     empty: "لا توجد طلبات", rejectTitle: "رفض الطلب", rejectReason: "سبب الرفض", cancel: "إلغاء", confirmReject: "تأكيد الرفض",
     payTitle: "تأكيد الصرف — المالية/المحاسبة", leavePay: (v) => <>تصفية إجازة كاملة — تعويض التذكرة: <b className="text-foreground">{formatCurrency(v)}</b></>,
@@ -489,19 +489,19 @@ export default function Approvals() {
             <TabsContent value="loans">
               <div className="space-y-3">
                 {visLoans.length === 0 ? <Empty t={t} /> : visLoans.map((r) => {
-                  const paid = Number(r.paid_amount) || 0;
-                  const remaining = Math.max(0, (Number(r.amount) || 0) - paid);
-                  const closed = (Number(r.amount) || 0) > 0 && paid >= (Number(r.amount) || 0);
-                  return (
-                    <RequestCard key={r.id} r={r} emp={empOf(r.employee_id)} actions={actionsFor("loans", r)} t={t} genBusy={genBusy} extra={
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {t.totalLoan}: <b className="text-foreground">{formatCurrency(r.amount)}</b> · {t.paidLabel.replace(" (ريال)","").replace(" (SAR)","")}: <b className="text-emerald-600">{formatCurrency(paid)}</b> · {t.remaining}: <b className="text-amber-600">{formatCurrency(remaining)}</b> {closed && <span className="px-1.5 rounded-full bg-rose-50 text-rose-600">مغلقة</span>}
-                      </div>
-                    }>
-                      <span className="text-xs text-muted-foreground">{r.installment_count} · {formatCurrency(r.monthly_installment)}</span>
-                    </RequestCard>
-                  );
-                })}
+                   const paid = Number(r.paid_amount) || 0;
+                   const remaining = Math.max(0, (Number(r.amount) || 0) - paid);
+                   const closed = (Number(r.amount) || 0) > 0 && paid >= (Number(r.amount) || 0);
+                   return (
+                     <RequestCard key={r.id} r={r} emp={empOf(r.employee_id)} actions={actionsFor("loans", r)} t={t} genBusy={genBusy} statusBadgeOverride={closed ? { label: "مغلقة", cls: "bg-rose-50 text-rose-600" } : null} extra={
+                       <div className="text-xs text-muted-foreground mt-1">
+                         {t.totalLoan}: <b className="text-foreground">{formatCurrency(r.amount)}</b> · تم سداد: <b className="text-emerald-600">{formatCurrency(paid)}</b> · {t.remaining}: <b className="text-amber-600">{formatCurrency(remaining)}</b>
+                       </div>
+                     }>
+                       <span className="text-xs text-muted-foreground">{r.installment_count} · {formatCurrency(r.monthly_installment)}</span>
+                     </RequestCard>
+                   );
+                 })}
               </div>
             </TabsContent>
 
@@ -804,7 +804,8 @@ export default function Approvals() {
   );
 }
 
-function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, kindBadge }) {
+function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, kindBadge, statusBadgeOverride }) {
+  const stBadge = statusBadgeOverride || badge(r.status);
   return (
     <div className="bg-white rounded-2xl border border-border p-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -823,7 +824,7 @@ function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, k
           </div>
           {extra}
           <div className="flex items-center gap-2 flex-wrap mt-2">
-            <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
+            <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", stBadge.cls)}>{stBadge.label}</span>
             {children}
           </div>
         </div>
