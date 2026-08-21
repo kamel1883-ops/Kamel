@@ -111,6 +111,7 @@ export default function Performance() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="font-semibold text-sm truncate">{r.employee_name}</div>
+                        <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{employees.find((e) => e.id === r.employee_id)?.national_id || "—"}</div>
                         <div className="text-xs text-muted-foreground">{r.department} • {t.perYear(r.period_year, r.review_period)}</div>
                       </div>
                       {r.overall_rating > 0 && (<span className={cn("shrink-0 text-xs font-bold px-2 py-1 rounded-full", ratingCls(r.overall_rating))}>{Math.round(r.overall_rating * 10) / 10} / 5</span>)}
@@ -156,7 +157,7 @@ export default function Performance() {
                     <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">{t.empCount(emps.length)}</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {emps.map((e) => (<span key={e.id} className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-50 border border-border">{e.employee_number} - {e.position}</span>))}
+                    {emps.map((e) => (<span key={e.id} className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-50 border border-border">{e.full_name} <span className="text-muted-foreground tabular-nums" dir="ltr">{e.national_id || "—"}</span></span>))}
                   </div>
                 </div>
               ))}
@@ -169,6 +170,7 @@ export default function Performance() {
                 <div key={r.id} className="bg-white rounded-2xl border border-border p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-semibold text-sm truncate">{r.employee_name}</div>
+                    <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{employees.find((e) => e.id === r.employee_id)?.national_id || "—"}</div>
                     <div className="text-xs text-muted-foreground">{r.department}</div>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Target size={12} /> {r.current_grade || "—"} → {r.target_grade || "—"}</div>
                   </div>

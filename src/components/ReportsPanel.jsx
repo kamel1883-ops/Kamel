@@ -281,7 +281,7 @@ function AttAllReport({ employees, attendance, statusLabel, t }) {
   }, [attendance]);
   const empName = (id) => employees.find((e) => e.id === id)?.full_name || "—";
   const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "—";
-  const committed = Object.entries(perEmp).map(([id, v]) => ({ id, name: empName(id), rate: v.total ? Math.round((v.present / v.total) * 100) : 0 })).filter((x) => x.rate > 0).sort((a,b) => b.rate - a.rate).slice(0, 6);
+  const committed = Object.entries(perEmp).map(([id, v]) => ({ id, name: empName(id), nat: empNat(id), rate: v.total ? Math.round((v.present / v.total) * 100) : 0 })).filter((x) => x.rate > 0).sort((a,b) => b.rate - a.rate).slice(0, 6);
   const absentees = Object.entries(perEmp).map(([id, v]) => ({ id, name: empName(id), nat: empNat(id), absent: v.absent })).filter((x) => x.absent > 0).sort((a,b) => b.absent - a.absent).slice(0, 6);
   return (
     <Card title={t.rAttAll}>
@@ -298,7 +298,9 @@ function AttAllReport({ employees, attendance, statusLabel, t }) {
         <div>
           <div className="text-xs font-semibold text-muted-foreground mb-2">{t.committer}</div>
           {committed.length ? (
-            <ResponsiveContainer width="100%" height={190}><BarChart data={committed} layout="vertical" margin={{left:8,right:8}}><XAxis type="number" domain={[0,100]} tick={{fontSize:10}} /><YAxis type="category" dataKey="name" tick={{fontSize:10}} width={90} /><Tooltip /><Bar dataKey="rate" name={t.attRate} radius={[0,4,4,0]} fill="#10b981" /></BarChart></ResponsiveContainer>
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-left pb-2 font-medium">{t.attRate}</th></tr></thead>
+              <tbody>{committed.map((c) => (<tr key={c.id} className="border-t border-border"><td className="py-2">{c.name}</td><td className="py-2 tabular-nums" dir="ltr">{c.nat}</td><td className="py-2 text-left font-semibold">{c.rate}%</td></tr>))}</tbody>
+            </table></div>
           ) : <NoRows text={t.noData} />}
         </div>
         <div>
@@ -352,7 +354,7 @@ function AttOneReport({ employees, attendance, empId, setEmpId, statusLabel, t }
           <div><div className="text-xs text-muted-foreground">{t.tripEmp}</div><div className="text-sm font-bold">{selEmp.full_name}</div></div>
           <div><div className="text-xs text-muted-foreground">{t.nationalId}</div><div className="text-sm font-bold tabular-nums" dir="ltr">{selEmp.national_id || "—"}</div></div>
           <div><div className="text-xs text-muted-foreground">{isAr ? "الإدارة" : "Department"}</div><div className="text-sm font-bold">{selEmp.department || "—"}</div></div>
-          <div><div className="text-xs text-muted-foreground">{isAr ? "المسمى" : "Position"}</div><div className="text-sm font-bold">{selEmp.position || "—"}</div></div>
+
         </div>
       ) : null}
       {empId ? (
@@ -487,8 +489,8 @@ function TripsReport({ records, employees, tripM, setTripM, t }) {
       <Card title={t.tripTable}>
         {rows.length ? (
           <div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
-             <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}<span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{empNat(r.employee_id)}</span></td><td className="py-2 tabular-nums" dir="ltr">{empNat(r.employee_id)}</td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
+            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
+             <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}<span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{empNat(r.employee_id)}</span></td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
           </table></div>
         ) : <NoRows text={t.noData} />}
       </Card>
@@ -573,7 +575,7 @@ function WarningsReport({ records, employees, empId, setEmpId, t }) {
             <div><div className="text-xs text-muted-foreground">{t.tripEmp}</div><div className="text-sm font-bold">{selEmp.full_name}</div></div>
             <div><div className="text-xs text-muted-foreground">{t.nationalId}</div><div className="text-sm font-bold tabular-nums" dir="ltr">{selEmp.national_id || "—"}</div></div>
             <div><div className="text-xs text-muted-foreground">{isAr ? "الإدارة" : "Department"}</div><div className="text-sm font-bold">{selEmp.department || "—"}</div></div>
-            <div><div className="text-xs text-muted-foreground">{isAr ? "المسمى" : "Position"}</div><div className="text-sm font-bold">{selEmp.position || "—"}</div></div>
+  
           </div>
         ) : null}
         {empId ? (
@@ -628,7 +630,7 @@ function PerformanceReport({ records, employees, empId, setEmpId, t }) {
           <div><div className="text-xs text-muted-foreground">{t.tripEmp}</div><div className="text-sm font-bold">{selEmp.full_name}</div></div>
           <div><div className="text-xs text-muted-foreground">{t.nationalId}</div><div className="text-sm font-bold tabular-nums" dir="ltr">{selEmp.national_id || "—"}</div></div>
           <div><div className="text-xs text-muted-foreground">{isAr ? "الإدارة" : "Department"}</div><div className="text-sm font-bold">{selEmp.department || "—"}</div></div>
-          <div><div className="text-xs text-muted-foreground">{isAr ? "المسمى" : "Position"}</div><div className="text-sm font-bold">{selEmp.position || "—"}</div></div>
+
         </div>
       ) : null}
       <div className="grid grid-cols-2 gap-3 mb-4">

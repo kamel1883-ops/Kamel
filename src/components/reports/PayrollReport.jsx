@@ -88,7 +88,6 @@ export default function PayrollReport({ org, records, t }) {
             <TableHeader>
                 <TableRow>
                   <TableHead>{t.payThEmp}</TableHead>
-                  <TableHead className="text-center">{t.natId || "الهوية/الإقامة"}</TableHead>
                   <TableHead className="text-center">{t.payThBase}</TableHead>
                   <TableHead className="text-center">{t.payThNet}</TableHead>
                   <TableHead className="text-center">{t.payThStatus}</TableHead>
@@ -102,7 +101,6 @@ export default function PayrollReport({ org, records, t }) {
                       {r.employee_name || "—"}
                       <span className="block text-[11px] text-muted-foreground tabular-nums" dir="ltr">{r.national_id || "—"}</span>
                     </TableCell>
-                    <TableCell className="text-center tabular-nums" dir="ltr">{r.national_id || "—"}</TableCell>
                   <TableCell className="text-center">{formatCurrency(r.base_salary)}</TableCell>
                   <TableCell className="text-center font-semibold">{formatCurrency(r.net_salary)}</TableCell>
                   <TableCell className="text-center">
