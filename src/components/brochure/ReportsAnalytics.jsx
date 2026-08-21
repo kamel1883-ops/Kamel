@@ -71,7 +71,7 @@ export default function ReportsAnalytics({ Section, Heading }) {
     },
     {
       icon: FileBadge,
-      label: "تراخيص حكومية غاربة على الانتهاء",
+      label: "تراخيص حكومية قاربت على الانتهاء",
       desc: "تنبيه استباقي قبل انتهاء الرخص",
       render: () => (
         <div className="bg-white rounded-xl p-3 border border-slate-200">
@@ -91,7 +91,7 @@ export default function ReportsAnalytics({ Section, Heading }) {
     },
     {
       icon: Building2,
-      label: "الاشتراكات الحكومية غاربة على الانتهاء",
+      label: "الاشتراكات الحكومية قاربت على الانتهاء",
       desc: "تنبيه استباقي قبل انتهاء الاشتراك",
       render: () => (
         <div className="bg-white rounded-xl p-3 border border-slate-200">
@@ -111,7 +111,7 @@ export default function ReportsAnalytics({ Section, Heading }) {
     },
     {
       icon: FileSignature,
-      label: "عقود العمل غاربة على الانتهاء",
+      label: "عقود العمل قاربت على الانتهاء",
       desc: "تنبيه استباقي قبل انتهاء العقود",
       render: () => (
         <div className="bg-white rounded-xl p-3 border border-slate-200">
