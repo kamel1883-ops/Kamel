@@ -9,7 +9,6 @@ import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
 import EmployeeLeaveRequestPhone from "@/components/landing/EmployeeLeaveRequestPhone";
-import EmployeePortalScreen from "@/components/landing/EmployeePortalScreen";
 import HrApprovalDesktop from "@/components/landing/HrApprovalDesktop";
 import { PhoneFrame, LaptopFrame } from "@/components/landing/DeviceFrames";
 import { useI18n } from "@/lib/i18n";
@@ -325,10 +324,10 @@ export default function Landing() {
           {/* جوال الموظف */}
           <div className="flex flex-col items-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-400/15 text-amber-200 border border-amber-300/20 px-3 py-1 text-xs">
-              <Users size={13} /> {isAr ? "بوابة الموظف — تم تقديم طلب الإجازة" : "Employee Portal — leave submitted"}
+              <Users size={13} /> {isAr ? "بوابة الموظف — تقديم طلب إجازة" : "Employee Portal — submit leave"}
             </div>
-            <div className="scale-90 sm:scale-100 origin-top">
-              <EmployeePortalScreen />
+            <div className="origin-top">
+              <PhoneFrame><EmployeeLeaveRequestPhone /></PhoneFrame>
             </div>
           </div>
 
@@ -337,7 +336,7 @@ export default function Landing() {
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-400/15 text-amber-200 border border-amber-300/20 px-3 py-1 text-xs">
               <Briefcase size={13} /> {isAr ? "بوابة الشركات — طلب بانتظار الموافقة" : "Company Portal — pending approval"}
             </div>
-            <div className="scale-90 sm:scale-100 origin-top">
+            <div className="origin-top">
               <LaptopFrame><HrApprovalDesktop /></LaptopFrame>
             </div>
           </div>
