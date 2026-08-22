@@ -164,6 +164,7 @@ export default function Attendance() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-muted-foreground text-xs">
                 <tr>
+                  <th className="text-right px-4 py-3 font-medium">{isAr ? "الرقم" : "#"}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thEmp}</th>
                   <th className="text-right px-4 py-3 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thBranch}</th>
@@ -174,8 +175,9 @@ export default function Attendance() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map((r) => (
+                {filtered.map((r, i) => (
                   <tr key={r.id} className="hover:bg-slate-50">
+                    <td className="px-4 py-3 font-medium tabular-nums">{i + 1}</td>
                     <td className="px-4 py-3 font-medium">{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name}</td>
                     <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "—")}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{r.branch_name || "—"}</td>
