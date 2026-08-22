@@ -289,7 +289,7 @@ export default function Landing() {
         <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 pb-8 w-full flex-1 flex items-center">
           <div className="relative w-full overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
             <video
-              src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/39a8e287d_HR_Hero_Film_v2.mp4"
+              src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/40648db8f_HR_Hero_Film_v3.mp4"
               autoPlay loop muted playsInline
               className="h-[58vh] w-full object-cover"
             />
