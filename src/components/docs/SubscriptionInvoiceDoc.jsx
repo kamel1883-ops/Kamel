@@ -205,7 +205,7 @@ export default function SubscriptionInvoiceDoc({
           </tr>
           <tr>
             <td colSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#0b1120", background: "#f8fafc" }}>{L.total}</td>
-            <td style={{ padding: "10px 10px", fontWeight: 800, fontSize: 15.5, color: "#1A237E", whiteSpace: "nowrap", background: "#eef2ff" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${sar}`}</td>
+            <td style={{ padding: "10px 10px", fontWeight: 800, fontSize: 15.5, color: "#1A237E", whiteSpace: "nowrap", background: "#eef2ff" }}>{num(bd.totalYear1)} {sar}</td>
           </tr>
         </tbody>
       </table>
