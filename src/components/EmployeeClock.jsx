@@ -32,12 +32,14 @@ const getPosition = (t) =>
   });
 
 // يحدد نطاق البصمة من فرع الموظف إن وُجد، ويعود للمقر الرئيسي للمنشأة كبدیل.
+// الفروع تختزن الموقع في lat/lng، أما المنشأة فتختزنه في workplace_lat/workplace_lng.
 function resolveWorkplace(org, branch) {
-  const has = (x) => x && x.lat != null && x.lat !== "" && x.lng != null && x.lng !== "";
-  if (has(branch)) {
+  const hasBranch = branch && branch.lat != null && branch.lat !== "" && branch.lng != null && branch.lng !== "";
+  if (hasBranch) {
     return { lat: Number(branch.lat), lng: Number(branch.lng), radius: Number(branch.radius) || Number(org?.workplace_radius) || 50, name: branch.name, isBranch: true };
   }
-  if (has(org)) {
+  const hasOrg = org && org.workplace_lat != null && org.workplace_lat !== "" && org.workplace_lng != null && org.workplace_lng !== "";
+  if (hasOrg) {
     return { lat: Number(org.workplace_lat), lng: Number(org.workplace_lng), radius: Number(org.workplace_radius) || 50, name: org?.name || "", isBranch: false };
   }
   return null;
