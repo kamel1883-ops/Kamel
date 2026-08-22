@@ -73,6 +73,9 @@ export default function Payroll() {
 
   const generate = async () => {
     setGenerating(true);
+    // جلب الموظفين الفعليين النشطين لحظة التوليد (يستبني من ترك العمل تلقائياً، ويضم المنضمين الجدد)
+    const activeEmps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
+    setEmployees(activeEmps);
     const existing = new Set(payrolls.map((p) => p.employee_id));
     const mm = String(month).padStart(2, "0");
     const startDate = `${year}-${mm}-01`;
@@ -85,7 +88,7 @@ export default function Payroll() {
       if (a.status === "absent") absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
     }
     const created = [];
-    for (const emp of employees) {
+    for (const emp of activeEmps) {
       if (existing.has(emp.id)) continue;
       const base = Number(emp.base_salary) || 0;
       const housing = Number(emp.housing_allowance) || 0;
