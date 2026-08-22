@@ -13,6 +13,7 @@ import { formatCurrency } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import ReportsPanel from "@/components/ReportsPanel";
+import ExpiryReport from "@/components/reports/ExpiryReport";
 
 const PERIODS = [
   { key: "year", months: 12 },
@@ -295,6 +296,8 @@ export default function Analytics() {
           </ChartCard>
         )}
       </div>
+
+      <ExpiryReport />
 
       <ReportsPanel employees={employees} attendance={attendance} />
     </div>

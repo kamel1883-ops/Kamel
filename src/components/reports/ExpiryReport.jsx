@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
-  FileText, ShieldCheck, Car, CalendarClock, Heart, Building2, Clock, AlertTriangle, IdCard,
+  FileText, ShieldCheck, Car, CalendarClock, Heart, Building2, Clock, AlertTriangle, CreditCard,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 
@@ -27,7 +27,7 @@ export default function ExpiryReport() {
   const CATS = isAr ? {
     license: { label: "تراخيص المنشأة", icon: FileText, tint: "blue" },
     gov_subscription: { label: "اشتراكات حكومية", icon: Building2, tint: "indigo" },
-    iqama: { label: "إقامات الموظفين", icon: IdCard, tint: "violet" },
+    iqama: { label: "إقامات الموظفين", icon: CreditCard, tint: "violet" },
     contract: { label: "العقود الوظيفية", icon: FileText, tint: "slate" },
     health_insurance: { label: "التأمين الطبي", icon: Heart, tint: "rose" },
     probation: { label: "انتهاء فترة التجربة (90 يوماً)", icon: Clock, tint: "amber" },
@@ -37,7 +37,7 @@ export default function ExpiryReport() {
   } : {
     license: { label: "Facility Licenses", icon: FileText, tint: "blue" },
     gov_subscription: { label: "Government Subscriptions", icon: Building2, tint: "indigo" },
-    iqama: { label: "Employee Iqamas", icon: IdCard, tint: "violet" },
+    iqama: { label: "Employee Iqamas", icon: CreditCard, tint: "violet" },
     contract: { label: "Employment Contracts", icon: FileText, tint: "slate" },
     health_insurance: { label: "Medical Insurance", icon: Heart, tint: "rose" },
     probation: { label: "Probation (90 days)", icon: Clock, tint: "amber" },
