@@ -30,14 +30,46 @@ const HEADERS = [
   "إستقطاعات أخرى (الكمية)",
 ];
 
-const INSTRUCTIONS = [
-  "تعليمات عامة",
-  "1. عدم إجراء التعديلات على هذه الحقول: \n\n• اسم الموظف \n• رقم هوية الموظف \n• الراتب الأساسي \n• بدل السكن \n• بدل النقل \n• إجمالي الراتب",
-  "2. إضافة/حذف الموظفين: \n\n• إضافة موظفين: \n• لا يمكن إضافة الموظفين مباشرة في هذا الملف \n• قم بإضافة الموظفين من خلال منصة مدد و التأمينات الاجتماعية, ثم قم بتحميل ملف الرواتب المحدث من صفحة الرواتب الشهرية \n• حذف موظفين: \n• إذا قمت بحذف صف الموظف، فسيعتبر النظام الموظف غير محدد في مسير الرواتب",
-  "التحقق من المدخلات",
-  "3. لا تدخل القيم التالية في حقول الاتسحقاقات والاستقطاعات: \n\n• قيم أو أعداد بالسالب \n• الرموز (مثل: @، #، %) \n• لأحرف (مثل: أ، ب، ج)",
+// لون شريط عناوين الأقسام في دليل التعليمات (أزرق/رمادي فاتح)
+const SEC_BAND_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF2F5FB" } };
+
+// محتوى دليل التعليمات — 5 أقسام بالنص الحرفي للنموذج الرسمي
+const GUIDE_SECTIONS = [
+  { title: "تعليمات عامة", body: [
+    { t: "1. عدم إجراء التعديلات على هذه الحقول:" },
+    { t: "- اسم الموظف", indent: true },
+    { t: "- رقم هوية الموظف", indent: true },
+    { t: "- الراتب الأساسي", indent: true },
+    { t: "- بدل السكن", indent: true },
+    { t: "- بدل النقل", indent: true },
+    { t: "- إجمالي الراتب", indent: true },
+  ]},
+  { title: "إضافة/حذف الموظفين", body: [
+    { t: "2. إضافة/حذف الموظفين:" },
+    { t: "- إضافة موظفين:", indent: true },
+    { t: "- لا يمكن إضافة الموظفين مباشرة في هذا الملف", indent: 2 },
+    { t: "- قم بإضافة الموظفين من خلال منصة مدد و التأمينات الاجتماعية، ثم قم بتحميل ملف الرواتب المحدث من صفحة الرواتب الشهرية", indent: 2 },
+    { t: "- حذف موظفين:", indent: true },
+    { t: "- إذا قمت بحذف صف الموظف، سيعتبر النظام الموظف غير محدد في مسير الرواتب", indent: 2 },
+  ]},
+  { title: "التحقق من المدخلات", body: [
+    { t: "3. لا تدخل القيم التالية في حقول الاستحقاقات والاستقطاعات:" },
+    { t: "- قيم أو أعداد بالسالب", indent: true },
+    { t: "- الرموز (مثل: @، #، %)", indent: true },
+    { t: "- لأحرف (مثل: أ، ب، ج)", indent: true },
+  ]},
+  { title: "الاستحقاقات و الاستقطاعات", body: [
+    { t: "4. لإضافة استحقاقات أو استقطاعات إضافية:" },
+    { t: "- انتقل إلى صفحة بيانات المنشأة في النظام", indent: true },
+    { t: "- اضغط على خانة تفاصيل الراتب", indent: true },
+    { t: "- قم بتفعيل الاستحقاقات أو الاستقطاعات المطلوبة", indent: true },
+    { t: "- ثم قم بتحميل ملف الرواتب المحدث من صفحة الرواتب الشهرية", indent: true },
+  ]},
+  { title: "ملاحظات إضافية", body: [
+    { t: "* أي تعديلات خارج هذه التعليمات قد تؤدي إلى أخطاء في النظام" },
+    { t: "* يرجى مراجعة جميع الحقول والتأكد من صحة البيانات المدخلة قبل رفع الملف على النظام" },
+  ]},
 ];
-const INSTRUCTION_HEIGHTS = [22, 130, 170, 22, 120];
 
 function idValue(raw) {
   const s = String(raw ?? "").trim();
@@ -92,11 +124,13 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
   ws.getRow(1).height = 22;
   ws.getRow(2).height = 20;
 
-  // تضمين صورة شعار مدد أعلى الملف (الصورة الرسمية كما هي)
-  try {
-    const logoId = wb.addImage({ base64: await fetchMudadLogoBase64(), extension: "png" });
+  // تضمين صورة شعار مدد أعلى الملف (الصورة الرسمية كما هي) — تُجلب مرة وتُعاد للورقتين
+  let logoBase64 = null;
+  try { logoBase64 = await fetchMudadLogoBase64(); } catch (_) {}
+  if (logoBase64) {
+    const logoId = wb.addImage({ base64: logoBase64, extension: "png" });
     ws.addImage(logoId, { tl: { col: 0.05, row: 0.15 }, ext: { width: 120, height: 44 } });
-  } catch (_) { /* تجاهل لو تعذّر جلب الشعار */ }
+  }
 
   // الصف 3 — لافتات الأقسام (أزرق) + لافتة العمود المحمي
   ws.mergeCells("A3:F3");
@@ -191,17 +225,44 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
     autoFilter: true,
   });
 
-  // الورقة الثانية — دليل التعليمات
+  // الورقة الثانية — دليل التعليمات (شعار + عنوان + 5 أقسام)
   const ws2 = wb.addWorksheet("دليل التعليمات", { views: [{ rightToLeft: true }] });
-  ws2.columns = [{ width: 90 }];
-  INSTRUCTIONS.forEach((text, i) => {
-    const r = ws2.getRow(i + 1);
-    const c = r.getCell(1);
-    c.value = text;
-    c.alignment = { vertical: "top", wrapText: true, horizontal: "right" };
-    c.font = { bold: i === 0 || i === 3, size: 12 };
-    r.height = INSTRUCTION_HEIGHTS[i] || 22;
-  });
+  ws2.columns = [
+    { width: 4 }, // A (هامش للمظهر فقط)
+    { width: 90 }, // B (المحتوى)
+  ];
+  ws2.getRow(1).height = 34;
+  ws2.mergeCells("B1:H1");
+  const gTitle = ws2.getCell("B1");
+  gTitle.value = "دليل التعليمات";
+  gTitle.font = { bold: true, size: 18, color: { argb: BLUE } };
+  gTitle.alignment = { horizontal: "center", vertical: "middle" };
+  if (logoBase64) {
+    const logoId2 = wb.addImage({ base64: logoBase64, extension: "png" });
+    ws2.addImage(logoId2, { tl: { col: 0.05, row: 0.2 }, ext: { width: 120, height: 44 } });
+  }
+
+  let r = 3;
+  for (const sec of GUIDE_SECTIONS) {
+    const sRow = ws2.getRow(r);
+    const sc = sRow.getCell(2);
+    sc.value = sec.title;
+    sc.font = { bold: true, size: 13, color: { argb: "FF1A2336" } };
+    sc.fill = SEC_BAND_FILL;
+    sc.alignment = { horizontal: "right", vertical: "middle" };
+    sRow.height = 24;
+    r++;
+    for (const item of sec.body) {
+      const row = ws2.getRow(r);
+      const cell = row.getCell(2);
+      cell.value = item.t;
+      cell.alignment = { horizontal: "right", vertical: "top", wrapText: true, indent: item.indent || 0 };
+      cell.font = { size: 11, color: { argb: "FF000000" } };
+      row.height = item.t.length > 70 ? 34 : 20;
+      r++;
+    }
+    r++; // سطر فاصل بين الأقسام
+  }
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], {
