@@ -265,35 +265,33 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-16 pb-12 grid lg:grid-cols-2 gap-10 items-center">
-        <motion.div initial="hidden" animate="show" variants={fadeUp}>
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-5">
-            <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="block whitespace-nowrap">{t.titlePre}</span>
-            <span className="block whitespace-nowrap bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{t.titleHi}</span>
-          </h1>
-          <p className="text-white/70 text-lg mt-5 max-w-xl leading-relaxed">{t.heroDesc}</p>
-          <div className="flex flex-wrap gap-3 mt-7">
-            <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
-              <Zap size={18} /> {t.cta1}
-            </button>
-            <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium transition">{t.cta2}</button>
-          </div>
-          <div className="flex gap-8 mt-8 text-sm">
-            {t.stats.map((s) => <Stat key={s.l} n={s.n} l={s.l} />)}
-          </div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/30 to-indigo-500/20 rounded-[2rem] blur-2xl" />
-          <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl bg-black">
-            <video src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/143552d34_.mp4" autoPlay muted loop playsInline preload="auto" className="w-full h-[420px] object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-transparent to-transparent pointer-events-none" />
-          </div>
-        </motion.div>
+      {/* Hero — فيديو يغطي كامل الشاشة */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        <video src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/9887a778a_Hero_HR_Showcase.mp4" autoPlay muted loop playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-[#0B2545]/65" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-[#0B2545]/55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/45 via-transparent to-[#0B2545]/30" />
+        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 py-24 w-full">
+          <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/90 mb-5 backdrop-blur-md">
+              <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
+            </div>
+            <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>
+              <span className="block">{t.titlePre}</span>
+              <span className="block bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{t.titleHi}</span>
+            </h1>
+            <p className="text-white/85 text-lg mt-5 max-w-2xl leading-relaxed drop-shadow-md">{t.heroDesc}</p>
+            <div className="flex flex-wrap gap-3 mt-7">
+              <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
+                <Zap size={18} /> {t.cta1}
+              </button>
+              <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-2xl font-medium transition">{t.cta2}</button>
+            </div>
+            <div className="flex gap-8 mt-8 text-sm">
+              {t.stats.map((s) => <Stat key={s.l} n={s.n} l={s.l} />)}
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* صورة الفريق السعودي + شبكة الخدمات بجوارها */}
