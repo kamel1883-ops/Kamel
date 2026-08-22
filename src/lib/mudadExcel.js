@@ -132,9 +132,9 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
     ws.addImage(logoId, { tl: { col: 0.05, row: 0.15 }, ext: { width: 120, height: 44 } });
   }
 
-  // الصف 3 — لافتات الأقسام (أزرق) + لافتة العمود المحمي
+  // الصف 3 — لافتات الأقسام (أزرق) + لافتة جانب محمي (رمادي) أسفل اللوقو أعلى الجدول
   ws.mergeCells("A3:F3");
-  ws.getCell("A3").value = "(لا يتم تعديل هذا العمود)";
+  ws.getCell("A3").value = "(هذا الجانب محمي — لا يتم تعديله)";
   ws.mergeCells("G3:H3");
   ws.getCell("G3").value = "الاستحقاقات";
   ws.mergeCells("I3:K3");
@@ -145,12 +145,13 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
     c.alignment = { horizontal: "center", vertical: "middle" };
     if (ref === "A3") {
       c.fill = GRAY_FILL;
-      c.font = { bold: true, color: { argb: "FF000000" } };
+      c.font = { bold: true, size: 12, color: { argb: "FF000000" } };
     } else {
       c.fill = BLUE_FILL;
-      c.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      c.font = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
     }
   }
+  ws.getRow(3).height = 26;
   // أكمل حدود باقي خلايا الصف 3 (المدمجة)
   for (let col = 1; col <= 11; col++) {
     const c = ws.getRow(3).getCell(col);
