@@ -152,13 +152,9 @@ export default function QuoteDoc({
             <div style={{ fontWeight: 600, fontSize: 13 }}>{L.netAnnualLabel}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: "#7c3aed" }}>{num(bd.finalAnnual)} {L.annual}</div>
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 10, paddingTop: 10, borderTop: "1px dashed #ddd6fe" }}>
-            <div style={{ fontWeight: 600, fontSize: 13 }}>{L.setupLabel}</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed" }}>{bd.isCustom && !bd.setup ? L.byAgreement : `${num(bd.setup)} ${L.annual}`}</div>
-          </div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12, paddingTop: 12, borderTop: "1.5px solid #c4b5fd", background: "#ede9fe", borderRadius: 12, padding: "12px 16px" }}>
             <div style={{ fontWeight: 800, fontSize: 15, color: "#5b21b6" }}>{L.year1Label}</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "#5b21b6" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${L.annual}`}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#5b21b6" }}>{num(bd.totalYear1)} {L.annual}</div>
           </div>
           <div style={{ fontSize: 11, color: "#64748b", marginTop: 12, paddingTop: 10, borderTop: "1px solid #ddd6fe" }}>{L.renewNote}</div>
         </div>
@@ -173,7 +169,7 @@ export default function QuoteDoc({
           {/* المبلغ المستحق */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "rgba(255,255,255,0.7)", border: "1px solid #a7f3d0", borderRadius: 12, padding: "10px 16px", fontSize: 12.5, marginBottom: 14 }}>
             <span style={{ color: "#64748b" }}>{L.amountDue}</span>
-            <span style={{ fontWeight: 800, color: "#047857", fontSize: 22 }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${L.annual}`}</span>
+            <span style={{ fontWeight: 800, color: "#047857", fontSize: 22 }}>{num(bd.totalYear1)} {L.annual}</span>
           </div>
 
           {/* بيانات البنك */}

@@ -77,23 +77,17 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                 <div className="lg:w-[230px] lg:shrink-0 flex flex-col justify-center border-t lg:border-t-0 lg:border-r-0 pt-4 lg:pt-0" style={{ borderColor: BORDER }}>
                   <div className="flex items-end gap-1.5">
                     <span className="text-4xl font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>
-                      {t.custom ? (isAr ? "حسب الاتفاق" : "Custom") : t.yearly.toLocaleString()}
+                      {t.yearly.toLocaleString()}{t.custom ? "+" : ""}
                     </span>
-                    {!t.custom && <span className="text-sm font-semibold mb-1.5" style={{ color: GREY }}>{currency}</span>}
+                    <span className="text-sm font-semibold mb-1.5" style={{ color: GREY }}>{currency}</span>
                   </div>
                   <div className="text-xs font-medium mt-0.5" style={{ color: GREY }}>{perYear}</div>
 
-                  <div className="mt-3 rounded-xl p-2.5 space-y-1.5" style={{ background: "#fff", border: `1px solid ${BORDER}` }}>
-                    <div className="flex items-center justify-between text-xs">
-                      <span style={{ color: GREY }}>{isAr ? "رسوم التأسيس" : "Setup"}</span>
-                      <span className="font-bold" style={{ color: NAVY }}>
-                        {t.custom ? (isAr ? "حسب الاتفاق" : "Custom") : `${t.setup.toLocaleString()} ${currency}`}
-                      </span>
-                    </div>
+                  <div className="mt-3 rounded-xl p-2.5" style={{ background: "#fff", border: `1px solid ${BORDER}` }}>
                     <div className="flex items-center justify-between text-xs">
                       <span style={{ color: GREY }}>{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
                       <span className="font-extrabold" style={{ color: GOLD_DARK }}>
-                        {t.custom ? (isAr ? "تأطير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
+                        {t.custom ? (isAr ? "تأثير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
                       </span>
                     </div>
                   </div>

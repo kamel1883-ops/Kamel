@@ -166,9 +166,8 @@ export default function Quote() {
   const quoteDate = new Date().toISOString().slice(0, 10);
   const matchedTier = company?.employee_count ? tierForCount(company.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null;
   const amount = discount ? discount.amount : (matchedTier ? matchedTier.yearly : 0);
-  const setup = matchedTier ? Number(matchedTier.setup) || 0 : 0;
   const isCustomT = matchedTier ? !!matchedTier.custom : false;
-  const totalYear1 = isCustomT ? amount : amount + setup;
+  const totalYear1 = amount;
   const baseAnnual = matchedTier ? Number(matchedTier.yearly) || 0 : 0;
   const discountAmount = Math.max(0, baseAnnual - amount);
 
@@ -431,14 +430,10 @@ export default function Quote() {
                 <div className="font-medium">{isAr ? "صافي الاشتراك السنوي" : "Net annual subscription"}</div>
                 <div className="text-xl font-extrabold text-violet-700">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
               </div>
-              <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-dashed border-violet-200/70">
-                <div className="font-medium">{isAr ? "رسوم التأسيس (لمرة واحدة)" : "Setup fee (one-time)"}</div>
-                <div className="text-lg font-extrabold text-violet-700">{isCustomT ? (isAr ? "حسب الاتفاق" : "By agreement") : `${setup.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</div>
-              </div>
               <div className="text-xs text-muted-foreground pt-3 border-t border-violet-200/70">{t.renewNote}</div>
               <div className="flex items-baseline justify-between gap-3 mt-1 -mx-5 -mb-5 px-5 py-4 bg-violet-100/80 rounded-b-2xl border-t-2 border-violet-300">
                 <div className="font-extrabold text-violet-900 text-base">{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</div>
-                <div className="text-2xl font-extrabold text-violet-900">{isCustomT ? `${amount.toLocaleString()} ${isAr ? "ريال" : "SAR"} + ${isAr ? "حسب الاتفاق" : "By agreement"}` : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</div>
+                <div className="text-2xl font-extrabold text-violet-900">{isCustomT ? (isAr ? "تأثير خاص" : "Custom") : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</div>
               </div>
             </div>
           </div>
@@ -454,7 +449,7 @@ export default function Quote() {
               {/* المبلغ المستحق */}
               <div className="flex items-center justify-between gap-3 bg-white/70 border border-emerald-200 rounded-xl px-4 py-3 text-sm">
                 <span className="text-muted-foreground">{isAr ? "المبلغ المستحق للسنة الأولى" : "Amount due for year 1"}</span>
-                <span className="font-extrabold text-emerald-700 text-2xl">{isCustomT ? `${amount.toLocaleString()} ${isAr ? "ريال" : "SAR"} + ${isAr ? "حسب الاتفاق" : "By agreement"}` : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</span>
+                <span className="font-extrabold text-emerald-700 text-2xl">{isCustomT ? (isAr ? "تأثير خاص" : "Custom") : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</span>
               </div>
 
               {/* بيانات البنك */}

@@ -11,11 +11,11 @@ export const PRICING_TIERS_AR = [
 ];
 
 export const PRICING_TIERS_EN = [
-  { id: "starter", min: 1, tier: "Starter", range: "1 - 20 employees", yearly: 2400, setup: 1000, year1: 3400, note: "Ideal for small businesses and startups — covers operating cost right from the first subscription." },
-  { id: "emerging", min: 21, tier: "Emerging", range: "21 - 60 employees", yearly: 3800, setup: 1500, year1: 5300, note: "Drives rapid growth for small firms with a high profit margin and services." },
-  { id: "medium", min: 61, tier: "Medium", range: "61 - 150 employees", yearly: 5500, setup: 2500, year1: 8000, note: "Integrated management for mid-sized teams with great value for cost." },
-  { id: "advanced", min: 151, tier: "Advanced", range: "151 - 400 employees", yearly: 8000, setup: 3500, year1: 11500, note: "Full support, advanced integrations, and HR analytics features." },
-  { id: "enterprise", min: 401, tier: "Enterprise", range: "401+", yearly: 12000, setup: 0, year1: null, custom: true, note: "Unlimited coverage, dedicated technical support, and API integration. Setup fee and total by agreement." },
+  { id: "starter", min: 1, tier: "Starter", range: "1 - 20 employees", yearly: 1900, setup: 0, year1: 1900, note: "Ideal for small businesses and startups — single annual price, no setup fee." },
+  { id: "emerging", min: 21, tier: "Emerging", range: "21 - 60 employees", yearly: 3200, setup: 0, year1: 3200, note: "Drives rapid growth for small firms with strong services — single annual price." },
+  { id: "medium", min: 61, tier: "Medium", range: "61 - 150 employees", yearly: 4500, setup: 0, year1: 4500, note: "Integrated management for mid-sized teams with great value for cost." },
+  { id: "advanced", min: 151, tier: "Advanced", range: "151 - 400 employees", yearly: 6800, setup: 0, year1: 6800, note: "Full support, advanced integrations, and HR analytics features." },
+  { id: "enterprise", min: 401, tier: "Enterprise", range: "401 - 1,000+ employees", yearly: 9900, setup: 0, year1: null, custom: true, note: "Wide coverage, dedicated technical support, and API integration — annual price starts at 9,900 SAR; total by agreement." },
 ];
 
 // المميزات الموحّدة — نفس القائمة الكاملة في كل باقة (بدون استثناء)

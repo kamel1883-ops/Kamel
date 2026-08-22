@@ -194,16 +194,10 @@ export default function SubscriptionInvoiceDoc({
               <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap", color: "#dc2626" }}>- {num(bd.discountAmount)} {sar}</td>
             </tr>
           )}
-          {!isRenewal && (
-            <tr>
-              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.setupLabel}</td>
-              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.once}</td>
-              <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{bd.isCustom && !bd.setup ? L.byAgreement : `${num(bd.setup)} ${sar}`}</td>
-            </tr>
-          )}
+          {/* لا توجد رسوم تأسيس */}
           <tr>
             <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0" }}>{isRenewal ? (isAr ? "رسوم التجديد السنوي" : "Annual renewal fee") : `${L.subtotal} (${L.year1Label})`}</td>
-            <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", borderBottom: "1px solid #e2e8f0" }}>{bd.isCustom ? `${num(bd.finalAnnual)} + ${L.byAgreement}` : `${num(bd.totalYear1)} ${sar}`}</td>
+            <td style={{ padding: "8px 10px", fontWeight: 700, whiteSpace: "nowrap", borderBottom: "1px solid #e2e8f0" }}>{num(bd.totalYear1)} {sar}</td>
           </tr>
           <tr>
             <td colSpan={2} style={{ padding: "8px 10px", textAlign: "left", color: "#475569", borderBottom: "1px solid #e2e8f0" }}>{L.taxRow}</td>
