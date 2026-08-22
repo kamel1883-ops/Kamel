@@ -1,7 +1,7 @@
 import React from "react";
 import { Crown } from "lucide-react";
 import { FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
-import ProviderStamp from "@/components/docs/ProviderStamp";
+import StampSeal from "@/components/docs/StampSeal";
 import { PROVIDER, PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
 import { computeBreakdown } from "@/lib/pricingBreakdown";
 
@@ -201,7 +201,7 @@ export default function QuoteDoc({
           <div style={{ height: 76, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#94a3b8" }}>مساحة التوقيع</div>
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, fontWeight: 700, minWidth: 220 }}>{L.sigName}</div>
         </div>
-        <ProviderStamp size={150} />
+        <StampSeal size={150} />
       </div>
 
       {/* الصفحة الثانية — شهادة الآيبان الرسمية للمنشأة المُوفِّرة */}

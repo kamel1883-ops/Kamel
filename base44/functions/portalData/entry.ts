@@ -250,13 +250,13 @@ export default async function (req) {
     // لا يُغيّر الحالة (trial/active/expired...) ولا يُولّد مستندات — يكتفي بتحديث الحقول.
     if (action === "owner_retiert_all") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
-      // مرآة خادمية لـ src/lib/pricing.js (شرائح الجديدة)
+      // مرآة خادمية لـ src/lib/pricing.js (الأسعار الحالية — بدون رسوم تأسيس)
       const TIERS = [
-        { min: 1, max: 20, tier: "البداية", yearly: 2400 },
-        { min: 21, max: 60, tier: "الناشئة", yearly: 3800 },
-        { min: 61, max: 150, tier: "المتوسطة", yearly: 5500 },
-        { min: 151, max: 400, tier: "المتقدمة", yearly: 8000 },
-        { min: 401, max: Infinity, tier: "الكبرى", yearly: 12000 },
+        { min: 1, max: 20, tier: "البداية", yearly: 1900 },
+        { min: 21, max: 60, tier: "الناشئة", yearly: 3200 },
+        { min: 61, max: 150, tier: "المتوسطة", yearly: 4500 },
+        { min: 151, max: 400, tier: "المتقدمة", yearly: 6800 },
+        { min: 401, max: Infinity, tier: "الكبرى", yearly: 9900 },
       ];
       const fn = (cnt: number) => {
         const n = Number(cnt) || 0;
@@ -271,9 +271,11 @@ export default async function (req) {
       for (const t of tenants) {
         const seg = fn(t.employee_count);
         if (!seg) { skipped.push(t.id); continue; }
+        const pct = Number(t.discount_percent) || 0;
+        const quoted = pct > 0 ? Math.round(seg.yearly * (1 - pct / 100)) : seg.yearly;
         await base44.asServiceRole.entities.Tenant.update(t.id, {
           pricing_tier: seg.tier,
-          quoted_amount: seg.yearly,
+          quoted_amount: quoted,
         });
         updated++;
       }

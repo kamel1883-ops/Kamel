@@ -85,8 +85,10 @@ export default function RegenerateAllDocumentsDialog({ open, onClose, tenants, s
         const subEnd =
           tenant.subscription_end
           || (() => { const d = new Date(subStart); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); })();
-        // المبلغ الجديد وفق الشريحة المعاد تصنيفها (لا يعتمد على القيمة القديمة)
-        const newAmount = (tier ? Number(tier.yearly) : Number(tenant.quoted_amount)) || 0;
+        // المبلغ الجديد وفق الشريحة المعاد تصنيفها (صافي بعد الخصم إن وُجد)
+        const grossAmount = (tier ? Number(tier.yearly) : Number(tenant.quoted_amount)) || 0;
+        const discPct = Number(tenant.discount_percent) || 0;
+        const newAmount = discPct > 0 ? Math.round(grossAmount * (1 - discPct / 100)) : grossAmount;
 
         // عقد الاشتراك
         const contractBlob = await renderToPdfBlob(
