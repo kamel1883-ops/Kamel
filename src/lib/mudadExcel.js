@@ -30,8 +30,8 @@ const HEADERS = [
   "إستقطاعات أخرى (الكمية)",
 ];
 
-// لون شريط عناوين الأقسام في دليل التعليمات (أزرق/رمادي فاتح)
-const SEC_BAND_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF2F5FB" } };
+// لون شريط عناوين الأقسام في دليل التعليمات (أزرق فاتح كما في النموذج الرسمي)
+const SEC_BAND_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F6FF" } };
 
 // محتوى دليل التعليمات — 5 أقسام بالنص الحرفي للنموذج الرسمي
 const GUIDE_SECTIONS = [
