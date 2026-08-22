@@ -90,8 +90,9 @@ export default function Employees() {
     const matchR = roleFilter === "all" || e.role_level === roleFilter;
     return matchQ && matchD && matchB && matchR;
   };
-  const activeList = employees.filter((e) => !isInactive(e) && matches(e));
-  const inactiveRaw = employees.filter((e) => isInactive(e) && matches(e));
+  const byHireAsc = (a, b) => String(a.hire_date || "9999-99-99").localeCompare(String(b.hire_date || "9999-99-99"));
+  const activeList = employees.filter((e) => !isInactive(e) && matches(e)).sort(byHireAsc);
+  const inactiveRaw = employees.filter((e) => isInactive(e) && matches(e)).sort(byHireAsc);
   const years = Array.from(new Set(inactiveRaw.map((e) => e.termination_date?.slice(0, 4)).filter(Boolean))).sort((a, b) => b - a);
   const inactiveList = yearFilter === "all" ? inactiveRaw : inactiveRaw.filter((e) => e.termination_date?.slice(0, 4) === yearFilter);
 
@@ -186,9 +187,9 @@ export default function Employees() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {activeList.map((emp) => (
+                      {activeList.map((emp, i) => (
                         <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
+                          <td className="px-4 py-3 font-medium">{i + 1}</td>
                           <td className="px-4 py-3 font-medium">{emp.full_name}</td>
                           <td className="px-4 py-3 font-medium tabular-nums">{emp.national_id || "—"}</td>
                           <td className="px-4 py-3">{emp.position}</td>
@@ -263,11 +264,11 @@ export default function Employees() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {inactiveList.map((emp) => {
+                      {inactiveList.map((emp, i) => {
                         const meta = emp.termination_reason && emp.termination_reason !== "none" ? reasonMeta(emp.termination_reason) : null;
                         return (
                           <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 font-medium cursor-pointer" onClick={() => { setProfileEmp(emp); setProfileOpen(true); }}>{emp.employee_number}</td>
+                            <td className="px-4 py-3 font-medium cursor-pointer" onClick={() => { setProfileEmp(emp); setProfileOpen(true); }}>{i + 1}</td>
                             <td className="px-4 py-3 font-medium">{emp.full_name}</td>
                             <td className="px-4 py-3 font-medium tabular-nums">{emp.national_id || "—"}</td>
                             <td className="px-4 py-3">{emp.position}</td>
