@@ -214,9 +214,9 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
   await ws.protect("", {
     selectLockedCells: true,
     selectUnlockedCells: true,
-    formatCells: false,
-    formatColumns: false,
-    formatRows: false,
+    formatCells: true,
+    formatColumns: true,
+    formatRows: true,
     insertRows: false,
     insertColumns: false,
     deleteRows: false,
