@@ -289,35 +289,28 @@ export default function Landing() {
 
         <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/30 to-indigo-500/20 rounded-[2rem] blur-2xl" />
-          <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
-            <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png" alt={isAr ? "فريق عمل سعودي يستخدم منصة جدارة" : "Saudi team using Jadara"} fittingType="fill" className="w-full h-[420px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-transparent to-transparent" />
+          <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl bg-black">
+            <video src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/143552d34_.mp4" autoPlay muted loop playsInline preload="auto" className="w-full h-[420px] object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-transparent to-transparent pointer-events-none" />
           </div>
         </motion.div>
       </section>
 
-      {/* بوابة الموظف + شبكة الخدمات بمحاذاتها */}
-      <section className="max-w-[1600px] mx-auto px-6 lg:px-14 py-8 grid lg:grid-cols-12 gap-6 items-start">
-        {/* بوابة الموظف الذاتية */}
-        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-amber-500/15 p-8 sm:p-10">
-          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
-          <div className="relative flex flex-col gap-6">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                <Users size={26} className="text-violet-200" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold">{t.portalTitle}</h3>
-                <p className="text-white/70 mt-2 leading-relaxed">{t.portalDesc}</p>
-              </div>
+      {/* صورة الفريق السعودي + شبكة الخدمات بجوارها */}
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-6 grid lg:grid-cols-12 gap-6 items-stretch">
+        {/* صورة الفريق السعودي — نُزلت هنا من الـ Hero لتظهر بجوار المميزات */}
+        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-white/10 min-h-[440px]">
+          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png" alt={isAr ? "فريق عمل سعودي يستخدم منصة جدارة" : "Saudi team using Jadara"} fittingType="fill" className="w-full h-full absolute inset-0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-transparent" />
+          <div className="absolute bottom-6 right-6 left-6">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/85 mb-3">
+              <Sparkles size={12} className="text-violet-300" /> {isAr ? "كل ما تحتاجه في مكان واحد" : "Everything in one place"}
             </div>
-            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-white text-[#0B2545] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
-              {t.portalCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
-            </Link>
+            <h3 className="text-2xl font-bold text-white leading-snug" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</h3>
           </div>
         </div>
 
-        {/* شبكة الخدمات — بمحاذاة بوابة الموظف */}
+        {/* شبكة الخدمات — بجوار صورة الفريق السعودي */}
         <div className="lg:col-span-7 relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-7">
           <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-indigo-500/15 blur-3xl" />
           <div className="relative mb-4 flex items-center gap-2">
@@ -334,6 +327,27 @@ export default function Landing() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* بوابة الموظف الذاتية — مكوّن مستقل */}
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pb-10">
+        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-amber-500/15 p-8 sm:p-10">
+          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
+          <div className="relative flex flex-col gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                <Users size={26} className="text-violet-200" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold">{t.portalTitle}</h3>
+                <p className="text-white/70 mt-2 leading-relaxed">{t.portalDesc}</p>
+              </div>
+            </div>
+            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-white text-[#0B2545] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
+              {t.portalCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+            </Link>
           </div>
         </div>
       </section>
