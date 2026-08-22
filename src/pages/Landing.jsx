@@ -8,7 +8,6 @@ import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
-import HeroShowcaseFilm from "@/components/landing/HeroShowcaseFilm";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -280,13 +279,28 @@ export default function Landing() {
               <span className="block">{t.titlePre}</span>
               <span className="block bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{t.titleHi}</span>
             </h1>
-            <p className="text-white/75 text-sm sm:text-base mt-3 max-w-2xl mx-auto leading-relaxed">{t.heroDesc}</p>
           </motion.div>
         </div>
 
-        {/* المساحة الكاملة مخصصة للفيديو المتحرك */}
+        {/* المساحة الكاملة مخصصة للفيديو الحقيقي */}
         <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 pb-8 w-full flex-1 flex items-center">
-          <HeroShowcaseFilm isAr={isAr} lang={lang} />
+          <div className="relative w-full overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
+            <video
+              src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/c55903ad7_HR_Hero_Film.mp4"
+              autoPlay loop muted playsInline
+              className="h-[58vh] w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/45 via-transparent to-[#0B2545]/20" />
+            <div className="absolute bottom-5 right-5 left-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-black/40 px-3 py-1.5 text-xs text-white/90 backdrop-blur-md ring-1 ring-white/20">
+                <span className="flex h-2 w-2"><span className="absolute h-2 w-2 animate-ping rounded-full bg-rose-400/80" /><span className="h-2 w-2 rounded-full bg-rose-400" /></span>
+                {isAr ? "مشاهد حقيقية من بيئة العمل" : "Real workplace scenes"}
+              </div>
+              <button onClick={() => navigate("/quote")} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#CBA83A] to-[#B6901F] px-5 py-2.5 text-sm font-semibold text-[#0B2545] shadow-lg">
+                <Zap size={16} /> {t.cta1}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pb-6 w-full">
