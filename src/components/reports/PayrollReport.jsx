@@ -5,12 +5,17 @@ import { Printer, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { printReport } from "@/lib/reportPrint";
 
-export default function PayrollReport({ org, records, t }) {
+export default function PayrollReport({ org, records, employees, t }) {
   const isAr = !!t.monthsList && t.monthsList[0] === "يناير";
   const paid = useMemo(
     () => (records || []).filter((r) => r.status === "paid").slice().sort((a, b) => (b.year - a.year) || (b.month - a.month)),
     [records]
   );
+  const empMap = useMemo(() => {
+    const m = {};
+    (employees || []).forEach((e) => { m[e.id] = e; });
+    return m;
+  }, [employees]);
 
   const groups = useMemo(() => {
     const m = new Map();
@@ -87,6 +92,7 @@ export default function PayrollReport({ org, records, t }) {
           <Table>
             <TableHeader>
                 <TableRow>
+                  <TableHead className="text-center">{isAr ? "الرقم" : "#"}</TableHead>
                   <TableHead>{t.payThEmp}</TableHead>
                   <TableHead className="text-center">{isAr ? "الهوية/الإقامة" : "National ID"}</TableHead>
                   <TableHead className="text-center">{t.payThBase}</TableHead>
@@ -96,10 +102,13 @@ export default function PayrollReport({ org, records, t }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sel.rows.map((r) => (
+                {sel.rows.map((r, i) => {
+                  const emp = empMap[r.employee_id] || {};
+                  return (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
-                    <TableCell className="text-center tabular-nums text-xs" dir="ltr">{r.national_id || "—"}</TableCell>
+                    <TableCell className="text-center font-medium tabular-nums">{i + 1}</TableCell>
+                    <TableCell className="font-medium">{emp.full_name || r.employee_name || "—"}</TableCell>
+                    <TableCell className="text-center tabular-nums text-xs" dir="ltr">{emp.national_id || r.national_id || "—"}</TableCell>
                   <TableCell className="text-center">{formatCurrency(r.base_salary)}</TableCell>
                   <TableCell className="text-center font-semibold">{formatCurrency(r.net_salary)}</TableCell>
                   <TableCell className="text-center">
@@ -109,7 +118,8 @@ export default function PayrollReport({ org, records, t }) {
                   </TableCell>
                   <TableCell className="text-center text-xs text-muted-foreground">{r.paid_date ? String(r.paid_date).slice(0, 10) : "—"}</TableCell>
                 </TableRow>
-              ))}
+                  );
+                })}
             </TableBody>
           </Table>
         </div>

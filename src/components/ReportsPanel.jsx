@@ -184,7 +184,7 @@ export default function ReportsPanel({ employees, attendance }) {
         {rid === "performance" && <PerformanceReport records={extra.reviews || []} employees={employees} empId={empId} setEmpId={setEmpId} t={t} />}
         {rid === "exit" && <ExitReport records={extra.exits || []} t={t} />}
         {rid === "surveys" && <SurveysReport surveys={extra.surveys || []} responses={extra.sresponses || []} t={t} />}
-        {rid === "payroll" && <PayrollReport org={org} records={extra.payroll || []} t={t} />}
+        {rid === "payroll" && <PayrollReport org={org} records={extra.payroll || []} employees={employees} t={t} />}
         {rid === "platforms" && <PlatformSubscriptionsReport records={extra.platforms || []} t={t} />}
       </div>
     </div>
