@@ -265,13 +265,17 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero — العنوان بالأعلى ثم فيديو متحرك احترافي يملأ المساحة */}
+      {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
-        <div className="absolute inset-0 bg-[#0B2545]/65" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-[#0B2545]/55" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/45 via-transparent to-[#0B2545]/30" />
-        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-8 w-full">
-          <motion.div initial="hidden" animate="show" variants={fadeUp} className="text-center max-w-3xl mx-auto">
+        <video
+          src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/929b967e9_Hero_Riyadh_Office_Film.mp4"
+          autoPlay loop muted playsInline preload="auto"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/80 via-[#0B2545]/45 to-[#0B2545]/90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/70 via-transparent to-transparent" />
+        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
+          <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/90 mb-4 backdrop-blur-md">
               <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
             </div>
@@ -282,26 +286,19 @@ export default function Landing() {
           </motion.div>
         </div>
 
-        {/* المساحة الكاملة مخصصة للفيديو الحقيقي */}
-        <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 pb-8 w-full flex-1 flex items-center">
-          <div className="relative w-full overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
-            <video
-              src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/40648db8f_HR_Hero_Film_v3.mp4"
-              autoPlay loop muted playsInline
-              className="h-[58vh] w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/30 via-transparent to-[#0B2545]/10 pointer-events-none" />
-          </div>
-        </div>
+        <div className="relative flex-1" />
 
-        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pb-6 w-full">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-3">
-              <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
-                <Zap size={18} /> {t.cta1}
-              </button>
-              <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-2xl font-medium flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
-            </div>
+        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pb-10 w-full">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-2xl text-center sm:text-start">
+              <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-5 drop-shadow">{t.heroDesc}</p>
+              <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+                <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
+                  <Zap size={18} /> {t.cta1}
+                </button>
+                <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-2xl font-medium flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
+              </div>
+            </motion.div>
             <div className="flex gap-8 text-sm">
               {t.stats.map((s) => <Stat key={s.l} n={s.n} l={s.l} />)}
             </div>
