@@ -8,6 +8,7 @@ import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
+import LeaveJourneyFilm from "@/components/landing/LeaveJourneyFilm";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -267,7 +268,7 @@ export default function Landing() {
 
       {/* Hero — فيديو يغطي كامل الشاشة */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <video src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/3b9304372_generated_video.mp4" autoPlay muted loop playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover" />
+        <LeaveJourneyFilm />
         <div className="absolute inset-0 bg-[#0B2545]/65" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-[#0B2545]/55" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/45 via-transparent to-[#0B2545]/30" />
