@@ -8,9 +8,8 @@ import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
-import EmployeeLeaveRequestPhone from "@/components/landing/EmployeeLeaveRequestPhone";
-import HrApprovalDesktop from "@/components/landing/HrApprovalDesktop";
-import { PhoneFrame, LaptopFrame } from "@/components/landing/DeviceFrames";
+import EmployeePortalScreen from "@/components/landing/EmployeePortalScreen";
+import CompanyPortalScreen from "@/components/landing/CompanyPortalScreen";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -327,7 +326,7 @@ export default function Landing() {
               <Users size={13} /> {isAr ? "بوابة الموظف — تقديم طلب إجازة" : "Employee Portal — submit leave"}
             </div>
             <div className="origin-top">
-              <PhoneFrame><EmployeeLeaveRequestPhone /></PhoneFrame>
+              <EmployeePortalScreen />
             </div>
           </div>
 
@@ -337,7 +336,7 @@ export default function Landing() {
               <Briefcase size={13} /> {isAr ? "بوابة الشركات — طلب بانتظار الموافقة" : "Company Portal — pending approval"}
             </div>
             <div className="origin-top">
-              <LaptopFrame><HrApprovalDesktop /></LaptopFrame>
+              <CompanyPortalScreen />
             </div>
           </div>
         </div>
