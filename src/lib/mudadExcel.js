@@ -170,10 +170,10 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
     const c = headerRow.getCell(i + 1);
     c.value = h;
     c.font = { bold: true, size: 11, color: { argb: "FF000000" } };
-    c.fill = GRAY_FILL;
+    if (i < 6) c.fill = GRAY_FILL; // الجانب المحمي رمادي، الاستحقاقات/الاستقطاعات أبيض
     c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     c.border = BORDER;
-    c.protection = { locked: true };
+    c.protection = { locked: i < 6 }; // عناوين الجانب المحمي مقفولة، والجانب الآخر قابل للتعديل
   });
   headerRow.height = 52;
   ws.autoFilter = { from: "A4", to: "K4" };
