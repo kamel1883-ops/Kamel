@@ -8,6 +8,7 @@ import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
+import HeroShowcaseFilm from "@/components/landing/HeroShowcaseFilm";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -265,31 +266,41 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero — فيديو يغطي كامل الشاشة */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* Hero — العنوان بالأعلى ثم فيديو متحرك احترافي يملأ المساحة */}
+      <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
         <div className="absolute inset-0 bg-[#0B2545]/65" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-[#0B2545]/55" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/45 via-transparent to-[#0B2545]/30" />
-        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 py-24 w-full">
-          <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/90 mb-5 backdrop-blur-md">
+        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-8 w-full">
+          <motion.div initial="hidden" animate="show" variants={fadeUp} className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/90 mb-4 backdrop-blur-md">
               <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
             </div>
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>
               <span className="block">{t.titlePre}</span>
               <span className="block bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{t.titleHi}</span>
             </h1>
-            <p className="text-white/85 text-lg mt-5 max-w-2xl leading-relaxed drop-shadow-md">{t.heroDesc}</p>
-            <div className="flex flex-wrap gap-3 mt-7">
+            <p className="text-white/75 text-sm sm:text-base mt-3 max-w-2xl mx-auto leading-relaxed">{t.heroDesc}</p>
+          </motion.div>
+        </div>
+
+        {/* المساحة الكاملة مخصصة للفيديو المتحرك */}
+        <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 pb-8 w-full flex-1 flex items-center">
+          <HeroShowcaseFilm isAr={isAr} lang={lang} />
+        </div>
+
+        <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pb-6 w-full">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-3">
               <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
                 <Zap size={18} /> {t.cta1}
               </button>
-              <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-2xl font-medium transition">{t.cta2}</button>
+              <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-2xl font-medium flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
             </div>
-            <div className="flex gap-8 mt-8 text-sm">
+            <div className="flex gap-8 text-sm">
               {t.stats.map((s) => <Stat key={s.l} n={s.n} l={s.l} />)}
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
