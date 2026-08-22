@@ -114,6 +114,32 @@ export function attendanceStatusLabel(status) {
   return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
 }
 
+// أسماء أيام الأسبوع بالعربية مفهرسة حسب getDay() (0=الأحد ... 6=السبت)
+export const WEEK_DAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+// يعيد اسم اليوم بالعربية لتاريخ بصيغة YYYY-MM-DD
+export function dayNameAr(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(String(dateStr).slice(0, 10) + "T00:00:00");
+  if (isNaN(d.getTime())) return "";
+  return WEEK_DAYS_AR[d.getDay()];
+}
+
+// يعيد مصفوفة أرقام أيام العمل المختارة للمنشأة (0=الأحد ... 6=السبت) — افتراضي السبت→الخميس
+export function orgWorkDays(org) {
+  const s = org?.work_days;
+  if (!s && s !== 0) return [0, 1, 2, 3, 4, 6];
+  const arr = String(s).split(",").map((x) => Number(x.trim())).filter((x) => !isNaN(x));
+  return arr.length ? arr : [0, 1, 2, 3, 4, 6];
+}
+
+// هل التاريخ المُعطى ضمن عطلة المنشأة الأسبوعية (أي ليس من أيام العمل)؟
+export function isOrgWeeklyOff(dateStr, org) {
+  const d = new Date(String(dateStr).slice(0, 10) + "T00:00:00");
+  if (isNaN(d.getTime())) return false;
+  return !orgWorkDays(org).includes(d.getDay());
+}
+
 export function payrollStatusLabel(status) {
   const lang = activeLang();
   const ar = {

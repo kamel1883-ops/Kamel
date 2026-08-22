@@ -11,6 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Building2, Save, Crosshair, Wallet, Upload, AlertTriangle, Trash2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
+// ترتيب الأسبوع السعودي: السبت → الجمعة (أرقام getDay: 6=السبت ... 5=الجمعة)
+const WEEK_ORDER = [6, 0, 1, 2, 3, 4, 5];
+const DAY_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const DAY_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DEFAULT_WORK_DAYS = "0,1,2,3,4,6"; // السبت–الخميس (الجمعة فقط إجازة)
 
 const empty = {
   name: "", industry: "", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
@@ -20,6 +27,7 @@ const empty = {
   eos_basis: "gross",
   gosi_saudi_employee_rate: 9.75, gosi_saudi_employer_rate: 9.75, gosi_expat_employer_rate: 2,
   work_week_hours: 48, work_week_days: 6, late_grace_minutes: 15,
+  work_days: DEFAULT_WORK_DAYS,
   work_start_time: "08:00", work_end_time: "17:00", work_hours_per_day: 9,
   absence_deduction_type: "monthly_divided",
   workplace_lat: "", workplace_lng: "", workplace_radius: 50,
@@ -40,7 +48,9 @@ export default function SettingsPage() {
     secEos: "إعدادات نهاية الخدمة والتأمينات", eosBasis: "أساس حساب نهاية الخدمة",
     gross: "الراتب الإجمالي (أساسي + بدلات)", baseOnly: "الراتب الأساسي فقط",
     gosiEmp: "نسبة تأمين الموظف السعودي %", gosiErSa: "نسبة تأمين صاحب العمل (سعودي) %", gosiErEx: "نسبة تأمين صاحب العمل (مقيم) %",
-    secAtt: "إعدادات الحضور والدوام", weekHours: "ساعات العمل الأسبوعية", weekDays: "أيام العمل الأسبوعية", grace: "سماح التأخير (دقيقة)",
+    secAtt: "إعدادات الحضور والدوام", weekHours: "ساعات العمل الأسبوعية", weekDays: "عدد أيام العمل", grace: "سماح التأخير (دقيقة)",
+    workDays: "أيام العمل الأسبوعية", workDaysHint: "الأيام غير المختارة تُعد إجازة أسبوعية — تُستخدم لحساب عطلات الأسبوع في الحضور وكشف الحضور.",
+    weeklyOffTitle: "الإجازة الأسبوعية",
     dayStart: "بداية الدوام", dayEnd: "نهاية الدوام", dayHours: "ساعات العمل اليومية المطلوبة (تتخللها فترة راحة)",
     absType: "طريقة خصم الغياب", monthlyDiv: "الراتب الشهري ÷ 30 لليوم", dailyWage: "الأجر اليومي",
     secLoc: "موقع مقر العمل (للبصمة)", lat: "خط العرض", lng: "خط الطول", radius: "نطاق البصمة (متر)", capture: "تحديد موقعي الحالي",
@@ -64,7 +74,9 @@ export default function SettingsPage() {
     secEos: "EOS & GOSI settings", eosBasis: "EOS calculation basis",
     gross: "Gross salary (base + allowances)", baseOnly: "Base salary only",
     gosiEmp: "Saudi employee GOSI rate %", gosiErSa: "Employer GOSI (Saudi) %", gosiErEx: "Employer GOSI (Expat) %",
-    secAtt: "Attendance & working time", weekHours: "Weekly working hours", weekDays: "Weekly working days", grace: "Late grace (minutes)",
+    secAtt: "Attendance & working time", weekHours: "Weekly working hours", weekDays: "Number of working days", grace: "Late grace (minutes)",
+    workDays: "Weekly working days", workDaysHint: "Unselected days are treated as the weekly off — used to mark weekly holidays in attendance and the attendance report.",
+    weeklyOffTitle: "Weekly off",
     dayStart: "Daily start time", dayEnd: "Daily end time", dayHours: "Required daily work hours (including a break period)",
     absType: "Absence deduction method", monthlyDiv: "Monthly salary ÷ 30 per day", dailyWage: "Daily wage",
     secLoc: "Workplace location (for check‑in)", lat: "Latitude", lng: "Longitude", radius: "Check‑in radius (m)", capture: "Set my current location",
@@ -127,6 +139,17 @@ export default function SettingsPage() {
   }, []);
 
   const set = (k, v) => setOrg((o) => ({ ...o, [k]: v }));
+
+  const toggleWorkDay = (day) => {
+    const cur = String(org.work_days || DEFAULT_WORK_DAYS)
+      .split(",").map((x) => Number(x.trim())).filter((x) => !isNaN(x));
+    const next = new Set(cur);
+    if (next.has(day)) next.delete(day); else next.add(day);
+    const sorted = [0, 1, 2, 3, 4, 5, 6].filter((d) => next.has(d));
+    if (!sorted.length) return; // منع إلغاء كل الأيام
+    set("work_days", sorted.join(","));
+    set("work_week_days", sorted.length);
+  };
 
   const captureLocation = () => {
     if (!navigator.geolocation) { alert(t.noGeo); return; }
@@ -259,8 +282,36 @@ export default function SettingsPage() {
           <SectionTitle title={t.secAtt} />
           <div className="grid grid-cols-3 gap-4">
             <Field label={t.weekHours}><Input type="number" value={org.work_week_hours} onChange={(e) => set("work_week_hours", Number(e.target.value))} /></Field>
-            <Field label={t.weekDays}><Input type="number" value={org.work_week_days} onChange={(e) => set("work_week_days", Number(e.target.value))} /></Field>
+            <Field label={t.weekDays}><div className="text-sm font-semibold px-3 py-2 rounded-md bg-muted tabular-nums">{org.work_week_days || 0} {isAr ? "أيام" : "days"}</div></Field>
             <Field label={t.grace}><Input type="number" value={org.late_grace_minutes} onChange={(e) => set("late_grace_minutes", Number(e.target.value))} /></Field>
+          </div>
+          <div className="grid grid-cols-1 mt-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">{t.workDays}</Label>
+              <div className="flex flex-wrap gap-2">
+                {WEEK_ORDER.map((d) => {
+                  const cur = String(org.work_days || DEFAULT_WORK_DAYS)
+                    .split(",").map((x) => Number(x.trim())).filter((x) => !isNaN(x));
+                  const active = cur.includes(d);
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => toggleWorkDay(d)}
+                      className={cn(
+                        "px-3.5 py-1.5 rounded-full text-xs font-medium border transition",
+                        active
+                          ? "bg-[#2e2448] text-white border-[#2e2448] shadow"
+                          : "bg-white text-muted-foreground border-input hover:bg-accent"
+                      )}
+                    >
+                      {isAr ? DAY_AR[d] : DAY_EN[d]}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">{t.workDaysHint}</p>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <Field label={t.dayStart}><Input type="time" value={org.work_start_time || ""} onChange={(e) => set("work_start_time", e.target.value)} /></Field>

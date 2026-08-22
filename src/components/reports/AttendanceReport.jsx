@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, CalendarRange, Users2, CheckCircle2, Clock, XCircle, CalendarOff } from "lucide-react";
 import { printReport } from "@/lib/reportPrint";
 import { cn } from "@/lib/utils";
-import { attendanceStatusLabel } from "@/lib/hr";
+import { attendanceStatusLabel, dayNameAr, isOrgWeeklyOff } from "@/lib/hr";
 
 const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
@@ -132,33 +132,42 @@ export default function AttendanceReport({ org }) {
           </div>
 
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>الموظف</TableHead>
-                <TableHead className="text-center">الهوية/الإقامة</TableHead>
-                <TableHead className="text-center">التاريخ</TableHead>
-                <TableHead className="text-center">الحضور</TableHead>
-                <TableHead className="text-center">الانصراف</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
+          <TableHeader>
+          <TableRow>
+            <TableHead>الموظف</TableHead>
+            <TableHead className="text-center">الهوية/الإقامة</TableHead>
+            <TableHead className="text-center">اليوم</TableHead>
+            <TableHead className="text-center">التاريخ</TableHead>
+            <TableHead className="text-center">الحضور</TableHead>
+            <TableHead className="text-center">الانصراف</TableHead>
+            <TableHead className="text-center">الحالة</TableHead>
+          </TableRow>
+          </TableHeader>
+          <TableBody>
+          {sel.rows.map((r) => {
+            const s = attendanceStatusLabel(r.status);
+            const dStr = String(r.date || "").slice(0, 10);
+            const weeklyOff = isOrgWeeklyOff(dStr, org);
+            return (
+              <TableRow key={r.id}>
+                <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
+                <TableCell className="text-center tabular-nums text-xs" dir="ltr">{r.national_id || "—"}</TableCell>
+                <TableCell className="text-center text-xs">
+                  <span className={cn("px-2 py-0.5 rounded-md", weeklyOff ? "bg-violet-50 text-violet-700 font-medium" : "text-muted-foreground")}>
+                    {dayNameAr(dStr) || "—"}
+                    {weeklyOff && <span className="block text-[10px] text-violet-500">إجازة أسبوعية</span>}
+                  </span>
+                </TableCell>
+                <TableCell className="text-center text-xs tabular-nums" dir="ltr">{dStr || "—"}</TableCell>
+                <TableCell className="text-center tabular-nums">{r.check_in || "—"}</TableCell>
+                <TableCell className="text-center tabular-nums">{r.check_out || "—"}</TableCell>
+                <TableCell className="text-center">
+                  <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", s.cls)}>{s.label}</span>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sel.rows.map((r) => {
-                const s = attendanceStatusLabel(r.status);
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
-                    <TableCell className="text-center tabular-nums text-xs" dir="ltr">{r.national_id || "—"}</TableCell>
-                    <TableCell className="text-center text-xs">{String(r.date || "").slice(0, 10)}</TableCell>
-                    <TableCell className="text-center tabular-nums">{r.check_in || "—"}</TableCell>
-                    <TableCell className="text-center tabular-nums">{r.check_out || "—"}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", s.cls)}>{s.label}</span>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+            );
+          })}
+          </TableBody>
           </Table>
         </div>
       )}

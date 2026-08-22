@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { CalendarCheck, Plus, Save } from "lucide-react";
+import { CalendarCheck, Plus, Save, CalendarOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { todayISO, attendanceStatusLabel } from "@/lib/hr";
+import { todayISO, attendanceStatusLabel, isOrgWeeklyOff, dayNameAr } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import AttendanceReport from "@/components/reports/AttendanceReport";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -92,6 +92,11 @@ export default function Attendance() {
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
 
+      {isOrgWeeklyOff(date, org) && (
+        <div className="bg-violet-50 border border-violet-200 text-violet-700 rounded-2xl px-4 py-2.5 mb-4 text-sm font-medium flex items-center gap-2">
+          <CalendarOff size={16} /> {isAr ? `يوم ${dayNameAr(date)} — ضمن الإجازة الأسبوعية للمنشأة` : `${dayNameAr(date)} — weekly off day`}
+        </div>
+      )}
       <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">{t.date}</label>
