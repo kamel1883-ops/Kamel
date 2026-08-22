@@ -231,9 +231,9 @@ function ContractsReport({ employees, winM, setWinM, t }) {
       <Card title={t.daysLeft}>
         {rows.length ? (
           <div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.contractStart}</th><th className="text-right pb-2 font-medium">{t.contractEnd}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
-            <tbody>{rows.map(({ e, d }) => (
-              <tr key={e.id} className="border-t border-border"><td className="py-2">{e.full_name}</td><td className="py-2">{e.national_id || "—"}</td><td className="py-2">{e.contract_start_date || "—"}</td><td className="py-2">{e.contract_end_date}</td>
+            <thead><tr className="text-xs text-muted-foreground"><th className="text-center pb-2 font-medium" style={{ width: 48 }}>{numLabel(t)}</th><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-center pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.contractStart}</th><th className="text-right pb-2 font-medium">{t.contractEnd}</th><th className="text-left pb-2 font-medium">{t.daysLeft}</th></tr></thead>
+            <tbody>{rows.map(({ e, d }, i) => (
+              <tr key={e.id} className="border-t border-border"><td className="py-2 text-center tabular-nums">{i + 1}</td><td className="py-2">{e.full_name}</td><td className="py-2 tabular-nums text-xs text-center" dir="ltr">{e.national_id || "—"}</td><td className="py-2">{e.contract_start_date || "—"}</td><td className="py-2">{e.contract_end_date}</td>
                 <td className="py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full", d < 0 ? "bg-rose-100 text-rose-700" : d <= 30 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700")}>{d} {t.days}</span></td></tr>
             ))}</tbody>
           </table></div>
@@ -298,16 +298,16 @@ function AttAllReport({ employees, attendance, statusLabel, t }) {
         <div>
           <div className="text-xs font-semibold text-muted-foreground mb-2">{t.committer}</div>
           {committed.length ? (
-            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-left pb-2 font-medium">{t.attRate}</th></tr></thead>
-              <tbody>{committed.map((c) => (<tr key={c.id} className="border-t border-border"><td className="py-2">{c.name}</td><td className="py-2 tabular-nums" dir="ltr">{c.nat}</td><td className="py-2 text-left font-semibold">{c.rate}%</td></tr>))}</tbody>
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-center pb-2 font-medium" style={{ width: 48 }}>{numLabel(t)}</th><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-center pb-2 font-medium">{t.nationalId}</th><th className="text-left pb-2 font-medium">{t.attRate}</th></tr></thead>
+               <tbody>{committed.map((c, i) => (<tr key={c.id} className="border-t border-border"><td className="py-2 text-center tabular-nums">{i + 1}</td><td className="py-2">{c.name}</td><td className="py-2 tabular-nums text-xs text-center" dir="ltr">{c.nat}</td><td className="py-2 text-left font-semibold">{c.rate}%</td></tr>))}</tbody>
             </table></div>
           ) : <NoRows text={t.noData} />}
         </div>
         <div>
           <div className="text-xs font-semibold text-muted-foreground mb-2">{t.absenteer}</div>
           {absentees.length ? (
-            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-left pb-2 font-medium">{t.absentDays}</th></tr></thead>
-              <tbody>{absentees.map((a) => (<tr key={a.id} className="border-t border-border"><td className="py-2">{a.name}</td><td className="py-2">{a.nat}</td><td className="py-2 text-left">{a.absent}</td></tr>))}</tbody>
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-xs text-muted-foreground"><th className="text-center pb-2 font-medium" style={{ width: 48 }}>{numLabel(t)}</th><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-center pb-2 font-medium">{t.nationalId}</th><th className="text-left pb-2 font-medium">{t.absentDays}</th></tr></thead>
+               <tbody>{absentees.map((a, i) => (<tr key={a.id} className="border-t border-border"><td className="py-2 text-center tabular-nums">{i + 1}</td><td className="py-2">{a.name}</td><td className="py-2 tabular-nums text-xs text-center" dir="ltr">{a.nat}</td><td className="py-2 text-left">{a.absent}</td></tr>))}</tbody>
             </table></div>
           ) : <NoRows text={t.noData} />}
         </div>
@@ -434,6 +434,7 @@ function LicensesReport({ records, t }) {
   );
 }
 function isArLabel(t, ar, en) { return t.days ? ar : en; }
+const numLabel = (t) => (t.monthsList?.[0] === "يناير" ? "الرقم" : "#");
 
 function VehiclesReport({ records, t }) {
   const statusCounts = useMemo(() => { const m = {}; records.forEach((v) => { m[v.status] = (m[v.status] || 0) + 1; }); return Object.entries(m).map(([k,v]) => ({ name: k, value: v })); }, [records]);
@@ -473,6 +474,7 @@ function TripsReport({ records, employees, tripM, setTripM, t }) {
   const since = addMonths(-tripM);
   const rows = records.filter((r) => r.start_date && new Date(r.start_date) >= since);
   const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "—";
+  const empName = (id) => employees.find((e) => e.id === id)?.full_name || "—";
   const byMonth = useMemo(() => { const m = {}; rows.forEach((r) => { const k = monthKey(r.start_date); m[k] = (m[k]||0)+1; }); return Object.entries(m).sort().map(([name, value]) => ({ name, value })); }, [rows]);
   return (
     <div>
@@ -489,8 +491,8 @@ function TripsReport({ records, employees, tripM, setTripM, t }) {
       <Card title={t.tripTable}>
         {rows.length ? (
           <div className="overflow-x-auto"><table className="w-full text-sm">
-            <thead><tr className="text-xs text-muted-foreground"><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-right pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-right pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
-             <tbody>{rows.map((r) => (<tr key={r.id} className="border-t border-border"><td className="py-2">{r.employee_name || "—"}</td><td className="py-2 tabular-nums text-xs" dir="ltr">{empNat(r.employee_id)}</td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2">{r.days_count || 0}</td><td className="py-2">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
+            <thead><tr className="text-xs text-muted-foreground"><th className="text-center pb-2 font-medium" style={{ width: 48 }}>{numLabel(t)}</th><th className="text-right pb-2 font-medium">{t.tripEmp}</th><th className="text-center pb-2 font-medium">{t.nationalId}</th><th className="text-right pb-2 font-medium">{t.tripDest}</th><th className="text-right pb-2 font-medium">{t.tripDates}</th><th className="text-center pb-2 font-medium">{t.tripDays}</th><th className="text-left pb-2 font-medium">{t.tripCost}</th></tr></thead>
+             <tbody>{rows.map((r, i) => (<tr key={r.id} className="border-t border-border"><td className="py-2 text-center tabular-nums">{i + 1}</td><td className="py-2">{empName(r.employee_id)}</td><td className="py-2 tabular-nums text-xs text-center" dir="ltr">{empNat(r.employee_id)}</td><td className="py-2">{r.destination || "—"}</td><td className="py-2">{r.start_date} ← {r.end_date}</td><td className="py-2 text-center">{r.days_count || 0}</td><td className="py-2 text-left">{formatCurrency(r.total_cost || 0)}</td></tr>))}</tbody>
           </table></div>
         ) : <NoRows text={t.noData} />}
       </Card>
@@ -607,7 +609,7 @@ function PerformanceReport({ records, employees, empId, setEmpId, t }) {
   const selEmp = employees.find((e) => e.id === empId) || null;
   if (!empId) {
     const m = {};
-    records.forEach((r) => { if (!r.employee_id) return; const e = (m[r.employee_id] || (m[r.employee_id] = { name: r.employee_name || r.employee_id, sum: 0, n: 0 })); e.sum += (Number(r.overall_rating) || 0); e.n++; });
+    records.forEach((r) => { if (!r.employee_id) return; const emp = employees.find((x) => x.id === r.employee_id); const e = (m[r.employee_id] || (m[r.employee_id] = { name: emp?.full_name || r.employee_name || r.employee_id, sum: 0, n: 0 })); e.sum += (Number(r.overall_rating) || 0); e.n++; });
     const data = Object.values(m).map((e) => ({ name: e.name, value: e.n ? Math.round((e.sum / e.n) * 100) / 100 : 0 })).sort((a, b) => b.value - a.value).slice(0, 15);
     return (
       <Card title={t.perfAll}>
