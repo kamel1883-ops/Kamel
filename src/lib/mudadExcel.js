@@ -109,8 +109,8 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
   const ws = wb.addWorksheet("ملف مسير الرواتب", {
     views: [{ rightToLeft: true }],
     columns: [
-      { width: 26 }, { width: 20 }, { width: 15 }, { width: 13 }, { width: 13 }, { width: 15 },
-      { width: 17 }, { width: 19 }, { width: 20 }, { width: 13 }, { width: 21 },
+      { width: 30 }, { width: 24 }, { width: 17 }, { width: 15 }, { width: 13 }, { width: 18 },
+      { width: 20 }, { width: 22 }, { width: 26 }, { width: 16 }, { width: 24 },
     ],
   });
 
@@ -175,7 +175,7 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
     c.border = BORDER;
     c.protection = { locked: true };
   });
-  headerRow.height = 38;
+  headerRow.height = 52;
   ws.autoFilter = { from: "A4", to: "K4" };
 
   // الصفوف 5+ — بيانات المسير
