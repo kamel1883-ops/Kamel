@@ -132,18 +132,25 @@ export default function OrgStructure() {
       ) : employees.length === 0 ? (
         <div className="bg-white border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">{t.empty}</div>
       ) : view === "chart" ? (
-        <div className="rounded-2xl border border-white/70 bg-white/55 backdrop-blur-xl p-6 shadow-[0_12px_44px_-18px_rgba(11,23,59,0.22)]">
-          <OrgChart roots={tree} lang={lang} dir={isAr ? "rtl" : "ltr"} />
-          {orphanNodes.length > 0 && (
-            <div className="mt-8 pt-4 border-t border-white/70">
-              <div className="text-sm font-medium text-muted-foreground mb-2">{t.orphans} ({orphanNodes.length})</div>
-              <div className="flex flex-wrap gap-2">
-                {orphanNodes.map((e) => (
-                  <span key={e.id} className="text-xs px-3 py-1.5 rounded-xl bg-white/65 backdrop-blur border border-white/70 shadow-sm">{employeeName(e)}</span>
-                ))}
+        <div className="relative overflow-hidden rounded-3xl p-6 border border-white/70 shadow-[0_18px_60px_-24px_rgba(11,23,59,0.38)]">
+          {/* خلفية متدرجة ملوّنة + بقع ضبابية لإظهار تأثير الزجاج */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-50 via-amber-50/50 to-slate-100" />
+          <div className="absolute -top-10 right-1/4 w-64 h-64 rounded-full bg-indigo-300/30 blur-3xl" />
+          <div className="absolute -bottom-12 left-1/4 w-72 h-72 rounded-full bg-amber-300/35 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 w-80 h-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/25 blur-3xl" />
+          <div className="relative">
+            <OrgChart roots={tree} lang={lang} dir={isAr ? "rtl" : "ltr"} />
+            {orphanNodes.length > 0 && (
+              <div className="mt-8 pt-4 border-t border-white/60">
+                <div className="text-sm font-medium text-slate-700/80 mb-2">{t.orphans} ({orphanNodes.length})</div>
+                <div className="flex flex-wrap gap-2">
+                  {orphanNodes.map((e) => (
+                    <span key={e.id} className="text-xs px-3 py-1.5 rounded-xl bg-white/40 backdrop-blur-md border border-white/80 shadow-sm text-slate-700">{employeeName(e)}</span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ) : view === "tree" ? (
         <div>

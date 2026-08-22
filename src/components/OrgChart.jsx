@@ -6,11 +6,11 @@ import { ROLE_STYLES, roleLabel } from "@/lib/orgTree";
  * كل بطاقة: بار لوني للمستوى + أيقونة + شارة المستوى الزجاجية + الاسم + المسمى + الإدارة + الرقم.
  * خطوط الربط كحلية ناعمة متدرجة.
  */
-const NAVY_LINE = "bg-[#142C4F]/25";
+const NAVY_LINE = "bg-[#142C4F]/30";
 const CARD_GLASS =
-  "rounded-2xl border border-white/70 bg-white/65 backdrop-blur-xl " +
-  "shadow-[0_10px_30px_-12px_rgba(11,23,59,0.18)] " +
-  "hover:shadow-[0_18px_44px_-14px_rgba(11,23,59,0.30)] hover:-translate-y-0.5 " +
+  "rounded-2xl border border-white/80 bg-white/45 backdrop-blur-xl " +
+  "shadow-[0_10px_30px_-12px_rgba(11,23,59,0.22)] " +
+  "hover:shadow-[0_18px_44px_-14px_rgba(11,23,59,0.36)] hover:-translate-y-0.5 " +
   "transition-all duration-300";
 
 export default function OrgChart({ roots, lang, dir = "rtl" }) {
