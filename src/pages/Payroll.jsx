@@ -8,7 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
@@ -28,7 +28,7 @@ export default function Payroll() {
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
     pdf: "تحميل / طباعة PDF", printDraft: "طباعة كمسودة", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
-    wps: "ملف WPS لمدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
+    wps: "ملف WPS لمدد", mudadSend: "تحويل الرواتب إلى مدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
     thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة",
     totalIncludedLabel: "إجمالي الرواتب للمشمولين بالصرف هذا الشهر", excludedHint: (n) => `${n} موظف مستثنى من صرف هذا الشهر`, allIncluded: "كل الموظفين مشمولون بالصرف",
@@ -42,7 +42,7 @@ export default function Payroll() {
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
     pdf: "Download / Print PDF", printDraft: "Print draft", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
-    wps: "WPS file (Mudad)", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
+    wps: "WPS file (Mudad)", mudadSend: "Send salaries to Mudad", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
     thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status",
     totalIncludedLabel: "Total payroll for employees included in this month's pay", excludedHint: (n) => `${n} employee(s) excluded from this month's pay`, allIncluded: "All employees are included in pay",
@@ -212,8 +212,8 @@ export default function Payroll() {
   };
 
   // توليد ملف حماية الأجور (WPS) الجاهز للرفع على مُدّد — من الرواتب المصروفة فقط
-  const exportWps = (rows = payrolls) => {
-    const paid = rows.filter((p) => p.status === "paid");
+  const exportWps = (rows = payrolls, statusFilter = "paid") => {
+    const paid = rows.filter((p) => p.status === statusFilter);
     if (paid.length === 0) { alert(t.wpsEmptyExport); return; }
     const empMap = {};
     for (const e of employees) empMap[e.id] = e;
@@ -294,6 +294,22 @@ export default function Payroll() {
   const anyApproved = includedPayrolls.some((p) => p.status === "approved");
   const monthStatus = includedPayrolls.length && includedPayrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
 
+  // تحويل المسير إلى مدد: يولّد ملف حماية الأجور (WPS) ويفتح بوابة مدد لإكمال الرفع
+  const sendToMudad = () => {
+    if (!anyApproved && monthStatus !== "paid") {
+      alert(isAr
+        ? "اعتمد كشف الرواتب أولاً قبل التحويل إلى مدد."
+        : "Approve the payroll sheet before sending to Mudad.");
+      return;
+    }
+    const statusFilter = paidCount > 0 ? "paid" : "approved";
+    exportWps(payrolls, statusFilter);
+    window.open("https://mudad.com.sa", "_blank", "noopener,noreferrer");
+    alert(isAr
+      ? `تم توليد ملف حماية الأجور (WPS) للمسير (${includedCount} موظف).\n\nالخطوات التالية:\n1) سجّل الدخول في بوابة «مدد» التي فُتحت في تبويب جديد.\n2) ارفع ملف WPS الذي نُزِّل للتو.\n3) اعتمد المسير — ثم يحوّل البنك المرتبط بحسابك الرواتب تلقائياً إلى حسابات الموظفين، وتُرفع حماية الأجور للوزارة.`
+      : `WPS file generated for ${includedCount} employees.\n\nNext steps:\n1) Sign in to the Mudad portal opened in the new tab.\n2) Upload the WPS file just downloaded.\n3) Approve the payroll — your linked bank will then transfer salaries to employee accounts automatically, and WPS will be filed with the Ministry.`);
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader
@@ -349,6 +365,7 @@ export default function Payroll() {
             {anyDraft && (<Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2"><FileCheck size={16} /> {t.approve}</Button>)}
             {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
             {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
+            {(anyApproved || monthStatus === "paid") && (<Button onClick={sendToMudad} disabled={batching} className="gap-2 bg-[#0B2545] hover:bg-[#14315a] text-white"><Send size={16} /> {t.mudadSend}</Button>)}
             <Button onClick={() => exportPdf({ draft: true })} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printDraft}</Button>
             <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
             {wpsRajhi ? (
