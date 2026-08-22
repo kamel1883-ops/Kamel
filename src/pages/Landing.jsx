@@ -268,7 +268,7 @@ export default function Landing() {
       {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
         <video
-          src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/172aad447_Hero_Riyadh_Office_Film_v2.mp4"
+          src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/1141d4146_Hero_Riyadh_Meeting.mp4"
           autoPlay loop muted playsInline preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
         />
