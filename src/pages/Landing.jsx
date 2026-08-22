@@ -286,20 +286,11 @@ export default function Landing() {
         <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 pb-8 w-full flex-1 flex items-center">
           <div className="relative w-full overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
             <video
-              src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/c55903ad7_HR_Hero_Film.mp4"
+              src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/39a8e287d_HR_Hero_Film_v2.mp4"
               autoPlay loop muted playsInline
               className="h-[58vh] w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/45 via-transparent to-[#0B2545]/20" />
-            <div className="absolute bottom-5 right-5 left-5 flex flex-wrap items-center justify-between gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full bg-black/40 px-3 py-1.5 text-xs text-white/90 backdrop-blur-md ring-1 ring-white/20">
-                <span className="flex h-2 w-2"><span className="absolute h-2 w-2 animate-ping rounded-full bg-rose-400/80" /><span className="h-2 w-2 rounded-full bg-rose-400" /></span>
-                {isAr ? "مشاهد حقيقية من بيئة العمل" : "Real workplace scenes"}
-              </div>
-              <button onClick={() => navigate("/quote")} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#CBA83A] to-[#B6901F] px-5 py-2.5 text-sm font-semibold text-[#0B2545] shadow-lg">
-                <Zap size={16} /> {t.cta1}
-              </button>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/30 via-transparent to-[#0B2545]/10 pointer-events-none" />
           </div>
         </div>
 
