@@ -3,7 +3,7 @@ import {
   Crown, Download, Users, Fingerprint, Wallet, Calculator, ShieldCheck, BadgeCheck,
   GraduationCap, GitBranch, Car, FileBadge, Building2, Smartphone, MapPin,
   ClipboardList, Server, Cpu, HardDrive, MemoryStick, Zap, Lock, Globe,
-  CalendarClock, Mail, Linkedin, Twitter, Network, BarChart3, Plane, FileText,
+  CalendarClock, Mail, Phone, Linkedin, Twitter, Network, BarChart3, Plane, FileText,
   Clock, Sparkles, LayoutDashboard, Bell, CheckCircle2,
   Briefcase, UserCog, Boxes, Settings, ShieldAlert, TrendingDown, UserCheck,
   CalendarCheck, FileSignature,
@@ -1203,6 +1203,10 @@ function Closing() {
           Try the platform free for 30 days and discover how your HR management transforms into one unified, premium digital ecosystem.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-7">
+          <a href="https://wa.me/966594700782" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(0,184,212,.10)", border: "1px solid rgba(0,184,212,.35)" }}>
+            <Phone size={18} style={{ color: CYAN }} />
+            <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">+966 59 470 0782</span>
+          </a>
           <div className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>
             <Mail size={18} style={{ color: CYAN }} />
             <a href="mailto:info@jadara-hr.com" style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">info@jadara-hr.com</a>
