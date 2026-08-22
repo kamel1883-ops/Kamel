@@ -8,8 +8,6 @@ import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
-import EmployeePortalScreen from "@/components/landing/EmployeePortalScreen";
-import CompanyPortalScreen from "@/components/landing/CompanyPortalScreen";
 import { useI18n } from "@/lib/i18n";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -306,37 +304,6 @@ export default function Landing() {
             </div>
             <div className="flex gap-8 text-sm">
               {t.stats.map((s) => <Stat key={s.l} n={s.n} l={s.l} />)}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* رحلة الطلب: من جوال الموظف إلى اعتماد الموارد البشرية */}
-      <section className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80">{isAr ? "رحلة الطلب من البداية حتى الموافقة" : "Request journey end-to-end"}</div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold mt-4" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "من جوال الموظف… إلى اعتماد الموارد البشرية" : "From the employee's phone… to HR approval"}</h2>
-          <p className="text-white/60 mt-3 max-w-2xl mx-auto text-sm leading-relaxed">{isAr ? "يرفع الموظف طلب إجازته من بوابة الموظف على جواله، ويصل الطلب فوراً للإدارة في بوابة الشركات للاعتماد على الكمبيوتر — مسار موافقات شفّاف وسلس بين الطرفين." : "The employee submits a leave request from their phone; it reaches management instantly on the company portal for desktop approval — a transparent, smooth shared flow."}</p>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 items-center">
-          {/* جوال الموظف */}
-          <div className="flex flex-col items-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-400/15 text-amber-200 border border-amber-300/20 px-3 py-1 text-xs">
-              <Users size={13} /> {isAr ? "بوابة الموظف — تقديم طلب إجازة" : "Employee Portal — submit leave"}
-            </div>
-            <div className="origin-top">
-              <EmployeePortalScreen />
-            </div>
-          </div>
-
-          {/* كمبيوتر الموارد البشرية */}
-          <div className="flex flex-col items-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-400/15 text-amber-200 border border-amber-300/20 px-3 py-1 text-xs">
-              <Briefcase size={13} /> {isAr ? "بوابة الشركات — طلب بانتظار الموافقة" : "Company Portal — pending approval"}
-            </div>
-            <div className="origin-top">
-              <CompanyPortalScreen />
             </div>
           </div>
         </div>
