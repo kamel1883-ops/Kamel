@@ -5,7 +5,7 @@ const scenes = [
   { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/b9ef3a105_Leave_Request.mp4", eyebrow: "بوابة الموظفين", title: "رفع طلب إجازة", detail: "تم إرسال الطلب بنجاح" },
   { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/d769dd672_HR_Approval.mp4", eyebrow: "الإجازات والموافقات", title: "تمت الموافقة", detail: "بانتظار المالية للسداد" },
   { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/84c3d9b9e_Bank_Transfer.mp4", eyebrow: "إشعار بنكي", title: "تم تحويل مستحقات إجازتك", detail: "وصل التحويل بنجاح" },
-  { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/6296ae168_generated_video.mp4", eyebrow: "جدارة", title: "مع جدارة، كل إدارة الموارد البشرية صارت أسهل", detail: "العامل نفسه، من المطار إلى داخل الطائرة بالملابس نفسها" },
+  { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/b3de9dd6e_Office_Flow.mp4", eyebrow: "جدارة", title: "منشأة واحدة.. ونظام يدير كل شيء", detail: "من البصمة إلى الاعتماد والرواتب في منصة واحدة" },
 ];
 
 export default function LeaveJourneyFilm() {
