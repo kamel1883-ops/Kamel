@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+import SceneScreen from "@/components/landing/SceneScreen";
 
 const scenes = [
   { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/8328186d7__.mp4", eyebrow: "بوابة الموظفين", title: "رفع طلب إجازة", detail: "تم إرسال الطلب بنجاح" },
   { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/3072c8041___.mp4", eyebrow: "الإجازات والموافقات", title: "تمت الموافقة", detail: "بانتظار المالية للسداد" },
   { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/76a2b9801__.mp4", eyebrow: "إشعار بنكي", title: "تم تحويل مستحقات إجازتك", detail: "وصل التحويل بنجاح" },
-  { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/89a71c774__.mp4", eyebrow: "رحلة أسهل", title: "من موقع العمل إلى بوابة السفر", detail: "كل الإجراءات اكتملت بسلاسة" },
-  { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/85d6b88e7__.mp4", eyebrow: "جدارة", title: "مع جدارة، كل إدارة الموارد البشرية صارت أسهل", detail: "منصة واحدة، تجربة متكاملة" },
+  { src: "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/6296ae168_generated_video.mp4", eyebrow: "جدارة", title: "مع جدارة، كل إدارة الموارد البشرية صارت أسهل", detail: "العامل نفسه، من المطار إلى داخل الطائرة بالملابس نفسها" },
 ];
 
 export default function LeaveJourneyFilm() {
@@ -18,6 +18,7 @@ export default function LeaveJourneyFilm() {
         onEnded={() => setIndex((index + 1) % scenes.length)}
         className="h-full w-full object-cover" />
       <div className="absolute inset-0 bg-primary/30" />
+      <SceneScreen index={index} />
       <div className="absolute bottom-8 left-6 right-6 mx-auto max-w-xl rounded-2xl border border-white/20 bg-primary/85 p-5 text-center shadow-2xl backdrop-blur-md">
         <p className="text-xs font-semibold text-violet-300">{scene.eyebrow}</p>
         <p className="mt-1 text-xl font-bold text-white sm:text-2xl">{scene.title}</p>
