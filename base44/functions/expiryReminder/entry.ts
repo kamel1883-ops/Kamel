@@ -5,14 +5,14 @@ import { verifyCronSecret } from "../../shared/renewal.ts";
 const DAY = 1000 * 60 * 60 * 24;
 const HORIZON = 30 * DAY;
 
-// تصنيف تاريخ انتهاء: منتهٍ / قريب خلال 30 يوماً / لا شيء
+// تصنيف تاريخ انتهاء: قريب خلال 30 يوماً مستقبلة فقط — المنتهي فعلاً يُستبعد (الغرامة تطبق بعد الانتهاء)
 function classify(dateStr, today) {
   if (!dateStr) return null;
   const d = new Date(dateStr + "T00:00:00");
   if (isNaN(d.getTime())) return null;
   const diff = d.getTime() - today.getTime();
   const days = Math.round(diff / DAY);
-  if (diff < 0) return { days, status: "expired", expiry: dateStr };
+  if (diff < 0) return null;
   if (diff <= HORIZON) return { days, status: "soon", expiry: dateStr };
   return null;
 }
@@ -87,8 +87,8 @@ export default async function (req) {
           const probEnd = new Date(ph.getTime() + 90 * DAY);
           const diff = probEnd.getTime() - today.getTime();
           const days = Math.round(diff / DAY);
-          if (diff <= HORIZON && diff >= -30 * DAY) {
-            items.push({ category: "probation", label: e.full_name || "موظف", identifier: e.employee_number || e.national_id || "", expiry: probEnd.toISOString().slice(0, 10), days, status: diff < 0 ? "expired" : "soon" });
+          if (diff >= 0 && diff <= HORIZON) {
+            items.push({ category: "probation", label: e.full_name || "موظف", identifier: e.employee_number || e.national_id || "", expiry: probEnd.toISOString().slice(0, 10), days, status: "soon" });
           }
         }
       }
@@ -110,25 +110,17 @@ export default async function (req) {
       return Response.json({ sent: false, count: 0 });
     }
 
-    const expired = items.filter((i) => i.status === "expired");
-    const soon = items.filter((i) => i.status === "soon");
+    const soon = items;
 
     let text = "";
-    if (expired.length > 0) {
-      text += "⚠️ منتهية بالفعل (" + expired.length + "):\n";
-      for (const x of expired) {
-        text += "• " + CAT[x.category] + " — " + x.label + " (" + x.identifier + ") — انتهت " + x.expiry + "\n";
-      }
-      text += "\n";
-    }
     if (soon.length > 0) {
-      text += "⏳ تنتهي خلال 30 يوماً (" + soon.length + "):\n";
+      text += "⏳ موشكة على الانتهاء خلال 30 يوماً (" + soon.length + "):\n";
       for (const x of soon) {
         text += "• " + CAT[x.category] + " — " + x.label + " (" + x.identifier + ") — تنتهي " + x.expiry + " (متبقٍ " + x.days + " يوم)\n";
       }
     }
 
-    const title = "تنبيه انتهاءات" + (expired.length > 0 ? " — يوجد " + expired.length + " منتهٍ" : "");
+    const title = "تنبيه انتهاءات موشكة — " + soon.length + " بند";
 
     try {
       await base44.asServiceRole.entities.Notification.create({
@@ -156,7 +148,6 @@ export default async function (req) {
     return Response.json({
       sent: true,
       count: items.length,
-      expired: expired.length,
       soon: soon.length,
       emailed,
       items,

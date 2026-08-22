@@ -16,7 +16,8 @@ function classify(dateStr, today) {
   if (isNaN(d.getTime())) return null;
   const diff = d.getTime() - today.getTime();
   const days = Math.round(diff / DAY);
-  if (diff < 0) return { days, status: "expired", expiry: dateStr };
+  // فقط الموشك على الانتهاء خلال 30 يوماً مستقبلة — المنتهي فعلاً يُستبعد (الغرامة تطبق بعد الانتهاء)
+  if (diff < 0) return null;
   if (diff <= HORIZON) return { days, status: "soon", expiry: dateStr };
   return null;
 }
@@ -47,36 +48,30 @@ export default function ExpiryReport() {
   };
 
   const t = isAr ? {
-    title: "تقرير الانتهاءات والتنبيهات",
-    subtitle: "كل ما ينتهي خلال 30 يوماً أو منتهٍ بالفعل — تراخيص، اشتراكات حكومية، إقامات، عقود، تأمين طبي، مركبات، وفترة تجربة",
+    title: "تقرير الموشكة على الانتهاء",
+    subtitle: "كل ما ينتهي خلال 30 يوماً قادمة — تراخيص، اشتراكات حكومية، إقامات، عقود، تأمين طبي، مركبات، وفترة تجربة. (المنتهي فعلاً لا يُعرض — تُطبّق الغرامة بعد الانتهاء)",
     loading: "جارٍ التحميل...",
-    empty: "لا توجد انتهاءات ضمن 30 يوماً — كل شيء سارٍ ✅",
-    expired: "منتهٍ",
+    empty: "لا توجد أي وثيقة موشكة على الانتهاء خلال 30 يوماً — كل شيء سارٍ ✅",
     soon: "خلال 30 يوماً",
     days: "يوم متبقٍ",
-    overdue: "يوم متأخر",
     item: "البند",
     ref: "المرجع",
     expiry: "تاريخ الانتهاء",
     status: "الحالة",
-    total: "إجمالي البلاغات",
-    expiredCount: "منتهية",
+    total: "إجمالي التنبيهات",
     soonCount: "تقترب",
   } : {
-    title: "Expirations & Alerts Report",
-    subtitle: "Everything expiring within 30 days or already expired — licenses, gov subscriptions, iqamas, contracts, medical insurance, vehicles, probation",
+    title: "Approaching Expirations Report",
+    subtitle: "Everything expiring within the next 30 days — licenses, gov subscriptions, iqamas, contracts, medical insurance, vehicles, probation. (Already-expired items are excluded — fines apply after expiry)",
     loading: "Loading...",
-    empty: "No expirations within 30 days — all valid ✅",
-    expired: "Expired",
+    empty: "No items expiring within 30 days — all valid ✅",
     soon: "Within 30d",
     days: "days left",
-    overdue: "days overdue",
     item: "Item",
     ref: "Ref",
     expiry: "Expiry",
     status: "Status",
     total: "Total alerts",
-    expiredCount: "Expired",
     soonCount: "Approaching",
   };
 
@@ -117,8 +112,8 @@ export default function ExpiryReport() {
             const probEnd = new Date(ph.getTime() + 90 * DAY);
             const diff = probEnd.getTime() - today.getTime();
             const days = Math.round(diff / DAY);
-            if (diff <= HORIZON && diff >= -30 * DAY) {
-              out.push({ category: "probation", label: e.full_name || "", identifier: e.employee_number || e.national_id || "", expiry: probEnd.toISOString().slice(0, 10), days, status: diff < 0 ? "expired" : "soon" });
+            if (diff >= 0 && diff <= HORIZON) {
+              out.push({ category: "probation", label: e.full_name || "", identifier: e.employee_number || e.national_id || "", expiry: probEnd.toISOString().slice(0, 10), days, status: "soon" });
             }
           }
         }
@@ -138,8 +133,7 @@ export default function ExpiryReport() {
     })();
   }, []);
 
-  const expired = items.filter((i) => i.status === "expired");
-  const soon = items.filter((i) => i.status === "soon");
+  const soon = items;
   const tintCls = { blue: "bg-blue-50 text-blue-700 border-blue-200", indigo: "bg-indigo-50 text-indigo-700 border-indigo-200", violet: "bg-violet-50 text-violet-700 border-violet-200", slate: "bg-slate-50 text-slate-700 border-slate-200", rose: "bg-rose-50 text-rose-700 border-rose-200", amber: "bg-amber-50 text-amber-700 border-amber-200", cyan: "bg-cyan-50 text-cyan-700 border-cyan-200", emerald: "bg-emerald-50 text-emerald-700 border-emerald-200", orange: "bg-orange-50 text-orange-700 border-orange-200" };
 
   return (
@@ -155,14 +149,10 @@ export default function ExpiryReport() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-4 mb-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-5">
             <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center"><AlertTriangle size={20} className="text-slate-700" /></div>
               <div><div className="text-xs text-muted-foreground">{t.total}</div><div className="text-lg font-bold">{items.length}</div></div>
-            </div>
-            <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center"><span className="text-rose-600 font-bold">!</span></div>
-              <div><div className="text-xs text-muted-foreground">{t.expiredCount}</div><div className="text-lg font-bold text-rose-600">{expired.length}</div></div>
             </div>
             <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><Clock size={20} className="text-amber-600" /></div>
@@ -179,7 +169,7 @@ export default function ExpiryReport() {
                     <th className="text-right px-3 py-3 font-medium">{t.item}</th>
                     <th className="text-right px-3 py-3 font-medium">{t.ref}</th>
                     <th className="text-right px-3 py-3 font-medium">{t.expiry}</th>
-                    <th className="text-right px-3 py-3 font-medium">{isAr ? "المتبقي/التأخر" : "Days"}</th>
+                    <th className="text-right px-3 py-3 font-medium">{isAr ? "المتبقي" : "Days left"}</th>
                     <th className="text-right px-3 py-3 font-medium">{t.status}</th>
                   </tr>
                 </thead>
@@ -197,12 +187,12 @@ export default function ExpiryReport() {
                         <td className="px-3 py-2 font-medium">{it.label}</td>
                         <td className="px-3 py-2 tabular-nums text-xs" dir="ltr">{it.identifier || "—"}</td>
                         <td className="px-3 py-2 tabular-nums">{it.expiry}</td>
-                        <td className={cn("px-3 py-2 font-semibold tabular-nums", it.status === "expired" ? "text-rose-600" : "text-amber-600")}>
-                          {it.status === "expired" ? `${Math.abs(it.days)} ${t.overdue}` : `${it.days} ${t.days}`}
+                        <td className="px-3 py-2 font-semibold tabular-nums text-amber-600">
+                          {it.days} {t.days}
                         </td>
                         <td className="px-3 py-2">
-                          <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", it.status === "expired" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700")}>
-                            {it.status === "expired" ? t.expired : t.soon}
+                          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-700">
+                            {t.soon}
                           </span>
                         </td>
                       </tr>
