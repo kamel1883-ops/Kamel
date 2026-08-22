@@ -267,7 +267,7 @@ export default function Landing() {
 
       {/* Hero — فيديو يغطي كامل الشاشة */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <video src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/c270dd9a3_generated_video.mp4" autoPlay muted loop playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover" />
+        <video src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/a4433f70b_generated_video.mp4" autoPlay muted loop playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-[#0B2545]/65" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-[#0B2545]/55" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/45 via-transparent to-[#0B2545]/30" />
