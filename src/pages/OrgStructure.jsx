@@ -132,14 +132,14 @@ export default function OrgStructure() {
       ) : employees.length === 0 ? (
         <div className="bg-white border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground">{t.empty}</div>
       ) : view === "chart" ? (
-        <div className="bg-white border border-border rounded-2xl p-6">
+        <div className="rounded-2xl border border-white/70 bg-white/55 backdrop-blur-xl p-6 shadow-[0_12px_44px_-18px_rgba(11,23,59,0.22)]">
           <OrgChart roots={tree} lang={lang} dir={isAr ? "rtl" : "ltr"} />
           {orphanNodes.length > 0 && (
-            <div className="mt-8 pt-4 border-t border-border">
+            <div className="mt-8 pt-4 border-t border-white/70">
               <div className="text-sm font-medium text-muted-foreground mb-2">{t.orphans} ({orphanNodes.length})</div>
               <div className="flex flex-wrap gap-2">
                 {orphanNodes.map((e) => (
-                  <span key={e.id} className="text-xs px-3 py-1.5 rounded-lg bg-slate-50 border border-border">{employeeName(e)}</span>
+                  <span key={e.id} className="text-xs px-3 py-1.5 rounded-xl bg-white/65 backdrop-blur border border-white/70 shadow-sm">{employeeName(e)}</span>
                 ))}
               </div>
             </div>
