@@ -4,7 +4,8 @@ import PageHeader from "@/components/PageHeader";
 import PerformanceForm from "@/components/PerformanceForm";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Star, Target, TrendingUp, Award, ArrowUpRight, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Target, TrendingUp, Award, ArrowUpRight, RotateCcw, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
@@ -37,6 +38,7 @@ export default function Performance() {
     ladderH: "سلم الدرجات الوظيفية", gradeEmpty: "لا توجد بيانات درجات وظيفية", empCount: (n) => `${n} موظف`,
     promoH: "مرشحو الترقية", promoEmpty: "لا يوجد مرشحون للترقية حالياً",
     reopen: "إعادة التقييم", reopenAsk: "سيُعاد فتح هذا التقييم كمسودة لإعادة التقييم. متابعة؟",
+    searchId: "بحث برقم الهوية...", noMatch: "لا توجد نتائج مطابقة لرقم الهوية",
   } : {
     title: "Performance & career paths", subtitle: "Periodic performance reviews and career path management", add: "New review",
     tabReviews: "Performance reviews", tabPaths: "Career paths",
@@ -45,6 +47,7 @@ export default function Performance() {
     ladderH: "Job grade ladder", gradeEmpty: "No job grade data", empCount: (n) => `${n} employees`,
     promoH: "Promotion candidates", promoEmpty: "No promotion candidates currently",
     reopen: "Re-evaluate", reopenAsk: "This review will be reopened as a draft for re-evaluation. Continue?",
+    searchId: "Search by ID...", noMatch: "No results match this ID",
   };
 
   const [reviews, setReviews] = useState([]);
@@ -53,6 +56,7 @@ export default function Performance() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [idQuery, setIdQuery] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -86,9 +90,21 @@ export default function Performance() {
 
   const promotionCandidates = reviews.filter((r) => r.promotion_ready || r.recommendation === "promote").filter((r, i, arr) => arr.findIndex((x) => x.employee_id === r.employee_id) === i);
 
+  const q = idQuery.trim();
+  const matchIds = new Set();
+  if (q) employees.forEach((e) => { if ((e.national_id || "").includes(q)) matchIds.add(e.id); });
+  const filteredReviews = q ? reviews.filter((r) => matchIds.has(r.employee_id)) : reviews;
+  const filteredLadder = gradeLadder.map(({ grade, emps }) => ({ grade, emps: q ? emps.filter((e) => matchIds.has(e.id)) : emps })).filter((g) => g.emps.length > 0);
+  const filteredPromos = q ? promotionCandidates.filter((r) => matchIds.has(r.employee_id)) : promotionCandidates;
+
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} action={<Button onClick={() => { setEditing(null); setShowForm(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>} />
+
+      <div className="relative max-w-md mt-2 mb-3">
+        <Search size={16} className="absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground pointer-events-none" />
+        <Input value={idQuery} onChange={(e) => setIdQuery(e.target.value)} placeholder={t.searchId} className="ps-9" inputMode="numeric" />
+      </div>
 
       <Tabs defaultValue="reviews" className="mt-2">
         <TabsList>
@@ -99,11 +115,11 @@ export default function Performance() {
         <TabsContent value="reviews">
           {loading ? (
             <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
-          ) : reviews.length === 0 ? (
-            <div className="p-14 text-center bg-white rounded-2xl border border-border"><Star size={40} className="mx-auto text-slate-300 mb-3" /><p className="text-muted-foreground">{t.empty}</p></div>
+          ) : filteredReviews.length === 0 ? (
+            <div className="p-14 text-center bg-white rounded-2xl border border-border"><Star size={40} className="mx-auto text-slate-300 mb-3" /><p className="text-muted-foreground">{q ? t.noMatch : t.empty}</p></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {reviews.map((r) => {
+              {filteredReviews.map((r) => {
                 const rec = recLabel[r.recommendation] || recLabel.none;
                 const st = statusLabel[r.status] || statusLabel.draft;
                 return (
@@ -148,9 +164,9 @@ export default function Performance() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="space-y-4">
               <h3 className="text-sm font-semibold flex items-center gap-2"><TrendingUp size={16} /> {t.ladderH}</h3>
-              {gradeLadder.length === 0 ? (
-                <div className="p-10 text-center text-muted-foreground bg-white rounded-2xl border border-border text-sm">{t.gradeEmpty}</div>
-              ) : gradeLadder.map(({ grade, emps }) => (
+              {filteredLadder.length === 0 ? (
+                <div className="p-10 text-center text-muted-foreground bg-white rounded-2xl border border-border text-sm">{q ? t.noMatch : t.gradeEmpty}</div>
+              ) : filteredLadder.map(({ grade, emps }) => (
                 <div key={grade} className="bg-white rounded-2xl border border-border p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-semibold text-sm">{grade}</span>
@@ -164,9 +180,9 @@ export default function Performance() {
             </div>
             <div className="space-y-4">
               <h3 className="text-sm font-semibold flex items-center gap-2"><Award size={16} /> {t.promoH}</h3>
-              {promotionCandidates.length === 0 ? (
-                <div className="p-10 text-center text-muted-foreground bg-white rounded-2xl border border-border text-sm">{t.promoEmpty}</div>
-              ) : promotionCandidates.map((r) => (
+              {filteredPromos.length === 0 ? (
+                <div className="p-10 text-center text-muted-foreground bg-white rounded-2xl border border-border text-sm">{q ? t.noMatch : t.promoEmpty}</div>
+              ) : filteredPromos.map((r) => (
                 <div key={r.id} className="bg-white rounded-2xl border border-border p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-semibold text-sm truncate">{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name}</div>
