@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { printReport } from "@/lib/reportPrint";
-import { isWpsRajhiTenant, downloadWpsRajhiExcel, downloadWpsRajhiTxt, validateWpsRajhiIbans } from "@/lib/wpsRajhi";
+import { downloadMudadExcel } from "@/lib/mudadExcel";
 
 export default function Payroll() {
   const { lang } = useI18n();
@@ -28,7 +28,7 @@ export default function Payroll() {
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
     pdf: "تحميل / طباعة PDF", printDraft: "طباعة كمسودة", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
-    wps: "ملف WPS لمدد", mudadSend: "تحويل الرواتب إلى مدد", wpsEmptyExport: "لا توجد رواتب مصروفة لإنتاج ملف WPS.", wpsNote: "يتم توليد الملف تلقائياً عند صرف الكشف وجاهز للرفع على مُدّد.",
+    mudadSend: "تحويل الرواتب إلى مدد", mudadEmpty: "لا توجد رواتب معتمدة أو مصروفة لتوليد ملف مدد.",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
     thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة",
     totalIncludedLabel: "إجمالي الرواتب للمشمولين بالصرف هذا الشهر", excludedHint: (n) => `${n} موظف مستثنى من صرف هذا الشهر`, allIncluded: "كل الموظفين مشمولون بالصرف",
@@ -42,7 +42,7 @@ export default function Payroll() {
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
     pdf: "Download / Print PDF", printDraft: "Print draft", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
-    wps: "WPS file (Mudad)", mudadSend: "Send salaries to Mudad", wpsEmptyExport: "No paid salaries to include in a WPS file.", wpsNote: "The file is generated automatically when the sheet is paid and is ready to upload to Mudad.",
+    mudadSend: "Send salaries to Mudad", mudadEmpty: "No approved or paid salaries to generate a Mudad file.",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
     thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status",
     totalIncludedLabel: "Total payroll for employees included in this month's pay", excludedHint: (n) => `${n} employee(s) excluded from this month's pay`, allIncluded: "All employees are included in pay",
@@ -154,7 +154,6 @@ export default function Payroll() {
     const updated = payrolls.map((p) => (target.find((tg) => tg.id === p.id) ? { ...p, status: "paid", paid_date: todayISO() } : p));
     setPayrolls(updated);
     setBatching(false);
-    if (updated.some((p) => p.status === "paid" && p.include_in_payroll !== false)) exportWps(updated);
     load();
   };
 
@@ -192,95 +191,6 @@ export default function Payroll() {
     } catch (e) { alert(isAr ? "تعذّر الحذف" : "Delete failed"); }
   };
 
-  const exportExcel = () => {
-    const headers = [t.thEmp, t.natId || "الهوية/الإقامة", t.thBase, t.thHouse, t.thTrans, t.thBonus, t.thOvertime, t.thAbsent, t.thDed, t.thLoan, t.thNet, t.thStatus];
-    const rows = includedPayrolls.map((p) => [
-      p.employee_name || "", p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || ""), p.base_salary || 0, p.housing_allowance || 0, p.transport_allowance || 0,
-      p.bonus || 0, p.overtime_amount || 0, p.absent_days || 0, p.deductions || 0, p.loan_installment || 0,
-      p.net_salary || 0, payrollStatusLabel(p.status).label,
-    ]);
-    const csv = [headers, ...rows]
-      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
-      .join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `payroll-${year}-${String(month).padStart(2, "0")}.csv`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  };
-
-  // توليد ملف حماية الأجور (WPS) الجاهز للرفع على مُدّد — من الرواتب المصروفة فقط
-  const exportWps = (rows = payrolls, statusFilter = "paid") => {
-    const paid = rows.filter((p) => p.status === statusFilter);
-    if (paid.length === 0) { alert(t.wpsEmptyExport); return; }
-    const empMap = {};
-    for (const e of employees) empMap[e.id] = e;
-    const mm = String(month).padStart(2, "0");
-    const lastDay = new Date(year, month, 0).getDate();
-    const start = `${year}-${mm}-01`;
-    const end = `${year}-${mm}-${String(lastDay).padStart(2, "0")}`;
-    const headers = [
-      "رقم الهوية/الإقامة", "اسم الموظف", "رقم الآيبان (IBAN)",
-      "الراتب الأساسي", "بدل السكن", "بدل المواصلات", "بدلات أخرى", "حوافز", "مبلغ العمل الإضافي (Overtime)",
-      "إجمالي الراتب", "خصومات (غياب/أخرى)", "قسط السلفة",
-      "صافي الراتب", "تاريخ بداية الفترة", "تاريخ نهاية الفترة", "عدد أيام العمل",
-    ];
-    const lines = [headers];
-    for (const p of paid) {
-      const emp = empMap[p.employee_id] || {};
-      const absent = Number(p.absent_days) || 0;
-      const workDays = Math.max(0, lastDay - absent);
-      lines.push([
-        emp.national_id || "",
-        emp.full_name || p.employee_name || "",
-        emp.bank_account || "",
-        p.base_salary || 0,
-        p.housing_allowance || 0,
-        p.transport_allowance || 0,
-        p.other_allowances || 0,
-        p.bonus || 0,
-        p.overtime_amount || 0,
-        p.gross_salary || 0,
-        p.deductions || 0,
-        p.loan_installment || 0,
-        p.net_salary || 0,
-        start, end, workDays,
-      ]);
-    }
-    const csv = lines.map((r) => r.map((c) => {
-      const s = String(c);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    }).join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `WPS_Mudad_${org?.unified_number || "EST"}_${year}-${mm}.csv`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  };
-
-  const wpsRajhi = isWpsRajhiTenant(org);
-
-  // تصدير قالب بنك الراجحي WPS — مخصص لشركة آل معيض المحدودة فقط
-  const onRajhiExcel = () => {
-    const paid = payrolls.filter((p) => p.status === "paid" && p.include_in_payroll !== false);
-    if (paid.length === 0) { alert(isAr ? "لا توجد رواتب مصروفة لتعبئة قالب البنك." : "No paid salaries to fill the bank template."); return; }
-    const v = validateWpsRajhiIbans(paid, employees);
-    if (v.fail.length) {
-      alert((isAr ? "يوجد آيبان ناقص/خطأ للموظفين التالية — صحّحها من ملف الموظف قبل التصدير:\n" : "Invalid/missing IBANs — fix them in the employee record before export:\n") + v.fail.map((f) => `• ${f.name} (${f.iban || "—"})`).join("\n"));
-      return;
-    }
-    downloadWpsRajhiExcel({ paidPayrolls: paid, employees, month, year });
-  };
-  const onRajhiFile = () => {
-    const paid = payrolls.filter((p) => p.status === "paid" && p.include_in_payroll !== false);
-    if (paid.length === 0) { alert(isAr ? "لا توجد رواتب مصروفة لإنشاء ملف البنك." : "No paid salaries to create the bank file."); return; }
-    downloadWpsRajhiTxt({ paidPayrolls: paid, employees, month, year });
-  };
-
   const includedPayrolls = payrolls.filter((p) => p.include_in_payroll !== false);
   const excludedPayrolls = payrolls.filter((p) => p.include_in_payroll === false);
   const includedCount = includedPayrolls.length;
@@ -294,20 +204,27 @@ export default function Payroll() {
   const anyApproved = includedPayrolls.some((p) => p.status === "approved");
   const monthStatus = includedPayrolls.length && includedPayrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
 
-  // تحويل المسير إلى مدد: يولّد ملف حماية الأجور (WPS) ويفتح بوابة مدد لإكمال الرفع
-  const sendToMudad = () => {
+  // تحويل المسير إلى مدد: يولّد ملف مسير الرواتب (xlsx) المطابق لنموذج مدد ويفتح بوابة الرفع
+  const sendToMudad = async () => {
     if (!anyApproved && monthStatus !== "paid") {
       alert(isAr
         ? "اعتمد كشف الرواتب أولاً قبل التحويل إلى مدد."
         : "Approve the payroll sheet before sending to Mudad.");
       return;
     }
-    const statusFilter = paidCount > 0 ? "paid" : "approved";
-    exportWps(payrolls, statusFilter);
-    window.open("https://mudad.com.sa", "_blank", "noopener,noreferrer");
-    alert(isAr
-      ? `تم توليد ملف حماية الأجور (WPS) للمسير (${includedCount} موظف).\n\nالخطوات التالية:\n1) سجّل الدخول في بوابة «مدد» التي فُتحت في تبويب جديد.\n2) ارفع ملف WPS الذي نُزِّل للتو.\n3) اعتمد المسير — ثم يحوّل البنك المرتبط بحسابك الرواتب تلقائياً إلى حسابات الموظفين، وتُرفع حماية الأجور للوزارة.`
-      : `WPS file generated for ${includedCount} employees.\n\nNext steps:\n1) Sign in to the Mudad portal opened in the new tab.\n2) Upload the WPS file just downloaded.\n3) Approve the payroll — your linked bank will then transfer salaries to employee accounts automatically, and WPS will be filed with the Ministry.`);
+    setBatching(true);
+    try {
+      const n = await downloadMudadExcel({ payrolls, employees, org, month, year });
+      if (n === 0) { alert(t.mudadEmpty); return; }
+      window.open("https://mudad.com.sa/home/payroll/regular/bulk", "_blank", "noopener,noreferrer");
+      alert(isAr
+        ? `تم توليد ملف مسير الرواتب لمدد (${n} موظف) بصيغة xlsx محمية.\n\nالخطوات:\n1) سجّل الدخول في بوابة «مدد» التي فُتحت في تبويب جديد.\n2) من قائمة «إدارة الرواتب ← الرواتب الشهرية» اضغط «رفع ملف الرواتب» واسحب الملف.\n3) اضغط «رفع» ثم اعتمد المسير — ثم يحوّل البنك المرتبط الرواتب إلى حسابات الموظفين.`
+        : `Mudad payroll file generated (${n} employees) as a protected xlsx.\n\nSteps:\n1) Sign in to the Mudad portal opened in the new tab.\n2) From "Payroll Management ► Monthly Salaries" choose "Upload Payroll File" and drop the file.\n3) Click "Upload" then approve the payroll — your linked bank will transfer salaries to employees.`);
+    } catch (e) {
+      alert(isAr ? "تعذّر توليد ملف مدد." : "Failed to generate the Mudad file.");
+    } finally {
+      setBatching(false);
+    }
   };
 
   return (
@@ -368,17 +285,6 @@ export default function Payroll() {
             {(anyApproved || monthStatus === "paid") && (<Button onClick={sendToMudad} disabled={batching} className="gap-2 bg-[#0B2545] hover:bg-[#14315a] text-white"><Send size={16} /> {t.mudadSend}</Button>)}
             <Button onClick={() => exportPdf({ draft: true })} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printDraft}</Button>
             <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
-            {wpsRajhi ? (
-              <>
-                <Button onClick={onRajhiExcel} disabled={paidCount === 0} variant="outline" className="gap-2 border-amber-300 text-amber-800 hover:bg-amber-50"><Shield size={16} /> {isAr ? "قالب بنك الراجحي (Excel)" : "Al Rajhi WPS (Excel)"}</Button>
-                <Button onClick={onRajhiFile} disabled={paidCount === 0} variant="outline" className="gap-2"><FileDown size={16} /> {isAr ? "Create File — ملف البنك" : "Create File — Bank txt"}</Button>
-              </>
-            ) : (
-              <>
-                <Button onClick={() => exportWps()} disabled={paidCount === 0} variant="outline" className="gap-2"><Shield size={16} /> {t.wps}</Button>
-                <Button onClick={exportExcel} variant="outline" className="gap-2"><FileSpreadsheet size={16} /> {t.excel}</Button>
-              </>
-            )}
             </div>
             </div>
             )}
