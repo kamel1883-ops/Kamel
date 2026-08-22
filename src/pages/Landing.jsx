@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import ShareBar from "@/components/ShareBar";
+import JadaraStoryFilm from "@/components/landing/JadaraStoryFilm";
 import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
 import PricingColumns from "@/components/landing/PricingColumns";
@@ -267,6 +268,7 @@ export default function Landing() {
 
       {/* Hero — فيديو يغطي كامل الشاشة */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        <JadaraStoryFilm />
         <div className="absolute inset-0 bg-[#0B2545]/65" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-[#0B2545]/55" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/45 via-transparent to-[#0B2545]/30" />
