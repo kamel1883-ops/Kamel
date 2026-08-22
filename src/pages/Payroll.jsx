@@ -347,8 +347,8 @@ export default function Payroll() {
                         {included ? <Check size={16} /> : <X size={16} />}
                       </button>
                     </td>
-                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">{p.employee_name}</td>
-                    <td className="px-3 py-2 tabular-nums text-xs" dir="ltr">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
+                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">{employees.find((e) => e.id === p.employee_id)?.full_name || p.employee_name}</td>
+                    <td className="px-3 py-2 tabular-nums text-xs">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
                     <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>

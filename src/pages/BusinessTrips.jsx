@@ -169,8 +169,8 @@ export default function BusinessTrips() {
                 const st = statusLabel[tr.status] || statusLabel.pending;
                 return (
                   <TableRow key={tr.id}>
-                    <TableCell className="font-medium">{tr.employee_name || "—"}</TableCell>
-                    <TableCell className="text-xs tabular-nums" dir="ltr">{empNat(tr.employee_id) || "—"}</TableCell>
+                    <TableCell className="font-medium">{employees.find((e) => e.id === tr.employee_id)?.full_name || tr.employee_name || "—"}</TableCell>
+                    <TableCell className="text-xs tabular-nums">{empNat(tr.employee_id) || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
                     <TableCell>{tr.destination || "—"}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{tr.start_date} ← {tr.end_date}</TableCell>

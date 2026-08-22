@@ -13,7 +13,9 @@ const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "ما
 // يحمل شعار المنشأة يميناً وشعار جدارة يسار أعلى الصفحة عبر printReport (BrandHeader).
 export default function AttendanceReport({ org }) {
   const [records, setRecords] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const empOf = (id) => employees.find((e) => e.id === id);
   const [selKey, setSelKey] = useState("");
   const [exporting, setExporting] = useState(false);
   const ref = useRef(null);
@@ -23,7 +25,9 @@ export default function AttendanceReport({ org }) {
       setLoading(true);
       try {
         const all = await base44.entities.Attendance.list("-created_date", 1000);
+        const emps = await base44.entities.Employee.list("-created_date", 500);
         setRecords(all || []);
+        setEmployees(emps || []);
       } catch {
         setRecords([]);
       } finally {
@@ -150,8 +154,8 @@ export default function AttendanceReport({ org }) {
             const weeklyOff = isOrgWeeklyOff(dStr, org);
             return (
               <TableRow key={r.id}>
-                <TableCell className="font-medium">{r.employee_name || "—"}</TableCell>
-                <TableCell className="text-center tabular-nums text-xs" dir="ltr">{r.national_id || "—"}</TableCell>
+                <TableCell className="font-medium">{empOf(r.employee_id)?.full_name || r.employee_name || "—"}</TableCell>
+                <TableCell className="text-center tabular-nums text-xs">{empOf(r.employee_id)?.national_id || r.national_id || "—"}</TableCell>
                 <TableCell className="text-center text-xs">
                   <span className={cn("px-2 py-0.5 rounded-md", weeklyOff ? "bg-violet-50 text-violet-700 font-medium" : "text-muted-foreground")}>
                     {dayNameAr(dStr) || "—"}

@@ -725,7 +725,7 @@ export default function Approvals() {
           <DialogHeader><DialogTitle>{t.loanHrTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">{acting.req.employee_name} <span className="text-xs text-muted-foreground tabular-nums" dir="ltr">· {empOf(acting.req.employee_id)?.national_id || "—"}</span></div>
+              <div className="text-sm text-muted-foreground">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name} <span className="text-xs text-muted-foreground tabular-nums">· {empOf(acting.req.employee_id)?.national_id || "—"}</span></div>
               <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3">
                 {isAr ? <>المبلغ المطلوب: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · الأقساط: <b className="text-foreground">{acting.req.installment_count || 1}</b></> : <>Requested: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · Inst: <b className="text-foreground">{acting.req.installment_count || 1}</b></>}
               </div>
@@ -844,8 +844,8 @@ function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, k
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <div>
-              <div className="font-medium text-sm">{r.employee_name}</div>
-              {emp?.national_id && <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{emp.national_id}</div>}
+              <div className="font-medium text-sm">{emp?.full_name || r.employee_name}</div>
+              {emp?.national_id && <div className="text-xs text-muted-foreground tabular-nums">{emp.national_id}</div>}
             </div>
             {kindBadge || (
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">

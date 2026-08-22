@@ -190,7 +190,7 @@ export default function Employees() {
                         <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 font-medium">{emp.employee_number}</td>
                           <td className="px-4 py-3 font-medium">{emp.full_name}</td>
-                          <td className="px-4 py-3 font-medium tabular-nums" dir="ltr">{emp.national_id || "—"}</td>
+                          <td className="px-4 py-3 font-medium tabular-nums">{emp.national_id || "—"}</td>
                           <td className="px-4 py-3">{emp.position}</td>
                           <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
                           <td className="px-4 py-3">
@@ -269,7 +269,7 @@ export default function Employees() {
                           <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                             <td className="px-4 py-3 font-medium cursor-pointer" onClick={() => { setProfileEmp(emp); setProfileOpen(true); }}>{emp.employee_number}</td>
                             <td className="px-4 py-3 font-medium">{emp.full_name}</td>
-                            <td className="px-4 py-3 font-medium tabular-nums" dir="ltr">{emp.national_id || "—"}</td>
+                            <td className="px-4 py-3 font-medium tabular-nums">{emp.national_id || "—"}</td>
                             <td className="px-4 py-3">{emp.position}</td>
                             <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
                             <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>

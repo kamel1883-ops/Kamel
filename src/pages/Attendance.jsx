@@ -176,8 +176,8 @@ export default function Attendance() {
               <tbody className="divide-y divide-border">
                 {filtered.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium">{r.employee_name}</td>
-                    <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground" dir="ltr">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "—")}</td>
+                    <td className="px-4 py-3 font-medium">{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name}</td>
+                    <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "—")}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{r.branch_name || "—"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_in || "-"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_out || "-"}</td>

@@ -208,7 +208,7 @@ export default function Gosi() {
                   <tr key={r.employee_id} className="hover:bg-slate-50">
                     <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
                     <td className="px-4 py-2 font-medium sticky right-0 bg-white">{r.employee_name}</td>
-                    <td className="px-3 py-2 tabular-nums" dir="ltr">{r.national_id || "—"}</td>
+                    <td className="px-3 py-2 tabular-nums">{r.national_id || "—"}</td>
                     <td className="px-3 py-2"><span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", r.is_saudi ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700")}>{r.is_saudi ? t.saudi : t.expat}</span></td>
                     <td className="px-3 py-2 tabular-nums">{formatCurrency(r.gross_wage)}</td>
                     <td className="px-3 py-2 text-amber-700">{r.is_saudi ? `${r.employee_rate}%` : "—"}</td>
