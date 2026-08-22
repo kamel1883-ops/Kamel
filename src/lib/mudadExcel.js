@@ -44,29 +44,21 @@ function idValue(raw) {
   return /^[0-9]+$/.test(s) ? Number(s) : s;
 }
 
-// يرسم شعار «مدد» كصورة PNG عبر canvas (نص عربي صحيح بدون اعتماد على صور خارجية)
-function buildMudadLogoBase64() {
-  const canvas = document.createElement("canvas");
-  const scale = 3;
-  const W = 260, H = 100;
-  canvas.width = W * scale;
-  canvas.height = H * scale;
-  const ctx = canvas.getContext("2d");
-  ctx.scale(scale, scale);
-  ctx.clearRect(0, 0, W, H);
-  ctx.direction = "rtl";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "alphabetic";
-  // كلمة «مدد» بخط عربي ثقيل باللون الأزرق الرسمي
-  ctx.fillStyle = "#0070c0";
-  ctx.font = '600 56px "Tajawal","IBM Plex Sans Arabic","Segoe UI","Arial",sans-serif';
-  ctx.fillText("مدد", W - 6, 58);
-  // كلمة MUDAD اللاتينية الصغيرة تحته
-  ctx.fillStyle = "#5599cc";
-  ctx.font = '700 17px Arial,sans-serif';
-  ctx.fillText("MUDAD", W - 6, 84);
-  const url = canvas.toDataURL("image/png");
-  return url.substring(url.indexOf(",") + 1);
+// صورة شعار «مدد» الرسمية (أصل مرفوع) — تُدرج داخل الملف كما هي دون رسم
+const MUDAD_LOGO_URL =
+  "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/2e6721a29_image.png";
+
+async function fetchMudadLogoBase64() {
+  const res = await fetch(MUDAD_LOGO_URL);
+  if (!res.ok) throw new Error("logo fetch failed");
+  const buf = await res.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
 }
 
 export async function downloadMudadExcel({ payrolls = [], employees = [], org = null, month, year }) {
@@ -100,11 +92,11 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
   ws.getRow(1).height = 22;
   ws.getRow(2).height = 20;
 
-  // تضمين صورة شعار مدد أعلى الملف
+  // تضمين صورة شعار مدد أعلى الملف (الصورة الرسمية كما هي)
   try {
-    const logoId = wb.addImage({ base64: buildMudadLogoBase64(), extension: "png" });
-    ws.addImage(logoId, { tl: { col: 0.1, row: 0.2 }, ext: { width: 104, height: 40 } });
-  } catch (_) { /* تجاهل لو تعذّر رسم اللوغو */ }
+    const logoId = wb.addImage({ base64: await fetchMudadLogoBase64(), extension: "png" });
+    ws.addImage(logoId, { tl: { col: 0.05, row: 0.15 }, ext: { width: 120, height: 44 } });
+  } catch (_) { /* تجاهل لو تعذّر جلب الشعار */ }
 
   // الصف 3 — لافتات الأقسام (أزرق) + لافتة العمود المحمي
   ws.mergeCells("A3:F3");
