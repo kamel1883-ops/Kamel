@@ -53,15 +53,7 @@ function buildBrandHeader(org) {
 }
 
 function buildDraftBanner() {
-  const b = document.createElement("div");
-  Object.assign(b.style, {
-    textAlign: "center", padding: "10px 16px", marginBottom: "16px",
-    border: "2px dashed #b45309", borderRadius: "10px",
-    background: "#fffbeb", color: "#b45309",
-    fontWeight: "700", fontSize: "12px",
-  });
-  b.textContent = "هذه نسخة مسودة — كشف رواتب غير معتمد. لا يُعتمد إلا بعد مراجعة الإدارة وضغط زر «اعتماد كشف الشهر».";
-  return b;
+  return null;
 }
 
 function buildTitle(title, subtitle) {
@@ -95,7 +87,7 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
 
   wrapper.appendChild(buildBrandHeader(org));
   if (title) wrapper.appendChild(buildTitle(title, subtitle));
-  if (draft) wrapper.appendChild(buildDraftBanner());
+  // لافتة المسودة تم إزالتها بناءً على طلب المستخدم
 
   const clone = node.cloneNode(true);
   clone.style.width = "100%";
