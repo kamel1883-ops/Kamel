@@ -268,7 +268,7 @@ export default function Landing() {
       {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
         <video
-          src="https://videos.pexels.com/video-files/13217151/13217151-uhd_2560_1440_60fps.mp4"
+          src="https://videos.pexels.com/video-files/7691548/7691548-hd_1920_1080_25fps.mp4"
           autoPlay loop muted playsInline preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
         />
