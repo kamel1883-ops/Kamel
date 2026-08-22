@@ -32,20 +32,19 @@ function drawPaidStamp(pdf, pageW, pageH) {
   try { pdf.setGState(new pdf.GState({ opacity: 1 })); } catch (e) {}
 }
 
-// يعزل كل جملة بين قوسين تحتوي عربيةً بعلامات عزل ثنائي الاتجاه (RLI/PDI)
-// حتى تظهر الأقواس محيطةً بالنص العربي بشكل صحيح داخل ملفات PDF
+// يزيل كل علامات الأقواس/الأقواس المربعة من نصوص العنصر المُطبوع نهائياً
+// لأنها تظهر معكوسة/غير مرتبة في ملفات PDF العربية (RTL). يُطبَّق على كل التقارير.
 function normalizeArabicParenthesis(root) {
   try {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const texts = [];
     while (walker.nextNode()) texts.push(walker.currentNode);
+    // أنواع الأقواس: ( ) [ ] （ ）［ ］【 】〚 〛⟦ ⟧⟨ ⟩⟪ ⟫
     for (const tn of texts) {
       const v = tn.nodeValue;
-      if (!v || v.indexOf("(") === -1) continue;
-      const nv = v.replace(/\(([^()]{0,120})\)/g, (m, inner) =>
-        /[\u0600-\u06FF]/.test(inner) ? `\u2067(${inner})\u2069` : m
-      );
-      if (nv !== v) tn.nodeValue = nv;
+      if (!v) continue;
+      const cleaned = v.replace(/[()[\]（）［］【】〚〛⟦⟧⟨⟩⟪⟫]/g, "");
+      if (cleaned !== v) tn.nodeValue = cleaned;
     }
   } catch (e) {}
 }
