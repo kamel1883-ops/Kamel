@@ -203,6 +203,7 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
       c.border = BORDER;
       c.alignment = { vertical: "middle", horizontal: col === 1 ? "right" : "center" };
       c.protection = { locked: col <= 6 };
+      if (col <= 6) c.fill = GRAY_FILL;
       if (col === 2 && typeof c.value === "number") c.numFmt = "0";
       if (col >= 3 && col <= 8) c.numFmt = "#,##0.00";
       if (col === 9) c.numFmt = "0.00";
