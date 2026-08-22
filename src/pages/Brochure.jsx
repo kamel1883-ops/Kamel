@@ -26,10 +26,13 @@ export default function Brochure() {
             <Crown size={18} style={{ color: GOLD }} />
             <span className="text-sm font-semibold">بروفايل منصة جدارة</span>
           </div>
-          <button onClick={() => window.print()}
-            className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#00B8D4] hover:bg-[#00a6c0] text-white text-sm font-semibold shadow-lg shadow-cyan-500/30">
-            <Download size={16} /> تصدير الملف
-          </button>
+          <div className="flex items-center gap-2">
+            <a href="/brochure-en" className="inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">English</a>
+            <button onClick={() => window.print()}
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#00B8D4] hover:bg-[#00a6c0] text-white text-sm font-semibold shadow-lg shadow-cyan-500/30">
+              <Download size={16} /> تصدير الملف
+            </button>
+          </div>
         </div>
       </div>
 

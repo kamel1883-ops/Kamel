@@ -61,13 +61,14 @@ const CustomerSurveyTake = lazy(() => import("@/pages/public/CustomerSurveyTake"
 const ContractSample = lazy(() => import("@/pages/ContractSample"));
 const Samples = lazy(() => import("@/pages/Samples"));
 const Brochure = lazy(() => import("@/pages/Brochure"));
+const BrochureEn = lazy(() => import("@/pages/BrochureEn"));
 const HrSystemPage = lazy(() => import("@/pages/landings/HrSystemPage"));
 const PayrollSystemPage = lazy(() => import("@/pages/landings/PayrollSystemPage"));
 const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSystemPage"));
 const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSystemPage"));
 import { PortalLangProvider } from "@/lib/portalI18n";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
           <Route path="/contract-sample" element={<ContractSample />} />
           <Route path="/samples" element={<Samples />} />
           <Route path="/brochure" element={<Brochure />} />
+          <Route path="/brochure-en" element={<BrochureEn />} />
           <Route path="/hr-system" element={<HrSystemPage />} />
           <Route path="/payroll-system" element={<PayrollSystemPage />} />
           <Route path="/attendance-system" element={<AttendanceSystemPage />} />
