@@ -6,10 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Image } from "@/components/ui/image";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from "@/components/ui/dialog";
-import { Loader2, Building2, Save, Crosshair, Wallet, Upload, AlertTriangle, Trash2 } from "lucide-react";
+import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -59,9 +56,6 @@ export default function SettingsPage() {
     changeLogo: "تغيير الشعار", chooseLogo: "اختيار صورة", logoEmpty: "لم يتم رفع شعار بعد",
     save: "حفظ الإعدادات",
     noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك",
-    delSec: "منطقة الخطر", delTitle: "حذف الحساب", delDesc: "طلب حذف حساب المنشأة وبياناتها. سيتم مراجعة الطلب والتواصل معك لإتمام الحذف.",
-    delBtn: "طلب حذف الحساب", delConfirm: "تأكيد طلب الحذف", delCancel: "إلغاء", delWarn: "لا يمكن التراجع عن هذه العملية.",
-    delSuccess: "تم استلام طلب حذف الحساب بنجاح، سيتواصل معك فريق الدعم.",
   } : {
     title: "Organization settings", subtitle: "Organization data and HR policies", loading: "Loading...",
     secOrg: "Organization data", secOrgNote: "Pulled from your quote / activation request — edit to save them to your organization.",
@@ -85,9 +79,6 @@ export default function SettingsPage() {
     changeLogo: "Change logo", chooseLogo: "Choose image", logoEmpty: "No logo uploaded yet",
     save: "Save settings",
     noGeo: "Device does not support geolocation", noAccess: "Could not access your location",
-    delSec: "Danger zone", delTitle: "Account deletion", delDesc: "Request deletion of your account and its data. The request will be reviewed and support will contact you to complete it.",
-    delBtn: "Request account deletion", delConfirm: "Confirm deletion request", delCancel: "Cancel", delWarn: "This action cannot be undone.",
-    delSuccess: "Account deletion request received — our support team will contact you.",
   };
 
   const [org, setOrg] = useState(null);
@@ -95,8 +86,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [subInfo, setSubInfo] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [delOpen, setDelOpen] = useState(false);
-  const [delBusy, setDelBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -179,25 +168,6 @@ export default function SettingsPage() {
       if (org.id) { await base44.entities.Organization.update(org.id, payload); }
       else { const created = await base44.entities.Organization.create(payload); setOrg({ ...org, ...created }); }
     } finally { setSaving(false); }
-  };
-
-  const requestDeletion = async () => {
-    setDelBusy(true);
-    try {
-      const payload = {
-        action: "account_deletion_request",
-        organization_id: org?.id || null,
-        organization_name: org?.name || null,
-        unified_number: org?.unified_number || null,
-        contact_email: org?.contact_email || null,
-        requested_at: new Date().toISOString(),
-      };
-      // Log the deletion request for the support/ops team to action.
-      console.log("[account deletion request]", payload);
-      await new Promise((r) => setTimeout(r, 500));
-      alert(t.delSuccess);
-      setDelOpen(false);
-    } finally { setDelBusy(false); }
   };
 
   if (loading) return <div className="p-10 text-center text-muted-foreground">{t.loading}</div>;
@@ -344,34 +314,7 @@ export default function SettingsPage() {
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} {t.save}
           </Button>
         </div>
-
-        {/* Danger zone — account deletion */}
-        <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600"><AlertTriangle size={18} /></span>
-            <div>
-              <h3 className="font-semibold text-rose-700">{t.delTitle}</h3>
-              <p className="text-xs text-rose-600/80">{t.delSec}</p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">{t.delDesc}</p>
-          <Button variant="destructive" onClick={() => setDelOpen(true)} className="gap-2"><Trash2 size={16} /> {t.delBtn}</Button>
-        </div>
       </div>
-
-      <Dialog open={delOpen} onOpenChange={setDelOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>{t.delTitle}</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">{t.delDesc}</p>
-          <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center gap-2"><AlertTriangle size={14} /> {t.delWarn}</div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDelOpen(false)} disabled={delBusy}>{t.delCancel}</Button>
-            <Button variant="destructive" onClick={requestDeletion} disabled={delBusy} className="gap-1">
-              {delBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} {t.delConfirm}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
