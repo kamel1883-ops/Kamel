@@ -8,7 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X, Send, Banknote } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Check, X, Send, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
@@ -190,14 +190,6 @@ export default function Payroll() {
         landscape: true,
       });
     } finally { setExporting(false); }
-  };
-
-  const deleteRow = async (id) => {
-    if (!confirm(isAr ? "حذف هذا الموظف من كشف الشهر؟" : "Remove this employee from the month sheet?")) return;
-    try {
-      await base44.entities.Payroll.delete(id);
-      setPayrolls((p) => p.filter((x) => x.id !== id));
-    } catch (e) { alert(isAr ? "تعذّر الحذف" : "Delete failed"); }
   };
 
   const includedPayrolls = payrolls.filter((p) => p.include_in_payroll !== false);
@@ -410,15 +402,7 @@ export default function Payroll() {
                       <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap", methodOf(p) === "mudad" ? "bg-[#0B2545]/10 text-[#0B2545]" : "bg-emerald-100 text-emerald-700")}>{methodOf(p) === "mudad" ? t.mudadBadge : t.cashBadge}</span>
                     </td>
                     <td className="px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>
-                        {p.status === "draft" && (
-                          <button onClick={() => deleteRow(p.id)} title={isAr ? "حذف من الكشف لهذا الشهر" : "Remove from sheet"}
-                            className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500">
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
+                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>
                     </td>
                   </tr>
                   );
