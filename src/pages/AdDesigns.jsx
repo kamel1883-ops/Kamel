@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Printer, Image as ImageIcon } from "lucide-react";
+import { Download, Image as ImageIcon } from "lucide-react";
 import EnvPoster from "@/components/ads/EnvPoster";
 
 const IMG_TEAM = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5170278ee_generated_image.png";
@@ -64,15 +64,41 @@ const POSTERS = [
 
 export default function AdDesigns() {
   const [active, setActive] = useState(POSTERS[0]);
+  const [downloading, setDownloading] = useState(false);
+  const posterRef = useRef(null);
+
+  const handleDownload = async () => {
+    if (!posterRef.current) return;
+    setDownloading(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 2.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false,
+      });
+      const link = document.createElement("a");
+      link.download = `jadara-${active.id}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (e) {
+      console.error(e);
+      alert("تعذّر تحميل الصورة، حاول مرة أخرى.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div dir="rtl">
       <PageHeader
         title="تصميمات الإعلانات"
-        subtitle="بوسترات دعائية مستوحاة من بيئة العمل السعودية — جاهزة للطباعة والنشر"
+        subtitle="بوسترات دعائية مستوحاة من بيئة العمل السعودية — جاهزة للنشر على وسائل التواصل"
         action={
-          <Button onClick={() => window.print()} className="gap-2">
-            <Printer size={18} /> طباعة البوستر الحالي
+          <Button onClick={handleDownload} disabled={downloading} className="gap-2">
+            <Download size={18} /> {downloading ? "جارٍ التحضير..." : "تحميل كصورة"}
           </Button>
         }
       />
@@ -110,7 +136,7 @@ export default function AdDesigns() {
               </div>
             </div>
             <div className="mx-auto" style={{ maxWidth: 560 }}>
-              <div style={{ aspectRatio: "1 / 1.414" }} className="rounded-xl overflow-hidden shadow-lg">
+              <div ref={posterRef} style={{ aspectRatio: "1 / 1.414" }} className="rounded-xl overflow-hidden shadow-lg">
                 <active.Comp />
               </div>
             </div>
