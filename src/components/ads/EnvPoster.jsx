@@ -44,9 +44,12 @@ export default function EnvPoster({
         </div>
 
         <div>
-          <h2 className="text-[clamp(1.5rem,5vw,3.05rem)] font-extrabold leading-[1.15] drop-shadow-sm">
-            {title} <span style={{ color: accent }}>{titleAccent}</span>
-          </h2>
+          <div
+            className="text-[clamp(1.5rem,5vw,3.05rem)] font-extrabold leading-[1.15] drop-shadow-sm"
+            style={{ unicodeBidi: "normal", letterSpacing: "normal" }}
+          >
+            {title} <span style={{ color: accent, letterSpacing: "normal" }}>{titleAccent}</span>
+          </div>
           {body && (
             <p className="text-slate-100 text-[clamp(.72rem,1.7vw,.95rem)] mt-3 max-w-[90%] leading-relaxed drop-shadow-sm">
               {body}
