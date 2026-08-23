@@ -16,6 +16,25 @@ import { printReport } from "@/lib/reportPrint";
 import { downloadMudadExcel } from "@/lib/mudadExcel";
 import { downloadCashPayrollExcel } from "@/lib/cashPayrollExcel";
 
+// === مساعدات احتساب الرواتب بحسب أيام الحضور الفعلي ===
+const PAID_STATUSES = new Set(["present", "late", "leave", "holiday"]);
+const computeWorkDaysSet = (workDaysStr) =>
+  new Set(String(workDaysStr || "0,1,2,3,4,6").split(",").map((d) => Number(d.trim())).filter((n) => !isNaN(n)));
+const computeWorkDaysInMonth = (year, month, workDaysSet) => {
+  const days = new Date(year, month, 0).getDate();
+  let count = 0;
+  for (let d = 1; d <= days; d++) {
+    if (workDaysSet.has(new Date(year, month - 1, d).getDay())) count++;
+  }
+  return count;
+};
+const computeNetFromAttendance = (gross, paidDays, workDaysInMonth, bonus, overtime, deductions, loan) => {
+  if (!workDaysInMonth) return 0;
+  const daily = Number(gross) / workDaysInMonth;
+  const attendanceAmount = Number((paidDays * daily).toFixed(2));
+  return Number((attendanceAmount + (bonus || 0) + (overtime || 0) - (deductions || 0) - (loan || 0)).toFixed(2));
+};
+
 export default function Payroll() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
@@ -23,7 +42,7 @@ export default function Payroll() {
     title: "الرواتب", subtitle: "معالجة كشوفات الرواتب الشهرية",
     gen: "توليد كشف الشهر", gening: "جارٍ التوليد...",
     sNet: "إجمالي الصافي", sBonus: "إجمالي الحوافز", sGosi: "تأمينات الموظفين", sDed: "إجمالي الخصومات", sPaid: "رواتب مصروفة",
-    info: "البصمات مربوطة تلقائياً: يُسحب الغياب من سجلات الحضور عند التوليد. لمدير الموارد البشرية صلاحية تعديل أيام الغياب يدوياً في الجدول عند وجود إذن (يُعاد راتب اليوم تلقائياً).",
+    info: "الراتب يُحسب حسب أيام الحضور الفعلي ضمن أيام عمل المنشأة المحددة في الإعدادات. لا توجد سجلات حضور للموظف = راتبه 0. أيام الإجازة الأسبوعية الرسمية لا تُحسب غياباً ولو لم يبصم فيها. لمدير الموارد البشرية صلاحية تعديل أيام الغياب يدوياً في الجدول عند وجود إذن.",
     month: "الشهر", year: "السنة",
     months: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
@@ -39,7 +58,7 @@ export default function Payroll() {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
     gen: "Generate month sheet", gening: "Generating...",
     sNet: "Total net", sBonus: "Total bonus", sGosi: "Employee GOSI", sDed: "Total deductions", sPaid: "Paid salaries",
-    info: "Attendance is linked automatically: absences are pulled from attendance records on generation. HR may manually adjust absence days in the table when excused (the day's salary is restored automatically).",
+    info: "Salary is calculated by actual attendance days within the organization's defined work days. No attendance records for an employee = salary 0. Official weekly days off are never counted as absence. HR may manually adjust absence days in the table when excused.",
     month: "Month", year: "Year",
     months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
@@ -87,19 +106,18 @@ export default function Payroll() {
     const endDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${mm}-${String(endDay).padStart(2, "0")}`;
     const attRecords = await base44.entities.Attendance.filter({ date: { $gte: startDate, $lte: endDate } }, "-created_date", 2000);
-    // أيام العمل الرسمية المعتمدة بالمنشأة (0=الأحد ... 6=السبت). الأيام خارجها = إجازة أسبوعية لا تُحسب غياباً.
+    // أيام العمل الرسمية المعتمدة بالمنشأة (0=الأحد ... 6=السبت). الأيام خارجها = إجازة أسبوعية لا تُحسب.
     const orgFresh = (org && org.work_days) ? org : ((await base44.entities.Organization.list("-created_date", 1))[0] || {});
-    const workDaysSet = new Set(
-      String(orgFresh.work_days || "0,1,2,3,4,6").split(",").map((d) => Number(d.trim())).filter((n) => !isNaN(n))
-    );
-    const absentByEmp = {};
+    const workDaysSet = computeWorkDaysSet(orgFresh.work_days);
+    const workDaysInMonth = computeWorkDaysInMonth(year, month, workDaysSet);
+    // إحصاء أيام الحضور المدفوعة لكل موظف: present/late/leave/holiday ضمن أيام العمل الرسمية فقط
+    const paidDaysByEmp = {};
     for (const a of attRecords) {
       if (!a.employee_id) continue;
-      if (a.status !== "absent") continue;
-      // تجاهل أي يوم يقع ضمن أيام الإجازة الأسبوعية للمنشأة (ليس يوماً عمل) — لا يُخصم
+      if (!PAID_STATUSES.has(a.status)) continue;
       const dow = a.date ? new Date(a.date + "T00:00:00").getDay() : -1;
       if (dow >= 0 && !workDaysSet.has(dow)) continue;
-      absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
+      paidDaysByEmp[a.employee_id] = (paidDaysByEmp[a.employee_id] || 0) + 1;
     }
     const created = [];
     const updates = [];
@@ -111,12 +129,10 @@ export default function Payroll() {
       const transport = Number(emp.transport_allowance) || 0;
       const other = Number(emp.other_allowances) || 0;
       const gross = base + housing + transport + other;
-      const absentDays = absentByEmp[emp.id] || 0;
-      const dailyWage = gross / 30;
-      const absentDeduction = Number((dailyWage * absentDays).toFixed(2));
-      const net = gross - absentDeduction;
+      const paidDays = Math.min(paidDaysByEmp[emp.id] || 0, workDaysInMonth);
+      const absentDays = Math.max(0, workDaysInMonth - paidDays);
       if (existing.has(emp.id)) {
-        // مزامنة القيم المالية لسجل مسود موجود من ملف الموظف الحالي
+        // مزامنة القيم المالية + إعادة حساب الصافي بحسب أيام الحضور من ملف الموظف الحالي
         const p = existingDrafts[emp.id];
         if (p) updates.push({
           id: p.id,
@@ -124,7 +140,8 @@ export default function Payroll() {
           gross_salary: gross, national_id: emp.national_id || p.national_id || "",
           employee_name: emp.full_name || p.employee_name || "",
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
-          net_salary: Number((gross + (p.bonus || 0) + (p.overtime_amount || 0) - (p.deductions || 0) - (p.loan_installment || 0)).toFixed(2)),
+          absent_days: absentDays,
+          net_salary: computeNetFromAttendance(gross, paidDays, workDaysInMonth, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
         });
         continue;
       }
@@ -132,8 +149,9 @@ export default function Payroll() {
         employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "",
         month, year, salary_payment_method: emp.salary_payment_method || "mudad",
         base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
-        gross_salary: gross, bonus: 0, deductions: absentDeduction, loan_installment: 0,
-        overtime_hours: 0, overtime_amount: 0, absent_days: absentDays, net_salary: net, status: "draft",
+        gross_salary: gross, bonus: 0, deductions: 0, loan_installment: 0,
+        overtime_hours: 0, overtime_amount: 0, absent_days: absentDays,
+        net_salary: computeNetFromAttendance(gross, paidDays, workDaysInMonth, 0, 0, 0, 0), status: "draft",
       });
     }
     if (created.length > 0) await base44.entities.Payroll.bulkCreate(created);
@@ -142,7 +160,7 @@ export default function Payroll() {
     load();
   };
 
-  // إعادة مزامنة القيم المالية لكل سجلات الكشف من ملفات الموظفين الحالية
+  // إعادة مزامنة القيم المالية لكل سجلات الكشف من ملفات الموظفين الحالية (مع إعادة احتساب الصافي بحسب الحضور)
   const syncFromEmployees = async () => {
     setGenerating(true);
     try {
@@ -150,6 +168,7 @@ export default function Payroll() {
       setEmployees(activeEmps);
       const empById = {};
       for (const e of activeEmps) empById[e.id] = e;
+      const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
       const updates = [];
       for (const p of payrolls) {
         const emp = empById[p.employee_id];
@@ -159,11 +178,12 @@ export default function Payroll() {
         const transport = Number(emp.transport_allowance) || 0;
         const other = Number(emp.other_allowances) || 0;
         const gross = base + housing + transport + other;
-        const net = gross + (p.bonus || 0) + (p.overtime_amount || 0) - (p.deductions || 0) - (p.loan_installment || 0);
+        const paidDays = Math.max(0, workDaysInMonth - (p.absent_days || 0));
         updates.push({
           id: p.id,
           base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
-          gross_salary: gross, net_salary: Number(net.toFixed(2)),
+          gross_salary: gross,
+          net_salary: computeNetFromAttendance(gross, paidDays, workDaysInMonth, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
           national_id: emp.national_id || p.national_id || "",
           employee_name: emp.full_name || p.employee_name || "",
@@ -178,8 +198,9 @@ export default function Payroll() {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
     updated.gross_salary = (updated.base_salary || 0) + (updated.housing_allowance || 0) + (updated.transport_allowance || 0) + (updated.other_allowances || 0);
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - (updated.deductions || 0) - (updated.loan_installment || 0);
-    updated.net_salary = Number(updated.net_salary.toFixed(2));
+    const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
+    const paidDays = Math.max(0, workDaysInMonth - (updated.absent_days || 0));
+    updated.net_salary = computeNetFromAttendance(updated.gross_salary, paidDays, workDaysInMonth, updated.bonus, updated.overtime_amount, updated.deductions, updated.loan_installment);
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
@@ -187,12 +208,11 @@ export default function Payroll() {
   const overrideAbsentDays = async (id, days) => {
     const rec = payrolls.find((p) => p.id === id);
     const abs = Math.max(0, Number(days) || 0);
+    const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
     const gross = Number(rec.gross_salary) || (Number(rec.base_salary) || 0);
-    const daily = gross / 30;
-    const deductions = Number((daily * abs).toFixed(2));
-    const updated = { ...rec, absent_days: abs, deductions };
-    updated.net_salary = (updated.gross_salary || 0) + (updated.bonus || 0) + (updated.overtime_amount || 0) - deductions - (updated.loan_installment || 0);
-    updated.net_salary = Number(updated.net_salary.toFixed(2));
+    const paidDays = Math.max(0, workDaysInMonth - abs);
+    const updated = { ...rec, absent_days: abs };
+    updated.net_salary = computeNetFromAttendance(gross, paidDays, workDaysInMonth, rec.bonus, rec.overtime_amount, rec.deductions, rec.loan_installment);
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
