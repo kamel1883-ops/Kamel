@@ -150,22 +150,22 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
         </Clause>
 
         {/* الإثبات */}
-        <p style={{ margin: "10px 0 4px", fontSize: 11.5, color: "#475569" }}>
+        <p style={{ margin: "6px 0 2px", fontSize: 11, color: "#475569" }}>
           إثباتاً لما تقدّم، حُرّر هذا العقد من نسختين أصليتين، وقد وقّع الطرفان أدناه على جميع بنوده وشروطه.
         </p>
 
         {/* التوقيعات */}
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 24, marginTop: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 20, marginTop: 8 }}>
           {/* الطرف الأول — موقّع ومختوم */}
           <div style={{ flex: 1, maxWidth: 340 }}>
-            <div style={{ fontWeight: 800, marginBottom: 10, borderBottom: "1.5px solid #0b1120", paddingBottom: 4 }}>الطرف الأول - {PROVIDER.institutionName} - جدارة</div>
-            <div style={{ position: "relative", height: 80, marginBottom: 6 }}>
-              <div style={{ height: 70, marginTop: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#94a3b8" }}>مساحة التوقيع</div>
+            <div style={{ fontWeight: 800, marginBottom: 6, borderBottom: "1.5px solid #0b1120", paddingBottom: 3, fontSize: 12.5 }}>الطرف الأول - {PROVIDER.institutionName} - جدارة</div>
+            <div style={{ position: "relative", height: 58, marginBottom: 4 }}>
+              <div style={{ height: 50, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#94a3b8" }}>مساحة التوقيع</div>
               <div style={{ position: "absolute", top: 0, left: 0, opacity: 0.85, transform: "rotate(-7deg)", transformOrigin: "top left" }}>
-                <StampSeal size={104} rotate={0} opacity={1} />
+                <StampSeal size={86} rotate={0} opacity={1} />
               </div>
             </div>
-            <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, lineHeight: 1.9 }}>
+            <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 4, fontSize: 11.5, lineHeight: 1.5 }}>
               <div><b>الاسم:</b> {PROVIDER.signerName}</div>
               <div><b>{PROVIDER.signerLabel} - {PROVIDER.institutionName}</b></div>
               <div><b>الرقم الموحّد:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
@@ -175,21 +175,21 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
 
           {/* الطرف الثاني — خانات فارغة */}
           <div style={{ flex: 1, maxWidth: 340 }}>
-            <div style={{ fontWeight: 800, marginBottom: 10, borderBottom: "1.5px solid #0b1120", paddingBottom: 4 }}>الطرف الثاني - العميل</div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, height: 80, marginBottom: 6 }}>
+            <div style={{ fontWeight: 800, marginBottom: 6, borderBottom: "1.5px solid #0b1120", paddingBottom: 3, fontSize: 12.5 }}>الطرف الثاني - العميل</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 10, height: 58, marginBottom: 4 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>التوقيع</div>
-                <div style={{ height: 64, border: "1.5px dashed #94a3b8", borderRadius: 10, background: "#f8fafc" }} />
+                <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>التوقيع</div>
+                <div style={{ height: 46, border: "1.5px dashed #94a3b8", borderRadius: 8, background: "#f8fafc" }} />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>الختم</div>
-                <div style={{ height: 64, border: "1.5px dashed #94a3b8", borderRadius: 10, background: "#f8fafc" }} />
+                <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>الختم</div>
+                <div style={{ height: 46, border: "1.5px dashed #94a3b8", borderRadius: 8, background: "#f8fafc" }} />
               </div>
             </div>
-            <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 6, fontSize: 12, lineHeight: 1.9 }}>
+            <div style={{ borderTop: "1px solid #94a3b8", paddingTop: 4, fontSize: 11.5, lineHeight: 1.5 }}>
               <div><b>المنشأة:</b> {company?.name || "—"}</div>
               {company?.contact_name ? <div><b>الممثّل:</b> {company.contact_name}</div> : null}
-              {company?.unified_number ? <div><b>الرقم الموحد:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{company.unified_number}</span></div> : null}
+              {company?.unified_number ? <div><b>الرقم الوحّد:</b> <span style={{ fontFamily: "ui-monospace, monospace" }}>{company.unified_number}</span></div> : null}
               <div><b>التاريخ:</b> ....... - ....... - .......... هـ</div>
             </div>
           </div>
@@ -201,11 +201,11 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
 
 function Clause({ n, title, children }) {
   return (
-    <div style={{ marginBottom: 8 }}>
-      <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 3 }}>
+    <div style={{ marginBottom: 6 }}>
+      <div style={{ fontWeight: 800, fontSize: 12.5, marginBottom: 2 }}>
         المادة {n} - {title}:
       </div>
-      <p style={{ margin: 0, color: "#1e293b" }}>{children}</p>
+      <p style={{ margin: 0, color: "#1e293b", lineHeight: 1.6 }}>{children}</p>
     </div>
   );
 }
