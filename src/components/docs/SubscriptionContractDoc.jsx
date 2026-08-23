@@ -70,30 +70,18 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
           </div>
         </div>
 
-        {/* ملخّص قيمة العقد */}
+        {/* ملخّص قيمة العقد — سطور نصية مدمجة لتقليل المساحة */}
         {tier && (() => {
           const num = (n) => Number(n || 0).toLocaleString();
-          const Row = ({ k, v, color }) => (
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-              <span style={{ color: "#64748b" }}>{k}</span>
-              <span style={{ fontWeight: 700, color: color || "#0b1120" }}>{v}</span>
-            </div>
-          );
           return (
-            <div style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 800, color: "#3730a3", marginBottom: 8 }}>ملخّص قيمة العقد</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px 24px", fontSize: 12, lineHeight: 1.7 }}>
-                <Row k="الباقة" v={`${tier.tier} — ${tier.range}`} />
-                <Row k="عدد الموظفين" v={company?.employee_count ? `${company.employee_count} موظفاً` : "—"} />
-                <Row k="الاشتراك السنوي" v={`${num(bd.baseAnnual)} ر.س`} />
-                {bd.hasDiscount ? <Row k={`الخصم${bd.discountCode ? ` — ${bd.discountCode}` : ""}${bd.discountPercent ? ` ${bd.discountPercent}%` : ""}`} v={`- ${num(bd.discountAmount)} ر.س`} color="#dc2626" /> : <span />}
-                <Row k="صافي الاشتراك السنوي" v={`${num(bd.finalAnnual)} ر.س`} />
-                <div style={{ gridColumn: "1 / -1", borderTop: "1px dashed #c7d2fe", marginTop: 4, paddingTop: 6, display: "flex", justifyContent: "space-between", fontWeight: 800, color: "#1A237E", fontSize: 13 }}>
-                  <span>{isRenewal ? "رسوم التجديد السنوي" : "إجمالي السنة الأولى"}</span>
-                  <span>{num(bd.totalYear1)} ر.س</span>
-                </div>
-              </div>
-            </div>
+            <p style={{ margin: "0 0 12px", padding: "8px 12px", background: "#f4f5fd", border: "1px solid #d0d2e8", borderRadius: 8, fontSize: 12, lineHeight: 1.65 }}>
+              <b style={{ color: "#2e2a8c" }}>ملخص قيمة العقد: </b>
+              الباقة <b>{tier.tier} — {tier.range}</b>
+              {company?.employee_count ? <>، عدد الموظفين <b>{company.employee_count} موظفاً</b></> : null}
+              ، الاشتراك السنوي <b>{num(bd.baseAnnual)} ر.س</b>
+              {bd.hasDiscount ? <>، الخصم{bd.discountCode ? ` — ${bd.discountCode}` : ""}{bd.discountPercent ? ` ${bd.discountPercent}%` : ""} (<b style={{ color: "#dc2626" }}>- {num(bd.discountAmount)} ر.س</b>)</> : null}
+              ، صافي الاشتراك السنوي <b>{num(bd.finalAnnual)} ر.س</b>، {isRenewal ? "رسوم التجديد السنوي" : "إجمالي السنة الأولى"} <b style={{ color: "#2e2a8c" }}>{num(bd.totalYear1)} ر.س</b>.
+            </p>
           );
         })()}
 
