@@ -8,12 +8,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X, Send } from "lucide-react";
+import { Wallet, FileCheck, Clock, TrendingUp, Sparkles, CheckCircle2, Shield, Fingerprint, FileDown, RotateCcw, FileSpreadsheet, Trash2, Check, X, Send, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, payrollStatusLabel, todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { printReport } from "@/lib/reportPrint";
 import { downloadMudadExcel } from "@/lib/mudadExcel";
+import { downloadCashPayrollExcel } from "@/lib/cashPayrollExcel";
 
 export default function Payroll() {
   const { lang } = useI18n();
@@ -29,8 +30,10 @@ export default function Payroll() {
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
     pdf: "تحميل / طباعة PDF", printDraft: "طباعة كمسودة", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
     mudadSend: "تحويل الرواتب إلى مدد", mudadEmpty: "لا توجد رواتب معتمدة أو مصروفة لتوليد ملف مدد.",
+    cashExport: "تحميل كشف رواتب الكاش", cashEmpty: "لا توجد رواتب كاش معتمدة أو مصروفة لتوليد الكشف.",
+    totMudad: "إجمالي التحويل عبر مدد", totCash: "إجمالي رواتب الكاش", totAll: "الإجمالي الكلي للرواتب",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
-    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة",
+    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة", thMethod: "طريقة الصرف", mudadBadge: "مدد", cashBadge: "كاش",
     totalIncludedLabel: "إجمالي الرواتب للمشمولين بالصرف هذا الشهر", excludedHint: (n) => `${n} موظف مستثنى من صرف هذا الشهر`, allIncluded: "كل الموظفين مشمولون بالصرف",
   } : {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
@@ -43,8 +46,10 @@ export default function Payroll() {
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
     pdf: "Download / Print PDF", printDraft: "Print draft", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
     mudadSend: "Send salaries to Mudad", mudadEmpty: "No approved or paid salaries to generate a Mudad file.",
+    cashExport: "Download cash payroll sheet", cashEmpty: "No approved or paid cash salaries to generate the sheet.",
+    totMudad: "Total via Mudad (WPS)", totCash: "Total cash salaries", totAll: "Grand total payroll",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
-    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status",
+    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status", thMethod: "Method", mudadBadge: "Mudad", cashBadge: "Cash",
     totalIncludedLabel: "Total payroll for employees included in this month's pay", excludedHint: (n) => `${n} employee(s) excluded from this month's pay`, allIncluded: "All employees are included in pay",
   };
 
@@ -101,7 +106,8 @@ export default function Payroll() {
       const net = gross - absentDeduction;
       created.push({
         employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "",
-        month, year, base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+        month, year, salary_payment_method: emp.salary_payment_method || "mudad",
+        base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: absentDeduction, loan_installment: 0,
         overtime_hours: 0, overtime_amount: 0, absent_days: absentDays, net_salary: net, status: "draft",
       });
@@ -207,17 +213,29 @@ export default function Payroll() {
   const anyApproved = includedPayrolls.some((p) => p.status === "approved");
   const monthStatus = includedPayrolls.length && includedPayrolls.every((p) => p.status === "paid") ? "paid" : anyDraft ? "draft" : anyApproved ? "approved" : "draft";
 
+  // تحديد طريقة الصرف لكل سجل: لقطة من سجل الرواتب، وإلا من ملف الموظف، وإلا «مدد» افتراضياً
+  const empMap = {};
+  for (const e of employees) empMap[e.id] = e;
+  const methodOf = (p) => p.salary_payment_method || empMap[p.employee_id]?.salary_payment_method || "mudad";
+  const mudadPayrolls = includedPayrolls.filter((p) => methodOf(p) === "mudad");
+  const cashPayrolls = includedPayrolls.filter((p) => methodOf(p) === "cash");
+  const totalMudad = mudadPayrolls.reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
+  const totalCash = cashPayrolls.reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
+  const anyApprovedMudad = mudadPayrolls.some((p) => p.status === "approved");
+  const anyApprovedCash = cashPayrolls.some((p) => p.status === "approved");
+
   // تحويل المسير إلى مدد: يولّد ملف مسير الرواتب (xlsx) المطابق لنموذج مدد ويفتح بوابة الرفع
   const sendToMudad = async () => {
-    if (!anyApproved && monthStatus !== "paid") {
+    if (!anyApprovedMudad) {
       alert(isAr
-        ? "اعتمد كشف الرواتب أولاً قبل التحويل إلى مدد."
-        : "Approve the payroll sheet before sending to Mudad.");
+        ? "اعتمد رواتب مدد أولاً قبل التحويل إلى مدد."
+        : "Approve Mudad salaries before sending to Mudad.");
       return;
     }
     setBatching(true);
     try {
-      const n = await downloadMudadExcel({ payrolls, employees, org, month, year });
+      const mudadOnly = payrolls.filter((p) => p.include_in_payroll !== false && methodOf(p) === "mudad");
+      const n = await downloadMudadExcel({ payrolls: mudadOnly, employees, org, month, year });
       if (n === 0) { alert(t.mudadEmpty); return; }
       window.open("https://mudad.com.sa/home/payroll/regular/bulk", "_blank", "noopener,noreferrer");
       alert(isAr
@@ -225,6 +243,21 @@ export default function Payroll() {
         : `Mudad payroll file generated (${n} employees) as a protected xlsx.\n\nSteps:\n1) Sign in to the Mudad portal opened in the new tab.\n2) From "Payroll Management ► Monthly Salaries" choose "Upload Payroll File" and drop the file.\n3) Click "Upload" then approve the payroll — your linked bank will transfer salaries to employees.`);
     } catch (e) {
       alert(isAr ? "تعذّر توليد ملف مدد." : "Failed to generate the Mudad file.");
+    } finally {
+      setBatching(false);
+    }
+  };
+
+  // تصدير كشف رواتب الكاش (xlsx) — يُطبع كمسودة حتى قبل الاعتماد، ويشمل كل رواتب الكاش المشمولة
+  const exportCashPayroll = async () => {
+    setBatching(true);
+    try {
+      const cashOnly = payrolls.filter((p) => p.include_in_payroll !== false && methodOf(p) === "cash");
+      const n = await downloadCashPayrollExcel({ payrolls: cashOnly, employees, month, year, monthName: t.months[month - 1] });
+      if (n === 0) { alert(t.cashEmpty); return; }
+      alert(isAr ? `تم توليد كشف رواتب الكاش (${n} موظف).` : `Cash payroll sheet generated (${n} employees).`);
+    } catch (e) {
+      alert(isAr ? "تعذّر توليد كشف الكاش." : "Failed to generate the cash sheet.");
     } finally {
       setBatching(false);
     }
@@ -285,7 +318,8 @@ export default function Payroll() {
             {anyDraft && (<Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2"><FileCheck size={16} /> {t.approve}</Button>)}
             {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
             {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
-            {(anyApproved || monthStatus === "paid") && (<Button onClick={sendToMudad} disabled={batching} className="gap-2 bg-[#0B2545] hover:bg-[#14315a] text-white"><Send size={16} /> {t.mudadSend}</Button>)}
+            {(anyApprovedMudad || monthStatus === "paid") && (<Button onClick={sendToMudad} disabled={batching} className="gap-2 bg-[#0B2545] hover:bg-[#14315a] text-white"><Send size={16} /> {t.mudadSend}</Button>)}
+            {cashPayrolls.length > 0 && (<Button onClick={exportCashPayroll} disabled={batching} variant="outline" className="gap-2 border-emerald-400 text-emerald-700 hover:bg-emerald-50"><Banknote size={16} /> {t.cashExport}</Button>)}
             <Button onClick={() => exportPdf({ draft: true })} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printDraft}</Button>
             <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
             </div>
@@ -293,15 +327,27 @@ export default function Payroll() {
             )}
 
             {payrolls.length > 0 && !loading && (
-            <div className="bg-gradient-to-l from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-2xl p-4 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-            <div className="text-sm font-semibold text-emerald-900">{t.totalIncludedLabel}</div>
-            <div className="text-xs text-emerald-700 mt-1">
-             {excludedCount > 0 ? t.excludedHint(excludedCount) : t.allIncluded}
+            <div className="bg-gradient-to-l from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-2xl p-4 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-xl bg-[#0B2545]/5 border border-[#0B2545]/15 p-3 text-center">
+                <div className="text-xs font-medium text-[#0B2545]/70">{t.totMudad}</div>
+                <div className="text-xl font-extrabold text-[#0B2545] tabular-nums mt-1">{formatCurrency(totalMudad)}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{isAr ? `${mudadPayrolls.length} موظف` : `${mudadPayrolls.length} employees`}</div>
+              </div>
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-center">
+                <div className="text-xs font-medium text-emerald-700">{t.totCash}</div>
+                <div className="text-xl font-extrabold text-emerald-700 tabular-nums mt-1">{formatCurrency(totalCash)}</div>
+                <div className="text-[10px] text-emerald-700/70 mt-0.5">{isAr ? `${cashPayrolls.length} موظف` : `${cashPayrolls.length} employees`}</div>
+              </div>
+              <div className="rounded-xl bg-slate-900/95 text-white p-3 text-center">
+                <div className="text-xs font-medium text-white/70">{t.totAll}</div>
+                <div className="text-xl font-extrabold tabular-nums mt-1">{formatCurrency(totalMudad + totalCash)}</div>
+                <div className="text-[10px] text-white/60 mt-0.5">{isAr ? `${includedCount} موظف` : `${includedCount} employees`}</div>
+              </div>
             </div>
-            <div className="text-xs text-emerald-700 mt-0.5">{isAr ? `المشمولون بالصرف: ${includedCount} — المستثنون: ${excludedCount}` : `Included: ${includedCount} — Excluded: ${excludedCount}`}</div>
+            <div className="text-xs text-emerald-700 mt-3 text-center">
+              {excludedCount > 0 ? t.excludedHint(excludedCount) : t.allIncluded}
             </div>
-            <div className="text-3xl font-extrabold text-emerald-700 tabular-nums">{formatCurrency(totalNet)}</div>
             </div>
             )}
 
@@ -330,6 +376,7 @@ export default function Payroll() {
                   <th className="text-right px-3 py-3 font-medium text-rose-600">{t.thDed}</th>
                   <th className="text-right px-3 py-3 font-medium text-violet-600">{t.thLoan}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thNet}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thMethod}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thStatus}</th>
                 </tr>
               </thead>
@@ -358,6 +405,9 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
+                    <td className="px-3 py-2">
+                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap", methodOf(p) === "mudad" ? "bg-[#0B2545]/10 text-[#0B2545]" : "bg-emerald-100 text-emerald-700")}>{methodOf(p) === "mudad" ? t.mudadBadge : t.cashBadge}</span>
+                    </td>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
                         <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>

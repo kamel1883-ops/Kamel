@@ -23,6 +23,7 @@ const empty = {
   termination_reason: "none", termination_date: "", manager_id: "",
   is_approver_manager: false, is_approver_finance: false, is_approver_hr: false,
   base_salary: 0, housing_allowance: 0, transport_allowance: 0, other_allowances: 0,
+  salary_payment_method: "mudad",
   avatar_url: "",
   iqama_expiry: "", passport_number: "", passport_expiry: "",
   health_insurance_expiry: "",
@@ -50,6 +51,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
     approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)", approverHr: "معتمد موارد بشرية (سلف وانتدابات)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
+    payMethod: "طريقة صرف الراتب", payMudad: "مدد — حماية الأجور", payCash: "كاش — صرف نقدي",
     cancel: "إلغاء", save: "حفظ",
   } : {
     edit: "Edit employee", add: "Add new employee",
@@ -67,6 +69,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
     approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)", approverHr: "HR approver (loans & trips)",
     deptHint: "Pick from existing departments or type a new one",
+    payMethod: "Salary payment method", payMudad: "Mudad — WPS", payCash: "Cash",
     cancel: "Cancel", save: "Save",
   };
 
@@ -192,6 +195,12 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.housing}><Input type="number" value={form.housing_allowance} onChange={(e) => set("housing_allowance", e.target.value)} /></Field>
             <Field label={t.transport}><Input type="number" value={form.transport_allowance} onChange={(e) => set("transport_allowance", e.target.value)} /></Field>
             <Field label={t.other}><Input type="number" value={form.other_allowances} onChange={(e) => set("other_allowances", e.target.value)} /></Field>
+            <Field label={t.payMethod}>
+              <Select value={form.salary_payment_method || "mudad"} onValueChange={(v) => set("salary_payment_method", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="mudad">{t.payMudad}</SelectItem><SelectItem value="cash">{t.payCash}</SelectItem></SelectContent>
+              </Select>
+            </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
