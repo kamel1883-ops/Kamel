@@ -497,22 +497,22 @@ export default function Payroll() {
             <table className="w-full text-xs whitespace-nowrap">
               <thead className="bg-slate-50 text-muted-foreground text-[11px]">
                 <tr>
-                  <th className="text-center px-2 py-1.5 font-medium">{t.thIncl}</th>
+                  <th data-pcol="include" className="text-center px-2 py-1.5 font-medium">{t.thIncl}</th>
                   <th className="text-right px-3 py-1.5 font-medium sticky right-0 bg-slate-50 z-10">{t.thEmp}</th>
                   <th className="text-right px-2 py-1.5 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
                   <th className="text-right px-2 py-1.5 font-medium">{t.thBase}</th>
-                  <th className="text-right px-2 py-1.5 font-medium">{t.thHouse}</th>
-                  <th className="text-right px-2 py-1.5 font-medium">{t.thTrans}</th>
+                  <th data-pcol="housing" className="text-right px-2 py-1.5 font-medium">{t.thHouse}</th>
+                  <th data-pcol="transport" className="text-right px-2 py-1.5 font-medium">{t.thTrans}</th>
                   <th className="text-right px-2 py-1.5 font-medium font-bold text-slate-700">{isAr ? "الإجمالي" : "Gross"}</th>
-                  <th className="text-right px-2 py-1.5 font-medium text-emerald-600">{t.thBonus}</th>
-                  <th className="text-right px-2 py-1.5 font-medium text-blue-600">{t.thOvertime}</th>
-                  <th className="text-right px-2 py-1.5 font-medium">{t.thAbsent}</th>
-                  <th className="text-right px-2 py-1.5 font-medium">{t.thAbsentHours}</th>
-                  <th className="text-right px-2 py-1.5 font-medium text-rose-600">{t.thDed}</th>
-                  <th className="text-right px-2 py-1.5 font-medium text-violet-600">{t.thLoan}</th>
+                  <th data-pcol="bonus" className="text-right px-2 py-1.5 font-medium text-emerald-600">{t.thBonus}</th>
+                  <th data-pcol="overtime" className="text-right px-2 py-1.5 font-medium text-blue-600">{t.thOvertime}</th>
+                  <th data-pcol="absDays" className="text-right px-2 py-1.5 font-medium">{t.thAbsent}</th>
+                  <th data-pcol="absHours" className="text-right px-2 py-1.5 font-medium">{t.thAbsentHours}</th>
+                  <th data-pcol="ded" className="text-right px-2 py-1.5 font-medium text-rose-600">{t.thDed}</th>
+                  <th data-pcol="loan" className="text-right px-2 py-1.5 font-medium text-violet-600">{t.thLoan}</th>
                   <th className="text-right px-2 py-1.5 font-medium font-bold text-primary sticky left-0 bg-slate-50 z-10">{t.thNet}</th>
-                  <th className="text-right px-2 py-1.5 font-medium">{t.thMethod}</th>
-                  <th className="text-right px-2 py-1.5 font-medium">{t.thStatus}</th>
+                  <th data-pcol="method" className="text-right px-2 py-1.5 font-medium">{t.thMethod}</th>
+                  <th data-pcol="status" className="text-right px-2 py-1.5 font-medium">{t.thStatus}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -520,7 +520,7 @@ export default function Payroll() {
                    const included = p.include_in_payroll !== false;
                    return (
                    <tr key={p.id} data-include={included ? "true" : "false"} data-method={methodOf(p)} className={cn("hover:bg-slate-50", !included && "opacity-60")}>
-                     <td className="px-2 py-1 text-center">
+                     <td data-pcol="include" className="px-2 py-1 text-center">
                        <button
                          onClick={() => toggleInclude(p.id)}
                          title={included ? (isAr ? "مشمول — اضغط لاستثنائه من هذا الشهر" : "Included — click to exclude") : (isAr ? "مستثنى — اضغط لإعادة إشراكه" : "Excluded — click to include")}
@@ -532,30 +532,30 @@ export default function Payroll() {
                      <td className="px-3 py-1 font-medium sticky right-0 bg-white z-10 max-w-[180px] truncate">{employees.find((e) => e.id === p.employee_id)?.full_name || p.employee_name}</td>
                      <td className="px-2 py-1 tabular-nums text-[11px]">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
                      <td className="px-2 py-1 tabular-nums">{formatCurrency(p.base_salary)}</td>
-                     <td className="px-2 py-1"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
-                     <td className="px-2 py-1"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
+                     <td data-pcol="housing" className="px-2 py-1"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
+                     <td data-pcol="transport" className="px-2 py-1"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
                      <td className="px-2 py-1 font-bold tabular-nums text-slate-800">{formatCurrency(p.gross_salary)}</td>
-                     <td className="px-2 py-1"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
-                     <td className="px-2 py-1"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
-                     <td className="px-2 py-1">
+                     <td data-pcol="bonus" className="px-2 py-1"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
+                     <td data-pcol="overtime" className="px-2 py-1"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
+                     <td data-pcol="absDays" className="px-2 py-1">
                        <div className="flex flex-col gap-0.5">
                          <EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} />
                          {(() => { const v = computeAbsentDeduction(p.gross_salary, p.absent_days, 0, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
                        </div>
                      </td>
-                     <td className="px-2 py-1">
+                     <td data-pcol="absHours" className="px-2 py-1">
                        <div className="flex flex-col gap-0.5">
                          <EditableCell value={p.absent_hours || 0} onCommit={(v) => overrideAbsentHours(p.id, v)} />
                          {(() => { const v = computeAbsentDeduction(p.gross_salary, 0, p.absent_hours, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
                        </div>
                      </td>
-                     <td className="px-2 py-1"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
-                     <td className="px-2 py-1"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
+                     <td data-pcol="ded" className="px-2 py-1"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
+                     <td data-pcol="loan" className="px-2 py-1"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                      <td className="px-2 py-1 font-bold tabular-nums text-primary sticky left-0 bg-white z-10">{formatCurrency(p.net_salary)}</td>
-                     <td className="px-2 py-1">
+                     <td data-pcol="method" className="px-2 py-1">
                        <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap", methodOf(p) === "mudad" ? "bg-[#0B2545]/10 text-[#0B2545]" : "bg-emerald-100 text-emerald-700")}>{methodOf(p) === "mudad" ? t.mudadBadge : t.cashBadge}</span>
                      </td>
-                     <td className="px-2 py-1">
+                     <td data-pcol="status" className="px-2 py-1">
                        <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>
                      </td>
                    </tr>
