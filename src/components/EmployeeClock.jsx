@@ -24,11 +24,30 @@ const distanceMeters = (lat1, lng1, lat2, lng2) => {
 const getPosition = (t) =>
   new Promise((resolve, reject) => {
     if (!navigator.geolocation) return reject(new Error(t.noGeo));
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
-      () => reject(new Error(t.noAccess)),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+    // محاولة حتى 3 قراءات لالتقاط أدق إحداثي (يقلّل خطأ GPS على الهواتف داخل المباني)
+    let best = null;
+    let done = 0;
+    let settled = false;
+    const opts = { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 };
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      if (best) resolve(best);
+      else reject(new Error(t.noAccess));
+    };
+    for (let i = 0; i < 3; i++) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const r = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+          if (!best || r.acc < best.acc) best = r;
+          done++;
+          if (done >= 3) finish();
+        },
+        () => { done++; if (done >= 3) finish(); },
+        opts
+      );
+    }
+    setTimeout(finish, 14000);
   });
 
 // يحدد نطاق البصمة من فرع الموظف إن وُجد، ويعود للمقر الرئيسي للمنشأة كبدیل.
@@ -84,8 +103,8 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
     try {
       const pos = await getPosition(t);
       const dist = distanceMeters(pos.lat, pos.lng, wp.lat, wp.lng);
-      // هامش تسامح يعادل دقة GPS (acc) لتجاوز الخطأ الطبيعي في التحديد، بحد أدنى 10م
-      const tolerance = Math.max(Number(pos.acc) || 10, 10);
+      // هامش تسامح يعادل دقة GPS + حد أدنى 25م لتجاوز خطأ التحديد العادي على الهواتف
+      const tolerance = (Number(pos.acc) || 25) + 25;
       if (dist > radius + tolerance) { setMsg({ type: "err", text: t.outRange(Math.round(dist), radius) }); setBusy(false); return; }
       if (kind === "in") {
         if (today && today.check_in) { setMsg({ type: "err", text: t.alreadyIn }); setBusy(false); return; }
