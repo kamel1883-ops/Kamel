@@ -101,29 +101,6 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
       if ((el.getAttribute("data-method") || "") !== filterMethod) el.remove();
     });
   }
-  // إخفاء الأعمدة الفارغة (لا توجد قيمة لأي موظف) لتنظيم الكشف المطبوع
-  const conditionalCols = ["housing","transport","bonus","overtime","absDays","absHours","ded","loan"];
-  const tbodyRows = Array.from(clone.querySelectorAll("tbody tr"));
-  const keepCols = new Set();
-  conditionalCols.forEach((col) => {
-    const has = tbodyRows.some((tr) => {
-      const cell = tr.querySelector(`td[data-pcol="${col}"]`);
-      if (!cell) return false;
-      const inp = cell.querySelector("input");
-      const val = inp ? inp.value : cell.textContent;
-      const n = parseFloat(String(val).replace(/[^\d.-]/g, "")) || 0;
-      return n > 0;
-    });
-    if (has) keepCols.add(col);
-  });
-  conditionalCols.forEach((col) => {
-    if (keepCols.has(col)) return;
-    clone.querySelectorAll(`[data-pcol="${col}"]`).forEach((el) => el.remove());
-  });
-  // أعمدة زر التضمين وطرق الصرف والحالة لا تظهر في المطبوع
-  clone.querySelectorAll('[data-pcol="include"],[data-pcol="method"],[data-pcol="status"]').forEach((el) => el.remove());
-  // إلغاء الثبات (sticky) لمنع التواء الأعمدة في المطبوع
-  clone.querySelectorAll('[class*="sticky"],.sticky').forEach((el) => { el.style.position = "static"; el.style.zIndex = "0"; });
   clone.querySelectorAll('[class*="overflow-auto"],[class*="overflow-x-auto"]').forEach((el) => {
     el.style.overflow = "visible";
     el.style.maxWidth = "none";
