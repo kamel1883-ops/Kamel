@@ -1,0 +1,41 @@
+{
+  "name": "Attendance Notification",
+  "description": "\u0639\u0646\u062f \u062a\u0633\u062c\u064a\u0644 \u062a\u0623\u062e\u0651\u0631 \u0623\u0648 \u063a\u064a\u0627\u0628 \u0644\u0645\u0648\u0638\u0641\u060c \u064a\u064f\u0646\u0634\u0626 \u0625\u0634\u0639\u0627\u0631\u0627\u064b \u0645\u0648\u062c\u0651\u0647\u0627\u064b \u0644\u0647 \u0641\u064a \u0628\u0648\u0627\u0628\u0629 \u0627\u0644\u0645\u0648\u0638\u0641 \u0648\u064a\u0631\u0633\u0644 \u0628\u0631\u064a\u062f\u0627\u064b \u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a\u0627\u064b \u0644\u0644\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0645\u0633\u062c\u0651\u0644 \u2014 \u0628\u0643\u0644 \u0627\u0644\u0644\u063a\u0627\u062a",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Attendance",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ (.trigger.data.status == \"late\" or .trigger.data.status == \"absent\") and (.trigger.event_type == \"create\" or ((.trigger.old_data.status // \"\") != \"late\" and (.trigger.old_data.status // \"\") != \"absent\")) }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "attendance_notification",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "notify": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "notifyAttendance",
+            "args": {
+              "attendance_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "\u0625\u0634\u0639\u0627\u0631 \u0627\u0644\u062a\u0623\u062e\u0651\u0631/\u0627\u0644\u063a\u064a\u0627\u0628",
+            "description": "\u0625\u0634\u0639\u0627\u0631 + \u0628\u0631\u064a\u062f \u0644\u0644\u0645\u0648\u0638\u0641 \u0628\u0643\u0644 \u0627\u0644\u0644\u063a\u0627\u062a"
+          }
+        }
+      }
+    ]
+  }
+}
