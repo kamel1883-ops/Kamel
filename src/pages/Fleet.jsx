@@ -6,8 +6,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, Pencil, Trash2, Shield, FileText, Wrench } from "lucide-react";
+import { Car, Plus, Pencil, Trash2, Shield, FileText, Wrench, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import VehicleDelegationDialog from "@/components/fleet/VehicleDelegationDialog";
 import { expirySeverity, todayISO } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 
@@ -50,6 +51,7 @@ export default function Fleet() {
   const [form, setForm] = useState(empty);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [delegVehicle, setDelegVehicle] = useState(null);
 
   const load = async () => {
     const data = await base44.entities.Vehicle.list("-created_date", 500);
@@ -89,6 +91,7 @@ export default function Fleet() {
                   <div><div className="font-bold">{vPlate(v)}</div><div className="text-xs text-muted-foreground">{vBrand(v)} {vModel(v)} · {v.year}</div></div>
                 </div>
                 <div className="flex gap-1">
+                  <button onClick={() => setDelegVehicle(v)} title="توكيل ووثيقة" className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><ScrollText size={15} /></button>
                   <button onClick={() => startEdit(v)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={15} /></button>
                   <button onClick={() => remove(v)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={15} /></button>
                 </div>
@@ -154,11 +157,15 @@ export default function Fleet() {
               <Button type="submit">{t.save}</Button>
             </div>
           </form>
-        </div>
-      )}
-    </div>
-  );
-}
+          </div>
+          )}
+
+          {delegVehicle && (
+          <VehicleDelegationDialog vehicle={delegVehicle} employees={employees} onClose={() => setDelegVehicle(null)} onSaved={load} />
+          )}
+          </div>
+          );
+          }
 
 function ExpiryRow({ icon: Icon, label, date, t }) {
   const sev = expirySeverity(date);
