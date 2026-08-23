@@ -6,6 +6,7 @@ import ClientsManager from "@/components/portal/ClientsManager";
 import SurveysManager from "@/components/portal/SurveysManager";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
+import NotificationsBell from "@/components/NotificationsBell";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -201,6 +202,7 @@ export default function OwnerPortal() {
           <span className="hidden sm:inline text-sm text-white/70 border-r border-white/15 pr-3">{t.brandSub}</span>
         </div>
         <div className="flex items-center gap-2">
+          <NotificationsBell tone="light" align={isAr ? "left" : "right"} />
           <LanguageToggle />
           <Link to="/" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.back}</Link>
           {session && (

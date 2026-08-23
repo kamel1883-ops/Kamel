@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Bell, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function NotificationsBell({ tone = "light" }) {
+export default function NotificationsBell({ tone = "light", align = "left" }) {
   const [items, setItems] = useState([]);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -31,7 +31,7 @@ export default function NotificationsBell({ tone = "light" }) {
         {unread > 0 && <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">{unread}</span>}
       </button>
       {open && (
-        <div dir="rtl" className="absolute mt-2 left-0 w-80 max-h-96 overflow-y-auto rounded-2xl border bg-white shadow-2xl z-50 text-foreground text-right">
+        <div dir="rtl" className={cn("absolute mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl border bg-white shadow-2xl z-50 text-foreground text-right", align === "right" ? "right-0" : "left-0")}>
           <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white">
             <span className="font-semibold text-sm">الإشعارات</span>
             {unread > 0 && <button onClick={markRead} className="text-xs text-violet-600 flex items-center gap-1"><Check size={12} /> مقروء</button>}
