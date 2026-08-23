@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_EN } from "@/lib/pricing";
+import { Image } from "@/components/ui/image";
 
 // Jadara Platform — Profile / Brochure — English edition (LTR), fully translated, printable.
 const NAVY = "#0A1629";
@@ -1134,21 +1135,22 @@ function Infra() {
 /* =================== Partners =================== */
 function Partners() {
   const partners = [
-    { n: "Code Al-Aamal Contracting Co.", tag: "Code Al-Aamal", sub: "Contracting", c1: "#0A1629", c2: "#0e1f3a", k: "C" },
-    { n: "Darz Fine Tailoring Co.", tag: "Darz", sub: "Fine tailoring", c1: "#0A1629", c2: "#1a2b4a", k: "D" },
-    { n: "Dr. Tom Clinic", tag: "Dr. Tom", sub: "Healthcare clinics", c1: "#00B8D4", c2: "#0096b5", k: "T" },
+    { n: "Business Code Contracting Co.", sub: "Contracting", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/d146af91b_Screenshot2026-08-09155940.png" },
+    { n: "Darz Fine Tailoring Co.", sub: "Fine tailoring", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/64e527d78_Screenshot2026-08-09155842.png" },
+    { n: "Dr. Tom Veterinary Clinic", sub: "Veterinary clinics", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5ae9d2097_Screenshot2026-08-05143830.png" },
+    { n: "Al Moied", sub: "Al Moied Co.", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/40f72a492_image.png" },
   ];
   return (
     <Section tint="light" heading={<Heading icon={<Network />} title="Our Partners" sub="The real companies and entities we work with and serve" />}>
-      <div className="grid sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {partners.map((p, k) => (
-          <div key={k} className="rounded-3xl bg-white border border-slate-200 p-6 flex flex-col items-center gap-3 shadow-sm hover:shadow-lg transition" style={{ minHeight: 180 }}>
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})`, boxShadow: "0 8px 24px -12px rgba(10,22,41,.4)", border: "1px solid rgba(255,255,255,.08)" }}>
-              <span style={{ fontSize: 34, fontWeight: 800, fontFamily: "var(--font-display)", color: p.k === "T" ? "#fff" : "#C9A961" }}>{p.k}</span>
+          <div key={k} className="rounded-3xl bg-white border border-slate-200 p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-lg transition" style={{ minHeight: 200 }}>
+            <div className="w-full h-24 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-3 overflow-hidden">
+              <Image src={p.logo} fittingType="fit" alt={p.n} className="h-full w-full" />
             </div>
             <div className="text-center">
-              <div className="text-[15px] font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>{p.n}</div>
-              <div className="text-[12px] text-slate-500 mt-1">{p.sub}</div>
+              <div className="text-[14px] font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>{p.n}</div>
+              <div className="text-[11px] text-slate-500 mt-1">{p.sub}</div>
             </div>
           </div>
         ))}

@@ -6,6 +6,7 @@ const CLIENTS = [
   { name: "عيادة دكتور توم البيطرية", en: "Dr. Tom Veterinary Clinic", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5ae9d2097_Screenshot2026-08-05143830.png" },
   { name: "شركة كود الأعمال للمقاولات", en: "Business Code Co.", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/d146af91b_Screenshot2026-08-09155940.png" },
   { name: "مصنع درز للخياطة الراقية", en: "Darz Tailoring Factory", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/64e527d78_Screenshot2026-08-09155842.png" },
+  { name: "آل معيض", en: "Al Moied", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/40f72a492_image.png" },
 ];
 
 export default function ClientMarquee() {

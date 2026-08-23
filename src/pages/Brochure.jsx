@@ -10,6 +10,7 @@ import {
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_AR } from "@/lib/pricing";
 import ReportsAnalytics from "@/components/brochure/ReportsAnalytics";
+import { Image } from "@/components/ui/image";
 
 // بروفايل منصة جدارة — نسخة فاخرة موسّعة، عربي صافٍ، RTL، قابل للطباعة
 const NAVY = "#0A1629";
@@ -932,21 +933,22 @@ function Infra() {
 /* =================== الشركاء =================== */
 function Partners() {
   const partners = [
-    { n: "شركة كود الأعمال للمقاولات", tag: "كود الأعمال", sub: "مقاولات", c1: "#0A1629", c2: "#0e1f3a", k: "ك" },
-    { n: "شركة درز للخياطة الراقية", tag: "درز", sub: "خياطة راقية", c1: "#0A1629", c2: "#1a2b4a", k: "د" },
-    { n: "عيادة دكتور توم", tag: "دكتور توم", sub: "عيادات صحية", c1: "#00B8D4", c2: "#0096b5", k: "ت" }
+    { n: "شركة كود الأعمال للمقاولات", sub: "مقاولات", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/d146af91b_Screenshot2026-08-09155940.png" },
+    { n: "شركة درز للخياطة الراقية", sub: "خياطة راقية", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/64e527d78_Screenshot2026-08-09155842.png" },
+    { n: "عيادة دكتور توم البيطرية", sub: "عيادات بيطريّة", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5ae9d2097_Screenshot2026-08-05143830.png" },
+    { n: "آل معيض", sub: "شركة آل معيض", logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/40f72a492_image.png" },
   ];
   return (
     <Section tint="light" heading={<Heading icon={<Network />} title="شركاؤنا" sub="الشركات والجهات الفعلية التي نتعامل معها ونخدمها" />}>
-      <div className="grid sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {partners.map((p, k) => (
-          <div key={k} className="rounded-3xl bg-white border border-slate-200 p-6 flex flex-col items-center gap-3 shadow-sm hover:shadow-lg transition" style={{ minHeight: 180 }}>
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})`, boxShadow: "0 8px 24px -12px rgba(10,22,41,.4)", border: "1px solid rgba(255,255,255,.08)" }}>
-              <span style={{ fontSize: 34, fontWeight: 800, fontFamily: "var(--font-display)", color: p.k === "ت" ? "#fff" : "#C9A961" }}>{p.k}</span>
+          <div key={k} className="rounded-3xl bg-white border border-slate-200 p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-lg transition" style={{ minHeight: 200 }}>
+            <div className="w-full h-24 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-3 overflow-hidden">
+              <Image src={p.logo} fittingType="fit" alt={p.n} className="h-full w-full" />
             </div>
             <div className="text-center">
-              <div className="text-[15px] font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>{p.n}</div>
-              <div className="text-[12px] text-slate-500 mt-1">{p.sub}</div>
+              <div className="text-[14px] font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>{p.n}</div>
+              <div className="text-[11px] text-slate-500 mt-1">{p.sub}</div>
             </div>
           </div>
         ))}
