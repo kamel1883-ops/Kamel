@@ -20,7 +20,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
   const t = usePortalT("leaveForm");
 
   const [form, setForm] = useState({
-    employee_id: "", leave_type: "annual",
+    employee_id: "", leave_type: "annual", annual_leave_mode: "actual_travel",
     start_date: "", end_date: "", reason: "", is_full_clearance: false,
   });
   const [medicalFile, setMedicalFile] = useState(null);
@@ -31,7 +31,8 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
     if (open) {
       setForm({
         employee_id: currentUserEmployee?.id || employees?.[0]?.id || "",
-        leave_type: "annual", start_date: "", end_date: "", reason: "", is_full_clearance: false,
+        leave_type: "annual", annual_leave_mode: "actual_travel",
+        start_date: "", end_date: "", reason: "", is_full_clearance: false,
       });
       setMedicalFile(null); setErr("");
     }
@@ -39,6 +40,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const isSick = form.leave_type === "sick";
+  const isAnnual = form.leave_type === "annual";
   const days = form.start_date && form.end_date ? differenceInDays(parseISO(form.end_date), parseISO(form.start_date)) + 1 : 0;
 
   const submit = async (e) => {
@@ -55,6 +57,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
       }
       const payload = {
         ...form,
+        annual_leave_mode: isAnnual ? form.annual_leave_mode : "actual_travel",
         employee_user_id: emp?.user_id || "",
         employee_name: emp ? emp.full_name : "",
         days_count: days, is_full_clearance: form.is_full_clearance,
@@ -115,6 +118,22 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
               <Input type="date" value={form.end_date} onChange={(e) => set("end_date", e.target.value)} required />
             </div>
           </div>
+
+          {isAnnual && (
+            <div className="space-y-1.5 rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+              <Label className="text-xs font-semibold text-amber-800">{t.modeLabel}</Label>
+              <Select value={form.annual_leave_mode} onValueChange={(v) => set("annual_leave_mode", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="actual_travel">{t.modeTravel}</SelectItem>
+                  <SelectItem value="encash_continue">{t.modeEncash}</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {form.annual_leave_mode === "encash_continue" ? t.modeEncashHint : t.modeTravelHint}
+              </p>
+            </div>
+          )}
 
           {isSick && (
             <div className="space-y-1.5">

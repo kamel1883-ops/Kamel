@@ -142,6 +142,14 @@ export default async function (req) {
             finance_status: "paid", finance_paid_date: today(), finance_proof_url: proofUrl,
             finance_proof_date: today(), finance_note: note, status: "completed",
           });
+          // الإجازة السنوية: تمييز سفر فعلي (على إجازة) عن تصفية مع مواصلة العمل (على رأس العمل)
+          if (r.leave_type === "annual") {
+            const empL = await base44.asServiceRole.entities.Employee.get(r.employee_id).catch(() => null);
+            if (empL) {
+              const newStatus = r.annual_leave_mode === "encash_continue" ? "active" : "on_leave";
+              await base44.asServiceRole.entities.Employee.update(empL.id, { status: newStatus });
+            }
+          }
           if (Number(r.ticket_amount) > 0) {
             const emp = await base44.asServiceRole.entities.Employee.get(r.employee_id).catch(() => null);
             if (emp) await base44.asServiceRole.entities.Employee.update(emp.id, { ticket_last_used_year: new Date().getFullYear() });

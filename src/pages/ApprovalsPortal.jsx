@@ -146,6 +146,11 @@ export default function ApprovalsPortal({ portalSession }) {
                 { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("leaves", r), busyKey: r.id },
                 { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("leaves", r) },
               ]}>
+              {r.leave_type === "annual" && (
+                <span className={cn("text-xs px-2 py-0.5 rounded-full", r.annual_leave_mode === "encash_continue" ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700")}>
+                  {isAr ? (r.annual_leave_mode === "encash_continue" ? "تصفية مع مواصلة العمل" : "إجازة سفر فعلي") : (r.annual_leave_mode === "encash_continue" ? "Encash & continue" : "Travel leave")}
+                </span>
+              )}
               {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
               {r.reason && <span className="text-xs text-muted-foreground">{r.reason}</span>}
             </Card>
@@ -218,6 +223,11 @@ export default function ApprovalsPortal({ portalSession }) {
           <div className="space-y-3">
             {leaves.length === 0 ? <Empty /> : leaves.map((r) => (
               <Card key={r.id} r={r} actions={leaveActions(r)}>
+                {r.leave_type === "annual" && (
+                  <span className={cn("text-xs px-2 py-0.5 rounded-full", r.annual_leave_mode === "encash_continue" ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700")}>
+                    {isAr ? (r.annual_leave_mode === "encash_continue" ? "تصفية مع مواصلة العمل" : "إجازة سفر فعلي") : (r.annual_leave_mode === "encash_continue" ? "Encash & continue" : "Travel leave")}
+                  </span>
+                )}
                 {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
                 {Number(r.ticket_amount) > 0 && <span className="text-xs text-muted-foreground">{t.ticket(r.ticket_amount)}</span>}
               </Card>
