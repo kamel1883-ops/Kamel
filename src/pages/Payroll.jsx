@@ -87,10 +87,19 @@ export default function Payroll() {
     const endDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${mm}-${String(endDay).padStart(2, "0")}`;
     const attRecords = await base44.entities.Attendance.filter({ date: { $gte: startDate, $lte: endDate } }, "-created_date", 2000);
+    // أيام العمل الرسمية المعتمدة بالمنشأة (0=الأحد ... 6=السبت). الأيام خارجها = إجازة أسبوعية لا تُحسب غياباً.
+    const orgFresh = (org && org.work_days) ? org : ((await base44.entities.Organization.list("-created_date", 1))[0] || {});
+    const workDaysSet = new Set(
+      String(orgFresh.work_days || "0,1,2,3,4,6").split(",").map((d) => Number(d.trim())).filter((n) => !isNaN(n))
+    );
     const absentByEmp = {};
     for (const a of attRecords) {
       if (!a.employee_id) continue;
-      if (a.status === "absent") absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
+      if (a.status !== "absent") continue;
+      // تجاهل أي يوم يقع ضمن أيام الإجازة الأسبوعية للمنشأة (ليس يوماً عمل) — لا يُخصم
+      const dow = a.date ? new Date(a.date + "T00:00:00").getDay() : -1;
+      if (dow >= 0 && !workDaysSet.has(dow)) continue;
+      absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
     }
     const created = [];
     const updates = [];
