@@ -201,7 +201,7 @@ export default function Employees() {
                           </td>
                           <td className="px-4 py-3"><RoleBadge level={emp.role_level} lang={lang} /></td>
                           <td className="px-4 py-3"><StatusBadge status={emp.status} /></td>
-                          <td className="px-4 py-3 tabular-nums">{formatCurrency(emp.base_salary)}</td>
+                          <td className="px-4 py-3 tabular-nums">{formatCurrency((emp.base_salary || 0) + (emp.housing_allowance || 0) + (emp.transport_allowance || 0) + (emp.other_allowances || 0))}</td>
                           <td className="px-4 py-3">
                             <div className="flex gap-1">
                               <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} title={isAr ? "تعديل" : "Edit"} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
