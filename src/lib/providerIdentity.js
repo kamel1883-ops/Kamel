@@ -9,6 +9,7 @@ export const PROVIDER = {
   signerNameEn: "Walid Hassan Al-Qarous",
   signerLabel: "المدير العام",
   signerLabelEn: "General Manager",
+  supportEmail: "info@jadara-hr.com",
 };
 
 // بيانات التحويل البنكي الرسمية للمنشأة المُوفِّرة (بنك إس تي سي) — موحّدة عبر المستندات.
