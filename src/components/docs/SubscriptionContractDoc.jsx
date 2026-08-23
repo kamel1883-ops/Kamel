@@ -10,6 +10,8 @@ import { computeBreakdown } from "@/lib/pricingBreakdown";
 export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "", tier = null, quotedAmount = 0, discountPercent = 0, discountCode = "", isRenewal = false }) {
   const cDate = date || new Date().toISOString().slice(0, 10);
   const bd = computeBreakdown({ tier, quotedAmount: quotedAmount || company?.quoted_amount || 0, discountPercent: discountPercent || company?.discount_percent || 0, discountCode: discountCode || company?.discount_code || "", excludeSetup: isRenewal });
+  // بنود خاصة بعميل محدّد — تظهر في عقده فقط دون بقية المنشآت
+  const isAlMoied = String(company?.unified_number || "") === "7001838478" && String(company?.name || "").includes("معيض");
   const fmt = (d) => {
     try {
       const dt = new Date(d);
@@ -143,7 +145,19 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
           يوافق الطرف الثاني على أن يحق للطرف الأول (منصة «جدارة») إدراج اسم منشأته وشعارها ضمن قائمة عملائها وفي ملفها التعريفي والمحتوى التسويقي الخاص بها، وذلك لأغراض التحسين من الملف التعريفي لمنصة «جدارة» فقط لا غير. ويُقرّ الطرف الثاني بأن هذا الإدراج لا يُنشئ أي التزام أو مسؤولية أو أثراً قانونياً على منصة «جدارة» من قِبَله، ولا يُعدّ شراكة قانونية أو توكيلاً، وعلى ألّا يشكّل ذلك أي خلل أو التزام أو تعدي قانوني على «جدارة» من قِبَل الطرف الثاني.
         </Clause>
 
-        <Clause n="12" title="حل النزاعات">
+        {isAlMoied && (
+          <>
+            <Clause n="12" title="الدعم الفني والفني المخصّص للطرف الثاني">
+              التزاماً بما ورد في المادتين 8 و10 من هذا العقد، يلتزم الطرف الأول بتقديم الدعم الفني والفني اللازم لمنشأة <b>{company?.name}</b> بكافة ما تتطلّبه تشغيل المنصة لديها ومواكبة احتياجاتها التقنية والفنية، وذلك ضمن نطاق رسوم الاشتراك السنوي المبرم بين الطرفين دون رسوم إضافية على هذا الدعم.
+            </Clause>
+
+            <Clause n="13" title="تثبيت قيمة التجديد لسنتين متتاليتين">
+              يلتزم الطرف الأول بتجديد هذا العقد للطرف الثاني بنفس قيمة الاشتراك السنوي المُتفق عليها في هذا العقد دون أي زيادة، وذلك لمدة سنتين متتاليتين من تاريخ انتهاء العقد الحالي. ويشترط لسريان هذا التثبيت ألّا يتجاوز الطرف الثاني عدد الموظفين المخصّص له ضمن الباقة المُشتراة حالياً، فإن تجاوزه سُطبّقت أحكام الترقية وسداد الفرق في رسوم الاشتراك بين الباقتين المنصوص عليها في المادة 7 من هذا العقد.
+            </Clause>
+          </>
+        )}
+
+        <Clause n={isAlMoied ? 14 : 12} title="حل النزاعات">
           أي نزاع ينشأ حول تفسير أو تنفيذ هذا العقد، وتعذّر حله ودياً بين الطرفين، يُحال إلى الجهات النظامية المختصة في المملكة العربية السعودية لفضّه وفقاً للأنظمة المعمول بها.
         </Clause>
 
