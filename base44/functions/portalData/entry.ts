@@ -34,7 +34,7 @@ export default async function (req) {
     const isOwner = isOwnerSession;
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -44,7 +44,19 @@ export default async function (req) {
         base44.asServiceRole.entities.Performance.filter({ employee_id: employeeId }, "-created_date", 100),
         base44.asServiceRole.entities.TrainingPlan.list("-created_date", 500),
         base44.asServiceRole.entities.Settlement.filter({ employee_id: employeeId }, "-created_date", 200),
+        base44.asServiceRole.entities.AdminDecision.list("-issued_date", 500),
+        base44.asServiceRole.entities.Incentive.list("-granted_date", 500),
       ]);
+      // القرارات والحوار — تظهر للموظف وفق نطاق الإرسال (الكل / قسمه / سجل فرد خاص به)
+      const matchesTarget = (rec: any) => {
+        if (!rec) return false;
+        if (rec.target === "all") return true;
+        if (rec.target === "department") return !!rec.department && !!emp?.department && rec.department === emp.department;
+        if (rec.target === "employee") return String(rec.employee_id || "") === String(employeeId);
+        return false;
+      };
+      const decisions = (allDecisions || []).filter((d: any) => d?.status === "issued" && matchesTarget(d));
+      const incentives = (allIncentives || []).filter((i: any) => i?.status === "granted" && matchesTarget(i));
       // يظهر للموظف فقط التقييمات التي اعتمدتها الموارد البشرية (مكتملة أو معتمدة)
       const reviews = (performances || []).filter((p) => p?.status === "completed" || p?.status === "acknowledged");
       // خطط التدريب المشمولة للموظف: ضمن employee_ids (JSON) أو employee_id القديم،
@@ -73,6 +85,7 @@ export default async function (req) {
         leaves, loans, attendance, trips, warnings,
         reviews, trainings,
         settlements: paidSettlements,
+        decisions, incentives,
       });
     }
 
@@ -610,6 +623,30 @@ export default async function (req) {
         status: "pending",
       });
       return Response.json({ ok: true, trip: created });
+    }
+
+    // ====== تأكيد الاطلاع — بوابة الموظف ======
+    // يُلحق سجل اطلاع الموظف على قرار/حافز (JSON: [{ employee_id, date }])
+    const ack = async (entity: "AdminDecision" | "Incentive", id: string) => {
+      const rec: any = await base44.asServiceRole.entities[entity].get(id);
+      if (!rec) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+      let log: any[] = [];
+      try { const p = JSON.parse(rec.acknowledged_log || "[]"); if (Array.isArray(p)) log = p; } catch {}
+      if (!log.find((x) => String(x.employee_id || "") === String(employeeId))) {
+        log.push({ employee_id: employeeId, date: new Date().toISOString().slice(0, 10) });
+        await base44.asServiceRole.entities[entity].update(id, { acknowledged_log: JSON.stringify(log) });
+      }
+      return Response.json({ ok: true });
+    };
+    if (action === "ack_decision") {
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      return await ack("AdminDecision", id);
+    }
+    if (action === "ack_incentive") {
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      return await ack("Incentive", id);
     }
 
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });

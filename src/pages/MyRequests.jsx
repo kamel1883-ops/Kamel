@@ -7,6 +7,8 @@ import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
+import EmployeeDecisions from "@/components/portal/EmployeeDecisions";
+import EmployeeIncentives from "@/components/portal/EmployeeIncentives";
 import EmployeePerformance from "@/components/portal/EmployeePerformance";
 import EmployeeTraining from "@/components/portal/EmployeeTraining";
 import EmployeeDocuments from "@/components/portal/EmployeeDocuments";
@@ -74,6 +76,8 @@ export default function MyRequests() {
   const [reviews, setReviews] = useState([]);
   const [trainings, setTrainings] = useState([]);
   const [settlements, setSettlements] = useState([]);
+  const [decisions, setDecisions] = useState([]);
+  const [incentives, setIncentives] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -111,6 +115,8 @@ export default function MyRequests() {
       setReviews(data.reviews || []);
       setTrainings(data.trainings || []);
       setSettlements(data.settlements || []);
+      setDecisions(data.decisions || []);
+      setIncentives(data.incentives || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -136,6 +142,7 @@ export default function MyRequests() {
     setSession(null);
     setEmployee(null); setOrg(null); setBranch(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
+    setDecisions([]); setIncentives([]);
     setView("self");
   };
 
@@ -467,6 +474,10 @@ export default function MyRequests() {
             </div>
             <div className="mt-6">
               <EmployeeWarnings employee={employee} warnings={warnings} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <EmployeeDecisions items={decisions} session={session} onReload={() => load(session)} />
+              <EmployeeIncentives items={incentives} session={session} onReload={() => load(session)} />
             </div>
           </>
         )}

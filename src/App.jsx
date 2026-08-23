@@ -22,6 +22,8 @@ const OwnerPortal = lazy(() => import("@/pages/OwnerPortal"));
 const ExitInterviews = lazy(() => import("@/pages/ExitInterviews"));
 const Surveys = lazy(() => import("@/pages/Surveys"));
 const Warnings = lazy(() => import("@/pages/Warnings"));
+const Decisions = lazy(() => import("@/pages/Decisions"));
+const Incentives = lazy(() => import("@/pages/Incentives"));
 const Payroll = lazy(() => import("@/pages/Payroll"));
 const Gosi = lazy(() => import("@/pages/Gosi"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
@@ -154,6 +156,8 @@ const AuthenticatedApp = () => {
         <Route path="/exit-interviews" element={<ExitInterviews />} />
         <Route path="/surveys" element={<Surveys />} />
         <Route path="/warnings" element={<Warnings />} />
+        <Route path="/decisions" element={<Decisions />} />
+        <Route path="/incentives" element={<Incentives />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/platform-subscriptions" element={<PlatformSubscriptions />} />
