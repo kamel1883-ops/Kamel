@@ -10,7 +10,7 @@ export default function EnvPoster({
   body,
   points = [],
   cta = "ابدأ تجربتك المجانية 30 يوماً",
-  email = "info@jadara.com.sa",
+  email = "info@jadara-hr.com",
   accent = "#E9C766",
 }) {
   return (
