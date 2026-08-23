@@ -274,6 +274,8 @@ export default async function (req) {
       const payload: any = {};
       const cp = isUrl(body.contract_pdf_url); if (cp) payload.contract_pdf_url = cp;
       const iv = isUrl(body.invoice_pdf_url); if (iv) payload.invoice_pdf_url = iv;
+      const csc = isUrl(body.client_sealed_contract_url); if (csc) payload.client_sealed_contract_url = csc;
+      if (body.clear_client_sealed_contract) payload.client_sealed_contract_url = null;
       if (body.contract_quote_no) payload.contract_quote_no = String(body.contract_quote_no).slice(0, 60);
       if (Object.keys(payload).length === 0) return Response.json({ ok: false, error: "missing" }, { status: 400 });
       await base44.asServiceRole.entities.Tenant.update(tenant_id, payload);

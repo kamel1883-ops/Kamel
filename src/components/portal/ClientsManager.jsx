@@ -9,6 +9,7 @@ import {
   Crown, Building2, FlaskConical, FileText, BadgeCheck, Pause, CalendarClock,
   Wallet, Loader2, AlertTriangle, RefreshCw, MessageCircle, Search, Users,
   Check, Sparkles, Ban, RotateCcw, Eye, Bell, Download, FileSignature,
+  UploadCloud, Stamp,
 } from "lucide-react";
 import { ClientInfoDialog, waLink, daysLeft, isOwnerTenant } from "./ClientActionDialogs";
 import RegenerateAllDocumentsDialog from "./RegenerateAllDocumentsDialog";
@@ -38,6 +39,8 @@ export default function ClientsManager({ session }) {
     contract: "العقد (PDF)", invoice: "الفاتورة (PDF)",
     approveAdmin: "اعتماد الصلاحية", rejectAdmin: "رفض", pendingAdmin: "بانتظار الاعتماد",
     regenAll: "إعادة توليد عقود العملاء", regenHint: "لإصلاح الختم ونموذج العقد في كل العقود والفواتير السابقة",
+    uploadClientContract: "رفع عقد العميل", clientContractHint: "رفع نسخة العقد الموقّعة والمختومة من العميل",
+    clientContractView: "عقد العميل", clientContractUploaded: "تم حفظ عقد العميل المختوم",
   } : {
     title: "Clients & Contracts",
     welcome: "Follow up trials & quote requests, receive transfers via WhatsApp, confirm contracts and activate subscriptions.",
@@ -60,6 +63,8 @@ export default function ClientsManager({ session }) {
     contract: "Contract PDF", invoice: "Invoice PDF",
     approveAdmin: "Approve admin", rejectAdmin: "Reject", pendingAdmin: "Pending approval",
     regenAll: "Regenerate client contracts", regenHint: "Fix the stamp & shortened contract across all past contracts and invoices",
+    uploadClientContract: "Upload client contract", clientContractHint: "Upload the client's signed & sealed contract copy",
+    clientContractView: "Client contract", clientContractUploaded: "Client sealed contract saved",
   };
 
   const [data, setData] = useState(null);
@@ -71,6 +76,8 @@ export default function ClientsManager({ session }) {
   const [toast, setToast] = useState("");
   const [info, setInfo] = useState(null);
   const [regenOpen, setRegenOpen] = useState(false);
+  const fileRef = useRef(null);
+  const [uploadTarget, setUploadTarget] = useState(null);
 
   const call = useCallback(async (action, extra = {}) => {
     const p = base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra });
@@ -97,6 +104,26 @@ export default function ClientsManager({ session }) {
     catch (e) { alert(e?.message || "fail"); }
     finally { setBusyId(null); }
   }, [call, loadAll, t.sent]);
+
+  // رفع نسخة العقد المختومة من العميل (للمشتركين الفعليين فقط) — تُحفظ مع عقد المنصة لطباعتها لاحقاً
+  const onPickClientContract = (tenant) => { setUploadTarget(tenant); fileRef.current?.click(); };
+  const onClientContractChosen = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const target = uploadTarget;
+    setUploadTarget(null);
+    if (!file || !target) return;
+    setBusyId(target.id);
+    try {
+      const up = await base44.integrations.Core.UploadFile({ file });
+      const file_url = up?.file_url || up?.data?.file_url;
+      if (!file_url) throw new Error("upload_failed");
+      await call("owner_save_documents", { tenant_id: target.id, client_sealed_contract_url: file_url });
+      flash(t.clientContractUploaded);
+      await loadAll();
+    } catch (err) { alert(err?.message || "fail"); }
+    finally { setBusyId(null); }
+  };
 
   const tenants = data?.tenants || [];
   const stats = data?.stats || {};
@@ -334,6 +361,18 @@ export default function ClientsManager({ session }) {
                                 <FileSignature size={13} /> {t.invoice}
                               </a>
                             )}
+                            {!owner && x.status === "active" && (
+                              <Button size="sm" variant="outline" onClick={() => onPickClientContract(x)} disabled={busyId === x.id}
+                                className="gap-1.5 h-8 border-amber-300 text-amber-700 hover:bg-amber-50" title={t.clientContractHint}>
+                                <UploadCloud size={14} /> {t.uploadClientContract}
+                              </Button>
+                            )}
+                            {x.client_sealed_contract_url && (
+                              <a href={x.client_sealed_contract_url} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100">
+                                <Stamp size={13} /> {t.clientContractView}
+                              </a>
+                            )}
                             {!owner && x.admin_status === "pending" && x.admin_user_id && (
                               <Button size="sm" onClick={() => act(x.id, "owner_approve_admin", { approve: true })} disabled={busyId === x.id} className="gap-1.5 h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
                                 <Check size={14} /> {t.approveAdmin}
@@ -381,6 +420,8 @@ export default function ClientsManager({ session }) {
         isAr={isAr}
         onDone={loadAll}
       />
+
+      <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={onClientContractChosen} />
     </div>
   );
 }
