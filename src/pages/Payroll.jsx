@@ -473,71 +473,73 @@ export default function Payroll() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-muted-foreground text-xs">
+            <table className="w-full text-xs whitespace-nowrap">
+              <thead className="bg-slate-50 text-muted-foreground text-[11px]">
                 <tr>
-                  <th className="text-center px-3 py-3 font-medium">{t.thIncl}</th>
-                  <th className="text-right px-4 py-3 font-medium sticky right-0 bg-slate-50">{t.thEmp}</th>
-                  <th className="text-right px-3 py-3 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thBase}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thHouse}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thTrans}</th>
-                  <th className="text-right px-3 py-3 font-medium text-emerald-600">{t.thBonus}</th>
-                  <th className="text-right px-3 py-3 font-medium text-blue-600">{t.thOvertime}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thAbsent}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thAbsentHours}</th>
-                  <th className="text-right px-3 py-3 font-medium text-rose-600">{t.thDed}</th>
-                  <th className="text-right px-3 py-3 font-medium text-violet-600">{t.thLoan}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thNet}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thMethod}</th>
-                  <th className="text-right px-3 py-3 font-medium">{t.thStatus}</th>
+                  <th className="text-center px-2 py-1.5 font-medium">{t.thIncl}</th>
+                  <th className="text-right px-3 py-1.5 font-medium sticky right-0 bg-slate-50 z-10">{t.thEmp}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{isAr ? "الهوية/الإقامة" : "National ID"}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thBase}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thHouse}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thTrans}</th>
+                  <th className="text-right px-2 py-1.5 font-medium font-bold text-slate-700">{isAr ? "الإجمالي" : "Gross"}</th>
+                  <th className="text-right px-2 py-1.5 font-medium text-emerald-600">{t.thBonus}</th>
+                  <th className="text-right px-2 py-1.5 font-medium text-blue-600">{t.thOvertime}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thAbsent}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thAbsentHours}</th>
+                  <th className="text-right px-2 py-1.5 font-medium text-rose-600">{t.thDed}</th>
+                  <th className="text-right px-2 py-1.5 font-medium text-violet-600">{t.thLoan}</th>
+                  <th className="text-right px-2 py-1.5 font-medium font-bold text-primary sticky left-0 bg-slate-50 z-10">{t.thNet}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thMethod}</th>
+                  <th className="text-right px-2 py-1.5 font-medium">{t.thStatus}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {payrolls.map((p) => {
-                  const included = p.include_in_payroll !== false;
-                  return (
-                  <tr key={p.id} data-include={included ? "true" : "false"} className={cn("hover:bg-slate-50", !included && "opacity-60")}>
-                    <td className="px-3 py-2 text-center">
-                      <button
-                        onClick={() => toggleInclude(p.id)}
-                        title={included ? (isAr ? "مشمول — اضغط لاستثنائه من هذا الشهر" : "Included — click to exclude") : (isAr ? "مستثنى — اضغط لإعادة إشراكه" : "Excluded — click to include")}
-                        className={cn("inline-flex items-center justify-center w-7 h-7 rounded-lg border-2 transition-all",
-                          included ? "border-emerald-400 bg-emerald-50 text-emerald-600" : "border-rose-400 bg-rose-50 text-rose-500")}>
-                        {included ? <Check size={16} /> : <X size={16} />}
-                      </button>
-                    </td>
-                    <td className="px-4 py-2 font-medium sticky right-0 bg-white">{employees.find((e) => e.id === p.employee_id)?.full_name || p.employee_name}</td>
-                    <td className="px-3 py-2 tabular-nums text-xs">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
-                    <td className="px-3 py-2 tabular-nums">{formatCurrency(p.base_salary)}</td>
-                    <td className="px-3 py-2"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
-                    <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
-                    <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
-                    <td className="px-3 py-2"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-col gap-0.5">
-                        <EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} />
-                        {(() => { const v = computeAbsentDeduction(p.gross_salary, p.absent_days, 0, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-col gap-0.5">
-                        <EditableCell value={p.absent_hours || 0} onCommit={(v) => overrideAbsentHours(p.id, v)} />
-                        {(() => { const v = computeAbsentDeduction(p.gross_salary, 0, p.absent_hours, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
-                    <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
-                    <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
-                    <td className="px-3 py-2">
-                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap", methodOf(p) === "mudad" ? "bg-[#0B2545]/10 text-[#0B2545]" : "bg-emerald-100 text-emerald-700")}>{methodOf(p) === "mudad" ? t.mudadBadge : t.cashBadge}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>
-                    </td>
-                  </tr>
-                  );
-                })}
+                   const included = p.include_in_payroll !== false;
+                   return (
+                   <tr key={p.id} data-include={included ? "true" : "false"} className={cn("hover:bg-slate-50", !included && "opacity-60")}>
+                     <td className="px-2 py-1 text-center">
+                       <button
+                         onClick={() => toggleInclude(p.id)}
+                         title={included ? (isAr ? "مشمول — اضغط لاستثنائه من هذا الشهر" : "Included — click to exclude") : (isAr ? "مستثنى — اضغط لإعادة إشراكه" : "Excluded — click to include")}
+                         className={cn("inline-flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all",
+                           included ? "border-emerald-400 bg-emerald-50 text-emerald-600" : "border-rose-400 bg-rose-50 text-rose-500")}>
+                         {included ? <Check size={14} /> : <X size={14} />}
+                       </button>
+                     </td>
+                     <td className="px-3 py-1 font-medium sticky right-0 bg-white z-10 max-w-[180px] truncate">{employees.find((e) => e.id === p.employee_id)?.full_name || p.employee_name}</td>
+                     <td className="px-2 py-1 tabular-nums text-[11px]">{p.national_id || (employees.find((e) => e.id === p.employee_id)?.national_id || "—")}</td>
+                     <td className="px-2 py-1 tabular-nums">{formatCurrency(p.base_salary)}</td>
+                     <td className="px-2 py-1"><EditableCell value={p.housing_allowance} onCommit={(v) => updateField(p.id, "housing_allowance", v)} /></td>
+                     <td className="px-2 py-1"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
+                     <td className="px-2 py-1 font-bold tabular-nums text-slate-800">{formatCurrency(p.gross_salary)}</td>
+                     <td className="px-2 py-1"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
+                     <td className="px-2 py-1"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
+                     <td className="px-2 py-1">
+                       <div className="flex flex-col gap-0.5">
+                         <EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} />
+                         {(() => { const v = computeAbsentDeduction(p.gross_salary, p.absent_days, 0, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
+                       </div>
+                     </td>
+                     <td className="px-2 py-1">
+                       <div className="flex flex-col gap-0.5">
+                         <EditableCell value={p.absent_hours || 0} onCommit={(v) => overrideAbsentHours(p.id, v)} />
+                         {(() => { const v = computeAbsentDeduction(p.gross_salary, 0, p.absent_hours, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
+                       </div>
+                     </td>
+                     <td className="px-2 py-1"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
+                     <td className="px-2 py-1"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
+                     <td className="px-2 py-1 font-bold tabular-nums text-primary sticky left-0 bg-white z-10">{formatCurrency(p.net_salary)}</td>
+                     <td className="px-2 py-1">
+                       <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap", methodOf(p) === "mudad" ? "bg-[#0B2545]/10 text-[#0B2545]" : "bg-emerald-100 text-emerald-700")}>{methodOf(p) === "mudad" ? t.mudadBadge : t.cashBadge}</span>
+                     </td>
+                     <td className="px-2 py-1">
+                       <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap", payrollStatusLabel(p.status).cls)}>{payrollStatusLabel(p.status).label}</span>
+                     </td>
+                   </tr>
+                   );
+                 })}
               </tbody>
             </table>
           </div>
@@ -553,6 +555,6 @@ function EditableCell({ value, onCommit }) {
   return (
     <input type="number" value={v} onChange={(e) => setV(e.target.value)} onBlur={() => onCommit(v)}
       onKeyDown={(e) => { if (e.key === "Enter") e.target.blur(); }}
-      className="w-20 px-2 py-1 text-xs tabular-nums border border-transparent rounded-lg hover:border-border focus:border-border focus:outline-none bg-transparent" />
+      className="w-16 px-1.5 py-0.5 text-[11px] tabular-nums border border-transparent rounded-md hover:border-border focus:border-border focus:outline-none bg-transparent" />
   );
 }
