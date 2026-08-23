@@ -4,13 +4,14 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ClipboardList, FileCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ClipboardList, FileCheck, RefreshCw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobFormDialog from "@/components/recruitment/JobFormDialog";
 import ApplicantsDialog from "@/components/recruitment/ApplicantsDialog";
 import TrialEvaluationDialog from "@/components/recruitment/TrialEvaluationDialog";
 import { safeHref } from "@/lib/utils";
 import ShareJobDialog from "@/components/recruitment/ShareJobDialog";
+import RegenerateAppointmentLettersDialog from "@/components/recruitment/RegenerateAppointmentLettersDialog";
 
 const plus90 = (d) => d ? new Date(new Date(d).getTime() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10) : "";
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -26,6 +27,7 @@ export default function Recruitment() {
   const [evalApplicant, setEvalApplicant] = useState(null);
   const [evalJob, setEvalJob] = useState(null);
   const [shareJob, setShareJob] = useState(null);
+  const [regenOpen, setRegenOpen] = useState(false);
 
   const [evalMap, setEvalMap] = useState({});
   const [employees, setEmployees] = useState([]);
@@ -74,7 +76,10 @@ export default function Recruitment() {
   return (
     <div>
       <PageHeader title="إدارة التوظيف" subtitle="إدارة الوظائف الشاغرة والوصف الوظيفي والمتقدمين والتعيين وتقييم فترة التجربة" action={
-        <Button onClick={openNew}><Plus size={16} /> وظيفة جديدة</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setRegenOpen(true)}><RefreshCw size={16} /> إعادة توليد قرارات التعيين</Button>
+          <Button onClick={openNew}><Plus size={16} /> وظيفة جديدة</Button>
+        </div>
       } />
 
       <Card className="p-4 mb-5">
@@ -169,6 +174,7 @@ export default function Recruitment() {
       <ApplicantsDialog open={!!applicantsJob} onOpenChange={(o) => !o && setApplicantsJob(null)} job={applicantsJob} onHired={load} onEvaluate={(a) => { setEvalApplicant(a); setEvalJob(applicantsJob); }} />
       <TrialEvaluationDialog open={!!evalApplicant} onOpenChange={(o) => !o && setEvalApplicant(null)} applicant={evalApplicant} job={evalJob} onSaved={load} />
       <ShareJobDialog open={!!shareJob} onOpenChange={(o) => !o && setShareJob(null)} job={shareJob} />
+      <RegenerateAppointmentLettersDialog open={regenOpen} onClose={() => setRegenOpen(false)} onDone={load} />
     </div>
   );
 }
