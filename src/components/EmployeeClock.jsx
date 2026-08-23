@@ -84,7 +84,9 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
     try {
       const pos = await getPosition(t);
       const dist = distanceMeters(pos.lat, pos.lng, wp.lat, wp.lng);
-      if (dist > radius) { setMsg({ type: "err", text: t.outRange(dist, radius) }); setBusy(false); return; }
+      // هامش تسامح يعادل دقة GPS (acc) لتجاوز الخطأ الطبيعي في التحديد، بحد أدنى 10م
+      const tolerance = Math.max(Number(pos.acc) || 10, 10);
+      if (dist > radius + tolerance) { setMsg({ type: "err", text: t.outRange(Math.round(dist), radius) }); setBusy(false); return; }
       if (kind === "in") {
         if (today && today.check_in) { setMsg({ type: "err", text: t.alreadyIn }); setBusy(false); return; }
         if (clockApi?.clockIn) {
