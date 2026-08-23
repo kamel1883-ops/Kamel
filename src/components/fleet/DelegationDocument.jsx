@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import BrandHeader from "@/components/docs/BrandHeader";
 
 export default function DelegationDocument({ delegation, onClose }) {
   const [org, setOrg] = useState(null);
@@ -10,7 +11,6 @@ export default function DelegationDocument({ delegation, onClose }) {
   }, []);
 
   const company = org?.name || "";
-  const logoUrl = org?.logo_url || "";
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
@@ -24,18 +24,10 @@ export default function DelegationDocument({ delegation, onClose }) {
         </div>
 
         <div className="print-delegation p-8 text-[#111]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic','Tajawal',sans-serif" }}>
-          <div className="flex items-center justify-between border-b-2 border-[#0B2545] pb-4">
-            <div className="flex items-center gap-3">
-              {logoUrl ? <img src={logoUrl} alt="logo" className="h-12 w-auto" /> : null}
-              <div>
-                <div className="font-bold text-lg text-[#0B2545]">{company}</div>
-                <div className="text-xs text-slate-500">وثيقة تفويض سائق واستلام مركبة</div>
-              </div>
-            </div>
-            <div className="text-left text-xs">
-              <div>رقم التوكيل: <b>{delegation.delegation_number}</b></div>
-              <div>تاريخ الإصدار: {new Date().toLocaleDateString("en-GB")}</div>
-            </div>
+          <BrandHeader org={org} />
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span>رقم التوكيل: <b className="text-slate-700">{delegation.delegation_number}</b></span>
+            <span>تاريخ الإصدار: {new Date().toLocaleDateString("en-GB")}</span>
           </div>
 
           <h2 className="text-center font-bold text-xl my-6 text-[#0B2545]">

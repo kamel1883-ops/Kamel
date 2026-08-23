@@ -1,5 +1,5 @@
 import React from "react";
-import { Image } from "@/components/ui/image";
+import BrandHeader from "@/components/docs/BrandHeader";
 import { formatCurrency } from "@/lib/hr";
 import { reasonMeta } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
@@ -35,23 +35,11 @@ export default function SettlementSheet({ record, org }) {
 
   return (
     <div className="print-settlement bg-white text-slate-900 mx-auto" style={{ maxWidth: "800px" }} dir={L ? "rtl" : "ltr"}>
-      <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4 mb-5">
-        <div className="flex items-center gap-3">
-          {org?.logo_url ? (
-            <Image src={org.logo_url} alt={org.name} className="w-16 h-16 object-contain" fittingType="fit" />
-          ) : (
-            <div className="w-16 h-16 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xl">{(org?.name || (L ? "ش" : "J")).charAt(0)}</div>
-          )}
-          <div>
-            <div className="font-bold text-lg">{org?.name || t.orgNameFallback}</div>
-            <div className="text-xs text-slate-500">{t.vat}: {org?.vat_number || "—"}</div>
-          </div>
-        </div>
-        <div className="text-left">
-          <div className="text-base font-bold">{t.title}</div>
-          <div className="text-xs text-slate-500">{t.no}: {r.id ? r.id.slice(-6).toUpperCase() : ""}</div>
-          <div className="text-xs text-slate-500">{r.generated_date || ""}</div>
-        </div>
+      <BrandHeader org={org} />
+      <div className="text-center mb-5">
+        <div className="text-base font-bold">{t.title}</div>
+        <div className="text-xs text-slate-500">{t.no}: {r.id ? r.id.slice(-6).toUpperCase() : ""} · {r.generated_date || ""}</div>
+        <div className="text-xs text-slate-500">{t.vat}: {org?.vat_number || "—"}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-5">

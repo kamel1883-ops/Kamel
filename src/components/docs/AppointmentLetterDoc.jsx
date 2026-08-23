@@ -1,4 +1,5 @@
 import React from "react";
+import BrandHeader from "@/components/docs/BrandHeader";
 
 const fmt = (d) => {
   try { return new Date(d).toLocaleDateString("ar-SA-u-ca-gregory", { year: "numeric", month: "long", day: "numeric" }); } catch { return String(d || ""); }
@@ -10,15 +11,7 @@ export default function AppointmentLetterDoc({ applicant, job, org }) {
   const probEnd = new Date(new Date(hireDate).getTime() + 90 * 24 * 3600 * 1000);
   return (
     <div dir="rtl" style={{ fontFamily: "Tajawal, IBM Plex Sans Arabic, sans-serif", padding: "44px", color: "#0f172a", width: "794px", background: "#fff" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #6d28d9", paddingBottom: "18px", marginBottom: "26px" }}>
-        <div>
-          <div style={{ fontSize: "26px", fontWeight: 800, color: "#4c1d95" }}>جدارة</div>
-          <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>لإدارة الموارد البشرية — Jadara HR</div>
-        </div>
-        {org?.logo_url
-          ? <img src={org.logo_url} alt="logo" style={{ height: "60px", objectFit: "contain" }} />
-          : <div style={{ fontSize: "13px", color: "#64748b" }}>{org?.name || ""}</div>}
-      </div>
+      <BrandHeader org={org} />
 
       <h1 style={{ fontSize: "21px", fontWeight: 800, textAlign: "center", marginBottom: "22px", color: "#0f172a" }}>قرار تعيين وتكليف (فترة تجربة)</h1>
 
