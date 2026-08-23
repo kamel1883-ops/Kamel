@@ -15,7 +15,8 @@ import EmployeeDocuments from "@/components/portal/EmployeeDocuments";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
 import Logo from "@/components/Logo";
 import PortalLanguageSelector from "@/components/portal/PortalLanguageSelector";
-import NotificationsBell from "@/components/NotificationsBell";
+import PortalNotificationsBell from "@/components/portal/PortalNotificationsBell";
+import PortalNotificationsSection from "@/components/portal/PortalNotificationsSection";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import PortalAuthCard from "@/components/portal/PortalAuthCard";
 import { Image } from "@/components/ui/image";
@@ -47,6 +48,7 @@ export default function MyRequests() {
   const { lang } = usePortalI18n();
   const isAr = lang === "ar";
   const t = usePortalT("portal");
+  const tN = usePortalT("notifications");
   const tripStatus = isAr ? {
     draft: { label: "مسودة", cls: "bg-slate-100 text-slate-600" },
     pending: { label: "قيد الاعتماد", cls: "bg-amber-50 text-amber-600" },
@@ -306,16 +308,17 @@ export default function MyRequests() {
           </div>
         </div>
 
-        {hasApprovals && (
-          <div className="flex gap-2 mb-5 border-b border-border flex-wrap">
-            <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
-            {hasApprovals && (
-              <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
-            )}
-          </div>
-        )}
+        <div className="flex gap-2 mb-5 border-b border-border flex-wrap">
+          <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
+          <button type="button" onClick={() => setView("notifications")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "notifications" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{tN.tabNotifications}</button>
+          {hasApprovals && (
+            <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
+          )}
+        </div>
         {hasApprovals && view === "approvals" ? (
           <ApprovalsPortal portalSession={session} />
+        ) : view === "notifications" ? (
+          <PortalNotificationsSection session={session} />
         ) : (
           <>
             <PageHeader
@@ -508,7 +511,7 @@ export default function MyRequests() {
             <Link to="/" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
               <ArrowRight size={16} style={{ transform: portalDir(lang) === "rtl" ? "none" : "scaleX(-1)" }} /> {t.backToSite}
             </Link>
-            <NotificationsBell tone="light" align={portalDir(lang) === "rtl" ? "left" : "right"} />
+            <PortalNotificationsBell session={session} onViewAll={() => setView("notifications")} tone="light" align={portalDir(lang) === "rtl" ? "left" : "right"} />
             <PortalLanguageSelector />
             {session && (
               <button onClick={exitToLanding} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">

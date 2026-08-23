@@ -12,6 +12,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Layout from "@/components/Layout";
 import AnimatedOutlet from "@/components/AnimatedOutlet";
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Notifications = lazy(() => import("@/pages/Notifications"));
 const Employees = lazy(() => import("@/pages/Employees"));
 const Attendance = lazy(() => import("@/pages/Attendance"));
 const Approvals = lazy(() => import("@/pages/Approvals"));
@@ -138,6 +139,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/app" element={<Dashboard />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/recruitment" element={<Recruitment />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />

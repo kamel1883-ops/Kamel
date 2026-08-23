@@ -669,6 +669,16 @@ const DICT = {
     fil: { title: "Mga Incentive at Gantimpala", subtitle: "Mga incentive na ibinigay sa iyo ng organisasyon — preserbado sa petsa, halaga at pahayag.", empty: "Walang incentive para sa iyo.", granted: "Ibinigay", amount: "Halaga", types: { bonus: "Bonus", cash_reward: "Cash reward", allowance_grant: "Allowance grant", gift: "Regalo", recognition: "Pagkilala", other: "Incentive" } },
     ur: { title: "ترغیبات و انعامات", subtitle: "ادارے کی طرف سے آپ کو دیے گئے ترغیبات — تاریخ، قدر اور بیان کے ساتھ محفوظ۔", empty: "آپ کے لیے کوئی ترغیب جاری نہیں۔", granted: "دی گئی", amount: "رقم", types: { bonus: "بونس", cash_reward: "نقد انعام", allowance_grant: "الاؤنس گرانٹ", gift: "تحفہ", recognition: "تشہیر", other: "ترغیب" } },
   },
+
+  notifications: {
+    ar: { title: "الإشعارات", markRead: "مقروء", markAll: "تعليم الكل كمقروء", viewAll: "عرض كل الإشعارات", sectionTitle: "الإشعارات", sectionSub: "سجل كامل بإشعاراتك السابقة — تبقى محفوظة دائماً", empty: "لا توجد إشعارات", loading: "جارٍ التحميل…", unread: "غير مقروء", tabNotifications: "الإشعارات" },
+    en: { title: "Notifications", markRead: "Mark read", markAll: "Mark all read", viewAll: "View all notifications", sectionTitle: "Notifications", sectionSub: "Full history of your past notifications — always preserved", empty: "No notifications", loading: "Loading…", unread: "Unread", tabNotifications: "Notifications" },
+    hi: { title: "सूचनाएँ", markRead: "पढ़ा", markAll: "सभी पढ़े चिह्नित करें", viewAll: "सभी सूचनाएँ देखें", sectionTitle: "सूचनाएँ", sectionSub: "आपकी पिछली सूचनाओं का पूरा इतिहास — हमेशा सुरक्षित", empty: "कोई सूचना नहीं", loading: "लोड हो रहा है…", unread: "अपठित", tabNotifications: "सूचनाएँ" },
+    ne: { title: "सूचनाहरू", markRead: "पढियो", markAll: "सबै पढिएको चिन्हित गर्नुहोस्", viewAll: "सबै सूचना हेर्नुहोस्", sectionTitle: "सूचनाहरू", sectionSub: "तपाईंका पुराना सूचनाको पूरा इतिहास — सधैं सुरक्षित", empty: "कुनै सूचना छैन", loading: "लोड हुँदै…", unread: "नपढिएको", tabNotifications: "सूचनाहरू" },
+    bn: { title: "বিজ্ঞপ্তি", markRead: "পড়া", markAll: "সব পড়া চিহ্নিত করুন", viewAll: "সব বিজ্ঞপ্তি দেখুন", sectionTitle: "বিজ্ঞপ্তি", sectionSub: "আপনার পুরোনো বিজ্ঞপ্তির সম্পূর্ণ ইতিহাস — সবসময় সুরক্ষিত", empty: "কোনো বিজ্ঞপ্তি নেই", loading: "লোড হচ্ছে…", unread: "অপঠিত", tabNotifications: "বিজ্ঞপ্তি" },
+    fil: { title: "Mga abiso", markRead: "Nabasa", markAll: "Markahin lahat na nabasa", viewAll: "Tingnan ang lahat ng abiso", sectionTitle: "Mga abiso", sectionSub: "Buong kasaysayan ng iyong mga dating abiso — palaging napanatili", empty: "Walang abiso", loading: "Naglo-load…", unread: "Hindi pa nabasa", tabNotifications: "Mga abiso" },
+    ur: { title: "اطلاعات", markRead: "پڑھا", markAll: "سب کو پڑھا ہوا نشان زد کریں", viewAll: "تمام اطلاعات دیکھیں", sectionTitle: "اطلاعات", sectionSub: "آپ کی پرانی اطلاعات کا مکمل ریکارڈ — ہمیشہ محفوظ", empty: "کوئی اطلاع نہیں", loading: "لوڈ ہو رہا ہے…", unread: "غیر پڑھا ہوا", tabNotifications: "اطلاعات" },
+  },
 };
 
 export function usePortalT(namespace) {

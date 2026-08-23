@@ -34,7 +34,7 @@ export default async function (req) {
     const isOwner = isOwnerSession;
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -46,6 +46,8 @@ export default async function (req) {
         base44.asServiceRole.entities.Settlement.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.AdminDecision.list("-issued_date", 500),
         base44.asServiceRole.entities.Incentive.list("-granted_date", 500),
+        // إشعارات الموظف الموجّهة له (تبقى محفوظة دائماً — تُعرض بلغة البوابة المختارة)
+        base44.asServiceRole.entities.Notification.filter({ employee_id: employeeId }, "-created_date", 500),
       ]);
       // القرارات والحوار — تظهر للموظف وفق نطاق الإرسال (الكل / قسمه / سجل فرد خاص به)
       const matchesTarget = (rec: any) => {
@@ -86,7 +88,26 @@ export default async function (req) {
         reviews, trainings,
         settlements: paidSettlements,
         decisions, incentives,
+        notifications: notifications || [],
       });
+    }
+
+    // ====== الإشعارات — بوابة الموظف ======
+    // قائمة إشعارات الموظف (بترتيب زمني تنازلي) — حدّ قصوى قابل للضبط (للجرس 50، للسجل الكامل 500)
+    if (action === "notifications") {
+      const limit = Math.min(Number(body.limit) || 50, 500);
+      const notifs = await base44.asServiceRole.entities.Notification.filter(
+        { employee_id: employeeId }, "-created_date", limit
+      );
+      return Response.json({ ok: true, notifications: notifs || [] });
+    }
+    // تعليم كل إشعارات الموظف غير المقروءة كمقروءة
+    if (action === "mark_notifications_read") {
+      await base44.asServiceRole.entities.Notification.updateMany(
+        { employee_id: employeeId, is_read: false },
+        { $set: { is_read: true } }
+      );
+      return Response.json({ ok: true });
     }
 
     // ====== إدارة العملاء — بوابة المالك ======

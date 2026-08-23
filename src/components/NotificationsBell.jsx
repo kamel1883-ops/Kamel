@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Bell, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const fmtDateTime = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return `${d.toLocaleDateString("ar-EG")} · ${d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}`;
+};
 
 export default function NotificationsBell({ tone = "light", align = "left" }) {
   const [items, setItems] = useState([]);
@@ -41,8 +49,10 @@ export default function NotificationsBell({ tone = "light", align = "left" }) {
               <div key={n.id} className={cn("px-5 py-3 border-b text-sm", n.is_read ? "bg-white" : "bg-violet-50")}>
                 <div className="font-medium text-right">{n.title}</div>
                 {n.body && <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed text-right break-words whitespace-pre-wrap">{n.body}</div>}
+                <div className="text-[10px] text-muted-foreground/70 mt-1 tabular-nums">{fmtDateTime(n.created_date)}</div>
               </div>
             ))}
+          <Link to="/notifications" onClick={() => setOpen(false)} className="block w-full text-center text-xs text-violet-600 py-3 border-t hover:bg-violet-50">عرض كل الإشعارات</Link>
         </div>
       )}
     </div>
