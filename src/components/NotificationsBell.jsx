@@ -31,16 +31,16 @@ export default function NotificationsBell({ tone = "light" }) {
         {unread > 0 && <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">{unread}</span>}
       </button>
       {open && (
-        <div className="absolute mt-2 right-0 w-80 max-h-96 overflow-y-auto rounded-2xl border bg-white shadow-2xl z-50 text-foreground">
+        <div dir="rtl" className="absolute mt-2 right-0 w-80 max-h-96 overflow-y-auto rounded-2xl border bg-white shadow-2xl z-50 text-foreground text-right">
           <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white">
             <span className="font-semibold text-sm">الإشعارات</span>
             {unread > 0 && <button onClick={markRead} className="text-xs text-violet-600 flex items-center gap-1"><Check size={12} /> مقروء</button>}
           </div>
           {items.length === 0 ? <div className="px-4 py-8 text-center text-sm text-muted-foreground">لا توجد إشعارات</div> :
             items.map((n) => (
-              <div key={n.id} className={cn("px-4 py-3 border-b text-sm", n.is_read ? "bg-white" : "bg-violet-50")}>
-                <div className="font-medium">{n.title}</div>
-                {n.body && <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{n.body}</div>}
+              <div key={n.id} className={cn("px-5 py-3 border-b text-sm", n.is_read ? "bg-white" : "bg-violet-50")}>
+                <div className="font-medium text-right">{n.title}</div>
+                {n.body && <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed text-right break-words whitespace-pre-wrap">{n.body}</div>}
               </div>
             ))}
         </div>
