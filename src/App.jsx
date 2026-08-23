@@ -24,6 +24,7 @@ const Surveys = lazy(() => import("@/pages/Surveys"));
 const Warnings = lazy(() => import("@/pages/Warnings"));
 const Decisions = lazy(() => import("@/pages/Decisions"));
 const Incentives = lazy(() => import("@/pages/Incentives"));
+const AdDesigns = lazy(() => import("@/pages/AdDesigns"));
 const Payroll = lazy(() => import("@/pages/Payroll"));
 const Gosi = lazy(() => import("@/pages/Gosi"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
@@ -158,6 +159,7 @@ const AuthenticatedApp = () => {
         <Route path="/warnings" element={<Warnings />} />
         <Route path="/decisions" element={<Decisions />} />
         <Route path="/incentives" element={<Incentives />} />
+        <Route path="/ad-designs" element={<AdDesigns />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/platform-subscriptions" element={<PlatformSubscriptions />} />

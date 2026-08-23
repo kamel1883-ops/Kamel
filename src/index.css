@@ -191,6 +191,10 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-client { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 20px; background: #fff; color: #111; }
   .print-client .no-print { display: none !important; }
 
+  .print-poster, .print-poster * { visibility: visible !important; }
+  .print-poster { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 0; }
+  .print-poster .no-print { display: none !important; }
+
   .print-delegation, .print-delegation * { visibility: visible !important; }
   .print-delegation { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-delegation .no-print { display: none !important; }
