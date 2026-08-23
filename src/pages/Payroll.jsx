@@ -216,7 +216,8 @@ export default function Payroll() {
   // تحديد طريقة الصرف لكل سجل: لقطة من سجل الرواتب، وإلا من ملف الموظف، وإلا «مدد» افتراضياً
   const empMap = {};
   for (const e of employees) empMap[e.id] = e;
-  const methodOf = (p) => p.salary_payment_method || empMap[p.employee_id]?.salary_payment_method || "mudad";
+  // طريقة الصرف: يُعتمد ملف الموظف الحي أولاً (يعكس أي تغيير في الإعداد) ثم لقطة سجل الرواتب
+  const methodOf = (p) => empMap[p.employee_id]?.salary_payment_method || p.salary_payment_method || "mudad";
   const mudadPayrolls = includedPayrolls.filter((p) => methodOf(p) === "mudad");
   const cashPayrolls = includedPayrolls.filter((p) => methodOf(p) === "cash");
   const totalMudad = mudadPayrolls.reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
