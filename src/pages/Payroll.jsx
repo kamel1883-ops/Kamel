@@ -93,8 +93,10 @@ export default function Payroll() {
       if (a.status === "absent") absentByEmp[a.employee_id] = (absentByEmp[a.employee_id] || 0) + 1;
     }
     const created = [];
+    const updates = [];
+    const existingDrafts = {};
+    for (const p of payrolls) if (p.employee_id && p.status === "draft") existingDrafts[p.employee_id] = p;
     for (const emp of activeEmps) {
-      if (existing.has(emp.id)) continue;
       const base = Number(emp.base_salary) || 0;
       const housing = Number(emp.housing_allowance) || 0;
       const transport = Number(emp.transport_allowance) || 0;
@@ -104,6 +106,19 @@ export default function Payroll() {
       const dailyWage = gross / 30;
       const absentDeduction = Number((dailyWage * absentDays).toFixed(2));
       const net = gross - absentDeduction;
+      if (existing.has(emp.id)) {
+        // مزامنة القيم المالية لسجل مسود موجود من ملف الموظف الحالي
+        const p = existingDrafts[emp.id];
+        if (p) updates.push({
+          id: p.id,
+          base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+          gross_salary: gross, national_id: emp.national_id || p.national_id || "",
+          employee_name: emp.full_name || p.employee_name || "",
+          salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
+          net_salary: Number((gross + (p.bonus || 0) + (p.overtime_amount || 0) - (p.deductions || 0) - (p.loan_installment || 0)).toFixed(2)),
+        });
+        continue;
+      }
       created.push({
         employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "",
         month, year, salary_payment_method: emp.salary_payment_method || "mudad",
@@ -113,6 +128,7 @@ export default function Payroll() {
       });
     }
     if (created.length > 0) await base44.entities.Payroll.bulkCreate(created);
+    if (updates.length > 0) await base44.entities.Payroll.bulkUpdate(updates);
     setGenerating(false);
     load();
   };
