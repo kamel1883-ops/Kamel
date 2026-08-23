@@ -1,6 +1,6 @@
 import React from "react";
 import { Image } from "@/components/ui/image";
-import { Crown, Check, Phone } from "lucide-react";
+import { Crown, Check, Phone, Mail } from "lucide-react";
 
 export default function EnvPoster({
   image,
@@ -10,6 +10,7 @@ export default function EnvPoster({
   body,
   points = [],
   cta = "ابدأ تجربتك المجانية 30 يوماً",
+  email = "info@jadara.com.sa",
   accent = "#E9C766",
 }) {
   return (
@@ -70,8 +71,9 @@ export default function EnvPoster({
               <div className="font-bold text-[clamp(.85rem,2vw,1.1rem)]">{cta}</div>
               <div className="text-[10px] text-slate-200">بدون رسوم تأسيس · تفعيل فوري</div>
             </div>
-            <div className="text-left font-bold whitespace-nowrap" style={{ color: accent }} dir="ltr">
-              <Phone size={14} className="inline ml-1" /> +966 59 470 0782
+            <div className="text-left whitespace-nowrap" dir="ltr">
+              <div className="font-bold" style={{ color: accent }}><Phone size={13} className="inline ml-1" /> +966 59 470 0782</div>
+              <div className="text-[10px] text-slate-100 mt-1 flex items-center gap-1 justify-end"><Mail size={11} /> {email}</div>
             </div>
           </div>
         </div>
