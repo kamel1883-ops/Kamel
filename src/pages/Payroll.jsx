@@ -28,11 +28,21 @@ const computeWorkDaysInMonth = (year, month, workDaysSet) => {
   }
   return count;
 };
-const computeNetFromAttendance = (gross, paidDays, workDaysInMonth, bonus, overtime, deductions, loan) => {
+// الأجر اليومي = الإجمالي ÷ أيام عمل المنشأة بالشهر، والأجر بالساعة = الأجر اليومي ÷ ساعات اليوم
+const computeDailyWage = (gross, workDaysInMonth) => (workDaysInMonth ? Number(gross) / workDaysInMonth : 0);
+const computeHourlyWage = (dailyWage, workHoursPerDay) => (workHoursPerDay > 0 ? dailyWage / workHoursPerDay : 0);
+// قيمة خصم الغياب (أيام + ساعات) — تُخزن لعرضها في الكشف والـ PDF
+const computeAbsentDeduction = (gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay) => {
+  const daily = computeDailyWage(gross, workDaysInMonth);
+  const hourly = computeHourlyWage(daily, workHoursPerDay);
+  return Number(((absentDays || 0) * daily + (absentHours || 0) * hourly).toFixed(2));
+};
+// الصافي = الإجمالي − خصم الغياب + الحوافز + العمل الإضافي − الخصومات الأخرى − السلفة
+const computeNetFromAttendance = (gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, bonus, overtime, deductions, loan) => {
   if (!workDaysInMonth) return 0;
-  const daily = Number(gross) / workDaysInMonth;
-  const attendanceAmount = Number((paidDays * daily).toFixed(2));
-  return Number((attendanceAmount + (bonus || 0) + (overtime || 0) - (deductions || 0) - (loan || 0)).toFixed(2));
+  const absentDeduction = computeAbsentDeduction(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay);
+  const net = (Number(gross) || 0) - absentDeduction + (bonus || 0) + (overtime || 0) - (deductions || 0) - (loan || 0);
+  return Number(net.toFixed(2));
 };
 
 export default function Payroll() {
@@ -42,7 +52,7 @@ export default function Payroll() {
     title: "الرواتب", subtitle: "معالجة كشوفات الرواتب الشهرية",
     gen: "توليد كشف الشهر", gening: "جارٍ التوليد...",
     sNet: "إجمالي الصافي", sBonus: "إجمالي الحوافز", sGosi: "تأمينات الموظفين", sDed: "إجمالي الخصومات", sPaid: "رواتب مصروفة",
-    info: "الراتب يُحسب حسب أيام الحضور الفعلي ضمن أيام عمل المنشأة المحددة في الإعدادات. لا توجد سجلات حضور للموظف = راتبه 0. أيام الإجازة الأسبوعية الرسمية لا تُحسب غياباً ولو لم يبصم فيها. لمدير الموارد البشرية صلاحية تعديل أيام الغياب يدوياً في الجدول عند وجود إذن.",
+    info: "الراتب يُحسب بحسب الحضور الفعلي: يُخصم الغياب (أيام وساعات) ويُفصَّل عدده وقيمته في الكشف والطباعة. لا توجد سجلات حضور = راتب 0. أيام الإجازة الأسبوعية الرسمية لا تُحسب غياباً. لمدير الموارد البشرية صلاحية تعديل أيام/ساعات الغياب يدوياً.",
     month: "الشهر", year: "السنة",
     months: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
     monthStatus: "حالة كشف الشهر:", empCount: (n) => `(${n} موظف)`, approve: "اعتماد كشف الشهر", pay: "صرف الكشف",
@@ -52,13 +62,13 @@ export default function Payroll() {
     cashExport: "تحميل كشف رواتب الكاش", cashEmpty: "لا توجد رواتب كاش معتمدة أو مصروفة لتوليد الكشف.",
     totMudad: "إجمالي التحويل عبر مدد", totCash: "إجمالي رواتب الكاش", totAll: "الإجمالي الكلي للرواتب",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
-    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم)", thDed: "خصومات", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة", thMethod: "طريقة الصرف", mudadBadge: "مدد", cashBadge: "كاش",
+    thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم/قيمة)", thAbsentHours: "غياب (ساعة/قيمة)", thDed: "خصومات أخرى", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة", thMethod: "طريقة الصرف", mudadBadge: "مدد", cashBadge: "كاش",
     totalIncludedLabel: "إجمالي الرواتب للمشمولين بالصرف هذا الشهر", excludedHint: (n) => `${n} موظف مستثنى من صرف هذا الشهر`, allIncluded: "كل الموظفين مشمولون بالصرف",
   } : {
     title: "Payroll", subtitle: "Process monthly payroll sheets",
     gen: "Generate month sheet", gening: "Generating...",
     sNet: "Total net", sBonus: "Total bonus", sGosi: "Employee GOSI", sDed: "Total deductions", sPaid: "Paid salaries",
-    info: "Salary is calculated by actual attendance days within the organization's defined work days. No attendance records for an employee = salary 0. Official weekly days off are never counted as absence. HR may manually adjust absence days in the table when excused.",
+    info: "Salary is based on actual attendance: absence (days & hours) is deducted with its count and value shown in the sheet and print. No attendance records = salary 0. Official weekly days off are never counted as absence. HR may adjust absence days/hours manually.",
     month: "Month", year: "Year",
     months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     monthStatus: "Month sheet status:", empCount: (n) => `(${n} employees)`, approve: "Approve sheet", pay: "Pay sheet",
@@ -68,7 +78,7 @@ export default function Payroll() {
     cashExport: "Download cash payroll sheet", cashEmpty: "No approved or paid cash salaries to generate the sheet.",
     totMudad: "Total via Mudad (WPS)", totCash: "Total cash salaries", totAll: "Grand total payroll",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
-    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days)", thDed: "Deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status", thMethod: "Method", mudadBadge: "Mudad", cashBadge: "Cash",
+    thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days/value)", thAbsentHours: "Absent (hrs/value)", thDed: "Other deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status", thMethod: "Method", mudadBadge: "Mudad", cashBadge: "Cash",
     totalIncludedLabel: "Total payroll for employees included in this month's pay", excludedHint: (n) => `${n} employee(s) excluded from this month's pay`, allIncluded: "All employees are included in pay",
   };
 
@@ -110,14 +120,22 @@ export default function Payroll() {
     const orgFresh = (org && org.work_days) ? org : ((await base44.entities.Organization.list("-created_date", 1))[0] || {});
     const workDaysSet = computeWorkDaysSet(orgFresh.work_days);
     const workDaysInMonth = computeWorkDaysInMonth(year, month, workDaysSet);
+    const workHoursPerDay = Number(orgFresh.work_hours_per_day) || 0;
     // إحصاء أيام الحضور المدفوعة لكل موظف: present/late/leave/holiday ضمن أيام العمل الرسمية فقط
     const paidDaysByEmp = {};
+    // إحصاء ساعات النقص (التغيب الجزئي) لكل موظف: الفرق بين ساعات اليوم المطلوبة وساعات العمل الفعلية في أيام الحضور
+    const shortfallByEmp = {};
     for (const a of attRecords) {
       if (!a.employee_id) continue;
       if (!PAID_STATUSES.has(a.status)) continue;
       const dow = a.date ? new Date(a.date + "T00:00:00").getDay() : -1;
       if (dow >= 0 && !workDaysSet.has(dow)) continue;
       paidDaysByEmp[a.employee_id] = (paidDaysByEmp[a.employee_id] || 0) + 1;
+      if (workHoursPerDay > 0 && (a.status === "present" || a.status === "late")) {
+        const wh = Number(a.work_hours) || 0;
+        const gap = Number((workHoursPerDay - wh).toFixed(2));
+        if (gap > 0) shortfallByEmp[a.employee_id] = Number(((shortfallByEmp[a.employee_id] || 0) + gap).toFixed(2));
+      }
     }
     const created = [];
     const updates = [];
@@ -131,6 +149,8 @@ export default function Payroll() {
       const gross = base + housing + transport + other;
       const paidDays = Math.min(paidDaysByEmp[emp.id] || 0, workDaysInMonth);
       const absentDays = Math.max(0, workDaysInMonth - paidDays);
+      const absentHours = shortfallByEmp[emp.id] || 0;
+      const absentDeduction = computeAbsentDeduction(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay);
       if (existing.has(emp.id)) {
         // مزامنة القيم المالية + إعادة حساب الصافي بحسب أيام الحضور من ملف الموظف الحالي
         const p = existingDrafts[emp.id];
@@ -140,8 +160,8 @@ export default function Payroll() {
           gross_salary: gross, national_id: emp.national_id || p.national_id || "",
           employee_name: emp.full_name || p.employee_name || "",
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
-          absent_days: absentDays,
-          net_salary: computeNetFromAttendance(gross, paidDays, workDaysInMonth, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
+          absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
+          net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
         });
         continue;
       }
@@ -150,8 +170,9 @@ export default function Payroll() {
         month, year, salary_payment_method: emp.salary_payment_method || "mudad",
         base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: 0, loan_installment: 0,
-        overtime_hours: 0, overtime_amount: 0, absent_days: absentDays,
-        net_salary: computeNetFromAttendance(gross, paidDays, workDaysInMonth, 0, 0, 0, 0), status: "draft",
+        overtime_hours: 0, overtime_amount: 0,
+        absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
+        net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, 0, 0, 0, 0), status: "draft",
       });
     }
     if (created.length > 0) await base44.entities.Payroll.bulkCreate(created);
@@ -169,6 +190,7 @@ export default function Payroll() {
       const empById = {};
       for (const e of activeEmps) empById[e.id] = e;
       const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
+      const workHoursPerDay = Number(org?.work_hours_per_day) || 0;
       const updates = [];
       for (const p of payrolls) {
         const emp = empById[p.employee_id];
@@ -178,12 +200,14 @@ export default function Payroll() {
         const transport = Number(emp.transport_allowance) || 0;
         const other = Number(emp.other_allowances) || 0;
         const gross = base + housing + transport + other;
-        const paidDays = Math.max(0, workDaysInMonth - (p.absent_days || 0));
+        const absentDays = p.absent_days || 0;
+        const absentHours = p.absent_hours || 0;
+        const absentDeduction = computeAbsentDeduction(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay);
         updates.push({
           id: p.id,
           base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
-          gross_salary: gross,
-          net_salary: computeNetFromAttendance(gross, paidDays, workDaysInMonth, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
+          gross_salary: gross, absent_deduction: absentDeduction,
+          net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
           national_id: emp.national_id || p.national_id || "",
           employee_name: emp.full_name || p.employee_name || "",
@@ -194,13 +218,16 @@ export default function Payroll() {
     } finally { setGenerating(false); }
   };
 
+  const orgWorkDaysInMonth = () => computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
+  const orgWorkHoursPerDay = () => Number(org?.work_hours_per_day) || 0;
+
   const updateField = async (id, field, value) => {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
     updated.gross_salary = (updated.base_salary || 0) + (updated.housing_allowance || 0) + (updated.transport_allowance || 0) + (updated.other_allowances || 0);
-    const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
-    const paidDays = Math.max(0, workDaysInMonth - (updated.absent_days || 0));
-    updated.net_salary = computeNetFromAttendance(updated.gross_salary, paidDays, workDaysInMonth, updated.bonus, updated.overtime_amount, updated.deductions, updated.loan_installment);
+    const wdh = orgWorkDaysInMonth();
+    updated.absent_deduction = computeAbsentDeduction(updated.gross_salary, updated.absent_days, updated.absent_hours, wdh, orgWorkHoursPerDay());
+    updated.net_salary = computeNetFromAttendance(updated.gross_salary, updated.absent_days, updated.absent_hours, wdh, orgWorkHoursPerDay(), updated.bonus, updated.overtime_amount, updated.deductions, updated.loan_installment);
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
@@ -208,11 +235,23 @@ export default function Payroll() {
   const overrideAbsentDays = async (id, days) => {
     const rec = payrolls.find((p) => p.id === id);
     const abs = Math.max(0, Number(days) || 0);
-    const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
+    const wdh = orgWorkDaysInMonth();
     const gross = Number(rec.gross_salary) || (Number(rec.base_salary) || 0);
-    const paidDays = Math.max(0, workDaysInMonth - abs);
     const updated = { ...rec, absent_days: abs };
-    updated.net_salary = computeNetFromAttendance(gross, paidDays, workDaysInMonth, rec.bonus, rec.overtime_amount, rec.deductions, rec.loan_installment);
+    updated.absent_deduction = computeAbsentDeduction(gross, abs, rec.absent_hours, wdh, orgWorkHoursPerDay());
+    updated.net_salary = computeNetFromAttendance(gross, abs, rec.absent_hours, wdh, orgWorkHoursPerDay(), rec.bonus, rec.overtime_amount, rec.deductions, rec.loan_installment);
+    await base44.entities.Payroll.update(id, updated);
+    setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
+  };
+
+  const overrideAbsentHours = async (id, hours) => {
+    const rec = payrolls.find((p) => p.id === id);
+    const hrs = Math.max(0, Number(hours) || 0);
+    const wdh = orgWorkDaysInMonth();
+    const gross = Number(rec.gross_salary) || (Number(rec.base_salary) || 0);
+    const updated = { ...rec, absent_hours: hrs };
+    updated.absent_deduction = computeAbsentDeduction(gross, rec.absent_days, hrs, wdh, orgWorkHoursPerDay());
+    updated.net_salary = computeNetFromAttendance(gross, rec.absent_days, hrs, wdh, orgWorkHoursPerDay(), rec.bonus, rec.overtime_amount, rec.deductions, rec.loan_installment);
     await base44.entities.Payroll.update(id, updated);
     setPayrolls((p) => p.map((x) => (x.id === id ? updated : x)));
   };
@@ -275,7 +314,7 @@ export default function Payroll() {
   const excludedCount = excludedPayrolls.length;
   const totalNet = includedPayrolls.reduce((s, p) => s + (p.net_salary || 0), 0);
   const totalBonus = includedPayrolls.reduce((s, p) => s + (p.bonus || 0), 0);
-  const totalDed = includedPayrolls.reduce((s, p) => s + (p.deductions || 0), 0);
+  const totalDed = includedPayrolls.reduce((s, p) => s + (p.deductions || 0) + (p.absent_deduction || 0), 0);
   const paidCount = includedPayrolls.filter((p) => p.status === "paid").length;
   const totalPaid = includedPayrolls.filter((p) => p.status === "paid").reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
   const anyDraft = includedPayrolls.some((p) => p.status === "draft");
@@ -446,6 +485,7 @@ export default function Payroll() {
                   <th className="text-right px-3 py-3 font-medium text-emerald-600">{t.thBonus}</th>
                   <th className="text-right px-3 py-3 font-medium text-blue-600">{t.thOvertime}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thAbsent}</th>
+                  <th className="text-right px-3 py-3 font-medium">{t.thAbsentHours}</th>
                   <th className="text-right px-3 py-3 font-medium text-rose-600">{t.thDed}</th>
                   <th className="text-right px-3 py-3 font-medium text-violet-600">{t.thLoan}</th>
                   <th className="text-right px-3 py-3 font-medium">{t.thNet}</th>
@@ -474,7 +514,18 @@ export default function Payroll() {
                     <td className="px-3 py-2"><EditableCell value={p.transport_allowance} onCommit={(v) => updateField(p.id, "transport_allowance", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.bonus} onCommit={(v) => updateField(p.id, "bonus", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.overtime_amount || 0} onCommit={(v) => updateField(p.id, "overtime_amount", v)} /></td>
-                    <td className="px-3 py-2"><EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} /></td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-col gap-0.5">
+                        <EditableCell value={p.absent_days || 0} onCommit={(v) => overrideAbsentDays(p.id, v)} />
+                        {(() => { const v = computeAbsentDeduction(p.gross_salary, p.absent_days, 0, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-col gap-0.5">
+                        <EditableCell value={p.absent_hours || 0} onCommit={(v) => overrideAbsentHours(p.id, v)} />
+                        {(() => { const v = computeAbsentDeduction(p.gross_salary, 0, p.absent_hours, orgWorkDaysInMonth(), orgWorkHoursPerDay()); return v ? <span className="text-[10px] text-rose-600 tabular-nums">−{formatCurrency(v)}</span> : null; })()}
+                      </div>
+                    </td>
                     <td className="px-3 py-2"><EditableCell value={p.deductions} onCommit={(v) => updateField(p.id, "deductions", v)} /></td>
                     <td className="px-3 py-2"><EditableCell value={p.loan_installment || 0} onCommit={(v) => updateField(p.id, "loan_installment", v)} /></td>
                     <td className="px-3 py-2 font-bold tabular-nums">{formatCurrency(p.net_salary)}</td>
