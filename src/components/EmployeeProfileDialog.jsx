@@ -5,7 +5,7 @@ import { Plane, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { formatCurrency, statusEmployeeLabel, leaveTypeLabel } from "@/lib/hr";
+import { formatCurrency, statusEmployeeLabel, leaveTypeLabel, ticketEntitlementLabel, contractTypeLabel } from "@/lib/hr";
 import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { reasonMeta, computeSettlement } from "@/lib/eos";
 import { badge } from "@/lib/approvals";
@@ -114,7 +114,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
               <Row label={isAr ? "الإدارة" : "Department"} value={employee.department} />
               <Row label={isAr ? "الفرع" : "Branch"} value={employee.branch_name} />
               <Row label={isAr ? "المسمى" : "Position"} value={employee.position} />
-              <Row label={isAr ? "نوع العقد" : "Contract type"} value={employee.contract_type} />
+              <Row label={isAr ? "نوع العقد" : "Contract type"} value={contractTypeLabel(employee.contract_type)} />
               <Row label={isAr ? "بداية العقد" : "Contract start"} value={employee.contract_start_date} />
               <Row label={isAr ? "نهاية العقد" : "Contract end"} value={employee.contract_end_date} />
               <Row label={isAr ? "المدير المباشر" : "Manager"} value={employee.manager_id} />
@@ -136,7 +136,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
               <Row label={t.leaveEnt(entitled?.toFixed(1))} value={`${entitled?.toFixed(1)}`} />
               <Row label={t.leaveUsed(used)} value={`${used}`} />
               <Row label={t.leaveRem(remaining)} value={`${remaining}`} />
-              <Row label={isAr ? "استحقاق التذاكر" : "Ticket entitlement"} value={employee.ticket_entitlement === "yearly" ? "سنوي" : employee.ticket_entitlement === "biennial" ? "كل سنتين" : employee.ticket_entitlement} />
+              <Row label={isAr ? "استحقاق التذاكر" : "Ticket entitlement"} value={ticketEntitlementLabel(employee.ticket_entitlement)} />
               <div className="pt-1">
                 <Label className="text-xs text-muted-foreground">{isAr ? "قيمة التذكرة (ريال — مفتوحة يحددها المسؤول)" : "Ticket value (SAR — open, set by admin)"}</Label>
                 <Input type="number" dir="ltr" value={ticketValue} placeholder="0" onChange={(e) => setTicketValue(e.target.value)} onBlur={(e) => saveTicket(e.target.value)} className="mt-1" />

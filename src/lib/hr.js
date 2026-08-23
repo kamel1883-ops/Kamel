@@ -89,6 +89,34 @@ export function statusEmployeeLabel(status) {
   return map[status] || { label: status, cls: "bg-slate-100 text-slate-600" };
 }
 
+export function ticketEntitlementLabel(value) {
+  const lang = activeLang();
+  const map = {
+    ar: { yearly: "سنوي", biennial: "كل سنتين", none: "لا يستحق" },
+    en: { yearly: "Yearly", biennial: "Biennial", none: "None" },
+    hi: { yearly: "वार्षिक", biennial: "द्विवार्षिक", none: "कोई नहीं" },
+    ne: { yearly: "वार्षिक", biennial: "द्विवार्षिक", none: "छैन" },
+    bn: { yearly: "বার্ষিক", biennial: "দ্বিবার্ষিক", none: "নেই" },
+    fil: { yearly: "Yearly", biennial: "Biennial", none: "None" },
+    ur: { yearly: "سالانہ", biennial: "ہر دو سال", none: "کوئی نہیں" },
+  };
+  return (map[lang] || map.en)[value] || value || "";
+}
+
+export function contractTypeLabel(value) {
+  const lang = activeLang();
+  const map = {
+    ar: { full_time: "دوام كامل", part_time: "دوام جزئي", contract: "عقد" },
+    en: { full_time: "Full time", part_time: "Part time", contract: "Contract" },
+    hi: { full_time: "पूर्णकालिक", part_time: "अंशकालिक", contract: "अनुबंध" },
+    ne: { full_time: "पूर्णकालिक", part_time: "अंशकालिक", contract: "सम्झौता" },
+    bn: { full_time: "পূর্ণকালীন", part_time: "খণ্ডকালীন", contract: "চুক্তি" },
+    fil: { full_time: "Full time", part_time: "Part time", contract: "Contract" },
+    ur: { full_time: "فل ٹائم", part_time: "پارٹ ٹائم", contract: "معاہدہ" },
+  };
+  return (map[lang] || map.en)[value] || value || "";
+}
+
 export function attendanceStatusLabel(status) {
   const lang = activeLang();
   const ar = {
