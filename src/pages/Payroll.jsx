@@ -59,8 +59,10 @@ export default function Payroll() {
     loading: "جارٍ التحميل...", empty: 'لا توجد كشوفات لهذا الشهر — اضغط "توليد كشف الشهر"',
     pdf: "تحميل / طباعة PDF", printDraft: "طباعة كمسودة", excel: "تحميل Excel", reopen: "إعادة فتح للتعديل وإعادة الاعتماد", exporting: "جارٍ التجهيز...",
     mudadSend: "تحويل الرواتب إلى مدد", mudadEmpty: "لا توجد رواتب معتمدة أو مصروفة لتوليد ملف مدد.",
-    cashExport: "تحميل كشف رواتب الكاش", cashEmpty: "لا توجد رواتب كاش معتمدة أو مصروفة لتوليد الكشف.",
     totMudad: "إجمالي التحويل عبر مدد", totCash: "إجمالي رواتب الكاش", totAll: "الإجمالي الكلي للرواتب",
+    printMudadDraft: "طباعة مسودة رواتب مدد", printCashDraft: "طباعة مسودة رواتب الكاش",
+    printMudadFinal: "طباعة رواتب مدد معتمدة", printCashFinal: "طباعة رواتب الكاش المعتمدة",
+    cashExport: "صرف الرواتب الكاش (Excel)", cashEmpty: "لا توجد رواتب كاش معتمدة لتوليد الكشف.",
     gosi: "التأمينات الاجتماعية", gosiHint: "احتساب اشتراكات GOSI وحفظها وتصديرها",
     thEmp: "الموظف", thBase: "أساسي", thHouse: "سكن", thTrans: "مواصلات", thBonus: "حوافز", thOvertime: "عمل إضافي", thGosi: "تأمينات (موظف)", thAbsent: "غياب (يوم/قيمة)", thAbsentHours: "غياب (ساعة/قيمة)", thDed: "خصومات أخرى", thLoan: "سلفة", thNet: "الصافي", thIncl: "يشمل الصرف", thStatus: "الحالة", thMethod: "طريقة الصرف", mudadBadge: "مدد", cashBadge: "كاش",
     totalIncludedLabel: "إجمالي الرواتب للمشمولين بالصرف هذا الشهر", excludedHint: (n) => `${n} موظف مستثنى من صرف هذا الشهر`, allIncluded: "كل الموظفين مشمولون بالصرف",
@@ -75,8 +77,10 @@ export default function Payroll() {
     loading: "Loading...", empty: 'No sheets for this month — click "Generate month sheet"',
     pdf: "Download / Print PDF", printDraft: "Print draft", excel: "Download Excel", reopen: "Reopen to edit & re-approve", exporting: "Preparing...",
     mudadSend: "Send salaries to Mudad", mudadEmpty: "No approved or paid salaries to generate a Mudad file.",
-    cashExport: "Download cash payroll sheet", cashEmpty: "No approved or paid cash salaries to generate the sheet.",
     totMudad: "Total via Mudad (WPS)", totCash: "Total cash salaries", totAll: "Grand total payroll",
+    printMudadDraft: "Print Mudad draft", printCashDraft: "Print cash draft",
+    printMudadFinal: "Print approved Mudad", printCashFinal: "Print approved cash",
+    cashExport: "Cash payroll (Excel)", cashEmpty: "No approved cash salaries to generate the sheet.",
     gosi: "Social Insurance (GOSI)", gosiHint: "Calculate, save and export GOSI subscriptions",
     thEmp: "Employee", thBase: "Base", thHouse: "Housing", thTrans: "Transport", thBonus: "Bonus", thOvertime: "Overtime", thGosi: "GOSI (emp)", thAbsent: "Absent (days/value)", thAbsentHours: "Absent (hrs/value)", thDed: "Other deductions", thLoan: "Loan", thNet: "Net", thIncl: "Include pay", thStatus: "Status", thMethod: "Method", mudadBadge: "Mudad", cashBadge: "Cash",
     totalIncludedLabel: "Total payroll for employees included in this month's pay", excludedHint: (n) => `${n} employee(s) excluded from this month's pay`, allIncluded: "All employees are included in pay",
@@ -290,19 +294,29 @@ export default function Payroll() {
     setBatching(false); load();
   };
 
+  // توليد كشف PDF لقناة محددة (مدد/كاش) — يفلتر الصفوف حسب الطريقة، ويعكس آخر تعديلات المسير
   const exportPdf = async (opts = {}) => {
     if (!sheetRef.current) return;
     setExporting(true);
     try {
+      const methodLabel = opts.method === "cash"
+        ? (isAr ? "رواتب الكاش" : "Cash payroll")
+        : (isAr ? "رواتب مدد" : "Mudad payroll");
+      const scopeTotal = opts.method === "cash" ? totalCash : totalMudad;
+      const scopeCount = opts.method === "cash" ? cashPayrolls.length : mudadPayrolls.length;
+      const titlePrefix = opts.draft
+        ? (isAr ? `مسودة ${methodLabel}` : `Draft ${methodLabel}`)
+        : (isAr ? `${methodLabel} معتمدة` : `Approved ${methodLabel}`);
       await printReport(sheetRef.current, {
         org,
-        title: isAr ? `كشف رواتب ${t.months[month - 1]} ${year}` : `Payroll sheet ${t.months[month - 1]} ${year}`,
+        title: isAr ? `${titlePrefix} — ${t.months[month - 1]} ${year}` : `${titlePrefix} — ${t.months[month - 1]} ${year}`,
         subtitle: isAr
-          ? `إجمالي الصافي للمشمولين: ${formatCurrency(totalNet)} — المشمولون: ${includedCount} موظف — المستثنون: ${excludedCount} موظف`
-          : `Total net (included): ${formatCurrency(totalNet)} — Included: ${includedCount} — Excluded: ${excludedCount}`,
-        stamp: monthStatus === "paid" && payrolls.length > 0 && !opts.draft,
+          ? `الإجمالي: ${formatCurrency(scopeTotal)} — ${scopeCount} موظف`
+          : `Total: ${formatCurrency(scopeTotal)} — ${scopeCount} employees`,
+        stamp: !opts.draft && payrolls.length > 0 && monthStatus !== "draft",
         draft: !!opts.draft,
         filterInclude: true,
+        filterMethod: opts.method,
         landscape: true,
       });
     } finally { setExporting(false); }
@@ -427,16 +441,23 @@ export default function Payroll() {
             <span className="text-xs text-muted-foreground">{t.empCount(payrolls.length)}</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {anyDraft && (<Button onClick={approveAll} disabled={batching} variant="outline" className="gap-2"><FileCheck size={16} /> {t.approve}</Button>)}
-            {anyApproved && (<Button onClick={payAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700"><FileCheck size={16} /> {t.pay}</Button>)}
-            {monthStatus === "paid" && (<Button onClick={reopen} disabled={batching} variant="outline" className="gap-2"><RotateCcw size={16} /> {t.reopen}</Button>)}
-            {(anyApprovedMudad || monthStatus === "paid") && (<Button onClick={sendToMudad} disabled={batching} className="gap-2 bg-[#0B2545] hover:bg-[#14315a] text-white"><Send size={16} /> {t.mudadSend}</Button>)}
-            {cashPayrolls.length > 0 && (<Button onClick={exportCashPayroll} disabled={batching} variant="outline" className="gap-2 border-emerald-400 text-emerald-700 hover:bg-emerald-50"><Banknote size={16} /> {t.cashExport}</Button>)}
-            <Button onClick={() => exportPdf({ draft: true })} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printDraft}</Button>
-            <Button onClick={() => exportPdf()} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.pdf}</Button>
-            </div>
-            </div>
+            {anyDraft ? (
+              <>
+                {mudadPayrolls.length > 0 && (<Button onClick={() => exportPdf({ draft: true, method: "mudad" })} disabled={exporting} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printMudadDraft}</Button>)}
+                {cashPayrolls.length > 0 && (<Button onClick={() => exportPdf({ draft: true, method: "cash" })} disabled={exporting} variant="outline" className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"><FileDown size={16} /> {exporting ? t.exporting : t.printCashDraft}</Button>)}
+                <Button onClick={approveAll} disabled={batching} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"><FileCheck size={16} /> {batching ? t.exporting : t.approve}</Button>
+              </>
+            ) : (
+              <>
+                {mudadPayrolls.length > 0 && (<Button onClick={sendToMudad} disabled={batching} className="gap-2 bg-[#0B2545] hover:bg-[#14315a] text-white"><Send size={16} /> {t.mudadSend}</Button>)}
+                {cashPayrolls.length > 0 && (<Button onClick={exportCashPayroll} disabled={batching} variant="outline" className="gap-2 border-emerald-400 text-emerald-700 hover:bg-emerald-50"><Banknote size={16} /> {t.cashExport}</Button>)}
+                {mudadPayrolls.length > 0 && (<Button onClick={() => exportPdf({ method: "mudad" })} disabled={exporting} variant="outline" className="gap-2"><FileDown size={16} /> {exporting ? t.exporting : t.printMudadFinal}</Button>)}
+                {cashPayrolls.length > 0 && (<Button onClick={() => exportPdf({ method: "cash" })} disabled={exporting} variant="outline" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50"><FileDown size={16} /> {exporting ? t.exporting : t.printCashFinal}</Button>)}
+              </>
             )}
+          </div>
+        </div>
+      )}
 
             {payrolls.length > 0 && !loading && (
             <div className="bg-gradient-to-l from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-2xl p-4 mb-5">
@@ -498,7 +519,7 @@ export default function Payroll() {
                 {payrolls.map((p) => {
                    const included = p.include_in_payroll !== false;
                    return (
-                   <tr key={p.id} data-include={included ? "true" : "false"} className={cn("hover:bg-slate-50", !included && "opacity-60")}>
+                   <tr key={p.id} data-include={included ? "true" : "false"} data-method={methodOf(p)} className={cn("hover:bg-slate-50", !included && "opacity-60")}>
                      <td className="px-2 py-1 text-center">
                        <button
                          onClick={() => toggleInclude(p.id)}

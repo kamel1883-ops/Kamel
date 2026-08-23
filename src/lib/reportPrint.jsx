@@ -72,7 +72,7 @@ function buildTitle(title, subtitle) {
   return c;
 }
 
-export async function printReport(node, { org, title, subtitle, stamp, landscape, draft, filterInclude } = {}) {
+export async function printReport(node, { org, title, subtitle, stamp, landscape, draft, filterInclude, filterMethod } = {}) {
   if (!node) return;
   const useLandscape = !!landscape;
   // عرض مطابق لنسب صفحة A4 ليملأ الصفحة كاملة دون هوامش جانبية كبيرة
@@ -94,6 +94,12 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
   // استبعاد صفوف المستثناة من صرف هذا الشهر (data-include="false") عند الطباعة
   if (filterInclude) {
     clone.querySelectorAll('tr[data-include="false"]').forEach((el) => el.remove());
+  }
+  // تصفية الصفوف حسب طريقة الصرف (مدد / كاش) لتوليد كشف مستقل لكل قناة
+  if (filterMethod) {
+    clone.querySelectorAll("tbody tr").forEach((el) => {
+      if ((el.getAttribute("data-method") || "") !== filterMethod) el.remove();
+    });
   }
   clone.querySelectorAll('[class*="overflow-auto"],[class*="overflow-x-auto"]').forEach((el) => {
     el.style.overflow = "visible";
