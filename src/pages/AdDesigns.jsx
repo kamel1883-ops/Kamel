@@ -5,7 +5,7 @@ import { Download, Image as ImageIcon } from "lucide-react";
 import EnvPoster from "@/components/ads/EnvPoster";
 
 const IMG_TEAM = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5170278ee_generated_image.png";
-const IMG_WOMAN = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/57ab495da_generated_image.png";
+const IMG_WOMAN = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9bdf26cee_generated_image.png";
 const IMG_HR = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/e295e9e35_generated_image.png";
 const IMG_RECRUIT = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/a1821ac4f_generated_image.png";
 
