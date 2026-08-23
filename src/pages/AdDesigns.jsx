@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Printer, Image as ImageIcon } from "lucide-react";
-import JadaraPoster1 from "@/components/ads/JadaraPoster1";
 import EnvPoster from "@/components/ads/EnvPoster";
 
 const IMG_TEAM = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/ff8622744_generated_image.png";
@@ -57,7 +56,6 @@ const RecruitPoster = () => (
 );
 
 const POSTERS = [
-  { id: "main", title: "البوستر الرئيسي للمنصة", subtitle: "تصميم marque كحلي/ذهبي — جاهز للطباعة", Comp: JadaraPoster1, tags: ["عام", "A4 عمودي"] },
   { id: "team", title: "روح الفريق في جدارة", subtitle: "مستوحى من بيئة العمل السعودية", Comp: TeamPoster, tags: ["فِرق", "A4 عمودي"] },
   { id: "self", title: "بوابة الموظف الذاتية", subtitle: "تجربة الموظف الرقمية", Comp: WomanPoster, tags: ["بوابة الموظف", "A4 عمودي"] },
   { id: "payroll", title: "الرواتب والتأمينات", subtitle: "دقة احترافية", Comp: HrPoster, tags: ["رواتب", "A4 عمودي"] },
