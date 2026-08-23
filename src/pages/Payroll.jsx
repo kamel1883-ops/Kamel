@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { flushSync } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
@@ -15,6 +17,7 @@ import { useI18n } from "@/lib/i18n";
 import { printReport } from "@/lib/reportPrint";
 import { downloadMudadExcel } from "@/lib/mudadExcel";
 import { downloadCashPayrollExcel } from "@/lib/cashPayrollExcel";
+import PayrollPrintSheet from "@/components/reports/PayrollPrintSheet";
 
 // === مساعدات احتساب الرواتب بحسب أيام الحضور الفعلي ===
 const PAID_STATUSES = new Set(["present", "late", "leave", "holiday"]);
@@ -294,32 +297,54 @@ export default function Payroll() {
     setBatching(false); load();
   };
 
-  // توليد كشف PDF لقناة محددة (مدد/كاش) — يفلتر الصفوف حسب الطريقة، ويعكس آخر تعديلات المسير
+  // توليد كشف PDF لقناة محددة (مدد/كاش) — يبني جدول طباعة نظيف (مستقل عن الجدول التفاعلي)
+  // بحيث تبقى الأعمدة الثابتة (أساسي/سكن/مواصلات/الإجمالي) ظاهرة دائماً، ولا تظهر الأعمدة
+  // الديناميكية (حوافز/عمل إضافي/خصومات/سلفة/بدلات أخرى/غياب) إلا إن وُجدت قيمة لأحد الموظفين.
   const exportPdf = async (opts = {}) => {
-    if (!sheetRef.current) return;
     setExporting(true);
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
     try {
-      const methodLabel = opts.method === "cash"
+      const method = opts.method;
+      const scoped = payrolls.filter((p) => p.include_in_payroll !== false && methodOf(p) === method);
+      if (scoped.length === 0) return;
+      const scopeTotal = scoped.reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
+      const monthName = t.months[month - 1];
+      const methodLabel = method === "cash"
         ? (isAr ? "رواتب الكاش" : "Cash payroll")
         : (isAr ? "رواتب مدد" : "Mudad payroll");
-      const scopeTotal = opts.method === "cash" ? totalCash : totalMudad;
-      const scopeCount = opts.method === "cash" ? cashPayrolls.length : mudadPayrolls.length;
       const titlePrefix = opts.draft
         ? (isAr ? `مسودة ${methodLabel}` : `Draft ${methodLabel}`)
         : (isAr ? `${methodLabel} معتمدة` : `Approved ${methodLabel}`);
-      await printReport(sheetRef.current, {
+      flushSync(() => {
+        root.render(
+          <PayrollPrintSheet
+            payrolls={scoped}
+            employees={employees}
+            workDaysInMonth={orgWorkDaysInMonth()}
+            workHoursPerDay={orgWorkHoursPerDay()}
+            isAr={isAr}
+          />
+        );
+      });
+      const tableNode = container.firstChild;
+      if (!tableNode) return;
+      await printReport(tableNode, {
         org,
-        title: isAr ? `${titlePrefix} — ${t.months[month - 1]} ${year}` : `${titlePrefix} — ${t.months[month - 1]} ${year}`,
+        title: `${titlePrefix} — ${monthName} ${year}`,
         subtitle: isAr
-          ? `الإجمالي: ${formatCurrency(scopeTotal)} — ${scopeCount} موظف`
-          : `Total: ${formatCurrency(scopeTotal)} — ${scopeCount} employees`,
-        stamp: !opts.draft && payrolls.length > 0 && monthStatus !== "draft",
+          ? `الإجمالي: ${formatCurrency(scopeTotal)} — ${scoped.length} موظف`
+          : `Total: ${formatCurrency(scopeTotal)} — ${scoped.length} employees`,
+        stamp: !opts.draft && scoped.some((p) => p.status !== "draft"),
         draft: !!opts.draft,
-        filterInclude: true,
-        filterMethod: opts.method,
         landscape: true,
       });
-    } finally { setExporting(false); }
+    } finally {
+      root.unmount();
+      container.remove();
+      setExporting(false);
+    }
   };
 
   const includedPayrolls = payrolls.filter((p) => p.include_in_payroll !== false);
