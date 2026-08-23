@@ -117,6 +117,38 @@ export default function Payroll() {
     load();
   };
 
+  // إعادة مزامنة القيم المالية لكل سجلات الكشف من ملفات الموظفين الحالية
+  const syncFromEmployees = async () => {
+    setGenerating(true);
+    try {
+      const activeEmps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
+      setEmployees(activeEmps);
+      const empById = {};
+      for (const e of activeEmps) empById[e.id] = e;
+      const updates = [];
+      for (const p of payrolls) {
+        const emp = empById[p.employee_id];
+        if (!emp) continue;
+        const base = Number(emp.base_salary) || 0;
+        const housing = Number(emp.housing_allowance) || 0;
+        const transport = Number(emp.transport_allowance) || 0;
+        const other = Number(emp.other_allowances) || 0;
+        const gross = base + housing + transport + other;
+        const net = gross + (p.bonus || 0) + (p.overtime_amount || 0) - (p.deductions || 0) - (p.loan_installment || 0);
+        updates.push({
+          id: p.id,
+          base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+          gross_salary: gross, net_salary: Number(net.toFixed(2)),
+          salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
+          national_id: emp.national_id || p.national_id || "",
+          employee_name: emp.full_name || p.employee_name || "",
+        });
+      }
+      if (updates.length) await base44.entities.Payroll.bulkUpdate(updates);
+      load();
+    } finally { setGenerating(false); }
+  };
+
   const updateField = async (id, field, value) => {
     const rec = payrolls.find((p) => p.id === id);
     const updated = { ...rec, [field]: Number(value) || 0 };
@@ -267,9 +299,12 @@ export default function Payroll() {
               <Link to="/gosi"><Shield size={18} /> {t.gosi}</Link>
             </Button>
             <Button onClick={generate} disabled={generating} className="gap-2">
-              <Sparkles size={18} /> {generating ? t.gening : t.gen}
-            </Button>
-          </div>
+               <Sparkles size={18} /> {generating ? t.gening : t.gen}
+             </Button>
+             <Button onClick={syncFromEmployees} disabled={generating} variant="outline" className="gap-2">
+               <RotateCcw size={16} /> {isAr ? "تحديث الرواتب من ملفات الموظفين" : "Sync salaries from employee files"}
+             </Button>
+            </div>
         }
       />
 
