@@ -21,33 +21,32 @@ const distanceMeters = (lat1, lng1, lat2, lng2) => {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
-const getPosition = (t) =>
-  new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject(new Error(t.noGeo));
-    // محاولة حتى 3 قراءات لالتقاط أدق إحداثي (يقلّل خطأ GPS على الهواتف داخل المباني)
-    let best = null;
-    let done = 0;
-    let settled = false;
+// التقاط عدة قراءات GPS متتالية لتمييز الموقع الحقيقي عن الموقع المُزيَّف:
+// قراءات GPS الحقيقية تتذبذب دائماً بأمتار قليلة بين القراءات، أما المُزيّف
+// فيُعيد نفس الإحداثيات تماماً بدقة مثالية. نُرجع مصفوفة القراءات للتحليل.
+const captureGPS = (count, t) =>
+  new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve({ error: t.noGeo, readings: [] });
+    const readings = [];
     const opts = { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 };
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      if (best) resolve(best);
-      else reject(new Error(t.noAccess));
-    };
-    for (let i = 0; i < 3; i++) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const r = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
-          if (!best || r.acc < best.acc) best = r;
-          done++;
-          if (done >= 3) finish();
-        },
-        () => { done++; if (done >= 3) finish(); },
-        opts
-      );
-    }
-    setTimeout(finish, 14000);
+    let stopped = false;
+    const one = () =>
+      new Promise((res) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => res({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
+          () => res(null),
+          opts
+        );
+      });
+    (async () => {
+      for (let i = 0; i < count && !stopped; i++) {
+        const r = await one();
+        if (r) readings.push(r);
+        if (i < count - 1) await new Promise((rr) => setTimeout(rr, 1200));
+      }
+      if (!stopped) resolve({ readings });
+    })();
+    setTimeout(() => { stopped = true; resolve({ readings }); }, count * 4500);
   });
 
 // يحدد نطاق البصمة من فرع الموظف إن وُجد، ويعود للمقر الرئيسي للمنشأة كبدیل.
@@ -101,15 +100,39 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
     if (!wp) { setMsg({ type: "err", text: t.noWorkplace }); return; }
     setBusy(true);
     try {
-      const pos = await getPosition(t);
-      const dist = distanceMeters(pos.lat, pos.lng, wp.lat, wp.lng);
-      // هامش تسامح يعادل دقة GPS + حد أدنى 25م لتجاوز خطأ التحديد العادي على الهواتف
-      const tolerance = (Number(pos.acc) || 25) + 25;
+      const { readings, error } = await captureGPS(3, t);
+      if (error) { setMsg({ type: "err", text: error }); setBusy(false); return; }
+      if (!readings.length) { setMsg({ type: "err", text: t.noAccess }); setBusy(false); return; }
+      if (readings.length < 2) {
+        setMsg({ type: "err", text: lang === "ar"
+          ? "لم نتمكن من التقاط قراءتين GPS متتاليتين — تأكد من تفعيل الموقع وحاول مجدداً."
+          : "Couldn't capture two consecutive GPS readings — make sure location is on and retry." });
+        setBusy(false); return;
+      }
+      // ترتيب القراءات حسب الدقة واتخاذ الوسيط كموقع معتمد
+      const sorted = [...readings].sort((a, b) => a.acc - b.acc);
+      const median = readings.length >= 3 ? sorted[Math.floor(readings.length / 2)] : sorted[0];
+      const minAcc = sorted[0].acc;
+      // مدى التذبذب (أقصى مسافة بين أي قراءتين بالأمتار) — GPS حقيقي يتذبذب ولا يثبت
+      let spread = 0;
+      for (let i = 0; i < readings.length; i++)
+        for (let j = i + 1; j < readings.length; j++)
+          spread = Math.max(spread, distanceMeters(readings[i].lat, readings[i].lng, readings[j].lat, readings[j].lng));
+      // كشف تزييف الموقع: قراءات متطابقة تماماً (تذبذب ≈ 0) أو دقة مستحيلة (< 3م) → موقع مُزيّف
+      if (spread < 0.5 || minAcc < 3) {
+        setMsg({ type: "err", text: lang === "ar"
+          ? "تعذّر التحقق من موقعك الفعلي. أغلق أي تطبيق لتغيير الموقع (تزييف GPS) ثم أعد المحاولة."
+          : "Couldn't verify your real location. Close any GPS-spoofing app and try again." });
+        setBusy(false); return;
+      }
+      const dist = distanceMeters(median.lat, median.lng, wp.lat, wp.lng);
+      // هامش تسامح = نصف دقة GPS (يحدّها نصف النطاق) + 5م لتجاوز خطأ التحديد على الهواتف
+      const tolerance = Math.min(Number(median.acc) || 25, radius * 0.5) + 5;
       if (dist > radius + tolerance) { setMsg({ type: "err", text: t.outRange(Math.round(dist), radius) }); setBusy(false); return; }
       if (kind === "in") {
         if (today && today.check_in) { setMsg({ type: "err", text: t.alreadyIn }); setBusy(false); return; }
         if (clockApi?.clockIn) {
-          await clockApi.clockIn();
+          await clockApi.clockIn(median.lat, median.lng, median.acc);
         } else {
           const name = `${employee.employee_number} - ${employee.position}`;
           const bId = branch?.id || employee.branch_id || null;

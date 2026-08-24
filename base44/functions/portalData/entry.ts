@@ -8,6 +8,15 @@ import { verifyToken } from "../../shared/portalToken.ts";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
+// مسافة Haversine بالأمتار بين نقطتين — تُستخدم للتحقّق الفعلي من قرب الموظف من مقر العمل.
+const haversineMeters = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const R = 6371e3;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -482,10 +491,32 @@ export default async function (req) {
       );
       // ربط سجل الحضور بفرع الموظف (للتمييز في تقارير الحضور حسب الفرع)
       let branchId: any = null, branchName = "";
+      let branchLat: any = null, branchLng: any = null, branchRadius: any = null;
       if (!isOwnerSession && emp?.branch_id) {
-        try { const br = await base44.asServiceRole.entities.Branch.get(emp.branch_id); branchId = br?.id || emp.branch_id; branchName = br?.name || emp.branch_name || ""; }
+        try { const br = await base44.asServiceRole.entities.Branch.get(emp.branch_id); branchId = br?.id || emp.branch_id; branchName = br?.name || emp.branch_name || ""; branchLat = br?.lat; branchLng = br?.lng; branchRadius = br?.radius; }
         catch { branchId = emp.branch_id; branchName = emp.branch_name || ""; }
       } else if (!isOwnerSession) { branchId = emp?.branch_id || null; branchName = emp?.branch_name || ""; }
+
+      // التحقق المُحكم من موقع الموظف الفعلي (ضد تزييف GPS):
+      // إن أرسلت الواجهة إحداثيات حقيقية يُحسب بُعدها عن مقر العمل/الفرع، ويُقبَل الحضور
+      // فقط ضمن النطاق المحدد (بالأمتار) ويُرفَض إذا تجاوزه — مصدر القرار هو الخادم.
+      const sentLat = Number(body.lat), sentLng = Number(body.lng), sentAcc = Number(body.accuracy || 0);
+      const hasCoords = isFinite(sentLat) && isFinite(sentLng) && sentLat !== 0 && sentLng !== 0;
+      let orgForWp: any = null;
+      try { const orgsWp: any[] = await base44.asServiceRole.entities.Organization.list("-created_date", 1); orgForWp = orgsWp[0] || null; } catch {}
+      let wpLat: number | null = null, wpLng: number | null = null, wpRadius = 50;
+      if (branchLat != null && branchLat !== "" && branchLng != null && branchLng !== "") {
+        wpLat = Number(branchLat); wpLng = Number(branchLng); wpRadius = Number(branchRadius) || Number(orgForWp?.workplace_radius) || 50;
+      } else if (orgForWp?.workplace_lat != null && orgForWp?.workplace_lat !== "" && orgForWp?.workplace_lng != null && orgForWp?.workplace_lng !== "") {
+        wpLat = Number(orgForWp.workplace_lat); wpLng = Number(orgForWp.workplace_lng); wpRadius = Number(orgForWp.workplace_radius) || 50;
+      }
+      if (hasCoords && wpLat != null && wpLng != null) {
+        const d = haversineMeters(sentLat, sentLng, wpLat, wpLng);
+        const tol = Math.min(isFinite(sentAcc) && sentAcc > 0 ? sentAcc : 0, wpRadius * 0.5) + 5;
+        if (d > wpRadius + tol) {
+          return Response.json({ ok: false, error: "out_of_range", dist: Math.round(d), radius: wpRadius }, { status: 400 });
+        }
+      }
 
       // تحديد حالة الحضور: إذا وصل الموظف بعد وقت الدوام + هامش التسامح → "late"، وإلا → "present"
       let arrivalStatus = "present";

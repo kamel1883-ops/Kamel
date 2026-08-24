@@ -189,12 +189,19 @@ export default function MyRequests() {
       const res = await base44.functions.invoke("portalData", { ...portalArgs, action: "today_attendance" });
       return res?.data?.today || null;
     },
-    clockIn: async () => {
+    clockIn: async (lat, lng, accuracy) => {
       const res = await base44.functions.invoke("portalData", {
-        ...portalArgs, action: "clock_in", check_in: nowHM(),
+        ...portalArgs, action: "clock_in", check_in: nowHM(), lat, lng, accuracy,
       });
       const data = res?.data || res;
-      if (!data?.ok) throw new Error(data?.error || "fail");
+      if (!data?.ok) {
+        if (data?.error === "out_of_range") {
+          throw new Error(isAr
+            ? `موقعك بعيد عن مقر العمل (${data.dist ?? "?"}م) — خارج النطاق المحدد (${data.radius ?? ""}م)`
+            : `You are ${data.dist ?? "?"}m from the workplace — outside the allowed ${data.radius ?? ""}m radius`);
+        }
+        throw new Error(data?.error || "fail");
+      }
       setTodayAtt(data.today);
     },
     clockOut: async (workHours) => {
