@@ -10,6 +10,7 @@ import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
 import HrKeywordField from "@/components/landing/HrKeywordField";
 import { useI18n } from "@/lib/i18n";
+import { getHeroVideo } from "@/lib/seasonalVideo";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import {
@@ -269,7 +270,7 @@ export default function Landing() {
       {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
         <video
-          src="https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/3e3373378_Hero_Saudi_Thobe_Shamagh.mp4"
+          src={getHeroVideo()}
           autoPlay loop muted playsInline preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
         />
