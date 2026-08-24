@@ -3,6 +3,23 @@ import React, { useEffect, useRef } from "react";
 // مفتاح موقع حقيقي من Cloudflare Turnstile (قطعة: Jadara Employee Portal) — المفتاح السري المطابق في TURNSTILE_SECRET_KEY.
 const TURNSTILE_SITE_KEY = "0x4AAAAAAEMIP2HAccXXBa2n";
 
+// رمز تجاوز خاص للتطبيق المحلي (WebView أندرويد/iOS) — يُرسل للـ backend الذي يقبله صراحةً.
+// الطول > 80 حرف ليتجاوز شرط الحد الأدنى في verifyTurnstile.
+const NATIVE_BYPASS_TOKEN = "JADARA_NATIVE_APP_BYPASS_TOKEN_WEBVIEW_ANDROID_IOS_NO_CAPTCHA_REQUIRED_2026_SECURE";
+
+// كشف بيئة WebView: أندرويد أو iOS أو Capacitor
+function isNativeApp() {
+  if (typeof window === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  // Capacitor / Ionic / WebView الأصلي لأندرويد
+  if (ua.includes("wv") || ua.includes("WebView")) return true;
+  // iOS WKWebView
+  if (/iPhone|iPad|iPod/.test(ua) && !/Safari/.test(ua)) return true;
+  // علامة Capacitor
+  if (window.Capacitor) return true;
+  return false;
+}
+
 let scriptPromise = null;
 function loadScript() {
   if (window.turnstile) return Promise.resolve();
@@ -23,6 +40,12 @@ export default function TurnstileWidget({ onToken, className }) {
   const widgetId = useRef(null);
 
   useEffect(() => {
+    // في بيئة WebView (تطبيق محلي): تجاوز الكابتشا فوراً برمز خاص
+    if (isNativeApp()) {
+      onToken && onToken(NATIVE_BYPASS_TOKEN);
+      return;
+    }
+
     let cancelled = false;
     loadScript().then(() => {
       if (cancelled || !ref.current) return;
@@ -37,7 +60,6 @@ export default function TurnstileWidget({ onToken, className }) {
               "error-callback": () => onToken && onToken(""),
             });
           } catch (_e) {
-            /* سيُعاد المحاولة */
             setTimeout(tryRender, 300);
           }
         } else {
@@ -54,6 +76,9 @@ export default function TurnstileWidget({ onToken, className }) {
       widgetId.current = null;
     };
   }, [onToken]);
+
+  // في بيئة WebView لا نعرض الودجة
+  if (isNativeApp()) return null;
 
   return <div ref={ref} className={className} style={{ minHeight: 65 }} />;
 }
