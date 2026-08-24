@@ -11,6 +11,8 @@ import HostingSpecs from "@/components/landing/HostingSpecs";
 import HrKeywordField from "@/components/landing/HrKeywordField";
 import { useI18n } from "@/lib/i18n";
 import { getHeroVideo } from "@/lib/seasonalVideo";
+import SeasonalHeroOverlay from "@/components/landing/SeasonalHeroOverlay";
+import SeasonalDiscountBanner from "@/components/landing/SeasonalDiscountBanner";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import {
@@ -267,6 +269,8 @@ export default function Landing() {
         </div>
       </header>
 
+      <SeasonalDiscountBanner />
+
       {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
         <video
@@ -277,6 +281,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/80 via-[#0B2545]/45 to-[#0B2545]/90" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/70 via-transparent to-transparent" />
         <HrKeywordField />
+        <SeasonalHeroOverlay lang={lang} />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
           <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/90 mb-4 backdrop-blur-md">
