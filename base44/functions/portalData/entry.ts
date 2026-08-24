@@ -486,17 +486,35 @@ export default async function (req) {
         try { const br = await base44.asServiceRole.entities.Branch.get(emp.branch_id); branchId = br?.id || emp.branch_id; branchName = br?.name || emp.branch_name || ""; }
         catch { branchId = emp.branch_id; branchName = emp.branch_name || ""; }
       } else if (!isOwnerSession) { branchId = emp?.branch_id || null; branchName = emp?.branch_name || ""; }
+
+      // تحديد حالة الحضور: إذا وصل الموظف بعد وقت الدوام + هامش التسامح → "late"، وإلا → "present"
+      let arrivalStatus = "present";
+      try {
+        const orgs: any[] = await base44.asServiceRole.entities.Organization.list("-created_date", 1);
+        const org = orgs[0] || {};
+        const workStart = String(org.work_start_time || "").trim();
+        const graceMinutes = Number(org.late_grace_minutes) || 0;
+        if (workStart && checkIn) {
+          const toMin = (hm: string) => { const m = /^(\d{1,2}):(\d{2})/.exec(hm); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+          const startMin = toMin(workStart);
+          const checkMin = toMin(checkIn);
+          if (startMin !== null && checkMin !== null && checkMin > startMin + graceMinutes) {
+            arrivalStatus = "late";
+          }
+        }
+      } catch {}
+
       const today = recs[0] || null;
       if (today) {
         const updated = await base44.asServiceRole.entities.Attendance.update(today.id, {
-          check_in: checkIn, status: "present", source: "portal", employee_user_id: emp.user_id || null,
+          check_in: checkIn, status: arrivalStatus, source: "portal", employee_user_id: emp.user_id || null,
           branch_id: branchId, branch_name: branchName,
         });
         return Response.json({ ok: true, today: updated });
       }
       const created = await base44.asServiceRole.entities.Attendance.create({
         employee_id: employeeId, employee_user_id: emp.user_id || null, employee_name: empLabel,
-        date, check_in: checkIn, status: "present", source: "portal", work_hours: 0,
+        date, check_in: checkIn, status: arrivalStatus, source: "portal", work_hours: 0,
         branch_id: branchId, branch_name: branchName,
       });
       return Response.json({ ok: true, today: created });
