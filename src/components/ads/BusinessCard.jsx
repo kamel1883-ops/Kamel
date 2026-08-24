@@ -1,0 +1,65 @@
+import React from "react";
+import { Crown, Mail, Phone, Globe, Instagram, Linkedin, Twitter } from "lucide-react";
+
+const NAVY = "#0B2545";
+const GOLD = "#E9C766";
+
+// وجه واحد من الكرت الشخصي (عربي أو إنجليزي) — نسبة 90×50 ملم
+function Side({ isAr, name, title, phone, email, website, social }) {
+  return (
+    <div
+      dir={isAr ? "rtl" : "ltr"}
+      className="relative w-full h-full overflow-hidden"
+      style={{ background: `linear-gradient(135deg, ${NAVY} 0%, #123156 55%, #0A1F3C 100%)` }}
+    >
+      <div
+        className="absolute -top-10 w-40 h-40 rounded-full opacity-20"
+        style={{ background: GOLD, filter: "blur(38px)", [isAr ? "left" : "right"]: "-2.5rem" }}
+      />
+      <div className="absolute bottom-0 inset-x-0 h-1.5" style={{ background: GOLD }} />
+
+      <div className="relative h-full flex flex-col justify-between p-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: GOLD }}>
+            <Crown size={18} color={NAVY} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-white font-bold text-[17px]">{isAr ? "جدارة" : "Jadara"}</div>
+            <div className="text-[9px] tracking-wide" style={{ color: GOLD }}>
+              {isAr ? "منصة الموارد البشرية" : "HR PLATFORM"}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-white font-bold text-[19px] leading-tight">{name}</div>
+          <div className="text-[11px] mt-0.5" style={{ color: GOLD }}>{title}</div>
+        </div>
+
+        <div className="space-y-1 text-[10px] text-white/85">
+          <div className="flex items-center gap-1.5"><Phone size={11} style={{ color: GOLD }} /><span dir="ltr">{phone}</span></div>
+          <div className="flex items-center gap-1.5"><Mail size={11} style={{ color: GOLD }} /><span dir="ltr">{email}</span></div>
+          <div className="flex items-center gap-1.5"><Globe size={11} style={{ color: GOLD }} /><span dir="ltr">{website}</span></div>
+          <div className="flex items-center gap-3 pt-1 text-white/70">
+            <span className="flex items-center gap-1"><Instagram size={10} /><span dir="ltr">{social}</span></span>
+            <span className="flex items-center gap-1"><Twitter size={10} /><span dir="ltr">{social}</span></span>
+            <span className="flex items-center gap-1"><Linkedin size={10} /><span dir="ltr">{social}</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function BusinessCard({ nameAr, nameEn, phone, email, website, social }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div style={{ aspectRatio: "9 / 5" }} className="rounded-xl overflow-hidden shadow-lg">
+        <Side isAr name={nameAr} title="مدير تنفيذي" phone={phone} email={email} website={website} social={social} />
+      </div>
+      <div style={{ aspectRatio: "9 / 5" }} className="rounded-xl overflow-hidden shadow-lg">
+        <Side isAr={false} name={nameEn} title="Chief Executive Officer" phone={phone} email={email} website={website} social={social} />
+      </div>
+    </div>
+  );
+}
