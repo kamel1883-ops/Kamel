@@ -33,7 +33,7 @@ function Side({ isAr, name, title, phone, email, website, social }) {
           <div className="leading-tight">
             <div className="text-white font-bold text-[17px]">{isAr ? "جدارة" : "Jadara"}</div>
             <div className="text-[9px] tracking-wide" style={{ color: GOLD }}>
-              {isAr ? "منصة الموارد البشرية" : "HR PLATFORM"}
+              {isAr ? "لإدارة الموارد البشرية" : "HUMAN RESOURCES MANAGEMENT"}
             </div>
           </div>
         </div>
