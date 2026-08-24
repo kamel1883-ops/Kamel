@@ -160,11 +160,11 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
             </div>
             <div className="space-y-1.5">
               <Label>{t.incident}</Label>
-              <Input type="date" value={form.incident_date} onChange={(e) => set("incident_date", e.target.value)} />
+              <Input type="date" value={form.incident_date} onChange={(e) => set("incident_date", e.target.value)} lang={isAr ? "ar" : "en"} />
             </div>
             <div className="space-y-1.5">
               <Label>{t.session}</Label>
-              <Input type="date" value={form.session_date} onChange={(e) => set("session_date", e.target.value)} />
+              <Input type="date" value={form.session_date} onChange={(e) => set("session_date", e.target.value)} lang={isAr ? "ar" : "en"} />
             </div>
           </div>
 
@@ -181,7 +181,7 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
           {err && <div className="text-sm text-rose-600">{err}</div>}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>إلغاء / Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>{isAr ? "إلغاء" : "Cancel"}</Button>
             <Button type="submit" disabled={saving} className="gap-2">{saving && <Loader2 size={16} className="animate-spin" />}{saving ? t.saving : t.save}</Button>
           </DialogFooter>
         </form>

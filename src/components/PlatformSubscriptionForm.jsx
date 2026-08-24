@@ -173,6 +173,7 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
                   <Label className="text-xs font-medium text-muted-foreground">{t.start}</Label>
                   <Input
                     type="date"
+                    lang={isAr ? "ar" : "en"}
                     value={form.start_date}
                     onChange={(e) => set("start_date", e.target.value)}
                   />
@@ -181,6 +182,7 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
                   <Label className="text-xs font-medium text-muted-foreground">{t.expiry}</Label>
                   <Input
                     type="date"
+                    lang={isAr ? "ar" : "en"}
                     value={form.expiry_date}
                     onChange={(e) => set("expiry_date", e.target.value)}
                   />

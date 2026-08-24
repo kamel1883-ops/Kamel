@@ -9,6 +9,7 @@ import {
 import { CalendarCheck, Plus, Save, CalendarOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { todayISO, attendanceStatusLabel, isOrgWeeklyOff, dayNameAr } from "@/lib/hr";
+// dayNameAr يُستخدم فقط في الفرع العربي للإجازة الأسبوعية؛ الفرع الإنجليزي يستخدم toLocaleDateString داخل العنصر.
 import { useI18n } from "@/lib/i18n";
 import AttendanceReport from "@/components/reports/AttendanceReport";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -94,13 +95,13 @@ export default function Attendance() {
 
       {isOrgWeeklyOff(date, org) && (
         <div className="bg-violet-50 border border-violet-200 text-violet-700 rounded-2xl px-4 py-2.5 mb-4 text-sm font-medium flex items-center gap-2">
-          <CalendarOff size={16} /> {isAr ? `يوم ${dayNameAr(date)} — ضمن الإجازة الأسبوعية للمنشأة` : `${dayNameAr(date)} — weekly off day`}
+          <CalendarOff size={16} /> {isAr ? `يوم ${dayNameAr(date)} — ضمن الإجازة الأسبوعية للمنشأة` : `${new Date(date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" })} — weekly off day`}
         </div>
       )}
       <div className="bg-white rounded-2xl border border-border p-4 mb-5 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">{t.date}</label>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="sm:w-44" />
+          <Input type="date" lang={isAr ? "ar" : "en"} value={date} onChange={(e) => setDate(e.target.value)} className="sm:w-44" />
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">{t.status}</label>
@@ -206,7 +207,7 @@ export default function Attendance() {
 
       <div className="mt-5">
         <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-          <CalendarCheck size={20} className="text-violet-600" /> تقرير الحضور الشهري (PDF)
+          <CalendarCheck size={20} className="text-violet-600" /> {isAr ? "تقرير الحضور الشهري (PDF)" : "Monthly attendance report (PDF)"}
         </h3>
         <AttendanceReport org={org} />
       </div>

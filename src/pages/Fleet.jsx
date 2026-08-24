@@ -147,10 +147,10 @@ export default function Fleet() {
                   </SelectContent>
                 </Select>
               </In>
-              <In label={t.insExp}><Input type="date" value={form.insurance_expiry} onChange={(e) => set("insurance_expiry", e.target.value)} /></In>
+              <In label={t.insExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.insurance_expiry} onChange={(e) => set("insurance_expiry", e.target.value)} /></In>
               <In label={t.insNo}><Input value={form.insurance_number} onChange={(e) => set("insurance_number", e.target.value)} /></In>
-              <In label={t.licExp}><Input type="date" value={form.license_expiry} onChange={(e) => set("license_expiry", e.target.value)} /></In>
-              <In label={t.inspExp}><Input type="date" value={form.inspection_expiry} onChange={(e) => set("inspection_expiry", e.target.value)} /></In>
+              <In label={t.licExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.license_expiry} onChange={(e) => set("license_expiry", e.target.value)} /></In>
+              <In label={t.inspExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.inspection_expiry} onChange={(e) => set("inspection_expiry", e.target.value)} /></In>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>{t.cancel}</Button>

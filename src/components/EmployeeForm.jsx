@@ -122,7 +122,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
                 <SelectContent><SelectItem value="male">{t.male}</SelectItem><SelectItem value="female">{t.female}</SelectItem></SelectContent>
               </Select>
             </Field>
-            <Field label={t.birth}><Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} /></Field>
+            <Field label={t.birth}><Input type="date" lang={isAr ? "ar" : "en"} value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} /></Field>
             <Field label={t.phone}><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
             <Field label={t.dept}>
               <Input value={form.department} onChange={(e) => set("department", e.target.value)} required placeholder={t.deptHint} list="dept-options" />
@@ -149,7 +149,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
               </Select>
             </Field>
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
-            <Field label={t.hireDate}><Input type="date" value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
+            <Field label={t.hireDate}><Input type="date" lang={isAr ? "ar" : "en"} value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
             <Field label={t.annualLeaveEnt}>
               <Select value={String(form.annual_leave_entitlement === 30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -159,8 +159,8 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
                 </SelectContent>
               </Select>
             </Field>
-            <Field label={t.contractStart}><Input type="date" value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
-            <Field label={t.contractEnd}><Input type="date" value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>
+            <Field label={t.contractStart}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
+            <Field label={t.contractEnd}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>
             <Field label={t.directManager}>
               <Select value={form.manager_id || "none"} onValueChange={(v) => set("manager_id", v === "none" ? "" : v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -210,10 +210,10 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
                 <SelectContent><SelectItem value="true">{t.saudiY}</SelectItem><SelectItem value="false">{t.saudiN}</SelectItem></SelectContent>
               </Select>
             </Field>
-            <Field label={t.iqama}><Input type="date" value={form.iqama_expiry} onChange={(e) => set("iqama_expiry", e.target.value)} /></Field>
+            <Field label={t.iqama}><Input type="date" lang={isAr ? "ar" : "en"} value={form.iqama_expiry} onChange={(e) => set("iqama_expiry", e.target.value)} /></Field>
             <Field label={t.passNo}><Input value={form.passport_number} onChange={(e) => set("passport_number", e.target.value)} /></Field>
-            <Field label={t.passExp}><Input type="date" value={form.passport_expiry} onChange={(e) => set("passport_expiry", e.target.value)} /></Field>
-            <Field label={t.medExp}><Input type="date" value={form.health_insurance_expiry} onChange={(e) => set("health_insurance_expiry", e.target.value)} /></Field>
+            <Field label={t.passExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.passport_expiry} onChange={(e) => set("passport_expiry", e.target.value)} /></Field>
+            <Field label={t.medExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.health_insurance_expiry} onChange={(e) => set("health_insurance_expiry", e.target.value)} /></Field>
             <Field label={t.ticket}>
               <Select value={form.ticket_entitlement} onValueChange={(v) => set("ticket_entitlement", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

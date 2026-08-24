@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Pencil, Trash2, GraduationCap, Search, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useI18n } from "@/lib/i18n";
 import TrainingPlanFormDialog from "@/components/training/TrainingPlanFormDialog";
 import TrainingPlanDetailsDialog from "@/components/training/TrainingPlanDetailsDialog";
 
@@ -14,15 +15,57 @@ const parseIds = (s) => {
   try { const v = JSON.parse(s || "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
 };
 
-const statusMap = {
-  draft: { ar: "مسودة", cls: "bg-slate-100 text-slate-700" },
-  in_progress: { ar: "قيد التنفيذ", cls: "bg-amber-100 text-amber-800" },
-  completed: { ar: "مكتملة", cls: "bg-emerald-100 text-emerald-800" },
-  cancelled: { ar: "ملغاة", cls: "bg-red-100 text-red-700" },
-};
-
 export default function Training() {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
   const { toast } = useToast();
+  const t = isAr ? {
+    title: "التدريب والتطوير",
+    subtitle: "إدارة الخطط التدريبية للموظفين والإدارات وتتبع أهدافها وتكلفتها",
+    newPlan: "خطة تدريبية جديدة",
+    searchPh: "ابحث باسم الخطة أو اسم الموظف أو رقمه — تظهر كل خطط الموظف المشمول",
+    loading: "جارٍ التحميل...",
+    emptyQ: "لا توجد خطط مطابقة لبحثك.",
+    empty: "لا توجد خطط تدريبية بعد — ابدأ بإنشاء أول خطة.",
+    confirmDel: "حذف هذه الخطة؟",
+    delOk: "تم الحذف",
+    delErr: "تعذر الحذف",
+    loadErr: "تعذر التحميل",
+    scopeDept: "جهة/قسم",
+    scopeIndiv: "نطاق فردي",
+    included: "مشمول",
+    participantsLabel: "المشمولون:",
+    goal: "الهدف",
+    sar: "ريال",
+    detailsBtn: "استعلام/التفاصيل",
+  } : {
+    title: "Training & Development",
+    subtitle: "Manage training plans for employees and departments and track their goals and costs",
+    newPlan: "New training plan",
+    searchPh: "Search by plan name, employee name or number — all plans for that employee appear",
+    loading: "Loading...",
+    emptyQ: "No plans match your search.",
+    empty: "No training plans yet — start by creating your first plan.",
+    confirmDel: "Delete this plan?",
+    delOk: "Deleted",
+    delErr: "Could not delete",
+    loadErr: "Could not load",
+    scopeDept: "Department",
+    scopeIndiv: "Individual scope",
+    included: "participants",
+    participantsLabel: "Participants:",
+    goal: "Goal",
+    sar: "SAR",
+    detailsBtn: "View / details",
+  };
+
+  const statusMap = {
+    draft: { ar: "مسودة", en: "Draft", cls: "bg-slate-100 text-slate-700" },
+    in_progress: { ar: "قيد التنفيذ", en: "In progress", cls: "bg-amber-100 text-amber-800" },
+    completed: { ar: "مكتملة", en: "Completed", cls: "bg-emerald-100 text-emerald-800" },
+    cancelled: { ar: "ملغاة", en: "Cancelled", cls: "bg-red-100 text-red-700" },
+  };
+
   const [plans, setPlans] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +83,7 @@ export default function Training() {
       ]);
       setPlans(pl || []);
       setEmployees(emps || []);
-    } catch (e) { toast({ title: "تعذر التحميل", description: e.message, variant: "destructive" }); }
+    } catch (e) { toast({ title: t.loadErr, description: e.message, variant: "destructive" }); }
     finally { setLoading(false); }
   };
 
@@ -49,12 +92,11 @@ export default function Training() {
   const openNew = () => { setEditing(null); setDialogOpen(true); };
   const openEdit = (p) => { setEditing(p); setDialogOpen(true); };
   const del = async (p) => {
-    if (!confirm("حذف هذه الخطة؟")) return;
-    try { await base44.entities.TrainingPlan.delete(p.id); toast({ title: "تم الحذف" }); load(); }
-    catch (e) { toast({ title: "تعذر الحذف", description: e.message, variant: "destructive" }); }
+    if (!confirm(t.confirmDel)) return;
+    try { await base44.entities.TrainingPlan.delete(p.id); toast({ title: t.delOk }); load(); }
+    catch (e) { toast({ title: t.delErr, description: e.message, variant: "destructive" }); }
   };
 
-  // البحث: اسم الخطة أو أسماء المشمولين أو أن الموظف المطابق للبحث ضمن employee_ids
   const ql = q.trim().toLowerCase();
   const matchedEmpIds = useMemo(() => {
     const s = new Set();
@@ -77,23 +119,23 @@ export default function Training() {
   });
 
   return (
-    <div>
-      <PageHeader title="التدريب والتطوير" subtitle="إدارة الخطط التدريبية للموظفين والإدارات وتتبع أهدافها وتكلفتها" action={
-        <Button onClick={openNew}><Plus size={16} /> خطة تدريبية جديدة</Button>
+    <div dir={isAr ? "rtl" : "ltr"}>
+      <PageHeader title={t.title} subtitle={t.subtitle} action={
+        <Button onClick={openNew}><Plus size={16} /> {t.newPlan}</Button>
       } />
 
       <div className="bg-white rounded-2xl border border-border p-3 mb-4 flex items-center gap-2">
         <Search size={16} className="text-muted-foreground shrink-0" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث باسم الخطة أو اسم الموظف أو رقمه — تظهر كل خطط الموظف المشمول" className="border-0 shadow-none focus-visible:ring-0 h-9" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.searchPh} className="border-0 shadow-none focus-visible:ring-0 h-9" />
       </div>
 
       {loading ? (
-        <div className="py-24 text-center text-muted-foreground">جارٍ التحميل...</div>
+        <div className="py-24 text-center text-muted-foreground">{t.loading}</div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-24 rounded-2xl border bg-card">
           <GraduationCap className="text-muted-foreground mb-4" size={48} />
-          <p className="text-muted-foreground mb-4">{q ? "لا توجد خطط مطابقة لبحثك." : "لا توجد خطط تدريبية بعد — ابدأ بإنشاء أول خطة."}</p>
-          {!q && <Button onClick={openNew}><Plus size={16} /> خطة تدريبية جديدة</Button>}
+          <p className="text-muted-foreground mb-4">{q ? t.emptyQ : t.empty}</p>
+          {!q && <Button onClick={openNew}><Plus size={16} /> {t.newPlan}</Button>}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -101,16 +143,16 @@ export default function Training() {
             const st = statusMap[p.status] || statusMap.draft;
             const names = p.employee_names || p.employee_name || "";
             const ids = parseIds(p.employee_ids);
-            const count = ids.length || (names ? names.split("،").length : 0);
+            const count = ids.length || (names ? names.split(isAr ? "،" : ",").length : 0);
             return (
               <Card key={p.id} className="p-4 flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="font-semibold text-foreground">{p.title}</div>
-                  <Badge className={st.cls + " border-0"}>{st.ar}</Badge>
+                  <Badge className={st.cls + " border-0"}>{isAr ? st.ar : st.en}</Badge>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {p.scope === "department" ? <span>جهة/قسم: {p.department || "—"}</span> : <span>نطاق فردي</span>}
-                  {count > 0 && <span className="mx-2">· {count} مشمول</span>}
+                  {p.scope === "department" ? <span>{t.scopeDept}: {p.department || "—"}</span> : <span>{t.scopeIndiv}</span>}
+                  {count > 0 && <span className="mx-2">· {count} {t.included}</span>}
                 </div>
                 {(() => {
                   const ids = parseIds(p.employee_ids);
@@ -118,8 +160,8 @@ export default function Training() {
                   const rows = list.map((id) => employees.find((e) => e.id === id)).filter(Boolean);
                   if (rows.length === 0 && !names) return null;
                   return (
-                    <div className="text-xs text-slate-700 bg-muted/40 rounded-lg p-2 max-h-24 overflow-y-auto" dir="rtl">
-                      <div className="font-medium text-muted-foreground mb-1">المشمولون:</div>
+                    <div className="text-xs text-slate-700 bg-muted/40 rounded-lg p-2 max-h-24 overflow-y-auto" dir={isAr ? "rtl" : "ltr"}>
+                      <div className="font-medium text-muted-foreground mb-1">{t.participantsLabel}</div>
                       {rows.length > 0 ? rows.map((e) => (
                         <div key={e.id} className="py-0.5">
                           <div>{e.full_name}</div>
@@ -129,11 +171,11 @@ export default function Training() {
                     </div>
                   );
                 })()}
-                {p.goal && <div className="text-sm text-muted-foreground line-clamp-2">الهدف: {p.goal}</div>}
+                {p.goal && <div className="text-sm text-muted-foreground line-clamp-2">{t.goal}: {p.goal}</div>}
                 <div className="flex items-center justify-between mt-2 pt-2 border-t">
-                  <span className="text-xs text-muted-foreground">{p.cost ? `${p.cost} ريال` : ""} {p.start_date ? `· ${p.start_date}` : ""}</span>
+                  <span className="text-xs text-muted-foreground">{p.cost ? `${p.cost} ${t.sar}` : ""} {p.start_date ? `· ${p.start_date}` : ""}</span>
                   <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => setViewing(p)} title="استعلام/التفاصيل"><Eye size={15} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => setViewing(p)} title={t.detailsBtn}><Eye size={15} /></Button>
                     <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil size={15} /></Button>
                     <Button size="icon" variant="ghost" onClick={() => del(p)}><Trash2 size={15} /></Button>
                   </div>
