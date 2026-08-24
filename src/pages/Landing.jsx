@@ -278,8 +278,8 @@ export default function Landing() {
           autoPlay loop muted playsInline preload="auto"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/80 via-[#0B2545]/45 to-[#0B2545]/90" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/55 via-[#0B2545]/15 to-[#0B2545]/75" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/50 via-transparent to-transparent" />
         <HrKeywordField />
         <SeasonalHeroOverlay lang={lang} />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
