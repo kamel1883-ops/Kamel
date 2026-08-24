@@ -14,8 +14,9 @@ const SEASONS = [
     start: "2026-08-24",
     // آخر يوم للفيديو الموسمي 22-10-2026 — وبتاريخ 23-10-2026 يعود فيديو جدارة الأساسي تلقائياً
     end: "2026-10-22",
-    video:
-      "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/d555b4344_National_Day_Celebration.mp4",
+    // أُلغي الفيديو الموسمي — الواجهة تأخذ هوية اليوم الوطني بالصور حتى 22-10-2026
+    heroImage:
+      "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9590f5522_generated_image.png",
   },
 ];
 

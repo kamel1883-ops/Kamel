@@ -10,7 +10,8 @@ import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
 import HrKeywordField from "@/components/landing/HrKeywordField";
 import { useI18n } from "@/lib/i18n";
-import { getHeroVideo } from "@/lib/seasonalVideo";
+import { getActiveSeason } from "@/lib/seasonalVideo";
+import SeasonalHero from "@/components/landing/SeasonalHero";
 import SeasonalHeroOverlay from "@/components/landing/SeasonalHeroOverlay";
 import SeasonalDiscountBanner from "@/components/landing/SeasonalDiscountBanner";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
@@ -236,14 +237,16 @@ export default function Landing() {
   };
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  // هوية موسمية لكل الصفحة داخل نطاق الموسم، وتعود هوية جدارة الكحلية تلقائياً بعده
+  const seasonal = !!getActiveSeason();
 
   return (
-    <div className="min-h-screen bg-[#0B2545] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
+    <div className={`min-h-screen text-white antialiased ${seasonal ? "bg-[#07231A]" : "bg-[#0B2545]"}`} dir={isAr ? "rtl" : "ltr"}>
       <AssistantAvatar mode="public" tone="dark" lang={lang} />
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
-        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px]" />
+        <div className={`absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-[120px] ${seasonal ? "bg-emerald-500/25" : "bg-violet-600/30"}`} />
+        <div className={`absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full blur-[120px] ${seasonal ? "bg-green-600/20" : "bg-indigo-600/20"}`} />
+        <div className={`absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px] ${seasonal ? "bg-teal-600/20" : "bg-blue-600/20"}`} />
       </div>
 
       {/* شريط علوي */}
@@ -273,13 +276,7 @@ export default function Landing() {
 
       {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
-        <video
-          src={getHeroVideo()}
-          autoPlay loop muted playsInline preload="auto"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B2545]/55 via-[#0B2545]/15 to-[#0B2545]/75" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/50 via-transparent to-transparent" />
+        <SeasonalHero isAr={isAr} />
         <HrKeywordField />
         <SeasonalHeroOverlay lang={lang} />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
@@ -385,7 +382,7 @@ export default function Landing() {
             const I = c.icon;
             return (
               <motion.div key={c.label} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className="relative bg-[#14315a] border border-white/10 rounded-3xl p-7 overflow-hidden">
+                className={`relative border border-white/10 rounded-3xl p-7 overflow-hidden ${seasonal ? "bg-[#0C3527]" : "bg-[#14315a]"}`}>
                 <div className={`absolute -top-10 -left-10 w-40 h-40 rounded-full bg-gradient-to-br ${c.glow} blur-2xl`} />
                 <div className="relative w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mb-4 shadow-lg">
                   <I size={22} className={c.ring} />
@@ -406,9 +403,9 @@ export default function Landing() {
             const I = f.icon;
             return (
               <motion.div key={f.title} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className="group relative bg-[#14315a] hover:bg-[#173466] border border-white/10 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden">
+                className={`group relative border border-white/10 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden ${seasonal ? "bg-[#0C3527] hover:bg-[#0F412F]" : "bg-[#14315a] hover:bg-[#173466]"}`}>
                 <div className="absolute top-7 left-6 h-8 w-8 rounded-full bg-violet-500/0 group-hover:bg-violet-500/10 blur-xl transition-all" />
-                <div className="relative w-12 h-12 rounded-2xl bg-[#1E3B66] border border-white/10 flex items-center justify-center mb-4 shadow-lg shadow-indigo-950/50">
+                <div className={`relative w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center mb-4 shadow-lg ${seasonal ? "bg-[#12513A] shadow-emerald-950/50" : "bg-[#1E3B66] shadow-indigo-950/50"}`}>
                   <I size={22} className="text-white" />
                 </div>
                 <div className="relative font-semibold text-lg leading-snug">{f.title}</div>
