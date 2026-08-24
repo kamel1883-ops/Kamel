@@ -134,6 +134,10 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
 /* Dark mode: adapt static bg-white surfaces (cards / sections) to the card token so they respond to system dark preference. */
 .dark .bg-white { background-color: hsl(var(--card)); }
 
+/* Brochure keeps pure white surfaces always — client logos, mock cards and report cards must stay clearly visible in any theme. */
+.dark .print-brochure .bg-white,
+.dark .print-brochure .bg-slate-50 { background-color: #ffffff !important; }
+
 /* === Blog Markdown content styling (rendered inside white card) === */
 .blog-content { color: #1e293b; line-height: 1.95; font-size: 1rem; }
 .blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4 {
@@ -202,6 +206,11 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-brochure, .print-brochure * { visibility: visible !important; }
   .print-brochure { position: absolute; top: 0; right: 0; left: 0; width: 100%; max-width: 100% !important; margin: 0; padding: 0; background: #fff; }
   .print-brochure .no-print { display: none !important; }
+  /* Every brochure section (cover, vision, each module, reports, partners, pricing …) starts on a fresh page and is kept whole — no description bleeds into the next page. */
+  .print-brochure > * { break-before: page; break-inside: avoid; page-break-before: always; page-break-inside: avoid; }
+  .print-brochure > *:first-child { break-before: avoid; page-break-before: avoid; }
+  .print-brochure .bg-white { background-color: #ffffff !important; }
+  .print-brochure .bg-slate-50 { background-color: #ffffff !important; }
   .no-print { display: none !important; }
 }
 

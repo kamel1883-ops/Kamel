@@ -1144,8 +1144,8 @@ function Partners() {
     <Section tint="light" heading={<Heading icon={<Network />} title="Our Partners" sub="The real companies and entities we work with and serve" />}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {partners.map((p, k) => (
-          <div key={k} className="rounded-3xl bg-white border border-slate-200 p-5 flex flex-col items-center gap-3 shadow-sm hover:shadow-lg transition" style={{ minHeight: 200 }}>
-            <div className="w-full h-24 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-3 overflow-hidden">
+          <div key={k} className="rounded-3xl border border-slate-200 p-5 flex flex-col items-center gap-3 shadow-sm" style={{ minHeight: 230, background: "#ffffff" }}>
+            <div className="w-full h-32 rounded-2xl flex items-center justify-center p-3 overflow-hidden" style={{ background: "#ffffff", border: "1px solid #eef2f6" }}>
               <Image src={p.logo} fittingType="fit" alt={p.n} className="h-full w-full" />
             </div>
             <div className="text-center">
