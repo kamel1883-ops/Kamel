@@ -40,7 +40,7 @@ function Side({ isAr, name, title, phone, email, website, social }) {
 
         <div>
           <div className="text-white font-bold text-[20px] leading-tight">{name}</div>
-          <div className="text-[15px] font-semibold mt-0.5" style={{ color: GOLD }}>{title}</div>
+          <div className="text-[15px] font-semibold mt-1.5" style={{ color: GOLD }}>{title}</div>
         </div>
 
         <div className="space-y-1 text-[13px] text-white/90">
@@ -62,7 +62,7 @@ export default function BusinessCard({ nameAr, nameEn, phone, email, website, so
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div style={{ aspectRatio: "9 / 5" }} className="rounded-xl overflow-hidden shadow-lg">
-        <Side isAr name={nameAr} title="مدير تنفيذي" phone={phone} email={email} website={website} social={social} />
+        <Side isAr name={nameAr} title="المدير التنفيذي" phone={phone} email={email} website={website} social={social} />
       </div>
       <div style={{ aspectRatio: "9 / 5" }} className="rounded-xl overflow-hidden shadow-lg">
         <Side isAr={false} name={nameEn} title="Chief Executive Officer" phone={phone} email={email} website={website} social={social} />
