@@ -7,10 +7,46 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
+import { useI18n } from "@/lib/i18n";
 import { Sparkles } from "lucide-react";
 
 export default function JobFormDialog({ open, onOpenChange, onSaved, job }) {
   const { toast } = useToast();
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    edit: "تعديل وظيفة", add: "وظيفة جديدة",
+    title: "المسمى الوظيفي *", prof: "المهنة", grade: "الدرجة الوظيفية",
+    type: "نوع الوظيفة", full: "دوام كامل", part: "دوام جزئي", cont: "عقد",
+    natReq: "المطلوب", any: "الجميع", saudi: "سعودي", resident: "مقيم",
+    salary: "الراتب (ريال)", vac: "عدد الشواغر", dept: "الإدارة",
+    qual: "المؤهلات المطلوبة", tasks: "المهام والمسؤوليات",
+    jd: "الوصف الوظيفي (Job Description)",
+    gen: "توليد بالذكاء الاصطناعي", gening: "توليد...",
+    jdPh: "الوصف الوظيفي — يمكنك توليده تلقائياً أو كتابته يدوياً",
+    jdHint: "يكون الوصف المولّد قابلاً للتعديل: أضف المهام أو احذفها يدوياً قبل الحفظ.",
+    status: "الحالة", open: "شاغرة", closed: "مغلقة",
+    needTitle: "يرجى إدخال المسمى الوظيفي", needTitleFirst: "أدخل المسمى الوظيفي أولاً",
+    genOk: "تم توليد الوصف الوظيفي", genFail: "تعذر التوليد", saveFail: "تعذر الحفظ",
+    upd: "تم تحديث الوظيفة", created: "تم إنشاء الوظيفة",
+    cancel: "إلغاء", save: "حفظ", saving: "جارٍ الحفظ...",
+  } : {
+    edit: "Edit job", add: "New job",
+    title: "Job title *", prof: "Profession", grade: "Job grade",
+    type: "Job type", full: "Full-time", part: "Part-time", cont: "Contract",
+    natReq: "Required", any: "Any", saudi: "Saudi", resident: "Resident",
+    salary: "Salary (SAR)", vac: "Vacancies", dept: "Department",
+    qual: "Required qualifications", tasks: "Tasks & responsibilities",
+    jd: "Job description",
+    gen: "Generate with AI", gening: "Generating...",
+    jdPh: "Job description — generate automatically or type manually",
+    jdHint: "The generated description is editable — add or remove tasks manually before saving.",
+    status: "Status", open: "Open", closed: "Closed",
+    needTitle: "Please enter the job title", needTitleFirst: "Enter the job title first",
+    genOk: "Job description generated", genFail: "Generation failed", saveFail: "Save failed",
+    upd: "Job updated", created: "Job created",
+    cancel: "Cancel", save: "Save", saving: "Saving...",
+  };
   const isEdit = !!job;
   const empty = { title: "", profession: "", job_type: "full_time", grade: "", salary: 0, nationality_req: "any", qualifications: "", tasks: "", vacancy_count: 1, department: "", status: "open", description: "" };
   const [form, setForm] = useState(empty);
@@ -21,86 +57,86 @@ export default function JobFormDialog({ open, onOpenChange, onSaved, job }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const generate = async () => {
-    if (!form.title) { toast({ title: "أدخل المسمى الوظيفي أولاً", variant: "destructive" }); return; }
+    if (!form.title) { toast({ title: t.needTitleFirst, variant: "destructive" }); return; }
     setGenerating(true);
     try {
       const prompt = `أنت خبير موارد بشرية. اكتب وصفاً وظيفياً كاملاً واحترافياً باللغة العربية للوظيفة التالية:\nالمسمى: ${form.title}\nالمهنة: ${form.profession}\nالدرجة: ${form.grade}\nنوع الوظيفة: ${form.job_type}\nالراتب: ${form.salary}\nالمطلوب: ${form.nationality_req}\nالمؤهلات: ${form.qualifications}\nالمهام: ${form.tasks}\nيتضمن: ملخص الوظيفة، المسؤوليات والمهام التفصيلية، المؤهلات والمهارات المطلوبة، الشروط والضوابط.`;
       const res = await base44.integrations.Core.InvokeLLM({ prompt });
       set("description", typeof res === "string" ? res : JSON.stringify(res));
-      toast({ title: "تم توليد الوصف الوظيفي" });
-    } catch (e) { toast({ title: "تعذر التوليد", description: e.message, variant: "destructive" }); }
+      toast({ title: t.genOk });
+    } catch (e) { toast({ title: t.genFail, description: e.message, variant: "destructive" }); }
     finally { setGenerating(false); }
   };
 
   const save = async () => {
-    if (!form.title) { toast({ title: "يرجى إدخال المسمى الوظيفي", variant: "destructive" }); return; }
+    if (!form.title) { toast({ title: t.needTitle, variant: "destructive" }); return; }
     setSaving(true);
     try {
       const payload = { ...form, salary: Number(form.salary) || 0, vacancy_count: Number(form.vacancy_count) || 1 };
       if (isEdit) await base44.entities.Job.update(job.id, payload);
       else await base44.entities.Job.create(payload);
-      toast({ title: isEdit ? "تم تحديث الوظيفة" : "تم إنشاء الوظيفة" });
+      toast({ title: isEdit ? t.upd : t.created });
       onSaved?.();
       onOpenChange(false);
-    } catch (e) { toast({ title: "تعذر الحفظ", description: e.message, variant: "destructive" }); }
+    } catch (e) { toast({ title: t.saveFail, description: e.message, variant: "destructive" }); }
     finally { setSaving(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>{isEdit ? "تعديل وظيفة" : "وظيفة جديدة"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? t.edit : t.add}</DialogTitle></DialogHeader>
         <div className="grid gap-3 py-2">
-          <div><Label>المسمى الوظيفي *</Label><Input value={form.title} onChange={(e) => set("title", e.target.value)} /></div>
+          <div><Label>{t.title}</Label><Input value={form.title} onChange={(e) => set("title", e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>المهنة</Label><Input value={form.profession} onChange={(e) => set("profession", e.target.value)} /></div>
-            <div><Label>الدرجة الوظيفية</Label><Input value={form.grade} onChange={(e) => set("grade", e.target.value)} /></div>
+            <div><Label>{t.prof}</Label><Input value={form.profession} onChange={(e) => set("profession", e.target.value)} /></div>
+            <div><Label>{t.grade}</Label><Input value={form.grade} onChange={(e) => set("grade", e.target.value)} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>نوع الوظيفة</Label>
+            <div><Label>{t.type}</Label>
               <Select value={form.job_type} onValueChange={(v) => set("job_type", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="full_time">دوام كامل</SelectItem>
-                  <SelectItem value="part_time">دوام جزئي</SelectItem>
-                  <SelectItem value="contract">عقد</SelectItem>
+                  <SelectItem value="full_time">{t.full}</SelectItem>
+                  <SelectItem value="part_time">{t.part}</SelectItem>
+                  <SelectItem value="contract">{t.cont}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>المطلوب</Label>
+            <div><Label>{t.natReq}</Label>
               <Select value={form.nationality_req} onValueChange={(v) => set("nationality_req", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="any">الجميع</SelectItem>
-                  <SelectItem value="saudi">سعودي</SelectItem>
-                  <SelectItem value="resident">مقيم</SelectItem>
+                  <SelectItem value="any">{t.any}</SelectItem>
+                  <SelectItem value="saudi">{t.saudi}</SelectItem>
+                  <SelectItem value="resident">{t.resident}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div><Label>الراتب (ريال)</Label><Input type="number" value={form.salary} onChange={(e) => set("salary", e.target.value)} /></div>
-            <div><Label>عدد الشواغر</Label><Input type="number" value={form.vacancy_count} onChange={(e) => set("vacancy_count", e.target.value)} /></div>
-            <div><Label>الإدارة</Label><Input value={form.department} onChange={(e) => set("department", e.target.value)} /></div>
+            <div><Label>{t.salary}</Label><Input type="number" value={form.salary} onChange={(e) => set("salary", e.target.value)} /></div>
+            <div><Label>{t.vac}</Label><Input type="number" value={form.vacancy_count} onChange={(e) => set("vacancy_count", e.target.value)} /></div>
+            <div><Label>{t.dept}</Label><Input value={form.department} onChange={(e) => set("department", e.target.value)} /></div>
           </div>
-          <div><Label>المؤهلات المطلوبة</Label><Textarea rows={2} value={form.qualifications} onChange={(e) => set("qualifications", e.target.value)} /></div>
-          <div><Label>المهام والمسؤوليات</Label><Textarea rows={2} value={form.tasks} onChange={(e) => set("tasks", e.target.value)} /></div>
+          <div><Label>{t.qual}</Label><Textarea rows={2} value={form.qualifications} onChange={(e) => set("qualifications", e.target.value)} /></div>
+          <div><Label>{t.tasks}</Label><Textarea rows={2} value={form.tasks} onChange={(e) => set("tasks", e.target.value)} /></div>
           <div className="flex items-center justify-between">
-            <Label>الوصف الوظيفي (Job Description)</Label>
-            <Button size="sm" variant="outline" onClick={generate} disabled={generating}><Sparkles size={14} />{generating ? "توليد..." : "توليد بالذكاء الاصطناعي"}</Button>
+            <Label>{t.jd}</Label>
+            <Button size="sm" variant="outline" onClick={generate} disabled={generating}><Sparkles size={14} />{generating ? t.gening : t.gen}</Button>
           </div>
-          <Textarea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="الوصف الوظيفي — يمكنك توليده تلقائياً أو كتابته يدوياً" />
-          <p className="text-xs text-muted-foreground">يكون الوصف المولّد قابلاً للتعديل: أضف المهام أو احذفها يدوياً قبل الحفظ.</p>
-          <div><Label>الحالة</Label>
+          <Textarea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder={t.jdPh} />
+          <p className="text-xs text-muted-foreground">{t.jdHint}</p>
+          <div><Label>{t.status}</Label>
             <Select value={form.status} onValueChange={(v) => set("status", v)}>
               <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="open">شاغرة</SelectItem><SelectItem value="closed">مغلقة</SelectItem></SelectContent>
+              <SelectContent><SelectItem value="open">{t.open}</SelectItem><SelectItem value="closed">{t.closed}</SelectItem></SelectContent>
             </Select>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>إلغاء</Button>
-          <Button onClick={save} disabled={saving}>{saving ? "جارٍ الحفظ..." : "حفظ"}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.cancel}</Button>
+          <Button onClick={save} disabled={saving}>{saving ? t.saving : t.save}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
