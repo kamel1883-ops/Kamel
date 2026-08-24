@@ -15,7 +15,7 @@ const SEASONS = [
     // آخر يوم للفيديو الموسمي 22-10-2026 — وبتاريخ 23-10-2026 يعود فيديو جدارة الأساسي تلقائياً
     end: "2026-10-22",
     video:
-      "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/5285be590_Riyadh_Real_Footage_v2.mp4",
+      "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/c732ba425_Riyadh_Footage_v3.mp4",
   },
 ];
 
