@@ -14,7 +14,7 @@ export default function SeasonalHeroOverlay({ lang }) {
   return (
     <div
       dir={isAr ? "rtl" : "ltr"}
-      className="absolute top-6 inset-x-0 z-[5] text-center pointer-events-none select-none"
+      className="absolute top-1/2 -translate-y-1/2 inset-x-0 z-[5] text-center pointer-events-none select-none"
     >
       <div className="inline-flex flex-col items-center gap-1 px-4">
         <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold tracking-wide text-emerald-200/90 drop-shadow">

@@ -12,7 +12,8 @@ const SEASONS = [
     titleAr: "اليوم الوطني السعودي 96 — عزنا بطبعنا",
     titleEn: "Saudi National Day 96 — Our Pride is Our Nature",
     start: "2026-08-24",
-    end: "2026-10-23",
+    // آخر يوم للفيديو الموسمي 22-10-2026 — وبتاريخ 23-10-2026 يعود فيديو جدارة الأساسي تلقائياً
+    end: "2026-10-22",
     video:
       "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/f2173a707_Riyadh_Real_Footage.mp4",
   },
