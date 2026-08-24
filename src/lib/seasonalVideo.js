@@ -14,7 +14,7 @@ const SEASONS = [
     start: "2026-08-24",
     end: "2026-10-23",
     video:
-      "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/0f494285f_National_Day_96_Riyadh.mp4",
+      "https://media.base44.com/videos/public/6a74edc8f347046365c2e1a4/f2173a707_Riyadh_Real_Footage.mp4",
   },
 ];
 
