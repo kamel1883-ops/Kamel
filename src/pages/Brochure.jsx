@@ -944,7 +944,7 @@ function Partners() {
         {partners.map((p, k) => (
           <div key={k} className="rounded-3xl border border-slate-200 p-5 flex flex-col items-center gap-3 shadow-sm" style={{ minHeight: 230, background: "#ffffff" }}>
             <div className="w-full h-32 rounded-2xl flex items-center justify-center p-3 overflow-hidden" style={{ background: "#ffffff", border: "1px solid #eef2f6" }}>
-              <Image src={p.logo} fittingType="fit" alt={p.n} className="h-full w-full" />
+              <Image src={p.logo} fittingType="fit" alt={p.n} loading="eager" fetchpriority="high" className="h-full w-full" />
             </div>
             <div className="text-center">
               <div className="text-[14px] font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>{p.n}</div>
