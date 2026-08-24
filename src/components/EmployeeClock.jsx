@@ -114,10 +114,20 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
           const name = `${employee.employee_number} - ${employee.position}`;
           const bId = branch?.id || employee.branch_id || null;
           const bName = branch?.name || employee.branch_name || "";
+          // حساب حالة التأخير من إعدادات المنشأة (وقت الدوام + هامش السماح)
+          const checkInTime = nowHM();
+          let arrivalStatus = "present";
+          const ws = String(org?.work_start_time || "").trim();
+          const grace = Number(org?.late_grace_minutes) || 0;
+          if (ws && checkInTime) {
+            const toMin = (hm) => { const m = /^(\d{1,2}):(\d{2})/.exec(hm); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+            const startMin = toMin(ws), checkMin = toMin(checkInTime);
+            if (startMin !== null && checkMin !== null && checkMin > startMin + grace) arrivalStatus = "late";
+          }
           if (today) {
-            await base44.entities.Attendance.update(today.id, { check_in: nowHM(), status: "present", source: "portal", employee_user_id: employee.user_id, branch_id: bId, branch_name: bName });
+            await base44.entities.Attendance.update(today.id, { check_in: checkInTime, status: arrivalStatus, source: "portal", employee_user_id: employee.user_id, branch_id: bId, branch_name: bName });
           } else {
-            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: nowHM(), status: "present", source: "portal", work_hours: 0, branch_id: bId, branch_name: bName });
+            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: checkInTime, status: arrivalStatus, source: "portal", work_hours: 0, branch_id: bId, branch_name: bName });
           }
         }
         setMsg({ type: "ok", text: t.doneIn });
