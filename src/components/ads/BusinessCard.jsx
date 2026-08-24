@@ -10,12 +10,19 @@ function Side({ isAr, name, title, phone, email, website, social }) {
     <div
       dir={isAr ? "rtl" : "ltr"}
       className="relative w-full h-full overflow-hidden"
-      style={{ background: `linear-gradient(135deg, ${NAVY} 0%, #123156 55%, #0A1F3C 100%)` }}
+      style={{ background: `linear-gradient(135deg, #14396B 0%, #1B4A81 55%, #10305C 100%)` }}
     >
       <div
-        className="absolute -top-10 w-40 h-40 rounded-full opacity-20"
+        className="absolute -top-10 w-40 h-40 rounded-full opacity-25"
         style={{ background: GOLD, filter: "blur(38px)", [isAr ? "left" : "right"]: "-2.5rem" }}
       />
+      {/* علامة مائية: التاج الذهبي */}
+      <div
+        className="absolute pointer-events-none"
+        style={{ opacity: 0.09, bottom: "-1.5rem", [isAr ? "left" : "right"]: "-1rem" }}
+      >
+        <Crown size={190} color={GOLD} />
+      </div>
       <div className="absolute bottom-0 inset-x-0 h-1.5" style={{ background: GOLD }} />
 
       <div className="relative h-full flex flex-col justify-between p-5">
@@ -32,18 +39,18 @@ function Side({ isAr, name, title, phone, email, website, social }) {
         </div>
 
         <div>
-          <div className="text-white font-bold text-[19px] leading-tight">{name}</div>
-          <div className="text-[11px] mt-0.5" style={{ color: GOLD }}>{title}</div>
+          <div className="text-white font-bold text-[20px] leading-tight">{name}</div>
+          <div className="text-[15px] font-semibold mt-0.5" style={{ color: GOLD }}>{title}</div>
         </div>
 
-        <div className="space-y-1 text-[10px] text-white/85">
-          <div className="flex items-center gap-1.5"><Phone size={11} style={{ color: GOLD }} /><span dir="ltr">{phone}</span></div>
-          <div className="flex items-center gap-1.5"><Mail size={11} style={{ color: GOLD }} /><span dir="ltr">{email}</span></div>
-          <div className="flex items-center gap-1.5"><Globe size={11} style={{ color: GOLD }} /><span dir="ltr">{website}</span></div>
-          <div className="flex items-center gap-3 pt-1 text-white/70">
-            <span className="flex items-center gap-1"><Instagram size={10} /><span dir="ltr">{social}</span></span>
-            <span className="flex items-center gap-1"><Twitter size={10} /><span dir="ltr">{social}</span></span>
-            <span className="flex items-center gap-1"><Linkedin size={10} /><span dir="ltr">{social}</span></span>
+        <div className="space-y-1 text-[13px] text-white/90">
+          <div className="flex items-center gap-1.5"><Phone size={14} style={{ color: GOLD }} /><span dir="ltr">{phone}</span></div>
+          <div className="flex items-center gap-1.5"><Mail size={14} style={{ color: GOLD }} /><span dir="ltr">{email}</span></div>
+          <div className="flex items-center gap-1.5"><Globe size={14} style={{ color: GOLD }} /><span dir="ltr">{website}</span></div>
+          <div className="flex items-center gap-3 pt-1 text-white/80 text-[12px]">
+            <span className="flex items-center gap-1"><Instagram size={12} /><span dir="ltr">{social}</span></span>
+            <span className="flex items-center gap-1"><Twitter size={12} /><span dir="ltr">{social}</span></span>
+            <span className="flex items-center gap-1"><Linkedin size={12} /><span dir="ltr">{social}</span></span>
           </div>
         </div>
       </div>
