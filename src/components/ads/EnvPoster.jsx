@@ -1,5 +1,6 @@
 import React from "react";
 import { Image } from "@/components/ui/image";
+import { useI18n } from "@/lib/i18n";
 import { Crown, Check, Phone, Mail } from "lucide-react";
 
 export default function EnvPoster({
@@ -9,13 +10,19 @@ export default function EnvPoster({
   titleAccent,
   body,
   points = [],
-  cta = "ابدأ تجربتك المجانية 30 يوماً",
+  cta,
   email = "info@jadara-hr.com",
   accent = "#E9C766",
 }) {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const footerNote = isAr ? "بدون رسوم تأسيس · تفعيل فوري" : "No setup fees · instant activation";
+  const defaultCta = isAr ? "ابدأ تجربتك المجانية 30 يوماً" : "Start your 30-day free trial";
+  const brand = isAr ? "جدارة" : "Jadara";
+
   return (
     <div
-      dir="rtl"
+      dir={isAr ? "rtl" : "ltr"}
       className="print-poster relative w-full h-full text-white overflow-hidden"
       style={{ aspectRatio: "1 / 1.414", fontFamily: "'IBM Plex Sans Arabic','Tajawal',sans-serif" }}
     >
@@ -34,7 +41,7 @@ export default function EnvPoster({
             <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: accent }}>
               <Crown size={18} className="text-[#0B2545]" />
             </div>
-            <span className="font-extrabold text-xl" style={{ color: accent }}>جدارة</span>
+            <span className="font-extrabold text-xl" style={{ color: accent }}>{brand}</span>
           </div>
           {eyebrow && (
             <span className="text-[10px] bg-white/10 backdrop-blur border border-white/20 px-2.5 py-1 rounded-full whitespace-nowrap">
@@ -71,8 +78,8 @@ export default function EnvPoster({
             style={{ background: "rgba(8,20,38,.55)", border: `1px solid ${accent}55` }}
           >
             <div>
-              <div className="font-bold text-[clamp(.85rem,2vw,1.1rem)]">{cta}</div>
-              <div className="text-[10px] text-slate-200">بدون رسوم تأسيس · تفعيل فوري</div>
+              <div className="font-bold text-[clamp(.85rem,2vw,1.1rem)]">{cta || defaultCta}</div>
+              <div className="text-[10px] text-slate-200">{footerNote}</div>
             </div>
             <div className="text-left whitespace-nowrap" dir="ltr">
               <div className="font-bold" style={{ color: accent }}><Phone size={13} className="inline ml-1" /> +966 59 470 0782</div>

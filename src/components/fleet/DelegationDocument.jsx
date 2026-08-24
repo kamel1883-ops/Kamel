@@ -3,8 +3,13 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import BrandHeader from "@/components/docs/BrandHeader";
+import { useI18n } from "@/lib/i18n";
 
 export default function DelegationDocument({ delegation, onClose }) {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const chrome = isAr ? { title: "مستند توكيل واستلام مركبة", close: "إغلاق", print: "طباعة / PDF" }
+    : { title: "Vehicle delegation document", close: "Close", print: "Print / PDF" };
   const [org, setOrg] = useState(null);
   useEffect(() => {
     base44.entities.Organization.list().then((d) => setOrg(d[0] || null)).catch(() => {});
@@ -16,10 +21,10 @@ export default function DelegationDocument({ delegation, onClose }) {
     <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto">
         <div className="no-print sticky top-0 bg-white/90 backdrop-blur border-b px-5 py-3 flex items-center justify-between">
-          <span className="font-semibold">مستند توكيل واستلام مركبة</span>
+          <span className="font-semibold">{chrome.title}</span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={onClose}>إغلاق</Button>
-            <Button size="sm" onClick={() => window.print()} className="gap-1.5"><Printer size={15} /> طباعة / PDF</Button>
+            <Button size="sm" variant="outline" onClick={onClose}>{chrome.close}</Button>
+            <Button size="sm" onClick={() => window.print()} className="gap-1.5"><Printer size={15} /> {chrome.print}</Button>
           </div>
         </div>
 

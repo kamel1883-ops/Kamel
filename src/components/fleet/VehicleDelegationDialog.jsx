@@ -5,9 +5,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollText, FileText, RotateCcw, Loader2 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 import DelegationDocument from "./DelegationDocument";
 
 export default function VehicleDelegationDialog({ vehicle, employees, onClose, onSaved }) {
+  const { lang } = useI18n();
+  const isAr = lang === "ar";
+  const t = isAr ? {
+    title: "توكيل واستلام المركبة",
+    close: "إغلاق", loading: "جارٍ التحميل…",
+    currentLabel: "السائق الحالي المُوكّل", id: "هوية", from: "من",
+    noCurrent: "لا يوجد توكيل ساري لهذه المركبة.",
+    reDelegateNote: "(إعادة توكيل — سينتهي التوكيل الحالي تلقائياً)",
+    formTitle: (re) => `توكيل سائق للمركبة ${re ? t.reDelegateNote : ""}`,
+    driver: "السائق (من قائمة الموظفين)", pickEmp: "اختر الموظف",
+    delDate: "تاريخ التوكيل الفعلي", notes: "ملاحظات", notesPh: "اختياري",
+    gen: "توليد وثيقة التوكيل",
+    log: "سجل التوكيلات", noLog: "لا يوجد سجل.",
+    active: "ساري", ended: "منتهٍ", doc: "وثيقة",
+    ongoing: "ساري",
+  } : {
+    title: "Vehicle delegation & handover",
+    close: "Close", loading: "Loading…",
+    currentLabel: "Current delegated driver", id: "ID", from: "From",
+    noCurrent: "No active delegation for this vehicle.",
+    reDelegateNote: "(re-delegation — the current delegation ends automatically)",
+    formTitle: (re) => `Delegate a driver to the vehicle ${re ? t.reDelegateNote : ""}`,
+    driver: "Driver (from employees)", pickEmp: "Pick employee",
+    delDate: "Actual delegation date", notes: "Notes", notesPh: "optional",
+    gen: "Generate delegation document",
+    log: "Delegation log", noLog: "No records.",
+    active: "Active", ended: "Ended", doc: "Document",
+    ongoing: "active",
+  };
   const [list, setList] = useState([]);
   const [empId, setEmpId] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -15,8 +45,6 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
   const [busy, setBusy] = useState(false);
   const [print, setPrint] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const empName = (id) => employees.find((e) => e.id === id)?.full_name || "";
 
   const load = async () => {
     setLoading(true);
@@ -30,8 +58,6 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
     if (!empId || !date) return;
     setBusy(true);
     try {
-      const now = new Date().toISOString().slice(0, 10);
-      // إنهاء التوكيل الحالي الساري إن وُجد
       const cur = list.find((r) => r.is_current && r.status === "active");
       if (cur) {
         await base44.entities.VehicleDelegation.update(cur.id, { is_current: false, return_date: date, status: "returned" });
@@ -67,35 +93,33 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-semibold flex items-center gap-2"><ScrollText size={18} className="text-violet-600" /> توكيل واستلام المركبة</h3>
+            <h3 className="font-semibold flex items-center gap-2"><ScrollText size={18} className="text-violet-600" /> {t.title}</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{vehicle.plate_number} · {[vehicle.brand, vehicle.model].filter(Boolean).join(" ")}</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>إغلاق</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>{t.close}</Button>
         </div>
 
-        {/* التوكيل الحالي */}
-        {loading ? <div className="py-6 text-center text-sm text-muted-foreground">جارٍ التحميل…</div> : (
+        {loading ? <div className="py-6 text-center text-sm text-muted-foreground">{t.loading}</div> : (
           <>
             {(() => { const cur = list.find((r) => r.is_current && r.status === "active"); return cur ? (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 mb-4 text-sm">
-                <div className="font-medium text-emerald-700 mb-1">السائق الحالي المُوكّل</div>
+                <div className="font-medium text-emerald-700 mb-1">{t.currentLabel}</div>
                 <div className="flex flex-wrap gap-x-6 gap-y-1">
                   <span><b>{cur.employee_name}</b></span>
-                  <span className="text-muted-foreground">هوية: {cur.national_id || "—"}</span>
-                  <span className="text-muted-foreground">من: {cur.delegation_date}</span>
+                  <span className="text-muted-foreground">{t.id}: {cur.national_id || "—"}</span>
+                  <span className="text-muted-foreground">{t.from}: {cur.delegation_date}</span>
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 mb-4 text-sm text-muted-foreground">لا يوجد توكيل ساري لهذه المركبة.</div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 mb-4 text-sm text-muted-foreground">{t.noCurrent}</div>
             ); })()}
 
-            {/* نموذج توكيل/إعادة توكيل */}
             <div className="rounded-xl border border-border p-4 space-y-3">
-              <div className="font-medium text-sm">توكيل سائق للمركبة {(() => { const cur = list.find((r) => r.is_current && r.status === "active"); return cur ? "(إعادة توكيل — سينتهي التوكيل الحالي تلقائياً)" : ""; })()}</div>
+              <div className="font-medium text-sm">{t.formTitle(!!(list.find((r) => r.is_current && r.status === "active")))}</div>
               <div className="space-y-1.5">
-                <Label>السائق (من قائمة الموظفين)</Label>
+                <Label>{t.driver}</Label>
                 <Select value={empId} onValueChange={setEmpId}>
-                  <SelectTrigger><SelectValue placeholder="اختر الموظف" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t.pickEmp} /></SelectTrigger>
                   <SelectContent>
                     {employees.map((e) => (
                       <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"} {e.position ? `· ${e.position}` : ""}</SelectItem>
@@ -105,39 +129,38 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label>تاريخ التوكيل الفعلي</Label>
-                  <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                  <Label>{t.delDate}</Label>
+                  <Input type="date" lang={isAr ? "ar" : "en"} value={date} onChange={(e) => setDate(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>ملاحظات</Label>
-                  <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="اختياري" />
+                  <Label>{t.notes}</Label>
+                  <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t.notesPh} />
                 </div>
               </div>
               <div className="flex justify-end">
                 <Button onClick={delegate} disabled={busy || !empId} className="gap-2">
-                  {busy ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />} توليد وثيقة التوكيل
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />} {t.gen}
                 </Button>
               </div>
             </div>
 
-            {/* سجل التوكيلات */}
             <div className="mt-5">
-              <div className="text-sm font-medium mb-2">سجل التوكيلات</div>
-              {list.length === 0 ? <div className="text-xs text-muted-foreground">لا يوجد سجل.</div> : (
+              <div className="text-sm font-medium mb-2">{t.log}</div>
+              {list.length === 0 ? <div className="text-xs text-muted-foreground">{t.noLog}</div> : (
                 <div className="space-y-1.5">
                   {list.map((r) => (
                     <div key={r.id} className="flex items-center justify-between rounded-lg border border-border p-2.5 text-sm">
                       <div>
                         <div className="font-medium">{r.employee_name} <span className="text-xs text-muted-foreground">({r.delegation_number})</span></div>
-                        <div className="text-xs text-muted-foreground" dir="ltr">{r.delegation_date} → {r.return_date || "ساري"}</div>
+                        <div className="text-xs text-muted-foreground" dir="ltr">{r.delegation_date} → {r.return_date || t.ongoing}</div>
                       </div>
                       <div className="flex items-center gap-2">
                         {r.is_current && r.status === "active" ? (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">ساري</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">{t.active}</span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">منتهٍ</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">{t.ended}</span>
                         )}
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPrint(r)}><FileText size={13} /> وثيقة</Button>
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPrint(r)}><FileText size={13} /> {t.doc}</Button>
                       </div>
                     </div>
                   ))}
