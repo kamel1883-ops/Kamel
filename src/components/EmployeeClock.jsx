@@ -24,33 +24,30 @@ const distanceMeters = (lat1, lng1, lat2, lng2) => {
 // التقاط عدة قراءات GPS متتالية لتمييز الموقع الحقيقي عن الموقع المُزيَّف:
 // قراءات GPS الحقيقية تتذبذب دائماً بأمتار قليلة بين القراءات، أما المُزيّف
 // فيُعيد نفس الإحداثيات تماماً بدقة مثالية. نُرجع مصفوفة القراءات للتحليل.
-const captureGPS = (count, t) =>
+// نستخدم watchPosition لتتابع القراءات لحظياً (أسرع بكثير من طلبات متتالية)،
+// ونتوقف فوراً عند أول قراءة تُثبت وجود الموظف داخل نطاق المقر، أو بعد 8 ثوانٍ كحد أقصى.
+const captureGPS = (t, isInside) =>
   new Promise((resolve) => {
     if (!navigator.geolocation) return resolve({ error: t.noGeo, readings: [] });
     const readings = [];
-    let stopped = false;
-    const one = (highAccuracy) =>
-      new Promise((res) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => res({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
-          () => res(null),
-          { enableHighAccuracy: highAccuracy, timeout: 15000, maximumAge: highAccuracy ? 0 : 30000 }
-        );
-      });
-    (async () => {
-      for (let i = 0; i < count && !stopped; i++) {
-        const r = await one(true);
-        if (r) readings.push(r);
-        if (i < count - 1) await new Promise((rr) => setTimeout(rr, 1000));
-      }
-      // احتياطي: إن تعذّرت الدقة العالية (أجهزة مكتبية/شبكات) نقبل قراءة الشبكة
-      if (!readings.length && !stopped) {
-        const r = await one(false);
-        if (r) readings.push(r);
-      }
-      if (!stopped) resolve({ readings });
-    })();
-    setTimeout(() => { stopped = true; resolve({ readings }); }, 45000);
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      navigator.geolocation.clearWatch(id);
+      clearTimeout(timer);
+      resolve({ readings });
+    };
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        readings.push({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy });
+        const last = readings[readings.length - 1];
+        if (isInside(last) || readings.length >= 4) finish();
+      },
+      () => finish(),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 5000 }
+    );
+    const timer = setTimeout(finish, 8000);
   });
 
 // يحدد نطاق البصمة من فرع الموظف إن وُجد، ويعود للمقر الرئيسي للمنشأة كبدیل.
@@ -104,7 +101,9 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
     if (!wp) { setMsg({ type: "err", text: t.noWorkplace }); return; }
     setBusy(true);
     try {
-      const { readings, error } = await captureGPS(3, t);
+      const inRange = (r) =>
+        distanceMeters(r.lat, r.lng, wp.lat, wp.lng) <= radius + Math.min(Number(r.acc) || 25, 150) + 15;
+      const { readings, error } = await captureGPS(t, inRange);
       if (error) { setMsg({ type: "err", text: error }); setBusy(false); return; }
       if (!readings.length) { setMsg({ type: "err", text: t.noAccess }); setBusy(false); return; }
       // ترتيب القراءات حسب الدقة واتخاذ الوسيط كموقع معتمد
