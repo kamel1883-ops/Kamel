@@ -142,11 +142,11 @@ export default function Attendance() {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">{t.in}</label>
-            <Input type="time" value={newRec.check_in} onChange={(e) => setNewRec({ ...newRec, check_in: e.target.value })} />
+            <Input type="time" lang="en-GB" step="60" value={newRec.check_in} onChange={(e) => setNewRec({ ...newRec, check_in: e.target.value })} />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">{t.out}</label>
-            <Input type="time" value={newRec.check_out} onChange={(e) => setNewRec({ ...newRec, check_out: e.target.value })} />
+            <Input type="time" lang="en-GB" step="60" value={newRec.check_out} onChange={(e) => setNewRec({ ...newRec, check_out: e.target.value })} />
           </div>
           <Button type="submit" disabled={creating} className="gap-2"><Plus size={18} /> {t.record}</Button>
         </div>

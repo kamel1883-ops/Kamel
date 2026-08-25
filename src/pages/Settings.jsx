@@ -287,8 +287,8 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4">
-            <Field label={t.dayStart}><Input type="time" value={org.work_start_time || ""} onChange={(e) => set("work_start_time", e.target.value)} /></Field>
-            <Field label={t.dayEnd}><Input type="time" value={org.work_end_time || ""} onChange={(e) => set("work_end_time", e.target.value)} /></Field>
+            <Field label={t.dayStart}><Input type="time" lang="en-GB" step="60" value={org.work_start_time || ""} onChange={(e) => set("work_start_time", e.target.value)} /></Field>
+            <Field label={t.dayEnd}><Input type="time" lang="en-GB" step="60" value={org.work_end_time || ""} onChange={(e) => set("work_end_time", e.target.value)} /></Field>
             <Field label={t.dayHours}><Input type="number" step="0.1" value={org.work_hours_per_day} onChange={(e) => set("work_hours_per_day", Number(e.target.value))} /></Field>
           </div>
           <div className="grid grid-cols-1 mt-4">

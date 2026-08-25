@@ -20,7 +20,7 @@ const fmtDateTime = (iso, lang) => {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
   const date = d.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB");
-  const time = d.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-GB", { hour: "2-digit", minute: "2-digit" });
+  const time = d.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${date} · ${time}`;
 };
 

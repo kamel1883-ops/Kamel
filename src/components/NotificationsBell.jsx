@@ -8,7 +8,7 @@ const fmtDateTime = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
-  return `${d.toLocaleDateString("ar-EG")} · ${d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}`;
+  return `${d.toLocaleDateString("ar-EG")} · ${d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
 };
 
 export default function NotificationsBell({ tone = "light", align = "left" }) {
