@@ -8,6 +8,7 @@ import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Image } from "@/components/ui/image";
 import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import WorkplaceMapPicker from "@/components/settings/WorkplaceMapPicker";
 import { cn } from "@/lib/utils";
 
 // ترتيب الأسبوع السعودي: السبت → الجمعة (أرقام getDay: 6=السبت ... 5=الجمعة)
@@ -52,6 +53,7 @@ export default function SettingsPage() {
     absType: "طريقة خصم الغياب", monthlyDiv: "الراتب الشهري ÷ 30 لليوم", dailyWage: "الأجر اليومي",
     secLoc: "موقع مقر العمل (للبصمة)", lat: "خط العرض", lng: "خط الطول", radius: "نطاق البصمة (متر)", capture: "تحديد موقعي الحالي",
     locNote: (r) => `سيُسمح للموظف بالبصمة فقط ضمن ${r || 50} متر من هذا الموقع.`,
+    mapHint: "انقر على الخريطة أو اسحب الدبوس لتحديد موقع المقر بدقة — الدائرة تمثل نطاق البصمة المسموح.",
     logo: "شعار المنشأة", logoHint: "يظهر في بوابة الموظف والاعتمادات", uploading: "جارٍ الرفع...",
     changeLogo: "تغيير الشعار", chooseLogo: "اختيار صورة", logoEmpty: "لم يتم رفع شعار بعد",
     save: "حفظ الإعدادات",
@@ -75,6 +77,7 @@ export default function SettingsPage() {
     absType: "Absence deduction method", monthlyDiv: "Monthly salary ÷ 30 per day", dailyWage: "Daily wage",
     secLoc: "Workplace location (for check‑in)", lat: "Latitude", lng: "Longitude", radius: "Check‑in radius (m)", capture: "Set my current location",
     locNote: (r) => `Employees may check in only within ${r || 50} m of this location.`,
+    mapHint: "Click the map or drag the pin to set the exact workplace — the circle shows the allowed check‑in radius.",
     logo: "Company logo", logoHint: "Shown in the employee & approvals portal", uploading: "Uploading...",
     changeLogo: "Change logo", chooseLogo: "Choose image", logoEmpty: "No logo uploaded yet",
     save: "Save settings",
@@ -306,6 +309,13 @@ export default function SettingsPage() {
             <Field label={t.radius}><Input type="number" value={org.workplace_radius} onChange={(e) => set("workplace_radius", Number(e.target.value))} /></Field>
           </div>
           <Button type="button" variant="outline" onClick={captureLocation} className="gap-2"><Crosshair size={16} /> {t.capture}</Button>
+          <WorkplaceMapPicker
+            lat={org.workplace_lat}
+            lng={org.workplace_lng}
+            radius={org.workplace_radius}
+            onChange={(la, ln) => { set("workplace_lat", la); set("workplace_lng", ln); }}
+            hint={t.mapHint}
+          />
           <p className="text-xs text-muted-foreground">{t.locNote(org.workplace_radius)}</p>
         </Card>
 
