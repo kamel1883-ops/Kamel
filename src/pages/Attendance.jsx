@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Time24Input from "@/components/ui/time24";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
@@ -142,11 +143,11 @@ export default function Attendance() {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">{t.in}</label>
-            <Input type="time" lang="en-GB" step="60" value={newRec.check_in} onChange={(e) => setNewRec({ ...newRec, check_in: e.target.value })} />
+            <Time24Input value={newRec.check_in} onChange={(v) => setNewRec({ ...newRec, check_in: v })} />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">{t.out}</label>
-            <Input type="time" lang="en-GB" step="60" value={newRec.check_out} onChange={(e) => setNewRec({ ...newRec, check_out: e.target.value })} />
+            <Time24Input value={newRec.check_out} onChange={(v) => setNewRec({ ...newRec, check_out: v })} />
           </div>
           <Button type="submit" disabled={creating} className="gap-2"><Plus size={18} /> {t.record}</Button>
         </div>

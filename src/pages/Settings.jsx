@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Image } from "@/components/ui/image";
+import Time24Input from "@/components/ui/time24";
 import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import WorkplaceMapPicker from "@/components/settings/WorkplaceMapPicker";
@@ -287,8 +288,8 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4">
-            <Field label={t.dayStart}><Input type="time" lang="en-GB" step="60" value={org.work_start_time || ""} onChange={(e) => set("work_start_time", e.target.value)} /></Field>
-            <Field label={t.dayEnd}><Input type="time" lang="en-GB" step="60" value={org.work_end_time || ""} onChange={(e) => set("work_end_time", e.target.value)} /></Field>
+            <Field label={t.dayStart}><Time24Input value={org.work_start_time || ""} onChange={(v) => set("work_start_time", v)} /></Field>
+            <Field label={t.dayEnd}><Time24Input value={org.work_end_time || ""} onChange={(v) => set("work_end_time", v)} /></Field>
             <Field label={t.dayHours}><Input type="number" step="0.1" value={org.work_hours_per_day} onChange={(e) => set("work_hours_per_day", Number(e.target.value))} /></Field>
           </div>
           <div className="grid grid-cols-1 mt-4">
