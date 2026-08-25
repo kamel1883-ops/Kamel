@@ -123,14 +123,21 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
           : "Couldn't verify your real location. Close any GPS-spoofing app and try again." });
         setBusy(false); return;
       }
-      const dist = distanceMeters(median.lat, median.lng, wp.lat, wp.lng);
-      // هامش تسامح = نصف دقة GPS (يحدّها نصف النطاق) + 5م لتجاوز خطأ التحديد على الهواتف
-      const tolerance = Math.min(Number(median.acc) || 25, 150) + 15;
-      if (dist > radius + tolerance) { setMsg({ type: "err", text: t.outRange(Math.round(dist), radius) }); setBusy(false); return; }
+      // نعتمد أقرب قراءة للمقر (تذبذب GPS الطبيعي يجعل بعض القراءات أبعد بأمتار)
+      const best = readings.reduce((a, r) =>
+        distanceMeters(r.lat, r.lng, wp.lat, wp.lng) < distanceMeters(a.lat, a.lng, wp.lat, wp.lng) ? r : a, readings[0]);
+      const chosen = best;
+      const dist = distanceMeters(chosen.lat, chosen.lng, wp.lat, wp.lng);
+      // هامش تسامح = دقة القراءة (حتى 150م) + 15م لتجاوز خطأ التحديد على الهواتف
+      const tolerance = Math.min(Number(chosen.acc) || 25, 150) + 15;
+      if (dist > radius + tolerance) {
+        setMsg({ type: "err", text: `${t.outRange(Math.round(dist), radius)} ${lang === "ar" ? `(دقة الموقع ±${Math.round(chosen.acc)}م)` : `(location accuracy ±${Math.round(chosen.acc)}m)`}` });
+        setBusy(false); return;
+      }
       if (kind === "in") {
         if (today && today.check_in) { setMsg({ type: "err", text: t.alreadyIn }); setBusy(false); return; }
         if (clockApi?.clockIn) {
-          await clockApi.clockIn(median.lat, median.lng, median.acc);
+          await clockApi.clockIn(chosen.lat, chosen.lng, chosen.acc);
         } else {
           const name = `${employee.employee_number} - ${employee.position}`;
           const bId = branch?.id || employee.branch_id || null;
