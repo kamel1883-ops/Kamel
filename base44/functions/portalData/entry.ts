@@ -668,7 +668,11 @@ export default async function (req) {
     }
 
     if (action === "create_loan") {
-      const p = pick(body.payload || {}, ["amount", "reason", "installment_count", "description"]);
+      const p = pick(body.payload || {}, ["amount", "reason", "installment_count", "monthly_installment", "description"]);
+      // تاريخ تقديم الطلب — يُحسب في الخادم ويظهر في المستندات والموافقات (لا يُستبدل بتاريخ اليوم لاحقاً)
+      p.request_date = todayISO();
+      p.requested_amount = Number(p.amount) || 0;
+      p.requested_installments = Math.max(1, Number(p.installment_count) || 1);
       // السلف لا تمرّ على المدير المباشر — تتجه مباشرة لمعتمد الموارد البشرية ثم المالية.
       const loan: any = await base44.asServiceRole.entities.LoanRequest.create({
         ...p,

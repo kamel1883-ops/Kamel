@@ -416,6 +416,7 @@ export default function MyRequests() {
                       {Number(r.balance_deducted) > 0 && Number(r.balance_deducted) < Number(r.days_count) && (
                         <div className="text-[11px] text-violet-600 mt-0.5">{isAr ? `المعتمد: ${Number(r.balance_deducted)} من ${Number(r.days_count)} يوم` : `Approved: ${Number(r.balance_deducted)} of ${Number(r.days_count)} days`}</div>
                       )}
+                      <RequestDate r={r} isAr={isAr} />
                       {r.status === "rejected" && <RejectedNote reason={rejectReason(r)} t={t} />}
                     </div>
                     <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", badge(r.status).cls)}>{badge(r.status).label}</span>
@@ -428,6 +429,12 @@ export default function MyRequests() {
                     <div>
                       <div className="font-medium text-sm">{Number(r.amount).toLocaleString()} {t.sar}</div>
                       <div className="text-xs text-muted-foreground mt-1">{t.loanInst(r.installment_count)} · {t.loanMonthly(formatCurrency(r.monthly_installment))}</div>
+                      <RequestDate r={r} isAr={isAr} />
+                      {Number(r.requested_amount) > 0 && Number(r.requested_amount) !== Number(r.amount) && (
+                        <div className="text-[11px] text-violet-600 mt-0.5">
+                          {isAr ? `المبلغ المطلوب: ${formatCurrency(r.requested_amount)} — المعتمد: ${formatCurrency(r.amount)}` : `Requested: ${formatCurrency(r.requested_amount)} — Approved: ${formatCurrency(r.amount)}`}
+                        </div>
+                      )}
                       {(r.status === "paid" || r.status === "completed") && (() => {
                         const amt = Number(r.amount) || 0;
                         const paid = Number(r.paid_amount) || 0;
@@ -585,6 +592,15 @@ function Row({ children }) {
 }
 function Empty({ text }) {
   return <div className="p-8 text-center text-muted-foreground text-sm">{text}</div>;
+}
+function RequestDate({ r, isAr }) {
+  const d = r.request_date || (r.created_date || "").slice(0, 10);
+  if (!d) return null;
+  return (
+    <div className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
+      {isAr ? "تاريخ تقديم الطلب" : "Request date"}: <b className="text-foreground">{d}</b>
+    </div>
+  );
 }
 function RejectedNote({ reason, t }) {
   if (!reason) return null;

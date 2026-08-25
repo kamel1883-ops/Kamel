@@ -8,7 +8,12 @@ export default function LoanStatementDoc({ employee, loan, org }) {
   const remaining = Math.max(0, amount - paid);
   const closed = amount > 0 && paid >= amount;
 
+  const requestDate = loan?.request_date || (loan?.created_date || "").slice(0, 10) || "—";
+  let payments = [];
+  try { payments = JSON.parse(loan?.payment_log || "[]"); } catch { payments = []; }
+
   const rows = [
+    ["تاريخ تقديم الطلب", requestDate],
     ["اسم الموظف", employee?.full_name],
     ["الرقم الوظيفي", employee?.employee_number],
     ["الهوية / الإقامة", employee?.national_id || "—"],
@@ -72,6 +77,34 @@ export default function LoanStatementDoc({ employee, loan, org }) {
         </tbody>
       </table>
 
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginTop: 20 }}>
+        <thead>
+          <tr style={{ background: "#f3f4f6" }}>
+            <th style={{ textAlign: "right", padding: "8px 6px", width: "22%" }}>تاريخ السداد</th>
+            <th style={{ textAlign: "right", padding: "8px 6px", width: "26%" }}>المبلغ المسدَّد</th>
+            <th style={{ textAlign: "right", padding: "8px 6px", width: "26%" }}>المتبقي بعد السداد</th>
+            <th style={{ textAlign: "right", padding: "8px 6px" }}>استلمه</th>
+          </tr>
+        </thead>
+        <tbody>
+          {payments.length === 0 ? (
+            <tr><td colSpan={4} style={{ padding: "10px 6px", color: "#667085", textAlign: "center" }}>لا توجد عمليات سداد مسجّلة حتى تاريخ هذا الكشف</td></tr>
+          ) : (
+            payments.map((p, i) => {
+              const rem = Math.max(0, amount - payments.slice(0, i + 1).reduce((s, x) => s + (Number(x.amount) || 0), 0));
+              return (
+                <tr key={i} style={{ borderBottom: "1px solid #eceef2" }}>
+                  <td style={{ padding: "8px 6px", fontWeight: 600 }}>{p.date || "—"}</td>
+                  <td style={{ padding: "8px 6px", fontWeight: 700, color: "#15803d" }}>{formatCurrency(Number(p.amount) || 0)}</td>
+                  <td style={{ padding: "8px 6px", fontWeight: 700, color: "#b45309" }}>{formatCurrency(rem)}</td>
+                  <td style={{ padding: "8px 6px", color: "#667085" }}>{p.by || "—"}</td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+
       {closed ? (
         <div
           style={{
@@ -120,7 +153,7 @@ export default function LoanStatementDoc({ employee, loan, org }) {
       )}
 
       <div style={{ marginTop: 26, display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-        <div>تاريخ الكشف: {new Date().toISOString().slice(0, 10)}</div>
+        <div>تاريخ تقديم الطلب: {requestDate}</div>
         <div>توقيع الموارد البشرية: .................................</div>
       </div>
       <div style={{ marginTop: 24, fontSize: 9, color: "#94a3b8", textAlign: "center" }}>

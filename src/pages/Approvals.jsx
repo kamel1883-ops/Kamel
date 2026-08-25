@@ -327,14 +327,7 @@ export default function Approvals() {
       finance_proof_date: todayISO(), finance_note: note,
       status: isLoan ? "paid" : "completed",
     };
-    if (isLoan) {
-      const amt = Math.max(0, Number(loanAmount) || 0);
-      const inst = Math.max(1, Number(loanInstallments) || 1);
-      patch.paid_amount = 0;
-      patch.amount = amt;
-      patch.installment_count = inst;
-      patch.monthly_installment = amt ? Math.round((amt / inst) * 100) / 100 : 0;
-    }
+    if (isLoan) patch.paid_amount = Number(acting.req.paid_amount) || 0;
     await update(acting.type, acting.req.id, patch);
     if (isLoan) { try { await generateLoanStatement({ ...acting.req, ...patch }, empOf(acting.req.employee_id), org); } catch (e) {} }
     if (acting.type === "leaves" && acting.req.ticket_amount > 0) {
@@ -371,13 +364,21 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     try {
+      const req = acting.req;
+      const amt = Math.max(0, Number(loanAmount) || 0);
+      const inst = Math.max(1, Number(loanInstallments) || 1);
       const patchLh = {
         hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
+        requested_amount: Number(req.requested_amount) || Number(req.amount) || 0,
+        requested_installments: Number(req.requested_installments) || Number(req.installment_count) || 1,
+        amount: amt, installment_count: inst,
+        monthly_installment: amt ? Math.round((amt / inst) * 100) / 100 : 0,
+        request_date: req.request_date || (req.created_date || "").slice(0, 10),
         status: "awaiting_finance",
       };
-      setLoans((prev) => prev.map((x) => (x.id === acting.req.id ? { ...x, ...patchLh } : x)));
-      await base44.entities.LoanRequest.update(acting.req.id, patchLh);
-      try { await generateLoanStatement(acting.req, empOf(acting.req.employee_id), org); } catch (e) {}
+      setLoans((prev) => prev.map((x) => (x.id === req.id ? { ...x, ...patchLh } : x)));
+      await base44.entities.LoanRequest.update(req.id, patchLh);
+      try { await generateLoanStatement({ ...req, ...patchLh }, empOf(req.employee_id), org); } catch (e) {}
     } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); load();
   };
@@ -390,9 +391,14 @@ export default function Approvals() {
     const total = Number(acting.req.amount) || 0;
     const totalPaid = Math.min(total, alreadyPaid + amt);
     const closed = total > 0 && totalPaid >= total;
-    const updated = { ...acting.req, paid_amount: totalPaid, status: closed ? "completed" : acting.req.status };
+    let log = [];
+    try { log = JSON.parse(acting.req.payment_log || "[]"); } catch { log = []; }
+    if (amt > 0) log = [...log, { date: todayISO(), amount: amt, by: me?.full_name || "" }];
+    const payment_log = JSON.stringify(log);
+    const updated = { ...acting.req, paid_amount: totalPaid, payment_log, status: closed ? "completed" : acting.req.status };
     await update("loans", acting.req.id, {
       paid_amount: totalPaid,
+      payment_log,
       finance_status: "paid",
       status: closed ? "completed" : acting.req.status,
     });
@@ -561,15 +567,8 @@ export default function Approvals() {
                 {acting.type === "leaves" ? t.leavePay(acting.req.ticket_amount) : t.loanPay(acting.req.amount)}
               </div>
               {acting.type === "loans" && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground">{t.loanAmountL} <span className="text-rose-500">*</span></Label>
-                    <Input type="number" min={0} dir="ltr" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground">{t.loanInstL}</Label>
-                    <Input type="number" min={1} dir="ltr" value={loanInstallments} onChange={(e) => setLoanInstallments(e.target.value)} />
-                  </div>
+                <div className="text-xs text-muted-foreground bg-slate-50 border border-border rounded-lg p-3">
+                  {isAr ? <>المبلغ المعتمد من الموارد البشرية: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · الأقساط: <b className="text-foreground">{acting.req.installment_count || 1}</b> × {formatCurrency(acting.req.monthly_installment)}<br />تاريخ الطلب: <b className="text-foreground">{acting.req.request_date || (acting.req.created_date || "").slice(0, 10)}</b></> : <>Approved amount: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · {acting.req.installment_count || 1} × {formatCurrency(acting.req.monthly_installment)}<br />Request date: <b className="text-foreground">{acting.req.request_date || (acting.req.created_date || "").slice(0, 10)}</b></>}
                 </div>
               )}
               <div className="space-y-1.5">
@@ -727,7 +726,20 @@ export default function Approvals() {
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">{empOf(acting.req.employee_id)?.full_name || acting.req.employee_name} <span className="text-xs text-muted-foreground tabular-nums">· {empOf(acting.req.employee_id)?.national_id || "—"}</span></div>
               <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3">
-                {isAr ? <>المبلغ المطلوب: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · الأقساط: <b className="text-foreground">{acting.req.installment_count || 1}</b></> : <>Requested: <b className="text-foreground">{formatCurrency(acting.req.amount)}</b> · Inst: <b className="text-foreground">{acting.req.installment_count || 1}</b></>}
+                {isAr ? <>المبلغ المطلوب من الموظف: <b className="text-foreground">{formatCurrency(acting.req.requested_amount || acting.req.amount)}</b> · الأقساط المطلوبة: <b className="text-foreground">{acting.req.requested_installments || acting.req.installment_count || 1}</b><br />تاريخ تقديم الطلب: <b className="text-foreground">{acting.req.request_date || (acting.req.created_date || "").slice(0, 10)}</b></> : <>Requested: <b className="text-foreground">{formatCurrency(acting.req.requested_amount || acting.req.amount)}</b> · Inst: <b className="text-foreground">{acting.req.requested_installments || acting.req.installment_count || 1}</b><br />Request date: <b className="text-foreground">{acting.req.request_date || (acting.req.created_date || "").slice(0, 10)}</b></>}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{isAr ? "المبلغ المعتمد (ر.س)" : "Approved amount (SAR)"} <span className="text-rose-500">*</span></Label>
+                  <Input type="number" min={0} dir="ltr" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{isAr ? "عدد أشهر السداد" : "Repayment months"} <span className="text-rose-500">*</span></Label>
+                  <Input type="number" min={1} dir="ltr" value={loanInstallments} onChange={(e) => setLoanInstallments(e.target.value)} />
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {isAr ? "القسط الشهري" : "Monthly installment"}: <b className="text-foreground">{formatCurrency((Number(loanAmount) || 0) / Math.max(1, Number(loanInstallments) || 1))}</b>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.leaveHrNote}</Label>
@@ -736,7 +748,7 @@ export default function Approvals() {
               <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.loanHrWarn}</div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
-                <Button onClick={confirmLoanHr} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
+                <Button onClick={confirmLoanHr} disabled={busy || !(Number(loanAmount) > 0)} className="gap-1 bg-violet-600 hover:bg-violet-700">
                   {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.loanHrBtn}
                 </Button>
               </DialogFooter>
@@ -855,6 +867,9 @@ function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, k
           </div>
           <div className="text-xs text-muted-foreground mt-1">
             {r.start_date ? t.days(r.start_date, r.end_date, r.days_count) : t.loanLine(r.amount, r.reason || "")}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">
+            تاريخ الطلب: <b className="text-foreground tabular-nums">{r.request_date || (r.created_date || "").slice(0, 10) || "—"}</b>
           </div>
           {extra}
           <div className="flex items-center gap-2 flex-wrap mt-2">

@@ -36,6 +36,8 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee, port
         employee_id: employee.id, employee_user_id: employee.user_id || "",
         employee_name: employee.full_name || "",
         amount, reason: form.reason, installment_count: installments, monthly_installment: monthly,
+        requested_amount: amount, requested_installments: installments,
+        request_date: new Date().toISOString().slice(0, 10),
         status: "pending", manager_status: "pending", hr_status: "pending", finance_status: "pending",
       };
       if (portalCreate) await portalCreate(payload);

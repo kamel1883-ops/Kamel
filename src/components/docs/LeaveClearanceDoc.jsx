@@ -3,7 +3,9 @@ import BrandHeader from "@/components/docs/BrandHeader";
 import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 
 export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore, balanceAfter, daysCash, dailyWage }) {
+  const requestDate = leave?.request_date || (leave?.created_date || "").slice(0, 10) || "—";
   const rows = [
+    ["تاريخ تقديم الطلب", requestDate],
     ["اسم الموظف", employee?.full_name],
     ["الرقم الوظيفي", employee?.employee_number],
     ["الهوية / الإقامة", employee?.national_id || "—"],
@@ -94,7 +96,7 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
       })()}
 
       <div style={{ marginTop: 26, display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-        <div>تاريخ المخالصة: {new Date().toISOString().slice(0, 10)}</div>
+        <div>تاريخ تقديم الطلب: {requestDate}</div>
         <div>توقيع الموارد البشرية: .................................</div>
       </div>
       <div style={{ marginTop: 28, fontSize: 9, color: "#94a3b8", textAlign: "center" }}>
