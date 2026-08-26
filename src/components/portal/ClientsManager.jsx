@@ -9,7 +9,7 @@ import {
   Crown, Building2, FlaskConical, FileText, BadgeCheck, Pause, CalendarClock,
   Wallet, Loader2, AlertTriangle, RefreshCw, MessageCircle, Search, Users,
   Check, Sparkles, Ban, RotateCcw, Eye, Bell, Download, FileSignature,
-  UploadCloud, Stamp,
+  UploadCloud, Stamp, Handshake,
 } from "lucide-react";
 import { ClientInfoDialog, waLink, daysLeft, isOwnerTenant } from "./ClientActionDialogs";
 import RegenerateAllDocumentsDialog from "./RegenerateAllDocumentsDialog";
@@ -303,6 +303,13 @@ export default function ClientsManager({ session }) {
                               {!owner && (
                                 <div className="text-[11px] text-emerald-600 mt-0.5 flex items-center gap-1">
                                   <Users size={11} /> {t.lblActualActive}: {x.employees_active_count ?? 0}
+                                </div>
+                              )}
+                              {!owner && (x.referral_affiliate_name || x.referral_code) && (
+                                <div className="text-[11px] text-amber-700 mt-1 inline-flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                                  <Handshake size={11} />
+                                  {isAr ? "عن طريق الشريك" : "Referred by"}: <b>{x.referral_affiliate_name || "—"}</b>
+                                  {x.referral_code && <span className="font-mono">({x.referral_code})</span>}
                                 </div>
                               )}
                             </div>

@@ -91,6 +91,23 @@ export default async function (req) {
     const pricingTier = tier ? tier.tier : '';
     const quoted_amount = Math.round(basePrice * (1 - discount_percent / 100));
 
+    // —— نسبة الإحالة لبرنامج شركاء جدارة (اختيارية وصارمة):
+    // تُسجَّل فقط إذا وصل العميل عبر رابط شريك (?ref=CODE) ويطابق الرمز شريكاً «مُعتمداً» (active).
+    // أي رمز غير موجود أو غير مُعتمد أو غير مُرسَل = لا نسبة إحالة إطلاقاً (يظهر العميل كعميل مباشر لجدارة).
+    let referral_code = "";
+    let referral_affiliate_id = "";
+    let referral_affiliate_name = "";
+    const rawRef = String(body.referral_code || "").trim().toUpperCase().slice(0, 24);
+    if (rawRef && /^[A-Z0-9-]{4,24}$/.test(rawRef)) {
+      const affs = await base44.asServiceRole.entities.Affiliate.filter({ ref_code: rawRef }, undefined, 2);
+      const aff = (affs || []).find((a: any) => a.status === "active");
+      if (aff) {
+        referral_code = rawRef;
+        referral_affiliate_id = String(aff.id);
+        referral_affiliate_name = String(aff.full_name || "");
+      }
+    }
+
     const today = new Date();
     const trialEnd = new Date(today);
     trialEnd.setDate(today.getDate() + 30);
@@ -125,6 +142,9 @@ export default async function (req) {
       pricing_tier: pricingTier,
       lead_source: String(body.lead_source || 'trial').trim() === 'quote' ? 'quote' : 'trial',
       contract_quote_no,
+      referral_code: referral_code || null,
+      referral_affiliate_id: referral_affiliate_id || null,
+      referral_affiliate_name: referral_affiliate_name || null,
       notes: String(body.notes || '').trim(),
     });
 

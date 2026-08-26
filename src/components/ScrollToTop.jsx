@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
+import { captureReferral } from "@/lib/referral";
 
 const getHashId = (hash) => {
   const rawId = hash.slice(1);
@@ -14,6 +15,9 @@ const getHashId = (hash) => {
 export default function ScrollToTop() {
   const { pathname, hash } = useLocation();
   const navigationType = useNavigationType();
+
+  // التقاط رمز إحالة الشريك من الرابط (?ref=CODE) وحفظه للزيارة الحالية
+  useEffect(() => { captureReferral(); }, [pathname]);
 
   useEffect(() => {
     if (navigationType === "POP") return;

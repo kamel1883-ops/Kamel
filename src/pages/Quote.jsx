@@ -11,6 +11,7 @@ import { Image } from "@/components/ui/image";
 import { Printer, Loader2, ArrowLeft, Copy, Check, MessageCircle, ShieldCheck, AlertTriangle, Building2, Sparkles, UserPlus, Banknote } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { getReferral } from "@/lib/referral";
 import { PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
 import ProviderStamp from "@/components/docs/ProviderStamp";
 
@@ -171,9 +172,15 @@ export default function Quote() {
   const baseAnnual = matchedTier ? Number(matchedTier.yearly) || 0 : 0;
   const discountAmount = Math.max(0, baseAnnual - amount);
 
+  // تعبئة رمز الشريك تلقائياً إن وصل العميل عبر رابط الشريك (?ref=CODE) — ويبقى قابلاً للتعديل يدوياً
+  useEffect(() => {
+    const ref = getReferral();
+    if (ref) setForm((f) => (f.referral_code ? f : { ...f, referral_code: ref }));
+  }, []);
+
   useEffect(() => {
     if (incoming && !registered) {
-      base44.functions.invoke("createTrial", incoming).then((res) => { setRegistered(true); setTenantId(res?.tenant_id || null); setContractProof(res?.contract_proof || null); }).catch(() => {});
+      base44.functions.invoke("createTrial", { ...incoming, referral_code: getReferral() || undefined }).then((res) => { setRegistered(true); setTenantId(res?.tenant_id || null); setContractProof(res?.contract_proof || null); }).catch(() => {});
     }
   }, []);
 
@@ -221,7 +228,7 @@ export default function Quote() {
         setSubmitting(false);
         return;
       }
-      const res = await base44.functions.invoke("createTrial", { ...form, commercial_register_doc_url: crDocUrl, lead_source: mode === "trial" ? "trial" : "quote", discount_code: form.discount_code?.trim() || undefined, captcha_token: captcha });
+      const res = await base44.functions.invoke("createTrial", { ...form, commercial_register_doc_url: crDocUrl, lead_source: mode === "trial" ? "trial" : "quote", discount_code: form.discount_code?.trim() || undefined, referral_code: (form.referral_code?.trim() || getReferral()) || undefined, captcha_token: captcha });
       const pct = Number(res?.discount_percent) || 0;
       setDiscount(pct > 0 ? { percent: pct, amount: Number(res?.quoted_amount) || 0, code: form.discount_code.trim() } : null);
       setTenantId(res?.tenant_id || null);
@@ -287,6 +294,14 @@ export default function Quote() {
             <div className="space-y-1.5">
               <Label>{t.discCode}</Label>
               <Input value={form.discount_code || ""} onChange={(e) => set("discount_code", e.target.value.toUpperCase())} placeholder="JADARA100" />
+            </div>
+            {/* رمز الشريك المسوّق — يوثّق رسمياً أن العميل جاء عن طريق شريك محدد (يظهر للمالك في قسم العملاء) */}
+            <div className="space-y-1.5">
+              <Label>{isAr ? "رمز الشريك المسوّق (اختياري)" : "Partner referral code (optional)"}</Label>
+              <Input value={form.referral_code || ""} onChange={(e) => set("referral_code", e.target.value.toUpperCase())} placeholder="JD-XXXXXX" className="font-mono" />
+              <p className="text-xs text-muted-foreground">
+                {isAr ? "إن وصلك رمز من أحد شركاء جدارة المسوّقين، اكتبه هنا ليُسجّل رسمياً أن اشتراكك جاء عن طريقه." : "If a Jadara marketing partner gave you a code, enter it so their referral is officially recorded."}
+              </p>
             </div>
             {/* إرفاق صورة السجل التجاري — إلزامي للتحقق من ملكية الرقم الموحّد */}
             <div className="space-y-1.5">
