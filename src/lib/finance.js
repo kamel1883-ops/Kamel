@@ -135,5 +135,4 @@ export const RECURRENCES = [
   { key: "one_time", ar: "مرة واحدة", en: "One time" },
   { key: "monthly", ar: "شهري", en: "Monthly" },
   { key: "yearly", ar: "سنوي", en: "Yearly" },
-  { key: "per_revenue", ar: "مع كل إيراد (نسبة %)", en: "With every revenue (%)" },
 ];

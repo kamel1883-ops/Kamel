@@ -136,7 +136,7 @@ export default function FinanceManager({ session, isAr = true }) {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-bold tabular-nums text-rose-600">
-                    {e.recurrence === "per_revenue" ? `${e.commission_percent || 0}%` : formatCurrency(e.amount)}
+                    {formatCurrency(e.amount)}
                   </span>
                   <button onClick={() => setDlg({ open: true, expense: e })} className="p-1.5 rounded-lg hover:bg-slate-100 text-muted-foreground"><Pencil size={14} /></button>
                   <button onClick={() => remove(e.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={14} /></button>
