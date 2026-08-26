@@ -5,6 +5,7 @@ import DiscountManager from "@/components/portal/DiscountManager";
 import ClientsManager from "@/components/portal/ClientsManager";
 import SurveysManager from "@/components/portal/SurveysManager";
 import FinanceManager from "@/components/portal/FinanceManager";
+import AffiliatesManager from "@/components/portal/AffiliatesManager";
 import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationsBell from "@/components/NotificationsBell";
@@ -367,10 +368,12 @@ export default function OwnerPortal() {
           <button onClick={() => setTab("clients")} className={tabCls("clients")}>{isAr ? "العملاء والعقود" : "Clients & Contracts"}</button>
           <button onClick={() => setTab("surveys")} className={tabCls("surveys")}>{isAr ? "استبيانات العميل" : "CX Surveys"}</button>
           <button onClick={() => setTab("finance")} className={tabCls("finance")}>{isAr ? "العمليات المالية" : "Finance"}</button>
+          <button onClick={() => setTab("affiliates")} className={tabCls("affiliates")}>{isAr ? "شركاء التسويق" : "Affiliates"}</button>
           <button onClick={() => setTab("discounts")} className={tabCls("discounts")}>{isAr ? "كودات الخصم" : "Discount Codes"}</button>
         </div>
         {tab === "clients" ? <ClientsManager session={session} />
           : tab === "surveys" ? <SurveysManager session={session} />
+          : tab === "affiliates" ? <AffiliatesManager session={session} isAr={isAr} />
           : tab === "finance" ? <FinanceManager session={session} isAr={isAr} />
           : <DiscountManager session={session} />}
       </div>

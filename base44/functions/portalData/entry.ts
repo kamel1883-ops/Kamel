@@ -479,6 +479,65 @@ export default async function (req) {
       return Response.json({ ok: true, responses: responses || [] });
     }
 
+    // ====== برنامج الشركاء — بوابة المالك ======
+    // قائمة الشركاء المسجّلين مع رمز الإحالة وبيانات التواصل، والعملاء المنسوبين لكل شريك
+    // وعمولة 7% من أول اشتراك مدفوع لكل عميل (تُصرف مرة واحدة).
+    if (action === "affiliate_list") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [affiliates, allTenants, subs] = await Promise.all([
+        base44.asServiceRole.entities.Affiliate.list("-created_date", 300),
+        base44.asServiceRole.entities.Tenant.list("-created_date", 500),
+        base44.asServiceRole.entities.Subscription.list("period_start", 1000),
+      ]);
+      const firstPaid: Record<string, number> = {};
+      for (const s of subs || []) {
+        if (s.status !== "paid") continue;
+        const k = String(s.tenant_id || "");
+        if (!k || firstPaid[k] !== undefined) continue;
+        firstPaid[k] = Number(s.amount) || 0;
+      }
+      const rows = (affiliates || []).map((a: any) => {
+        const code = String(a.ref_code || "").toUpperCase();
+        const clients = (allTenants || [])
+          .filter((t: any) => t.status !== "pending_payment" &&
+            (String(t.referral_affiliate_id || "") === String(a.id) ||
+             String(t.referral_code || "").toUpperCase() === code))
+          .map((t: any) => {
+            const first = firstPaid[String(t.id)] || 0;
+            const pct = Number(a.commission_percent) || 7;
+            return {
+              id: t.id, name: t.name, status: t.status,
+              contact_email: t.contact_email, contact_phone: t.contact_phone,
+              first_paid_amount: first,
+              commission: first > 0 ? Math.round(first * pct / 100) : 0,
+            };
+          });
+        return {
+          ...a,
+          clients_count: clients.length,
+          paid_clients_count: clients.filter((c: any) => c.first_paid_amount > 0).length,
+          commission_total: clients.reduce((s: number, c: any) => s + c.commission, 0),
+          clients,
+        };
+      });
+      return Response.json({ ok: true, affiliates: rows });
+    }
+    if (action === "affiliate_save") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const src = body.payload || {};
+      const payload: any = {};
+      if (src.status) payload.status = ["pending", "active", "suspended"].includes(String(src.status)) ? String(src.status) : "pending";
+      if (src.commission_percent !== undefined) payload.commission_percent = Number(src.commission_percent) || 0;
+      if (src.bank_name !== undefined) payload.bank_name = String(src.bank_name || "").slice(0, 120);
+      if (src.bank_iban !== undefined) payload.bank_iban = String(src.bank_iban || "").slice(0, 60);
+      if (src.notes !== undefined) payload.notes = String(src.notes || "").slice(0, 1000);
+      if (!Object.keys(payload).length) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.Affiliate.update(id, payload);
+      return Response.json({ ok: true });
+    }
+
     // ====== العمليات المالية — بوابة المالك (إيرادات مقابل مصروفات وعمولات) ======
     if (action === "finance_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
