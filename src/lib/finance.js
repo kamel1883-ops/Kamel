@@ -37,14 +37,14 @@ const labelOf = (d, mode, isAr) => {
   return String(d.getFullYear());
 };
 
-// الفترات من الأقدم للأحدث، آخرها الفترة الحالية
-export function buildPeriods(mode, isAr) {
+// الفترات من الأقدم للأحدث، آخرها الفترة الحالية — و forecast يضيف فترات قادمة (توقّع)
+export function buildPeriods(mode, isAr, forecast = 0) {
   const count = PERIOD_COUNT[mode] || 12;
   const current = startOf(new Date(), mode);
   const out = [];
-  for (let i = count - 1; i >= 0; i--) {
+  for (let i = count - 1; i >= -forecast; i--) {
     const s = shift(current, mode, -i);
-    out.push({ start: iso(s), end: iso(shift(s, mode, 1)), label: labelOf(s, mode, isAr) });
+    out.push({ start: iso(s), end: iso(shift(s, mode, 1)), label: labelOf(s, mode, isAr), future: i < 0 });
   }
   return out;
 }
@@ -52,12 +52,14 @@ export function buildPeriods(mode, isAr) {
 // توزيع مصروف على تواريخ فعلية داخل نطاق [from, to) — يعيد قائمة { date, amount }
 export function expenseOccurrences(exp, fromISO, toISO) {
   const amount = Number(exp.amount) || 0;
-  const start = parse(exp.expense_date);
+  // المصروف الثابت يُرسى على تاريخ التجديد ويستمر تلقائياً بلا تاريخ توقف
+  const fixed = !!exp.is_fixed;
+  const start = parse(fixed ? (exp.renewal_date || exp.expense_date) : exp.expense_date);
   if (!start || amount <= 0) return [];
   const from = parse(fromISO), to = parse(toISO);
-  const stop = parse(exp.end_date);
+  const stop = fixed ? null : parse(exp.end_date);
   const hardEnd = stop && stop < to ? stop : to;
-  const rec = exp.recurrence || "one_time";
+  const rec = fixed ? (exp.recurrence === "monthly" ? "monthly" : "yearly") : (exp.recurrence || "one_time");
   if (rec === "per_revenue") return []; // تُحسب كنسبة من الإيراد داخل financeRows
   if (rec === "one_time") return start >= from && start < to ? [{ date: iso(start), amount }] : [];
   const out = [];
@@ -74,10 +76,11 @@ export function expenseOccurrences(exp, fromISO, toISO) {
 const revenueDate = (r) => r.paid_date || r.period_start || String(r.created_date || "").slice(0, 10);
 
 // صفوف التقرير: إيراد ومصروف وصافي لكل فترة + الإجماليات
-export function financeRows({ revenues = [], expenses = [], mode = "month", isAr = true }) {
-  const periods = buildPeriods(mode, isAr);
+export function financeRows({ revenues = [], expenses = [], mode = "month", isAr = true, forecast = 0 }) {
+  const periods = buildPeriods(mode, isAr, forecast);
   const from = periods[0].start, to = periods[periods.length - 1].end;
   const rows = periods.map((p) => ({ ...p, revenue: 0, expense: 0, net: 0 }));
+  // المصروف الثابت يُحمّل حتى في الفترات القادمة بلا إيراد (يظهر الصافي بالسالب)
   const idx = (d) => rows.findIndex((r) => d >= r.start && d < r.end);
 
   for (const r of revenues) {

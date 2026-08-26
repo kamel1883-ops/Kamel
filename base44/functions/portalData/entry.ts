@@ -491,7 +491,12 @@ export default async function (req) {
         amount: Number(src.amount) || 0,
         recurrence: String(src.recurrence || "one_time"),
         expense_date: String(src.expense_date || "").slice(0, 10),
-        end_date: src.end_date ? String(src.end_date).slice(0, 10) : null,
+        is_fixed: src.is_fixed === true,
+        renewal_date: src.is_fixed === true
+          ? String(src.renewal_date || src.expense_date || "").slice(0, 10)
+          : null,
+        // المصروف الثابت لا تاريخ توقف له — يتجدد تلقائياً كل فترة
+        end_date: src.is_fixed === true ? null : (src.end_date ? String(src.end_date).slice(0, 10) : null),
         vendor: String(src.vendor || "").slice(0, 200),
         partner_name: String(src.partner_name || "").slice(0, 200),
         commission_percent: Number(src.commission_percent) || 0,

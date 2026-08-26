@@ -18,6 +18,7 @@ export default function FinanceManager({ session, isAr = true }) {
   const [mode, setMode] = useState("month");
   const [dlg, setDlg] = useState({ open: false, expense: null });
   const [cleaning, setCleaning] = useState(false);
+  const [showForecast, setShowForecast] = useState(true);
 
   const call = (action, extra = {}) =>
     base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra })
@@ -32,7 +33,10 @@ export default function FinanceManager({ session, isAr = true }) {
   };
   useEffect(() => { load(); }, []);
 
-  const { rows, totals } = useMemo(() => financeRows({ revenues, expenses, mode, isAr }), [revenues, expenses, mode, isAr]);
+  const { rows, totals } = useMemo(
+    () => financeRows({ revenues, expenses, mode, isAr, forecast: showForecast ? (mode === "year" ? 1 : 3) : 0 }),
+    [revenues, expenses, mode, isAr, showForecast]
+  );
   const fixed = useMemo(() => recurringTotals(expenses), [expenses]);
 
   const save = async (payload) => {
@@ -83,6 +87,10 @@ export default function FinanceManager({ session, isAr = true }) {
         <Button variant="outline" size="sm" onClick={dedupe} disabled={cleaning} className="gap-1.5 text-amber-700 border-amber-200 hover:bg-amber-50 ms-auto order-last">
           {cleaning ? <Loader2 size={14} className="animate-spin" /> : <Eraser size={14} />} {isAr ? "تنظيف الإيرادات المكرّرة" : "Clean duplicate revenue"}
         </Button>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+          <input type="checkbox" checked={showForecast} onChange={(e) => setShowForecast(e.target.checked)} className="accent-[#0B2545]" />
+          {isAr ? "إظهار الفترات القادمة (المصروف الثابت بلا إيراد)" : "Show upcoming periods (fixed cost with no revenue)"}
+        </label>
         <span className="text-sm text-muted-foreground">{isAr ? "طريقة العرض:" : "View by:"}</span>
         <Select value={mode} onValueChange={setMode}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
@@ -129,9 +137,16 @@ export default function FinanceManager({ session, isAr = true }) {
             ) : expenses.map((e) => (
               <div key={e.id} className={cn("px-4 py-2.5 flex items-center justify-between gap-3", e.status === "stopped" && "opacity-55")}>
                 <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{e.name}</div>
+                  <div className="text-sm font-medium truncate flex items-center gap-1.5">
+                    {e.name}
+                    {e.is_fixed && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#0B2545]/10 text-[#0B2545] font-semibold">
+                        {isAr ? "ثابت" : "Fixed"}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[11px] text-muted-foreground truncate">
-                    {catLabel(e.category)} · {recLabel(e.recurrence)} · {e.expense_date}
+                    {catLabel(e.category)} · {recLabel(e.recurrence)} · {e.is_fixed ? `${isAr ? "تجديد" : "renews"} ${e.renewal_date || e.expense_date}` : e.expense_date}
                     {e.commission_percent ? ` · ${e.commission_percent}% ${e.partner_name || ""}` : ""}
                   </div>
                 </div>

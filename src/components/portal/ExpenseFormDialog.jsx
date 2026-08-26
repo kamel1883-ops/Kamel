@@ -12,6 +12,7 @@ const empty = {
   name: "", category: "other", amount: "", recurrence: "monthly",
   expense_date: new Date().toISOString().slice(0, 10), end_date: "", vendor: "",
   partner_name: "", commission_percent: "", base_amount: "", revenue_ref: "",
+  is_fixed: false, renewal_date: "",
   status: "active", notes: "",
 };
 
@@ -37,6 +38,9 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
         commission_percent: Number(form.commission_percent) || 0,
         base_amount: Number(form.base_amount) || 0,
         recurrence: isCommission ? "one_time" : form.recurrence,
+        is_fixed: !isCommission && !!form.is_fixed,
+        renewal_date: !isCommission && form.is_fixed ? (form.renewal_date || form.expense_date) : "",
+        end_date: form.is_fixed ? "" : form.end_date,
       });
       onClose?.();
     } finally { setSaving(false); }
@@ -130,12 +134,37 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
             </div>
           )}
 
+          {!isCommission && (
+            <div className="rounded-xl border border-[#0B2545]/15 bg-[#0B2545]/[0.04] p-3 space-y-3">
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" checked={!!form.is_fixed}
+                  onChange={(e) => { set("is_fixed", e.target.checked); if (e.target.checked && form.recurrence === "one_time") set("recurrence", "yearly"); }}
+                  className="mt-1 accent-[#0B2545]" />
+                <span>
+                  <span className="text-sm font-semibold">{isAr ? "مصروف ثابت (دومين / بريد / سيرفر)" : "Fixed cost (domain / email / server)"}</span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    {isAr
+                      ? "يتجدد تلقائياً في تاريخ التجديد بلا تاريخ توقف، ويُخصم في ذلك التاريخ سواء وُجد إيراد أو لا — وإن لم يوجد إيراد يظهر الصافي بالسالب."
+                      : "Renews automatically on its renewal date with no stop date, and is charged then whether revenue exists or not — with no revenue the net shows negative."}
+                  </span>
+                </span>
+              </label>
+              {form.is_fixed && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{isAr ? "تاريخ التجديد" : "Renewal date"}</Label>
+                  <Input type="date" lang={isAr ? "ar" : "en"} value={form.renewal_date || form.expense_date}
+                    onChange={(e) => set("renewal_date", e.target.value)} required />
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">{isCommission ? (isAr ? "تاريخ المعاملة" : "Transaction date") : (isAr ? "تاريخ المصروف / بداية التكرار" : "Date / recurrence start")}</Label>
               <Input type="date" lang={isAr ? "ar" : "en"} value={form.expense_date} onChange={(e) => set("expense_date", e.target.value)} required />
             </div>
-            {!isCommission && form.recurrence !== "one_time" && (
+            {!isCommission && !form.is_fixed && form.recurrence !== "one_time" && (
               <div className="space-y-1.5">
                 <Label className="text-xs">{isAr ? "تاريخ التوقف (اختياري)" : "Stop date (optional)"}</Label>
                 <Input type="date" lang={isAr ? "ar" : "en"} value={form.end_date || ""} onChange={(e) => set("end_date", e.target.value)} />
