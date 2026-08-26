@@ -76,7 +76,7 @@ const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSyste
 const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSystemPage"));
 import { PortalLangProvider } from "@/lib/portalI18n";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/strategic-plan", "/ad-designs", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -115,6 +115,9 @@ const AuthenticatedApp = () => {
           <Route path="/samples" element={<Samples />} />
           <Route path="/brochure" element={<Brochure />} />
           <Route path="/brochure-en" element={<BrochureEn />} />
+          {/* مستندات خاصة بالمالك فقط — بروابط مباشرة غير مرتبطة بأي بوابة أو قائمة تنقّل */}
+          <Route path="/strategic-plan" element={<StrategicPlan />} />
+          <Route path="/ad-designs" element={<AdDesigns />} />
           <Route path="/hr-system" element={<HrSystemPage />} />
           <Route path="/payroll-system" element={<PayrollSystemPage />} />
           <Route path="/attendance-system" element={<AttendanceSystemPage />} />
@@ -168,8 +171,6 @@ const AuthenticatedApp = () => {
         <Route path="/warnings" element={<Warnings />} />
         <Route path="/decisions" element={<Decisions />} />
         <Route path="/incentives" element={<Incentives />} />
-        <Route path="/ad-designs" element={<AdDesigns />} />
-        <Route path="/strategic-plan" element={<StrategicPlan />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/platform-subscriptions" element={<PlatformSubscriptions />} />

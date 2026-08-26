@@ -216,6 +216,19 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-report tr { break-inside: avoid; page-break-inside: avoid; }
   .print-report tfoot tr { background: #0B2545 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
+  /* الخطة الاستراتيجية: مستند خاص بالمالك — يُطبع كامل المحتوى الظاهر بصفحات A4 */
+  .print-strategy, .print-strategy * { visibility: visible !important; }
+  .print-strategy {
+    position: absolute; top: 0; right: 0; left: 0; width: 100%;
+    margin: 0; padding: 0; background: #fff; color: #111;
+  }
+  .print-strategy .no-print { display: none !important; }
+  .print-strategy [class*="overflow-x-auto"], .print-strategy [class*="overflow-auto"] { overflow: visible !important; }
+  .print-strategy table { width: 100% !important; table-layout: fixed; font-size: 9pt; border-collapse: collapse; }
+  .print-strategy th, .print-strategy td { padding: 4px 5px !important; white-space: normal !important; overflow-wrap: break-word; }
+  .print-strategy section, .print-strategy tr { break-inside: avoid; page-break-inside: avoid; }
+  .print-strategy .bg-white { background-color: #fff !important; }
+
   .print-poster, .print-poster * { visibility: visible !important; }
   .print-poster { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 0; }
   .print-poster .no-print { display: none !important; }

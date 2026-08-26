@@ -24,7 +24,7 @@ export default function StrategicPlan() {
   const [tab, setTab] = useState("finance");
 
   return (
-    <div dir="rtl" className="print-report">
+    <div dir="rtl" className="print-strategy min-h-screen bg-background p-4 sm:p-6 lg:p-9">
       <PageHeader
         title="الخطة الاستراتيجية للعمل"
         subtitle="خطة مبنية على أرقامك الفعلية من العمليات المالية في بوابة المالك: الإيرادات، المصروفات التشغيلية، وعمولة الشركاء 7%"
