@@ -131,11 +131,13 @@ export default function FinanceManager({ session, isAr = true }) {
                   <div className="text-sm font-medium truncate">{e.name}</div>
                   <div className="text-[11px] text-muted-foreground truncate">
                     {catLabel(e.category)} · {recLabel(e.recurrence)} · {e.expense_date}
-                    {e.category === "commission" && e.commission_percent ? ` · ${e.commission_percent}% ${e.partner_name || ""}` : ""}
+                    {e.commission_percent ? ` · ${e.commission_percent}% ${e.partner_name || ""}` : ""}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-sm font-bold tabular-nums text-rose-600">{formatCurrency(e.amount)}</span>
+                  <span className="text-sm font-bold tabular-nums text-rose-600">
+                    {e.recurrence === "per_revenue" ? `${e.commission_percent || 0}%` : formatCurrency(e.amount)}
+                  </span>
                   <button onClick={() => setDlg({ open: true, expense: e })} className="p-1.5 rounded-lg hover:bg-slate-100 text-muted-foreground"><Pencil size={14} /></button>
                   <button onClick={() => remove(e.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={14} /></button>
                 </div>

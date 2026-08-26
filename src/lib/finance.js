@@ -58,6 +58,7 @@ export function expenseOccurrences(exp, fromISO, toISO) {
   const stop = parse(exp.end_date);
   const hardEnd = stop && stop < to ? stop : to;
   const rec = exp.recurrence || "one_time";
+  if (rec === "per_revenue") return []; // تُحسب كنسبة من الإيراد داخل financeRows
   if (rec === "one_time") return start >= from && start < to ? [{ date: iso(start), amount }] : [];
   const out = [];
   const cur = new Date(start);
@@ -85,6 +86,14 @@ export function financeRows({ revenues = [], expenses = [], mode = "month", isAr
     const i = d ? idx(d) : -1;
     if (i >= 0) rows[i].revenue += Number(r.amount) || 0;
   }
+  // نِسب تُدفع مع كل إيراد (نسبة شريك/مستفيد) — تُحسب من إيراد كل فترة
+  const perRevenuePct = expenses
+    .filter((e) => e.recurrence === "per_revenue" && e.status !== "stopped")
+    .reduce((s, e) => s + (Number(e.commission_percent) || 0), 0);
+  if (perRevenuePct > 0) {
+    for (const r of rows) r.expense += Number((r.revenue * perRevenuePct / 100).toFixed(2));
+  }
+
   for (const e of expenses) {
     if (e.status === "stopped" && e.recurrence !== "one_time") continue;
     for (const occ of expenseOccurrences(e, from, to)) {
@@ -116,6 +125,7 @@ export const EXPENSE_CATEGORIES = [
   { key: "email", ar: "بريد إلكتروني", en: "Email" },
   { key: "marketing", ar: "حملات تسويقية", en: "Marketing" },
   { key: "commission", ar: "عمولة مسوّق", en: "Sales commission" },
+  { key: "partner_share", ar: "نسبة مستفيد / شريك", en: "Partner share" },
   { key: "salary", ar: "رواتب وأجور", en: "Salaries" },
   { key: "tools", ar: "أدوات وخدمات", en: "Tools & services" },
   { key: "other", ar: "أخرى", en: "Other" },
@@ -125,4 +135,5 @@ export const RECURRENCES = [
   { key: "one_time", ar: "مرة واحدة", en: "One time" },
   { key: "monthly", ar: "شهري", en: "Monthly" },
   { key: "yearly", ar: "سنوي", en: "Yearly" },
+  { key: "per_revenue", ar: "مع كل إيراد (نسبة %)", en: "With every revenue (%)" },
 ];

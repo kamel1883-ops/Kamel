@@ -22,7 +22,8 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
   useEffect(() => { setForm(expense ? { ...empty, ...expense } : empty); }, [expense, open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const isCommission = form.category === "commission";
+  const isPerRevenue = form.recurrence === "per_revenue";
+  const isCommission = form.category === "commission" && !isPerRevenue;
   const commissionAmount = Number(
     ((Number(form.base_amount) || 0) * (Number(form.commission_percent) || 0) / 100).toFixed(2)
   );
@@ -33,7 +34,7 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
     try {
       await onSave({
         ...form,
-        amount: isCommission ? commissionAmount : Number(form.amount) || 0,
+        amount: isPerRevenue ? 0 : isCommission ? commissionAmount : Number(form.amount) || 0,
         commission_percent: Number(form.commission_percent) || 0,
         base_amount: Number(form.base_amount) || 0,
         recurrence: isCommission ? "one_time" : form.recurrence,
@@ -75,7 +76,26 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
             </div>
           </div>
 
-          {isCommission ? (
+          {isPerRevenue ? (
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 p-3 space-y-3">
+              <p className="text-[11px] leading-relaxed text-indigo-900">
+                {isAr
+                  ? "نسبة تُخصم تلقائياً من كل إيراد يُسجَّل — لا تحتاج إدخال مبلغ."
+                  : "A percentage automatically deducted from every recorded revenue — no fixed amount needed."}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{isAr ? "اسم المستفيد" : "Beneficiary"}</Label>
+                  <Input value={form.partner_name} onChange={(e) => set("partner_name", e.target.value)} required
+                    placeholder={isAr ? "مثال: وليد القروص" : "e.g. Waleed" } />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{isAr ? "النسبة من كل إيراد %" : "Share of each revenue %"}</Label>
+                  <Input type="number" step="0.1" value={form.commission_percent} onChange={(e) => set("commission_percent", e.target.value)} dir="ltr" placeholder="15" required />
+                </div>
+              </div>
+            </div>
+          ) : isCommission ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 space-y-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">{isAr ? "اسم المسوّق" : "Partner name"}</Label>
@@ -130,7 +150,7 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
               <Label className="text-xs">{isAr ? "تاريخ المصروف / بداية التكرار" : "Date / recurrence start"}</Label>
               <Input type="date" lang={isAr ? "ar" : "en"} value={form.expense_date} onChange={(e) => set("expense_date", e.target.value)} required />
             </div>
-            {!isCommission && form.recurrence !== "one_time" && (
+            {!isCommission && !isPerRevenue && form.recurrence !== "one_time" && (
               <div className="space-y-1.5">
                 <Label className="text-xs">{isAr ? "تاريخ التوقف (اختياري)" : "Stop date (optional)"}</Label>
                 <Input type="date" lang={isAr ? "ar" : "en"} value={form.end_date || ""} onChange={(e) => set("end_date", e.target.value)} />
