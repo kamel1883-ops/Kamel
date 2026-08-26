@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/hr";
 import { financeRows, recurringTotals, EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
 import ExpenseFormDialog from "@/components/portal/ExpenseFormDialog";
 import FinancePeriodTable from "@/components/portal/FinancePeriodTable";
+import ExpenseReports from "@/components/portal/ExpenseReports";
 import { cn } from "@/lib/utils";
 
 // لوحة العمليات المالية للمالك: الإيرادات (اشتراكات مدفوعة) مقابل المصروفات (ثابتة/متكررة/عمولات)
@@ -146,6 +147,8 @@ export default function FinanceManager({ session, isAr = true }) {
           </div>
         </section>
       </div>
+
+      <ExpenseReports expenses={expenses} isAr={isAr} />
 
       <ExpenseFormDialog
         open={dlg.open}
