@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature, FileText } from "lucide-react";
+import { Loader2, Check, CalendarPlus, CalendarClock, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature, FileText } from "lucide-react";
 import ConfirmSubscriptionDialog from "./ConfirmSubscriptionDialog";
+import RenewYearDialog from "./RenewYearDialog";
 import { renderToPdfBlob } from "@/lib/pdfDocs";
 import QuoteDoc from "@/components/docs/QuoteDoc";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
@@ -179,6 +180,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
   const [end, setEnd] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [renewOpen, setRenewOpen] = useState(false);
   const [quoteBusy, setQuoteBusy] = useState(false);
   useEffect(() => {
     if (open && tenant) {
@@ -188,6 +190,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
       const d = new Date(); d.setHours(0, 0, 0, 0); d.setFullYear(d.getFullYear() + 1);
       setEnd(d.toISOString().slice(0, 10));
       setConfirmOpen(false);
+      setRenewOpen(false);
     }
   }, [open, tenant]);
   if (!open || !tenant) return null;
@@ -334,16 +337,31 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
             </div>
           )}
           {(status === "trial" || status === "expired" || status === "active") && (
+            <div className="space-y-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <div className="text-sm font-medium">{isAr ? "تجديد سنوي (تسجيل الإيراد)" : "Annual renewal (record revenue)"}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {isAr ? "حدد الفترة والمبلغ وارفع الإيصال — يُسجَّل إيراد واحد لهذه الفترة دون تكرار." : "Set the period, amount and receipt — one revenue entry per period, never duplicated."}
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => setRenewOpen(true)} disabled={busy} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <CalendarClock size={14} /> {isAr ? "تجديد سنوي" : "Renew year"}
+                </Button>
+              </div>
+            </div>
+          )}
+          {(status === "trial" || status === "expired" || status === "active") && (
             <div className="space-y-2 rounded-xl border border-violet-200 bg-violet-50/50 p-3">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div>
-                  <div className="text-sm font-medium">{status === "active" ? (isAr ? "تجديد الاشتراك السنوي" : "Renew annual subscription") : (isAr ? "تأكيد اشتراك — رفع إيصال وتوليد عقد وفاتورة" : "Confirm subscription — upload receipt & generate documents")}</div>
+                  <div className="text-sm font-medium">{isAr ? "توليد / إعادة توليد العقد والفاتورة" : "Generate / re-generate contract & invoice"}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    {isAr ? "ارفع صورة الإيصال المُستلَم عبر واتساب، ثم يُفعَّل الاشتراك ويُولَّد العقد والفاتورة تلقائياً ويُحفظان." : "Upload the WhatsApp receipt, the subscription activates and contract+invoice generate automatically and save."}
+                    {isAr ? "إجراء منفصل لا يُسجّل أي إيراد — يمكنك تكراره في أي وقت سواء جدّدت للعميل أو لا." : "Separate action, records no revenue — repeat any time, whether the client renewed or not."}
                   </div>
                 </div>
                 <Button size="sm" onClick={() => setConfirmOpen(true)} disabled={busy} className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white">
-                  <BadgeCheck size={14} /> {status === "active" ? (isAr ? "تجديد وتوليد" : "Renew & generate") : (isAr ? "تأكيد وتوليد" : "Confirm & generate")}
+                  <BadgeCheck size={14} /> {isAr ? "توليد المستندات" : "Generate documents"}
                 </Button>
               </div>
             </div>
@@ -379,6 +397,14 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
       <ConfirmSubscriptionDialog
         open={confirmOpen}
         onClose={() => { setConfirmOpen(false); if (onRefresh) onRefresh(); }}
+        tenant={tenant}
+        isAr={isAr}
+        session={session}
+        onSaved={() => { if (onRefresh) onRefresh(); }}
+      />
+      <RenewYearDialog
+        open={renewOpen}
+        onClose={() => { setRenewOpen(false); if (onRefresh) onRefresh(); }}
         tenant={tenant}
         isAr={isAr}
         session={session}

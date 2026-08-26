@@ -264,24 +264,48 @@ export default async function (req) {
         quoted_amount: amount || Number(t.quoted_amount) || 0,
         activation_proof_url: proof_url_safe || null,
       });
-      // === منع تكرار الإيراد ===
-      // إعادة توليد العقد/الفاتورة لنفس الاشتراك لا تُنشئ إيراداً جديداً — تُحدّث السجل القائم.
-      // الإيراد الجديد يُسجَّل فقط عند «تجديد سنوي» صريح (is_renewal) بفترة جديدة.
-      const isRenewal = body.is_renewal === true;
-      const subsAll: any[] = await base44.asServiceRole.entities.Subscription.filter({ tenant_id }, "-period_start", 100);
-      const paidSubs = (subsAll || []).filter((s: any) => s.status === "paid");
-      let target: any = paidSubs.find((s: any) => s.period_end === subscription_end || s.period_start === subscription_start);
-      if (!target && !isRenewal && paidSubs.length) target = paidSubs[0];
+      // === فصل تام بين توليد العقود والإيرادات ===
+      // توليد/إعادة توليد العقد والفاتورة لا يُسجّل أي إيراد إطلاقاً — يمكن تكراره كما يشاء المالك.
+      // الإيراد يُسجَّل فقط من إجراء «التجديد السنوي» المنفصل (owner_renew_year).
+      return Response.json({ ok: true, subscription_start, subscription_end, revenue_added: false });
+    }
+
+    // ====== التجديد السنوي — منفصل تماماً عن توليد العقود ======
+    // يُحدّد المالك الفترة والمبلغ ويرفع الإيصال → يُسجَّل إيراد واحد لهذه الفترة (بدون تكرار) وتُمدّ نهاية الاشتراك.
+    if (action === "owner_renew_year") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      const period_start = String(body.period_start || "").slice(0, 10);
+      const period_end = String(body.period_end || "").slice(0, 10);
+      const amount = Number(body.amount) || 0;
+      if (!tenant_id || !period_start || !period_end || amount <= 0)
+        return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const proof_raw = String(body.proof_url || "").trim();
+      const proof_url_safe = /^https?:\/\//i.test(proof_raw) ? proof_raw : "";
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const subsAll: any[] = await base44.asServiceRole.entities.Subscription.filter({ tenant_id }, "-period_start", 200);
+      const existing = (subsAll || []).find(
+        (s: any) => s.status === "paid" && s.period_start === period_start && s.period_end === period_end
+      );
       const subPayload: any = {
-        tenant_id, tenant_name: t.name, plan: "annual",
-        amount: amount || Number(t.quoted_amount) || 0,
-        period_start: subscription_start, period_end: subscription_end,
-        payment_method: "direct", status: "paid", paid_date: target?.paid_date || todayStr,
-        notes: proof_url_safe ? ("تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك — إيصال: " + proof_url_safe) : "تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك",
+        tenant_id, tenant_name: t.name, plan: "annual", amount,
+        period_start, period_end,
+        payment_method: "direct", status: "paid",
+        paid_date: String(body.paid_date || "").slice(0, 10) || existing?.paid_date || todayStr,
+        notes: proof_url_safe ? ("تجديد سنوي — بوابة المالك — إيصال: " + proof_url_safe) : "تجديد سنوي — بوابة المالك",
       };
-      if (target) await base44.asServiceRole.entities.Subscription.update(target.id, subPayload);
+      if (existing) await base44.asServiceRole.entities.Subscription.update(existing.id, subPayload);
       else await base44.asServiceRole.entities.Subscription.create(subPayload);
-      return Response.json({ ok: true, subscription_start, subscription_end, revenue_added: !target });
+      await base44.asServiceRole.entities.Tenant.update(tenant_id, {
+        status: "active", plan: "annual",
+        subscription_end: period_end,
+        contract_confirmed: true,
+        suspended_from: null,
+        quoted_amount: amount,
+        activation_proof_url: proof_url_safe || t.activation_proof_url || null,
+      });
+      return Response.json({ ok: true, revenue_added: !existing, duplicate: !!existing });
     }
 
     // حفظ روابط العقد والفاتورة المُولَّدين من الواجهة بعد تأكيد الاشتراك.

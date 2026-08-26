@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/hr";
 import { EXPENSE_CATEGORIES } from "@/lib/finance";
 import { REPORT_PERIODS, partnerStatements, categoryStatements, recurringCommitments } from "@/lib/expenseReports";
 import { cn } from "@/lib/utils";
+import { printA4 } from "@/lib/printA4";
 
 const TABS = [
   { key: "partner", icon: Users, ar: "كشف حساب المستفيدين / الشركاء", en: "Beneficiary / partner statement" },
@@ -26,7 +27,7 @@ export default function ExpenseReports({ expenses = [], isAr = true }) {
   const active = tab === "partner" ? partner : category;
 
   return (
-    <section className="print-client bg-white rounded-2xl border border-border overflow-hidden">
+    <section className="print-report bg-white rounded-2xl border border-border overflow-hidden">
       <header className="px-4 py-3 border-b border-border flex flex-wrap items-center gap-2">
         <h3 className="font-semibold text-sm">{isAr ? "تقارير المصروفات" : "Expense reports"}</h3>
         <div className="ms-auto flex items-center gap-2 no-print">
@@ -38,7 +39,7 @@ export default function ExpenseReports({ expenses = [], isAr = true }) {
               </SelectContent>
             </Select>
           )}
-          <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={() => window.print()}>
+          <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={() => printA4(true)}>
             <Printer size={14} /> {isAr ? "طباعة" : "Print"}
           </Button>
         </div>

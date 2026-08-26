@@ -78,7 +78,6 @@ export default function ConfirmSubscriptionDialog({ open, onClose, tenant, isAr,
         amount: Number(amount),
         subscription_end: end,
         subscription_start: new Date().toISOString().slice(0, 10),
-        is_renewal: isRenewal,
         proof_url,
       });
       const ract = act?.data || act;
@@ -188,15 +187,11 @@ export default function ConfirmSubscriptionDialog({ open, onClose, tenant, isAr,
               <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} dir="ltr" disabled={busy} />
             </div>
           </div>
-          <label className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/60 p-3 cursor-pointer">
-            <input type="checkbox" checked={isRenewal} onChange={(e) => setIsRenewal(e.target.checked)} disabled={busy} className="mt-0.5 w-4 h-4 accent-amber-600" />
-            <span className="text-xs leading-relaxed">
-              <span className="font-semibold block text-amber-900">{isAr ? "تجديد سنوي جديد (سنة جديدة)" : "New annual renewal (new year)"}</span>
-              {isAr
-                ? "فعّل هذا الخيار فقط عند تجديد العميل لسنة جديدة — يُسجَّل إيراد جديد. بدون تفعيله يُعاد توليد العقد والفاتورة للاشتراك الحالي دون تكرار الإيراد."
-                : "Enable only when the client renews for a new year — a new revenue entry is recorded. Otherwise the contract & invoice are re-generated for the current subscription with no duplicate revenue."}
-            </span>
-          </label>
+          <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-xs leading-relaxed text-amber-900">
+            {isAr
+              ? "توليد العقد والفاتورة لا يُسجّل أي إيراد — يمكنك تكراره كما تشاء. تسجيل الإيراد يتم فقط من إجراء «تجديد سنوي» المنفصل."
+              : "Generating the contract & invoice records no revenue — repeat it freely. Revenue is recorded only via the separate “Annual renewal” action."}
+          </div>
           {busy && (
             <div className="flex items-center gap-2 text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-2.5">
               <Loader2 size={14} className="animate-spin" /> {step || (isAr ? "جارٍ التنفيذ…" : "Working…")}
