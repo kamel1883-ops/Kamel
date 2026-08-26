@@ -58,6 +58,8 @@ const QiwaMudadPage = lazy(() => import("@/pages/landings/QiwaMudadPage"));
 const WpsMudadPage = lazy(() => import("@/pages/landings/WpsMudadPage"));
 const EosCalculatorPage = lazy(() => import("@/pages/landings/EosCalculatorPage"));
 const ContractsPage = lazy(() => import("@/pages/landings/ContractsPage"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const RefundPolicy = lazy(() => import("@/pages/RefundPolicy"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const BlogArticle = lazy(() => import("@/pages/BlogArticle"));
 const CustomerSurveys = lazy(() => import("@/pages/CustomerSurveys"));
@@ -72,7 +74,7 @@ const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSyste
 const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSystemPage"));
 import { PortalLangProvider } from "@/lib/portalI18n";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -122,6 +124,8 @@ const AuthenticatedApp = () => {
           <Route path="/wps-mudad" element={<WpsMudadPage />} />
           <Route path="/eos-calculator" element={<EosCalculatorPage />} />
           <Route path="/contracts" element={<ContractsPage />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogArticle />} />
           <Route path="/jobs/:id" element={<JobApply />} />

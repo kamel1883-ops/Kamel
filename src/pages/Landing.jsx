@@ -559,6 +559,8 @@ export default function Landing() {
             <Link to="/about" className="block hover:text-white">{isAr ? "من نحن" : "About"}</Link>
             <Link to="/contact" className="block hover:text-white">{t.nav.contact}</Link>
             <Link to="/company-login?returnTo=/app" className="block hover:text-white">{t.login}</Link>
+            <Link to="/privacy" className="block hover:text-white">{isAr ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
+            <Link to="/refund-policy" className="block hover:text-white">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>
           </div>
         </div>
         <div className="text-center text-white/50 text-sm pb-6">{t.copy}</div>
