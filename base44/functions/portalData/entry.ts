@@ -445,6 +445,48 @@ export default async function (req) {
       return Response.json({ ok: true, responses: responses || [] });
     }
 
+    // ====== العمليات المالية — بوابة المالك (إيرادات مقابل مصروفات وعمولات) ======
+    if (action === "finance_list") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [subs, exps] = await Promise.all([
+        base44.asServiceRole.entities.Subscription.list("-paid_date", 1000),
+        base44.asServiceRole.entities.Expense.list("-expense_date", 500),
+      ]);
+      const revenues = (subs || []).filter((s: any) => s.status === "paid");
+      return Response.json({ ok: true, revenues, expenses: exps || [] });
+    }
+    if (action === "expense_save") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const src = body.payload || {};
+      const payload: any = {
+        name: String(src.name || "").trim().slice(0, 200),
+        category: String(src.category || "other"),
+        amount: Number(src.amount) || 0,
+        recurrence: String(src.recurrence || "one_time"),
+        expense_date: String(src.expense_date || "").slice(0, 10),
+        end_date: src.end_date ? String(src.end_date).slice(0, 10) : null,
+        vendor: String(src.vendor || "").slice(0, 200),
+        partner_name: String(src.partner_name || "").slice(0, 200),
+        commission_percent: Number(src.commission_percent) || 0,
+        base_amount: Number(src.base_amount) || 0,
+        revenue_ref: String(src.revenue_ref || "").slice(0, 200),
+        status: src.status === "stopped" ? "stopped" : "active",
+        notes: String(src.notes || "").slice(0, 1000),
+      };
+      if (!payload.name || !payload.expense_date) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const id = String(body.id || "");
+      if (id) await base44.asServiceRole.entities.Expense.update(id, payload);
+      else await base44.asServiceRole.entities.Expense.create(payload);
+      return Response.json({ ok: true });
+    }
+    if (action === "expense_delete") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.Expense.delete(id);
+      return Response.json({ ok: true });
+    }
+
     // ====== كودات الخصم — إدارة كاملة من بوابة المالك ======
     if (action === "discount_list") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
