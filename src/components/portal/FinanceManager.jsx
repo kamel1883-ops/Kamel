@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, Repeat } from "lucide-react";
+import { Plus, Loader2, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, Repeat, Eraser } from "lucide-react";
 import { formatCurrency } from "@/lib/hr";
 import { financeRows, recurringTotals, EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
 import ExpenseFormDialog from "@/components/portal/ExpenseFormDialog";
@@ -16,6 +16,7 @@ export default function FinanceManager({ session, isAr = true }) {
   const [expenses, setExpenses] = useState([]);
   const [mode, setMode] = useState("month");
   const [dlg, setDlg] = useState({ open: false, expense: null });
+  const [cleaning, setCleaning] = useState(false);
 
   const call = (action, extra = {}) =>
     base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra })
@@ -43,6 +44,17 @@ export default function FinanceManager({ session, isAr = true }) {
     await load();
   };
 
+  // تنظيف الإيرادات المكرّرة (سجلات نتجت عن إعادة توليد عقد نفس الاشتراك)
+  const dedupe = async () => {
+    if (!window.confirm(isAr ? "سيتم حذف سجلات الإيراد المكرّرة لنفس العميل ونفس الفترة. متابعة؟" : "Duplicate revenue rows for the same client and period will be deleted. Continue?")) return;
+    setCleaning(true);
+    try {
+      const r = await call("finance_dedupe");
+      await load();
+      window.alert(isAr ? `تم حذف ${r?.removed || 0} سجل إيراد مكرّر.` : `Removed ${r?.removed || 0} duplicate revenue rows.`);
+    } finally { setCleaning(false); }
+  };
+
   const catLabel = (k) => { const c = EXPENSE_CATEGORIES.find((x) => x.key === k); return c ? (isAr ? c.ar : c.en) : k; };
   const recLabel = (k) => { const r = RECURRENCES.find((x) => x.key === k); return r ? (isAr ? r.ar : r.en) : k; };
 
@@ -67,6 +79,9 @@ export default function FinanceManager({ session, isAr = true }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        <Button variant="outline" size="sm" onClick={dedupe} disabled={cleaning} className="gap-1.5 text-amber-700 border-amber-200 hover:bg-amber-50 ms-auto order-last">
+          {cleaning ? <Loader2 size={14} className="animate-spin" /> : <Eraser size={14} />} {isAr ? "تنظيف الإيرادات المكرّرة" : "Clean duplicate revenue"}
+        </Button>
         <span className="text-sm text-muted-foreground">{isAr ? "طريقة العرض:" : "View by:"}</span>
         <Select value={mode} onValueChange={setMode}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>

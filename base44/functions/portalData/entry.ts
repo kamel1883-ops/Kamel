@@ -264,14 +264,24 @@ export default async function (req) {
         quoted_amount: amount || Number(t.quoted_amount) || 0,
         activation_proof_url: proof_url_safe || null,
       });
-      await base44.asServiceRole.entities.Subscription.create({
+      // === منع تكرار الإيراد ===
+      // إعادة توليد العقد/الفاتورة لنفس الاشتراك لا تُنشئ إيراداً جديداً — تُحدّث السجل القائم.
+      // الإيراد الجديد يُسجَّل فقط عند «تجديد سنوي» صريح (is_renewal) بفترة جديدة.
+      const isRenewal = body.is_renewal === true;
+      const subsAll: any[] = await base44.asServiceRole.entities.Subscription.filter({ tenant_id }, "-period_start", 100);
+      const paidSubs = (subsAll || []).filter((s: any) => s.status === "paid");
+      let target: any = paidSubs.find((s: any) => s.period_end === subscription_end || s.period_start === subscription_start);
+      if (!target && !isRenewal && paidSubs.length) target = paidSubs[0];
+      const subPayload: any = {
         tenant_id, tenant_name: t.name, plan: "annual",
         amount: amount || Number(t.quoted_amount) || 0,
         period_start: subscription_start, period_end: subscription_end,
-        payment_method: "direct", status: "paid", paid_date: todayStr,
+        payment_method: "direct", status: "paid", paid_date: target?.paid_date || todayStr,
         notes: proof_url_safe ? ("تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك — إيصال: " + proof_url_safe) : "تفعيل اشتراك وتأكيد تعاقد — يدوي من بوابة المالك",
-      });
-      return Response.json({ ok: true, subscription_start, subscription_end });
+      };
+      if (target) await base44.asServiceRole.entities.Subscription.update(target.id, subPayload);
+      else await base44.asServiceRole.entities.Subscription.create(subPayload);
+      return Response.json({ ok: true, subscription_start, subscription_end, revenue_added: !target });
     }
 
     // حفظ روابط العقد والفاتورة المُولَّدين من الواجهة بعد تأكيد الاشتراك.
@@ -454,6 +464,23 @@ export default async function (req) {
       ]);
       const revenues = (subs || []).filter((s: any) => s.status === "paid");
       return Response.json({ ok: true, revenues, expenses: exps || [] });
+    }
+    // تنظيف الإيرادات المكرّرة الناتجة عن إعادة توليد العقد لنفس الفترة (يبقى سجل واحد لكل عميل/فترة)
+    if (action === "finance_dedupe") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const subs: any[] = await base44.asServiceRole.entities.Subscription.list("-created_date", 1000);
+      const seen = new Set<string>();
+      const dupIds: string[] = [];
+      for (const s of subs || []) {
+        if (s.status !== "paid") continue;
+        const key = [s.tenant_id, s.period_start || "", s.period_end || ""].join("|");
+        if (seen.has(key)) dupIds.push(String(s.id));
+        else seen.add(key);
+      }
+      for (const id of dupIds) {
+        try { await base44.asServiceRole.entities.Subscription.delete(id); } catch {}
+      }
+      return Response.json({ ok: true, removed: dupIds.length });
     }
     if (action === "expense_save") {
       if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
