@@ -29,6 +29,11 @@ function boolSaudi(v) {
 const lower = (s) => String(s ?? '').trim().toLowerCase();
 const GENDER = { 'ذكر':'male','male':'male','m':'male','أنثى':'female','انثى':'female','female':'female','f':'female' };
 const CONTRACT = { 'دوام كامل':'full_time','full_time':'full_time','full':'full_time','كامل':'full_time','جزئي':'part_time','part_time':'part_time','part':'part_time','عقد':'contract','contract':'contract' };
+// طريقة صرف الراتب: مدد (حماية الأجور) أو كاش (صرف نقدي)
+const PAYMENT = { 'مدد':'mudad','mudad':'mudad','كاش':'cash','cash':'cash','نقدي':'cash' };
+// استحقاق التذكرة: سنوي / كل سنتين / لا ينطبق
+// استحقاق التذكرة: سنوي / كل سنتين / لا ينطبق
+const TICKET = { 'سنوي':'yearly','yearly':'yearly','كل سنتين':'biennial','biennial':'biennial','سنتين':'biennial','لا':'none','none':'none','لا ينطبق':'none' };
 // لا يُسمح بتعيين "owner" عبر الاستيراد — المالك ليس موظف ويُدار ببوابة مستقلة
 const ROLE = { 'executive':'executive','تنفيذي':'executive','manager':'manager','مدير':'manager','supervisor':'supervisor','مشرف':'supervisor','employee':'employee','موظف':'employee','worker':'worker','عامل':'worker' };
 
@@ -50,6 +55,9 @@ function normalizeRecord(r) {
   const g = lower(r.gender);
   const c = lower(r.contract_type);
   const rl = lower(r.role_level);
+  const pm = lower(r.salary_payment_method);
+  const tk = lower(r.ticket_entitlement);
+  const ann = num(r.annual_leave_entitlement);
   return {
     full_name: String(r.full_name ?? '').trim(),
     employee_number: String(r.employee_number ?? '').trim(),
@@ -75,8 +83,16 @@ function normalizeRecord(r) {
     iqama_expiry: parseDate(r.iqama_expiry),
     passport_number: String(r.passport_number ?? '').trim(),
     passport_expiry: parseDate(r.passport_expiry),
+    health_insurance_number: String(r.health_insurance_number ?? '').trim(),
     health_insurance_expiry: parseDate(r.health_insurance_expiry),
     bank_account: String(r.bank_account ?? '').trim(),
+    salary_payment_method: PAYMENT[pm] || 'mudad',
+    nationality: String(r.nationality ?? '').trim(),
+    address: String(r.address ?? '').trim(),
+    emergency_contact: String(r.emergency_contact ?? '').trim(),
+    annual_leave_entitlement: (ann === 30) ? 30 : 21,
+    ticket_entitlement: TICKET[tk] || 'yearly',
+    ticket_value: num(r.ticket_value),
     prior_used_leave: num(r.prior_used_leave),
     leave_total_entitled: num(r.leave_total_entitled),
     leave_used: num(r.leave_used),
@@ -137,8 +153,16 @@ export default async function (req) {
               iqama_expiry: { type: 'string', title: 'تاريخ انتهاء الإقامة' },
               passport_number: { type: 'string', title: 'رقم الجواز' },
               passport_expiry: { type: 'string', title: 'تاريخ انتهاء الجواز' },
+              health_insurance_number: { type: 'string', title: 'رقم التأمين الطبي' },
               health_insurance_expiry: { type: 'string', title: 'تاريخ انتهاء التأمين الطبي' },
               bank_account: { type: 'string', title: 'الحساب البنكي' },
+              salary_payment_method: { type: 'string', title: 'طريقة صرف الراتب (مدد/كاش)' },
+              nationality: { type: 'string', title: 'الجنسية' },
+              address: { type: 'string', title: 'العنوان' },
+              emergency_contact: { type: 'string', title: 'جهة الاتصال الطارئ' },
+              annual_leave_entitlement: { type: 'number', title: 'الرصيد السنوي للإجازات (21/30)' },
+              ticket_entitlement: { type: 'string', title: 'استحقاق التذكرة (سنوي/كل سنتين/لا)' },
+              ticket_value: { type: 'number', title: 'قيمة التذكرة (ريال)' },
               prior_used_leave: { type: 'number', title: 'أيام الإجازات المستخدمة سابقاً' },
               leave_total_entitled: { type: 'number', title: 'إجمالي رصيد الإجازات المستحق' },
               leave_used: { type: 'number', title: 'رصيد الإجازات المستخدم' },
