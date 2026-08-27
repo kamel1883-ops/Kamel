@@ -88,11 +88,13 @@
 
   html {
     direction: rtl;
+    overscroll-behavior: none;
   }
 
   body {
     @apply bg-background text-foreground font-body antialiased;
     font-family: 'IBM Plex Sans Arabic', 'Tajawal', ui-sans-serif, system-ui, sans-serif;
+    overscroll-behavior: none;
   }
 
   h1, h2, h3, h4 {
@@ -254,6 +256,9 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
 /* === Native WebView / mobile enhancements === */
 @media (max-width: 1023px) {
   header.sticky, .app-header { padding-top: max(env(safe-area-inset-top), 0px); }
+  /* إخفاء أشرطة التمرير على الجوال لتبدو قريبة من تطبيقات iOS الأصلية */
+  ::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+  * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 }
 
 button, a, [role="button"], nav, header, footer, svg, .lucide {

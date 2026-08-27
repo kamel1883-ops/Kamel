@@ -16,6 +16,7 @@ import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
 import { getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Approvals() {
   const { lang } = useI18n();
@@ -460,6 +461,7 @@ export default function Approvals() {
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
       ) : (
+        <PullToRefresh onRefresh={load}>
         <>
           <div className="relative mb-4">
             <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -530,6 +532,7 @@ export default function Approvals() {
             </TabsContent>
           </Tabs>
         </>
+        </PullToRefresh>
       )}
 
       <Dialog open={acting?.action === "reject"} onOpenChange={() => setActing(null)}>

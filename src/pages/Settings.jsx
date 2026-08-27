@@ -10,6 +10,7 @@ import Time24Input from "@/components/ui/time24";
 import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import WorkplaceMapPicker from "@/components/settings/WorkplaceMapPicker";
+import AccountDeletion from "@/components/settings/AccountDeletion";
 import { cn } from "@/lib/utils";
 
 // ترتيب الأسبوع السعودي: السبت → الجمعة (أرقام getDay: 6=السبت ... 5=الجمعة)
@@ -319,6 +320,8 @@ export default function SettingsPage() {
           />
           <p className="text-xs text-muted-foreground">{t.locNote(org.workplace_radius)}</p>
         </Card>
+
+        <AccountDeletion org={org} />
 
         <div className="flex justify-end">
           <Button onClick={save} disabled={saving} className="gap-2">

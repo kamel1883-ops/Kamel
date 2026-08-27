@@ -13,6 +13,7 @@ import { cn, safeHref } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement } from "@/lib/docGenerators";
 import { getOrgOnce } from "@/lib/leaveBalance";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Leaves() {
   const { lang } = useI18n();
@@ -120,7 +121,7 @@ export default function Leaves() {
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
-
+      <PullToRefresh onRefresh={load}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard icon={<CalendarDays size={18} />} label={t.sTotal} value={stats.total} cls="bg-violet-50 text-violet-600" />
         <StatCard icon={<Clock size={18} />} label={t.sPending} value={stats.pending} cls="bg-amber-50 text-amber-600" />
@@ -211,6 +212,7 @@ export default function Leaves() {
           </Table>
         </div>
       )}
+      </PullToRefresh>
     </div>
   );
 }

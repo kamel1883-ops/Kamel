@@ -15,6 +15,7 @@ import { cn, safeHref } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { generateBusinessTripApproval } from "@/lib/docGenerators";
 import { getOrgOnce } from "@/lib/leaveBalance";
+import PullToRefresh from "@/components/PullToRefresh";
 
 export default function BusinessTrips() {
   const { lang } = useI18n();
@@ -112,7 +113,7 @@ export default function BusinessTrips() {
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
-
+      <PullToRefresh onRefresh={load}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard icon={<Plane size={18} />} label={t.sTotal} value={stats.total} cls="bg-violet-50 text-violet-600" />
         <StatCard icon={<MapPin size={18} />} label={t.sInternal} value={stats.internal} cls="bg-blue-50 text-blue-600" />
@@ -205,6 +206,8 @@ export default function BusinessTrips() {
           </Table>
         </div>
       )}
+
+      </PullToRefresh>
 
       <BusinessTripForm open={showForm} employees={employees} editing={editing} onClose={() => setShowForm(false)} onSaved={load} />
     </div>

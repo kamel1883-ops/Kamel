@@ -34,6 +34,7 @@ import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/le
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import AssistantAvatar from "@/components/AssistantAvatar";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const localToday = () => {
   const d = new Date();
@@ -506,7 +507,7 @@ export default function MyRequests() {
   return (
     <div className="min-h-screen bg-background" dir={portalDir(lang)}>
       {session && <IdleSessionGuard onTimeout={exitToLanding} />}
-      <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/portal"><Logo tone="light" size={38} /></Link>
@@ -542,7 +543,7 @@ export default function MyRequests() {
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07] dark:opacity-[0.10]" aria-hidden="true">
           <Crown size={400} className="text-amber-500 dark:text-amber-400" strokeWidth={0.8} />
         </div>
-        <div className="relative">{content}</div>
+        <div className="relative"><PullToRefresh onRefresh={() => load(session)}>{content}</PullToRefresh></div>
         <AssistantAvatar mode={session ? "employee" : "public"} session={session} tone="dark" lang={lang} />
       </div>
     </div>

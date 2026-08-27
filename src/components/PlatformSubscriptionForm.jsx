@@ -11,6 +11,9 @@ import { base44 } from "@/api/base44Client";
 import { PLATFORM_TYPES, platformMeta } from "@/lib/platforms";
 import { differenceInMonths, parseISO } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
 
 const empty = {
   platform_key: "", custom_label: "", account_id: "",
@@ -113,20 +116,14 @@ export default function PlatformSubscriptionForm({ open, onClose, onSaved, editi
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">{t.type}</Label>
-            <select
-              value={form.platform_key}
-              onChange={(e) => set("platform_key", e.target.value)}
-              disabled={!!fixedKey}
-              required
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-            >
-              <option value="">{t.choose}</option>
-              {PLATFORM_TYPES.map((tt) => (
-                <option key={tt.key} value={tt.key}>
-                  {platformMeta(tt.key).label}
-                </option>
-              ))}
-            </select>
+            <Select value={form.platform_key} onValueChange={(v) => set("platform_key", v)} disabled={!!fixedKey}>
+              <SelectTrigger className="w-full"><SelectValue placeholder={t.choose} /></SelectTrigger>
+              <SelectContent>
+                {PLATFORM_TYPES.map((tt) => (
+                  <SelectItem key={tt.key} value={tt.key}>{platformMeta(tt.key).label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {form.platform_key === "other" && (
