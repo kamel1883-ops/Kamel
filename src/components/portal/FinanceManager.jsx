@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, Repeat, Eraser } from "lucide-react";
+import { Plus, Loader2, Pencil, Trash2, Printer, TrendingUp, TrendingDown, Wallet, Repeat } from "lucide-react";
 import { formatCurrency } from "@/lib/hr";
 import { financeRows, recurringTotals, EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
 import ExpenseFormDialog from "@/components/portal/ExpenseFormDialog";
 import FinancePeriodTable from "@/components/portal/FinancePeriodTable";
+import FinancePrintReport from "@/components/portal/FinancePrintReport";
 import ExpenseReports from "@/components/portal/ExpenseReports";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,6 @@ export default function FinanceManager({ session, isAr = true }) {
   const [expenses, setExpenses] = useState([]);
   const [mode, setMode] = useState("month");
   const [dlg, setDlg] = useState({ open: false, expense: null });
-  const [cleaning, setCleaning] = useState(false);
   const [showForecast, setShowForecast] = useState(true);
 
   const call = (action, extra = {}) =>
@@ -49,17 +49,6 @@ export default function FinanceManager({ session, isAr = true }) {
     await load();
   };
 
-  // تنظيف الإيرادات المكرّرة (سجلات نتجت عن إعادة توليد عقد نفس الاشتراك)
-  const dedupe = async () => {
-    if (!window.confirm(isAr ? "سيتم حذف سجلات الإيراد المكرّرة لنفس العميل ونفس الفترة. متابعة؟" : "Duplicate revenue rows for the same client and period will be deleted. Continue?")) return;
-    setCleaning(true);
-    try {
-      const r = await call("finance_dedupe");
-      await load();
-      window.alert(isAr ? `تم حذف ${r?.removed || 0} سجل إيراد مكرّر.` : `Removed ${r?.removed || 0} duplicate revenue rows.`);
-    } finally { setCleaning(false); }
-  };
-
   const catLabel = (k) => { const c = EXPENSE_CATEGORIES.find((x) => x.key === k); return c ? (isAr ? c.ar : c.en) : k; };
   const recLabel = (k) => { const r = RECURRENCES.find((x) => x.key === k); return r ? (isAr ? r.ar : r.en) : k; };
 
@@ -84,10 +73,10 @@ export default function FinanceManager({ session, isAr = true }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button variant="outline" size="sm" onClick={dedupe} disabled={cleaning} className="gap-1.5 text-amber-700 border-amber-200 hover:bg-amber-50 ms-auto order-last">
-          {cleaning ? <Loader2 size={14} className="animate-spin" /> : <Eraser size={14} />} {isAr ? "تنظيف الإيرادات المكرّرة" : "Clean duplicate revenue"}
+        <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-[#0B2545] border-[#0B2545]/30 hover:bg-[#0B2545]/5 ms-auto order-last no-print">
+          <Printer size={14} /> {isAr ? "طباعة / PDF" : "Print / PDF"}
         </Button>
-        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer no-print">
           <input type="checkbox" checked={showForecast} onChange={(e) => setShowForecast(e.target.checked)} className="accent-[#0B2545]" />
           {isAr ? "إظهار الفترات القادمة (المصروف الثابت بلا إيراد)" : "Show upcoming periods (fixed cost with no revenue)"}
         </label>
@@ -101,6 +90,8 @@ export default function FinanceManager({ session, isAr = true }) {
       </div>
 
       <FinancePeriodTable rows={rows} totals={totals} isAr={isAr} />
+
+      <FinancePrintReport rows={rows} totals={totals} fixed={fixed} modeLabel={periodLabels[mode]} isAr={isAr} />
 
       {/* نصف الإيرادات | نصف المصروفات */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
