@@ -15,18 +15,8 @@ export async function verifyTurnstile(token: string): Promise<boolean> {
     });
     const vdata: any = await vr.json();
     if (Boolean(vdata && vdata.success)) return true;
-    // فشل التحقق الخادمي رغم نجاح الودجة لدى العميل (تظهر "Success!") يحدث لأسباب متعددة على Cloudflare:
-    // invalid-input-secret (عدم تطابق المفتاح السري مع sitekey)، invalid-input-response الكاذب على
-    // الودجات الحديثة، timeout-or-duplicate... إلخ. طالما أن الرمز يبدو صادراً من ودجة Turnstile ذاتها
-    // (يبدأ بـ "0." وطوله كافٍ) نعتمده — فالتحقق البشري (الودجة) هو المتحقق الأساسي، والبوابات محروسة
-    // بالحدّ من المعدّل وعامل OTP الإلزامي المرتبط ببريد الموظف المسجّل.
-    const codes: string[] = Array.isArray(vdata?.["error-codes"]) ? vdata["error-codes"] : [];
-    const missingInput = codes.some((c) => c === "missing-input-response" || c === "missing-input-secret");
-    // اقبل الرمز طالما ليس فارغاً وليس خطأ "مدخلات مفقودة" — توافقنا على أن OTP الإلزامي
-    // والحدّ من المعدّل هما البوابة الأمنية الفعلية، والغرض من Turnstile كبح الإساءة الآلية.
-    if (!missingInput && t.length > 80) {
-      return true;
-    }
+    // فشل التحقق الخادمي — لا نعتمد الرمز مهما كان طوله أو شكله. الحل الصحيح هو ضبط sitekey/secret
+    // في Cloudflare وليس تخفيف التحقق. (fail-closed)
     return false;
   } catch (_e) {
     return false;
