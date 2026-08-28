@@ -1,4 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { verifyCronSecret } from "../../shared/renewal.ts";
 
 // يُستدعى تلقائياً عبر workflow عند إنشاء/تعديل سجل حضور بحالة "متأخر" أو "غياب".
 // ينشئ إشعاراً موجّهاً للموظف (بكل لغات البوابة) ويرسل بريداً للعنوان المسجل لديه.
@@ -57,6 +58,9 @@ export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+    if (!verifyCronSecret(body?.cron_secret)) {
+      return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
+    }
     const attendanceId = String(body.attendance_id || "");
     if (!attendanceId) return Response.json({ ok: false, error: "missing" }, { status: 400 });
 
