@@ -1,5 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { createRateLimiter } from "../../shared/turnstile.ts";
+import { createRateLimiter, verifyTurnstile } from "../../shared/turnstile.ts";
 import { generateResetCode, RESET_CODE_TTL_MS } from "../../shared/ownerAuth.ts";
 
 // طلب استعادة كلمة مرور المالك: يطابق الإقامة + الميلاد + البريد،
@@ -18,6 +18,10 @@ export default async function (req) {
     const email = String(body.email || "").trim().toLowerCase();
     if (!iqama || !birth || !email)
       return Response.json({ ok: false, error: "missing" }, { status: 400 });
+
+    const captcha = String(body.captcha_token || "");
+    if (!(await verifyTurnstile(captcha)))
+      return Response.json({ ok: false, error: "captcha" }, { status: 400 });
 
     const ownerIqama = (Deno.env.get("OWNER_IQAMA") || "").trim();
     const ownerBirth = (Deno.env.get("OWNER_BIRTH_DATE") || "").trim();

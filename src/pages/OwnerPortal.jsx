@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Crown, ShieldCheck, Loader2, LogOut, ArrowRight, LogIn, KeyRound, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { portalSession } from "@/lib/portalSession";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 // بوابة المالك الذاتية — مستقلة عن بوابة الموظف. خاص بالمالك فقط (role_level = "owner")
 // لإدارة العملاء والاشتراكات. الدخول برقم الإقامة وتاريخ الميلاد (نفس آلية التحقق).
@@ -91,6 +92,9 @@ export default function OwnerPortal() {
   const [rCode, setRCode] = useState("");
   const [newPw, setNewPw] = useState("");
   const [newPw2, setNewPw2] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [capKey, setCapKey] = useState(0);
+  const resetCaptcha = () => { setCaptchaToken(""); setCapKey((k) => k + 1); };
 
   const pt = isAr ? {
     pwLabel: "كلمة المرور", pwPh: "••••••••",
@@ -133,11 +137,11 @@ export default function OwnerPortal() {
   const handleLogin = async (e) => {
     e.preventDefault();
     const id = nid.trim(), bd = birth.trim();
-    if (!id || !bd || !password) return;
+    if (!id || !bd || !password || !captchaToken) return;
     setSigningIn(true); setMsg({ type: "", text: "" });
     try {
       const res = await base44.functions.invoke("verifyOwnerLogin", {
-        iqama: id, birth_date: bd, password,
+        iqama: id, birth_date: bd, password, captcha_token: captchaToken,
       });
       const data = res?.data || res;
       if (data?.ok) {
@@ -145,27 +149,29 @@ export default function OwnerPortal() {
         setSession(portalSession.load()); setEmployee(data.employee);
         setNid(""); setBirth(""); setPassword("");
       } else {
-        const m = data?.error === "setup_required" ? pt.setupRequired : data?.error === "wrong_password" ? pt.wrongPw : t.gFail;
+        const m = data?.error === "setup_required" ? pt.setupRequired : data?.error === "wrong_password" ? pt.wrongPw : data?.error === "captcha" ? t.gCaptcha : t.gFail;
         setMsg({ type: "err", text: m });
+        resetCaptcha();
       }
-    } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); }
+    } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); resetCaptcha(); }
     finally { setSigningIn(false); }
   };
 
   const handleForgot = async (e) => {
     e.preventDefault();
     const id = nid.trim(), bd = birth.trim();
-    if (!id || !bd || !fEmail.trim()) return;
+    if (!id || !bd || !fEmail.trim() || !captchaToken) return;
     setSigningIn(true); setMsg({ type: "", text: "" });
     try {
       const res = await base44.functions.invoke("ownerForgotPassword", {
-        iqama: id, birth_date: bd, email: fEmail.trim(),
+        iqama: id, birth_date: bd, email: fEmail.trim(), captcha_token: captchaToken,
       });
       const data = res?.data || res;
-      if (data?.ok) { setMsg({ type: "ok", text: pt.codeSent }); setMode("reset"); }
-      else if (data?.error === "email_failed") setMsg({ type: "err", text: isAr ? "تعذّر إرسال الرمز — تأكد أن بريد المالك مسجّل كمستخدم في التطبيق، ثم أعد المحاولة." : "Could not send the code — ensure the owner email is a registered app user, then retry." });
-      else setMsg({ type: "err", text: t.gFail });
-    } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); }
+      if (data?.ok) { setMsg({ type: "ok", text: pt.codeSent }); setMode("reset"); resetCaptcha(); }
+      else if (data?.error === "email_failed") { setMsg({ type: "err", text: isAr ? "تعذّر إرسال الرمز — تأكد أن بريد المالك مسجّل كمستخدم في التطبيق، ثم أعد المحاولة." : "Could not send the code — ensure the owner email is a registered app user, then retry." }); resetCaptcha(); }
+      else if (data?.error === "captcha") { setMsg({ type: "err", text: t.gCaptcha }); resetCaptcha(); }
+      else { setMsg({ type: "err", text: t.gFail }); resetCaptcha(); }
+    } catch (err) { setMsg({ type: "err", text: apiErrText(err, t.gFail) }); resetCaptcha(); }
     finally { setSigningIn(false); }
   };
 
@@ -173,13 +179,14 @@ export default function OwnerPortal() {
     e.preventDefault();
     if (newPw.length < 6) { setMsg({ type: "err", text: pt.weakPw }); return; }
     if (newPw !== newPw2) { setMsg({ type: "err", text: pt.mismatch }); return; }
+    if (!captchaToken) return;
     setSigningIn(true); setMsg({ type: "", text: "" });
     try {
-      const res = await base44.functions.invoke("ownerResetPassword", { reset_code: rCode.trim(), new_password: newPw });
+      const res = await base44.functions.invoke("ownerResetPassword", { reset_code: rCode.trim(), new_password: newPw, captcha_token: captchaToken });
       const data = res?.data || res;
-      if (data?.ok) { setMsg({ type: "ok", text: pt.resetOk }); setMode("login"); setRCode(""); setNewPw(""); setNewPw2(""); setPassword(""); }
-      else setMsg({ type: "err", text: data?.error === "expired_code" ? pt.codeExpired : pt.codeInvalid });
-    } catch (err) { setMsg({ type: "err", text: apiErrText(err, isAr ? "خطأ." : "Error.") }); }
+      if (data?.ok) { setMsg({ type: "ok", text: pt.resetOk }); setMode("login"); setRCode(""); setNewPw(""); setNewPw2(""); setPassword(""); resetCaptcha(); }
+      else { setMsg({ type: "err", text: data?.error === "expired_code" ? pt.codeExpired : data?.error === "captcha" ? t.gCaptcha : pt.codeInvalid }); resetCaptcha(); }
+    } catch (err) { setMsg({ type: "err", text: apiErrText(err, isAr ? "خطأ." : "Error.") }); resetCaptcha(); }
     finally { setSigningIn(false); }
   };
 
@@ -243,14 +250,15 @@ export default function OwnerPortal() {
                   <Label>{pt.pwLabel}</Label>
                   <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={pt.pwPh} required disabled={signingIn} dir="ltr" />
                 </div>
+                <TurnstileWidget key={`cap-${capKey}`} onToken={setCaptchaToken} />
                 {msg.text && (
                   <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
                 )}
-                <Button type="submit" disabled={signingIn} className="gap-2 w-full">
+                <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2 w-full">
                   {signingIn ? <Loader2 size={16} className="animate-spin" /> : <LogIn size={16} />} {t.gBtn}
                 </Button>
                 <div className="flex items-center justify-between">
-                  <button type="button" onClick={() => { setMode("forgot"); setMsg({ type: "", text: "" }); }} className="text-xs text-violet-600 hover:underline">{pt.forgot}</button>
+                  <button type="button" onClick={() => { setMode("forgot"); setMsg({ type: "", text: "" }); resetCaptcha(); }} className="text-xs text-violet-600 hover:underline">{pt.forgot}</button>
                 </div>
                 <p className="text-xs text-amber-600 leading-relaxed">{pt.setupHint}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{t.gNote}</p>
@@ -272,19 +280,21 @@ export default function OwnerPortal() {
                   <Label>{pt.emailLabel}</Label>
                   <Input type="email" value={fEmail} onChange={(e) => setFEmail(e.target.value)} placeholder={pt.emailPh} required disabled={signingIn} dir="ltr" />
                 </div>
+                <TurnstileWidget key={`cap-forgot-${capKey}`} onToken={setCaptchaToken} />
                 {msg.text && (
                   <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
                 )}
-                <Button type="submit" disabled={signingIn} className="gap-2 w-full">
+                <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2 w-full">
                   {signingIn ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />} {pt.sendCode}
                 </Button>
-                <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>
+                <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); resetCaptcha(); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>
               </form>
             )}
 
             {mode === "reset" && (
               <form onSubmit={handleReset} className="space-y-4">
                 <div className="rounded-lg bg-violet-50 text-violet-700 text-xs p-3 leading-relaxed">{pt.resetDesc}</div>
+                <TurnstileWidget key={`cap-reset-${capKey}`} onToken={setCaptchaToken} />
                 <div className="space-y-1.5">
                   <Label>{pt.codeLabel}</Label>
                   <Input value={rCode} onChange={(e) => setRCode(e.target.value)} placeholder={pt.codePh} required disabled={signingIn} dir="ltr" inputMode="numeric" />
@@ -300,10 +310,10 @@ export default function OwnerPortal() {
                 {msg.text && (
                   <div className={cn("text-sm rounded-lg p-3 leading-relaxed", msg.type === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>{msg.text}</div>
                 )}
-                <Button type="submit" disabled={signingIn} className="gap-2 w-full">
+                <Button type="submit" disabled={signingIn || !captchaToken} className="gap-2 w-full">
                   {signingIn ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />} {pt.resetBtn}
                 </Button>
-                <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>
+                <button type="button" onClick={() => { setMode("login"); setMsg({ type: "", text: "" }); resetCaptcha(); }} className="text-xs text-muted-foreground hover:underline">{pt.back}</button>
               </form>
             )}
           </div>

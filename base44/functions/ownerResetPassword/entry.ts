@@ -1,6 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { hashPassword } from "../../shared/ownerAuth.ts";
-import { createRateLimiter } from "../../shared/turnstile.ts";
+import { createRateLimiter, verifyTurnstile } from "../../shared/turnstile.ts";
 
 // تعيين كلمة مرور جديدة للمالك: يتحقق من رمز الاستعادة (غير منتهٍ) مع تقييد المعدّل
 // وقفل بعد عدد محاولات فاشل، ثم يخزّن تجزئة كلمة المرور الجديدة ويمسح الرمز والمحاولات.
@@ -19,6 +19,10 @@ export default async function (req) {
     const newPass = String(body.new_password || "");
     if (!code || !newPass || newPass.length < 6)
       return Response.json({ ok: false, error: "invalid" }, { status: 400 });
+
+    const captcha = String(body.captcha_token || "");
+    if (!(await verifyTurnstile(captcha)))
+      return Response.json({ ok: false, error: "captcha" }, { status: 400 });
 
     // إغلاق صارم: لا يمكن إعادة التعيين ما لم يُضبط بريد المالك المسؤول عن استلام الرمز.
     const ownerEmail = (Deno.env.get("OWNER_EMAIL") || "").trim().toLowerCase();

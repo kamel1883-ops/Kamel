@@ -1,6 +1,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { signToken } from "../../shared/portalToken.ts";
 import { verifyPassword } from "../../shared/ownerAuth.ts";
+import { verifyTurnstile } from "../../shared/turnstile.ts";
 
 // دخول بوابة المالك: يطابق رقم الإقامة + الميلاد (أسرار) + كلمة المرور (كيان OwnerCredential).
 // لا يعتمد على جدول الموظفين، ولا يظهر المالك كموظف للعملاء.
@@ -13,6 +14,10 @@ export default async function (req) {
     const password = String(body.password || "");
     if (!iqama || !birth || !password)
       return Response.json({ ok: false, error: "missing" }, { status: 400 });
+
+    const captcha = String(body.captcha_token || "");
+    if (!(await verifyTurnstile(captcha)))
+      return Response.json({ ok: false, error: "captcha" }, { status: 400 });
 
     const ownerIqama = (Deno.env.get("OWNER_IQAMA") || "").trim();
     const ownerBirth = (Deno.env.get("OWNER_BIRTH_DATE") || "").trim();
