@@ -1,5 +1,4 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
-import { verifyTurnstile } from "../../shared/turnstile.ts";
 import { signToken } from "../../shared/portalToken.ts";
 import { verifyPassword } from "../../shared/ownerAuth.ts";
 
@@ -12,11 +11,8 @@ export default async function (req) {
     const iqama = String(body.iqama || "").trim();
     const birth = String(body.birth_date || "").trim();
     const password = String(body.password || "");
-    const captchaToken = String(body.captcha_token || "");
     if (!iqama || !birth || !password)
       return Response.json({ ok: false, error: "missing" }, { status: 400 });
-    if (!(await verifyTurnstile(captchaToken)))
-      return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
 
     const ownerIqama = (Deno.env.get("OWNER_IQAMA") || "").trim();
     const ownerBirth = (Deno.env.get("OWNER_BIRTH_DATE") || "").trim();
