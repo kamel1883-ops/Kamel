@@ -26,6 +26,7 @@ const Warnings = lazy(() => import("@/pages/Warnings"));
 const Decisions = lazy(() => import("@/pages/Decisions"));
 const Incentives = lazy(() => import("@/pages/Incentives"));
 const AdDesigns = lazy(() => import("@/pages/AdDesigns"));
+const AppStoreScreens = lazy(() => import("@/pages/AppStoreScreens"));
 const StrategicPlan = lazy(() => import("@/pages/StrategicPlan"));
 const Payroll = lazy(() => import("@/pages/Payroll"));
 const Gosi = lazy(() => import("@/pages/Gosi"));
@@ -76,7 +77,7 @@ const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSyste
 const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSystemPage"));
 import { PortalLangProvider } from "@/lib/portalI18n";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/strategic-plan", "/ad-designs", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/strategic-plan", "/ad-designs", "/app-store-screens", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -118,6 +119,7 @@ const AuthenticatedApp = () => {
           {/* مستندات خاصة بالمالك فقط — بروابط مباشرة غير مرتبطة بأي بوابة أو قائمة تنقّل */}
           <Route path="/strategic-plan" element={<StrategicPlan />} />
           <Route path="/ad-designs" element={<AdDesigns />} />
+          <Route path="/app-store-screens" element={<AppStoreScreens />} />
           <Route path="/hr-system" element={<HrSystemPage />} />
           <Route path="/payroll-system" element={<PayrollSystemPage />} />
           <Route path="/attendance-system" element={<AttendanceSystemPage />} />
