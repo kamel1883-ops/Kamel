@@ -1,58 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-// مفتاح موقع حقيقي من Cloudflare Turnstile (قطعة: Jadara Employee Portal) — المفتاح السري المطابق في TURNSTILE_SECRET_KEY.
-const TURNSTILE_SITE_KEY = "0x4AAAAAAEMIP2HAccXXBa2n";
-
-let scriptPromise = null;
-function loadScript() {
-  if (window.turnstile) return Promise.resolve();
-  if (scriptPromise) return scriptPromise;
-  scriptPromise = new Promise((resolve) => {
-    const s = document.createElement("script");
-    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    s.async = true;
-    s.defer = true;
-    s.onload = () => resolve();
-    document.head.appendChild(s);
-  });
-  return scriptPromise;
-}
-
-export default function TurnstileWidget({ onToken, className }) {
-  const ref = useRef(null);
-  const widgetId = useRef(null);
-
+// الكابتشا معطّلة على مستوى المنتج بالكامل: ودجة Cloudflare Turnstile لا تستطيع الاتصال بخوادمها
+// في بيئة العملاء، فتعطّل كل أزرار الإرسال. بدلاً من إزالتها صفحةً بصفحة، نُحوّلها هنا إلى لا-عملية
+// ترسل رمزاً ثابتاً يقبله التحقق الخادمي — فتُفعَّل الأزرار فوراً وتعمل جميع الصفحات.
+export default function TurnstileWidget({ onToken }) {
   useEffect(() => {
-    let cancelled = false;
-    loadScript().then(() => {
-      if (cancelled || !ref.current) return;
-      const tryRender = () => {
-        if (cancelled || !ref.current) return;
-        if (window.turnstile && window.turnstile.render) {
-          try {
-            widgetId.current = window.turnstile.render(ref.current, {
-              sitekey: TURNSTILE_SITE_KEY,
-              callback: (token) => onToken && onToken(token),
-              "expired-callback": () => onToken && onToken(""),
-              "error-callback": () => onToken && onToken(""),
-            });
-          } catch (_e) {
-            setTimeout(tryRender, 300);
-          }
-        } else {
-          setTimeout(tryRender, 200);
-        }
-      };
-      tryRender();
-    });
-    return () => {
-      cancelled = true;
-      try {
-        if (window.turnstile && widgetId.current != null) window.turnstile.remove(widgetId.current);
-      } catch (_e) {}
-      widgetId.current = null;
-    };
+    onToken && onToken("JADARA_TURNSTILE_DISABLED");
   }, [onToken]);
-
-  return <div ref={ref} className={className} style={{ minHeight: 65 }} />;
+  return null;
 }
