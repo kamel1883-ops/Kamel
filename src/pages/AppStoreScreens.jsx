@@ -12,10 +12,16 @@ import { Link } from "react-router-dom";
 
 // المقاسات الرسمية المطلوبة من Apple App Store (عمودي Portrait، PNG/JPEG بدون شفافية)
 const PRESETS = [
-  { key: "iphone67", label: 'آيفون 6.7" — 1290 × 2796', hint: "إلزامي لكل تطبيق", w: 1290, h: 2796, icon: Smartphone, required: true },
-  { key: "iphone65", label: 'آيفون 6.5" — 1242 × 2688', w: 1242, h: 2688, icon: Smartphone },
-  { key: "iphone55", label: 'آيفون 5.5" — 1242 × 2208', w: 1242, h: 2208, icon: Smartphone },
-  { key: "ipad129", label: 'آيباد 12.9" — 2048 × 2732', w: 2048, h: 2732, icon: Tablet },
+  { key: "65-p1242", label: '6.5" عمودي — 1242 × 2688', w: 1242, h: 2688, icon: Smartphone, hint: "خانة 6.5\" / مقبول أيضاً لخانة 6.7\"" },
+  { key: "65-l2688", label: '6.5" أفقي — 2688 × 1242', w: 2688, h: 1242, icon: Smartphone },
+  { key: "61-p1284", label: '6.1" عمودي — 1284 × 2778', w: 1284, h: 2778, icon: Smartphone, hint: "مقبول ضمن خانة 6.5\"" },
+  { key: "61-l2778", label: '6.1" أفقي — 2778 × 1284', w: 2778, h: 1284, icon: Smartphone },
+  { key: "67-p1290", label: '6.7" عمودي — 1290 × 2796', w: 1290, h: 2796, icon: Smartphone, hint: "إلزامي لكل تطبيق جديد", required: true },
+  { key: "67-l2796", label: '6.7" أفقي — 2796 × 1290', w: 2796, h: 1290, icon: Smartphone },
+  { key: "55-p1242", label: '5.5" عمودي — 1242 × 2208', w: 1242, h: 2208, icon: Smartphone },
+  { key: "55-l2208", label: '5.5" أفقي — 2208 × 1242', w: 2208, h: 1242, icon: Smartphone },
+  { key: "ipad-p2048", label: 'iPad 12.9" عمودي — 2048 × 2732', w: 2048, h: 2732, icon: Tablet },
+  { key: "ipad-l2732", label: 'iPad 12.9" أفقي — 2732 × 2048', w: 2732, h: 2048, icon: Tablet },
 ];
 
 const FIT_MODES = [
@@ -27,7 +33,7 @@ const FIT_MODES = [
 let _id = 0;
 
 export default function AppStoreScreens() {
-  const [preset, setPreset] = useState("iphone67");
+  const [preset, setPreset] = useState("65-p1242");
   const [fit, setFit] = useState("cover");
   const [bg, setBg] = useState("#ffffff");
   const [caption, setCaption] = useState("");
