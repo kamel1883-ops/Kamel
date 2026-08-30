@@ -86,8 +86,8 @@ export default function QuoteDoc({
 
       {/* رأس هوية المنشأة — مطابق لعقد الاشتراك */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 18, borderBottom: "2px solid #0b1120", marginBottom: 22 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 16, background: "#35254d", boxShadow: "0 0 0 1.5px #c5a575, 0 6px 18px -10px rgba(53,37,77,.5)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Crown size={26} strokeWidth={1.8} style={{ color: "#c5a575" }} />
+        <div style={{ width: 52, height: 52, borderRadius: 16, background: "linear-gradient(135deg,#0b0f19,#2e2448)", boxShadow: "0 0 0 1px rgba(252,211,77,.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
         </div>
         <div>
           <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
