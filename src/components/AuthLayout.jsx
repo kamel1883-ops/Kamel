@@ -33,7 +33,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
         <div className="relative">
           <h2 className="text-3xl font-extrabold leading-snug" style={{ fontFamily: "var(--font-display)" }}>
             {t.pre}
-            <span className="block bg-gradient-to-l from-violet-300 to-indigo-300 bg-clip-text text-transparent">{t.hi}</span>
+            <span className="block bg-gradient-to-l from-violet-400 to-violet-600 bg-clip-text text-transparent">{t.hi}</span>
           </h2>
           <p className="text-white/70 mt-4 max-w-md leading-relaxed">{t.desc}</p>
           <ul className="mt-7 space-y-2.5 text-sm text-white/80">
