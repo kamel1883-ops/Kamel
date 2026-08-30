@@ -12,7 +12,7 @@ export default function EnvPoster({
   points = [],
   cta,
   email = "info@jadara-hr.com",
-  accent = "#E9C766",
+  accent = "#8B5CF6",
 }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";

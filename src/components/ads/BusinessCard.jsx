@@ -2,7 +2,7 @@ import React from "react";
 import { Crown, Mail, Phone, Globe, Instagram, Linkedin, Twitter } from "lucide-react";
 
 const NAVY = "#0B2545";
-const GOLD = "#E9C766";
+const GOLD = "#8B5CF6";
 
 // وجه واحد من الكرت الشخصي (عربي أو إنجليزي) — نسبة 90×50 ملم
 function Side({ isAr, name, title, phone, email, website, social }) {
@@ -10,7 +10,7 @@ function Side({ isAr, name, title, phone, email, website, social }) {
     <div
       dir={isAr ? "rtl" : "ltr"}
       className="relative w-full h-full overflow-hidden"
-      style={{ background: `linear-gradient(135deg, #14396B 0%, #1B4A81 55%, #10305C 100%)` }}
+      style={{ background: `linear-gradient(135deg, #1a1333 0%, #2e2448 55%, #0f0a1f 100%)` }}
     >
       <div
         className="absolute -top-10 w-40 h-40 rounded-full opacity-25"

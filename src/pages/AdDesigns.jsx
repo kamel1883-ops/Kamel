@@ -44,7 +44,7 @@ export default function AdDesigns() {
         title: "رواتبك وحساباتك", titleAccent: "بلا أخطاء",
         body: "احتساب الرواتب والتأمينات الاجتماعية والإجازات والحوافز والترقيات ونهاية الخدمة تلقائياً، مع تقارير احترافية جاهزة للاعتماد.",
         points: ["احتساب الرواتب مباشرة من البصمة", "نهاية الخدمة", "التأمينات الاجتماعية", "تقارير قابلة للاعتماد"],
-        accent: "#E9C766",
+        accent: "#8B5CF6",
       },
     },
     {
@@ -55,7 +55,7 @@ export default function AdDesigns() {
         title: "استقطب أفضل", titleAccent: "الكفاءات",
         body: "نظام توظيف متكامل من إعلان الوظيفة إلى فرز الطلبات والمقابلات وقرار التعيين ومستند التكليف — في منصة واحدة.",
         points: ["إعلان الوظائف", "فرز الطلبات", "المقابلات", "قرار التعيين"],
-        accent: "#E9C766",
+        accent: "#8B5CF6",
       },
     },
   ] : [
@@ -87,7 +87,7 @@ export default function AdDesigns() {
         title: "Payroll & calculations", titleAccent: "error-free",
         body: "Automatic computation of payroll, social insurance, leaves, incentives, promotions and end-of-service, with professional review-ready reports.",
         points: ["Attendance-driven payroll", "End of service", "Social insurance", "Approval-ready reports"],
-        accent: "#E9C766",
+        accent: "#8B5CF6",
       },
     },
     {
@@ -98,7 +98,7 @@ export default function AdDesigns() {
         title: "Attract the best", titleAccent: "talent",
         body: "An end-to-end hiring system — from job posting to application screening, interviews, the hire decision and the assignment letter — in one platform.",
         points: ["Job postings", "Application screening", "Interviews", "Hire decision"],
-        accent: "#E9C766",
+        accent: "#8B5CF6",
       },
     },
   ];
