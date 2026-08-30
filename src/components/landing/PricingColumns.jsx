@@ -7,14 +7,14 @@ import { PRICING_TIERS_AR, PRICING_TIERS_EN, FULL_FEATURES_AR, FULL_FEATURES_EN 
 // قسم الباقات — بهوية جدارة اللونية: كحلي عميق #0B2545 + ذهبي راقٍ #CBA83A.
 // التخطيط: قائمة عمودية واحدة للشرائح الخمس (كل شريحة صف كامل) + بطاقة التجربة المجانية أسفلهم.
 // خطوط أكبر ومساحة عرض أوسع بدل six cramped columns.
-const GOLD = "#CBA83A";
-const GOLD_DARK = "#9A741E";
-const GOLD_SOFT = "#FBF7EC";
-const GOLD_LIGHT = "#EBD69E";
-const NAVY = "#0B2545";
-const GREY = "#4A5568";
-const CARD = "#F7FAFC";
-const BORDER = "#E2E8F0";
+const GOLD = "#7C5CE6";
+const GOLD_DARK = "#6D45D6";
+const GOLD_SOFT = "#F5F2FC";
+const GOLD_LIGHT = "#C4B5FD";
+const NAVY = "#5B3FD6";
+const GREY = "#5B5566";
+const CARD = "#F8F6FC";
+const BORDER = "#E9E2F7";
 
 export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier }) {
   const tiers = isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN;
@@ -25,7 +25,7 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
 
   return (
     <section id="pricing" className="max-w-[1400px] mx-auto px-4 lg:px-10 py-14">
-      <div className="bg-white rounded-[2rem] p-6 sm:p-10 text-[#0B2545] shadow-xl shadow-black/10 border border-[#E2E8F0]">
+      <div className="bg-white rounded-[2rem] p-6 sm:p-10 text-foreground shadow-xl shadow-violet-900/10 border border-violet-100">
         {/* ترويسة */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-1.5" style={{ background: GOLD_SOFT, color: GOLD_DARK }}>

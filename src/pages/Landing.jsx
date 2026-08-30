@@ -241,33 +241,33 @@ export default function Landing() {
   const seasonal = !!getActiveSeason();
 
   return (
-    <div className={`min-h-screen text-white antialiased ${seasonal ? "bg-[#07231A]" : "bg-[#0B2545]"}`} dir={isAr ? "rtl" : "ltr"}>
+    <div className="min-h-screen antialiased bg-[#F6F3FC] text-foreground" dir={isAr ? "rtl" : "ltr"}>
       <AssistantAvatar mode="public" tone="dark" lang={lang} />
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className={`absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-[120px] ${seasonal ? "bg-emerald-500/25" : "bg-violet-600/30"}`} />
-        <div className={`absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full blur-[120px] ${seasonal ? "bg-green-600/20" : "bg-indigo-600/20"}`} />
-        <div className={`absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px] ${seasonal ? "bg-teal-600/20" : "bg-blue-600/20"}`} />
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-[120px] bg-violet-300/40" />
+        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full blur-[120px] bg-violet-200/35" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px] bg-fuchsia-200/25" />
       </div>
 
       {/* شريط علوي */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-14 h-20 flex items-center justify-between">
           <Link to="/">
-            <Logo tone="light" size={56} />
+            <Logo tone="dark" size={56} />
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-base text-white/75">
-            <button onClick={() => scrollTo("features")} className="hover:text-white transition">{t.nav.features}</button>
-            <button onClick={() => scrollTo("licenses")} className="hover:text-white transition">{t.nav.licenses}</button>
-            <button onClick={() => scrollTo("integrations")} className="hover:text-white transition">{t.nav.integrations}</button>
-            <button onClick={() => scrollTo("about")} className="hover:text-white transition">{t.nav.about}</button>
-            <button onClick={() => scrollTo("pricing")} className="hover:text-white transition">{t.nav.pricing}</button>
-            <button onClick={() => scrollTo("contact")} className="hover:text-white transition">{t.nav.contact}</button>
+          <nav className="hidden md:flex items-center gap-8 text-base text-foreground/70">
+            <button onClick={() => scrollTo("features")} className="hover:text-violet-700 transition">{t.nav.features}</button>
+            <button onClick={() => scrollTo("licenses")} className="hover:text-violet-700 transition">{t.nav.licenses}</button>
+            <button onClick={() => scrollTo("integrations")} className="hover:text-violet-700 transition">{t.nav.integrations}</button>
+            <button onClick={() => scrollTo("about")} className="hover:text-violet-700 transition">{t.nav.about}</button>
+            <button onClick={() => scrollTo("pricing")} className="hover:text-violet-700 transition">{t.nav.pricing}</button>
+            <button onClick={() => scrollTo("contact")} className="hover:text-violet-700 transition">{t.nav.contact}</button>
           </nav>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/portal" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
-            <Link to="/company-login" className="text-base text-white/80 hover:text-white px-4 py-2 rounded-lg hidden sm:block">{t.login}</Link>
-            <button onClick={() => navigate("/quote")} className="text-base bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-5 py-2.5 rounded-xl font-semibold text-[#0B2545] shadow-lg shadow-amber-600/30 transition">{t.start}</button>
+            <Link to="/portal" className="text-base text-foreground/70 hover:text-violet-700 px-4 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
+            <Link to="/company-login" className="text-base text-foreground/70 hover:text-violet-700 px-4 py-2 rounded-lg hidden sm:block">{t.login}</Link>
+            <button onClick={() => navigate("/quote")} className="text-base bg-violet-600 hover:bg-violet-700 px-5 py-2.5 rounded-xl font-semibold text-white shadow-lg shadow-violet-600/30 transition">{t.start}</button>
           </div>
         </div>
       </header>
@@ -281,12 +281,12 @@ export default function Landing() {
         <SeasonalHeroOverlay lang={lang} />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
           <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/90 mb-4 backdrop-blur-md">
-              <BadgeCheck size={14} className="text-violet-300" /> {t.badge}
+            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4 backdrop-blur-md">
+              <BadgeCheck size={14} className="text-violet-600" /> {t.badge}
             </div>
-            <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
               <span className="block">{t.titlePre}</span>
-              <span className="block bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{t.titleHi}</span>
+              <span className="block bg-gradient-to-l from-violet-600 via-fuchsia-500 to-violet-700 bg-clip-text text-transparent">{t.titleHi}</span>
             </h1>
           </motion.div>
         </div>
@@ -296,12 +296,12 @@ export default function Landing() {
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pb-10 w-full">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-2xl text-center sm:text-start">
-              <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-5 drop-shadow">{t.heroDesc}</p>
+              <p className="text-foreground/70 text-sm sm:text-base leading-relaxed mb-5">{t.heroDesc}</p>
               <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                <button onClick={() => navigate("/quote")} className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 flex items-center gap-2 transition">
+                <button onClick={() => navigate("/quote")} className="bg-violet-600 hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold text-white shadow-xl shadow-violet-600/30 flex items-center gap-2 transition">
                   <Zap size={18} /> {t.cta1}
                 </button>
-                <button onClick={() => scrollTo("features")} className="bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-2xl font-medium flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
+                <button onClick={() => scrollTo("features")} className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-6 py-3.5 rounded-2xl font-medium flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
               </div>
             </motion.div>
             <div className="flex gap-8 text-sm">
@@ -314,31 +314,31 @@ export default function Landing() {
       {/* صورة الفريق السعودي + شبكة الخدمات بجوارها */}
       <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-6 grid lg:grid-cols-12 gap-6 items-stretch">
         {/* صورة الفريق السعودي — نُزلت هنا من الـ Hero لتظهر بجوار المميزات */}
-        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-white/10 min-h-[440px]">
+        <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-100 min-h-[440px]">
           <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png" alt={isAr ? "فريق عمل سعودي يستخدم منصة جدارة" : "Saudi team using Jadara"} fittingType="fill" className="w-full h-full absolute inset-0" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-[#0B2545]/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <div className="absolute bottom-6 right-6 left-6">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/85 mb-3">
-              <Sparkles size={12} className="text-violet-300" /> {isAr ? "كل ما تحتاجه في مكان واحد" : "Everything in one place"}
+            <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs text-white/90 mb-3 backdrop-blur-md">
+              <Sparkles size={12} className="text-violet-200" /> {isAr ? "كل ما تحتاجه في مكان واحد" : "Everything in one place"}
             </div>
             <h3 className="text-2xl font-bold text-white leading-snug" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</h3>
           </div>
         </div>
 
         {/* شبكة الخدمات — بجوار صورة الفريق السعودي */}
-        <div className="lg:col-span-7 relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-7">
-          <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-indigo-500/15 blur-3xl" />
+        <div className="lg:col-span-7 relative overflow-hidden rounded-[2rem] border border-violet-100 bg-white p-6 sm:p-7">
+          <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-violet-200/40 blur-3xl" />
           <div className="relative mb-4 flex items-center gap-2">
-            <Sparkles size={16} className="text-violet-200" />
-            <span className="text-sm font-semibold text-white/85">{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</span>
+            <Sparkles size={16} className="text-violet-600" />
+            <span className="text-sm font-semibold text-foreground">{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</span>
           </div>
           <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {features.map((f) => {
               const I = f.icon;
               return (
-                <div key={f.title} className="bg-white/8 border border-white/12 rounded-xl px-2.5 py-2.5 flex items-center gap-2">
-                  <I size={15} className="text-violet-200 shrink-0" />
-                  <span className="text-[11px] leading-tight text-white/90">{f.title}</span>
+                <div key={f.title} className="bg-violet-50/60 border border-violet-100 rounded-xl px-2.5 py-2.5 flex items-center gap-2">
+                  <I size={15} className="text-violet-600 shrink-0" />
+                  <span className="text-[11px] leading-tight text-foreground">{f.title}</span>
                 </div>
               );
             })}
@@ -348,19 +348,19 @@ export default function Landing() {
 
       {/* بوابة الموظف الذاتية — مكوّن مستقل */}
       <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pb-10">
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/20 via-indigo-600/15 to-amber-500/15 p-8 sm:p-10">
-          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-violet-200 bg-gradient-to-l from-violet-50 via-violet-100/60 to-fuchsia-50 p-8 sm:p-10">
+          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-300/30 blur-3xl" />
           <div className="relative flex flex-col gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-                <Users size={26} className="text-violet-200" />
+              <div className="w-14 h-14 rounded-2xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
+                <Users size={26} className="text-violet-600" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">{t.portalTitle}</h3>
-                <p className="text-white/70 mt-2 leading-relaxed">{t.portalDesc}</p>
+                <h3 className="text-2xl font-bold text-foreground">{t.portalTitle}</h3>
+                <p className="text-muted-foreground mt-2 leading-relaxed">{t.portalDesc}</p>
               </div>
             </div>
-            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-white text-[#0B2545] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl transition">
+            <Link to="/portal" className="self-start inline-flex items-center gap-2 bg-violet-600 text-white hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-600/30 transition">
               {t.portalCta} <ArrowLeft size={18} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
@@ -375,20 +375,20 @@ export default function Landing() {
         <SectionHead tag={t.vmvTag} title={t.vmvTitle} />
         <div className="grid md:grid-cols-3 gap-5 mt-10">
           {[
-            { icon: Star, label: t.visionLabel, text: t.visionText, glow: "from-amber-500/20 to-yellow-500/10", ring: "text-amber-300" },
-            { icon: ShieldCheck, label: t.missionLabel, text: t.missionText, glow: "from-emerald-500/20 to-teal-500/10", ring: "text-emerald-300" },
-            { icon: Target, label: t.goalsLabel, text: t.goalsText, glow: "from-violet-500/20 to-indigo-500/10", ring: "text-violet-300" },
+            { icon: Star, label: t.visionLabel, text: t.visionText, glow: "from-violet-200/60 to-violet-100/40", ring: "text-violet-600" },
+            { icon: ShieldCheck, label: t.missionLabel, text: t.missionText, glow: "from-fuchsia-200/60 to-violet-100/40", ring: "text-fuchsia-600" },
+            { icon: Target, label: t.goalsLabel, text: t.goalsText, glow: "from-indigo-200/60 to-violet-100/40", ring: "text-indigo-600" },
           ].map((c) => {
             const I = c.icon;
             return (
               <motion.div key={c.label} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className={`relative border border-white/10 rounded-3xl p-7 overflow-hidden ${seasonal ? "bg-[#0C3527]" : "bg-[#14315a]"}`}>
+                className="relative border border-violet-100 rounded-3xl p-7 overflow-hidden bg-white">
                 <div className={`absolute -top-10 -left-10 w-40 h-40 rounded-full bg-gradient-to-br ${c.glow} blur-2xl`} />
-                <div className="relative w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mb-4 shadow-lg">
+                <div className="relative w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-4 shadow-sm">
                   <I size={22} className={c.ring} />
                 </div>
-                <div className="relative text-xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>{c.label}</div>
-                <p className="relative text-white/65 text-sm leading-relaxed">{c.text}</p>
+                <div className="relative text-xl font-bold mb-2 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.label}</div>
+                <p className="relative text-muted-foreground text-sm leading-relaxed">{c.text}</p>
               </motion.div>
             );
           })}
@@ -403,13 +403,13 @@ export default function Landing() {
             const I = f.icon;
             return (
               <motion.div key={f.title} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className={`group relative border border-white/10 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden ${seasonal ? "bg-[#0C3527] hover:bg-[#0F412F]" : "bg-[#14315a] hover:bg-[#173466]"}`}>
+                className="group relative border border-violet-100 rounded-3xl p-6 pt-7 transition-all hover:-translate-y-1 overflow-hidden bg-white hover:bg-violet-50/40">
                 <div className="absolute top-7 left-6 h-8 w-8 rounded-full bg-violet-500/0 group-hover:bg-violet-500/10 blur-xl transition-all" />
-                <div className={`relative w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center mb-4 shadow-lg ${seasonal ? "bg-[#12513A] shadow-emerald-950/50" : "bg-[#1E3B66] shadow-indigo-950/50"}`}>
-                  <I size={22} className="text-white" />
+                <div className="relative w-12 h-12 rounded-2xl border border-violet-100 flex items-center justify-center mb-4 shadow-sm bg-violet-50">
+                  <I size={22} className="text-violet-600" />
                 </div>
-                <div className="relative font-semibold text-lg leading-snug">{f.title}</div>
-                <div className="relative text-white/60 text-sm mt-2 leading-relaxed">{f.desc}</div>
+                <div className="relative font-semibold text-lg leading-snug text-foreground">{f.title}</div>
+                <div className="relative text-muted-foreground text-sm mt-2 leading-relaxed">{f.desc}</div>
               </motion.div>
             );
           })}
@@ -422,13 +422,13 @@ export default function Landing() {
         <div className="grid lg:grid-cols-3 gap-6 mt-10 items-start">
           <div className="lg:col-span-2 grid sm:grid-cols-2 gap-3">
             {licenses.map((l) => (
-              <div key={l} className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm">
-                <Landmark size={16} className="text-violet-300 shrink-0" /> {l}
+              <div key={l} className="flex items-center gap-2.5 bg-white border border-violet-100 rounded-2xl px-4 py-3 text-sm text-foreground">
+                <Landmark size={16} className="text-violet-600 shrink-0" /> {l}
               </div>
             ))}
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-3 text-sm text-white/75">
-            <div className="font-semibold text-white text-base mb-1">{t.licBadge}</div>
+          <div className="bg-white border border-violet-100 rounded-3xl p-6 space-y-3 text-sm text-muted-foreground">
+            <div className="font-semibold text-foreground text-base mb-1">{t.licBadge}</div>
             {t.licLi.map((li) => <FeatureLi key={li}>{li}</FeatureLi>)}
           </div>
         </div>
@@ -441,15 +441,15 @@ export default function Landing() {
           {integrations.map((it) => {
             const I = it.icon;
             return (
-              <div key={it.t} className="bg-white/5 border border-white/10 rounded-3xl p-6">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500/30 to-teal-500/20 border border-white/10 flex items-center justify-center mb-4">
-                  <I size={20} className="text-emerald-200" />
+              <div key={it.t} className="bg-white border border-violet-100 rounded-3xl p-6">
+                <div className="w-11 h-11 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-4">
+                  <I size={20} className="text-violet-600" />
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <div className="font-semibold">{it.t}</div>
-                  {it.soon && <span className="text-[11px] bg-emerald-400/15 text-emerald-200 border border-emerald-300/25 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>}
+                  <div className="font-semibold text-foreground">{it.t}</div>
+                  {it.soon && <span className="text-[11px] bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>}
                 </div>
-                <div className="text-white/60 text-sm mt-1.5 leading-relaxed">{it.d}</div>
+                <div className="text-muted-foreground text-sm mt-1.5 leading-relaxed">{it.d}</div>
               </div>
             );
           })}
@@ -460,24 +460,24 @@ export default function Landing() {
       <section id="about" className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.aboutTag} title={t.aboutTitle} />
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-          className="bg-gradient-to-br from-white/8 to-white/5 border border-white/10 rounded-3xl p-8 mt-8 grid sm:grid-cols-[auto,1fr] gap-7 items-start">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-violet-500/30 to-indigo-500/20 border border-white/15 flex items-center justify-center mx-auto sm:mx-0">
-            <Crown size={40} className="text-amber-300" />
+          className="bg-white border border-violet-100 rounded-3xl p-8 mt-8 grid sm:grid-cols-[auto,1fr] gap-7 items-start">
+          <div className="w-24 h-24 rounded-3xl bg-violet-50 border border-violet-100 flex items-center justify-center mx-auto sm:mx-0">
+            <Crown size={40} className="text-violet-600" />
           </div>
           <div>
-            <div className="inline-flex items-center gap-2 bg-amber-400/15 text-amber-200 border border-amber-300/20 rounded-full px-3 py-1 text-xs mb-3">
+            <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1 text-xs mb-3">
               <Sparkles size={13} /> {t.aboutChip}
             </div>
-            <h3 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>{t.aboutRole}</h3>
-            <p className="text-white/75 mt-3 leading-loose">
-              {t.aboutText1}<b className="text-white">{t.aboutTextBold1}</b>{t.aboutTextUniv}<b className="text-white">{t.aboutTextUnivBold}</b>{t.aboutTextGrade}<b className="text-white">{t.aboutTextGradeBold}</b>{t.aboutText2} <b className="text-white">SHRM‑SCP</b> {isAr ? "الأمريكية، وشهادة" : ", the"} <b className="text-white">OTHM</b> {isAr ? "، وشهادة" : " certificate, and the"} <b className="text-white">CMI</b> {isAr ? "." : " certificate."}
+            <h3 className="text-2xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.aboutRole}</h3>
+            <p className="text-muted-foreground mt-3 leading-loose">
+              {t.aboutText1}<b className="text-violet-700">{t.aboutTextBold1}</b>{t.aboutTextUniv}<b className="text-violet-700">{t.aboutTextUnivBold}</b>{t.aboutTextGrade}<b className="text-violet-700">{t.aboutTextGradeBold}</b>{t.aboutText2} <b className="text-violet-700">SHRM‑SCP</b> {isAr ? "الأمريكية، وشهادة" : ", the"} <b className="text-violet-700">OTHM</b> {isAr ? "، وشهادة" : " certificate, and the"} <b className="text-violet-700">CMI</b> {isAr ? "." : " certificate."}
             </p>
             <div className="flex flex-wrap gap-2 mt-5">
               {(isAr ? t.certAr : t.certs).map((c) => {
                 const I = c.includes("MA") || c.includes("ماجستير") ? GraduationCap : Award;
                 return (
-                  <span key={c} className="inline-flex items-center gap-1.5 text-xs bg-white/8 border border-white/15 rounded-full px-3 py-1.5">
-                    <I size={13} className="text-violet-200" /> {c}
+                  <span key={c} className="inline-flex items-center gap-1.5 text-xs bg-violet-50 border border-violet-200 rounded-full px-3 py-1.5 text-foreground">
+                    <I size={13} className="text-violet-600" /> {c}
                   </span>
                 );
               })}
@@ -494,9 +494,9 @@ export default function Landing() {
 
       {/* شارك جدارة */}
       <section id="share" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-12 text-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-3" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
-        <p className="text-white/60 mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
+        <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
+        <p className="text-muted-foreground mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
         <ShareBar isAr={isAr} />
       </section>
 
@@ -504,67 +504,67 @@ export default function Landing() {
       <section id="contact" className="max-w-[1400px] mx-auto px-6 lg:px-14 py-14">
         <SectionHead tag={t.contactTag} title={t.contactTitle} />
         <div className="grid sm:grid-cols-3 gap-5 mt-8">
-          <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-400/20 rounded-3xl p-6 text-center transition group">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-300" /></div>
-            <div className="font-semibold">{t.wa}</div>
-            <div className="text-white/60 text-sm mt-1" dir="ltr">+966 594700782</div>
+          <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-3xl p-6 text-center transition group">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-600" /></div>
+            <div className="font-semibold text-foreground">{t.wa}</div>
+            <div className="text-muted-foreground text-sm mt-1" dir="ltr">+966 594700782</div>
           </a>
-          <a href={`mailto:${SALES_EMAIL}`} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 text-center transition">
-            <div className="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-200" /></div>
-            <div className="font-semibold">{t.emailCard}</div>
-            <div className="text-white/60 text-sm mt-1" dir="ltr">{SALES_EMAIL}</div>
+          <a href={`mailto:${SALES_EMAIL}`} className="bg-white hover:bg-violet-50 border border-violet-100 rounded-3xl p-6 text-center transition">
+            <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-600" /></div>
+            <div className="font-semibold text-foreground">{t.emailCard}</div>
+            <div className="text-muted-foreground text-sm mt-1" dir="ltr">{SALES_EMAIL}</div>
           </a>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3"><MapPin size={22} className="text-blue-200" /></div>
-            <div className="font-semibold">{t.loc}</div>
-            <div className="text-white/60 text-sm mt-1">{t.locVal}</div>
+          <div className="bg-white border border-violet-100 rounded-3xl p-6 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-3"><MapPin size={22} className="text-indigo-600" /></div>
+            <div className="font-semibold text-foreground">{t.loc}</div>
+            <div className="text-muted-foreground text-sm mt-1">{t.locVal}</div>
           </div>
         </div>
       </section>
 
       {/* التذييل */}
-      <footer className="border-t border-white/10 mt-10">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-14 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-base text-white/70">
+      <footer className="border-t border-violet-100 mt-10 bg-white/60">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-14 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-base text-muted-foreground">
           <div>
-            <div className="mb-2"><Logo tone="light" size={48} /></div>
+            <div className="mb-2"><Logo tone="dark" size={48} /></div>
             <p>{t.footerDesc}</p>
             <div className="flex items-center gap-2 mt-4">
               <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"
-                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Linkedin size={17} className="text-white/80" />
+                className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
+                <Linkedin size={17} className="text-violet-600" />
               </a>
               <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noreferrer" aria-label="X (Twitter)"
-                className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Twitter size={17} className="text-white/80" />
+                className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
+                <Twitter size={17} className="text-violet-600" />
               </a>
             </div>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-white mb-1">{isAr ? "الحلول" : "Solutions"}</div>
-            <Link to="/qiwa-mudad" className="block hover:text-white">{isAr ? "تكامل قوى ومدد" : "Qiwa & Mudad"}</Link>
-            <Link to="/wps-mudad" className="block hover:text-white">{isAr ? "حماية الأجور (مدد)" : "Wage Protection (Mudad)"}</Link>
-            <Link to="/eos-calculator" className="block hover:text-white">{isAr ? "حاسبة نهاية الخدمة" : "EOS Calculator"}</Link>
-            <Link to="/contracts" className="block hover:text-white">{isAr ? "إدارة العقود واللوائح" : "Contracts & Policies"}</Link>
-            <Link to="/blog" className="block hover:text-white">{isAr ? "مدونة HR" : "HR Blog"}</Link>
-            <Link to="/affiliate-program" className="block hover:text-white">{isAr ? "التسويق بالعمولة (7%)" : "Affiliate Program (7%)"}</Link>
+            <div className="font-medium text-foreground mb-1">{isAr ? "الحلول" : "Solutions"}</div>
+            <Link to="/qiwa-mudad" className="block hover:text-violet-700">{isAr ? "تكامل قوى ومدد" : "Qiwa & Mudad"}</Link>
+            <Link to="/wps-mudad" className="block hover:text-violet-700">{isAr ? "حماية الأجور (مدد)" : "Wage Protection (Mudad)"}</Link>
+            <Link to="/eos-calculator" className="block hover:text-violet-700">{isAr ? "حاسبة نهاية الخدمة" : "EOS Calculator"}</Link>
+            <Link to="/contracts" className="block hover:text-violet-700">{isAr ? "إدارة العقود واللوائح" : "Contracts & Policies"}</Link>
+            <Link to="/blog" className="block hover:text-violet-700">{isAr ? "مدونة HR" : "HR Blog"}</Link>
+            <Link to="/affiliate-program" className="block hover:text-violet-700">{isAr ? "التسويق بالعمولة (7%)" : "Affiliate Program (7%)"}</Link>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-white mb-1">{t.footContact}</div>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><MessageCircle size={14} /> WhatsApp: +966 594700782</a>
-            <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-white"><Mail size={14} /> {SALES_EMAIL}</a>
+            <div className="font-medium text-foreground mb-1">{t.footContact}</div>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-violet-700"><MessageCircle size={14} /> WhatsApp: +966 594700782</a>
+            <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-violet-700"><Mail size={14} /> {SALES_EMAIL}</a>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-white mb-1">{t.footPlatform}</div>
-            <button onClick={() => scrollTo("features")} className="block hover:text-white">{t.nav.features}</button>
-            <button onClick={() => scrollTo("pricing")} className="block hover:text-white">{t.nav.pricing}</button>
-            <Link to="/about" className="block hover:text-white">{isAr ? "من نحن" : "About"}</Link>
-            <Link to="/contact" className="block hover:text-white">{t.nav.contact}</Link>
-            <Link to="/company-login?returnTo=/app" className="block hover:text-white">{t.login}</Link>
-            <Link to="/privacy" className="block hover:text-white">{isAr ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
-            <Link to="/refund-policy" className="block hover:text-white">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>
+            <div className="font-medium text-foreground mb-1">{t.footPlatform}</div>
+            <button onClick={() => scrollTo("features")} className="block hover:text-violet-700">{t.nav.features}</button>
+            <button onClick={() => scrollTo("pricing")} className="block hover:text-violet-700">{t.nav.pricing}</button>
+            <Link to="/about" className="block hover:text-violet-700">{isAr ? "من نحن" : "About"}</Link>
+            <Link to="/contact" className="block hover:text-violet-700">{t.nav.contact}</Link>
+            <Link to="/company-login?returnTo=/app" className="block hover:text-violet-700">{t.login}</Link>
+            <Link to="/privacy" className="block hover:text-violet-700">{isAr ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
+            <Link to="/refund-policy" className="block hover:text-violet-700">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>
           </div>
         </div>
-        <div className="text-center text-white/50 text-sm pb-6">{t.copy}</div>
+        <div className="text-center text-muted-foreground/70 text-sm pb-6">{t.copy}</div>
       </footer>
 
     </div>
@@ -574,8 +574,8 @@ export default function Landing() {
 function SectionHead({ tag, title }) {
   return (
     <div className="text-center">
-      <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80">{tag}</div>
-      <h2 className="text-3xl sm:text-4xl font-extrabold mt-4" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+      <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700">{tag}</div>
+      <h2 className="text-3xl sm:text-4xl font-extrabold mt-4 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
     </div>
   );
 }
@@ -583,14 +583,14 @@ function SectionHead({ tag, title }) {
 function Stat({ n, l }) {
   return (
     <div>
-      <div className="text-2xl font-extrabold bg-gradient-to-l from-[#DBC364] to-[#EBD69E] bg-clip-text text-transparent">{n}</div>
-      <div className="text-white/50 text-xs mt-0.5">{l}</div>
+      <div className="text-2xl font-extrabold bg-gradient-to-l from-violet-600 to-violet-800 bg-clip-text text-transparent">{n}</div>
+      <div className="text-muted-foreground text-xs mt-0.5">{l}</div>
     </div>
   );
 }
 
 function FeatureLi({ children }) {
   return (
-    <div className="flex items-start gap-2"><Check size={16} className="text-emerald-400 mt-0.5 shrink-0" /> <span>{children}</span></div>
+    <div className="flex items-start gap-2"><Check size={16} className="text-violet-600 mt-0.5 shrink-0" /> <span>{children}</span></div>
   );
 }
