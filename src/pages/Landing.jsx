@@ -281,7 +281,7 @@ export default function Landing() {
         <SeasonalHeroOverlay lang={lang} />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
           <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4 backdrop-blur-md">
               <BadgeCheck size={14} className="text-violet-600" /> {t.badge}
             </div>
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
@@ -296,7 +296,7 @@ export default function Landing() {
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pb-10 w-full">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-2xl text-center sm:text-start">
-              <p className="text-foreground/70 text-sm sm:text-base leading-relaxed mb-5">{t.heroDesc}</p>
+              <p className="text-foreground/70 text-base sm:text-lg leading-relaxed mb-5">{t.heroDesc}</p>
               <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
                 <button onClick={() => navigate("/quote")} className="bg-violet-600 hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold text-white shadow-xl shadow-violet-600/30 flex items-center gap-2 transition">
                   <Zap size={18} /> {t.cta1}
@@ -330,7 +330,7 @@ export default function Landing() {
           <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-violet-200/40 blur-3xl" />
           <div className="relative mb-4 flex items-center gap-2">
             <Sparkles size={16} className="text-violet-600" />
-            <span className="text-sm font-semibold text-foreground">{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</span>
+            <span className="text-base font-semibold text-foreground">{isAr ? "كل خدمات المنصة في مكان واحد" : "All platform services in one place"}</span>
           </div>
           <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {features.map((f) => {
@@ -338,7 +338,7 @@ export default function Landing() {
               return (
                 <div key={f.title} className="bg-violet-50/60 border border-violet-100 rounded-xl px-2.5 py-2.5 flex items-center gap-2">
                   <I size={15} className="text-violet-600 shrink-0" />
-                  <span className="text-[11px] leading-tight text-foreground">{f.title}</span>
+                  <span className="text-sm leading-snug text-foreground">{f.title}</span>
                 </div>
               );
             })}
@@ -387,8 +387,8 @@ export default function Landing() {
                 <div className="relative w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-4 shadow-sm">
                   <I size={22} className={c.ring} />
                 </div>
-                <div className="relative text-xl font-bold mb-2 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.label}</div>
-                <p className="relative text-muted-foreground text-sm leading-relaxed">{c.text}</p>
+                <div className="relative text-2xl font-bold mb-2 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.label}</div>
+                <p className="relative text-muted-foreground text-base leading-relaxed">{c.text}</p>
               </motion.div>
             );
           })}
@@ -408,8 +408,8 @@ export default function Landing() {
                 <div className="relative w-12 h-12 rounded-2xl border border-violet-100 flex items-center justify-center mb-4 shadow-sm bg-violet-50">
                   <I size={22} className="text-violet-600" />
                 </div>
-                <div className="relative font-semibold text-lg leading-snug text-foreground">{f.title}</div>
-                <div className="relative text-muted-foreground text-sm mt-2 leading-relaxed">{f.desc}</div>
+                <div className="relative font-bold text-xl leading-snug text-foreground">{f.title}</div>
+                <div className="relative text-muted-foreground text-base mt-2 leading-relaxed">{f.desc}</div>
               </motion.div>
             );
           })}
@@ -422,13 +422,13 @@ export default function Landing() {
         <div className="grid lg:grid-cols-3 gap-6 mt-10 items-start">
           <div className="lg:col-span-2 grid sm:grid-cols-2 gap-3">
             {licenses.map((l) => (
-              <div key={l} className="flex items-center gap-2.5 bg-white border border-violet-100 rounded-2xl px-4 py-3 text-sm text-foreground">
+              <div key={l} className="flex items-center gap-2.5 bg-white border border-violet-100 rounded-2xl px-4 py-3 text-base text-foreground">
                 <Landmark size={16} className="text-violet-600 shrink-0" /> {l}
               </div>
             ))}
           </div>
-          <div className="bg-white border border-violet-100 rounded-3xl p-6 space-y-3 text-sm text-muted-foreground">
-            <div className="font-semibold text-foreground text-base mb-1">{t.licBadge}</div>
+          <div className="bg-white border border-violet-100 rounded-3xl p-6 space-y-3 text-base text-muted-foreground">
+            <div className="font-semibold text-foreground text-lg mb-1">{t.licBadge}</div>
             {t.licLi.map((li) => <FeatureLi key={li}>{li}</FeatureLi>)}
           </div>
         </div>
@@ -447,9 +447,9 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="font-semibold text-foreground">{it.t}</div>
-                  {it.soon && <span className="text-[11px] bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>}
+                  {it.soon && <span className="text-xs bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-2 py-0.5">{isAr ? "قريباً" : "Soon"}</span>}
                 </div>
-                <div className="text-muted-foreground text-sm mt-1.5 leading-relaxed">{it.d}</div>
+                <div className="text-muted-foreground text-base mt-1.5 leading-relaxed">{it.d}</div>
               </div>
             );
           })}
@@ -465,18 +465,18 @@ export default function Landing() {
             <Crown size={40} className="text-violet-600" />
           </div>
           <div>
-            <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1 text-xs mb-3">
+            <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1 text-sm mb-3">
               <Sparkles size={13} /> {t.aboutChip}
             </div>
             <h3 className="text-2xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.aboutRole}</h3>
-            <p className="text-muted-foreground mt-3 leading-loose">
+            <p className="text-muted-foreground text-base mt-3 leading-loose">
               {t.aboutText1}<b className="text-violet-700">{t.aboutTextBold1}</b>{t.aboutTextUniv}<b className="text-violet-700">{t.aboutTextUnivBold}</b>{t.aboutTextGrade}<b className="text-violet-700">{t.aboutTextGradeBold}</b>{t.aboutText2} <b className="text-violet-700">SHRM‑SCP</b> {isAr ? "الأمريكية، وشهادة" : ", the"} <b className="text-violet-700">OTHM</b> {isAr ? "، وشهادة" : " certificate, and the"} <b className="text-violet-700">CMI</b> {isAr ? "." : " certificate."}
             </p>
             <div className="flex flex-wrap gap-2 mt-5">
               {(isAr ? t.certAr : t.certs).map((c) => {
                 const I = c.includes("MA") || c.includes("ماجستير") ? GraduationCap : Award;
                 return (
-                  <span key={c} className="inline-flex items-center gap-1.5 text-xs bg-violet-50 border border-violet-200 rounded-full px-3 py-1.5 text-foreground">
+                  <span key={c} className="inline-flex items-center gap-1.5 text-sm bg-violet-50 border border-violet-200 rounded-full px-3 py-1.5 text-foreground">
                     <I size={13} className="text-violet-600" /> {c}
                   </span>
                 );
@@ -494,9 +494,9 @@ export default function Landing() {
 
       {/* شارك جدارة */}
       <section id="share" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-12 text-center">
-        <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
-        <p className="text-muted-foreground mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
+        <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
+        <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
+        <p className="text-muted-foreground text-base mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
         <ShareBar isAr={isAr} />
       </section>
 
@@ -507,17 +507,17 @@ export default function Landing() {
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-3xl p-6 text-center transition group">
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-600" /></div>
             <div className="font-semibold text-foreground">{t.wa}</div>
-            <div className="text-muted-foreground text-sm mt-1" dir="ltr">+966 594700782</div>
+            <div className="text-muted-foreground text-base mt-1" dir="ltr">+966 594700782</div>
           </a>
           <a href={`mailto:${SALES_EMAIL}`} className="bg-white hover:bg-violet-50 border border-violet-100 rounded-3xl p-6 text-center transition">
             <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-600" /></div>
             <div className="font-semibold text-foreground">{t.emailCard}</div>
-            <div className="text-muted-foreground text-sm mt-1" dir="ltr">{SALES_EMAIL}</div>
+            <div className="text-muted-foreground text-base mt-1" dir="ltr">{SALES_EMAIL}</div>
           </a>
           <div className="bg-white border border-violet-100 rounded-3xl p-6 text-center">
             <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-3"><MapPin size={22} className="text-indigo-600" /></div>
             <div className="font-semibold text-foreground">{t.loc}</div>
-            <div className="text-muted-foreground text-sm mt-1">{t.locVal}</div>
+            <div className="text-muted-foreground text-base mt-1">{t.locVal}</div>
           </div>
         </div>
       </section>
@@ -540,7 +540,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-foreground mb-1">{isAr ? "الحلول" : "Solutions"}</div>
+            <div className="font-semibold text-base text-foreground mb-1">{isAr ? "الحلول" : "Solutions"}</div>
             <Link to="/qiwa-mudad" className="block hover:text-violet-700">{isAr ? "تكامل قوى ومدد" : "Qiwa & Mudad"}</Link>
             <Link to="/wps-mudad" className="block hover:text-violet-700">{isAr ? "حماية الأجور (مدد)" : "Wage Protection (Mudad)"}</Link>
             <Link to="/eos-calculator" className="block hover:text-violet-700">{isAr ? "حاسبة نهاية الخدمة" : "EOS Calculator"}</Link>
@@ -549,12 +549,12 @@ export default function Landing() {
             <Link to="/affiliate-program" className="block hover:text-violet-700">{isAr ? "التسويق بالعمولة (7%)" : "Affiliate Program (7%)"}</Link>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-foreground mb-1">{t.footContact}</div>
+            <div className="font-semibold text-base text-foreground mb-1">{t.footContact}</div>
             <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-violet-700"><MessageCircle size={14} /> WhatsApp: +966 594700782</a>
             <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-violet-700"><Mail size={14} /> {SALES_EMAIL}</a>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-foreground mb-1">{t.footPlatform}</div>
+            <div className="font-semibold text-base text-foreground mb-1">{t.footPlatform}</div>
             <button onClick={() => scrollTo("features")} className="block hover:text-violet-700">{t.nav.features}</button>
             <button onClick={() => scrollTo("pricing")} className="block hover:text-violet-700">{t.nav.pricing}</button>
             <Link to="/about" className="block hover:text-violet-700">{isAr ? "من نحن" : "About"}</Link>
@@ -564,7 +564,7 @@ export default function Landing() {
             <Link to="/refund-policy" className="block hover:text-violet-700">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>
           </div>
         </div>
-        <div className="text-center text-muted-foreground/70 text-sm pb-6">{t.copy}</div>
+        <div className="text-center text-muted-foreground/70 text-base pb-6">{t.copy}</div>
       </footer>
 
     </div>
@@ -574,8 +574,8 @@ export default function Landing() {
 function SectionHead({ tag, title }) {
   return (
     <div className="text-center">
-      <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700">{tag}</div>
-      <h2 className="text-3xl sm:text-4xl font-extrabold mt-4 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+      <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700">{tag}</div>
+      <h2 className="text-4xl sm:text-5xl font-extrabold mt-4 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
     </div>
   );
 }
@@ -584,7 +584,7 @@ function Stat({ n, l }) {
   return (
     <div>
       <div className="text-2xl font-extrabold bg-gradient-to-l from-violet-600 to-violet-800 bg-clip-text text-transparent">{n}</div>
-      <div className="text-muted-foreground text-xs mt-0.5">{l}</div>
+      <div className="text-muted-foreground text-sm mt-0.5">{l}</div>
     </div>
   );
 }

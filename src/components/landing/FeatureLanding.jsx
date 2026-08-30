@@ -86,7 +86,7 @@ export default function FeatureLanding({ content }) {
           <Link to="/" className="flex items-center gap-2">
             <Logo tone="dark" size={42} />
           </Link>
-          <nav className="hidden md:flex items-center gap-5 text-sm text-foreground/70">
+          <nav className="hidden md:flex items-center gap-5 text-base text-foreground/70">
             <Link to="/" className="hover:text-violet-700 transition">{isAr ? "الرئيسية" : "Home"}</Link>
             <Link to="/quote" className="hover:text-violet-700 transition">{isAr ? "عرض السعر" : "Quote"}</Link>
             <Link to="/about" className="hover:text-violet-700 transition">{isAr ? "من نحن" : "About"}</Link>
@@ -94,8 +94,8 @@ export default function FeatureLanding({ content }) {
           </nav>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/company-login" className="text-sm text-foreground/70 hover:text-violet-700 px-3 py-2 rounded-lg hidden sm:block">{isAr ? "بوابة الشركات" : "Company Portal"}</Link>
-            <Link to="/quote" className="text-sm bg-violet-600 hover:bg-violet-700 px-4 py-2 rounded-xl font-medium text-white shadow-lg shadow-violet-600/30 transition inline-flex items-center gap-1.5">
+            <Link to="/company-login" className="text-base text-foreground/70 hover:text-violet-700 px-3 py-2 rounded-lg hidden sm:block">{isAr ? "بوابة الشركات" : "Company Portal"}</Link>
+            <Link to="/quote" className="text-base bg-violet-600 hover:bg-violet-700 px-4 py-2 rounded-xl font-medium text-white shadow-lg shadow-violet-600/30 transition inline-flex items-center gap-1.5">
               <Zap size={15} /> {isAr ? "ابدأ الآن" : "Get Started"}
             </Link>
           </div>
@@ -105,7 +105,7 @@ export default function FeatureLanding({ content }) {
       {/* فتاحة الموقع */}
       <section className="max-w-5xl mx-auto px-5 pt-20 pb-12 text-center">
         <motion.div initial="hidden" animate="show" variants={fadeUp}>
-          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-5">
+          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-5">
             {c.badge}
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
@@ -141,7 +141,7 @@ export default function FeatureLanding({ content }) {
             <div className="font-semibold mb-3 text-foreground">{c.painTitle}</div>
             <div className="grid sm:grid-cols-2 gap-3">
               {c.painPoints.map((p) => (
-                <div key={p} className="flex items-start gap-2 text-sm text-foreground/80">
+                <div key={p} className="flex items-start gap-2 text-base text-foreground/80">
                   <Check size={16} className="text-violet-600 mt-0.5 shrink-0" /> <span>{p}</span>
                 </div>
               ))}
@@ -154,7 +154,7 @@ export default function FeatureLanding({ content }) {
       {c.features?.length > 0 && (
         <section className="max-w-7xl mx-auto px-5 py-12">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700">{c.featuresTag}</div>
+            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700">{c.featuresTag}</div>
             <h2 className="text-3xl font-extrabold mt-4 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.featuresTitle}</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -167,7 +167,7 @@ export default function FeatureLanding({ content }) {
                     <I size={22} className="text-violet-600" />
                   </div>
                   <div className="font-semibold text-lg text-foreground">{f.t}</div>
-                  <div className="text-muted-foreground text-sm mt-2 leading-relaxed">{f.d}</div>
+                  <div className="text-muted-foreground text-base mt-2 leading-relaxed">{f.d}</div>
                 </motion.div>
               );
             })}
@@ -188,7 +188,7 @@ export default function FeatureLanding({ content }) {
                 <div className="w-9 h-9 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center font-bold text-violet-700 shrink-0">{i + 1}</div>
                 <div>
                   <div className="font-semibold text-foreground">{s.t}</div>
-                  <div className="text-muted-foreground text-sm mt-1 leading-relaxed">{s.d}</div>
+                  <div className="text-muted-foreground text-base mt-1 leading-relaxed">{s.d}</div>
                 </div>
               </motion.div>
             ))}
@@ -209,7 +209,7 @@ export default function FeatureLanding({ content }) {
                   {f.q}
                   <ChevronLeft size={18} className="text-muted-foreground group-open:-rotate-45 transition shrink-0" style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
                 </summary>
-                <p className="text-muted-foreground text-sm mt-3 leading-relaxed">{f.a}</p>
+                <p className="text-muted-foreground text-base mt-3 leading-relaxed">{f.a}</p>
               </details>
             ))}
           </div>
@@ -235,7 +235,7 @@ export default function FeatureLanding({ content }) {
 
       {/* التذييل */}
       <footer className="border-t border-violet-100 mt-6 bg-white/60">
-        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm text-muted-foreground">
+        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-base text-muted-foreground">
           <div>
             <div className="mb-2"><Logo tone="dark" size={36} /></div>
             <p>{isAr ? "منصة الموارد البشرية السعودية المتكاملة." : "The integrated Saudi HR platform."}</p>
@@ -261,7 +261,7 @@ export default function FeatureLanding({ content }) {
             <Link to="/contact" className="block hover:text-violet-700">{isAr ? "تواصل" : "Contact"}</Link>
           </div>
         </div>
-        <div className="text-center text-muted-foreground/70 text-xs pb-6">© 2027 {isAr ? "جدارة" : "Jadara"} — {isAr ? "جميع الحقوق محفوظة" : "All rights reserved"}</div>
+        <div className="text-center text-muted-foreground/70 text-sm pb-6">© 2027 {isAr ? "جدارة" : "Jadara"} — {isAr ? "جميع الحقوق محفوظة" : "All rights reserved"}</div>
       </footer>
     </div>
   );

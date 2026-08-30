@@ -73,21 +73,21 @@ export default function HostingSpecs({ isAr = true }) {
       <div className="bg-white rounded-[2rem] p-6 sm:p-10 text-foreground shadow-xl shadow-violet-900/10 border border-violet-100">
         {/* ترويسة */}
         <div className="text-center max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-2 bg-cyan-100 text-cyan-700 text-xs font-semibold rounded-full px-4 py-1.5">
+          <span className="inline-flex items-center gap-2 bg-cyan-100 text-cyan-700 text-sm font-semibold rounded-full px-4 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
             {L.tag}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold mt-4 mb-2 text-[#5B3FD6]" style={{ fontFamily: "var(--font-display)" }}>
             {isAr ? <>سيرفر خاص <span className="text-cyan-600">بأعلى المواصفات</span> — لأداء لا يتأثر بحجم منشأتك</> : <>A dedicated <span className="text-cyan-600">high-spec</span> server — performance that grows with you</>}
           </h2>
-          <p className="text-[#4b5563] text-sm leading-relaxed max-w-2xl mx-auto">{L.desc}</p>
+          <p className="text-[#4b5563] text-base leading-relaxed max-w-2xl mx-auto">{L.desc}</p>
         </div>
 
         {/* بطاقة السيرفر + المواصفات */}
         <div className="grid lg:grid-cols-[420px,1fr] gap-6 mt-10 items-stretch">
           {/* بطاقة السيرفر — على نمط المرجع */}
           <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 flex flex-col mx-auto max-w-md w-full">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-[11px] font-bold rounded-lg px-4 py-1.5 bg-violet-600 text-white shadow-lg shadow-violet-600/30">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-sm font-bold rounded-lg px-4 py-1.5 bg-violet-600 text-white shadow-lg shadow-violet-600/30">
               <Server size={12} /> {L.badge}
             </span>
 
@@ -100,13 +100,13 @@ export default function HostingSpecs({ isAr = true }) {
 
             {/* السعر */}
             <div className="mt-5">
-              <span className="inline-flex items-center text-[11px] font-bold rounded-md px-2.5 py-1 bg-violet-600 text-white">{L.savingTag}</span>
+              <span className="inline-flex items-center text-sm font-bold rounded-md px-2.5 py-1 bg-violet-600 text-white">{L.savingTag}</span>
               <div className="flex items-baseline gap-2 mt-2">
-                <span className="text-[#cbd5e1] line-through text-sm font-semibold">{L.strikethrough}</span>
+                <span className="text-[#cbd5e1] line-through text-base font-semibold">{L.strikethrough}</span>
                 <span className="text-4xl font-extrabold text-[#5B3FD6]">{L.price}</span>
-                <span className="text-sm font-medium text-[#4b5563]">{L.priceUnit}</span>
+                <span className="text-base font-medium text-[#4b5563]">{L.priceUnit}</span>
               </div>
-              <div className="text-xs text-[#4b5563] mt-1">{L.subtext}</div>
+              <div className="text-sm text-[#4b5563] mt-1">{L.subtext}</div>
             </div>
 
             {/* المواصفات */}
@@ -116,8 +116,8 @@ export default function HostingSpecs({ isAr = true }) {
                 return (
                   <div key={s.big} className="bg-[#f4f7f9] rounded-xl p-3 text-center border border-slate-100">
                     <I size={18} className="text-cyan-600 mx-auto mb-1.5" />
-                    <div className="text-sm font-extrabold text-[#5B3FD6]">{s.big}</div>
-                    <div className="text-[10px] text-[#6b7280] leading-tight mt-0.5">{s.small}</div>
+                    <div className="text-base font-extrabold text-[#5B3FD6]">{s.big}</div>
+                    <div className="text-xs text-[#6b7280] leading-tight mt-0.5">{s.small}</div>
                   </div>
                 );
               })}
@@ -125,15 +125,15 @@ export default function HostingSpecs({ isAr = true }) {
 
             {/* سعة الموظفين */}
             <div className="mt-5 rounded-xl bg-gradient-to-r from-cyan-50 to-violet-50 border border-cyan-100 p-3 text-center">
-              <div className="text-[11px] text-[#6b7280] font-semibold">{L.capacityLabel}</div>
+              <div className="text-sm text-[#6b7280] font-semibold">{L.capacityLabel}</div>
               <div className="text-lg font-extrabold text-[#5B3FD6] mt-0.5 flex items-center justify-center gap-1.5">
                 <Users size={16} className="text-cyan-600" /> {L.capacityValue}
               </div>
-              <div className="text-[10.5px] text-[#6b7280] mt-0.5">{L.capacityNote}</div>
+              <div className="text-sm text-[#6b7280] mt-0.5">{L.capacityNote}</div>
             </div>
 
             <div className="flex-1" />
-            <button className="mt-5 w-full rounded-2xl py-3.5 text-sm font-bold text-white bg-violet-600 hover:bg-violet-700 shadow-lg shadow-violet-600/30 transition inline-flex items-center justify-center gap-2">
+            <button className="mt-5 w-full rounded-2xl py-3.5 text-base font-bold text-white bg-violet-600 hover:bg-violet-700 shadow-lg shadow-violet-600/30 transition inline-flex items-center justify-center gap-2">
               <Zap size={16} /> {L.cta}
             </button>
           </div>
@@ -144,7 +144,7 @@ export default function HostingSpecs({ isAr = true }) {
               {L.features.map((f, i) => (
                 <div key={i} className="bg-white rounded-2xl border border-slate-100 px-4 py-3.5 flex items-start gap-2.5 shadow-sm">
                   <span className="mt-1.5 w-2 h-2 rounded-full shrink-0" style={{ background: GOLD }} />
-                  <span className="text-sm text-[#5B3FD6] leading-relaxed">{f}</span>
+                  <span className="text-base text-[#5B3FD6] leading-relaxed">{f}</span>
                 </div>
               ))}
             </div>
@@ -166,7 +166,7 @@ function TrustChip({ icon: I, label }) {
   return (
     <div className="bg-white rounded-xl border border-slate-100 px-3 py-2.5 flex items-center gap-2 shadow-sm">
       <I size={16} className="text-cyan-600 shrink-0" />
-      <span className="text-xs font-semibold text-[#5B3FD6]">{label}</span>
+      <span className="text-sm font-semibold text-[#5B3FD6]">{label}</span>
     </div>
   );
 }

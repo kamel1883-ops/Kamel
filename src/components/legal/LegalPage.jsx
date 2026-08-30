@@ -13,7 +13,7 @@ export default function LegalPage({ isAr, title, updated, intro, sections = [] }
           <Link to="/"><Logo tone="dark" size={52} /></Link>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/" className="inline-flex items-center gap-1.5 text-sm bg-white border border-violet-200 text-foreground hover:bg-violet-50 px-4 py-2 rounded-xl transition">
+            <Link to="/" className="inline-flex items-center gap-1.5 text-base bg-white border border-violet-200 text-foreground hover:bg-violet-50 px-4 py-2 rounded-xl transition">
               <ArrowLeft size={15} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
               {isAr ? "الرئيسية" : "Home"}
             </Link>
@@ -23,7 +23,7 @@ export default function LegalPage({ isAr, title, updated, intro, sections = [] }
 
       <main className="max-w-[1100px] mx-auto px-5 sm:px-8 py-10 sm:py-14">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{title}</h1>
-        <div className="text-muted-foreground text-sm mt-2">{isAr ? "آخر تحديث: " : "Last updated: "}{updated}</div>
+        <div className="text-muted-foreground text-base mt-2">{isAr ? "آخر تحديث: " : "Last updated: "}{updated}</div>
         <p className="text-muted-foreground leading-loose mt-6 bg-white border border-violet-100 rounded-3xl p-6">{intro}</p>
 
         <div className="mt-8 space-y-5">
@@ -32,11 +32,11 @@ export default function LegalPage({ isAr, title, updated, intro, sections = [] }
               <h2 className="text-lg sm:text-xl font-bold mb-3 text-foreground" style={{ fontFamily: "var(--font-display)" }}>
                 {i + 1}. {s.title}
               </h2>
-              {s.body ? <p className="text-muted-foreground text-sm leading-loose">{s.body}</p> : null}
+              {s.body ? <p className="text-muted-foreground text-base leading-loose">{s.body}</p> : null}
               {s.items?.length ? (
                 <ul className="mt-3 space-y-2">
                   {s.items.map((it) => (
-                    <li key={it} className="text-muted-foreground text-sm leading-relaxed flex gap-2">
+                    <li key={it} className="text-muted-foreground text-base leading-relaxed flex gap-2">
                       <span className="text-violet-600 shrink-0">•</span><span>{it}</span>
                     </li>
                   ))}
@@ -46,7 +46,7 @@ export default function LegalPage({ isAr, title, updated, intro, sections = [] }
           ))}
         </div>
 
-        <div className="text-center text-muted-foreground text-sm mt-10">
+        <div className="text-center text-muted-foreground text-base mt-10">
           {isAr ? "للاستفسارات: " : "Inquiries: "}<a href="mailto:info@jadara-hr.com" className="text-violet-700 hover:text-violet-800" dir="ltr">info@jadara-hr.com</a>
         </div>
       </main>

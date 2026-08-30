@@ -77,7 +77,7 @@ export default function About() {
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link to="/"><Logo tone="dark" size={40} /></Link>
-          <nav className="flex items-center gap-3 text-sm text-foreground/70">
+          <nav className="flex items-center gap-3 text-base text-foreground/70">
             <LanguageToggle />
             <Link to="/contact" className="hover:text-violet-700 transition">{t.navContact}</Link>
           </nav>
@@ -86,7 +86,7 @@ export default function About() {
 
       <main className="max-w-4xl mx-auto px-5 py-14">
         <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4">
+          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4">
             <Sparkles size={14} className="text-violet-600" /> {t.badge}
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.h1}</h1>
@@ -107,7 +107,7 @@ export default function About() {
                   <I size={20} className="text-violet-600" />
                 </div>
                 <div className="font-semibold text-foreground">{p.t}</div>
-                <div className="text-muted-foreground text-sm mt-1.5 leading-relaxed">{p.d}</div>
+                <div className="text-muted-foreground text-base mt-1.5 leading-relaxed">{p.d}</div>
               </div>
             );
           })}
@@ -124,9 +124,9 @@ export default function About() {
               <div key={a.article} className="bg-white border border-violet-100 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold text-foreground">{a.title}</span>
-                  <span className="text-[11px] bg-violet-100 text-violet-700 rounded-full px-2 py-0.5">{a.article}</span>
+                  <span className="text-sm bg-violet-100 text-violet-700 rounded-full px-2 py-0.5">{a.article}</span>
                 </div>
-                <div className="text-muted-foreground text-sm leading-relaxed">{a.desc}</div>
+                <div className="text-muted-foreground text-base leading-relaxed">{a.desc}</div>
               </div>
             ))}
           </div>
@@ -142,7 +142,7 @@ export default function About() {
             <Crown size={40} className="text-violet-600" />
           </div>
           <div>
-            <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1 text-xs mb-3">
+            <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1 text-sm mb-3">
               <Sparkles size={13} /> {t.chip}
             </div>
             <h2 className="text-2xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.founderH}</h2>
@@ -153,7 +153,7 @@ export default function About() {
               {t.certs.map((c) => {
                 const I = c.i;
                 return (
-                  <span key={c.t} className="inline-flex items-center gap-1.5 text-xs bg-violet-50 border border-violet-200 rounded-full px-3 py-1.5 text-foreground">
+                  <span key={c.t} className="inline-flex items-center gap-1.5 text-sm bg-violet-50 border border-violet-200 rounded-full px-3 py-1.5 text-foreground">
                     <I size={13} className="text-violet-600" /> {c.t}
                   </span>
                 );
@@ -165,7 +165,7 @@ export default function About() {
         <div className="mt-12 bg-white border border-violet-100 rounded-3xl p-7 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <div className="font-semibold text-lg text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.readyT}</div>
-            <div className="text-muted-foreground text-sm mt-1">{t.readySub}</div>
+            <div className="text-muted-foreground text-base mt-1">{t.readySub}</div>
           </div>
           <div className="flex gap-3">
             <Link to="/contact" className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-5 py-3 rounded-2xl font-medium transition">{t.ctaContact}</Link>
@@ -175,7 +175,7 @@ export default function About() {
       </main>
 
       <footer className="border-t border-violet-100 mt-10 bg-white/60">
-        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-base text-muted-foreground">
           <Link to="/"><Logo tone="dark" size={36} /></Link>
           <div className="flex items-center gap-4">
             <a href={`mailto:${SALES_EMAIL}`} className="hover:text-violet-700">{SALES_EMAIL}</a>

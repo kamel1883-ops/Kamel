@@ -73,7 +73,7 @@ export default function Contact() {
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link to="/"><Logo tone="dark" size={40} /></Link>
-          <nav className="flex items-center gap-3 text-sm text-foreground/70">
+          <nav className="flex items-center gap-3 text-base text-foreground/70">
             <LanguageToggle />
             <Link to="/about" className="hover:text-violet-700 transition">{t.navAbout}</Link>
           </nav>
@@ -82,7 +82,7 @@ export default function Contact() {
 
       <main className="max-w-4xl mx-auto px-5 py-14">
         <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4">
+          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4">
             <ShieldCheck size={14} className="text-violet-600" /> {t.badge}
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.h1}</h1>
@@ -93,37 +93,37 @@ export default function Contact() {
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-3xl p-6 text-center transition group">
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-600" /></div>
             <div className="font-semibold text-foreground">{t.wa}</div>
-            <div className="text-muted-foreground text-sm mt-1" dir="ltr">+966 594700782</div>
+            <div className="text-muted-foreground text-base mt-1" dir="ltr">+966 594700782</div>
           </a>
           <a href={`mailto:${SALES_EMAIL}`} className="bg-white hover:bg-violet-50 border border-violet-100 rounded-3xl p-6 text-center transition">
             <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-600" /></div>
             <div className="font-semibold text-foreground">{t.email}</div>
-            <div className="text-muted-foreground text-sm mt-1" dir="ltr">{SALES_EMAIL}</div>
+            <div className="text-muted-foreground text-base mt-1" dir="ltr">{SALES_EMAIL}</div>
           </a>
           <div className="bg-white border border-violet-100 rounded-3xl p-6 text-center">
             <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-3"><MapPin size={22} className="text-indigo-600" /></div>
             <div className="font-semibold text-foreground">{t.loc}</div>
-            <div className="text-muted-foreground text-sm mt-1">{t.locVal}</div>
+            <div className="text-muted-foreground text-base mt-1">{t.locVal}</div>
           </div>
         </div>
 
         <form onSubmit={submit} className="bg-white border border-violet-100 rounded-3xl p-7 mt-10 space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">{t.name}</label>
+              <label className="text-sm text-muted-foreground">{t.name}</label>
               <input value={f.name} onChange={(e) => set("name", e.target.value)} required
-                className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.namePh} />
+                className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.namePh} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">{t.emailL}</label>
+              <label className="text-sm text-muted-foreground">{t.emailL}</label>
               <input type="email" value={f.email} onChange={(e) => set("email", e.target.value)} required
-                className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder="name@example.com" />
+                className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder="name@example.com" />
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground">{t.msg}</label>
+            <label className="text-sm text-muted-foreground">{t.msg}</label>
             <textarea value={f.message} onChange={(e) => set("message", e.target.value)} required rows={4}
-              className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.msgPh} />
+              className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.msgPh} />
           </div>
           <div className="flex justify-center">
             <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
@@ -132,19 +132,19 @@ export default function Contact() {
             <Send size={18} /> {status === "sending" ? t.sending : t.send}
           </button>
           {status === "sent" && (
-            <div className="flex items-center justify-center gap-2 text-emerald-600 text-sm">
+            <div className="flex items-center justify-center gap-2 text-emerald-600 text-base">
               <CheckCircle2 size={16} /> {t.sent}
             </div>
           )}
           {status === "failed" && (
-            <div className="flex items-center justify-center gap-2 text-rose-600 text-sm">{t.failed}</div>
+            <div className="flex items-center justify-center gap-2 text-rose-600 text-base">{t.failed}</div>
           )}
-          <p className="text-muted-foreground/60 text-xs text-center">{t.note}</p>
+          <p className="text-muted-foreground/60 text-sm text-center">{t.note}</p>
         </form>
       </main>
 
       <footer className="border-t border-violet-100 mt-10 bg-white/60">
-        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-base text-muted-foreground">
           <Link to="/"><Logo tone="dark" size={36} /></Link>
           <Link to="/" className="hover:text-violet-700 inline-flex items-center gap-1.5"><ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.home}</Link>
           <div>{t.copy}</div>

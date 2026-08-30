@@ -260,16 +260,16 @@ export default function Quote() {
             <Link to="/"><Logo size={40} /></Link>
             <div className="flex items-center gap-2">
               <LanguageToggle />
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">{t.barBack}</Link>
+              <Link to="/" className="text-base text-muted-foreground hover:text-foreground">{t.barBack}</Link>
             </div>
           </div>
         </div>
         <div className="max-w-2xl mx-auto px-5 py-10">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#8E24AA] bg-violet-100 rounded-full px-3 py-1 mb-3"><span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]" /> {t.step1Badge}</div>
+          <div className="inline-flex items-center gap-2 text-sm font-semibold text-[#8E24AA] bg-violet-100 rounded-full px-3 py-1 mb-3"><span className="w-1.5 h-1.5 rounded-full bg-[#8E24AA]" /> {t.step1Badge}</div>
           <h1 className="text-2xl sm:text-3xl font-bold">{t.formTitle}</h1>
           <p className="text-muted-foreground mt-2">{mode === "trial" ? t.trialFormSub : t.buyFormSub}</p>
           {mode === "buy" && selectedTier && (
-            <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-violet-50 border border-violet-200 text-[#8E24AA] px-4 py-2 text-sm">
+            <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-violet-50 border border-violet-200 text-[#8E24AA] px-4 py-2 text-base">
               <Sparkles size={14} /> {isAr ? `${selectedTier.tier} — ${selectedTier.yearly.toLocaleString()} ريال / سنوياً` : `${selectedTier.tier} — ${selectedTier.yearly.toLocaleString()} SAR / year`}
             </div>
           )}
@@ -285,9 +285,9 @@ export default function Quote() {
             <Field label={t.email} value={form.contact_email} onChange={(v) => set("contact_email", v)} type="email" required />
             <Field label={t.headcountLabel} value={form.employee_count} onChange={(v) => set("employee_count", v.replace(/\D/g, ""))} required />
             {mode === "trial" ? (
-              <div className="text-xs text-muted-foreground flex items-start gap-2"><Sparkles size={13} className="text-[#8E24AA] mt-0.5 shrink-0" /> {t.trialHeadcountNote}</div>
-            ) : (() => { const pt2 = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt2 ? <div className="text-sm rounded-xl bg-violet-50 border border-violet-200 text-[#8E24AA] px-4 py-3">{t.headcountHint(pt2.tier, pt2.yearly)}</div> : <div className="text-xs text-muted-foreground">{t.headcountRequired}</div>; })()}
-            <div className="text-xs flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
+              <div className="text-sm text-muted-foreground flex items-start gap-2"><Sparkles size={13} className="text-[#8E24AA] mt-0.5 shrink-0" /> {t.trialHeadcountNote}</div>
+            ) : (() => { const pt2 = form.employee_count ? tierForCount(form.employee_count, isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN) : null; return pt2 ? <div className="text-base rounded-xl bg-violet-50 border border-violet-200 text-[#8E24AA] px-4 py-3">{t.headcountHint(pt2.tier, pt2.yearly)}</div> : <div className="text-sm text-muted-foreground">{t.headcountRequired}</div>; })()}
+            <div className="text-sm flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
               <div><b>{t.emailNotice}:</b> {t.emailNoticeBody}</div>
             </div>
@@ -299,7 +299,7 @@ export default function Quote() {
             <div className="space-y-1.5">
               <Label>{isAr ? "رمز الشريك المسوّق (اختياري)" : "Partner referral code (optional)"}</Label>
               <Input value={form.referral_code || ""} onChange={(e) => set("referral_code", e.target.value.toUpperCase())} placeholder="JD-XXXXXX" className="font-mono" />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {isAr ? "إن وصلك رمز من أحد شركاء جدارة المسوّقين، اكتبه هنا ليُسجّل رسمياً أن اشتراكك جاء عن طريقه." : "If a Jadara marketing partner gave you a code, enter it so their referral is officially recorded."}
               </p>
             </div>
@@ -312,19 +312,19 @@ export default function Quote() {
                   type="file"
                   accept="image/*,application/pdf"
                   onChange={(e) => { const f = e.target.files?.[0] || null; setCrFile(f); setErr(""); }}
-                  className="block w-full text-sm text-muted-foreground file:mr-3 file:ml-0 file:rounded-lg file:border-0 file:bg-[#8E24AA] file:px-4 file:py-2 file:text-white file:font-medium hover:file:bg-[#7E22CE] cursor-pointer"
+                  className="block w-full text-base text-muted-foreground file:mr-3 file:ml-0 file:rounded-lg file:border-0 file:bg-[#8E24AA] file:px-4 file:py-2 file:text-white file:font-medium hover:file:bg-[#7E22CE] cursor-pointer"
                 />
-                {crFile && <div className="text-xs text-emerald-700 mt-2 flex items-center gap-1"><Check size={13} /> {crFile.name}</div>}
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{t.crDocHint}</p>
+                {crFile && <div className="text-sm text-emerald-700 mt-2 flex items-center gap-1"><Check size={13} /> {crFile.name}</div>}
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{t.crDocHint}</p>
               </div>
             </div>
             <TurnstileWidget onToken={setCaptcha} className="flex justify-center" />
-            {err && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 whitespace-pre-line">{err}</div>}
+            {err && <div className="text-base text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 whitespace-pre-line">{err}</div>}
             <Button type="submit" disabled={submitting || uploading || !captcha} className="gap-2 min-w-[200px] bg-[#8E24AA] hover:bg-[#7E22CE]">
               {submitting ? <Loader2 size={16} className="animate-spin" /> : mode === "trial" ? <ShieldCheck size={16} /> : <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />}
               {submitting ? t.uploading : (mode === "trial" ? t.trialSubmit : t.buySubmit)}
             </Button>
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5"><ShieldCheck size={13} /> {t.secure}</p>
+            <p className="text-sm text-muted-foreground flex items-center gap-1.5"><ShieldCheck size={13} /> {t.secure}</p>
           </form>
         </div>
       </div>
@@ -339,7 +339,7 @@ export default function Quote() {
           <Link to="/"><Logo size={40} /></Link>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">{t.barBack}</Link>
+            <Link to="/" className="text-base text-muted-foreground hover:text-foreground hidden sm:inline">{t.barBack}</Link>
             <Button onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.barPrint}</Button>
           </div>
         </div>
@@ -351,8 +351,8 @@ export default function Quote() {
             <div className="flex items-center gap-2 text-emerald-700 font-bold">
               <Check size={20} /> {t.trialDoneTitle}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">{t.trialDoneNote}</p>
-            <div className="mt-5 grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+            <p className="text-base text-muted-foreground mt-1">{t.trialDoneNote}</p>
+            <div className="mt-5 grid sm:grid-cols-2 gap-x-8 gap-y-1 text-base">
               <Row k={t.company} v={company.name} />
               <Row k={t.unified} v={company.unified_number} mono />
               <Row k={t.email} v={company.contact_email} />
@@ -362,14 +362,14 @@ export default function Quote() {
               <div className="flex items-center gap-2 text-[#8E24AA] font-bold">
                 <UserPlus size={18} /> {t.activateTitle}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">{t.activateNote}</p>
+              <p className="text-base text-muted-foreground mt-1">{t.activateNote}</p>
               <div className="mt-3">
                 <Link to={`/company-register?email=${encodeURIComponent(company.contact_email || "")}&unified=${encodeURIComponent(company.unified_number || "")}`} className="inline-flex items-center gap-2 rounded-2xl bg-[#8E24AA] hover:bg-[#7E22CE] text-white px-5 py-3 font-bold shadow-md shadow-[#8E24AA]/30 transition">
                   {t.activateBtn} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
                 </Link>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">{t.activateHint}</p>
-              <div className="mt-3 text-xs text-slate-500 bg-violet-50/60 border border-violet-100 rounded-lg px-3 py-2">{t.portalNote}</div>
+              <p className="text-sm text-muted-foreground mt-2">{t.activateHint}</p>
+              <div className="mt-3 text-sm text-slate-500 bg-violet-50/60 border border-violet-100 rounded-lg px-3 py-2">{t.portalNote}</div>
             </div>
           </div>
         </div>
@@ -382,10 +382,10 @@ export default function Quote() {
               <Logo size={56} />
               <div>
                 <div className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>{t.pageTitle}</div>
-                <div className="text-xs text-muted-foreground">جدارة — منصة الموارد البشرية السعودية</div>
+                <div className="text-sm text-muted-foreground">جدارة — منصة الموارد البشرية السعودية</div>
               </div>
             </div>
-            <div className="text-left sm:text-right space-y-1 text-sm">
+            <div className="text-left sm:text-right space-y-1 text-base">
               <div><span className="text-muted-foreground">{t.quoteNo}: </span><span className="font-mono font-semibold">{quoteNo}</span></div>
               <div><span className="text-muted-foreground">{t.date}: </span><span className="font-semibold">{quoteDate}</span></div>
             </div>
@@ -393,8 +393,8 @@ export default function Quote() {
 
           {/* إلى (بيانات المنشأة) */}
           <div className="py-6">
-            <div className="text-xs font-semibold text-muted-foreground mb-2">{t.to}</div>
-            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+            <div className="text-sm font-semibold text-muted-foreground mb-2">{t.to}</div>
+            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-1 text-base">
               <Row k={t.company} v={company.name} />
               <Row k={t.industry} v={company.industry} />
               <Row k={t.city} v={company.city} />
@@ -408,9 +408,9 @@ export default function Quote() {
           {/* الباقة والمميزات */}
           <div className="py-6 border-t border-border">
             <div className="text-xl font-bold mb-1">{t.planTitle}</div>
-            <div className="text-sm text-muted-foreground mb-4">{t.planDesc}</div>
-            <div className="text-xs font-semibold text-muted-foreground mb-3">{t.includes}</div>
-            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+            <div className="text-base text-muted-foreground mb-4">{t.planDesc}</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-3">{t.includes}</div>
+            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-base">
               {features.map((f) => (
                 <div key={f} className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
@@ -426,9 +426,9 @@ export default function Quote() {
               <div className="flex items-baseline justify-between gap-3">
                 <div>
                   <div className="font-medium">{matchedTier ? matchedTier.tier : t.planTier}</div>
-                  <div className="text-xs text-muted-foreground">{matchedTier ? matchedTier.range : t.planTierRange}</div>
+                  <div className="text-sm text-muted-foreground">{matchedTier ? matchedTier.range : t.planTierRange}</div>
                 </div>
-                <div className={discount ? "text-sm text-muted-foreground line-through" : "text-2xl font-extrabold text-violet-700"}>
+                <div className={discount ? "text-base text-muted-foreground line-through" : "text-2xl font-extrabold text-violet-700"}>
                   {(matchedTier ? matchedTier.yearly : 0).toLocaleString()} {isAr ? "ريال" : "SAR"}
                 </div>
               </div>
@@ -436,7 +436,7 @@ export default function Quote() {
                 <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-violet-200/70">
                   <div>
                     <div className="font-medium">{t.discBadge} {discount.percent}% — {discount.code}</div>
-                    <div className="text-xs text-muted-foreground">{t.discApplied}</div>
+                    <div className="text-sm text-muted-foreground">{t.discApplied}</div>
                   </div>
                   <div className="text-lg font-extrabold text-rose-600">- {discountAmount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
                 </div>
@@ -445,7 +445,7 @@ export default function Quote() {
                 <div className="font-medium">{isAr ? "صافي الاشتراك السنوي" : "Net annual subscription"}</div>
                 <div className="text-xl font-extrabold text-violet-700">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
               </div>
-              <div className="text-xs text-muted-foreground pt-3 border-t border-violet-200/70">{t.renewNote}</div>
+              <div className="text-sm text-muted-foreground pt-3 border-t border-violet-200/70">{t.renewNote}</div>
               <div className="flex items-baseline justify-between gap-3 mt-1 -mx-5 -mb-5 px-5 py-4 bg-violet-100/80 rounded-b-2xl border-t-2 border-violet-300">
                 <div className="font-extrabold text-violet-900 text-base">{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</div>
                 <div className="text-2xl font-extrabold text-violet-900">{isCustomT ? (isAr ? "تأثير خاص" : "Custom") : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</div>
@@ -459,18 +459,18 @@ export default function Quote() {
               <div className="flex items-center gap-2 text-emerald-800 font-bold text-lg">
                 <Banknote size={20} /> {t.transferTitle}
               </div>
-              <p className="text-sm text-emerald-900/80">{t.transferNote}</p>
+              <p className="text-base text-emerald-900/80">{t.transferNote}</p>
 
               {/* المبلغ المستحق */}
-              <div className="flex items-center justify-between gap-3 bg-white/70 border border-emerald-200 rounded-xl px-4 py-3 text-sm">
+              <div className="flex items-center justify-between gap-3 bg-white/70 border border-emerald-200 rounded-xl px-4 py-3 text-base">
                 <span className="text-muted-foreground">{isAr ? "المبلغ المستحق للسنة الأولى" : "Amount due for year 1"}</span>
                 <span className="font-extrabold text-emerald-700 text-2xl">{isCustomT ? (isAr ? "تأثير خاص" : "Custom") : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</span>
               </div>
 
               {/* بيانات البنك */}
               <div className="bg-white/80 border border-violet-200 rounded-xl p-4">
-                <div className="text-sm font-semibold text-violet-700 mb-3 flex items-center gap-2"><Building2 size={15} /> {t.bankSection}</div>
-                <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                <div className="text-base font-semibold text-violet-700 mb-3 flex items-center gap-2"><Building2 size={15} /> {t.bankSection}</div>
+                <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-base">
                   <Row k={t.beneficiary} v={isAr ? PROVIDER_BANK.beneficiaryAr : PROVIDER_BANK.beneficiaryEn} />
                   <Row k={t.bank} v={isAr ? PROVIDER_BANK.bankAr : PROVIDER_BANK.bankEn} />
                   <Row k={t.account} v={PROVIDER_BANK.account} mono />
@@ -480,7 +480,7 @@ export default function Quote() {
                       <span className="font-mono font-semibold tracking-wide break-all">{PROVIDER_BANK.iban}</span>
                     </div>
                     <button type="button" onClick={copyIban}
-                      className="inline-flex items-center gap-1 text-xs text-violet-700 border border-violet-200 rounded-lg px-2.5 py-1.5 hover:bg-violet-50 transition">
+                      className="inline-flex items-center gap-1 text-sm text-violet-700 border border-violet-200 rounded-lg px-2.5 py-1.5 hover:bg-violet-50 transition">
                       {copied ? <Check size={13} /> : <Copy size={13} />}
                       {copied ? t.copied : t.copy}
                     </button>
@@ -493,7 +493,7 @@ export default function Quote() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 font-bold text-emerald-800"><MessageCircle size={18} /> {t.waSupport}</div>
                   <div className="text-xl font-mono font-bold mt-1 tracking-wide" dir="ltr">{WHATSAPP_NUMBER}</div>
-                  <div className="text-sm text-emerald-900/80 mt-1">{t.sendReceipt}</div>
+                  <div className="text-base text-emerald-900/80 mt-1">{t.sendReceipt}</div>
                 </div>
                 <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold px-5 py-3 shadow-md transition shrink-0">
                   <MessageCircle size={18} /> {t.openWhatsApp}
@@ -509,7 +509,7 @@ export default function Quote() {
                 <div className="flex items-center gap-2 text-violet-700 font-bold">
                   <UserPlus size={18} /> {t.activateTitle}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{t.activateNote}</p>
+                <p className="text-base text-muted-foreground mt-1">{t.activateNote}</p>
                 <div className="mt-3">
                   <Link
                     to={`/company-register?email=${encodeURIComponent(company.contact_email || "")}&unified=${encodeURIComponent(company.unified_number || "")}`}
@@ -518,8 +518,8 @@ export default function Quote() {
                     {t.activateBtn} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
                   </Link>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">{t.activateHint}</p>
-                <div className="mt-3 text-xs text-slate-500 bg-white/60 border border-violet-100 rounded-lg px-3 py-2">{t.portalNote}</div>
+                <p className="text-sm text-muted-foreground mt-2">{t.activateHint}</p>
+                <div className="mt-3 text-sm text-slate-500 bg-white/60 border border-violet-100 rounded-lg px-3 py-2">{t.portalNote}</div>
               </div>
             </div>
           )}
@@ -527,8 +527,8 @@ export default function Quote() {
           {/* التوقيع والختم */}
           <div className="pt-8 border-t border-border flex items-end justify-between gap-6 flex-wrap">
             <div className="w-64">
-              <div className="h-20 flex items-center justify-center text-xs text-muted-foreground/60">مساحة التوقيع</div>
-              <div className="text-sm font-semibold mt-2 border-t border-foreground/20 pt-1">{t.sigName}</div>
+              <div className="h-20 flex items-center justify-center text-sm text-muted-foreground/60">مساحة التوقيع</div>
+              <div className="text-base font-semibold mt-2 border-t border-foreground/20 pt-1">{t.sigName}</div>
             </div>
             <ProviderStamp size={150} />
           </div>
@@ -536,9 +536,9 @@ export default function Quote() {
           {/* الصفحة الثانية — شهادة الآيبان الرسمية للمنشأة المُوفِّرة */}
           <div className="break-before-page pt-10 mt-10 border-t border-dashed border-border flex flex-col items-center">
             <div className="text-base font-bold mb-1">شهادة رقم الآيبان (IBAN) — {isAr ? PROVIDER_BANK.beneficiaryAr : PROVIDER_BANK.beneficiaryEn}</div>
-            <div className="text-xs text-muted-foreground mb-4">الرقم الوطني الموحد للمنشأة: 7054695650 · {PROVIDER_BANK.bankAr}</div>
+            <div className="text-sm text-muted-foreground mb-4">الرقم الوطني الموحد للمنشأة: 7054695650 · {PROVIDER_BANK.bankAr}</div>
             <img src={IBAN_CERT_URL} crossOrigin="anonymous" alt="شهادة الآيبان" className="max-w-[560px] w-full rounded-2xl border border-border shadow-sm" />
-            <div className="mt-4 text-xs text-muted-foreground text-center leading-7 max-w-[560px]">
+            <div className="mt-4 text-sm text-muted-foreground text-center leading-7 max-w-[560px]">
               <div><b>المستفيد:</b> {PROVIDER_BANK.beneficiaryAr} · <b>رقم الحساب:</b> <span className="font-mono">{PROVIDER_BANK.account}</span></div>
               <div><b>الآيبان (IBAN):</b> <span className="font-mono">{PROVIDER_BANK.iban}</span></div>
             </div>
