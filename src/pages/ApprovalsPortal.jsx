@@ -195,26 +195,53 @@ export default function ApprovalsPortal({ portalSession }) {
         </div>
 
         {(() => {
-          const hist = (data?.leaveHistory || []).filter((r) => r.settlement_pdf_url);
-          if (hist.length === 0) return null;
+          const docBtn = (url, label) => url ? (
+            <a href={url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+              <Download size={13} /> {label}
+            </a>
+          ) : <span className="text-xs text-muted-foreground">—</span>;
+          const rows = [
+            ...(data?.leaveHistory || []).map((r) => ({
+              key: "L" + r.id, emp: r.employee_name, date: r.start_date, sort: r.start_date,
+              kind: leaveTypeLabel(r.leave_type), detail: isAr ? `${r.start_date} → ${r.end_date}` : `${r.start_date} → ${r.end_date}`,
+              status: r.status, doc: r.settlement_pdf_url, docLabel: isAr ? "المخالصة" : "Settlement",
+            })),
+            ...(data?.loanHistory || []).map((r) => ({
+              key: "N" + r.id, emp: r.employee_name, date: r.request_date || r.created_date?.slice(0, 10), sort: r.request_date || r.created_date,
+              kind: t.loan || (isAr ? "سلفة" : "Loan"), detail: formatCurrency(r.amount), status: r.status,
+              doc: r.statement_pdf_url, docLabel: isAr ? "كشف السلفة" : "Loan statement",
+            })),
+            ...(data?.tripHistory || []).map((r) => ({
+              key: "T" + r.id, emp: r.employee_name, date: r.start_date, sort: r.start_date,
+              kind: r.trip_type === "external" ? (t.tripExt || (isAr ? "انتداب خارجي" : "External trip")) : (t.tripInt || (isAr ? "انتداب داخلي" : "Internal trip")),
+              detail: r.destination || "", status: r.status,
+              doc: r.approval_pdf_url, docLabel: isAr ? "موافقة الانتداب" : "Trip approval",
+            })),
+          ].sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
+          if (rows.length === 0) return null;
           return (
             <>
               <h3 className="text-sm font-semibold text-muted-foreground mt-6 mb-2 flex items-center gap-1.5">
-                <Download size={14} /> {isAr ? "سجل المخالصات المُولّدة لمرؤوسيك" : "Generated settlements for your team"}
+                <Download size={14} /> {isAr ? "سجل معاملات المرؤوسين" : "Subordinates' transactions log"}
               </h3>
-              <div className="space-y-3">
-                {hist.map((r) => (
-                  <div key={r.id} className="text-sm border rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
-                    <div className="space-y-0.5">
-                      <div className="font-medium">{r.employee_name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {leaveTypeLabel(r.leave_type)} · {r.start_date} → {r.end_date} · <span className={cn("px-1.5 py-0.5 rounded-full", badge(r.status))}>{r.status}</span>
-                      </div>
-                    </div>
-                    <a href={r.settlement_pdf_url} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
-                      <Download size={13} /> {isAr ? "عرض المخالصة" : "View settlement"}
-                    </a>
+              <div className="border rounded-xl overflow-hidden">
+                <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-muted/50 text-xs font-semibold text-muted-foreground">
+                  <div className="col-span-3">{isAr ? "الموظف" : "Employee"}</div>
+                  <div className="col-span-2">{isAr ? "التاريخ" : "Date"}</div>
+                  <div className="col-span-2">{isAr ? "النوع" : "Type"}</div>
+                  <div className="col-span-2">{isAr ? "التفاصيل" : "Details"}</div>
+                  <div className="col-span-1">{isAr ? "الحالة" : "Status"}</div>
+                  <div className="col-span-2 text-center">{isAr ? "المستند" : "Document"}</div>
+                </div>
+                {rows.map((r) => (
+                  <div key={r.key} className="grid grid-cols-12 gap-2 px-3 py-2.5 text-xs border-t items-center">
+                    <div className="col-span-3 font-medium truncate">{r.emp}</div>
+                    <div className="col-span-2 text-muted-foreground">{r.date || "—"}</div>
+                    <div className="col-span-2">{r.kind}</div>
+                    <div className="col-span-2 text-muted-foreground truncate">{r.detail}</div>
+                    <div className="col-span-1"><span className={cn("px-1.5 py-0.5 rounded-full", badge(r.status))}>{r.status}</span></div>
+                    <div className="col-span-2 text-center">{docBtn(r.doc, r.docLabel)}</div>
                   </div>
                 ))}
               </div>
