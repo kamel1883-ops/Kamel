@@ -242,6 +242,13 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-delegation { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-delegation .no-print { display: none !important; }
 
+  .print-attendance, .print-attendance * { visibility: visible !important; }
+  .print-attendance { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 0; background: #fff; color: #111; }
+  .print-attendance .no-print { display: none !important; }
+  .print-attendance .border, .print-attendance .rounded-xl { border: 1px solid #cbd5e1 !important; border-radius: 0 !important; }
+  .print-attendance table, .print-attendance [class*="grid-cols"] { font-size: 9pt; }
+  .print-attendance .grid > * { padding: 4px 5px !important; }
+
   .print-brochure, .print-brochure * { visibility: visible !important; }
   .print-brochure { position: absolute; top: 0; right: 0; left: 0; width: 100%; max-width: 100% !important; margin: 0; padding: 0; background: #fff; }
   .print-brochure .no-print { display: none !important; }

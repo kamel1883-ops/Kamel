@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
+import ManagerAttendanceSection from "@/components/portal/ManagerAttendanceSection";
 
 export default function ApprovalsPortal({ portalSession }) {
   const { lang } = usePortalI18n();
@@ -194,6 +195,8 @@ export default function ApprovalsPortal({ portalSession }) {
             </Card>
           ))}
         </div>
+
+        <ManagerAttendanceSection records={data?.attendance || []} subs={data?.subordinates || []} />
 
         {(() => {
           const docBtn = (url, label) => url ? (

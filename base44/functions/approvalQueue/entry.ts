@@ -71,6 +71,9 @@ export default async function (req) {
       const done = (arr) => (arr || [])
         .filter((r) => subIds.has(r.employee_id) && !mgrPending.includes(r.status))
         .map((r) => ({ ...r, employee_name: r.employee_name || subName(r.employee_id) }));
+      // سجلّات الحضور والانصراف لمرؤوسي المدير — أحدث 300 سجل
+      const allAttendance = await base44.asServiceRole.entities.Attendance.list("-date", 300);
+      const attendance = withNat((allAttendance || []).filter((a) => subIds.has(a.employee_id)));
       return Response.json({
         role: "manager",
         myEmp,
@@ -82,6 +85,7 @@ export default async function (req) {
         leaveHistory: withNat(done(allLeaves)),
         loanHistory: withNat(done(allLoans)),
         tripHistory: withNat(done(allTrips)),
+        attendance,
         message: subs.length === 0 ? "لا يوجد مرؤوسون مربوطون بك حالياً." : null,
       });
     }
