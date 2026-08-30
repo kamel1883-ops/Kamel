@@ -12,7 +12,6 @@ import HrKeywordField from "@/components/landing/HrKeywordField";
 import { useI18n } from "@/lib/i18n";
 import { getActiveSeason } from "@/lib/seasonalVideo";
 import SeasonalHero from "@/components/landing/SeasonalHero";
-import SeasonalHeroOverlay from "@/components/landing/SeasonalHeroOverlay";
 import SeasonalDiscountBanner from "@/components/landing/SeasonalDiscountBanner";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -278,7 +277,6 @@ export default function Landing() {
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
         <SeasonalHero isAr={isAr} />
         <HrKeywordField />
-        <SeasonalHeroOverlay lang={lang} />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
           <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4 backdrop-blur-md">

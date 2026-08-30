@@ -7,7 +7,7 @@ import { getHeroVideo, getActiveSeason } from "@/lib/seasonalVideo";
 export default function SeasonalHero({ isAr }) {
   const season = getActiveSeason();
   const images = season?.heroImages || [];
-  const shade = season ? "#07231A" : "#0B2545";
+  const shade = season && images.length ? "#07231A" : "#0B2545";
   const [i, setI] = useState(0);
 
   useEffect(() => {

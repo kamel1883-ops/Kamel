@@ -12,14 +12,9 @@ const SEASONS = [
     titleAr: "اليوم الوطني السعودي 96 — عزنا بطبعنا",
     titleEn: "Saudi National Day 96 — Our Pride is Our Nature",
     start: "2026-08-24",
-    // آخر يوم للفيديو الموسمي 22-10-2026 — وبتاريخ 23-10-2026 يعود فيديو جدارة الأساسي تلقائياً
+    // آخر يوم للخصم الموسمي 22-10-2026 — وبتاريخ 23-10-2026 يُحذف شريط الخصم تلقائياً.
+    // الفيديو الأساسي لجدارة يظهر دائماً (أُلغيت صور/فيديو الموسم).
     end: "2026-10-22",
-    // أُلغي الفيديو الموسمي — الواجهة تأخذ هوية اليوم الوطني بالصور حتى 22-10-2026
-    heroImages: [
-      "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9590f5522_generated_image.png",
-      "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/be2a4b231_generated_image.png",
-      "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/77387bd56_generated_image.png",
-    ],
   },
 ];
 
