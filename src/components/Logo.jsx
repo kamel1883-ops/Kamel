@@ -3,25 +3,28 @@ import { Crown } from "lucide-react";
 export { Crown };
 import { cn } from "@/lib/utils";
 
+// الشعار الرسمي الموحّد لجدارة — يُستخدم كما هو (صورة واحدة فيها الأيقونة + الاسم)
+// عبر كامل النظام: الهبوط، بوابة الموظف، بوابة الشركات، بوابة المالك، واجهات الدخول.
+const LOGO_URL =
+  "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/9be992640_Gemini_Generated_Image_inkbyxinkbyxinkb.jpg";
+
 export default function Logo({ variant = "full", tone = "light", size = 44, className }) {
-  const textMain = tone === "light" ? "text-white" : "text-foreground";
-  const textSub = tone === "light" ? "text-white/55" : "text-muted-foreground";
   return (
-    <div className={cn("inline-flex items-center gap-3", className)} dir="rtl">
-      <div
-        className="relative flex items-center justify-center rounded-2xl ring-1 ring-[#c5a575] shrink-0"
-        style={{ width: size, height: size, backgroundColor: "#35254d", boxShadow: "0 6px 20px -10px rgba(53,37,77,.55)" }}
-      >
-        <Crown size={Math.round(size * 0.48)} className="text-[#c5a575]" strokeWidth={1.8} />
-      </div>
-      {variant === "full" && (
-        <div className="leading-tight">
-          <div className={cn("font-bold text-base sm:text-lg", textMain)} style={{ fontFamily: "var(--font-display)" }}>
-            جدارة
-          </div>
-          <div className={cn("text-[10px] sm:text-[11px] -mt-0.5", textSub)}>لإدارة الموارد البشرية</div>
-        </div>
-      )}
+    <div className={cn("inline-flex items-center", className)} dir="rtl">
+      <img
+        src={LOGO_URL}
+        alt="جدارة — لإدارة الموارد البشرية"
+        loading="eager"
+        draggable={false}
+        style={{
+          height: size,
+          width: "auto",
+          objectFit: "contain",
+          display: "block",
+          maxWidth: "none",
+          borderRadius: Math.round(size * 0.18),
+        }}
+      />
     </div>
   );
 }
