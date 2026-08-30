@@ -194,6 +194,34 @@ export default function ApprovalsPortal({ portalSession }) {
           ))}
         </div>
 
+        {(() => {
+          const hist = (data?.leaveHistory || []).filter((r) => r.settlement_pdf_url);
+          if (hist.length === 0) return null;
+          return (
+            <>
+              <h3 className="text-sm font-semibold text-muted-foreground mt-6 mb-2 flex items-center gap-1.5">
+                <Download size={14} /> {isAr ? "سجل المخالصات المُولّدة لمرؤوسيك" : "Generated settlements for your team"}
+              </h3>
+              <div className="space-y-3">
+                {hist.map((r) => (
+                  <div key={r.id} className="text-sm border rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+                    <div className="space-y-0.5">
+                      <div className="font-medium">{r.employee_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {leaveTypeLabel(r.leave_type)} · {r.start_date} → {r.end_date} · <span className={cn("px-1.5 py-0.5 rounded-full", badge(r.status))}>{r.status}</span>
+                      </div>
+                    </div>
+                    <a href={r.settlement_pdf_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+                      <Download size={13} /> {isAr ? "عرض المخالصة" : "View settlement"}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </>
+          );
+        })()}
+
         <Dialog open={!!acting} onOpenChange={() => setActing(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{t.rejectTitle}</DialogTitle></DialogHeader>

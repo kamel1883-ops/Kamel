@@ -66,6 +66,11 @@ export default async function (req) {
         base44.asServiceRole.entities.BusinessTrip.list("-created_date", 500),
       ]);
       const bySub = (arr) => (arr || []).filter((r) => subIds.has(r.employee_id) && mgrPending.includes(r.status));
+      // سجلّ طلبات المرؤوسين (كل ما تجاوز مرحلة المدير) — ليتفاعل المدير مع المخالصات والمستندات المُولّدة لكل مرؤوس.
+      const subName = (id) => subs.find((s) => s.id === id)?.full_name || "";
+      const leaveHistory = (allLeaves || [])
+        .filter((l) => subIds.has(l.employee_id) && !mgrPending.includes(l.status))
+        .map((l) => ({ ...l, employee_name: l.employee_name || subName(l.employee_id) }));
       return Response.json({
         role: "manager",
         myEmp,
@@ -74,6 +79,7 @@ export default async function (req) {
         leaves: withNat(bySub(allLeaves)),
         loans: withNat(bySub(allLoans)),
         trips: withNat(bySub(allTrips)),
+        leaveHistory: withNat(leaveHistory),
         message: subs.length === 0 ? "لا يوجد مرؤوسون مربوطون بك حالياً." : null,
       });
     }
