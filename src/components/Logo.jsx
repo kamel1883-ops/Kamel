@@ -9,10 +9,10 @@ export default function Logo({ variant = "full", tone = "light", size = 44, clas
   return (
     <div className={cn("inline-flex items-center gap-3", className)} dir="rtl">
       <div
-        className="relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#1a1333] to-[#2e2448] ring-1 ring-[#d4af37]/30 shadow-lg shadow-[#1a1333]/20 shrink-0"
-        style={{ width: size, height: size }}
+        className="relative flex items-center justify-center rounded-2xl ring-1 ring-[#c5a575] shrink-0"
+        style={{ width: size, height: size, backgroundColor: "#35254d", boxShadow: "0 6px 20px -10px rgba(53,37,77,.55)" }}
       >
-        <Crown size={Math.round(size * 0.48)} className="text-[#d4af37]" strokeWidth={1.8} />
+        <Crown size={Math.round(size * 0.48)} className="text-[#c5a575]" strokeWidth={1.8} />
       </div>
       {variant === "full" && (
         <div className="leading-tight">
