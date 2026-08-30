@@ -15,28 +15,28 @@ const appNav = [
   { to: "/app", ar: "الرئيسية", en: "Dashboard", icon: LayoutDashboard },
   { to: "/notifications", ar: "الإشعارات", en: "Notifications", icon: Bell },
   { to: "/recruitment", ar: "إدارة التوظيف", en: "Recruitment", icon: Briefcase },
-  { to: "/employees", ar: "الموظفين", en: "Employees", icon: Users },
-  { to: "/attendance", ar: "الحضور والانصراف", en: "Attendance", icon: Fingerprint },
+  { to: "/employees", ar: "إدارة الموظفين", en: "Employees", icon: Users },
+  { to: "/attendance", ar: "إدارة الحضور والانصراف", en: "Attendance", icon: Fingerprint },
   { to: "/import-attendance", ar: "استيراد البصمات يدوياً", en: "Import Attendance", icon: ClipboardList },
-  { to: "/approvals", ar: "الموافقات", en: "Approvals", icon: CheckCircle2 },
-  { to: "/leaves", ar: "الإجازات", en: "Leaves", icon: CalendarDays },
-  { to: "/business-trips", ar: "رحلات العمل", en: "Business Trips", icon: Plane },
-  { to: "/payroll", ar: "الرواتب", en: "Payroll", icon: Wallet },
+  { to: "/approvals", ar: "إدارة الموافقات", en: "Approvals", icon: CheckCircle2 },
+  { to: "/leaves", ar: "إدارة الإجازات", en: "Leaves", icon: CalendarDays },
+  { to: "/business-trips", ar: "إدارة رحلات العمل", en: "Business Trips", icon: Plane },
+  { to: "/payroll", ar: "إدارة الرواتب", en: "Payroll", icon: Wallet },
   { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield },
-  { to: "/fleet", ar: "المركبات", en: "Fleet", icon: Car },
-  { to: "/end-of-service", ar: "نهاية الخدمة", en: "End of Service", icon: FileText },
+  { to: "/fleet", ar: "إدارة المركبات", en: "Fleet", icon: Car },
+  { to: "/end-of-service", ar: "إدارة نهاية الخدمة", en: "End of Service", icon: FileText },
   { to: "/performance", ar: "إدارة الأداء", en: "Performance", icon: Target },
-  { to: "/training", ar: "التدريب والتطوير", en: "Training & Development", icon: GraduationCap },
+  { to: "/training", ar: "إدارة التدريب والتطوير", en: "Training & Development", icon: GraduationCap },
   { to: "/workforce-planning", ar: "تخطيط القوى العاملة", en: "Workforce Planning", icon: CalendarRange },
-  { to: "/succession", ar: "التعاقب الوظيفي", en: "Succession", icon: GitBranch },
-  { to: "/org-structure", ar: "الهيكل التنظيمي", en: "Org Structure", icon: Network },
+  { to: "/succession", ar: "إدارة التعاقب الوظيفي", en: "Succession", icon: GitBranch },
+  { to: "/org-structure", ar: "إدارة الهيكل التنظيمي", en: "Org Structure", icon: Network },
   { to: "/licenses", ar: "إدارة التراخيص", en: "Licenses", icon: FileBadge },
   { to: "/platform-subscriptions", ar: "اشتراكات المنصات الحكومية", en: "Platform Subscriptions", icon: Globe },
   { to: "/warnings", ar: "إدارة الإنذارات", en: "Warnings", icon: ShieldAlert },
   { to: "/decisions", ar: "القرارات الإدارية", en: "Decisions", icon: ScrollText },
-  { to: "/incentives", ar: "الحوافز والمكافآت", en: "Incentives", icon: Gift },
-  { to: "/exit-interviews", ar: "مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare },
-  { to: "/surveys", ar: "الاستبيانات", en: "Surveys", icon: ClipboardList },
+  { to: "/incentives", ar: "إدارة الحوافز والمكافآت", en: "Incentives", icon: Gift },
+  { to: "/exit-interviews", ar: "إدارة مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare },
+  { to: "/surveys", ar: "إدارة الاستبيانات", en: "Surveys", icon: ClipboardList },
   { to: "/analytics", ar: "إدارة التحليلات والتقارير", en: "Analytics & Reports", icon: BarChart3 },
   { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
 ];
@@ -80,17 +80,17 @@ export default function Layout() {
       {user && <IdleSessionGuard onTimeout={handleLogout} />}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 right-0 h-screen w-72 bg-[#0B2545] text-white z-40 transition-transform duration-300 flex flex-col",
+          "fixed lg:sticky top-0 right-0 h-screen w-72 bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8] text-[#2A2340] z-40 transition-transform duration-300 flex flex-col border-l border-[#E2D6F4]",
           open ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="h-20 flex items-center justify-between px-5 border-b border-white/10">
-          <Link to="/app"><Logo tone="light" size={44} /></Link>
-          <button className="lg:hidden text-white/60" onClick={() => setOpen(false)}><X size={20} /></button>
+        <div className="h-20 flex items-center justify-between px-5 border-b border-[#E2D6F4]">
+          <Link to="/app"><Logo tone="dark" size={44} /></Link>
+          <button className="lg:hidden text-[#6B5E8C]" onClick={() => setOpen(false)}><X size={20} /></button>
         </div>
-        <div className="h-px bg-gradient-to-l from-violet-500/50 to-indigo-500/30" />
+        <div className="h-px bg-gradient-to-l from-[#A78BFA]/60 to-[#C4B5FD]/40" />
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
           {appNav.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.to);
@@ -100,31 +100,33 @@ export default function Layout() {
                 to={item.to}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border-r-2",
-                  active ? "bg-[#16355c] border-violet-300 text-white" : "border-transparent text-white/55 hover:text-white hover:bg-white/5"
+                  "flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-[13.5px] font-semibold transition-all border",
+                  active
+                    ? "bg-gradient-to-l from-[#7C5CE6] to-[#A78BFA] border-transparent text-white shadow-sm shadow-violet-300/40"
+                    : "bg-white/70 border-[#E8DEF7] text-[#4A3F66] hover:bg-white hover:border-[#C9B8EE] hover:text-[#2A2340]"
                 )}
               >
-                <Icon size={19} className={active ? "text-violet-200" : "text-white/50"} />
+                <Icon size={18} className={active ? "text-white" : "text-[#8B7AB8]"} />
                 {isAr ? item.ar : item.en}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-[#E2D6F4]">
           <div className="px-3 pb-2"><LanguageToggle /></div>
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-              <UserCircle size={22} className="text-amber-200" />
+          <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg bg-white/60 border border-[#E8DEF7]">
+            <div className="w-9 h-9 rounded-full bg-[#EDE4FB] flex items-center justify-center">
+              <UserCircle size={22} className="text-[#7C5CE6]" />
             </div>
             <div className="flex-1 leading-tight min-w-0">
-              <div className="text-sm font-medium truncate text-white">{user?.full_name || ui.manager}</div>
-              <div className="text-xs text-white/50 truncate">{user?.email || ""}</div>
+              <div className="text-sm font-semibold truncate text-[#2A2340]">{user?.full_name || ui.manager}</div>
+              <div className="text-xs text-[#8B7AB8] truncate">{user?.email || ""}</div>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/60 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-[#6B5E8C] bg-white/50 border border-[#E8DEF7] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
           >
             <LogOut size={19} /> {ui.logout}
           </button>
@@ -134,24 +136,24 @@ export default function Layout() {
       {open && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setOpen(false)} />}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="lg:hidden h-16 bg-[#0B2545] text-white border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-20" style={{ paddingTop: "max(env(safe-area-inset-top), 0px)" }}>
+        <header className="lg:hidden h-16 bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8] text-[#2A2340] border-b border-[#E2D6F4] flex items-center justify-between px-4 sticky top-0 z-20" style={{ paddingTop: "max(env(safe-area-inset-top), 0px)" }}>
           <div className="flex items-center gap-2.5">
             {location.pathname !== "/app" && location.pathname !== "/" && (
-              <button onClick={() => navigate(-1)} className="text-white/80 active:scale-95 transition" aria-label="back">
+              <button onClick={() => navigate(-1)} className="text-[#6B5E8C] active:scale-95 transition" aria-label="back">
                 <ArrowRight size={22} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
               </button>
             )}
-            <Logo tone="light" size={36} />
+            <Logo tone="dark" size={36} />
           </div>
           <div className="flex items-center gap-2">
-            <NotificationsBell tone="light" />
+            <NotificationsBell tone="dark" />
             <LanguageToggle />
-            <button onClick={() => setOpen(true)} className="text-white/80"><Menu size={22} /></button>
+            <button onClick={() => setOpen(true)} className="text-[#6B5E8C]"><Menu size={22} /></button>
           </div>
         </header>
 
-        <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b bg-background/80 backdrop-blur sticky top-0 z-20">
-          <div className="text-sm text-muted-foreground">{isAr ? "منصة جدارة — الموارد البشرية" : "Jadara HR Platform"}</div>
+        <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b bg-[#F8F6FC]/80 backdrop-blur sticky top-0 z-20">
+          <div className="text-sm font-medium text-[#6B5E8C]">{isAr ? "منصة جدارة — الموارد البشرية" : "Jadara HR Platform"}</div>
           <NotificationsBell tone="dark" />
         </div>
 
@@ -167,13 +169,13 @@ export default function Layout() {
           </div>
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0B2545]/95 backdrop-blur border-t border-white/10 flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#F6F3FC]/95 backdrop-blur border-t border-[#E2D6F4] flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           {bottomNav.map((item) => {
             const Icon = item.icon;
             const active = item.to === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.to);
             return (
               <Link key={item.to} to={item.to} state={active ? { refreshKey: Date.now() } : undefined} onClick={() => setOpen(false)}
-                className={cn("flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-[11px] font-medium transition-colors", active ? "text-violet-300" : "text-white/55")}>
+                className={cn("flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-[11px] font-semibold transition-colors", active ? "text-[#7C5CE6]" : "text-[#8B7AB8]")}>
                 <Icon size={20} />
                 {isAr ? item.ar : item.en}
               </Link>
