@@ -284,7 +284,7 @@ export default function Landing() {
             </div>
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
               <span className="block">{t.titlePre}</span>
-              <span className="block bg-gradient-to-l from-violet-600 via-fuchsia-500 to-violet-700 bg-clip-text text-transparent">{t.titleHi}</span>
+              <span className="block bg-gradient-to-l from-violet-600 to-violet-700 bg-clip-text text-transparent">{t.titleHi}</span>
             </h1>
           </motion.div>
         </div>
