@@ -25,6 +25,7 @@ export default function ApprovalsPortal({ portalSession }) {
   const [note, setNote] = useState("");
   const [proofFile, setProofFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [histSearch, setHistSearch] = useState("");
 
   const portalArgs = portalSession
     ? { portal_token: portalSession.token, portal_employee_id: portalSession.employee_id }
@@ -203,28 +204,43 @@ export default function ApprovalsPortal({ portalSession }) {
           ) : <span className="text-xs text-muted-foreground">—</span>;
           const rows = [
             ...(data?.leaveHistory || []).map((r) => ({
-              key: "L" + r.id, emp: r.employee_name, date: r.start_date, sort: r.start_date,
+              key: "L" + r.id, emp: r.employee_name, nat: r.national_id || "", date: r.start_date, sort: r.start_date,
               kind: leaveTypeLabel(r.leave_type), detail: isAr ? `${r.start_date} → ${r.end_date}` : `${r.start_date} → ${r.end_date}`,
               status: r.status, doc: r.settlement_pdf_url, docLabel: isAr ? "المخالصة" : "Settlement",
             })),
             ...(data?.loanHistory || []).map((r) => ({
-              key: "N" + r.id, emp: r.employee_name, date: r.request_date || r.created_date?.slice(0, 10), sort: r.request_date || r.created_date,
+              key: "N" + r.id, emp: r.employee_name, nat: r.national_id || "", date: r.request_date || (r.created_date || "").slice(0, 10), sort: r.request_date || r.created_date,
               kind: t.loan || (isAr ? "سلفة" : "Loan"), detail: formatCurrency(r.amount), status: r.status,
               doc: r.statement_pdf_url, docLabel: isAr ? "كشف السلفة" : "Loan statement",
             })),
             ...(data?.tripHistory || []).map((r) => ({
-              key: "T" + r.id, emp: r.employee_name, date: r.start_date, sort: r.start_date,
+              key: "T" + r.id, emp: r.employee_name, nat: r.national_id || "", date: r.start_date, sort: r.start_date,
               kind: r.trip_type === "external" ? (t.tripExt || (isAr ? "انتداب خارجي" : "External trip")) : (t.tripInt || (isAr ? "انتداب داخلي" : "Internal trip")),
               detail: r.destination || "", status: r.status,
               doc: r.approval_pdf_url, docLabel: isAr ? "موافقة الانتداب" : "Trip approval",
             })),
           ].sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
           if (rows.length === 0) return null;
+          const q = histSearch.trim();
+          const filtered = q ? rows.filter((r) => (r.nat || "").includes(q) || (r.emp || "").includes(q)) : rows;
           return (
             <>
               <h3 className="text-sm font-semibold text-muted-foreground mt-6 mb-2 flex items-center gap-1.5">
                 <Download size={14} /> {isAr ? "سجل معاملات المرؤوسين" : "Subordinates' transactions log"}
               </h3>
+              <div className="mb-2 flex items-center gap-2">
+                <div className="relative">
+                  <Input
+                    value={histSearch}
+                    onChange={(e) => setHistSearch(e.target.value)}
+                    placeholder={isAr ? "بحث برقم الهوية أو الاسم" : "Search by ID or name"}
+                    className="h-8 w-56 text-xs"
+                  />
+                </div>
+                {histSearch && (
+                  <button onClick={() => setHistSearch("")} className="text-xs text-muted-foreground hover:text-foreground">{isAr ? "مسح" : "Clear"}</button>
+                )}
+              </div>
               <div className="border rounded-xl overflow-hidden">
                 <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-muted/50 text-xs font-semibold text-muted-foreground">
                   <div className="col-span-3">{isAr ? "الموظف" : "Employee"}</div>
@@ -234,7 +250,7 @@ export default function ApprovalsPortal({ portalSession }) {
                   <div className="col-span-1">{isAr ? "الحالة" : "Status"}</div>
                   <div className="col-span-2 text-center">{isAr ? "المستند" : "Document"}</div>
                 </div>
-                {rows.map((r) => (
+                {filtered.map((r) => (
                   <div key={r.key} className="grid grid-cols-12 gap-2 px-3 py-2.5 text-xs border-t items-center">
                     <div className="col-span-3 font-medium truncate">{r.emp}</div>
                     <div className="col-span-2 text-muted-foreground">{r.date || "—"}</div>
