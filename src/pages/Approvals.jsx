@@ -158,7 +158,10 @@ export default function Approvals() {
     const s = r.status;
     if (type === "trips") {
       const tb = [];
-      if ((s === "pending" || s === "draft") && isHR) {
+      if ((s === "pending_manager" || s === "pending" || s === "draft") && isManagerOf(r)) {
+        tb.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
+        tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
+      } else if (s === "manager_approved" && isHR) {
         tb.push({ label: t.hrTripApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openTripApprove(r) });
         tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
       } else if (s === "awaiting_finance" && isFinance) {
@@ -169,10 +172,13 @@ export default function Approvals() {
       return tb;
     }
 
-    // السلف: تتجه مباشرة لمعتمد الموارد البشرية داخل النظام (لا مرور بالمدير المباشر)
+    // السلف: تمرّ بالمدير المباشر ← الموارد البشرية ← المالية
     if (type === "loans") {
       const btns = [];
-      if (s === "pending" && isHR) {
+      if ((s === "pending_manager" || s === "pending") && isManagerOf(r)) {
+        btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
+        btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "manager") });
+      } else if (s === "manager_approved" && isHR) {
         btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLoanHr(r) });
         btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "hr") });
       } else if ((s === "awaiting_finance" || s === "hr_approved") && isFinance) {
@@ -194,7 +200,11 @@ export default function Approvals() {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "manager") });
     } else if (s === "manager_approved" && isHR) {
-      btns.push({ label: t.leaveHrBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLeaveHr(r) });
+      if (needsFinance(r, empOf(r.employee_id), org)) {
+        btns.push({ label: t.leaveHrBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLeaveHr(r) });
+      } else {
+        btns.push({ label: isAr ? "اعتماد وإكمال" : "Approve & complete", cls: "bg-violet-600 hover:bg-violet-700", onClick: () => hrCompleteLeave(r) });
+      }
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "hr") });
     } else if (s === "hr_settled" && isHR) {
       btns.push({ label: t.forwardBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => forwardToFinance(r) });
@@ -305,6 +315,23 @@ export default function Approvals() {
     } catch (e) {}
     load();
   };
+  // إكمال الإجازات غير المالية (مرضية / بدون راتب / استئذان) — تكتمل عند اعتماد الموارد البشرية دون مرور بالمالية.
+  const hrCompleteLeave = async (r) => {
+    try {
+      const emp = empOf(r.employee_id);
+      const patchDone = {
+        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
+        hr_note: note || "", finance_status: "pending",
+        status: "completed",
+      };
+      setLeaves((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchDone } : x)));
+      await base44.entities.LeaveRequest.update(r.id, patchDone);
+      if (r.leave_type === "permission" && emp) {
+        // الاستئذان لا يغيّر حالة الموظف الوظيفية ولا يخصم رصيد الإجازات
+      }
+    } catch (e) {}
+    setNote(""); load();
+  };
   const openReject = (type, r, stage) => { setActing({ type, req: r, action: "reject", stage }); setNote(""); };
   const reject = async () => {
     if (!acting) return;
@@ -340,10 +367,11 @@ export default function Approvals() {
   };
   // Optimistic UI: patch local state instantly, then persist; rollback via reload on error.
   const update = async (type, id, patch) => {
-    const setter = type === "leaves" ? setLeaves : setLoans;
+    const setter = type === "leaves" ? setLeaves : type === "trips" ? setTrips : setLoans;
     setter((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
     try {
       if (type === "leaves") await base44.entities.LeaveRequest.update(id, patch);
+      else if (type === "trips") await base44.entities.BusinessTrip.update(id, patch);
       else await base44.entities.LoanRequest.update(id, patch);
     } catch (e) {
       load(); // rollback to server truth

@@ -134,18 +134,28 @@ export default function ApprovalsPortal({ portalSession }) {
   // ===== المدير المباشر =====
   if (role === "manager") {
     const leaves = data?.leaves || [];
+    const loans = data?.loans || [];
+    const trips = data?.trips || [];
+    const total = leaves.length + loans.length + trips.length;
     return (
       <div dir={portalDir(lang)} className="animate-fade-in">
         <PageHeader title={t.mTitle} subtitle={t.mSub} />
         {data?.message && <div className="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{data.message}</div>}
         {data?.subordinates?.length > 0 && <div className="mb-3 text-xs text-muted-foreground">{t.subInfo(data.subordinates.length)}</div>}
+        {total === 0 && <Empty />}
+        {leaves.length > 0 && <h3 className="text-sm font-semibold text-muted-foreground mt-5 mb-2">{isAr ? "الإجازات والاستئذان" : "Leaves & permissions"}</h3>}
         <div className="space-y-3">
-          {leaves.length === 0 ? <Empty /> : leaves.map((r) => (
+          {leaves.map((r) => (
             <Card key={r.id} r={r}
               actions={[
                 { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("leaves", r), busyKey: r.id },
                 { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("leaves", r) },
               ]}>
+              {r.leave_type === "permission" && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                  {isAr ? `استئذان · ${Math.floor((r.permission_minutes||0)/60)}س ${(r.permission_minutes||0)%60}د` : `Permission · ${Math.floor((r.permission_minutes||0)/60)}h ${(r.permission_minutes||0)%60}m`}
+                </span>
+              )}
               {r.leave_type === "annual" && (
                 <span className={cn("text-xs px-2 py-0.5 rounded-full", r.annual_leave_mode === "encash_continue" ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700")}>
                   {isAr ? (r.annual_leave_mode === "encash_continue" ? "تصفية مع مواصلة العمل" : "إجازة سفر فعلي") : (r.annual_leave_mode === "encash_continue" ? "Encash & continue" : "Travel leave")}
@@ -153,6 +163,33 @@ export default function ApprovalsPortal({ portalSession }) {
               )}
               {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
               {r.reason && <span className="text-xs text-muted-foreground">{r.reason}</span>}
+            </Card>
+          ))}
+        </div>
+        {loans.length > 0 && <h3 className="text-sm font-semibold text-muted-foreground mt-5 mb-2">{isAr ? "طلبات السلف" : "Loans"}</h3>}
+        <div className="space-y-3">
+          {loans.map((r) => (
+            <Card key={r.id} r={r}
+              kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{t.loan}</span>}
+              actions={[
+                { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("loans", r), busyKey: r.id },
+                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r) },
+              ]}>
+              <span className="text-xs text-muted-foreground">{formatCurrency(r.amount)}</span>
+              {r.reason && <span className="text-xs text-muted-foreground">· {r.reason}</span>}
+            </Card>
+          ))}
+        </div>
+        {trips.length > 0 && <h3 className="text-sm font-semibold text-muted-foreground mt-5 mb-2">{isAr ? "طلبات الانتداب" : "Business trips"}</h3>}
+        <div className="space-y-3">
+          {trips.map((r) => (
+            <Card key={r.id} r={r}
+              kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 flex items-center gap-1"><Plane size={11} /> {r.trip_type === "external" ? t.tripExt : t.tripInt}</span>}
+              actions={[
+                { label: t.approve, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("trips", r), busyKey: r.id },
+                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("trips", r) },
+              ]}>
+              <span className="text-xs text-muted-foreground">{r.destination}</span>
             </Card>
           ))}
         </div>
