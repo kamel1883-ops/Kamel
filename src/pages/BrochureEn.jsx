@@ -15,7 +15,7 @@ import { Image } from "@/components/ui/image";
 // Jadara Platform — Profile / Brochure — English edition (LTR), fully translated, printable.
 const NAVY = "#0A1629";
 const NAVY2 = "#0e1f3a";
-const CYAN = "#00B8D4";
+const CYAN = "#8B5CF6";
 const GOLD = "#C9A961";
 
 export default function BrochureEn() {
@@ -30,7 +30,7 @@ export default function BrochureEn() {
           <div className="flex items-center gap-2">
             <a href="/brochure" className="inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-white/10 hover:bg-white/15 text-white text-sm font-semibold">العربية</a>
             <button onClick={() => window.print()}
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#00B8D4] hover:bg-[#00a6c0] text-white text-sm font-semibold shadow-lg shadow-cyan-500/30">
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#8B5CF6] hover:bg-[#7C5CE6] text-white text-sm font-semibold shadow-lg shadow-cyan-500/30">
               <Download size={16} /> Export PDF
             </button>
           </div>
@@ -185,7 +185,7 @@ function DashboardOverview() {
             ].map((x, k) => {
               const I = x.i;
               return (
-                <div key={k} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: x.a ? "rgba(0,184,212,.18)" : "transparent", color: x.a ? "#fff" : "#9fb3c8" }}>
+                <div key={k} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: x.a ? "rgba(139,92,246,.18)" : "transparent", color: x.a ? "#fff" : "#9fb3c8" }}>
                   <I size={12} /> {x.t}
                 </div>
               );
@@ -217,7 +217,7 @@ function DashboardOverview() {
             <div className="grid grid-cols-2 gap-2 mt-3">
               <div className="bg-white rounded-xl p-3 border border-slate-200">
                 <div className="text-[10px] text-slate-400 mb-2">Requests Status</div>
-                {[{ t: "Pending manager", n: 5, c: "#fbbf24" }, { t: "Pending finance", n: 3, c: "#00B8D4" }, { t: "Completed", n: 28, c: "#16a34a" }].map((r, k) => (
+                {[{ t: "Pending manager", n: 5, c: "#fbbf24" }, { t: "Pending finance", n: 3, c: "#8B5CF6" }, { t: "Completed", n: 28, c: "#16a34a" }].map((r, k) => (
                   <div key={k} className="flex items-center justify-between text-[10px] py-1 border-b border-slate-100 last:border-0">
                     <span className="text-slate-600">{r.t}</span><span className="font-bold" style={{ color: r.c }}>{r.n}</span>
                   </div>
@@ -559,7 +559,7 @@ function RecruitmentModule() {
           <div className="bg-white rounded-xl p-3 border border-slate-200">
             <div className="text-[11px] text-slate-700 font-bold mb-2">Role: HR Analyst · 2 vacancies</div>
             <div className="flex items-center gap-1 mb-3">
-              {[{ s: "Applied", n: 38, c: "#94a3b8" }, { s: "Screened", n: 12, c: "#00B8D4" }, { s: "Interview", n: 5, c: "#fbbf24" }, { s: "Hired", n: 2, c: "#16a34a" }].map((x, k) => (
+              {[{ s: "Applied", n: 38, c: "#94a3b8" }, { s: "Screened", n: 12, c: "#8B5CF6" }, { s: "Interview", n: 5, c: "#fbbf24" }, { s: "Hired", n: 2, c: "#16a34a" }].map((x, k) => (
                 <React.Fragment key={k}>
                   <div className="flex-1 text-center rounded-lg py-1.5" style={{ background: `${x.c}1A`, border: `1px solid ${x.c}55` }}>
                     <div className="text-sm font-extrabold" style={{ color: x.c }}>{x.n}</div>
@@ -572,7 +572,7 @@ function RecruitmentModule() {
             {[
               { n: "Mohammed Al-Shehri", e: "5 years", s: "First interview", c: "#fbbf24" },
               { n: "Reem Al-Harbi", e: "3 years", s: "Hired", c: "#16a34a" },
-              { n: "Fahd Al-Naimi", e: "7 years", s: "Initial screening", c: "#00B8D4" },
+              { n: "Fahd Al-Naimi", e: "7 years", s: "Initial screening", c: "#8B5CF6" },
             ].map((r, k) => (
               <div key={k} className="flex items-center justify-between text-[11px] py-2 border-b border-slate-100 last:border-0">
                 <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-slate-100 text-[10px] flex items-center justify-center font-bold text-slate-500">{r.n[0]}</div>{r.n}</div>
@@ -1070,7 +1070,7 @@ function PhoneMock() {
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             {[{ I: Fingerprint, t: "Check-in" }, { I: CalendarClock, t: "Leave" }, { I: Wallet, t: "Loan" }].map((x, i) => (
-              <div key={i} className="rounded-lg py-3" style={{ background: "rgba(0,184,212,.12)", border: "1px solid rgba(0,184,212,.25)" }}>
+              <div key={i} className="rounded-lg py-3" style={{ background: "rgba(139,92,246,.12)", border: "1px solid rgba(139,92,246,.25)" }}>
                 <x.I size={16} style={{ color: CYAN, margin: "0 auto 4px" }} />
                 <div style={{ fontSize: 10 }}>{x.t}</div>
               </div>
@@ -1086,7 +1086,7 @@ function PhoneMock() {
               <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 text-[11px]"><span style={{ width: 6, height: 6, borderRadius: 999, background: x.c }} /> {x.t}</div>
             ))}
           </div>
-          <button className="rounded-xl py-2.5 text-center font-bold text-xs" style={{ background: `linear-gradient(135deg, ${CYAN}, #0096b5)`, color: "#fff" }}>
+          <button className="rounded-xl py-2.5 text-center font-bold text-xs" style={{ background: `linear-gradient(135deg, ${CYAN}, #7C5CE6)`, color: "#fff" }}>
             <Fingerprint size={13} className="inline mr-1" /> Check in now
           </button>
         </div>
@@ -1205,7 +1205,7 @@ function Closing() {
           Try the platform free for 30 days and discover how your HR management transforms into one unified, premium digital ecosystem.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-7">
-          <a href="https://wa.me/966594700782" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(0,184,212,.10)", border: "1px solid rgba(0,184,212,.35)" }}>
+          <a href="https://wa.me/966594700782" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(139,92,246,.10)", border: "1px solid rgba(139,92,246,.35)" }}>
             <Phone size={18} style={{ color: CYAN }} />
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">+966 59 470 0782</span>
           </a>
@@ -1246,7 +1246,7 @@ function Section({ tint, heading, children }) {
 function Heading({ icon, title, sub, dark }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: dark ? "rgba(0,184,212,.12)" : "rgba(0,184,212,.10)", color: CYAN, border: `1px solid ${CYAN}44` }}>{icon}</div>
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: dark ? "rgba(139,92,246,.12)" : "rgba(139,92,246,.10)", color: CYAN, border: `1px solid ${CYAN}44` }}>{icon}</div>
       <h3 style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", color: dark ? "#fff" : NAVY, marginBottom: 6 }}>{title}</h3>
       <p style={{ fontSize: 14, color: dark ? "#a9bcd0" : "#64748b", maxWidth: 680 }}>{sub}</p>
       <div style={{ width: 56, height: 3, borderRadius: 999, background: CYAN, marginTop: 12 }} />
