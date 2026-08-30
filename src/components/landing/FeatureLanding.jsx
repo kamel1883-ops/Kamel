@@ -73,29 +73,29 @@ export default function FeatureLanding({ content }) {
   }, [c, content.path, isAr]);
 
   return (
-    <div className="min-h-screen bg-[#0B2545] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
-        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px]" />
+    <div className="min-h-screen bg-[#F6F3FC] text-foreground antialiased" dir={isAr ? "rtl" : "ltr"}>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-300/40 blur-[120px]" />
+        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-violet-200/35 blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-fuchsia-200/25 blur-[120px]" />
       </div>
 
       {/* شريط علوي */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <Logo tone="light" size={42} />
+            <Logo tone="dark" size={42} />
           </Link>
-          <nav className="hidden md:flex items-center gap-5 text-sm text-white/70">
-            <Link to="/" className="hover:text-white transition">{isAr ? "الرئيسية" : "Home"}</Link>
-            <Link to="/quote" className="hover:text-white transition">{isAr ? "عرض السعر" : "Quote"}</Link>
-            <Link to="/about" className="hover:text-white transition">{isAr ? "من نحن" : "About"}</Link>
-            <Link to="/contact" className="hover:text-white transition">{isAr ? "تواصل" : "Contact"}</Link>
+          <nav className="hidden md:flex items-center gap-5 text-sm text-foreground/70">
+            <Link to="/" className="hover:text-violet-700 transition">{isAr ? "الرئيسية" : "Home"}</Link>
+            <Link to="/quote" className="hover:text-violet-700 transition">{isAr ? "عرض السعر" : "Quote"}</Link>
+            <Link to="/about" className="hover:text-violet-700 transition">{isAr ? "من نحن" : "About"}</Link>
+            <Link to="/contact" className="hover:text-violet-700 transition">{isAr ? "تواصل" : "Contact"}</Link>
           </nav>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/company-login" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{isAr ? "بوابة الشركات" : "Company Portal"}</Link>
-            <Link to="/quote" className="text-sm bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-4 py-2 rounded-xl font-medium text-[#0B2545] shadow-lg shadow-amber-600/30 transition inline-flex items-center gap-1.5">
+            <Link to="/company-login" className="text-sm text-foreground/70 hover:text-violet-700 px-3 py-2 rounded-lg hidden sm:block">{isAr ? "بوابة الشركات" : "Company Portal"}</Link>
+            <Link to="/quote" className="text-sm bg-violet-600 hover:bg-violet-700 px-4 py-2 rounded-xl font-medium text-white shadow-lg shadow-violet-600/30 transition inline-flex items-center gap-1.5">
               <Zap size={15} /> {isAr ? "ابدأ الآن" : "Get Started"}
             </Link>
           </div>
@@ -105,19 +105,19 @@ export default function FeatureLanding({ content }) {
       {/* فتاحة الموقع */}
       <section className="max-w-5xl mx-auto px-5 pt-20 pb-12 text-center">
         <motion.div initial="hidden" animate="show" variants={fadeUp}>
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-5">
+          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-5">
             {c.badge}
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
             {c.titlePre}{" "}
-            <span className="bg-gradient-to-l from-[#DBC364] via-[#EBD69E] to-[#DBC364] bg-clip-text text-transparent">{c.titleHi}</span>
+            <span className="bg-gradient-to-l from-violet-600 via-fuchsia-500 to-violet-700 bg-clip-text text-transparent">{c.titleHi}</span>
           </h1>
-          <p className="text-white/70 text-lg mt-6 max-w-3xl mx-auto leading-relaxed">{c.hero}</p>
+          <p className="text-muted-foreground text-lg mt-6 max-w-3xl mx-auto leading-relaxed">{c.hero}</p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">
-            <Link to="/quote" className="bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] px-6 py-3.5 rounded-2xl font-semibold text-[#0B2545] shadow-xl shadow-amber-600/30 inline-flex items-center gap-2 transition">
+            <Link to="/quote" className="bg-violet-600 hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold text-white shadow-xl shadow-violet-600/30 inline-flex items-center gap-2 transition">
               <Zap size={18} /> {c.ctaPrimary}
             </Link>
-            <Link to="/" className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium transition inline-flex items-center gap-1.5">
+            <Link to="/" className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-6 py-3.5 rounded-2xl font-medium transition inline-flex items-center gap-1.5">
               {isAr ? "كل المميزات" : "All features"} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
             </Link>
           </div>
@@ -125,10 +125,10 @@ export default function FeatureLanding({ content }) {
 
         {c.heroImg && (
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative mt-12 max-w-4xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/30 to-indigo-500/20 rounded-[2rem] blur-2xl" />
-            <div className="relative rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-400/30 to-fuchsia-300/20 rounded-[2rem] blur-2xl" />
+            <div className="relative rounded-[2rem] border border-violet-100 overflow-hidden shadow-2xl">
               <img src={c.heroImg} alt={c.titleHi} className="w-full h-[340px] object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-violet-950/30 via-transparent to-transparent" />
             </div>
           </motion.div>
         )}
@@ -137,12 +137,12 @@ export default function FeatureLanding({ content }) {
       {/* نقاط الألم / الكلمات المفتاحية */}
       {c.painPoints?.length > 0 && (
         <section className="max-w-5xl mx-auto px-5 py-10">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-7">
-            <div className="font-semibold mb-3 text-white/90">{c.painTitle}</div>
+          <div className="bg-white border border-violet-100 rounded-3xl p-7">
+            <div className="font-semibold mb-3 text-foreground">{c.painTitle}</div>
             <div className="grid sm:grid-cols-2 gap-3">
               {c.painPoints.map((p) => (
-                <div key={p} className="flex items-start gap-2 text-sm text-white/80">
-                  <Check size={16} className="text-emerald-400 mt-0.5 shrink-0" /> <span>{p}</span>
+                <div key={p} className="flex items-start gap-2 text-sm text-foreground/80">
+                  <Check size={16} className="text-violet-600 mt-0.5 shrink-0" /> <span>{p}</span>
                 </div>
               ))}
             </div>
@@ -154,20 +154,20 @@ export default function FeatureLanding({ content }) {
       {c.features?.length > 0 && (
         <section className="max-w-7xl mx-auto px-5 py-12">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80">{c.featuresTag}</div>
-            <h2 className="text-3xl font-extrabold mt-4" style={{ fontFamily: "var(--font-display)" }}>{c.featuresTitle}</h2>
+            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700">{c.featuresTag}</div>
+            <h2 className="text-3xl font-extrabold mt-4 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.featuresTitle}</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {c.features.map((f) => {
               const I = f.icon;
               return (
                 <motion.div key={f.t} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                  className="bg-[#14315a] hover:bg-[#173466] border border-white/10 rounded-3xl p-6 transition-all hover:-translate-y-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#37376c] border border-white/10 flex items-center justify-center mb-4 shadow-lg shadow-indigo-950/50">
-                    <I size={22} className="text-white" />
+                  className="bg-white hover:bg-violet-50/50 border border-violet-100 rounded-3xl p-6 transition-all hover:-translate-y-1 hover:border-violet-200">
+                  <div className="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-4">
+                    <I size={22} className="text-violet-600" />
                   </div>
-                  <div className="font-semibold text-lg">{f.t}</div>
-                  <div className="text-white/60 text-sm mt-2 leading-relaxed">{f.d}</div>
+                  <div className="font-semibold text-lg text-foreground">{f.t}</div>
+                  <div className="text-muted-foreground text-sm mt-2 leading-relaxed">{f.d}</div>
                 </motion.div>
               );
             })}
@@ -179,16 +179,16 @@ export default function FeatureLanding({ content }) {
       {c.steps?.length > 0 && (
         <section className="max-w-5xl mx-auto px-5 py-12">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{c.stepsTitle}</h2>
+            <h2 className="text-3xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.stepsTitle}</h2>
           </div>
           <div className="space-y-4">
             {c.steps.map((s, i) => (
               <motion.div key={s.t} initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}
-                className="flex gap-4 items-start bg-white/5 border border-white/10 rounded-2xl p-5">
-                <div className="w-9 h-9 rounded-xl bg-violet-500/20 border border-violet-400/20 flex items-center justify-center font-bold text-violet-200 shrink-0">{i + 1}</div>
+                className="flex gap-4 items-start bg-white border border-violet-100 rounded-2xl p-5">
+                <div className="w-9 h-9 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center font-bold text-violet-700 shrink-0">{i + 1}</div>
                 <div>
-                  <div className="font-semibold">{s.t}</div>
-                  <div className="text-white/60 text-sm mt-1 leading-relaxed">{s.d}</div>
+                  <div className="font-semibold text-foreground">{s.t}</div>
+                  <div className="text-muted-foreground text-sm mt-1 leading-relaxed">{s.d}</div>
                 </div>
               </motion.div>
             ))}
@@ -200,16 +200,16 @@ export default function FeatureLanding({ content }) {
       {c.faqs?.length > 0 && (
         <section className="max-w-3xl mx-auto px-5 py-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{c.faqTitle}</h2>
+            <h2 className="text-3xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.faqTitle}</h2>
           </div>
           <div className="space-y-3">
             {c.faqs.map((f) => (
-              <details key={f.q} className="group bg-white/5 border border-white/10 rounded-2xl p-5">
-                <summary className="cursor-pointer font-semibold flex items-center justify-between gap-2 list-none">
+              <details key={f.q} className="group bg-white border border-violet-100 rounded-2xl p-5">
+                <summary className="cursor-pointer font-semibold flex items-center justify-between gap-2 list-none text-foreground">
                   {f.q}
-                  <ChevronLeft size={18} className="text-white/50 group-open:-rotate-45 transition shrink-0" style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+                  <ChevronLeft size={18} className="text-muted-foreground group-open:-rotate-45 transition shrink-0" style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
                 </summary>
-                <p className="text-white/60 text-sm mt-3 leading-relaxed">{f.a}</p>
+                <p className="text-muted-foreground text-sm mt-3 leading-relaxed">{f.a}</p>
               </details>
             ))}
           </div>
@@ -218,15 +218,15 @@ export default function FeatureLanding({ content }) {
 
       {/* دعوة لاتخاذ إجراء */}
       <section className="max-w-5xl mx-auto px-5 py-14">
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/25 via-indigo-600/15 to-amber-500/15 p-8 sm:p-10 text-center">
-          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
-          <h2 className="relative text-2xl sm:text-3xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{c.ctaTitle}</h2>
-          <p className="relative text-white/70 mt-3 max-w-2xl mx-auto">{c.ctaDesc}</p>
+        <div className="relative overflow-hidden rounded-[2rem] border border-violet-200 bg-gradient-to-l from-violet-100 via-violet-50 to-fuchsia-50 p-8 sm:p-10 text-center">
+          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-300/40 blur-3xl" />
+          <h2 className="relative text-2xl sm:text-3xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{c.ctaTitle}</h2>
+          <p className="relative text-muted-foreground mt-3 max-w-2xl mx-auto">{c.ctaDesc}</p>
           <div className="relative flex flex-wrap justify-center gap-3 mt-7">
-            <Link to="/quote" className="bg-white text-[#0B2545] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl inline-flex items-center gap-2 transition">
+            <Link to="/quote" className="bg-violet-600 text-white hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-600/30 inline-flex items-center gap-2 transition">
               <Zap size={18} /> {c.ctaPrimary}
             </Link>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition">
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition">
               <MessageCircle size={18} /> {isAr ? "واتساب مباشر" : "WhatsApp"}
             </a>
           </div>
@@ -234,34 +234,34 @@ export default function FeatureLanding({ content }) {
       </section>
 
       {/* التذييل */}
-      <footer className="border-t border-white/10 mt-6">
-        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm text-white/60">
+      <footer className="border-t border-violet-100 mt-6 bg-white/60">
+        <div className="max-w-7xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm text-muted-foreground">
           <div>
-            <div className="mb-2"><Logo tone="light" size={36} /></div>
+            <div className="mb-2"><Logo tone="dark" size={36} /></div>
             <p>{isAr ? "منصة الموارد البشرية السعودية المتكاملة." : "The integrated Saudi HR platform."}</p>
             <div className="flex items-center gap-2 mt-4">
-              <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors"><Linkedin size={17} /></a>
-              <a href={SOCIAL.twitter} target="_blank" rel="noreferrer" aria-label="X" className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-white/20 transition-colors"><Twitter size={17} /></a>
+              <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors"><Linkedin size={17} className="text-violet-600" /></a>
+              <a href={SOCIAL.twitter} target="_blank" rel="noreferrer" aria-label="X" className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors"><Twitter size={17} className="text-violet-600" /></a>
             </div>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-white mb-1">{isAr ? "تواصل معنا" : "Contact"}</div>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><MessageCircle size={14} /> WhatsApp: +966 594700782</a>
-            <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-white"><Mail size={14} /> {SALES_EMAIL}</a>
+            <div className="font-medium text-foreground mb-1">{isAr ? "تواصل معنا" : "Contact"}</div>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-violet-700"><MessageCircle size={14} /> WhatsApp: +966 594700782</a>
+            <a href={`mailto:${SALES_EMAIL}`} className="flex items-center gap-2 hover:text-violet-700"><Mail size={14} /> {SALES_EMAIL}</a>
           </div>
           <div className="space-y-1.5">
-            <div className="font-medium text-white mb-1">{isAr ? "روابط المنصة" : "Platform"}</div>
-            <Link to="/" className="block hover:text-white">{isAr ? "الرئيسية" : "Home"}</Link>
-            <Link to="/hr-system" className="block hover:text-white">{isAr ? "نظام موارد بشرية" : "HR System"}</Link>
-            <Link to="/payroll-system" className="block hover:text-white">{isAr ? "نظام رواتب" : "Payroll System"}</Link>
-            <Link to="/attendance-system" className="block hover:text-white">{isAr ? "نظام الحضور والانصراف" : "Attendance System"}</Link>
-            <Link to="/performance-system" className="block hover:text-white">{isAr ? "نظام إدارة الأداء" : "Performance System"}</Link>
-            <Link to="/quote" className="block hover:text-white">{isAr ? "عرض السعر" : "Quote"}</Link>
-            <Link to="/about" className="block hover:text-white">{isAr ? "من نحن" : "About"}</Link>
-            <Link to="/contact" className="block hover:text-white">{isAr ? "تواصل" : "Contact"}</Link>
+            <div className="font-medium text-foreground mb-1">{isAr ? "روابط المنصة" : "Platform"}</div>
+            <Link to="/" className="block hover:text-violet-700">{isAr ? "الرئيسية" : "Home"}</Link>
+            <Link to="/hr-system" className="block hover:text-violet-700">{isAr ? "نظام موارد بشرية" : "HR System"}</Link>
+            <Link to="/payroll-system" className="block hover:text-violet-700">{isAr ? "نظام رواتب" : "Payroll System"}</Link>
+            <Link to="/attendance-system" className="block hover:text-violet-700">{isAr ? "نظام الحضور والانصراف" : "Attendance System"}</Link>
+            <Link to="/performance-system" className="block hover:text-violet-700">{isAr ? "نظام إدارة الأداء" : "Performance System"}</Link>
+            <Link to="/quote" className="block hover:text-violet-700">{isAr ? "عرض السعر" : "Quote"}</Link>
+            <Link to="/about" className="block hover:text-violet-700">{isAr ? "من نحن" : "About"}</Link>
+            <Link to="/contact" className="block hover:text-violet-700">{isAr ? "تواصل" : "Contact"}</Link>
           </div>
         </div>
-        <div className="text-center text-white/40 text-xs pb-6">© 2027 {isAr ? "جدارة" : "Jadara"} — {isAr ? "جميع الحقوق محفوظة" : "All rights reserved"}</div>
+        <div className="text-center text-muted-foreground/70 text-xs pb-6">© 2027 {isAr ? "جدارة" : "Jadara"} — {isAr ? "جميع الحقوق محفوظة" : "All rights reserved"}</div>
       </footer>
     </div>
   );

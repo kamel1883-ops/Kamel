@@ -65,88 +65,88 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={t.dir}>
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
-        <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
+    <div className="min-h-screen bg-[#F6F3FC] text-foreground antialiased" dir={t.dir}>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-300/40 blur-[120px]" />
+        <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full bg-violet-200/35 blur-[120px]" />
       </div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link to="/"><Logo tone="light" size={40} /></Link>
-          <nav className="flex items-center gap-3 text-sm text-white/70">
+          <Link to="/"><Logo tone="dark" size={40} /></Link>
+          <nav className="flex items-center gap-3 text-sm text-foreground/70">
             <LanguageToggle />
-            <Link to="/about" className="hover:text-white transition">{t.navAbout}</Link>
+            <Link to="/about" className="hover:text-violet-700 transition">{t.navAbout}</Link>
           </nav>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-5 py-14">
         <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-4">
-            <ShieldCheck size={14} className="text-violet-300" /> {t.badge}
+          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4">
+            <ShieldCheck size={14} className="text-violet-600" /> {t.badge}
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{t.h1}</h1>
-          <p className="text-white/70 mt-3 text-lg leading-relaxed max-w-2xl">{t.intro}</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.h1}</h1>
+          <p className="text-muted-foreground mt-3 text-lg leading-relaxed max-w-2xl">{t.intro}</p>
         </motion.div>
 
         <div className="grid sm:grid-cols-3 gap-5 mt-10">
-          <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-400/20 rounded-3xl p-6 text-center transition group">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-300" /></div>
-            <div className="font-semibold">{t.wa}</div>
-            <div className="text-white/60 text-sm mt-1" dir="ltr">+966 594700782</div>
+          <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-3xl p-6 text-center transition group">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3"><MessageCircle size={22} className="text-emerald-600" /></div>
+            <div className="font-semibold text-foreground">{t.wa}</div>
+            <div className="text-muted-foreground text-sm mt-1" dir="ltr">+966 594700782</div>
           </a>
-          <a href={`mailto:${SALES_EMAIL}`} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 text-center transition">
-            <div className="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-200" /></div>
-            <div className="font-semibold">{t.email}</div>
-            <div className="text-white/60 text-sm mt-1" dir="ltr">{SALES_EMAIL}</div>
+          <a href={`mailto:${SALES_EMAIL}`} className="bg-white hover:bg-violet-50 border border-violet-100 rounded-3xl p-6 text-center transition">
+            <div className="w-12 h-12 rounded-2xl bg-violet-100 flex items-center justify-center mx-auto mb-3"><Mail size={22} className="text-violet-600" /></div>
+            <div className="font-semibold text-foreground">{t.email}</div>
+            <div className="text-muted-foreground text-sm mt-1" dir="ltr">{SALES_EMAIL}</div>
           </a>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3"><MapPin size={22} className="text-blue-200" /></div>
-            <div className="font-semibold">{t.loc}</div>
-            <div className="text-white/60 text-sm mt-1">{t.locVal}</div>
+          <div className="bg-white border border-violet-100 rounded-3xl p-6 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-3"><MapPin size={22} className="text-indigo-600" /></div>
+            <div className="font-semibold text-foreground">{t.loc}</div>
+            <div className="text-muted-foreground text-sm mt-1">{t.locVal}</div>
           </div>
         </div>
 
-        <form onSubmit={submit} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-7 mt-10 space-y-4">
+        <form onSubmit={submit} className="bg-white border border-violet-100 rounded-3xl p-7 mt-10 space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs text-white/60">{t.name}</label>
+              <label className="text-xs text-muted-foreground">{t.name}</label>
               <input value={f.name} onChange={(e) => set("name", e.target.value)} required
-                className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.namePh} />
+                className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.namePh} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-white/60">{t.emailL}</label>
+              <label className="text-xs text-muted-foreground">{t.emailL}</label>
               <input type="email" value={f.email} onChange={(e) => set("email", e.target.value)} required
-                className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder="name@example.com" />
+                className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder="name@example.com" />
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs text-white/60">{t.msg}</label>
+            <label className="text-xs text-muted-foreground">{t.msg}</label>
             <textarea value={f.message} onChange={(e) => set("message", e.target.value)} required rows={4}
-              className="w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.msgPh} />
+              className="w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50" placeholder={t.msgPh} />
           </div>
           <div className="flex justify-center">
             <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
           </div>
-          <button type="submit" disabled={status === "sending" || !captcha} className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 disabled:opacity-60 rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-500/30 transition">
+          <button type="submit" disabled={status === "sending" || !captcha} className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-600/30 transition">
             <Send size={18} /> {status === "sending" ? t.sending : t.send}
           </button>
           {status === "sent" && (
-            <div className="flex items-center justify-center gap-2 text-emerald-300 text-sm">
+            <div className="flex items-center justify-center gap-2 text-emerald-600 text-sm">
               <CheckCircle2 size={16} /> {t.sent}
             </div>
           )}
           {status === "failed" && (
-            <div className="flex items-center justify-center gap-2 text-rose-300 text-sm">{t.failed}</div>
+            <div className="flex items-center justify-center gap-2 text-rose-600 text-sm">{t.failed}</div>
           )}
-          <p className="text-white/40 text-xs text-center">{t.note}</p>
+          <p className="text-muted-foreground/60 text-xs text-center">{t.note}</p>
         </form>
       </main>
 
-      <footer className="border-t border-white/10 mt-10">
-        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/55">
-          <Link to="/"><Logo tone="light" size={36} /></Link>
-          <Link to="/" className="hover:text-white inline-flex items-center gap-1.5"><ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.home}</Link>
+      <footer className="border-t border-violet-100 mt-10 bg-white/60">
+        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <Link to="/"><Logo tone="dark" size={36} /></Link>
+          <Link to="/" className="hover:text-violet-700 inline-flex items-center gap-1.5"><ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.home}</Link>
           <div>{t.copy}</div>
         </div>
       </footer>

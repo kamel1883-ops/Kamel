@@ -29,14 +29,14 @@ export default function AffiliateJoinForm({ isAr }) {
     setCaptchaKey((k) => k + 1);
   };
 
-  const cls = "w-full bg-white/10 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400/50";
+  const cls = "w-full bg-violet-50/50 border border-violet-200 rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-400/50";
 
   return (
-    <form onSubmit={submit} className="bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-8 space-y-4">
-      <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+    <form onSubmit={submit} className="bg-white border border-violet-100 rounded-3xl p-6 sm:p-8 space-y-4">
+      <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>
         {isAr ? "انضم لبرنامج الشركاء" : "Join the affiliate program"}
       </h2>
-      <p className="text-white/60 text-sm">
+      <p className="text-muted-foreground text-sm">
         {isAr ? "أرسل بياناتك وسيتواصل معك فريق جدارة لتزويدك برابط الإحالة الخاص بك واعتماد شراكتك." : "Send your details and the Jadara team will contact you with your referral link and approve your partnership."}
       </p>
 
@@ -53,16 +53,16 @@ export default function AffiliateJoinForm({ isAr }) {
         <TurnstileWidget key={captchaKey} onToken={setCaptcha} className="rounded-xl overflow-hidden" />
       </div>
       <button type="submit" disabled={status === "sending" || !captcha}
-        className="w-full bg-gradient-to-r from-[#CBA83A] to-[#B6901F] hover:from-[#D9B863] hover:to-[#CBA83A] disabled:opacity-60 rounded-2xl py-3.5 font-semibold text-[#0B2545] flex items-center justify-center gap-2 shadow-xl shadow-amber-600/25 transition">
+        className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white rounded-2xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-xl shadow-violet-600/30 transition">
         <Send size={18} /> {status === "sending" ? (isAr ? "جارٍ الإرسال…" : "Sending…") : (isAr ? "إرسال طلب الانضمام" : "Submit application")}
       </button>
       {status === "sent" && (
-        <div className="flex items-center justify-center gap-2 text-emerald-300 text-sm">
+        <div className="flex items-center justify-center gap-2 text-emerald-600 text-sm">
           <CheckCircle2 size={16} /> {isAr ? "تم إرسال طلبك، سنتواصل معك قريباً." : "Your application was sent. We'll contact you soon."}
         </div>
       )}
       {status === "failed" && (
-        <div className="text-center text-rose-300 text-sm">{isAr ? "تعذّر الإرسال، حاول مرة أخرى." : "Could not send. Please try again."}</div>
+        <div className="text-center text-rose-600 text-sm">{isAr ? "تعذّر الإرسال، حاول مرة أخرى." : "Could not send. Please try again."}</div>
       )}
     </form>
   );

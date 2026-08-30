@@ -63,86 +63,86 @@ export default function BlogArticle() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/20 blur-[120px]" />
-        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
+    <div className="min-h-screen bg-[#F6F3FC] text-foreground antialiased" dir={isAr ? "rtl" : "ltr"}>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-300/40 blur-[120px]" />
+        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-violet-200/35 blur-[120px]" />
       </div>
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-3xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2"><Logo tone="light" size={38} /></Link>
+          <Link to="/" className="flex items-center gap-2"><Logo tone="dark" size={38} /></Link>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/blog" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{isAr ? "كل المقالات" : "All articles"}</Link>
+            <Link to="/blog" className="text-sm text-foreground/70 hover:text-violet-700 px-3 py-2 rounded-lg hidden sm:block">{isAr ? "كل المقالات" : "All articles"}</Link>
           </div>
         </div>
       </header>
 
       {loading ? (
-        <div className="py-24 text-center text-white/50"><Loader2 className="animate-spin mx-auto" size={28} /></div>
+        <div className="py-24 text-center text-muted-foreground"><Loader2 className="animate-spin mx-auto" size={28} /></div>
       ) : err || !article ? (
         <div className="max-w-3xl mx-auto px-5 py-24 text-center">
-          <div className="text-rose-300 mb-4">{err || t.notFound}</div>
-          <Link to="/blog" className="inline-flex items-center gap-1.5 text-violet-300 hover:text-violet-200">{t.back}</Link>
+          <div className="text-rose-600 mb-4">{err || t.notFound}</div>
+          <Link to="/blog" className="inline-flex items-center gap-1.5 text-violet-700 hover:text-violet-800">{t.back}</Link>
         </div>
       ) : (
         <>
           <article className="max-w-3xl mx-auto px-5 pt-10 pb-6">
-            <Link to="/blog" className="inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white mb-5">
+            <Link to="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-violet-700 mb-5">
               <ArrowRight size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.back}
             </Link>
-            <div className="text-xs text-violet-300 mb-3">{cats[article.category] || article.category}</div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>{article.title}</h1>
-            <div className="flex items-center gap-3 mt-4 text-xs text-white/50">
+            <div className="text-xs text-violet-700 mb-3">{cats[article.category] || article.category}</div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>{article.title}</h1>
+            <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground">
               {article.author_name && <span>{article.author_name}</span>}
               {article.published_date && <span>• {article.published_date}</span>}
               <span className="inline-flex items-center gap-1"><Clock size={12} /> {article.reading_minutes || 3} {t.minutes}</span>
             </div>
 
             {article.cover_image_url && (
-              <div className="mt-6 rounded-2xl overflow-hidden border border-white/10">
+              <div className="mt-6 rounded-2xl overflow-hidden border border-violet-100">
                 <img src={article.cover_image_url} alt={article.title} className="w-full h-64 object-cover" />
               </div>
             )}
 
-            <div className="mt-8 bg-white rounded-3xl border border-border p-7 sm:p-9 text-slate-800 blog-content">
+            <div className="mt-8 bg-white rounded-3xl border border-violet-100 p-7 sm:p-9 text-slate-800 blog-content">
               <ReactMarkdown>{article.content || ""}</ReactMarkdown>
             </div>
 
             {article.tags && (
               <div className="flex flex-wrap gap-2 mt-6">
                 {String(article.tags).split(",").map((tg) => tg.trim()).filter(Boolean).map((tg) => (
-                  <span key={tg} className="text-xs bg-white/5 border border-white/10 rounded-full px-3 py-1 text-white/60">#{tg}</span>
+                  <span key={tg} className="text-xs bg-violet-50 border border-violet-200 rounded-full px-3 py-1 text-violet-700">#{tg}</span>
                 ))}
               </div>
             )}
           </article>
 
           <section className="max-w-3xl mx-auto px-5 py-8">
-            <div className="relative overflow-hidden rounded-3xl border border-violet-400/30 bg-gradient-to-l from-violet-600/25 via-indigo-600/15 to-blue-600/25 p-8 text-center">
-              <div className="absolute -top-12 -left-12 w-52 h-52 rounded-full bg-violet-500/20 blur-3xl" />
-              <h2 className="relative text-2xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{t.ctaTitle}</h2>
-              <p className="relative text-white/70 mt-2 max-w-xl mx-auto">{t.ctaDesc}</p>
+            <div className="relative overflow-hidden rounded-3xl border border-violet-200 bg-gradient-to-l from-violet-100 via-violet-50 to-fuchsia-50 p-8 text-center">
+              <div className="absolute -top-12 -left-12 w-52 h-52 rounded-full bg-violet-300/40 blur-3xl" />
+              <h2 className="relative text-2xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.ctaTitle}</h2>
+              <p className="relative text-muted-foreground mt-2 max-w-xl mx-auto">{t.ctaDesc}</p>
               <div className="relative flex flex-wrap justify-center gap-3 mt-6">
-                <Link to="/quote" className="bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl inline-flex items-center gap-2 transition"><Zap size={18} /> {t.ctaBtn}</Link>
-                <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition"><MessageCircle size={18} /> {isAr ? "واتساب مباشر" : "WhatsApp"}</a>
+                <Link to="/quote" className="bg-violet-600 text-white hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-600/30 inline-flex items-center gap-2 transition"><Zap size={18} /> {t.ctaBtn}</Link>
+                <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition"><MessageCircle size={18} /> {isAr ? "واتساب مباشر" : "WhatsApp"}</a>
               </div>
             </div>
           </section>
 
           {related.length > 0 && (
             <section className="max-w-3xl mx-auto px-5 pb-16">
-              <h3 className="font-bold text-lg mb-4">{t.related}</h3>
+              <h3 className="font-bold text-lg mb-4 text-foreground">{t.related}</h3>
               <div className="grid sm:grid-cols-3 gap-4">
                 {related.map((a) => (
-                  <Link key={a.id} to={`/blog/${a.slug}`} className="group block bg-[#13161f] hover:bg-[#171b29] border border-white/10 rounded-2xl overflow-hidden transition hover:-translate-y-1">
+                  <Link key={a.id} to={`/blog/${a.slug}`} className="group block bg-white hover:bg-violet-50/50 border border-violet-100 hover:border-violet-200 rounded-2xl overflow-hidden transition hover:-translate-y-1">
                     <div className="h-28 overflow-hidden">
                       <img src={a.cover_image_url || "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=80"} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
                     </div>
                     <div className="p-3">
-                      <div className="text-[11px] text-violet-300 mb-1">{cats[a.category]}</div>
-                      <div className="font-semibold text-sm leading-snug group-hover:text-violet-200 transition line-clamp-2">{a.title}</div>
+                      <div className="text-[11px] text-violet-700 mb-1">{cats[a.category]}</div>
+                      <div className="font-semibold text-sm leading-snug text-foreground group-hover:text-violet-700 transition line-clamp-2">{a.title}</div>
                     </div>
                   </Link>
                 ))}

@@ -106,23 +106,23 @@ export default function Blog() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0c14] text-white antialiased" dir={isAr ? "rtl" : "ltr"}>
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/25 blur-[120px]" />
-        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]" />
+    <div className="min-h-screen bg-[#F6F3FC] text-foreground antialiased" dir={isAr ? "rtl" : "ltr"}>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-300/40 blur-[120px]" />
+        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-violet-200/35 blur-[120px]" />
       </div>
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2"><Logo tone="light" size={42} /></Link>
-          <nav className="hidden md:flex items-center gap-5 text-sm text-white/70">
-            <Link to="/" className="hover:text-white transition">{isAr ? "الرئيسية" : "Home"}</Link>
-            <Link to="/quote" className="hover:text-white transition">{isAr ? "عرض السعر" : "Quote"}</Link>
-            <Link to="/about" className="hover:text-white transition">{isAr ? "من نحن" : "About"}</Link>
+          <Link to="/" className="flex items-center gap-2"><Logo tone="dark" size={42} /></Link>
+          <nav className="hidden md:flex items-center gap-5 text-sm text-foreground/70">
+            <Link to="/" className="hover:text-violet-700 transition">{isAr ? "الرئيسية" : "Home"}</Link>
+            <Link to="/quote" className="hover:text-violet-700 transition">{isAr ? "عرض السعر" : "Quote"}</Link>
+            <Link to="/about" className="hover:text-violet-700 transition">{isAr ? "من نحن" : "About"}</Link>
           </nav>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/quote" className="text-sm bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-500/30 transition inline-flex items-center gap-1.5">
+            <Link to="/quote" className="text-sm bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-600/30 transition inline-flex items-center gap-1.5">
               <Zap size={15} /> {isAr ? "ابدأ الآن" : "Get Started"}
             </Link>
           </div>
@@ -130,46 +130,46 @@ export default function Blog() {
       </header>
 
       <section className="max-w-7xl mx-auto px-5 pt-16 pb-8 text-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-5">{t.badge}</div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{t.title}</h1>
-        <p className="text-white/70 text-lg mt-5 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
+        <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-5">{t.badge}</div>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.title}</h1>
+        <p className="text-muted-foreground text-lg mt-5 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
       </section>
 
       <section className="max-w-7xl mx-auto px-5 pb-6">
         <div className="flex flex-wrap justify-center gap-2">
-          <button onClick={() => setCat(null)} className={`text-sm px-4 py-2 rounded-full border transition ${!cat ? "bg-[#452a7a] text-white border-transparent shadow-lg shadow-violet-900/40" : "bg-[#1a1e2a] text-[#a0a0a0] border-[#2f3342] hover:text-white hover:border-[#452a7a]"}`}>{t.all}</button>
+          <button onClick={() => setCat(null)} className={`text-sm px-4 py-2 rounded-full border transition ${!cat ? "bg-violet-600 text-white border-transparent shadow-lg shadow-violet-600/30" : "bg-white text-muted-foreground border-violet-200 hover:text-violet-700 hover:border-violet-400"}`}>{t.all}</button>
           {Object.entries(cats).map(([k, v]) => (
-            <button key={k} onClick={() => setCat(k)} className={`text-sm px-4 py-2 rounded-full border transition whitespace-nowrap ${cat === k ? "bg-[#452a7a] text-white border-transparent shadow-lg shadow-violet-900/40" : "bg-[#1a1e2a] text-[#a0a0a0] border-[#2f3342] hover:text-white hover:border-[#452a7a]"}`}>{v}</button>
+            <button key={k} onClick={() => setCat(k)} className={`text-sm px-4 py-2 rounded-full border transition whitespace-nowrap ${cat === k ? "bg-violet-600 text-white border-transparent shadow-lg shadow-violet-600/30" : "bg-white text-muted-foreground border-violet-200 hover:text-violet-700 hover:border-violet-400"}`}>{v}</button>
           ))}
         </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-5 pb-14">
         {loading ? (
-          <div className="py-20 text-center text-white/50"><Loader2 className="animate-spin mx-auto" size={28} /></div>
+          <div className="py-20 text-center text-muted-foreground"><Loader2 className="animate-spin mx-auto" size={28} /></div>
         ) : err ? (
-          <div className="py-20 text-center text-rose-300">{err}</div>
+          <div className="py-20 text-center text-rose-600">{err}</div>
         ) : articles.length === 0 ? (
-          <div className="py-20 text-center text-white/50">{t.empty}</div>
+          <div className="py-20 text-center text-muted-foreground">{t.empty}</div>
         ) : (
           <>
             {featured && !cat && (
               <Link to={`/blog/${featured.slug}`} className="group block mb-8">
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/10 grid lg:grid-cols-2">
+                <div className="relative overflow-hidden rounded-[2rem] border border-violet-100 grid lg:grid-cols-2 bg-white">
                   <div className="relative h-56 lg:h-auto">
                     <img src={featured.cover_image_url || "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=1200&q=80"} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-[#0b1120] via-[#0b1120]/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-violet-950/70 via-violet-950/30 to-transparent" />
                   </div>
-                  <div className="p-7 sm:p-10 bg-[#0f1322]">
-                    <div className="inline-flex items-center gap-1.5 bg-violet-500/15 border border-violet-400/25 text-violet-200 rounded-full px-3 py-1 text-xs mb-4">{t.featured} • {cats[featured.category]}</div>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold group-hover:text-violet-200 transition" style={{ fontFamily: "var(--font-display)" }}>{featured.title}</h2>
-                    <p className="text-white/65 mt-3 leading-relaxed">{featured.excerpt}</p>
-                    <div className="flex items-center gap-3 mt-5 text-xs text-white/50">
+                  <div className="p-7 sm:p-10 bg-white">
+                    <div className="inline-flex items-center gap-1.5 bg-violet-100 border border-violet-200 text-violet-700 rounded-full px-3 py-1 text-xs mb-4">{t.featured} • {cats[featured.category]}</div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground group-hover:text-violet-700 transition" style={{ fontFamily: "var(--font-display)" }}>{featured.title}</h2>
+                    <p className="text-muted-foreground mt-3 leading-relaxed">{featured.excerpt}</p>
+                    <div className="flex items-center gap-3 mt-5 text-xs text-muted-foreground">
                       {featured.author_name && <span>{featured.author_name}</span>}
                       {featured.published_date && <span>• {featured.published_date}</span>}
                       <span className="inline-flex items-center gap-1"><Clock size={12} /> {featured.reading_minutes || 3} {isAr ? "د" : "min"}</span>
                     </div>
-                    <div className="mt-5 inline-flex items-center gap-1.5 text-violet-300 text-sm font-medium">{t.read} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /></div>
+                    <div className="mt-5 inline-flex items-center gap-1.5 text-violet-700 text-sm font-medium">{t.read} <ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /></div>
                   </div>
                 </div>
               </Link>
@@ -178,15 +178,15 @@ export default function Blog() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {articles.map((a) => (
                 <motion.div key={a.id} initial="hidden" whileInView="show" viewport={{ once: true }} variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-                  <Link to={`/blog/${a.slug}`} className="group block h-full bg-[#13161f] hover:bg-[#171b29] border border-white/10 rounded-3xl overflow-hidden transition hover:-translate-y-1">
+                  <Link to={`/blog/${a.slug}`} className="group block h-full bg-white hover:bg-violet-50/50 border border-violet-100 rounded-3xl overflow-hidden transition hover:-translate-y-1 hover:border-violet-200">
                     <div className="h-40 overflow-hidden">
                       <img src={a.cover_image_url || "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=800&q=80"} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
                     </div>
                     <div className="p-5">
-                      <div className="text-xs text-violet-300 mb-2">{cats[a.category]}</div>
-                      <h3 className="font-bold text-lg leading-snug group-hover:text-violet-200 transition">{a.title}</h3>
-                      <p className="text-white/55 text-sm mt-2 leading-relaxed line-clamp-3">{a.excerpt}</p>
-                      <div className="flex items-center gap-2 mt-4 text-xs text-white/40">
+                      <div className="text-xs text-violet-700 mb-2">{cats[a.category]}</div>
+                      <h3 className="font-bold text-lg leading-snug text-foreground group-hover:text-violet-700 transition">{a.title}</h3>
+                      <p className="text-muted-foreground text-sm mt-2 leading-relaxed line-clamp-3">{a.excerpt}</p>
+                      <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
                         {a.published_date && <span>{a.published_date}</span>}
                         <span className="inline-flex items-center gap-1"><Clock size={12} /> {a.reading_minutes || 3} {isAr ? "د" : "min"}</span>
                       </div>
@@ -200,13 +200,13 @@ export default function Blog() {
       </section>
 
       <section className="max-w-5xl mx-auto px-5 pb-14">
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-l from-violet-600/25 via-indigo-600/15 to-blue-600/25 p-8 sm:p-10 text-center">
-          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-500/20 blur-3xl" />
-          <h2 className="relative text-2xl sm:text-3xl font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{t.ctaTitle}</h2>
-          <p className="relative text-white/70 mt-3 max-w-2xl mx-auto">{t.ctaDesc}</p>
+        <div className="relative overflow-hidden rounded-[2rem] border border-violet-200 bg-gradient-to-l from-violet-100 via-violet-50 to-fuchsia-50 p-8 sm:p-10 text-center">
+          <div className="absolute -top-12 -left-12 w-60 h-60 rounded-full bg-violet-300/40 blur-3xl" />
+          <h2 className="relative text-2xl sm:text-3xl font-extrabold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.ctaTitle}</h2>
+          <p className="relative text-muted-foreground mt-3 max-w-2xl mx-auto">{t.ctaDesc}</p>
           <div className="relative flex flex-wrap justify-center gap-3 mt-7">
-            <Link to="/quote" className="bg-white text-[#0b1120] hover:bg-white/90 px-6 py-3.5 rounded-2xl font-semibold shadow-xl inline-flex items-center gap-2 transition"><Zap size={18} /> {t.ctaBtn}</Link>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/15 border border-white/15 px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition"><MessageCircle size={18} /> {isAr ? "واتساب مباشر" : "WhatsApp"}</a>
+            <Link to="/quote" className="bg-violet-600 text-white hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-violet-600/30 inline-flex items-center gap-2 transition"><Zap size={18} /> {t.ctaBtn}</Link>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-6 py-3.5 rounded-2xl font-medium inline-flex items-center gap-2 transition"><MessageCircle size={18} /> {isAr ? "واتساب مباشر" : "WhatsApp"}</a>
           </div>
         </div>
       </section>

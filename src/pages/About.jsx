@@ -69,32 +69,32 @@ export default function About() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-white antialiased" dir={t.dir}>
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
-        <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
+    <div className="min-h-screen bg-[#F6F3FC] text-foreground antialiased" dir={t.dir}>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-violet-300/40 blur-[120px]" />
+        <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full bg-violet-200/35 blur-[120px]" />
       </div>
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-violet-100">
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link to="/"><Logo tone="light" size={40} /></Link>
-          <nav className="flex items-center gap-3 text-sm text-white/70">
+          <Link to="/"><Logo tone="dark" size={40} /></Link>
+          <nav className="flex items-center gap-3 text-sm text-foreground/70">
             <LanguageToggle />
-            <Link to="/contact" className="hover:text-white transition">{t.navContact}</Link>
+            <Link to="/contact" className="hover:text-violet-700 transition">{t.navContact}</Link>
           </nav>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-5 py-14">
         <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}>
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs text-white/80 mb-4">
-            <Sparkles size={14} className="text-violet-300" /> {t.badge}
+          <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-xs text-violet-700 mb-4">
+            <Sparkles size={14} className="text-violet-600" /> {t.badge}
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight" style={{ fontFamily: "var(--font-display)" }}>{t.h1}</h1>
-          <p className="text-white/70 text-lg mt-4 leading-relaxed">{t.intro}</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.h1}</h1>
+          <p className="text-muted-foreground text-lg mt-4 leading-relaxed">{t.intro}</p>
         </motion.div>
 
-        <section className="mt-10 space-y-4 text-white/75 leading-relaxed">
-          <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{t.what}</h2>
+        <section className="mt-10 space-y-4 text-muted-foreground leading-relaxed">
+          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.what}</h2>
           <p>{t.whatBody}</p>
         </section>
 
@@ -102,12 +102,12 @@ export default function About() {
           {pillars.map((p) => {
             const I = p.icon;
             return (
-              <div key={p.t} className="bg-white/5 border border-white/10 rounded-3xl p-6">
-                <div className="w-11 h-11 rounded-2xl bg-[#37376c] border border-white/10 flex items-center justify-center mb-4">
-                  <I size={20} className="text-white" />
+              <div key={p.t} className="bg-white border border-violet-100 rounded-3xl p-6">
+                <div className="w-11 h-11 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-4">
+                  <I size={20} className="text-violet-600" />
                 </div>
-                <div className="font-semibold">{p.t}</div>
-                <div className="text-white/60 text-sm mt-1.5 leading-relaxed">{p.d}</div>
+                <div className="font-semibold text-foreground">{p.t}</div>
+                <div className="text-muted-foreground text-sm mt-1.5 leading-relaxed">{p.d}</div>
               </div>
             );
           })}
@@ -115,46 +115,46 @@ export default function About() {
 
         <section className="mt-12">
           <div className="flex items-center gap-2 mb-2">
-            <Landmark size={18} className="text-violet-300" />
-            <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{t.eosH}</h2>
+            <Landmark size={18} className="text-violet-600" />
+            <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.eosH}</h2>
           </div>
-          <p className="text-white/75 leading-relaxed">{t.eosBody}</p>
+          <p className="text-muted-foreground leading-relaxed">{t.eosBody}</p>
           <div className="grid sm:grid-cols-2 gap-3 mt-6">
             {eosArticleReference.map((a) => (
-              <div key={a.article} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div key={a.article} className="bg-white border border-violet-100 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold">{a.title}</span>
-                  <span className="text-[11px] bg-violet-500/20 text-violet-100 rounded-full px-2 py-0.5">{a.article}</span>
+                  <span className="font-semibold text-foreground">{a.title}</span>
+                  <span className="text-[11px] bg-violet-100 text-violet-700 rounded-full px-2 py-0.5">{a.article}</span>
                 </div>
-                <div className="text-white/60 text-sm leading-relaxed">{a.desc}</div>
+                <div className="text-muted-foreground text-sm leading-relaxed">{a.desc}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-12 space-y-4 text-white/75 leading-relaxed">
-          <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{t.whoH}</h2>
+        <section className="mt-12 space-y-4 text-muted-foreground leading-relaxed">
+          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.whoH}</h2>
           <p>{t.whoBody}</p>
         </section>
 
-        <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-gradient-to-br from-white/8 to-white/5 border border-white/10 rounded-3xl p-8 mt-12 grid sm:grid-cols-[auto,1fr] gap-7 items-start">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-violet-500/30 to-indigo-500/20 border border-white/15 flex items-center justify-center mx-auto sm:mx-0">
-            <Crown size={40} className="text-amber-300" />
+        <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white border border-violet-100 rounded-3xl p-8 mt-12 grid sm:grid-cols-[auto,1fr] gap-7 items-start">
+          <div className="w-24 h-24 rounded-3xl bg-violet-50 border border-violet-100 flex items-center justify-center mx-auto sm:mx-0">
+            <Crown size={40} className="text-violet-600" />
           </div>
           <div>
-            <div className="inline-flex items-center gap-2 bg-amber-400/15 text-amber-200 border border-amber-300/20 rounded-full px-3 py-1 text-xs mb-3">
+            <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1 text-xs mb-3">
               <Sparkles size={13} /> {t.chip}
             </div>
-            <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>{t.founderH}</h2>
-            <p className="mt-3 leading-loose">
-              {t.founder}<b className="text-white">{t.founderB}</b>{t.from}<b className="text-white">{t.univ}</b>{t.grade}<b className="text-white">{t.gradeV}</b>{t.add} <b className="text-white">SHRM‑SCP</b>, <b className="text-white">OTHM</b>, <b className="text-white">CMI</b>.
+            <h2 className="text-2xl font-bold text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.founderH}</h2>
+            <p className="mt-3 leading-loose text-muted-foreground">
+              {t.founder}<b className="text-violet-700">{t.founderB}</b>{t.from}<b className="text-violet-700">{t.univ}</b>{t.grade}<b className="text-violet-700">{t.gradeV}</b>{t.add} <b className="text-violet-700">SHRM‑SCP</b>, <b className="text-violet-700">OTHM</b>, <b className="text-violet-700">CMI</b>.
             </p>
             <div className="flex flex-wrap gap-2 mt-5">
               {t.certs.map((c) => {
                 const I = c.i;
                 return (
-                  <span key={c.t} className="inline-flex items-center gap-1.5 text-xs bg-white/8 border border-white/15 rounded-full px-3 py-1.5">
-                    <I size={13} className="text-violet-200" /> {c.t}
+                  <span key={c.t} className="inline-flex items-center gap-1.5 text-xs bg-violet-50 border border-violet-200 rounded-full px-3 py-1.5 text-foreground">
+                    <I size={13} className="text-violet-600" /> {c.t}
                   </span>
                 );
               })}
@@ -162,24 +162,24 @@ export default function About() {
           </div>
         </motion.section>
 
-        <div className="mt-12 bg-white/5 border border-white/10 rounded-3xl p-7 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-12 bg-white border border-violet-100 rounded-3xl p-7 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <div className="font-semibold text-lg" style={{ fontFamily: "var(--font-display)" }}>{t.readyT}</div>
-            <div className="text-white/60 text-sm mt-1">{t.readySub}</div>
+            <div className="font-semibold text-lg text-foreground" style={{ fontFamily: "var(--font-display)" }}>{t.readyT}</div>
+            <div className="text-muted-foreground text-sm mt-1">{t.readySub}</div>
           </div>
           <div className="flex gap-3">
-            <Link to="/contact" className="bg-white/10 hover:bg-white/15 border border-white/15 px-5 py-3 rounded-2xl font-medium transition">{t.ctaContact}</Link>
-            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 px-5 py-3 rounded-2xl font-semibold shadow-lg shadow-violet-500/30 transition">{t.ctaStart}</a>
+            <Link to="/contact" className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-5 py-3 rounded-2xl font-medium transition">{t.ctaContact}</Link>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer" className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-3 rounded-2xl font-semibold shadow-lg shadow-violet-600/30 transition">{t.ctaStart}</a>
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-white/10 mt-10">
-        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/55">
-          <Link to="/"><Logo tone="light" size={36} /></Link>
+      <footer className="border-t border-violet-100 mt-10 bg-white/60">
+        <div className="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <Link to="/"><Logo tone="dark" size={36} /></Link>
           <div className="flex items-center gap-4">
-            <a href={`mailto:${SALES_EMAIL}`} className="hover:text-white">{SALES_EMAIL}</a>
-            <Link to="/" className="hover:text-white inline-flex items-center gap-1.5"><ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.home}</Link>
+            <a href={`mailto:${SALES_EMAIL}`} className="hover:text-violet-700">{SALES_EMAIL}</a>
+            <Link to="/" className="hover:text-violet-700 inline-flex items-center gap-1.5"><ArrowLeft size={14} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.home}</Link>
           </div>
           <div>{t.copy}</div>
         </div>
