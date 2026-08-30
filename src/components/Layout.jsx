@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe, ScrollText, Gift, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
+import { Image } from "@/components/ui/image";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
@@ -116,9 +117,13 @@ export default function Layout() {
         <div className="p-3 border-t border-[#E2D6F4]">
           <div className="px-3 pb-2"><LanguageToggle /></div>
           <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg bg-white/60 border border-[#E8DEF7]">
-            <div className="w-9 h-9 rounded-full bg-[#EDE4FB] flex items-center justify-center">
-              <UserCircle size={22} className="text-[#7C5CE6]" />
-            </div>
+            {user?.avatar_url ? (
+              <Image src={user.avatar_url} fittingType="fill" className="w-9 h-9 rounded-full shrink-0 border border-[#E8DEF7]" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-[#EDE4FB] flex items-center justify-center shrink-0">
+                <UserCircle size={22} className="text-[#7C5CE6]" />
+              </div>
+            )}
             <div className="flex-1 leading-tight min-w-0">
               <div className="text-sm font-semibold truncate text-[#2A2340]">{user?.full_name || ui.manager}</div>
               <div className="text-xs text-[#8B7AB8] truncate">{user?.email || ""}</div>

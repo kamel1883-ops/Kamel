@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Image } from "@/components/ui/image";
 import Time24Input from "@/components/ui/time24";
-import { Loader2, Building2, Save, Crosshair, Wallet, Upload } from "lucide-react";
+import { Loader2, Building2, Save, Crosshair, Wallet, Upload, UserCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import WorkplaceMapPicker from "@/components/settings/WorkplaceMapPicker";
 import AccountDeletion from "@/components/settings/AccountDeletion";
@@ -58,6 +58,8 @@ export default function SettingsPage() {
     mapHint: "انقر على الخريطة أو اسحب الدبوس لتحديد موقع المقر بدقة — الدائرة تمثل نطاق البصمة المسموح.",
     logo: "شعار المنشأة", logoHint: "يظهر في بوابة الموظف والاعتمادات", uploading: "جارٍ الرفع...",
     changeLogo: "تغيير الشعار", chooseLogo: "اختيار صورة", logoEmpty: "لم يتم رفع شعار بعد",
+    secAccount: "الصورة الشخصية للمسؤول", accountHint: "تظهر صورة الشخص المسؤول في تعريف المنشأة والشريط الجانبي",
+    accountEmpty: "لم يتم رفع صورة بعد", changePhoto: "تغيير الصورة", choosePhoto: "اختيار صورة", photoUploading: "جارٍ رفع الصورة...",
     save: "حفظ الإعدادات",
     noGeo: "الجهاز لا يدعم تحديد الموقع", noAccess: "تعذر الوصول إلى موقعك",
   } : {
@@ -82,6 +84,8 @@ export default function SettingsPage() {
     mapHint: "Click the map or drag the pin to set the exact workplace — the circle shows the allowed check‑in radius.",
     logo: "Company logo", logoHint: "Shown in the employee & approvals portal", uploading: "Uploading...",
     changeLogo: "Change logo", chooseLogo: "Choose image", logoEmpty: "No logo uploaded yet",
+    secAccount: "Responsible person photo", accountHint: "Shown in the establishment definition and the sidebar",
+    accountEmpty: "No photo uploaded yet", changePhoto: "Change photo", choosePhoto: "Choose image", photoUploading: "Uploading photo...",
     save: "Save settings",
     noGeo: "Device does not support geolocation", noAccess: "Could not access your location",
   };
@@ -91,6 +95,12 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [subInfo, setSubInfo] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  useEffect(() => {
+    base44.auth.me().then((u) => setAvatarUrl(u?.avatar_url || "")).catch(() => {});
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -162,6 +172,17 @@ export default function SettingsPage() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       set("logo_url", file_url);
     } catch (_) {} finally { setUploading(false); }
+  };
+
+  const onAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ avatar_url: file_url });
+      setAvatarUrl(file_url);
+    } catch (_) {} finally { setAvatarUploading(false); }
   };
 
   const save = async () => {
@@ -320,6 +341,24 @@ export default function SettingsPage() {
           />
           <p className="text-xs text-muted-foreground">{t.locNote(org.workplace_radius)}</p>
         </Card>
+
+        <Section title={t.secAccount} icon={UserCircle}>
+          <p className="text-xs text-muted-foreground -mt-1">{t.accountHint}</p>
+          <div className="flex items-center gap-4 pt-1">
+            <div className="w-20 h-20 rounded-full border border-input bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+              {avatarUrl ? <Image src={avatarUrl} fittingType="fill" className="w-full h-full" /> : <UserCircle size={34} className="text-muted-foreground" />}
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs font-medium text-muted-foreground">{t.responsible}</Label>
+              <p className="text-xs text-muted-foreground mb-2">{avatarUrl ? t.accountHint : t.accountEmpty}</p>
+              <label className="inline-flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-md border border-input bg-transparent hover:bg-accent cursor-pointer">
+                {avatarUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                {avatarUploading ? t.photoUploading : (avatarUrl ? t.changePhoto : t.choosePhoto)}
+                <input type="file" accept="image/*" className="hidden" onChange={onAvatarChange} disabled={avatarUploading} />
+              </label>
+            </div>
+          </div>
+        </Section>
 
         <AccountDeletion org={org} />
 

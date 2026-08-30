@@ -507,29 +507,29 @@ export default function MyRequests() {
   return (
     <div className="min-h-screen bg-background" dir={portalDir(lang)}>
       {session && <IdleSessionGuard onTimeout={exitToLanding} />}
-      <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}>
+      <header className="sticky top-0 z-40 bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8] text-[#2A2340] border-b border-[#E2D6F4]" style={{ paddingTop: "max(env(safe-area-inset-top), 12px)" }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/portal"><Logo tone="light" size={38} /></Link>
-            <div className="hidden sm:block text-xs text-white/60 leading-tight">
+            <Link to="/portal"><Logo tone="dark" size={38} /></Link>
+            <div className="hidden sm:block text-xs text-[#6B5E8C] leading-tight">
               {t.brandSub}<br />
-              <span className="text-white/40">{t.brandOnly}</span>
+              <span className="text-[#8B7AB8]">{t.brandOnly}</span>
             </div>
             {session && org && (
-              <div className="hidden sm:flex items-center gap-2 ps-3 border-s border-white/10">
-                {org.logo_url ? <Image src={org.logo_url} fittingType="fit" className="h-8 w-8 rounded bg-white/90 p-0.5" /> : null}
-                <span className="text-sm font-medium text-white/90 truncate max-w-[160px]" title={org.name}>{org.name}</span>
+              <div className="hidden sm:flex items-center gap-2 ps-3 border-s border-[#E2D6F4]">
+                {org.logo_url ? <Image src={org.logo_url} fittingType="fit" className="h-8 w-8 rounded bg-white/90 p-0.5 border border-[#E8DEF7]" /> : null}
+                <span className="text-sm font-semibold text-[#2A2340] truncate max-w-[160px]" title={org.name}>{org.name}</span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+            <Link to="/" className="flex items-center gap-1.5 text-sm text-[#6B5E8C] hover:text-[#2A2340] px-3 py-2 rounded-lg hover:bg-white/60 transition">
               <ArrowRight size={16} style={{ transform: portalDir(lang) === "rtl" ? "none" : "scaleX(-1)" }} /> {t.backToSite}
             </Link>
-            <PortalNotificationsBell session={session} onViewAll={() => setView("notifications")} tone="light" align={portalDir(lang) === "rtl" ? "left" : "right"} />
+            <PortalNotificationsBell session={session} onViewAll={() => setView("notifications")} tone="dark" align={portalDir(lang) === "rtl" ? "left" : "right"} />
             <PortalLanguageSelector />
             {session && (
-              <button onClick={exitToLanding} className="flex items-center gap-2 text-sm text-white/70 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition">
+              <button onClick={exitToLanding} className="flex items-center gap-2 text-sm text-[#6B5E8C] hover:text-[#2A2340] px-3 py-2 rounded-lg hover:bg-white/60 transition">
                 <LogOut size={18} /> {t.logout}
               </button>
             )}

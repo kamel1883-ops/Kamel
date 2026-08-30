@@ -199,18 +199,18 @@ export default function OwnerPortal() {
   const isOwner = employee?.role_level === "owner";
 
   const Header = () => (
-    <header className="sticky top-0 z-40 bg-[#0b1120] text-white border-b border-white/10">
+    <header className="sticky top-0 z-40 bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8] text-[#2A2340] border-b border-[#E2D6F4]">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Logo tone="light" size={40} />
-          <span className="hidden sm:inline text-sm text-white/70 border-r border-white/15 pr-3">{t.brandSub}</span>
+          <Logo tone="dark" size={40} />
+          <span className="hidden sm:inline text-sm text-[#6B5E8C] border-r border-[#E2D6F4] pr-3">{t.brandSub}</span>
         </div>
         <div className="flex items-center gap-2">
-          <NotificationsBell tone="light" align={isAr ? "left" : "right"} />
+          <NotificationsBell tone="dark" align={isAr ? "left" : "right"} />
           <LanguageToggle />
-          <Link to="/" className="text-sm text-white/80 hover:text-white px-3 py-2 rounded-lg hidden sm:block">{t.back}</Link>
+          <Link to="/" className="text-sm text-[#6B5E8C] hover:text-[#2A2340] px-3 py-2 rounded-lg hidden sm:block hover:bg-white/60 transition">{t.back}</Link>
           {session && (
-            <button type="button" onClick={handleLogout} className="text-sm bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg flex items-center gap-1.5">
+            <button type="button" onClick={handleLogout} className="text-sm bg-white/70 hover:bg-white border border-[#E8DEF7] text-[#6B5E8C] hover:text-[#2A2340] px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
               <LogOut size={15} /> {t.logout}
             </button>
           )}
@@ -222,7 +222,7 @@ export default function OwnerPortal() {
   // ——— شاشة الدخول ———
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#0b1120]">
+      <div className="min-h-screen bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8]">
         <Header />
         <div className="max-w-xl mx-auto px-5 py-12">
           <div className="bg-white rounded-2xl border border-border p-8 shadow-xl">
@@ -325,7 +325,7 @@ export default function OwnerPortal() {
   // ——— جلسة لكن نتحقق من صلاحية المالك ———
   if (session && !employee?.role_level) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#F8F6FC]">
         <Header />
         <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
           {refreshing && <Loader2 className="animate-spin" size={24} />}
@@ -338,7 +338,7 @@ export default function OwnerPortal() {
   // ——— جلسة لكن صلاحية غير مالك ———
   if (!isOwner) {
     return (
-      <div className="min-h-screen bg-[#0b1120]">
+      <div className="min-h-screen bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8]">
         <Header />
         <div className="max-w-xl mx-auto px-5 py-16">
           <div className="bg-white rounded-2xl border border-border p-8 text-center">
@@ -360,10 +360,10 @@ export default function OwnerPortal() {
   }
 
   // ——— لوحة المالك ——— العملاء والعقود + كودات الخصم
-  const tabCls = (k) => cn("px-4 py-2 rounded-full text-sm font-medium border transition",
-    tab === k ? "bg-[#2e2448] text-white border-[#2e2448]" : "bg-white border-border text-muted-foreground hover:bg-slate-50");
+  const tabCls = (k) => cn("px-4 py-2 rounded-full text-sm font-semibold border transition",
+    tab === k ? "bg-gradient-to-l from-[#7C5CE6] to-[#A78BFA] text-white border-transparent shadow-sm shadow-violet-300/40" : "bg-white border-[#E8DEF7] text-[#4A3F66] hover:border-[#C9B8EE] hover:text-[#2A2340]");
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#F8F6FC]">
       <Header />
       <div className="max-w-6xl mx-auto px-5 py-8">
         <div className="flex flex-wrap gap-2 mb-5">
