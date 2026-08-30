@@ -75,8 +75,8 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
         days_count: days, per_diem_total: perDiemTotal, total_cost: total,
       };
       if (editing) await base44.entities.BusinessTrip.update(editing.id, payload);
-      else if (portalCreate) await portalCreate({ ...payload, status: "pending" });
-      else await base44.entities.BusinessTrip.create({ ...payload, status: "pending" });
+      else if (portalCreate) await portalCreate({ ...payload, status: "pending_manager", manager_status: "pending" });
+      else await base44.entities.BusinessTrip.create({ ...payload, status: "pending_manager", manager_status: "pending" });
       onSaved?.(); onClose?.();
     } catch (error) {
       setErr(error?.message || t.fail);

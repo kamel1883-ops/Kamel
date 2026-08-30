@@ -16,13 +16,13 @@ export function todayISO() {
 
 // أسماء أنواع الإجازات — 7 لغات
 const LEAVE_TYPES = {
-  ar: { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "بدون راتب", maternity: "إجازة أمومة" },
-  en: { annual: "Annual", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity" },
-  hi: { annual: "वार्षिक अवकाश", sick: "बीमारी अवकाश", emergency: "आपातकालीन अवकाश", unpaid: "बिना वेतन", maternity: "मातृत्व अवकाश" },
-  ne: { annual: "वार्षिक बिदा", sick: "बिरामी बिदा", emergency: "आपतकालीन बिदा", unpaid: "बिना तलब बिदा", maternity: "मातृत्व बिदा" },
-  bn: { annual: "বার্ষিক ছুটি", sick: "অসুস্থতার ছুটি", emergency: "জরুরি ছুটি", unpaid: "বেতনহীন ছুটি", maternity: "মাতৃত্ব ছুটি" },
-  fil: { annual: "Taon-taon", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity" },
-  ur: { annual: "سالانہ چھٹی", sick: "بیماری کی چھٹی", emergency: "ایمرجنسی", unpaid: "بلا تنخواہ", maternity: "مادرناٹی" },
+  ar: { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "بدون راتب", maternity: "إجازة أمومة", permission: "استئذان" },
+  en: { annual: "Annual", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity", permission: "Permission" },
+  hi: { annual: "वार्षिक अवकाश", sick: "बीमारी अवकाश", emergency: "आपातकालीन अवकाश", unpaid: "बिना वेतन", maternity: "मातृत्व अवकाश", permission: "अनुमति" },
+  ne: { annual: "वार्षिक बिदा", sick: "बिरामी बिदा", emergency: "आपतकालीन बिदा", unpaid: "बिना तलब बिदा", maternity: "मातृत्व बिदा", permission: "अनुमति" },
+  bn: { annual: "বার্ষিক ছুটি", sick: "অসুস্থতার ছুটি", emergency: "জরুরি ছুটি", unpaid: "বেতনহীন ছুটি", maternity: "মাতৃত্ব ছুটি", permission: "অনুমতি" },
+  fil: { annual: "Taon-taon", sick: "Sick", emergency: "Emergency", unpaid: "Unpaid", maternity: "Maternity", permission: "Permission" },
+  ur: { annual: "سالانہ چھٹی", sick: "بیماری کی چھٹی", emergency: "ایمرجنسی", unpaid: "بلا تنخواہ", maternity: "مادرناٹی", permission: "اجازت" },
 };
 
 export function leaveTypeLabel(type) {
@@ -33,13 +33,13 @@ export function leaveTypeLabel(type) {
 
 // النوع الكامل مع بيان الراتب (براتب / بدون راتب) — 7 لغات
 const LEAVE_FULL = {
-  ar: { annual: "إجازة سنوية براتب", sick: "إجازة مرضية براتب", emergency: "إجازة طارئة براتب", unpaid: "إجازة بدون راتب", maternity: "إجازة أمومة براتب" },
-  en: { annual: "Annual leave (paid)", sick: "Sick leave (paid)", emergency: "Emergency leave (paid)", unpaid: "Unpaid leave", maternity: "Maternity leave (paid)" },
-  hi: { annual: "वार्षिक अवकाश (paid)", sick: "बीमारी अवकाश (paid)", emergency: "आपातकालीन अवकाश (paid)", unpaid: "बिना वेतन अवकाश", maternity: "मातृत्व अवकाश (paid)" },
-  ne: { annual: "वार्षिक बिदा (paid)", sick: "बिरामी बिदा (paid)", emergency: "आपतकालीन बिदा (paid)", unpaid: "बिना तलब बिदा", maternity: "मातृत्व बिदा (paid)" },
-  bn: { annual: "বার্ষিক ছুটি (paid)", sick: "অসুস্থতার ছুটি (paid)", emergency: "জরুরি ছুটি (paid)", unpaid: "বেতনহীন ছুটি", maternity: "মাতৃত্ব ছুটি (paid)" },
-  fil: { annual: "Annual leave (paid)", sick: "Sick leave (paid)", emergency: "Emergency leave (paid)", unpaid: "Unpaid leave", maternity: "Maternity leave (paid)" },
-  ur: { annual: "سالانہ چھٹی (مع تنخواہ)", sick: "بیماری کی چھٹی (مع تنخواہ)", emergency: "ایمرجنسی چھٹی (مع تنخواہ)", unpaid: "بلا تنخواہ چھٹی", maternity: "مادرناٹی چھٹی (مع تنخواہ)" },
+  ar: { annual: "إجازة سنوية براتب", sick: "إجازة مرضية براتب", emergency: "إجازة طارئة براتب", unpaid: "إجازة بدون راتب", maternity: "إجازة أمومة براتب", permission: "استئذان (ساعات)" },
+  en: { annual: "Annual leave (paid)", sick: "Sick leave (paid)", emergency: "Emergency leave (paid)", unpaid: "Unpaid leave", maternity: "Maternity leave (paid)", permission: "Permission (hours)" },
+  hi: { annual: "वार्षिक अवकाश (paid)", sick: "बीमारी अवकाश (paid)", emergency: "आपातकालीन अवकाश (paid)", unpaid: "बिना वेतन अवकाश", maternity: "मातृत्व अवकाश (paid)", permission: "अनुमति (घंटे)" },
+  ne: { annual: "वार्षिक बिदा (paid)", sick: "बिरामी बिदा (paid)", emergency: "आपातकालीन बिदा (paid)", unpaid: "बिना तलब बिदा", maternity: "मातृत्व बिदा (paid)", permission: "अनुमति (घण्टा)" },
+  bn: { annual: "বার্ষিক ছুটি (paid)", sick: "অসুস্থতার ছুটি (paid)", emergency: "জরুরি ছুটি (paid)", unpaid: "বেতনহীন ছুটি", maternity: "মাতৃত্ব ছুটি (paid)", permission: "অনুমতি (ঘণ্টা)" },
+  fil: { annual: "Annual leave (paid)", sick: "Sick leave (paid)", emergency: "Emergency leave (paid)", unpaid: "Unpaid leave", maternity: "Maternity leave (paid)", permission: "Permission (hours)" },
+  ur: { annual: "سالانہ چھٹی (مع تنخواہ)", sick: "بیماری کی چھٹی (مع تنخواہ)", emergency: "ایمرجنسی چھٹی (مع تنخواہ)", unpaid: "بلا تنخواہ چھٹی", maternity: "مادرناٹی چھٹی (مع تنخواہ)", permission: "اجازت (گھنٹے)" },
 };
 
 export function leaveFullTypeLabel(type) {

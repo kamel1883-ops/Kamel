@@ -19,10 +19,13 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
   usePortalI18n();
   const t = usePortalT("leaveForm");
 
-  const [form, setForm] = useState({
+  const empty = {
     employee_id: "", leave_type: "annual", annual_leave_mode: "actual_travel",
     start_date: "", end_date: "", reason: "", is_full_clearance: false,
-  });
+    permission_hours: 0, permission_minutes: 0,
+  };
+
+  const [form, setForm] = useState(empty);
   const [medicalFile, setMedicalFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -30,9 +33,8 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
   useEffect(() => {
     if (open) {
       setForm({
+        ...empty,
         employee_id: currentUserEmployee?.id || employees?.[0]?.id || "",
-        leave_type: "annual", annual_leave_mode: "actual_travel",
-        start_date: "", end_date: "", reason: "", is_full_clearance: false,
       });
       setMedicalFile(null); setErr("");
     }
@@ -41,11 +43,15 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const isSick = form.leave_type === "sick";
   const isAnnual = form.leave_type === "annual";
+  const isPermission = form.leave_type === "permission";
   const days = form.start_date && form.end_date ? differenceInDays(parseISO(form.end_date), parseISO(form.start_date)) + 1 : 0;
+  const totalPermissionMinutes = (Number(form.permission_hours) || 0) * 60 + (Number(form.permission_minutes) || 0);
 
   const submit = async (e) => {
     e.preventDefault();
-    if (days <= 0) return;
+    if (isPermission) {
+      if (!form.start_date || totalPermissionMinutes <= 0) { setErr(t.requireDuration || "حدّد المدة"); return; }
+    } else if (days <= 0) return;
     if (isSick && !medicalFile) { setErr(t.requireMed); return; }
     setErr(""); setSaving(true);
     try {
@@ -56,12 +62,19 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
         medical_url = up.file_url;
       }
       const payload = {
-        ...form,
+        employee_id: form.employee_id,
+        leave_type: form.leave_type,
         annual_leave_mode: isAnnual ? form.annual_leave_mode : "actual_travel",
+        start_date: isPermission ? form.start_date : form.start_date,
+        end_date: isPermission ? form.start_date : form.end_date,
+        reason: form.reason,
+        is_full_clearance: isPermission ? false : form.is_full_clearance,
+        permission_minutes: isPermission ? totalPermissionMinutes : 0,
         employee_user_id: emp?.user_id || "",
         employee_name: emp ? emp.full_name : "",
-        days_count: days, is_full_clearance: form.is_full_clearance,
-        medical_report_url: medical_url, status: "pending_manager",
+        days_count: isPermission ? 0 : days,
+        medical_report_url: medical_url,
+        status: "pending_manager",
         manager_status: "pending", hr_status: "pending", finance_status: "pending",
       };
       if (portalCreate) await portalCreate(payload);
@@ -101,63 +114,117 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
                   <SelectItem value="emergency">{leaveFullTypeLabel("emergency")}</SelectItem>
                   <SelectItem value="unpaid">{leaveFullTypeLabel("unpaid")}</SelectItem>
                   <SelectItem value="maternity">{leaveFullTypeLabel("maternity")}</SelectItem>
+                  <SelectItem value="permission">{leaveFullTypeLabel("permission")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">{t.days}</Label>
-              <Input value={days > 0 ? String(days) : ""} disabled placeholder={t.daysHint} />
-              {days > 0 && <span className="text-xs text-muted-foreground">{t.daysHint}</span>}
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">{t.start}</Label>
-              <Input type="date" value={form.start_date} onChange={(e) => set("start_date", e.target.value)} required />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">{t.end}</Label>
-              <Input type="date" value={form.end_date} onChange={(e) => set("end_date", e.target.value)} required />
-            </div>
+            {!isPermission && (
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.days}</Label>
+                <Input value={days > 0 ? String(days) : ""} disabled placeholder={t.daysHint} />
+                {days > 0 && <span className="text-xs text-muted-foreground">{t.daysHint}</span>}
+              </div>
+            )}
           </div>
 
-          {isAnnual && (
-            <div className="space-y-1.5 rounded-lg border border-amber-200 bg-amber-50/60 p-3">
-              <Label className="text-xs font-semibold text-amber-800">{t.modeLabel}</Label>
-              <Select value={form.annual_leave_mode} onValueChange={(v) => set("annual_leave_mode", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="actual_travel">{t.modeTravel}</SelectItem>
-                  <SelectItem value="encash_continue">{t.modeEncash}</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {form.annual_leave_mode === "encash_continue" ? t.modeEncashHint : t.modeTravelHint}
-              </p>
-            </div>
-          )}
+          {isPermission ? (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{t.start}</Label>
+                <Input type="date" lang="ar" value={form.start_date} onChange={(e) => set("start_date", e.target.value)} required />
+              </div>
+              <div className="space-y-1.5 rounded-lg border border-violet-200 bg-violet-50/60 p-3">
+                <Label className="text-xs font-semibold text-violet-800">
+                  {(t.permissionDurationLabel) || "مدة الاستئذان"}
+                </Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div>
+                    <Label className="text-[11px] text-muted-foreground">{(t.permissionHours) || "ساعات"}</Label>
+                    <Input type="number" min={0} max={12} dir="ltr" value={form.permission_hours} onChange={(e) => set("permission_hours", Math.max(0, Number(e.target.value) || 0))} />
+                  </div>
+                  <div>
+                    <Label className="text-[11px] text-muted-foreground">{(t.permissionMinutes) || "دقائق"}</Label>
+                    <Select value={String(form.permission_minutes)} onValueChange={(v) => set("permission_minutes", Number(v))}>
+                      <SelectTrigger><SelectValue placeholder="0" /></SelectTrigger>
+                      <SelectContent>
+                        {[0, 15, 20, 30, 40, 45, 50].map((m) => (
+                          <SelectItem key={m} value={String(m)}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {[[1,0],[0,30],[1,30],[0,20],[1,40],[2,0]].map(([h,m]) => (
+                    <button type="button" key={`${h}-${m}`} onClick={() => { set("permission_hours", h); set("permission_minutes", m); }}
+                      className="text-[11px] px-2.5 py-1 rounded-full bg-white border border-violet-200 text-violet-700 hover:bg-violet-100">
+                      {h > 0 ? `${h} س` : ""}{h > 0 && m > 0 ? " و" : ""}{m > 0 ? `${m} د` : ""}{h === 0 && m === 0 ? "0" : ""}
+                    </button>
+                  ))}
+                </div>
+                {totalPermissionMinutes > 0 && (
+                  <div className="text-xs text-violet-700 mt-2">
+                    {Math.floor(totalPermissionMinutes / 60)} ساعة و {totalPermissionMinutes % 60} دقيقة ({totalPermissionMinutes} دقيقة)
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground mt-1">{(t.permissionHint) || "طلب الاستئذان يمرّ بالمدير المباشر ثم الموارد البشرية ولا يحتاج إلى صرف مالي."}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.start}</Label>
+                  <Input type="date" lang="ar" value={form.start_date} onChange={(e) => set("start_date", e.target.value)} required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{t.end}</Label>
+                  <Input type="date" lang="ar" value={form.end_date} onChange={(e) => set("end_date", e.target.value)} required />
+                </div>
+              </div>
 
-          {isSick && (
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">
-                {t.med} <span className="text-rose-500">*</span>
-                <span className="text-rose-500 text-xs mr-1">{t.medReq}</span>
-              </Label>
-              <Input type="file" accept="image/*,application/pdf" onChange={(e) => setMedicalFile(e.target.files?.[0] || null)} required />
-              <p className="text-xs text-muted-foreground">{t.medNote}</p>
-            </div>
+              {isAnnual && (
+                <div className="space-y-1.5 rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+                  <Label className="text-xs font-semibold text-amber-800">{t.modeLabel}</Label>
+                  <Select value={form.annual_leave_mode} onValueChange={(v) => set("annual_leave_mode", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="actual_travel">{t.modeTravel}</SelectItem>
+                      <SelectItem value="encash_continue">{t.modeEncash}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {form.annual_leave_mode === "encash_continue" ? t.modeEncashHint : t.modeTravelHint}
+                  </p>
+                </div>
+              )}
+
+              {isSick && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    {t.med} <span className="text-rose-500">*</span>
+                    <span className="text-rose-500 text-xs mr-1">{t.medReq}</span>
+                  </Label>
+                  <Input type="file" accept="image/*,application/pdf" onChange={(e) => setMedicalFile(e.target.files?.[0] || null)} required />
+                  <p className="text-xs text-muted-foreground">{t.medNote}</p>
+                </div>
+              )}
+
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.is_full_clearance} onChange={(e) => set("is_full_clearance", e.target.checked)} className="w-4 h-4" />
+                {t.full}
+              </label>
+            </>
           )}
 
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">{t.reason}</Label>
             <Textarea value={form.reason} onChange={(e) => set("reason", e.target.value)} rows={3} />
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.is_full_clearance} onChange={(e) => set("is_full_clearance", e.target.checked)} className="w-4 h-4" />
-            {t.full}
-          </label>
           {err && <div className="text-sm text-rose-600 bg-rose-50 rounded-lg p-3">{err}</div>}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>{t.cancel}</Button>
-            <Button type="submit" disabled={saving || days <= 0}>
+            <Button type="submit" disabled={saving || (!isPermission && days <= 0)}>
               {saving && <Loader2 size={16} className="animate-spin ml-2" />} {t.submit}
             </Button>
           </DialogFooter>

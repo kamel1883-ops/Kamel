@@ -59,16 +59,21 @@ export default async function (req) {
     if (myEmp.is_approver_manager) {
       const subs = (allEmployees || []).filter((e) => e.manager_id === myEmp.id);
       const subIds = new Set(subs.map((s) => s.id));
-      const allLeaves = await base44.asServiceRole.entities.LeaveRequest.list("-created_date", 500);
-      const leaves = (allLeaves || []).filter(
-        (l) => subIds.has(l.employee_id) && (l.status === "pending_manager" || l.status === "pending")
-      );
+      const mgrPending = ["pending_manager", "pending"];
+      const [allLeaves, allLoans, allTrips] = await Promise.all([
+        base44.asServiceRole.entities.LeaveRequest.list("-created_date", 500),
+        base44.asServiceRole.entities.LoanRequest.list("-created_date", 500),
+        base44.asServiceRole.entities.BusinessTrip.list("-created_date", 500),
+      ]);
+      const bySub = (arr) => (arr || []).filter((r) => subIds.has(r.employee_id) && mgrPending.includes(r.status));
       return Response.json({
         role: "manager",
         myEmp,
         actorId, actorName,
         subordinates: subs.map((s) => ({ id: s.id, full_name: s.full_name, department: s.department, position: s.position, national_id: s.national_id || "" })),
-        leaves: withNat(leaves),
+        leaves: withNat(bySub(allLeaves)),
+        loans: withNat(bySub(allLoans)),
+        trips: withNat(bySub(allTrips)),
         message: subs.length === 0 ? "لا يوجد مرؤوسون مربوطون بك حالياً." : null,
       });
     }

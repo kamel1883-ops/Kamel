@@ -42,10 +42,13 @@ export function leaveTicketAmount(employee, org) {
   return 0;
 }
 
-// أنواع الطلبات التي تتطلب صرفاً مالياً
+// أنواع الطلبات التي تتطلب صرفاً مالياً.
+// القاعدة: كل الطلبات تمر بالمدير ← الموارد البشرية ← المالية،
+// ما عدا: الاستئذان، الإجازة المرضية، والإجازة بدون راتب — تتوقف عند الموارد البشرية.
 export function needsFinance(req, employee, org) {
   if (!req) return false;
-  if (!req.leave_type) return true;
+  if (!req.leave_type) return true; // سلف، انتداب → مالية
   if (req.is_full_clearance) return true;
-  return req.leave_type === 'annual';
+  if (["sick", "unpaid", "permission"].includes(req.leave_type)) return false;
+  return true; // سنوية، طارئة، أمومة → مالية
 }

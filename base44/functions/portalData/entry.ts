@@ -808,7 +808,7 @@ export default async function (req) {
     if (action === "create_leave") {
       const p = pick(body.payload || {}, [
         "leave_type", "start_date", "end_date", "days_count", "reason",
-        "medical_report_url", "is_full_clearance", "description",
+        "medical_report_url", "is_full_clearance", "description", "permission_minutes",
       ]);
       p.medical_report_url = safeUrl(p.medical_report_url);
       const { manager_id, manager_name } = await resolveManager();
@@ -830,13 +830,15 @@ export default async function (req) {
       p.request_date = todayISO();
       p.requested_amount = Number(p.amount) || 0;
       p.requested_installments = Math.max(1, Number(p.installment_count) || 1);
-      // السلف لا تمرّ على المدير المباشر — تتجه مباشرة لمعتمد الموارد البشرية ثم المالية.
+      // كل الطلبات تمرّ بالمدير المباشر أولاً ثم الموارد البشرية ثم المالية.
+      const { manager_id, manager_name } = await resolveManager();
       const loan: any = await base44.asServiceRole.entities.LoanRequest.create({
         ...p,
         employee_id: employeeId,
         employee_user_id: emp.user_id || null,
         employee_name: empLabel,
-        status: "pending", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        status: "pending_manager", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        manager_id, manager_name,
         paid_amount: 0,
       });
       return Response.json({ ok: true, loan });
@@ -848,12 +850,15 @@ export default async function (req) {
         "transport_mode", "employee_note", "employee_document_url", "description",
       ]);
       p.employee_document_url = safeUrl(p.employee_document_url);
+      // كل الطلبات تمرّ بالمدير المباشر أولاً ثم الموارد البشرية ثم المالية.
+      const { manager_id, manager_name } = await resolveManager();
       const created = await base44.asServiceRole.entities.BusinessTrip.create({
         ...p,
         employee_id: employeeId,
         employee_user_id: emp.user_id || null,
         employee_name: empLabel,
-        status: "pending",
+        status: "pending_manager",
+        manager_status: "pending", manager_id, manager_name,
       });
       return Response.json({ ok: true, trip: created });
     }

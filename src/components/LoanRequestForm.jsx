@@ -38,7 +38,7 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee, port
         amount, reason: form.reason, installment_count: installments, monthly_installment: monthly,
         requested_amount: amount, requested_installments: installments,
         request_date: new Date().toISOString().slice(0, 10),
-        status: "pending", manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        status: "pending_manager", manager_status: "pending", hr_status: "pending", finance_status: "pending",
       };
       if (portalCreate) await portalCreate(payload);
       else await base44.entities.LoanRequest.create(payload);

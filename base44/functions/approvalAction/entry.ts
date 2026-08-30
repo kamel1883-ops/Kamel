@@ -56,12 +56,55 @@ export default async function (req) {
     const myUn = String(myEmp.unified_number || "").trim();
     const sameTenant = (employeeId) => !!myUn && idToUn.get(employeeId) === myUn;
 
+    // ===== المدير المباشر — سلف / انتداب (جميع الطلبات تمرّ بالمدير المباشر أولاً) =====
+    if (myEmp.is_approver_manager && type === "loans" && (action === "approve" || action === "reject")) {
+      const r = await base44.asServiceRole.entities.LoanRequest.get(id);
+      const emp = (allEmployees || []).find((e) => e.id === r.employee_id);
+      if (!emp || emp.manager_id !== myEmp.id)
+        return Response.json({ error: "هذا الطلب خارج نطاق مرؤوسيك" }, { status: 403 });
+      if (r.status !== "pending_manager" && r.status !== "pending")
+        return Response.json({ error: "الطلب ليس في مرحلة موافقة المدير المباشر" }, { status: 400 });
+      if (action === "approve") {
+        await base44.asServiceRole.entities.LoanRequest.update(id, {
+          manager_status: "approved", manager_id: actorId, manager_name: actorName,
+          manager_date: today(), status: "manager_approved",
+        });
+      } else {
+        await base44.asServiceRole.entities.LoanRequest.update(id, {
+          manager_status: "rejected", manager_id: actorId, manager_name: actorName,
+          manager_date: today(), manager_note: note, status: "rejected",
+        });
+      }
+      return Response.json({ ok: true });
+    }
+
+    if (myEmp.is_approver_manager && type === "trips" && (action === "approve" || action === "reject")) {
+      const r = await base44.asServiceRole.entities.BusinessTrip.get(id);
+      const emp = (allEmployees || []).find((e) => e.id === r.employee_id);
+      if (!emp || emp.manager_id !== myEmp.id)
+        return Response.json({ error: "هذا الطلب خارج نطاق مرؤوسيك" }, { status: 403 });
+      if (r.status !== "pending_manager" && r.status !== "pending")
+        return Response.json({ error: "الطلب ليس في مرحلة موافقة المدير المباشر" }, { status: 400 });
+      if (action === "approve") {
+        await base44.asServiceRole.entities.BusinessTrip.update(id, {
+          manager_status: "approved", manager_id: actorId, manager_name: actorName,
+          manager_date: today(), status: "manager_approved",
+        });
+      } else {
+        await base44.asServiceRole.entities.BusinessTrip.update(id, {
+          manager_status: "rejected", manager_id: actorId, manager_name: actorName,
+          manager_date: today(), manager_note: note, status: "rejected",
+        });
+      }
+      return Response.json({ ok: true });
+    }
+
     // ===== معتمد الموارد البشرية — سلف =====
     if (myEmp.is_approver_hr && type === "loans" && (action === "approve" || action === "reject")) {
       const r = await base44.asServiceRole.entities.LoanRequest.get(id);
       if (!sameTenant(r.employee_id))
         return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
-      if (r.status !== "pending")
+      if (r.status !== "pending" && r.status !== "manager_approved")
         return Response.json({ error: "الطلب ليس في مرحلة اعتماد الموارد البشرية" }, { status: 400 });
       if (action === "approve") {
         const newAmount = Number(body.amount);
@@ -91,7 +134,7 @@ export default async function (req) {
       const r = await base44.asServiceRole.entities.BusinessTrip.get(id);
       if (!sameTenant(r.employee_id))
         return Response.json({ error: "هذا الطلب خارج نطاق منشأتك" }, { status: 403 });
-      if (r.status !== "pending")
+      if (r.status !== "pending" && r.status !== "manager_approved")
         return Response.json({ error: "الطلب ليس في مرحلة اعتماد الموارد البشرية" }, { status: 400 });
       if (action === "approve") {
         await base44.asServiceRole.entities.BusinessTrip.update(id, {
