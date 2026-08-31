@@ -83,7 +83,7 @@ export default function ApprovalsPortal({ portalSession }) {
   };
 
   const Card = ({ r, children, actions, kindBadge }) => (
-    <div className="bg-white rounded-2xl border border-border p-4">
+    <div className="bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-lg p-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -123,7 +123,7 @@ export default function ApprovalsPortal({ portalSession }) {
   );
 
   const Empty = () => (
-    <div className="p-14 text-center bg-white rounded-2xl border border-border">
+    <div className="p-14 text-center bg-white/40 backdrop-blur-md rounded-2xl border border-white/60">
       <ClipboardCheck size={40} className="mx-auto text-slate-300 mb-3" />
       <p className="text-muted-foreground">{t.empty}</p>
     </div>
@@ -322,8 +322,9 @@ export default function ApprovalsPortal({ portalSession }) {
   return (
     <div dir={portalDir(lang)} className="animate-fade-in">
       <PageHeader title={t.fTitle} subtitle={t.fSub} />
+      <div className="rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-xl p-4 sm:p-5">
       <Tabs defaultValue="leaves">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 bg-white/50 backdrop-blur-md border border-white/60 rounded-2xl">
           <TabsTrigger value="leaves">{t.tabLeaves(leaves.length)}</TabsTrigger>
           <TabsTrigger value="loans">{t.tabLoans(loans.length)}</TabsTrigger>
           <TabsTrigger value="trips">{t.tabTrips(trips.length)}</TabsTrigger>
@@ -368,7 +369,7 @@ export default function ApprovalsPortal({ portalSession }) {
         <TabsContent value="settlements">
           <div className="space-y-3">
             {settlements.length === 0 ? <Empty /> : settlements.map((r) => (
-              <div key={r.id} className="bg-white rounded-2xl border border-border p-4">
+              <div key={r.id} className="bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-lg p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -399,6 +400,7 @@ export default function ApprovalsPortal({ portalSession }) {
           </div>
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* رفض */}
       <Dialog open={acting?.action === "reject"} onOpenChange={() => setActing(null)}>

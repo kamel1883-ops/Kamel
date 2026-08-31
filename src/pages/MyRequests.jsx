@@ -316,11 +316,11 @@ export default function MyRequests() {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-5 border-b border-border flex-wrap">
-          <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "self" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.selfTab}</button>
-          <button type="button" onClick={() => setView("notifications")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "notifications" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{tN.tabNotifications}</button>
+        <div className="flex gap-2 mb-5 flex-wrap rounded-2xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-lg p-1.5">
+          <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "self" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{t.selfTab}</button>
+          <button type="button" onClick={() => setView("notifications")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "notifications" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{tN.tabNotifications}</button>
           {hasApprovals && (
-            <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition", view === "approvals" ? "border-violet-500 text-violet-700" : "border-transparent text-muted-foreground hover:text-foreground")}>{t.approvalsTab}</button>
+            <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "approvals" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{t.approvalsTab}</button>
           )}
         </div>
         {hasApprovals && view === "approvals" ? (
