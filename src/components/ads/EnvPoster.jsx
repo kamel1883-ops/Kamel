@@ -58,7 +58,7 @@ export default function EnvPoster({
             className="text-[clamp(1.5rem,5vw,3.05rem)] font-extrabold leading-[1.15] drop-shadow-sm"
             style={{ unicodeBidi: "normal", letterSpacing: "normal" }}
           >
-            {title} <span style={{ color: accent, letterSpacing: "normal" }}>{titleAccent}</span>
+            {title} <span style={{ color: "#ffffff", letterSpacing: "normal" }}>{titleAccent}</span>
           </div>
           {body && (
             <p className="text-slate-100 text-[clamp(.72rem,1.7vw,.95rem)] mt-3 max-w-[90%] leading-relaxed drop-shadow-sm">
@@ -85,7 +85,7 @@ export default function EnvPoster({
               <div className="text-[10px] text-slate-200">{footerNote}</div>
             </div>
             <div className="text-left whitespace-nowrap" dir="ltr">
-              <div className="font-bold" style={{ color: accent }}><Phone size={13} className="inline ml-1" /> +966 59 470 0782</div>
+              <div className="font-bold text-white"><Phone size={13} className="inline ml-1" /> +966 59 470 0782</div>
               <div className="text-[10px] text-slate-100 mt-1 flex items-center gap-1 justify-end"><Mail size={11} /> {email}</div>
             </div>
           </div>
