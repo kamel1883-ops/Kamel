@@ -577,9 +577,9 @@ function SectionHead({ tag, title }) {
 
 function Stat({ n, l }) {
   return (
-    <div>
-      <div className="text-2xl font-extrabold bg-gradient-to-l from-violet-600 to-violet-800 bg-clip-text text-transparent">{n}</div>
-      <div className="text-muted-foreground text-sm mt-0.5">{l}</div>
+    <div className="bg-white border-2 border-black rounded-2xl px-5 py-3 shadow-xl shadow-black/20 text-center">
+      <div className="text-2xl font-extrabold text-foreground">{n}</div>
+      <div className="text-foreground text-sm mt-0.5">{l}</div>
     </div>
   );
 }
