@@ -279,12 +279,9 @@ export default function Landing() {
         <HrKeywordField />
         <div className="relative max-w-[1600px] mx-auto px-6 lg:px-14 pt-12 pb-6 w-full text-center">
           <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4 backdrop-blur-md">
-              <BadgeCheck size={14} className="text-violet-600" /> {t.badge}
-            </div>
-            <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight text-white drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>
               <span className="block">{t.titlePre}</span>
-              <span className="block bg-gradient-to-l from-violet-600 to-violet-700 bg-clip-text text-transparent">{t.titleHi}</span>
+              <span className="block text-white">{t.titleHi}</span>
             </h1>
           </motion.div>
         </div>
