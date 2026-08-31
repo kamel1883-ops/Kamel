@@ -283,17 +283,3 @@ body, p, span, article, li, td, th, input, textarea, label, h1, h2, h3, h4, h5, 
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
-
-/* === إخفاء شارة Cloudflare Turnstile العائمة === */
-/* الشارة العائمة (شعار الحماية في زاوية الشاشة) يضيفها Cloudflare كـ direct child للـ body مع position: fixed */
-/* نخفيها مع الإبقاء على كابتشا الدخول المضمّن داخل النماذج (هو متداخل أعمق من body) */
-body > div:has(> iframe[src*="challenges.cloudflare.com"]),
-body > iframe[src*="challenges.cloudflare.com"],
-body > div > iframe[src*="challenges.cloudflare.com"][style*="position"],
-.cf-turnstile-badge,
-.cf-badge {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
