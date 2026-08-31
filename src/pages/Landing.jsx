@@ -313,7 +313,7 @@ export default function Landing() {
       <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-6 grid lg:grid-cols-12 gap-6 items-stretch">
         {/* صورة الفريق السعودي — نُزلت هنا من الـ Hero لتظهر بجوار المميزات */}
         <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-100 min-h-[440px]">
-          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png" alt={isAr ? "فريق عمل سعودي يستخدم منصة جدارة" : "Saudi team using Jadara"} fittingType="fill" className="w-full h-full absolute inset-0" />
+          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5dd0b6962_generated_image.png" alt={isAr ? "فريق عمل سعودي واقفون في بيئة عمل احترافية مع شعار جدارة" : "Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <div className="absolute bottom-6 right-6 left-6">
             <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs text-white/90 mb-3 backdrop-blur-md">
