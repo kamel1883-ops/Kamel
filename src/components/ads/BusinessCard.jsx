@@ -19,19 +19,19 @@ function Side({ isAr, name, title, phone, email, website, social }) {
       {/* علامة مائية: التاج الذهبي */}
       <div
         className="absolute pointer-events-none"
-        style={{ opacity: 0.09, bottom: "-1.5rem", [isAr ? "left" : "right"]: "-1rem" }}
+        style={{ opacity: 0.10, bottom: "-1.5rem", [isAr ? "left" : "right"]: "-1rem" }}
       >
-        <Crown size={190} color={GOLD} />
+        <Crown size={190} color="#d4af37" strokeWidth={1.5} />
       </div>
       <div className="absolute bottom-0 inset-x-0 h-1.5" style={{ background: GOLD }} />
 
       <div className="relative h-full flex flex-col justify-between p-5">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: GOLD }}>
-            <Crown size={18} color={NAVY} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #1a1333 0%, #2e2448 100%)", boxShadow: "0 2px 10px rgba(0,0,0,.30)" }}>
+            <Crown size={18} color="#d4af37" strokeWidth={1.8} />
           </div>
           <div className="leading-tight">
-            <div className="text-white font-bold text-[17px]">{isAr ? "جدارة" : "Jadara"}</div>
+            <div className="text-white font-bold text-[17px]" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "جدارة" : "Jadara"}</div>
             <div className="text-[9px] tracking-wide" style={{ color: GOLD }}>
               {isAr ? "لإدارة الموارد البشرية" : "HUMAN RESOURCES MANAGEMENT"}
             </div>

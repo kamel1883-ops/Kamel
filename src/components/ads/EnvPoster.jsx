@@ -38,10 +38,13 @@ export default function EnvPoster({
       <div className="relative h-full flex flex-col justify-between p-[6%]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: accent }}>
-              <Crown size={18} className="text-[#0B2545]" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md" style={{ background: "linear-gradient(135deg, #1a1333 0%, #2e2448 100%)", boxShadow: "0 2px 10px rgba(0,0,0,.30)" }}>
+              <Crown size={20} className="text-[#d4af37]" strokeWidth={1.8} />
             </div>
-            <span className="font-extrabold text-xl" style={{ color: accent }}>{brand}</span>
+            <div className="leading-tight">
+              <span className="font-extrabold text-xl text-white" style={{ fontFamily: "var(--font-display)" }}>{brand}</span>
+              <div className="text-[9px] text-white/60">{isAr ? "لإدارة الموارد البشرية" : "HR MANAGEMENT"}</div>
+            </div>
           </div>
           {eyebrow && (
             <span className="text-[10px] bg-white/10 backdrop-blur border border-white/20 px-2.5 py-1 rounded-full whitespace-nowrap">
