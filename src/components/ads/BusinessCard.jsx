@@ -32,7 +32,7 @@ function Side({ isAr, name, title, phone, email, website, social }) {
           </div>
           <div className="leading-tight">
             <div className="text-white font-bold text-[17px]" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "جدارة" : "Jadara"}</div>
-            <div className="text-[9px] tracking-wide" style={{ color: GOLD }}>
+            <div className="text-[9px] tracking-wide text-white">
               {isAr ? "لإدارة الموارد البشرية" : "HUMAN RESOURCES MANAGEMENT"}
             </div>
           </div>
@@ -40,13 +40,13 @@ function Side({ isAr, name, title, phone, email, website, social }) {
 
         <div>
           <div className="text-white font-bold text-[20px] leading-tight">{name}</div>
-          <div className="text-[15px] font-semibold mt-1.5" style={{ color: GOLD }}>{title}</div>
+          <div className="text-[15px] font-semibold mt-1.5 text-white">{title}</div>
         </div>
 
         <div className="space-y-1 text-[13px] text-white/90">
-          <div className="flex items-center gap-1.5"><Phone size={14} style={{ color: GOLD }} /><span dir="ltr">{phone}</span></div>
-          <div className="flex items-center gap-1.5"><Mail size={14} style={{ color: GOLD }} /><span dir="ltr">{email}</span></div>
-          <div className="flex items-center gap-1.5"><Globe size={14} style={{ color: GOLD }} /><span dir="ltr">{website}</span></div>
+          <div className="flex items-center gap-1.5"><Phone size={14} className="text-white" /><span dir="ltr">{phone}</span></div>
+          <div className="flex items-center gap-1.5"><Mail size={14} className="text-white" /><span dir="ltr">{email}</span></div>
+          <div className="flex items-center gap-1.5"><Globe size={14} className="text-white" /><span dir="ltr">{website}</span></div>
           <div className="flex items-center gap-3 pt-1 text-white/80 text-[12px]">
             <span className="flex items-center gap-1"><Instagram size={12} /><span dir="ltr">{social}</span></span>
             <span className="flex items-center gap-1"><Twitter size={12} /><span dir="ltr">{social}</span></span>
