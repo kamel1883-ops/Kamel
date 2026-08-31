@@ -113,7 +113,18 @@ export default async function (req) {
       const loans = (allLoans || []).filter((l) => finStatuses.includes(l.status) && sameTenant(l));
       const trips = (allTrips || []).filter((t) => t.status === "awaiting_finance" && sameTenant(t));
       const settlements = (allSettlements || []).filter((s) => s.status === "awaiting_finance" && sameTenant(s));
-      return Response.json({ role: "finance", myEmp, actorId, actorName, leaves: withNat(leaves), loans: withNat(loans), trips: withNat(trips), settlements: withNat(settlements) });
+      // سجل دائم للمالية — كل ما تجاوز مرحلة الصرف (مدفوع/مرفوض/مكتمل) ليبقى مرجعاً تدقيقياً للمدير المالي.
+      const doneFin = (arr) => (arr || [])
+        .filter((r) => sameTenant(r) && !finStatuses.includes(r.status) && r.status !== "awaiting_finance")
+        .map((r) => ({ ...r, employee_name: r.employee_name || idToName.get(r.employee_id) || "" }));
+      return Response.json({
+        role: "finance", myEmp, actorId, actorName,
+        leaves: withNat(leaves), loans: withNat(loans), trips: withNat(trips), settlements: withNat(settlements),
+        leaveHistory: withNat(doneFin(allLeaves)),
+        loanHistory: withNat(doneFin(allLoans)),
+        tripHistory: withNat(doneFin(allTrips)),
+        settlementHistory: withNat(doneFin(allSettlements)),
+      });
     }
 
     return Response.json({ role: "none" });

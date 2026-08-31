@@ -27,6 +27,7 @@ export default function ApprovalsPortal({ portalSession }) {
   const [proofFile, setProofFile] = useState(null);
   const [busy, setBusy] = useState(false);
   const [histSearch, setHistSearch] = useState("");
+  const [finHistSearch, setFinHistSearch] = useState("");
 
   const portalArgs = portalSession
     ? { portal_token: portalSession.token, portal_employee_id: portalSession.employee_id }
@@ -401,6 +402,113 @@ export default function ApprovalsPortal({ portalSession }) {
         </TabsContent>
       </Tabs>
       </div>
+
+      {/* سجل المعاملات المالي الدائم — كل ما صُرف أو اعتمد عبر المالية */}
+      {(() => {
+        const docBtn = (url, label) => url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+            <Download size={13} /> {label}
+          </a>
+        ) : <span className="text-xs text-muted-foreground">—</span>;
+        const rows = [
+          ...(data?.leaveHistory || []).map((r) => ({
+            key: "L" + r.id, emp: r.employee_name, nat: r.national_id || "",
+            date: r.finance_paid_date || r.start_date || (r.created_date || "").slice(0, 10),
+            sort: r.finance_paid_date || r.start_date || r.created_date,
+            kind: leaveTypeLabel(r.leave_type),
+            detail: isAr ? `${r.start_date} → ${r.end_date}` : `${r.start_date} → ${r.end_date}`,
+            status: r.status, paidDate: r.finance_paid_date || "—",
+            doc: r.settlement_pdf_url, docLabel: isAr ? "المخالصة" : "Settlement",
+            proof: r.finance_proof_url,
+          })),
+          ...(data?.loanHistory || []).map((r) => ({
+            key: "N" + r.id, emp: r.employee_name, nat: r.national_id || "",
+            date: r.finance_paid_date || r.request_date || (r.created_date || "").slice(0, 10),
+            sort: r.finance_paid_date || r.request_date || r.created_date,
+            kind: t.loan || (isAr ? "سلفة" : "Loan"), detail: formatCurrency(r.amount),
+            status: r.status, paidDate: r.finance_paid_date || "—",
+            doc: r.statement_pdf_url, docLabel: isAr ? "كشف السلفة" : "Loan statement",
+            proof: r.finance_proof_url,
+          })),
+          ...(data?.tripHistory || []).map((r) => ({
+            key: "T" + r.id, emp: r.employee_name, nat: r.national_id || "",
+            date: r.finance_paid_date || r.start_date || (r.created_date || "").slice(0, 10),
+            sort: r.finance_paid_date || r.start_date || r.created_date,
+            kind: r.trip_type === "external" ? (t.tripExt || (isAr ? "انتداب خارجي" : "External trip")) : (t.tripInt || (isAr ? "انتداب داخلي" : "Internal trip")),
+            detail: r.destination || "", status: r.status,
+            paidDate: r.finance_paid_date || "—",
+            doc: r.approval_pdf_url, docLabel: isAr ? "موافقة الانتداب" : "Trip approval",
+            proof: r.finance_proof_url,
+          })),
+          ...(data?.settlementHistory || []).map((r) => ({
+            key: "S" + r.id, emp: r.employee_name, nat: r.national_id || "",
+            date: r.finance_paid_date || r.generated_date || (r.created_date || "").slice(0, 10),
+            sort: r.finance_paid_date || r.generated_date || r.created_date,
+            kind: isAr ? "مخالصة نهاية خدمة" : "End-of-service",
+            detail: formatCurrency(r.total_settlement), status: r.status,
+            paidDate: r.finance_paid_date || "—",
+            doc: null, docLabel: "", proof: r.finance_proof_url,
+          })),
+        ].sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
+        if (rows.length === 0) return null;
+        const q = finHistSearch.trim();
+        const filtered = q ? rows.filter((r) => (r.nat || "").includes(q) || (r.emp || "").includes(q)) : rows;
+        return (
+          <div className="mt-6 rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-xl p-4 sm:p-5">
+            <h3 className="text-base font-bold mb-1 flex items-center gap-2">
+              <ClipboardCheck size={18} className="text-violet-600" /> {t.finHistoryTitle}
+            </h3>
+            <p className="text-xs text-muted-foreground mb-3">{t.finHistorySub}</p>
+            <div className="mb-3 flex items-center gap-2">
+              <Input
+                value={finHistSearch}
+                onChange={(e) => setFinHistSearch(e.target.value)}
+                placeholder={t.finSearchPh}
+                className="h-9 w-64 text-sm"
+              />
+              {finHistSearch && (
+                <button onClick={() => setFinHistSearch("")} className="text-xs text-muted-foreground hover:text-foreground">{isAr ? "مسح" : "Clear"}</button>
+              )}
+            </div>
+            {filtered.length === 0 ? (
+              <div className="p-10 text-center text-muted-foreground text-sm">{t.finHistoryEmpty}</div>
+            ) : (
+              <div className="rounded-2xl bg-white/50 backdrop-blur-md border border-white/60 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <div className="grid grid-cols-12 gap-2 px-3 py-2.5 bg-violet-500/10 text-xs font-semibold text-muted-foreground">
+                    <div className="col-span-3">{isAr ? "الموظف" : "Employee"}</div>
+                    <div className="col-span-2">{isAr ? "التاريخ" : "Date"}</div>
+                    <div className="col-span-2">{isAr ? "النوع" : "Type"}</div>
+                    <div className="col-span-2">{isAr ? "التفاصيل" : "Details"}</div>
+                    <div className="col-span-1">{isAr ? "الحالة" : "Status"}</div>
+                    <div className="col-span-1">{t.finPaidDate}</div>
+                    <div className="col-span-1 text-center">{isAr ? "المستند" : "Document"}</div>
+                  </div>
+                  {filtered.map((r) => (
+                    <div key={r.key} className="grid grid-cols-12 gap-2 px-3 py-2.5 text-xs border-t border-white/40 items-center">
+                      <div className="col-span-3 font-medium truncate">
+                        {r.emp}
+                        {r.nat && <div className="text-muted-foreground tabular-nums" dir="ltr">{r.nat}</div>}
+                      </div>
+                      <div className="col-span-2 text-muted-foreground">{r.date || "—"}</div>
+                      <div className="col-span-2">{r.kind}</div>
+                      <div className="col-span-2 text-muted-foreground truncate">{r.detail}</div>
+                      <div className="col-span-1"><span className={cn("px-1.5 py-0.5 rounded-full", badge(r.status))}>{r.status}</span></div>
+                      <div className="col-span-1 text-muted-foreground">{r.paidDate}</div>
+                      <div className="col-span-1 text-center flex items-center justify-center gap-1">
+                        {r.doc && docBtn(r.doc, r.docLabel)}
+                        {r.proof && !r.doc && docBtn(r.proof, t.finProof)}
+                        {!r.doc && !r.proof && <span className="text-xs text-muted-foreground">—</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* رفض */}
       <Dialog open={acting?.action === "reject"} onOpenChange={() => setActing(null)}>
