@@ -20,8 +20,12 @@ const PRESETS = [
   { key: "67-l2796", label: '6.7" أفقي — 2796 × 1290', w: 2796, h: 1290, icon: Smartphone },
   { key: "55-p1242", label: '5.5" عمودي — 1242 × 2208', w: 1242, h: 2208, icon: Smartphone },
   { key: "55-l2208", label: '5.5" أفقي — 2208 × 1242', w: 2208, h: 1242, icon: Smartphone },
+  { key: "ipad13-p2064", label: 'iPad Pro 13" (M4) عمودي — 2064 × 2752', w: 2064, h: 2752, icon: Tablet, hint: "إلزامي — المطلوب من App Store الحالي", required: true },
+  { key: "ipad13-l2752", label: 'iPad Pro 13" (M4) أفقي — 2752 × 2064', w: 2752, h: 2064, icon: Tablet },
   { key: "ipad-p2048", label: 'iPad 12.9" عمودي — 2048 × 2732', w: 2048, h: 2732, icon: Tablet },
   { key: "ipad-l2732", label: 'iPad 12.9" أفقي — 2732 × 2048', w: 2732, h: 2048, icon: Tablet },
+  { key: "ipad11-p1668", label: 'iPad Pro 11" / iPad Air 10.5" عمودي — 1668 × 2388', w: 1668, h: 2388, icon: Tablet },
+  { key: "ipad11-l2388", label: 'iPad Pro 11" / iPad Air 10.5" أفقي — 2388 × 1668', w: 2388, h: 1668, icon: Tablet },
 ];
 
 const FIT_MODES = [
@@ -33,7 +37,7 @@ const FIT_MODES = [
 let _id = 0;
 
 export default function AppStoreScreens() {
-  const [preset, setPreset] = useState("65-p1242");
+  const [preset, setPreset] = useState("ipad13-p2064");
   const [fit, setFit] = useState("cover");
   const [bg, setBg] = useState("#ffffff");
   const [caption, setCaption] = useState("");
