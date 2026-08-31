@@ -293,10 +293,10 @@ export default function Landing() {
             <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-2xl text-center sm:text-start">
               <p className="text-foreground/70 text-base sm:text-lg leading-relaxed mb-5">{t.heroDesc}</p>
               <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                <button onClick={() => navigate("/quote")} className="bg-violet-600 hover:bg-violet-700 px-6 py-3.5 rounded-2xl font-semibold text-white shadow-xl shadow-violet-600/30 flex items-center gap-2 transition">
+                <button onClick={() => navigate("/quote")} className="bg-white hover:bg-slate-100 border-2 border-black text-foreground px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-black/20 flex items-center gap-2 transition">
                   <Zap size={18} /> {t.cta1}
                 </button>
-                <button onClick={() => scrollTo("features")} className="bg-white hover:bg-violet-50 border border-violet-200 text-foreground px-6 py-3.5 rounded-2xl font-medium flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
+                <button onClick={() => scrollTo("features")} className="bg-white hover:bg-slate-100 border-2 border-black text-foreground px-6 py-3.5 rounded-2xl font-medium shadow-xl shadow-black/20 flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
               </div>
             </motion.div>
             <div className="flex gap-8 text-sm">
