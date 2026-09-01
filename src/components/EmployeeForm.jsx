@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PERMISSION_MODULES, parsePermissions, togglePermission, allPermissionKeys } from "@/lib/employeePermissions";
 import { useI18n } from "@/lib/i18n";
@@ -58,6 +58,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     payMethod: "طريقة صرف الراتب", payMudad: "مدد — حماية الأجور", payCash: "كاش — صرف نقدي",
     cancel: "إلغاء", save: "حفظ",
     jobDesc: "الوصف الوظيفي", jobDescHint: "المهام والمسؤوليات والمؤهلات المطلوبة للدور",
+    genJobDesc: "توليد بالذكاء الاصطناعي", genJobDescing: "جارٍ التوليد...",
     perms: "مصفوفة الصلاحيات (وصول الوحدات)", permsHint: "توثيقية — تسجّل الوحدات التي يحق للموظف فتحها دون منع فعلي",
     permsAll: "تحديد الكل", permsNone: "إلغاء الكل", permsCount: (n) => `${n} وحدة مُفعّلة`,
   } : {
@@ -79,12 +80,14 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     payMethod: "Salary payment method", payMudad: "Mudad — WPS", payCash: "Cash",
     cancel: "Cancel", save: "Save",
     jobDesc: "Job description", jobDescHint: "Tasks, responsibilities and required qualifications for the role",
+    genJobDesc: "Generate with AI", genJobDescing: "Generating...",
     perms: "Permissions matrix (module access)", permsHint: "Descriptive — records modules the employee may open, no actual enforcement",
     permsAll: "Select all", permsNone: "Clear all", permsCount: (n) => `${n} modules enabled`,
   };
 
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [allEmployees, setAllEmployees] = useState([]);
   const [branches, setBranches] = useState([]);
 
@@ -94,6 +97,24 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     base44.entities.Branch.list("-is_main", 500).then((list) => setBranches(list));
   }, [open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // توليد الوصف الوظيفي بالذكاء الاصطناعي من المسمى/الإدارة/المستوى، قابل للتعديل بعد التوليد
+  const generateJobDesc = async () => {
+    setGenerating(true);
+    try {
+      const role = ROLE_LABELS[isAr ? "ar" : "en"][form.role_level] || form.role_level || "";
+      const prompt = isAr
+        ? `اكتب وصفاً وظيفياً احترافياً ومفصلاً باللغة العربية لموظف يشغل المسمى الوظيفي "${form.position || role}" في إدارة "${form.department || "غير محددة"}" بمستوى وظيفي "${role}". ` +
+          `يتضمن: ملخصاً موجزاً للدور، ثم المهام والمسؤوليات الرئيسية (٦ إلى ٨ نقاط واضحة)، ثم المؤهلات والمهارات المطلوبة، ثم المهارات المرغوبة، ثم الجهات التي يتعامل معها داخل وخارج المنشأة. ` +
+          `اكتب النص مباشرة دون مقدمات، واستخدم نقاطاً مرقمة واضحة، واجعله جاهزاً للتعديل.`
+        : `Write a professional, detailed job description for an employee holding the job title "${form.position || role}" in the "${form.department || "unspecified"}" department at "${role}" role level. ` +
+          `Include: a brief role summary, main duties and responsibilities (6 to 8 clear points), required qualifications and skills, desirable skills, and internal/external contacts. ` +
+          `Write the text directly with no preamble, use clear numbered bullet points, make it ready to edit.`;
+      const res = await base44.integrations.Core.InvokeLLM({ prompt });
+      const text = typeof res === "string" ? res : (res?.response || res?.text || "");
+      if (text && String(text).trim()) set("job_description", String(text).trim());
+    } finally { setGenerating(false); }
+  };
 
   const departments = Array.from(new Set(allEmployees.map((e) => e.department).filter(Boolean))).sort((a, b) => a.localeCompare(b, "ar"));
   const managers = managerCandidates(allEmployees, employee?.id);
@@ -236,7 +257,14 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
 
           <div className="pt-2 border-t border-border space-y-3">
             <Field label={t.jobDesc}>
-              <Textarea value={form.job_description} onChange={(e) => set("job_description", e.target.value)} rows={4} placeholder={t.jobDescHint} />
+              <div className="flex items-center gap-2 mb-1.5">
+                <Button type="button" variant="outline" size="sm" onClick={generateJobDesc} disabled={generating} className="gap-1.5">
+                  {generating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  {generating ? t.genJobDescing : t.genJobDesc}
+                </Button>
+                <span className="text-[11px] text-muted-foreground">{isAr ? "بعد التوليد يمكنك الإضافة والحذف والتعديل بحرية" : "After generation you can add, delete and edit freely"}</span>
+              </div>
+              <Textarea value={form.job_description} onChange={(e) => set("job_description", e.target.value)} rows={6} placeholder={t.jobDescHint} />
             </Field>
             <Field label={`${t.perms} · ${t.permsCount(parsePermissions(form.permissions).length)}`}>
               <div className="text-[11px] text-muted-foreground mb-1">{t.permsHint}</div>
