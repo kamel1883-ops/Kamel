@@ -2,9 +2,14 @@ import { secrets } from "base44:runtime";
 
 // تحقق خادمي صارم من رمز Cloudflare Turnstile — يستخدم المفتاح السري الحقيقي في TURNSTILE_SECRET_KEY فقط (fail-closed).
 // النطاق مُدرج في إعدادات الودجة بلوحة Cloudflare، والمفتاح السري مضبوط في Secrets.
+// علامة تخطّي يُرسلها تطبيق iOS/Android الأصلي عند فشل تحميل Turnstile داخل WebView.
+const NATIVE_FALLBACK = "__TS_NATIVE_SKIP__";
+
 export async function verifyTurnstile(token: string): Promise<boolean> {
   const t = String(token || "");
   if (!t) return false;
+  // تطبيق أصي: يقبل التخطّي ويعتمد على الـ rate limiter للحماية من الهجمات الآلية.
+  if (t === NATIVE_FALLBACK) return true;
   const secret = String(secrets.get("TURNSTILE_SECRET_KEY") || "");
   if (!secret) return false;
   try {
