@@ -10,6 +10,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { PERMISSION_MODULES, parsePermissions, togglePermission, allPermissionKeys } from "@/lib/employeePermissions";
 import { useI18n } from "@/lib/i18n";
 import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
@@ -30,6 +32,8 @@ const empty = {
   bank_account: "", ticket_entitlement: "yearly", ticket_last_used_year: null, ticket_value: "",
   annual_leave_entitlement: 21,
   unified_number: "",
+  job_description: "",
+  permissions: "",
 };
 
 export default function EmployeeForm({ open, onClose, onSaved, employee, unifiedNumber }) {
@@ -53,6 +57,9 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
     payMethod: "طريقة صرف الراتب", payMudad: "مدد — حماية الأجور", payCash: "كاش — صرف نقدي",
     cancel: "إلغاء", save: "حفظ",
+    jobDesc: "الوصف الوظيفي", jobDescHint: "المهام والمسؤوليات والمؤهلات المطلوبة للدور",
+    perms: "مصفوفة الصلاحيات (وصول الوحدات)", permsHint: "توثيقية — تسجّل الوحدات التي يحق للموظف فتحها دون منع فعلي",
+    permsAll: "تحديد الكل", permsNone: "إلغاء الكل", permsCount: (n) => `${n} وحدة مُفعّلة`,
   } : {
     edit: "Edit employee", add: "Add new employee",
     fullName: "Full name", empNo: "Employee number",
@@ -71,6 +78,9 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     deptHint: "Pick from existing departments or type a new one",
     payMethod: "Salary payment method", payMudad: "Mudad — WPS", payCash: "Cash",
     cancel: "Cancel", save: "Save",
+    jobDesc: "Job description", jobDescHint: "Tasks, responsibilities and required qualifications for the role",
+    perms: "Permissions matrix (module access)", permsHint: "Descriptive — records modules the employee may open, no actual enforcement",
+    permsAll: "Select all", permsNone: "Clear all", permsCount: (n) => `${n} modules enabled`,
   };
 
   const [form, setForm] = useState(empty);
@@ -222,6 +232,30 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             </Field>
             <Field label={t.ticketValue}><Input type="number" value={form.ticket_value} onChange={(e) => set("ticket_value", e.target.value)} placeholder="0" dir="ltr" /></Field>
             <Field label={t.bank}><Input value={form.bank_account} onChange={(e) => set("bank_account", e.target.value)} /></Field>
+          </div>
+
+          <div className="pt-2 border-t border-border space-y-3">
+            <Field label={t.jobDesc}>
+              <Textarea value={form.job_description} onChange={(e) => set("job_description", e.target.value)} rows={4} placeholder={t.jobDescHint} />
+            </Field>
+            <Field label={`${t.perms} · ${t.permsCount(parsePermissions(form.permissions).length)}`}>
+              <div className="text-[11px] text-muted-foreground mb-1">{t.permsHint}</div>
+              <div className="flex gap-2 mb-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => set("permissions", JSON.stringify(allPermissionKeys()))}>{t.permsAll}</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => set("permissions", "[]")}>{t.permsNone}</Button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-56 overflow-y-auto rounded-xl border border-border p-2 bg-slate-50/40">
+                {PERMISSION_MODULES.map((m) => {
+                  const checked = parsePermissions(form.permissions).includes(m.key);
+                  return (
+                    <label key={m.key} className="flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg hover:bg-white cursor-pointer">
+                      <input type="checkbox" checked={checked} onChange={() => set("permissions", JSON.stringify(togglePermission(form.permissions, m.key)))} className="w-3.5 h-3.5 accent-violet-600 shrink-0" />
+                      <span className="truncate">{isAr ? m.ar : m.en}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </Field>
           </div>
 
           <DialogFooter>

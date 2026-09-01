@@ -12,6 +12,7 @@ import { badge } from "@/lib/approvals";
 import EmployeePaidDocuments from "@/components/EmployeePaidDocuments";
 import EmployeePortalPasswordAdmin from "@/components/portal/EmployeePortalPasswordAdmin";
 import { useI18n } from "@/lib/i18n";
+import { PERMISSION_MODULES, parsePermissions } from "@/lib/employeePermissions";
 
 function Row({ label, value }) {
   return (
@@ -154,6 +155,28 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
                 </>
               ) : <div className="text-sm text-emerald-600">{t.none}</div>}
             </Block>
+
+            {(employee?.job_description || parsePermissions(employee?.permissions).length > 0) && (
+              <Block title={isAr ? "الوصف الوظيفي والصلاحيات" : "Job description & permissions"}>
+                {employee?.job_description && (
+                  <div className="mb-2">
+                    <div className="text-xs text-muted-foreground mb-1">{isAr ? "الوصف الوظيفي" : "Job description"}</div>
+                    <div className="text-sm whitespace-pre-line">{employee.job_description}</div>
+                  </div>
+                )}
+                {parsePermissions(employee?.permissions).length > 0 && (
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">{isAr ? "الوحدات المصرّح بها (توثيقية)" : "Allowed modules (descriptive)"}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {parsePermissions(employee?.permissions).map((k) => {
+                        const m = PERMISSION_MODULES.find((x) => x.key === k);
+                        return <span key={k} className="text-[11px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">{m ? (isAr ? m.ar : m.en) : k}</span>;
+                      })}
+                    </div>
+                  </div>
+                )}
+              </Block>
+            )}
 
             <EmployeePortalPasswordAdmin employee={employee} />
 
