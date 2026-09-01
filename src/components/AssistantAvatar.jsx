@@ -80,6 +80,58 @@ export default function AssistantAvatar({ mode = "public", session = null, tone 
   const fromMicRef = useRef(false);
   const stopLoopRef = useRef(false);
 
+  // === ودجت المساعد قابل للسحب (touch + mouse) مع حفظ الموضع ===
+  const POS_KEY = "jadara_assistant_pos";
+  const readPos = () => {
+    try { const p = JSON.parse(localStorage.getItem(POS_KEY) || "null"); if (p && typeof p.x === "number") return p; } catch (_e) {}
+    return null;
+  };
+  const [pos, setPos] = useState(() => readPos() || { x: 20, y: 96 });
+  const dragRef = useRef(null);
+  const dragging = useRef(false);
+  const movedRef = useRef(false);
+  const startRef = useRef({ x: 0, y: 0, px: 0, py: 0, pointerId: null });
+
+  const clampPos = (x, y) => {
+    const w = typeof window !== "undefined" ? window.innerWidth : 360;
+    const h = typeof window !== "undefined" ? window.innerHeight : 640;
+    const SIZE = 92; // تقدير حجم الودجت
+    return {
+      x: Math.max(8, Math.min(x, w - SIZE - 8)),
+      y: Math.max(8, Math.min(y, h - SIZE - 8)),
+    };
+  };
+
+  const onPointerDown = (e) => {
+    // لا تعطل النقر الافتتاحي عند الضغط العادي — نسجّل البداية فقط
+    startRef.current = { x: e.clientX, y: e.clientY, px: pos.x, py: pos.y, pointerId: e.pointerId };
+    movedRef.current = false;
+    dragging.current = true;
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (_e) {}
+  };
+
+  const onPointerMove = (e) => {
+    if (!dragging.current) return;
+    const dx = e.clientX - startRef.current.x;
+    const dy = e.clientY - startRef.current.y;
+    if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return; // عتبة لتمييز السحب عن النقر
+    movedRef.current = true;
+    setPos(clampPos(startRef.current.px + dx, startRef.current.py + dy));
+  };
+
+  const onPointerUp = (e) => {
+    dragging.current = false;
+    try { e.currentTarget?.releasePointerCapture?.(e.pointerId); } catch (_e) {}
+    if (movedRef.current) {
+      setPos((p) => { try { localStorage.setItem(POS_KEY, JSON.stringify(p)); } catch (_e) {} return p; });
+    }
+  };
+
+  const onBtnClick = () => {
+    if (movedRef.current) { movedRef.current = false; return; } // تجاهل النقر بعد سحب
+    setOpen(true);
+  };
+
   const onSpokeEnd = useCallback(() => {
     if (fromMicRef.current && !stopLoopRef.current) start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,10 +222,16 @@ export default function AssistantAvatar({ mode = "public", session = null, tone 
 
   return (
     <>
-      {/* علامة المساعد — شخصية سعودية في أعلى الصفحة */}
+      {/* علامة المساعد — شخصية سعودية، قابلة للسحب لأي زاوية */}
       <button
-        onClick={() => setOpen(true)}
-        className={"fixed top-24 left-5 z-40 group flex flex-col items-center gap-1.5 transition active:scale-95"}
+        ref={dragRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onClick={onBtnClick}
+        style={{ left: pos.x, top: pos.y, touchAction: "none" }}
+        className={"fixed z-40 group flex flex-col items-center gap-1.5 transition active:scale-95 select-none"}
         title={ui.btnTitle}
         aria-label={ui.btnTitle}
       >
