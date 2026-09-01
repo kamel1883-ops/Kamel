@@ -379,7 +379,7 @@ export default function OwnerPortal() {
           : tab === "surveys" ? <SurveysManager session={session} />
           : tab === "affiliates" ? <AffiliatesManager session={session} isAr={isAr} />
           : tab === "finance" ? <FinanceManager session={session} isAr={isAr} />
-          : tab === "strategy" ? <StrategicPlan />
+          : tab === "strategy" ? <StrategicPlan session={session} />
           : <DiscountManager session={session} />}
       </div>
     </div>

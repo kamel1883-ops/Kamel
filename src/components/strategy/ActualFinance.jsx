@@ -7,21 +7,38 @@ import FinancePeriodTable from "@/components/portal/FinancePeriodTable";
 import FinanceInsights from "@/components/strategy/FinanceInsights";
 import { cn } from "@/lib/utils";
 
-export default function ActualFinance() {
+export default function ActualFinance({ session }) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ subscriptions: [], expenses: [], tenants: [] });
 
+  // عند توفر جلسة المالك نأخذ البيانات من نفس مصدر تبويب «العمليات المالية» عبر portalData
+  // (كيانات الاشتراك/المصروف محمية بصلاحية admin فقط، وجلسة البوابة ليست جلسة Base44).
+  // بدون جلسة (صفحة /strategic-plan المستقلة) نعود للاستدعاء المباشر (يعمل لحساب admin).
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const [subscriptions, expenses, tenants] = await Promise.all([
-        base44.entities.Subscription.list("-created_date", 500),
-        base44.entities.Expense.list("-created_date", 500),
-        base44.entities.Tenant.list("-created_date", 500),
-      ]);
+      let subscriptions = [], expenses = [], tenants = [];
+      if (session) {
+        const call = (action, extra = {}) =>
+          base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra })
+            .then((r) => r?.data || r);
+        const [fin, own] = await Promise.all([call("finance_list"), call("owner_list")]);
+        subscriptions = fin?.revenues || [];
+        expenses = fin?.expenses || [];
+        tenants = own?.tenants || [];
+      } else {
+        [subscriptions, expenses, tenants] = await Promise.all([
+          base44.entities.Subscription.list("-created_date", 500),
+          base44.entities.Expense.list("-created_date", 500),
+          base44.entities.Tenant.list("-created_date", 500),
+        ]);
+      }
+      if (cancelled) return;
       setData({ subscriptions, expenses, tenants });
       setLoading(false);
     })();
-  }, []);
+    return () => { cancelled = true; };
+  }, [session?.token, session?.employee_id]);
 
   const snap = useMemo(() => actualSnapshot({ ...data, isAr: true }), [data]);
 

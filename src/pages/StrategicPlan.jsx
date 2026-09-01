@@ -22,7 +22,7 @@ const SECTIONS = [
   { id: "marketing", label: "التوصيات التسويقية", Comp: MarketingPlan, props: { isAr: true } },
 ];
 
-export default function StrategicPlan() {
+export default function StrategicPlan({ session }) {
   const [tab, setTab] = useState("finance");
 
   return (
@@ -67,7 +67,7 @@ export default function StrategicPlan() {
               {s.label}
             </h2>
             <div className="print-body">
-              <Comp {...(s.props || {})} />
+              <Comp {...(s.props || {})} {...(s.id === "finance" && session ? { session } : {})} />
             </div>
           </section>
         );
