@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plane, Download } from "lucide-react";
+import { Plane, Download, Eye, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel, leaveTypeLabel, ticketEntitlementLabel, contractTypeLabel } from "@/lib/hr";
 import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
@@ -89,6 +90,45 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
   }) : null;
   const tmeta = employee?.termination_reason && employee.termination_reason !== "none" ? reasonMeta(employee.termination_reason) : null;
 
+  // مستند الوصف الوظيفي — مشاهدة/طباعة PDF منسّق بهوية جدارة
+  const buildJobDescHtml = () => {
+    const title = isAr ? "الوصف الوظيفي" : "Job Description";
+    const name = employee?.full_name || "";
+    const position = employee?.position || "";
+    const department = employee?.department || "";
+    const num = employee?.employee_number || "";
+    const body = (employee?.job_description || "").replace(/&/g, "&").replace(/</g, "<").replace(/\n/g, "<br>");
+    return `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title} — ${name}</title>
+<style>
+  body{font-family:'Tajawal','IBM Plex Sans Arabic',sans-serif;color:#0f172a;padding:32px;max-width:800px;margin:0 auto;}
+  .h{display:flex;align-items:center;gap:12px;border-bottom:2px solid #0B2545;padding-bottom:12px;margin-bottom:20px;}
+  .logo{width:44px;height:44px;border-radius:10px;background:#0B2545;color:#d4af37;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;}
+  .brand{font-weight:700;font-size:18px;}
+  .sub{font-size:12px;color:#64748b;}
+  h1{font-size:18px;margin:0 0 10px;}
+  .meta{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:#334155;margin-bottom:18px;padding:12px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;}
+  .meta b{color:#0f172a;}
+  .body{font-size:14px;line-height:1.95;}
+  @page{size:A4;margin:14mm;}
+</style></head><body>
+  <div class="h"><div class="logo">ج</div><div><div class="brand">جدارة</div><div class="sub">${isAr ? "منصة الموارد البشرية" : "HR Platform"}</div></div></div>
+  <h1>${title}</h1>
+  <div class="meta">
+    <div><b>${isAr ? "الاسم:" : "Name:"}</b> ${name}</div>
+    ${num ? `<div><b>${isAr ? "الرقم الوظيفي:" : "Emp. No:"}</b> ${num}</div>` : ""}
+    ${position ? `<div><b>${isAr ? "المسمى:" : "Position:"}</b> ${position}</div>` : ""}
+    ${department ? `<div><b>${isAr ? "الإدارة:" : "Department:"}</b> ${department}</div>` : ""}
+  </div>
+  <div class="body">${body || (isAr ? "—" : "—")}</div>
+</body></html>`;
+  };
+  const openJobDesc = (print) => {
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.open(); w.document.write(buildJobDescHtml()); w.document.close();
+    if (print) { setTimeout(() => { w.focus(); w.print(); }, 350); }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -160,7 +200,13 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
               <Block title={isAr ? "الوصف الوظيفي والصلاحيات" : "Job description & permissions"}>
                 {employee?.job_description && (
                   <div className="mb-2">
-                    <div className="text-xs text-muted-foreground mb-1">{isAr ? "الوصف الوظيفي" : "Job description"}</div>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="text-xs text-muted-foreground">{isAr ? "الوصف الوظيفي" : "Job description"}</div>
+                      <div className="flex gap-1.5">
+                        <Button size="sm" variant="outline" onClick={() => openJobDesc(false)} className="h-7 px-2 text-xs gap-1.5"><Eye size={13} />{isAr ? "مشاهدة" : "View"}</Button>
+                        <Button size="sm" variant="outline" onClick={() => openJobDesc(true)} className="h-7 px-2 text-xs gap-1.5"><Printer size={13} />{isAr ? "طباعة PDF" : "Print PDF"}</Button>
+                      </div>
+                    </div>
                     <div className="text-sm whitespace-pre-line">{employee.job_description}</div>
                   </div>
                 )}
