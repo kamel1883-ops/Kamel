@@ -1099,6 +1099,66 @@ export default async function (req) {
       return Response.json({ ok: true, employee: created, preparer: prep });
     }
 
+    // ====== تفويض عام للأقسام الإدارية — إنشاء/استعراض/تعديل/حذف عبر بوابة الموظف ======
+    // كل قسم محدود بصلاحيته، ويُحقن توثيق «أُعدّت بواسطة (الاسم + الهوية)» تلقائيًا
+    // باسم ورقم هوية الموظف المُفوّض المنفّذ للعمل.
+    const DELEGATED_MAP: Record<string, { entity: string; perm: string; nameField: string; idField: string; numberField?: string; numberPrefix?: string }> = {
+      training:   { entity: "TrainingPlan", perm: "training", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      incentives: { entity: "Incentive", perm: "incentives", nameField: "created_by_name", idField: "created_by_id", numberField: "incentive_number", numberPrefix: "INC" },
+      warnings:   { entity: "Warning", perm: "warnings", nameField: "prepared_by_name", idField: "prepared_by_id" },
+    };
+
+    if (action === "delegated_list") {
+      const key = String(body.section || "");
+      const cfg = DELEGATED_MAP[key];
+      if (!cfg) return Response.json({ ok: false, error: "unknown_section" }, { status: 400 });
+      if (!parsePerms(emp?.permissions).includes(cfg.perm)) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [orgs, emps, records] = await Promise.all([
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+        base44.asServiceRole.entities.Employee.list("-created_date", 500),
+        (base44.asServiceRole.entities as any)[cfg.entity].list("-created_date", 500),
+      ]);
+      return Response.json({ ok: true, org: orgs?.[0] || null, employees: emps || [], records: records || [], preparer: { name: emp?.full_name || "", id: String(emp?.national_id || "") } });
+    }
+
+    if (action === "delegated_create") {
+      const key = String(body.section || "");
+      const cfg = DELEGATED_MAP[key];
+      if (!cfg) return Response.json({ ok: false, error: "unknown_section" }, { status: 400 });
+      if (!parsePerms(emp?.permissions).includes(cfg.perm)) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const payload: any = { ...(body.payload || {}) };
+      payload[cfg.nameField] = emp?.full_name || "موظف الموارد البشرية";
+      payload[cfg.idField] = String(emp?.national_id || "");
+      if (cfg.numberField && cfg.numberPrefix && !payload[cfg.numberField]) {
+        const all = await (base44.asServiceRole.entities as any)[cfg.entity].list("-created_date", 1);
+        payload[cfg.numberField] = `${cfg.numberPrefix}-${String((all?.length || 0) + 1).padStart(4, "0")}`;
+      }
+      const created = await (base44.asServiceRole.entities as any)[cfg.entity].create(payload);
+      return Response.json({ ok: true, record: created });
+    }
+
+    if (action === "delegated_update") {
+      const key = String(body.section || "");
+      const cfg = DELEGATED_MAP[key];
+      if (!cfg) return Response.json({ ok: false, error: "unknown_section" }, { status: 400 });
+      if (!parsePerms(emp?.permissions).includes(cfg.perm)) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await (base44.asServiceRole.entities as any)[cfg.entity].update(id, { ...(body.payload || {}) });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "delegated_delete") {
+      const key = String(body.section || "");
+      const cfg = DELEGATED_MAP[key];
+      if (!cfg) return Response.json({ ok: false, error: "unknown_section" }, { status: 400 });
+      if (!parsePerms(emp?.permissions).includes(cfg.perm)) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await (base44.asServiceRole.entities as any)[cfg.entity].delete(id);
+      return Response.json({ ok: true });
+    }
+
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
   } catch (error) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });
