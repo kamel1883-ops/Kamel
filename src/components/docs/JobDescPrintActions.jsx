@@ -27,7 +27,7 @@ export default function JobDescPrintActions({ employee, text, isAr = true, size 
       )}
 
       {preview && (
-        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4 no-print" onClick={() => setPreview(false)}>
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 no-print" onClick={() => setPreview(false)}>
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-border px-5 py-3 flex items-center justify-between">
               <span className="font-bold text-sm">{isAr ? "معاينة الوصف الوظيفي" : "Job description preview"}</span>

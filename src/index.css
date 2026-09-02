@@ -198,9 +198,12 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-client .no-print { display: none !important; }
 
   .print-jobdesc, .print-jobdesc * { visibility: visible !important; }
-  .print-jobdesc { position: static; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
-  .print-jobdesc, .print-jobdesc * { break-inside: auto; page-break-inside: auto; }
+  .print-jobdesc { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-jobdesc .no-print { display: none !important; }
+  .print-jobdesc .jd-section { break-inside: avoid; page-break-inside: avoid; }
+  .print-jobdesc h1, .print-jobdesc h2, .print-jobdesc h3 { break-after: avoid; page-break-after: avoid; }
+  .print-jobdesc .jd-header { break-inside: avoid; page-break-inside: avoid; }
+  .print-jobdesc .jd-meta { break-inside: avoid; page-break-inside: avoid; }
 
   .print-payroll, .print-payroll * { visibility: visible !important; }
   .print-payroll { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
