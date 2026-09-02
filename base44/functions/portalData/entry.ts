@@ -1413,8 +1413,8 @@ export default async function (req) {
       Warning: ["warnings", "analytics"], AdminDecision: ["decisions"], Incentive: ["incentives", "analytics"],
       License: ["licenses"], PlatformSubscription: ["platform-subscriptions"],
       CustomerSurvey: ["customer-surveys"], CustomerSurveyResponse: ["customer-surveys"],
-      Branch: ["employees", "attendance"], Organization: ["employees"],
-      Notification: ["employees"],
+      Branch: ["employees", "attendance", "settings"], Organization: ["employees", "settings"],
+      Notification: ["employees", "settings"],
     };
     const READ_ANY = new Set(["Organization", "Employee", "Branch", "Notification", "Job", "Vehicle"]);
     const READ_OPS = new Set(["list", "filter", "get"]);

@@ -26,6 +26,7 @@ export const DELEGATED_SECTIONS = [
   { key: "licenses", ar: "إدارة تراخيص المنشأة", en: "Licenses", icon: "FileBadge" },
   { key: "platform-subscriptions", ar: "إدارة اشتراكات المنصات", en: "Platform subscriptions", icon: "Globe" },
   { key: "customer-surveys", ar: "إدارة استبيانات العملاء", en: "Customer surveys", icon: "MessageSquare" },
+  { key: "settings", ar: "الإعدادات", en: "Settings", icon: "Settings" },
 ];
 
 // الأقسام المفوّضة فعلياً للموظف — مصفوفة صلاحيات فارغة تعني كل الأقسام.

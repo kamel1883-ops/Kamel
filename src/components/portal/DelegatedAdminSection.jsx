@@ -30,6 +30,7 @@ const PAGES = {
   licenses: lazy(() => import("@/pages/Licenses")),
   "platform-subscriptions": lazy(() => import("@/pages/PlatformSubscriptions")),
   "customer-surveys": lazy(() => import("@/pages/CustomerSurveys")),
+  settings: lazy(() => import("@/pages/Settings")),
 };
 
 export const hasAdminPage = (key) => !!PAGES[key];
