@@ -180,7 +180,14 @@ export default function Attendance() {
                 {filtered.map((r, i) => (
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium tabular-nums">{i + 1}</td>
-                    <td className="px-4 py-3 font-medium">{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name}</td>
+                    <td className="px-4 py-3 font-medium">
+                      <div>{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name}</div>
+                      {r.prepared_by_name && (
+                        <div className="text-[10px] text-violet-600 mt-0.5">
+                          {isAr ? "أُعدّت بواسطة" : "Prepared by"}: {r.prepared_by_name}{r.prepared_by_id ? ` — ${r.prepared_by_id}` : ""}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground">{r.national_id || (employees.find((e) => e.id === r.employee_id)?.national_id || "—")}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{r.branch_name || "—"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_in || "-"}</td>

@@ -176,7 +176,14 @@ export default function Leaves() {
                 const st = statusLabel[r.status] || statusLabel.pending_manager;
                 return (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name || "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      <div>{employees.find((e) => e.id === r.employee_id)?.full_name || r.employee_name || "—"}</div>
+                      {r.prepared_by_name && (
+                        <div className="text-[10px] text-violet-600 mt-0.5">
+                          {isAr ? "أُعدّت بواسطة" : "Prepared by"}: {r.prepared_by_name}{r.prepared_by_id ? ` — ${r.prepared_by_id}` : ""}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs tabular-nums">{empNat(r.employee_id) || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
                     <TableCell className="text-sm">{r.start_date}</TableCell>

@@ -190,7 +190,14 @@ export default function Employees() {
                       {activeList.map((emp, i) => (
                         <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 font-medium">{i + 1}</td>
-                          <td className="px-4 py-3 font-medium">{emp.full_name}</td>
+                          <td className="px-4 py-3 font-medium">
+                            <div>{emp.full_name}</div>
+                            {emp.hired_by_name && (
+                              <div className="text-[10px] text-violet-600 mt-0.5">
+                                {isAr ? "أُعدّت بواسطة" : "Prepared by"}: {emp.hired_by_name}
+                              </div>
+                            )}
+                          </td>
                           <td className="px-4 py-3 font-medium tabular-nums">{emp.national_id || "—"}</td>
                           <td className="px-4 py-3">{emp.position}</td>
                           <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>

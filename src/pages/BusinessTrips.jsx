@@ -170,7 +170,14 @@ export default function BusinessTrips() {
                 const st = statusLabel[tr.status] || statusLabel.pending;
                 return (
                   <TableRow key={tr.id}>
-                    <TableCell className="font-medium">{employees.find((e) => e.id === tr.employee_id)?.full_name || tr.employee_name || "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      <div>{employees.find((e) => e.id === tr.employee_id)?.full_name || tr.employee_name || "—"}</div>
+                      {tr.prepared_by_name && (
+                        <div className="text-[10px] text-violet-600 mt-0.5">
+                          {isAr ? "أُعدّت بواسطة" : "Prepared by"}: {tr.prepared_by_name}{tr.prepared_by_id ? ` — ${tr.prepared_by_id}` : ""}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs tabular-nums">{empNat(tr.employee_id) || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", tp.cls)}>{tp.label}</span></TableCell>
                     <TableCell>{tr.destination || "—"}</TableCell>
