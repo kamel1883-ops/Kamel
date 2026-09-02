@@ -43,7 +43,7 @@ export default async function (req) {
     const isOwner = isOwnerSession;
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications, payroll] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -57,6 +57,8 @@ export default async function (req) {
         base44.asServiceRole.entities.Incentive.list("-granted_date", 500),
         // إشعارات الموظف الموجّهة له (تبقى محفوظة دائماً — تُعرض بلغة البوابة المختارة)
         base44.asServiceRole.entities.Notification.filter({ employee_id: employeeId }, "-created_date", 500),
+        // قسائم رواتب الموظف (المعتمدة/المصروفة) — لإطلاعه عليها عند منحه صلاحية الرواتب
+        base44.asServiceRole.entities.Payroll.filter({ employee_id: employeeId }, "-created_date", 60),
       ]);
       // القرارات والحوار — تظهر للموظف وفق نطاق الإرسال (الكل / قسمه / سجل فرد خاص به)
       const matchesTarget = (rec: any) => {
@@ -98,6 +100,7 @@ export default async function (req) {
         settlements: paidSettlements,
         decisions, incentives,
         notifications: notifications || [],
+        payroll: (payroll || []).filter((p: any) => p?.status === "approved" || p?.status === "paid"),
       });
     }
 

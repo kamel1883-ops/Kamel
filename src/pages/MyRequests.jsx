@@ -31,6 +31,8 @@ import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
+import { computeSettlement } from "@/lib/eos";
+import { parsePermissions } from "@/lib/employeePermissions";
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import AssistantAvatar from "@/components/AssistantAvatar";
@@ -82,6 +84,7 @@ export default function MyRequests() {
   const [settlements, setSettlements] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [incentives, setIncentives] = useState([]);
+  const [payroll, setPayroll] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -121,6 +124,7 @@ export default function MyRequests() {
       setSettlements(data.settlements || []);
       setDecisions(data.decisions || []);
       setIncentives(data.incentives || []);
+      setPayroll(data.payroll || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -146,7 +150,7 @@ export default function MyRequests() {
     setSession(null);
     setEmployee(null); setOrg(null); setBranch(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
-    setDecisions([]); setIncentives([]);
+    setDecisions([]); setIncentives([]); setPayroll([]);
     setView("self");
   };
 
@@ -273,6 +277,9 @@ export default function MyRequests() {
 
     const hasApprovals = Boolean(employee.is_approver_manager || employee.is_approver_finance);
     const isOwner = employee.role_level === "owner";
+    // مصفوفة الصلاحيات — تتحكم بإظهار أقسام البوابة للموظف. فارغة = كل الأقسام (افتراضي).
+    const perms = parsePermissions(employee.permissions);
+    const can = (key) => perms.length === 0 || perms.includes(key);
     content = (
           <div>
           {/* بطاقة المنشأة + الصلاحيات */}
@@ -334,9 +341,9 @@ export default function MyRequests() {
               subtitle={`${employee.full_name || ""}`}
               action={
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>
+                  {can("leaves") && <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>}
                   <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> {t.loanBtn}</Button>
-                  <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>
+                  {can("business-trips") && <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>}
                 </div>
               }
             />
@@ -348,7 +355,9 @@ export default function MyRequests() {
               <InfoCard icon={BadgeCheck} label={t.ticketLabel} value={ticketLabel} sub={employee.is_saudi ? t.ticketSaudi : t.ticketExpat} />
             </div>
 
-            <EmployeeClock employee={employee} org={org} branch={branch} onChanged={() => load(session)} clockApi={clockApi} initialToday={todayAtt} />
+            {can("attendance") && (
+              <EmployeeClock employee={employee} org={org} branch={branch} onChanged={() => load(session)} clockApi={clockApi} initialToday={todayAtt} />
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               <SideCard title={t.detailTitle}>
@@ -366,7 +375,9 @@ export default function MyRequests() {
 
               <div className="lg:col-span-2">
                 <SideCard title={t.attTitle}>
-                  {attendance.length === 0 ? (
+                  {!can("attendance") ? (
+                    <div className="p-6 text-center text-muted-foreground text-sm">{isAr ? "لا تملك صلاحية عرض الحضور" : "No attendance access"}</div>
+                  ) : attendance.length === 0 ? (
                     <div className="p-6 text-center text-muted-foreground text-sm">{t.attEmpty}</div>
                   ) : (
                     <div className="overflow-x-auto">
@@ -402,6 +413,7 @@ export default function MyRequests() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {can("leaves") && (
               <Section title={t.leavesTitle}>
                 {leaves.length === 0 ? <Empty text={t.noLeaves} /> : leaves.map((r) => (
                   <Row key={r.id}>
@@ -424,6 +436,7 @@ export default function MyRequests() {
                   </Row>
                 ))}
               </Section>
+              )}
               <Section title={t.loansTitle}>
                 {loans.length === 0 ? <Empty text={t.noLoans} /> : loans.map((r) => (
                   <Row key={r.id}>
@@ -459,6 +472,7 @@ export default function MyRequests() {
             </div>
 
             <div className="mt-6">
+              {can("business-trips") && (
               <Section title={t.tripsTitle}>
                 {trips.length === 0 ? <Empty text={t.noTrips} /> : trips.map((r) => {
                   const st = tripStatus[r.status] || tripStatus.pending;
@@ -474,29 +488,81 @@ export default function MyRequests() {
                   );
                 })}
               </Section>
+              )}
             </div>
 
             <LeaveRequestForm open={leaveOpen} onClose={() => setLeaveOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateLeave} />
             <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={() => load(session)} employee={employee} portalCreate={portalCreateLoan} />
             <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateTrip} />
 
+            {can("performance") && (
             <div className="mt-6">
               <EmployeePerformance reviews={reviews} />
             </div>
+            )}
 
+            {can("training") && (
             <div className="mt-6">
               <EmployeeTraining trainings={trainings} />
             </div>
+            )}
 
             <div className="mt-6">
               <EmployeeDocuments loans={loans} leaves={leaves} settlements={settlements} org={org} />
             </div>
+            {can("warnings") && (
             <div className="mt-6">
               <EmployeeWarnings employee={employee} warnings={warnings} />
             </div>
+            )}
+            {can("payroll") && (
+              <div className="mt-6">
+                <Section title={isAr ? "قسائم الرواتب" : "Payslips"}>
+                  {payroll.length === 0 ? <Empty text={isAr ? "لا توجد قسائم" : "No payslips"} /> : payroll.map((p) => (
+                    <Row key={p.id}>
+                      <div>
+                        <div className="font-medium text-sm">{isAr ? "شهر" : "Month"} {p.month}/{p.year}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{isAr ? "الصافي" : "Net"}: {formatCurrency(p.net_salary)} · {isAr ? "الحالة" : "Status"}: {p.status === "paid" ? (isAr ? "مصروف" : "Paid") : (isAr ? "معتمد" : "Approved")}</div>
+                        {p.paid_date && <div className="text-[11px] text-muted-foreground mt-0.5">{isAr ? "تاريخ الصرف" : "Paid date"}: {p.paid_date}</div>}
+                      </div>
+                    </Row>
+                  ))}
+                </Section>
+              </div>
+            )}
+            {can("end-of-service") && (
+              <div className="mt-6">
+                <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>
+                  {(() => {
+                    const eosEst = computeSettlement({
+                      employee, org,
+                      lastWorkingDate: employee.termination_date || new Date().toISOString().slice(0, 10),
+                      reason: employee.termination_reason && employee.termination_reason !== "none" ? employee.termination_reason : "end_of_contract",
+                      leaveBalance: remaining,
+                      ticketAmount: Number(employee.ticket_value) || 0,
+                    });
+                    return (
+                      <div className="space-y-1.5 text-sm">
+                        <DLine label={isAr ? "أساس الحساب" : "Basis"} value={formatCurrency(eosEst.monthlyWage)} />
+                        <DLine label={isAr ? "سنوات الخدمة" : "Years"} value={eosEst.years} />
+                        <DLine label={isAr ? "النسبة" : "Fraction"} value={eosEst.fractionLabel} />
+                        <DLine label={isAr ? "مكافأة نهاية الخدمة" : "EOS award"} value={formatCurrency(eosEst.amount)} />
+                        <DLine label={isAr ? "تعويض الإجازات" : "Leave cash"} value={formatCurrency(eosEst.leaveCash)} />
+                        <DLine label={isAr ? "تعويض التذكرة" : "Ticket"} value={formatCurrency(eosEst.ticketAmount)} />
+                        <div className="flex items-center justify-between pt-2 mt-1 border-t border-border">
+                          <span className="font-bold">{isAr ? "الإجمالي التقديري" : "Estimated total"}</span>
+                          <span className="font-bold">{formatCurrency(eosEst.total_settlement)}</span>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-1">{isAr ? "قيمة تقديرية للاطلاع فقط — تُحتسب عند الإنهاء فعلياً" : "Estimate for viewing only — finalized on termination"}</div>
+                      </div>
+                    );
+                  })()}
+                </SideCard>
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <EmployeeDecisions items={decisions} session={session} onReload={() => load(session)} />
-              <EmployeeIncentives items={incentives} session={session} onReload={() => load(session)} />
+              {can("decisions") && <EmployeeDecisions items={decisions} session={session} onReload={() => load(session)} />}
+              {can("incentives") && <EmployeeIncentives items={incentives} session={session} onReload={() => load(session)} />}
             </div>
           </>
         )}
