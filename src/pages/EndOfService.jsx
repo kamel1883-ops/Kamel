@@ -320,6 +320,7 @@ export default function EndOfService() {
                           <div className="font-medium text-sm">{s.employee_name}</div>
                           <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{s.national_id || "—"}</div>
                           <div className="text-xs text-muted-foreground">{s.last_working_date} • {reasonMeta(s.reason).label} • {formatCurrency(s.total_settlement)}</div>
+                          {s.prepared_by_name && <div className="text-[11px] text-violet-700">{isAr ? "أُعدّت بواسطة" : "Prepared by"}: {s.prepared_by_name}{s.prepared_by_id ? ` — ${s.prepared_by_id}` : ""}</div>}
                           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", b.cls)}>{b.label}</span>
                             {s.hr_name && <span className="text-xs text-muted-foreground">{s.hr_name} • {s.hr_date}</span>}

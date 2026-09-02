@@ -108,6 +108,7 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
                   <span><b>{cur.employee_name}</b></span>
                   <span className="text-muted-foreground">{t.id}: {cur.national_id || "—"}</span>
                   <span className="text-muted-foreground">{t.from}: {cur.delegation_date}</span>
+                  {cur.created_by_name && <span className="text-[11px] text-violet-700">{isAr ? "أُعدّت بواسطة" : "Prepared by"}: {cur.created_by_name}</span>}
                 </div>
               </div>
             ) : (
@@ -153,6 +154,7 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
                       <div>
                         <div className="font-medium">{r.employee_name} <span className="text-xs text-muted-foreground">({r.delegation_number})</span></div>
                         <div className="text-xs text-muted-foreground" dir="ltr">{r.delegation_date} → {r.return_date || t.ongoing}</div>
+                        {r.created_by_name && <div className="text-[11px] text-violet-700">{isAr ? "أُعدّت بواسطة" : "Prepared by"}: {r.created_by_name}{r.created_by_id ? ` — ${r.created_by_id}` : ""}</div>}
                       </div>
                       <div className="flex items-center gap-2">
                         {r.is_current && r.status === "active" ? (

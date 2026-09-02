@@ -1102,7 +1102,7 @@ export default async function (req) {
     // ====== تفويض عام للأقسام الإدارية — إنشاء/استعراض/تعديل/حذف عبر بوابة الموظف ======
     // كل قسم محدود بصلاحيته، ويُحقن توثيق «أُعدّت بواسطة (الاسم + الهوية)» تلقائيًا
     // باسم ورقم هوية الموظف المُفوّض المنفّذ للعمل.
-    const DELEGATED_MAP: Record<string, { entity: string; perm: string; nameField: string; idField: string; numberField?: string; numberPrefix?: string }> = {
+    const DELEGATED_MAP: Record<string, { entity: string; perm: string; nameField: string; idField: string; numberField?: string; numberPrefix?: string; idIsEmployeeId?: boolean }> = {
       training:   { entity: "TrainingPlan", perm: "training", nameField: "prepared_by_name", idField: "prepared_by_id" },
       incentives: { entity: "Incentive", perm: "incentives", nameField: "created_by_name", idField: "created_by_id", numberField: "incentive_number", numberPrefix: "INC" },
       warnings:   { entity: "Warning", perm: "warnings", nameField: "prepared_by_name", idField: "prepared_by_id" },
@@ -1121,7 +1121,7 @@ export default async function (req) {
       attendance: { entity: "Attendance", perm: "attendance", nameField: "prepared_by_name", idField: "prepared_by_id" },
       leaves: { entity: "LeaveRequest", perm: "leaves", nameField: "prepared_by_name", idField: "prepared_by_id" },
       "business-trips": { entity: "BusinessTrip", perm: "business-trips", nameField: "prepared_by_name", idField: "prepared_by_id" },
-      employees: { entity: "Employee", perm: "employees", nameField: "hired_by_name", idField: "hired_by_employee_id" },
+      employees: { entity: "Employee", perm: "employees", nameField: "hired_by_name", idField: "hired_by_employee_id", idIsEmployeeId: true },
       fleet: { entity: "VehicleDelegation", perm: "fleet", nameField: "created_by_name", idField: "created_by_id" },
     };
 
@@ -1145,7 +1145,7 @@ export default async function (req) {
       if (!parsePerms(emp?.permissions).includes(cfg.perm)) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
       const payload: any = { ...(body.payload || {}) };
       payload[cfg.nameField] = emp?.full_name || "موظف الموارد البشرية";
-      payload[cfg.idField] = String(emp?.national_id || "");
+      payload[cfg.idField] = cfg.idIsEmployeeId ? String(emp?.id || "") : String(emp?.national_id || "");
       if (cfg.numberField && cfg.numberPrefix && !payload[cfg.numberField]) {
         const all = await (base44.asServiceRole.entities as any)[cfg.entity].list("-created_date", 1);
         payload[cfg.numberField] = `${cfg.numberPrefix}-${String((all?.length || 0) + 1).padStart(4, "0")}`;

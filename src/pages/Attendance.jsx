@@ -173,6 +173,7 @@ export default function Attendance() {
                   <th className="text-right px-4 py-3 font-medium">{t.thIn}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thOut}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thStatus}</th>
+                  <th className="text-right px-4 py-3 font-medium">{isAr ? "أُعدّت بواسطة" : "Prepared by"}</th>
                   <th className="text-right px-4 py-3 font-medium">{t.thActions}</th>
                 </tr>
               </thead>
@@ -186,6 +187,7 @@ export default function Attendance() {
                     <td className="px-4 py-3 tabular-nums">{r.check_in || "-"}</td>
                     <td className="px-4 py-3 tabular-nums">{r.check_out || "-"}</td>
                     <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
+                    <td className="px-4 py-3 text-[11px] text-violet-700">{r.prepared_by_name ? `${r.prepared_by_name}${r.prepared_by_id ? ` — ${r.prepared_by_id}` : ""}` : "—"}</td>
                     <td className="px-4 py-3">
                       <Select value={r.status} onValueChange={(v) => updateStatus(r, v)}>
                         <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
