@@ -29,6 +29,7 @@ export const DELEGATED_SECTIONS = [
   { key: "settings", ar: "الإعدادات", en: "Settings", icon: "Settings" },
 ];
 
-// الأقسام المفوّضة فعلياً للموظف — مصفوفة صلاحيات فارغة تعني كل الأقسام.
+// الأقسام المفوّضة فعلياً للموظف — تُعرض فقط ما صرّحت به الموارد البشرية صراحةً في ملف الموظف.
+// مصفوفة صلاحيات فارغة = لا تظهر أي أقسام إدارية (الموظف العادي لا يرى شيئاً).
 export const delegatedFor = (perms) =>
-  DELEGATED_SECTIONS.filter((s) => !perms?.length || perms.includes(s.key));
+  DELEGATED_SECTIONS.filter((s) => Array.isArray(perms) && perms.includes(s.key));
