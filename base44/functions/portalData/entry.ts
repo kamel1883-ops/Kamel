@@ -1099,6 +1099,154 @@ export default async function (req) {
       return Response.json({ ok: true, employee: created, preparer: prep });
     }
 
+    // ====== إدارة التوظيف الكاملة — بوابة الموظف المُفوّض (وظائف/متقدمون/مقابلات/تعيين/تجربة) ======
+    if (action === "recruit_list") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [jobs, apps, evals, orgs] = await Promise.all([
+        base44.asServiceRole.entities.Job.list("-created_date", 300),
+        base44.asServiceRole.entities.JobApplication.list("-created_date", 1000),
+        base44.asServiceRole.entities.TrialEvaluation.list("-created_date", 500),
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+      ]);
+      return Response.json({
+        ok: true, jobs: jobs || [], applications: apps || [], evaluations: evals || [],
+        org: orgs?.[0] || null, preparer: hirePreparer(),
+      });
+    }
+
+    if (action === "recruit_job_save") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const s = body.payload || {};
+      const payload: any = {
+        title: String(s.title || "").trim().slice(0, 200),
+        profession: String(s.profession || "").slice(0, 200),
+        job_type: ["full_time", "part_time", "contract"].includes(String(s.job_type)) ? String(s.job_type) : "full_time",
+        grade: String(s.grade || "").slice(0, 100),
+        salary: Number(s.salary) || 0,
+        nationality_req: ["any", "saudi", "resident"].includes(String(s.nationality_req)) ? String(s.nationality_req) : "any",
+        qualifications: String(s.qualifications || "").slice(0, 4000),
+        tasks: String(s.tasks || "").slice(0, 4000),
+        description: String(s.description || "").slice(0, 10000),
+        vacancy_count: Number(s.vacancy_count) || 1,
+        department: String(s.department || "").slice(0, 200),
+        status: s.status === "closed" ? "closed" : "open",
+      };
+      if (!payload.title) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const id = String(body.id || "");
+      if (payload.status === "closed") payload.closed_date = todayISO();
+      if (id) {
+        await base44.asServiceRole.entities.Job.update(id, payload);
+        return Response.json({ ok: true, id });
+      }
+      const created: any = await base44.asServiceRole.entities.Job.create({ ...payload, published_date: todayISO() });
+      return Response.json({ ok: true, id: created?.id, job: created });
+    }
+
+    if (action === "recruit_job_delete") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.Job.delete(id);
+      return Response.json({ ok: true });
+    }
+
+    // فرز المتقدمين ومتابعتهم: تغيير الحالة، جدولة المقابلة، ملاحظات، سبب الرفض
+    if (action === "recruit_app_update") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const s = body.payload || {};
+      const payload: any = {};
+      if (s.status && ["applied", "screened", "interview", "hired", "rejected"].includes(String(s.status))) payload.status = String(s.status);
+      if (s.interview_date !== undefined) payload.interview_date = String(s.interview_date || "").slice(0, 10) || null;
+      if (s.interview_notes !== undefined) payload.interview_notes = String(s.interview_notes || "").slice(0, 3000);
+      if (s.reject_reason !== undefined) payload.reject_reason = String(s.reject_reason || "").slice(0, 1000);
+      if (!Object.keys(payload).length) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      await base44.asServiceRole.entities.JobApplication.update(id, payload);
+      return Response.json({ ok: true });
+    }
+
+    // إكمال التوظيف: إنشاء سجل الموظف من ملف المتقدم وتعليم الطلب «معيّن» وإغلاق الوظيفة
+    if (action === "recruit_hire") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const applicationId = String(body.application_id || "");
+      if (!applicationId) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const app: any = await base44.asServiceRole.entities.JobApplication.get(applicationId);
+      if (!app) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+      const job: any = app.job_id ? await base44.asServiceRole.entities.Job.get(app.job_id).catch(() => null) : null;
+      const s = body.payload || {};
+      const [orgs, allEmps] = await Promise.all([
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+        base44.asServiceRole.entities.Employee.list("-created_date", 1),
+      ]);
+      const orgFresh: any = orgs?.[0] || {};
+      const prep = hirePreparer();
+      const hireDate = String(s.hire_date || "").slice(0, 10) || todayISO();
+      const created: any = await base44.asServiceRole.entities.Employee.create({
+        full_name: app.full_name,
+        employee_number: String(s.employee_number || "").trim() || `EMP-${String((allEmps?.length || 0) + 1).padStart(4, "0")}`,
+        national_id: String(s.national_id || "").slice(0, 40),
+        email: app.email || "", nationality: app.nationality || "",
+        is_saudi: !!s.is_saudi, phone: app.phone || "",
+        department: String(s.department || job?.department || "").slice(0, 200),
+        position: String(s.position || job?.title || app.job_title || "").slice(0, 200),
+        role_level: "employee",
+        hire_date: hireDate, contract_start_date: hireDate,
+        contract_type: job?.job_type || "full_time",
+        base_salary: Number(s.base_salary) || Number(job?.salary) || 0,
+        housing_allowance: Number(s.housing_allowance) || 0,
+        transport_allowance: Number(s.transport_allowance) || 0,
+        other_allowances: Number(s.other_allowances) || 0,
+        salary_payment_method: s.salary_payment_method === "cash" ? "cash" : "mudad",
+        status: "active", leave_balance: 0,
+        annual_leave_entitlement: orgFresh.annual_leave_days || 21,
+        ticket_entitlement: orgFresh.ticket_policy || "yearly",
+        hired_by_name: prep.hired_by_name, hired_by_employee_id: prep.hired_by_employee_id,
+      });
+      await base44.asServiceRole.entities.JobApplication.update(applicationId, {
+        status: "hired", hired_date: hireDate, hired_employee_id: created?.id || "",
+      });
+      if (job?.id) {
+        await base44.asServiceRole.entities.Job.update(job.id, {
+          hired_applicant_name: app.full_name,
+          status: "closed", closed_date: todayISO(),
+        });
+      }
+      return Response.json({ ok: true, employee: created });
+    }
+
+    // تقييم فترة التجربة (٩٠ يوماً) للمعيّنين
+    if (action === "recruit_eval_save") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const s = body.payload || {};
+      const num = (v: any) => Math.max(0, Math.min(5, Number(v) || 0));
+      const ratings = {
+        competence_rating: num(s.competence_rating), behavior_rating: num(s.behavior_rating),
+        knowledge_rating: num(s.knowledge_rating), professional_field_rating: num(s.professional_field_rating),
+        experience_rating: num(s.experience_rating),
+      };
+      const vals = Object.values(ratings).filter((x) => x > 0);
+      const payload: any = {
+        job_id: String(s.job_id || ""), job_title: String(s.job_title || ""),
+        applicant_id: String(s.applicant_id || ""),
+        employee_name: String(s.employee_name || "").slice(0, 200),
+        department: String(s.department || "").slice(0, 200),
+        evaluation_date: String(s.evaluation_date || todayISO()).slice(0, 10),
+        ...ratings,
+        overall_rating: vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : 0,
+        strengths: String(s.strengths || "").slice(0, 3000),
+        improvements: String(s.improvements || "").slice(0, 3000),
+        recommendation: ["confirm", "dismiss_probation", "extend"].includes(String(s.recommendation)) ? String(s.recommendation) : "confirm",
+        status: "completed",
+        notes: String(s.notes || "").slice(0, 2000),
+      };
+      if (!payload.employee_name) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const id = String(body.id || "");
+      if (id) await base44.asServiceRole.entities.TrialEvaluation.update(id, payload);
+      else await base44.asServiceRole.entities.TrialEvaluation.create(payload);
+      return Response.json({ ok: true });
+    }
+
     // ====== تفويض عام للأقسام الإدارية — إنشاء/استعراض/تعديل/حذف عبر بوابة الموظف ======
     // كل قسم محدود بصلاحيته، ويُحقن توثيق «أُعدّت بواسطة (الاسم + الهوية)» تلقائيًا
     // باسم ورقم هوية الموظف المُفوّض المنفّذ للعمل.

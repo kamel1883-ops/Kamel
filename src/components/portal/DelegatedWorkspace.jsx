@@ -9,6 +9,7 @@ import { delegatedFor } from "./delegatedRegistry";
 import PortalDelegatedManager from "./PortalDelegatedManager";
 import PortalPayrollManager from "./PortalPayrollManager";
 import PortalRecruitmentManager from "./PortalRecruitmentManager";
+import PortalJobsManager from "./recruitment/PortalJobsManager";
 import PortalTrainingManager from "./PortalTrainingManager";
 import PortalIncentivesManager from "./PortalIncentivesManager";
 import PortalWarningsManager from "./PortalWarningsManager";
@@ -28,7 +29,15 @@ function SectionBody({ sectionKey, session, isAr }) {
   const p = { session, isAr };
   switch (sectionKey) {
     case "payroll": return <PortalPayrollManager {...p} />;
-    case "recruitment": return <PortalRecruitmentManager {...p} />;
+    case "recruitment":
+      // القسم كامل: الوظائف والإعلان والمتقدمون والفرز والمقابلات والتعيين وتقييم التجربة،
+      // ثم إضافة موظف مباشرة (تعيين بدون إعلان وظيفة).
+      return (
+        <div className="space-y-6">
+          <PortalJobsManager {...p} />
+          <PortalRecruitmentManager {...p} />
+        </div>
+      );
     case "training": return <PortalTrainingManager {...p} />;
     case "incentives": return <PortalIncentivesManager {...p} />;
     case "warnings": return <PortalWarningsManager {...p} />;
