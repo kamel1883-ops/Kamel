@@ -78,6 +78,7 @@ export default function Incentives() {
                 <th className="text-right font-medium px-4 py-3">{t.amount}</th>
                 <th className="text-right font-medium px-4 py-3">{t.target}</th>
                 <th className="text-right font-medium px-4 py-3">{t.granted}</th>
+                <th className="text-right font-medium px-4 py-3">{t.by}</th>
                 <th className="text-right font-medium px-4 py-3">{t.actions}</th>
               </tr></thead>
               <tbody>
@@ -92,6 +93,7 @@ export default function Incentives() {
                       <td className="px-4 py-3 font-semibold text-violet-700">{formatCurrency(r.amount)}</td>
                       <td className="px-4 py-3 text-xs">{targetLabel}</td>
                       <td className="px-4 py-3 text-xs" dir="ltr">{r.granted_date || "—"}</td>
+                      <td className="px-4 py-3 text-[11px] text-violet-700">{r.created_by_name ? `${r.created_by_name}${r.created_by_id ? ` — ${r.created_by_id}` : ""}` : "—"}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
                           <button onClick={() => setView(r)} className="p-1.5 rounded-md hover:bg-violet-50 text-violet-600" title={t.view}><Eye size={15} /></button>

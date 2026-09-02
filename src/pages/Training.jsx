@@ -172,6 +172,7 @@ export default function Training() {
                   );
                 })()}
                 {p.goal && <div className="text-sm text-muted-foreground line-clamp-2">{t.goal}: {p.goal}</div>}
+                {(p.prepared_by_name || p.created_by_name) && <div className="text-[11px] text-violet-700 flex items-center gap-1">{isAr ? "أُعدّت بواسطة" : "Prepared by"}: {p.prepared_by_name || p.created_by_name}{(p.prepared_by_id || p.created_by_id) ? ` — ${p.prepared_by_id || p.created_by_id}` : ""}</div>}
                 <div className="flex items-center justify-between mt-2 pt-2 border-t">
                   <span className="text-xs text-muted-foreground">{p.cost ? `${p.cost} ${t.sar}` : ""} {p.start_date ? `· ${p.start_date}` : ""}</span>
                   <div className="flex gap-1">

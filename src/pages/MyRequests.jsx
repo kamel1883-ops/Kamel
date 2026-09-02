@@ -40,6 +40,7 @@ import PortalRecruitmentManager from "@/components/portal/PortalRecruitmentManag
 import PortalTrainingManager from "@/components/portal/PortalTrainingManager";
 import PortalIncentivesManager from "@/components/portal/PortalIncentivesManager";
 import PortalWarningsManager from "@/components/portal/PortalWarningsManager";
+import PortalDelegatedManager from "@/components/portal/PortalDelegatedManager";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import PullToRefresh from "@/components/PullToRefresh";
 
@@ -543,6 +544,12 @@ export default function MyRequests() {
                 <PortalWarningsManager session={session} isAr={isAr} />
               </div>
             )}
+            {can("decisions") && <div className="mt-6"><PortalDelegatedManager section="decisions" session={session} isAr={isAr} /></div>}
+            {can("performance") && <div className="mt-6"><PortalDelegatedManager section="performance" session={session} isAr={isAr} /></div>}
+            {can("succession") && <div className="mt-6"><PortalDelegatedManager section="succession" session={session} isAr={isAr} /></div>}
+            {can("exit-interviews") && <div className="mt-6"><PortalDelegatedManager section="exit-interviews" session={session} isAr={isAr} /></div>}
+            {can("surveys") && <div className="mt-6"><PortalDelegatedManager section="surveys" session={session} isAr={isAr} /></div>}
+            {can("licenses") && <div className="mt-6"><PortalDelegatedManager section="licenses" session={session} isAr={isAr} /></div>}
             {can("end-of-service") && (
               <div className="mt-6">
                 <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>

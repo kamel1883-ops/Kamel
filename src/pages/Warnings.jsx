@@ -143,13 +143,14 @@ export default function Warnings() {
               <th className="text-right font-medium px-4 py-3 hidden md:table-cell">{t.thIncident}</th>
               <th className="text-right font-medium px-4 py-3 hidden lg:table-cell">{t.thSession}</th>
               <th className="text-right font-medium px-4 py-3">{t.thStatus}</th>
+              <th className="text-right font-medium px-4 py-3">{isAr ? "أُعدّت بواسطة" : "Prepared by"}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">—</td></tr>
+              <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">—</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{t.no}</td></tr>
+              <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">{t.no}</td></tr>
             ) : filtered.map((w) => {
               const c = categoryById(w.violation_category, lang);
               const lv = levelById(w.warning_level, lang);
@@ -163,6 +164,7 @@ export default function Warnings() {
                   <td className="px-4 py-3 hidden md:table-cell">{w.incident_date || "—"}</td>
                   <td className="px-4 py-3 hidden lg:table-cell">{w.session_date || "—"}</td>
                   <td className="px-4 py-3"><span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{w.status === "acknowledged" ? t.ack : t.sent}</span></td>
+                  <td className="px-4 py-3 text-[11px] text-violet-700">{w.prepared_by_name ? `${w.prepared_by_name}${w.prepared_by_id ? ` — ${w.prepared_by_id}` : ""}` : "—"}</td>
                 </tr>
               );
             })}

@@ -1106,6 +1106,12 @@ export default async function (req) {
       training:   { entity: "TrainingPlan", perm: "training", nameField: "prepared_by_name", idField: "prepared_by_id" },
       incentives: { entity: "Incentive", perm: "incentives", nameField: "created_by_name", idField: "created_by_id", numberField: "incentive_number", numberPrefix: "INC" },
       warnings:   { entity: "Warning", perm: "warnings", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      decisions:  { entity: "AdminDecision", perm: "decisions", nameField: "created_by_name", idField: "created_by_id", numberField: "decision_number", numberPrefix: "DEC" },
+      performance: { entity: "Performance", perm: "performance", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      succession: { entity: "SuccessionPlan", perm: "succession", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "exit-interviews": { entity: "ExitInterview", perm: "exit-interviews", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      surveys:    { entity: "Survey", perm: "surveys", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      licenses:   { entity: "License", perm: "licenses", nameField: "prepared_by_name", idField: "prepared_by_id" },
     };
 
     if (action === "delegated_list") {
