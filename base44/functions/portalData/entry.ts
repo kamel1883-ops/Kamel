@@ -1144,8 +1144,13 @@ export default async function (req) {
       if (!cfg) return Response.json({ ok: false, error: "unknown_section" }, { status: 400 });
       if (!parsePerms(emp?.permissions).includes(cfg.perm)) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
       const payload: any = { ...(body.payload || {}) };
-      payload[cfg.nameField] = emp?.full_name || "موظف الموارد البشرية";
-      payload[cfg.idField] = cfg.idIsEmployeeId ? String(emp?.id || "") : String(emp?.national_id || "");
+      const pName = emp?.full_name || "موظف الموارد البشرية";
+      const pNid = String(emp?.national_id || "");
+      // ملاحظة: created_by_id حقل مدمج تُعيد المنصة كتابته، لذا تُضمَّن هوية المُعِدّ
+      // مع الاسم في هذه الأقسام لضمان بقاء التوثيق ظاهراً في لوحة الإدارة.
+      payload[cfg.nameField] = cfg.idField === "created_by_id" && pNid ? `${pName} — ${pNid}` : pName;
+      if (cfg.idField !== "created_by_id")
+        payload[cfg.idField] = cfg.idIsEmployeeId ? String(emp?.id || "") : pNid;
       if (cfg.numberField && cfg.numberPrefix && !payload[cfg.numberField]) {
         const all = await (base44.asServiceRole.entities as any)[cfg.entity].list("-created_date", 1);
         payload[cfg.numberField] = `${cfg.numberPrefix}-${String((all?.length || 0) + 1).padStart(4, "0")}`;
