@@ -1,0 +1,105 @@
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
+import {
+  Users, UserPlus, Fingerprint, Upload, CheckCircle2, CalendarDays, Plane, Banknote,
+  ShieldCheck, Car, FileText, Target, GraduationCap, Network, MessageSquare,
+  AlertTriangle, ScrollText, Gift, BarChart3, FileBadge, Globe, ChevronLeft,
+} from "lucide-react";
+import { delegatedFor } from "./delegatedRegistry";
+import PortalDelegatedManager from "./PortalDelegatedManager";
+import PortalPayrollManager from "./PortalPayrollManager";
+import PortalRecruitmentManager from "./PortalRecruitmentManager";
+import PortalTrainingManager from "./PortalTrainingManager";
+import PortalIncentivesManager from "./PortalIncentivesManager";
+import PortalWarningsManager from "./PortalWarningsManager";
+import PortalEmployeesManager from "./PortalEmployeesManager";
+import PortalAnalyticsManager from "./PortalAnalyticsManager";
+import PortalImportAttendance from "./PortalImportAttendance";
+import ApprovalsPortal from "@/pages/ApprovalsPortal";
+
+const ICONS = {
+  Users, UserPlus, Fingerprint, Upload, CheckCircle2, CalendarDays, Plane, Banknote,
+  ShieldCheck, Car, FileText, Target, GraduationCap, Network, MessageSquare,
+  AlertTriangle, ScrollText, Gift, BarChart3, FileBadge, Globe,
+};
+
+// يعرض القسم الإداري المُفوّض كاملاً بكل مهامه — كأن الموظف مسؤول الموارد البشرية.
+function SectionBody({ sectionKey, session, isAr }) {
+  const p = { session, isAr };
+  switch (sectionKey) {
+    case "payroll": return <PortalPayrollManager {...p} />;
+    case "recruitment": return <PortalRecruitmentManager {...p} />;
+    case "training": return <PortalTrainingManager {...p} />;
+    case "incentives": return <PortalIncentivesManager {...p} />;
+    case "warnings": return <PortalWarningsManager {...p} />;
+    case "employees": return <PortalEmployeesManager {...p} />;
+    case "analytics": return <PortalAnalyticsManager {...p} />;
+    case "import-attendance": return <PortalImportAttendance {...p} />;
+    case "approvals": return <ApprovalsPortal portalSession={session} />;
+    case "fleet":
+      // القسم كامل: تسجيل المركبات أولاً ثم إصدار توكيلاتها
+      return (
+        <div className="space-y-6">
+          <PortalDelegatedManager section="vehicles" {...p} />
+          <PortalDelegatedManager section="fleet" {...p} />
+        </div>
+      );
+    default: return <PortalDelegatedManager section={sectionKey} {...p} />;
+  }
+}
+
+export default function DelegatedWorkspace({ perms, session, isAr = true }) {
+  const sections = delegatedFor(perms);
+  const [active, setActive] = useState(null);
+  if (!sections.length) return null;
+
+  const current = sections.find((s) => s.key === active);
+
+  return (
+    <div className="mt-8">
+      <div className="flex items-center gap-2 mb-3">
+        <ShieldCheck size={18} className="text-violet-600" />
+        <h3 className="font-bold">{isAr ? "الأقسام الإدارية المفوّضة لك" : "Your delegated departments"}</h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
+          {sections.length}
+        </span>
+      </div>
+
+      {!current ? (
+        <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/70 shadow-lg divide-y divide-border overflow-hidden">
+          {sections.map((s) => {
+            const Icon = ICONS[s.icon] || ShieldCheck;
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setActive(s.key)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-right hover:bg-violet-50/60 transition"
+              >
+                <span className="flex items-center gap-3 min-w-0">
+                  <span className="h-9 w-9 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                    <Icon size={17} className="text-violet-600" />
+                  </span>
+                  <span className="text-sm font-medium truncate">{isAr ? s.ar : s.en}</span>
+                </span>
+                <ChevronLeft size={16} className={cn("text-muted-foreground shrink-0", !isAr && "rotate-180")} />
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div>
+          <button
+            type="button"
+            onClick={() => setActive(null)}
+            className="mb-4 inline-flex items-center gap-2 text-sm px-3 py-2 rounded-xl bg-white border border-border hover:bg-violet-50 transition"
+          >
+            <ChevronLeft size={16} className={cn(isAr && "rotate-180")} />
+            {isAr ? "رجوع للأقسام" : "Back to departments"}
+          </button>
+          <SectionBody sectionKey={current.key} session={session} isAr={isAr} />
+        </div>
+      )}
+    </div>
+  );
+}

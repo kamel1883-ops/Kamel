@@ -35,15 +35,7 @@ import { computeSettlement } from "@/lib/eos";
 import { parsePermissions } from "@/lib/employeePermissions";
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
-import PortalPayrollManager from "@/components/portal/PortalPayrollManager";
-import PortalRecruitmentManager from "@/components/portal/PortalRecruitmentManager";
-import PortalTrainingManager from "@/components/portal/PortalTrainingManager";
-import PortalIncentivesManager from "@/components/portal/PortalIncentivesManager";
-import PortalWarningsManager from "@/components/portal/PortalWarningsManager";
-import PortalDelegatedManager from "@/components/portal/PortalDelegatedManager";
-import PortalEmployeesManager from "@/components/portal/PortalEmployeesManager";
-import PortalAnalyticsManager from "@/components/portal/PortalAnalyticsManager";
-import PortalImportAttendance from "@/components/portal/PortalImportAttendance";
+import DelegatedWorkspace from "@/components/portal/DelegatedWorkspace";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import PullToRefresh from "@/components/PullToRefresh";
 
@@ -522,51 +514,7 @@ export default function MyRequests() {
               <EmployeeWarnings employee={employee} warnings={warnings} />
             </div>
             )}
-            {can("payroll") && (
-              <div className="mt-6">
-                <PortalPayrollManager session={session} isAr={isAr} />
-              </div>
-            )}
-            {can("recruitment") && (
-              <div className="mt-6">
-                <PortalRecruitmentManager session={session} isAr={isAr} />
-              </div>
-            )}
-            {can("training") && (
-              <div className="mt-6">
-                <PortalTrainingManager session={session} isAr={isAr} />
-              </div>
-            )}
-            {can("incentives") && (
-              <div className="mt-6">
-                <PortalIncentivesManager session={session} isAr={isAr} />
-              </div>
-            )}
-            {can("warnings") && (
-              <div className="mt-6">
-                <PortalWarningsManager session={session} isAr={isAr} />
-              </div>
-            )}
-            {can("decisions") && <div className="mt-6"><PortalDelegatedManager section="decisions" session={session} isAr={isAr} /></div>}
-            {can("performance") && <div className="mt-6"><PortalDelegatedManager section="performance" session={session} isAr={isAr} /></div>}
-            {can("succession") && <div className="mt-6"><PortalDelegatedManager section="succession" session={session} isAr={isAr} /></div>}
-            {can("exit-interviews") && <div className="mt-6"><PortalDelegatedManager section="exit-interviews" session={session} isAr={isAr} /></div>}
-            {can("surveys") && <div className="mt-6"><PortalDelegatedManager section="surveys" session={session} isAr={isAr} /></div>}
-            {can("licenses") && <div className="mt-6"><PortalDelegatedManager section="licenses" session={session} isAr={isAr} /></div>}
-            {can("gosi") && <div className="mt-6"><PortalDelegatedManager section="gosi" session={session} isAr={isAr} /></div>}
-            {can("org-structure") && <div className="mt-6"><PortalDelegatedManager section="org-structure" session={session} isAr={isAr} /></div>}
-            {can("workforce-planning") && <div className="mt-6"><PortalDelegatedManager section="workforce-planning" session={session} isAr={isAr} /></div>}
-            {can("platform-subscriptions") && <div className="mt-6"><PortalDelegatedManager section="platform-subscriptions" session={session} isAr={isAr} /></div>}
-            {can("customer-surveys") && <div className="mt-6"><PortalDelegatedManager section="customer-surveys" session={session} isAr={isAr} /></div>}
-            {can("end-of-service") && <div className="mt-6"><PortalDelegatedManager section="end-of-service" session={session} isAr={isAr} /></div>}
-            {can("attendance") && <div className="mt-6"><PortalDelegatedManager section="attendance" session={session} isAr={isAr} /></div>}
-            {can("leaves") && <div className="mt-6"><PortalDelegatedManager section="leaves" session={session} isAr={isAr} /></div>}
-            {can("business-trips") && <div className="mt-6"><PortalDelegatedManager section="business-trips" session={session} isAr={isAr} /></div>}
-            {can("employees") && <div className="mt-6"><PortalEmployeesManager session={session} isAr={isAr} /></div>}
-            {can("approvals") && <div className="mt-6"><ApprovalsPortal portalSession={session} /></div>}
-            {can("analytics") && <div className="mt-6"><PortalAnalyticsManager session={session} isAr={isAr} /></div>}
-            {can("import-attendance") && <div className="mt-6"><PortalImportAttendance session={session} isAr={isAr} /></div>}
-            {can("fleet") && <div className="mt-6"><PortalDelegatedManager section="fleet" session={session} isAr={isAr} /></div>}
+            <DelegatedWorkspace perms={perms} session={session} isAr={isAr} />
             {can("end-of-service") && (
               <div className="mt-6">
                 <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>

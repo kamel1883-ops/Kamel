@@ -1123,6 +1123,7 @@ export default async function (req) {
       "business-trips": { entity: "BusinessTrip", perm: "business-trips", nameField: "prepared_by_name", idField: "prepared_by_id" },
       employees: { entity: "Employee", perm: "employees", nameField: "hired_by_name", idField: "hired_by_employee_id", idIsEmployeeId: true },
       fleet: { entity: "VehicleDelegation", perm: "fleet", nameField: "created_by_name", idField: "created_by_id" },
+      vehicles: { entity: "Vehicle", perm: "fleet", nameField: "prepared_by_name", idField: "prepared_by_id" },
     };
 
     if (action === "delegated_list") {
