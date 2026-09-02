@@ -15,6 +15,7 @@ import { PERMISSION_MODULES, parsePermissions, togglePermission, allPermissionKe
 import { useI18n } from "@/lib/i18n";
 import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
+import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
 
 const empty = {
   full_name: "",
@@ -263,6 +264,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
                   {generating ? t.genJobDescing : t.genJobDesc}
                 </Button>
                 <span className="text-[11px] text-muted-foreground">{isAr ? "بعد التوليد يمكنك الإضافة والحذف والتعديل بحرية" : "After generation you can add, delete and edit freely"}</span>
+                <div className="ms-auto"><JobDescPrintActions employee={{ ...employee, ...form }} text={form.job_description} isAr={isAr} /></div>
               </div>
               <Textarea value={form.job_description} onChange={(e) => set("job_description", e.target.value)} rows={6} placeholder={t.jobDescHint} />
             </Field>

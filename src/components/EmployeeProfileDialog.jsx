@@ -14,6 +14,7 @@ import EmployeePaidDocuments from "@/components/EmployeePaidDocuments";
 import EmployeePortalPasswordAdmin from "@/components/portal/EmployeePortalPasswordAdmin";
 import { useI18n } from "@/lib/i18n";
 import { PERMISSION_MODULES, parsePermissions } from "@/lib/employeePermissions";
+import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
 
 function Row({ label, value }) {
   return (
@@ -170,10 +171,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
                       <div className="text-xs text-muted-foreground">{isAr ? "الوصف الوظيفي" : "Job description"}</div>
-                      <div className="flex gap-1.5">
-                        <Button size="sm" variant="outline" onClick={() => setShowJobDescPreview(true)} className="h-7 px-2 text-xs gap-1.5"><Eye size={13} />{isAr ? "مشاهدة" : "View"}</Button>
-                        <Button size="sm" variant="outline" onClick={printJobDesc} className="h-7 px-2 text-xs gap-1.5"><Printer size={13} />{isAr ? "طباعة PDF" : "Print PDF"}</Button>
-                      </div>
+                      <JobDescPrintActions employee={employee} isAr={isAr} />
                     </div>
                     <div className="text-sm whitespace-pre-line">{employee.job_description}</div>
                   </div>
