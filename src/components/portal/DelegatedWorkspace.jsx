@@ -17,6 +17,7 @@ import PortalEmployeesManager from "./PortalEmployeesManager";
 import PortalAnalyticsManager from "./PortalAnalyticsManager";
 import PortalImportAttendance from "./PortalImportAttendance";
 import ApprovalsPortal from "@/pages/ApprovalsPortal";
+import DelegatedAdminSection, { hasAdminPage } from "./DelegatedAdminSection";
 
 const ICONS = {
   Users, UserPlus, Fingerprint, Upload, CheckCircle2, CalendarDays, Plane, Banknote,
@@ -24,8 +25,10 @@ const ICONS = {
   AlertTriangle, ScrollText, Gift, BarChart3, FileBadge, Globe,
 };
 
-// يعرض القسم الإداري المُفوّض كاملاً بكل مهامه — كأن الموظف مسؤول الموارد البشرية.
-function SectionBody({ sectionKey, session, isAr }) {
+// يعرض القسم الإداري المُفوّض كاملاً بكل مهامه — تُنقل صفحة القسم من لوحة الشركات كما هي.
+function SectionBody({ sectionKey, session, employee, isAr }) {
+  if (hasAdminPage(sectionKey))
+    return <DelegatedAdminSection sectionKey={sectionKey} session={session} employee={employee} />;
   const p = { session, isAr };
   switch (sectionKey) {
     case "payroll": return <PortalPayrollManager {...p} />;
@@ -57,7 +60,7 @@ function SectionBody({ sectionKey, session, isAr }) {
   }
 }
 
-export default function DelegatedWorkspace({ perms, session, isAr = true }) {
+export default function DelegatedWorkspace({ perms, session, employee, isAr = true }) {
   const sections = delegatedFor(perms);
   const [active, setActive] = useState(null);
   if (!sections.length) return null;
@@ -106,7 +109,7 @@ export default function DelegatedWorkspace({ perms, session, isAr = true }) {
             <ChevronLeft size={16} className={cn(isAr && "rotate-180")} />
             {isAr ? "رجوع للأقسام" : "Back to departments"}
           </button>
-          <SectionBody sectionKey={current.key} session={session} isAr={isAr} />
+          <SectionBody sectionKey={current.key} session={session} employee={employee} isAr={isAr} />
         </div>
       )}
     </div>

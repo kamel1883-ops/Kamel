@@ -514,7 +514,7 @@ export default function MyRequests() {
               <EmployeeWarnings employee={employee} warnings={warnings} />
             </div>
             )}
-            <DelegatedWorkspace perms={perms} session={session} isAr={isAr} />
+            <DelegatedWorkspace perms={perms} session={session} employee={employee} isAr={isAr} />
             {can("end-of-service") && (
               <div className="mt-6">
                 <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>

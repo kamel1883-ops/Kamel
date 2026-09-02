@@ -1394,6 +1394,65 @@ export default async function (req) {
       return Response.json({ ok: true, vehicles: vehicles || [] });
     }
 
+    // ====== جسر البيانات العام — يفتح صفحات لوحة الشركات كما هي للموظف المُفوّض ======
+    // الموظف المُفوّض على قسم يحصل على القسم بكامل مهامه: كل قراءة/كتابة تمرّ هنا،
+    // فيُتحقق أولاً أن مصفوفة صلاحياته تشمل القسم المالك للكيان، ثم تُنفّذ عبر خدمة-الدور.
+    // كيانات مساندة (المنشأة، الموظفون، الفروع...) تُقرأ لأي مُفوّض لأنها لازمة لكل شاشة.
+    const ENTITY_PERMS: Record<string, string[]> = {
+      Employee: ["employees", "recruitment"],
+      Job: ["recruitment"], JobApplication: ["recruitment"], TrialEvaluation: ["recruitment"],
+      Attendance: ["attendance", "import-attendance"],
+      LeaveRequest: ["leaves", "approvals"], LoanRequest: ["approvals"],
+      BusinessTrip: ["business-trips", "approvals"],
+      Payroll: ["payroll"], GosiRecord: ["gosi"],
+      Vehicle: ["fleet"], VehicleDelegation: ["fleet"],
+      Settlement: ["end-of-service"], Performance: ["performance"],
+      TrainingPlan: ["training"], SuccessionPlan: ["succession"],
+      OrgUnit: ["org-structure"], WorkforcePlan: ["workforce-planning"],
+      ExitInterview: ["exit-interviews"], Survey: ["surveys"], SurveyResponse: ["surveys"],
+      Warning: ["warnings"], AdminDecision: ["decisions"], Incentive: ["incentives"],
+      License: ["licenses"], PlatformSubscription: ["platform-subscriptions"],
+      CustomerSurvey: ["customer-surveys"], CustomerSurveyResponse: ["customer-surveys"],
+      Branch: ["employees", "attendance"], Organization: ["employees"],
+      Notification: ["employees"],
+    };
+    const READ_ANY = new Set(["Organization", "Employee", "Branch", "Notification", "Job", "Vehicle"]);
+    const READ_OPS = new Set(["list", "filter", "get"]);
+    const WRITE_OPS = new Set(["create", "update", "delete", "bulkCreate", "bulkUpdate", "updateMany", "deleteMany"]);
+
+    if (action === "entity_op") {
+      const entity = String(body.entity || "");
+      const op = String(body.op || "");
+      const args = Array.isArray(body.args) ? body.args : [];
+      const allowed = ENTITY_PERMS[entity];
+      if (!allowed) return Response.json({ ok: false, error: "unknown_entity" }, { status: 400 });
+      if (!READ_OPS.has(op) && !WRITE_OPS.has(op)) return Response.json({ ok: false, error: "unknown_op" }, { status: 400 });
+      const perms = parsePerms(emp?.permissions);
+      if (!perms.length) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const hasPerm = allowed.some((p) => perms.includes(p));
+      const readOnlyPass = READ_OPS.has(op) && READ_ANY.has(entity);
+      if (!hasPerm && !readOnlyPass) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+
+      // توثيق «أُعدّت بواسطة»: يُحقن اسم ورقم هوية الموظف المُفوّض في كل سجل يُنشئه من البوابة.
+      const pName = emp?.full_name || "الموظف المُفوّض";
+      const pNid = String(emp?.national_id || "");
+      const stamp = (rec: any) => {
+        if (!rec || typeof rec !== "object") return rec;
+        const out: any = { ...rec };
+        if (entity === "Employee") { out.hired_by_name = pName; out.hired_by_employee_id = String(emp?.id || ""); }
+        else if (entity === "Incentive" || entity === "AdminDecision" || entity === "VehicleDelegation") out.created_by_name = pNid ? `${pName} — ${pNid}` : pName;
+        else { out.prepared_by_name = pName; out.prepared_by_id = pNid; }
+        return out;
+      };
+      const target: any = (base44.asServiceRole.entities as any)[entity];
+      if (!target) return Response.json({ ok: false, error: "unknown_entity" }, { status: 400 });
+      let callArgs = args;
+      if (op === "create") callArgs = [stamp(args[0])];
+      if (op === "bulkCreate") callArgs = [(args[0] || []).map(stamp)];
+      const result = await target[op](...callArgs);
+      return Response.json({ ok: true, result: result ?? null });
+    }
+
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
   } catch (error) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });
