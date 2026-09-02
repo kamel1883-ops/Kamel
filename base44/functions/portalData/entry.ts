@@ -1117,6 +1117,11 @@ export default async function (req) {
       "workforce-planning": { entity: "WorkforcePlan", perm: "workforce-planning", nameField: "prepared_by_name", idField: "prepared_by_id" },
       "platform-subscriptions": { entity: "PlatformSubscription", perm: "platform-subscriptions", nameField: "prepared_by_name", idField: "prepared_by_id" },
       "customer-surveys": { entity: "CustomerSurvey", perm: "customer-surveys", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "end-of-service": { entity: "Settlement", perm: "end-of-service", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      attendance: { entity: "Attendance", perm: "attendance", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      leaves: { entity: "LeaveRequest", perm: "leaves", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "business-trips": { entity: "BusinessTrip", perm: "business-trips", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      employees: { entity: "Employee", perm: "employees", nameField: "hired_by_name", idField: "hired_by_employee_id" },
     };
 
     if (action === "delegated_list") {
@@ -1168,6 +1173,63 @@ export default async function (req) {
       if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
       await (base44.asServiceRole.entities as any)[cfg.entity].delete(id);
       return Response.json({ ok: true });
+    }
+
+    // ====== التحليلات والتقارير (للموظف المُفوّض بصلاحية «analytics») ======
+    if (action === "analytics_stats") {
+      if (!parsePerms(emp?.permissions).includes("analytics")) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [emps, atts, pays, warns, incs] = await Promise.all([
+        base44.asServiceRole.entities.Employee.list("-created_date", 2000),
+        base44.asServiceRole.entities.Attendance.list("-created_date", 500),
+        base44.asServiceRole.entities.Payroll.list("-created_date", 500),
+        base44.asServiceRole.entities.Warning.list("-created_date", 500),
+        base44.asServiceRole.entities.Incentive.list("-created_date", 500),
+      ]);
+      const e = emps || [];
+      const byDept: Record<string, number> = {};
+      e.forEach((x: any) => { const d = x.department || "بدون إدارة"; byDept[d] = (byDept[d] || 0) + 1; });
+      return Response.json({ ok: true, stats: {
+        employees: e.length,
+        active: e.filter((x: any) => x.status === "active").length,
+        on_leave: e.filter((x: any) => x.status === "on_leave").length,
+        terminated: e.filter((x: any) => x.status === "terminated" || x.status === "resigned").length,
+        saudi: e.filter((x: any) => x.is_saudi).length,
+        expat: e.filter((x: any) => !x.is_saudi).length,
+        departments: Object.keys(byDept).length,
+        byDept,
+        attendanceRecords: (atts || []).length,
+        payrollRecords: (pays || []).length,
+        warnings: (warns || []).length,
+        incentives: (incs || []).length,
+      }});
+    }
+
+    // ====== استيراد البصمات (للموظف المُفوّض بصلاحية «import-attendance») ======
+    // يستقبل السجلات المُحلّلة في المتصفح (CSV) ويطابقها بالموظفين ويُنشئ سجلات الحضور
+    // مع توثيق «أُعدّت بواسطة» باسم وهوية المُنفّذ.
+    if (action === "delegated_import_attendance") {
+      if (!parsePerms(emp?.permissions).includes("import-attendance")) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const records = Array.isArray(body.records) ? body.records : [];
+      if (!records.length) return Response.json({ ok: false, error: "empty" }, { status: 400 });
+      const emps = await base44.asServiceRole.entities.Employee.list("-created_date", 2000);
+      const byNum: Record<string, any> = {};
+      (emps || []).forEach((x: any) => { if (x.employee_number) byNum[String(x.employee_number).trim()] = x; });
+      const pname = emp?.full_name || "موظف الموارد البشرية";
+      const pid = String(emp?.national_id || "");
+      const toCreate: any[] = [];
+      for (const r of records) {
+        const num = String(r.employee_number || "").trim();
+        const empMatch = byNum[num];
+        if (!empMatch || !r.date) continue;
+        toCreate.push({
+          employee_id: empMatch.id, employee_user_id: empMatch.user_id || "", employee_name: empMatch.full_name,
+          national_id: empMatch.national_id || "", branch_id: empMatch.branch_id || "", branch_name: empMatch.branch_name || "",
+          date: String(r.date), check_in: r.check_in || "", check_out: r.check_out || "", status: "present", source: "import",
+          prepared_by_name: pname, prepared_by_id: pid,
+        });
+      }
+      if (toCreate.length) await base44.asServiceRole.entities.Attendance.bulkCreate(toCreate);
+      return Response.json({ ok: true, imported: toCreate.length, total: records.length, skipped: records.length - toCreate.length });
     }
 
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
