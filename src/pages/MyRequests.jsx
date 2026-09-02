@@ -35,6 +35,8 @@ import { computeSettlement } from "@/lib/eos";
 import { parsePermissions } from "@/lib/employeePermissions";
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
+import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
+import JobDescriptionDoc from "@/components/docs/JobDescriptionDoc";
 import DelegatedWorkspace from "@/components/portal/DelegatedWorkspace";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -514,7 +516,16 @@ export default function MyRequests() {
               <EmployeeWarnings employee={employee} warnings={warnings} />
             </div>
             )}
-            <DelegatedWorkspace perms={perms} session={session} employee={employee} isAr={isAr} />
+            {employee?.job_description && String(employee.job_description).trim() && (
+              <div className="mt-6">
+                <SideCard title={isAr ? "الوصف الوظيفي" : "Job description"}>
+                  <div className="flex justify-end mb-3">
+                    <JobDescPrintActions employee={employee} isAr={isAr} />
+                  </div>
+                  <JobDescriptionDoc employee={employee} isAr={isAr} />
+                </SideCard>
+              </div>
+            )}
             {can("end-of-service") && (
               <div className="mt-6">
                 <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>
@@ -549,6 +560,7 @@ export default function MyRequests() {
               {can("decisions") && <EmployeeDecisions items={decisions} session={session} onReload={() => load(session)} />}
               {can("incentives") && <EmployeeIncentives items={incentives} session={session} onReload={() => load(session)} />}
             </div>
+            <DelegatedWorkspace perms={perms} session={session} employee={employee} isAr={isAr} />
           </>
         )}
       </div>
