@@ -29,7 +29,6 @@ export const PERMISSION_MODULES = [
   { key: "licenses", ar: "تراخيص المنشأة", en: "Licenses" },
   { key: "platform-subscriptions", ar: "اشتراكات المنصات", en: "Platform subscriptions" },
   { key: "customer-surveys", ar: "استبيانات تجربة العميل", en: "Customer surveys" },
-  { key: "discounts", ar: "كودات الخصم", en: "Discount codes" },
   { key: "settings", ar: "الإعدادات", en: "Settings" },
 ];
 
