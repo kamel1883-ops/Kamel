@@ -37,6 +37,9 @@ import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import PortalPayrollManager from "@/components/portal/PortalPayrollManager";
 import PortalRecruitmentManager from "@/components/portal/PortalRecruitmentManager";
+import PortalTrainingManager from "@/components/portal/PortalTrainingManager";
+import PortalIncentivesManager from "@/components/portal/PortalIncentivesManager";
+import PortalWarningsManager from "@/components/portal/PortalWarningsManager";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import PullToRefresh from "@/components/PullToRefresh";
 
@@ -523,6 +526,21 @@ export default function MyRequests() {
             {can("recruitment") && (
               <div className="mt-6">
                 <PortalRecruitmentManager session={session} isAr={isAr} />
+              </div>
+            )}
+            {can("training") && (
+              <div className="mt-6">
+                <PortalTrainingManager session={session} isAr={isAr} />
+              </div>
+            )}
+            {can("incentives") && (
+              <div className="mt-6">
+                <PortalIncentivesManager session={session} isAr={isAr} />
+              </div>
+            )}
+            {can("warnings") && (
+              <div className="mt-6">
+                <PortalWarningsManager session={session} isAr={isAr} />
               </div>
             )}
             {can("end-of-service") && (
