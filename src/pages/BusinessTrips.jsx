@@ -161,7 +161,6 @@ export default function BusinessTrips() {
                 <TableHead>{t.thTransport}</TableHead>
                 <TableHead>{t.thCost}</TableHead>
                 <TableHead>{t.thStatus}</TableHead>
-                <TableHead>{isAr ? "أُعدّت بواسطة" : "Prepared by"}</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -180,7 +179,6 @@ export default function BusinessTrips() {
                     <TableCell className="text-sm">{transportLabel[tr.transport_mode] || "—"}</TableCell>
                     <TableCell className="font-medium">{(Number(tr.total_cost) || 0).toLocaleString()}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
-                    <TableCell className="text-[11px] text-violet-700">{tr.prepared_by_name ? `${tr.prepared_by_name}${tr.prepared_by_id ? ` — ${tr.prepared_by_id}` : ""}` : "—"}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <button onClick={() => { setEditing(tr); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>

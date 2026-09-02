@@ -167,7 +167,6 @@ export default function Leaves() {
                 <TableHead>{t.thDays}</TableHead>
                 <TableHead>{t.thReason}</TableHead>
                 <TableHead>{t.thStatus}</TableHead>
-                <TableHead>{isAr ? "أُعدّت بواسطة" : "Prepared by"}</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -189,7 +188,6 @@ export default function Leaves() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate">{r.reason || "—"}</TableCell>
                     <TableCell><span className={cn("text-xs px-2 py-1 rounded-full font-medium", st.cls)}>{st.label}</span></TableCell>
-                    <TableCell className="text-[11px] text-violet-700">{r.prepared_by_name ? `${r.prepared_by_name}${r.prepared_by_id ? ` — ${r.prepared_by_id}` : ""}` : "—"}</TableCell>
                     <TableCell>
                       {r.status === "completed" ? (
                         r.settlement_pdf_url ? (
