@@ -31,6 +31,7 @@ export default function PayrollPrintSheet({ payrolls = [], employees = [], workD
   const tdR = "border-b border-slate-200 px-2 py-1.5 text-[12px] text-slate-800 text-right whitespace-nowrap";
 
   const totalNet = payrolls.reduce((s, p) => s + (Number(p.net_salary) || 0), 0);
+  const preparer = payrolls.find((p) => p.prepared_by_name);
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} style={{ fontFamily: "var(--font-display), Tajawal, IBM Plex Sans Arabic, sans-serif" }}>
@@ -117,6 +118,15 @@ export default function PayrollPrintSheet({ payrolls = [], employees = [], workD
           </tr>
         </tfoot>
       </table>
+      {preparer && (
+        <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-start" }}>
+          <div style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: "8px 16px", background: "#f8fafc", fontSize: 12, color: "#334155" }}>
+            <span style={{ fontWeight: 700 }}>{isAr ? "أُعدّت بواسطة:" : "Prepared by:"}</span>{" "}
+            {preparer.prepared_by_name}
+            {preparer.prepared_by_id ? ` — ${preparer.prepared_by_id}` : ""}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

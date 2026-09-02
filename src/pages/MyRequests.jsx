@@ -35,6 +35,7 @@ import { computeSettlement } from "@/lib/eos";
 import { parsePermissions } from "@/lib/employeePermissions";
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
+import PortalPayrollManager from "@/components/portal/PortalPayrollManager";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import PullToRefresh from "@/components/PullToRefresh";
 
@@ -84,7 +85,6 @@ export default function MyRequests() {
   const [settlements, setSettlements] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [incentives, setIncentives] = useState([]);
-  const [payroll, setPayroll] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -124,7 +124,6 @@ export default function MyRequests() {
       setSettlements(data.settlements || []);
       setDecisions(data.decisions || []);
       setIncentives(data.incentives || []);
-      setPayroll(data.payroll || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -150,7 +149,7 @@ export default function MyRequests() {
     setSession(null);
     setEmployee(null); setOrg(null); setBranch(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
-    setDecisions([]); setIncentives([]); setPayroll([]);
+    setDecisions([]); setIncentives([]);
     setView("self");
   };
 
@@ -517,17 +516,7 @@ export default function MyRequests() {
             )}
             {can("payroll") && (
               <div className="mt-6">
-                <Section title={isAr ? "قسائم الرواتب" : "Payslips"}>
-                  {payroll.length === 0 ? <Empty text={isAr ? "لا توجد قسائم" : "No payslips"} /> : payroll.map((p) => (
-                    <Row key={p.id}>
-                      <div>
-                        <div className="font-medium text-sm">{isAr ? "شهر" : "Month"} {p.month}/{p.year}</div>
-                        <div className="text-xs text-muted-foreground mt-1">{isAr ? "الصافي" : "Net"}: {formatCurrency(p.net_salary)} · {isAr ? "الحالة" : "Status"}: {p.status === "paid" ? (isAr ? "مصروف" : "Paid") : (isAr ? "معتمد" : "Approved")}</div>
-                        {p.paid_date && <div className="text-[11px] text-muted-foreground mt-0.5">{isAr ? "تاريخ الصرف" : "Paid date"}: {p.paid_date}</div>}
-                      </div>
-                    </Row>
-                  ))}
-                </Section>
+                <PortalPayrollManager session={session} isAr={isAr} />
               </div>
             )}
             {can("end-of-service") && (

@@ -1,5 +1,9 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyToken } from "../../shared/portalToken.ts";
+import {
+  PAID_STATUSES, computeWorkDaysSet, computeWorkDaysInMonth,
+  computeAbsentDeduction, computeNetFromAttendance,
+} from "../../shared/payrollCompute.ts";
 
 // وصلة بيانات بوابة المالك/الموظف: تتحقق من رمز الجلسة الموقّع ثم ترد/تنشئ
 // بيانات الموظف (طلباته، حضوره، إنذاراته) وإنشاء طلبات إجازة/سلفة/انتداب وبصمة الحضور،
@@ -43,7 +47,7 @@ export default async function (req) {
     const isOwner = isOwnerSession;
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications, payroll] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -57,8 +61,6 @@ export default async function (req) {
         base44.asServiceRole.entities.Incentive.list("-granted_date", 500),
         // إشعارات الموظف الموجّهة له (تبقى محفوظة دائماً — تُعرض بلغة البوابة المختارة)
         base44.asServiceRole.entities.Notification.filter({ employee_id: employeeId }, "-created_date", 500),
-        // قسائم رواتب الموظف (المعتمدة/المصروفة) — لإطلاعه عليها عند منحه صلاحية الرواتب
-        base44.asServiceRole.entities.Payroll.filter({ employee_id: employeeId }, "-created_date", 60),
       ]);
       // القرارات والحوار — تظهر للموظف وفق نطاق الإرسال (الكل / قسمه / سجل فرد خاص به)
       const matchesTarget = (rec: any) => {
@@ -100,7 +102,6 @@ export default async function (req) {
         settlements: paidSettlements,
         decisions, incentives,
         notifications: notifications || [],
-        payroll: (payroll || []).filter((p: any) => p?.status === "approved" || p?.status === "paid"),
       });
     }
 
@@ -888,6 +889,165 @@ export default async function (req) {
       const id = String(body.id || "");
       if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
       return await ack("Incentive", id);
+    }
+
+    // ====== إدارة الرواتب — بوابة الموظف (مُفوّض بصلاحية الرواتب) ======
+    // كل الإجراءات تتحقق أن مصفوفة صلاحيات الموظف تشمل "payroll" قبل أي عملية.
+    const parsePerms = (p: any): string[] => {
+      try { const a = JSON.parse(String(p || "[]")); return Array.isArray(a) ? a.map(String) : []; } catch { return []; }
+    };
+    const canPayroll = parsePerms(emp?.permissions).includes("payroll");
+    // هوية المُعِدّ: الموظف المُفوّض الذي ينفّذ الاعتماد من البوابة — اسمه ورقم هويته/إقامته.
+    const preparerIdentity = () => ({
+      prepared_by_name: emp?.full_name || "الموظف المُفوّض",
+      prepared_by_id: String(emp?.national_id || ""),
+    });
+
+    if (action === "payroll_list") {
+      if (!canPayroll) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const month = Number(body.month), year = Number(body.year);
+      const [orgs, emps, pays] = await Promise.all([
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+        base44.asServiceRole.entities.Employee.filter({ status: "active" }, "-created_date", 500),
+        !month || !year
+          ? Promise.resolve([] as any[])
+          : base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000),
+      ]);
+      return Response.json({ ok: true, org: orgs?.[0] || null, employees: emps || [], payrolls: pays || [] });
+    }
+
+    if (action === "payroll_generate") {
+      if (!canPayroll) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const month = Number(body.month), year = Number(body.year);
+      if (!month || !year) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const mm = String(month).padStart(2, "0");
+      const endDay = String(new Date(year, month, 0).getDate()).padStart(2, "0");
+      const [orgs, activeEmps, existingPays, attRecords] = await Promise.all([
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+        base44.asServiceRole.entities.Employee.filter({ status: "active" }, "-created_date", 500),
+        base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000),
+        base44.asServiceRole.entities.Attendance.filter({ date: { $gte: `${year}-${mm}-01`, $lte: `${year}-${mm}-${endDay}` } }, "-created_date", 2000),
+      ]);
+      const orgFresh: any = orgs?.[0] || {};
+      const workDaysSet = computeWorkDaysSet(orgFresh.work_days);
+      const workDaysInMonth = computeWorkDaysInMonth(year, month, workDaysSet);
+      const workHoursPerDay = Number(orgFresh.work_hours_per_day) || 0;
+      const paidDaysByEmp: Record<string, number> = {};
+      const shortfallByEmp: Record<string, number> = {};
+      for (const a of attRecords || []) {
+        if (!a.employee_id) continue;
+        if (!PAID_STATUSES.has(a.status)) continue;
+        const dow = a.date ? new Date(a.date + "T00:00:00").getDay() : -1;
+        if (dow >= 0 && !workDaysSet.has(dow)) continue;
+        paidDaysByEmp[a.employee_id] = (paidDaysByEmp[a.employee_id] || 0) + 1;
+        if (workHoursPerDay > 0 && (a.status === "present" || a.status === "late")) {
+          const wh = Number(a.work_hours) || 0;
+          const gap = Number((workHoursPerDay - wh).toFixed(2));
+          if (gap > 0) shortfallByEmp[a.employee_id] = Number(((shortfallByEmp[a.employee_id] || 0) + gap).toFixed(2));
+        }
+      }
+      const existingIds = new Set((existingPays || []).map((p: any) => p.employee_id));
+      const existingDrafts: Record<string, any> = {};
+      for (const p of existingPays || []) if (p.employee_id && p.status === "draft") existingDrafts[p.employee_id] = p;
+      const created: any[] = [];
+      const updates: any[] = [];
+      for (const e of activeEmps || []) {
+        const base = Number(e.base_salary) || 0;
+        const housing = Number(e.housing_allowance) || 0;
+        const transport = Number(e.transport_allowance) || 0;
+        const other = Number(e.other_allowances) || 0;
+        const gross = base + housing + transport + other;
+        const paidDays = Math.min(paidDaysByEmp[e.id] || 0, workDaysInMonth);
+        const absentDays = Math.max(0, workDaysInMonth - paidDays);
+        const absentHours = shortfallByEmp[e.id] || 0;
+        const absentDeduction = computeAbsentDeduction(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay);
+        if (existingIds.has(e.id)) {
+          const p = existingDrafts[e.id];
+          if (p) updates.push({
+            id: p.id,
+            base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+            gross_salary: gross, national_id: e.national_id || p.national_id || "",
+            employee_name: e.full_name || p.employee_name || "",
+            salary_payment_method: e.salary_payment_method || p.salary_payment_method || "mudad",
+            absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
+            net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
+          });
+          continue;
+        }
+        created.push({
+          employee_id: e.id, employee_name: e.full_name || "", national_id: e.national_id || "",
+          month, year, salary_payment_method: e.salary_payment_method || "mudad",
+          base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+          gross_salary: gross, bonus: 0, deductions: 0, loan_installment: 0,
+          overtime_hours: 0, overtime_amount: 0,
+          absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
+          net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, 0, 0, 0, 0), status: "draft",
+        });
+      }
+      if (created.length) await base44.asServiceRole.entities.Payroll.bulkCreate(created);
+      if (updates.length) await base44.asServiceRole.entities.Payroll.bulkUpdate(updates);
+      return Response.json({ ok: true, created: created.length, updated: updates.length });
+    }
+
+    if (action === "payroll_update") {
+      if (!canPayroll) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const id = String(body.id || "");
+      if (!id) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const fields = ["bonus", "overtime_amount", "overtime_hours", "deductions", "loan_installment", "absent_days", "absent_hours", "include_in_payroll", "notes"];
+      const payload: any = {};
+      for (const f of fields) if (body[f] !== undefined) payload[f] = body[f];
+      if (!Object.keys(payload).length) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const p: any = await base44.asServiceRole.entities.Payroll.get(id);
+      const next: any = { ...p, ...payload };
+      const gross = Number(next.gross_salary) || ((Number(next.base_salary)||0)+(Number(next.housing_allowance)||0)+(Number(next.transport_allowance)||0)+(Number(next.other_allowances)||0));
+      const orgs = await base44.asServiceRole.entities.Organization.list("-created_date", 1);
+      const o: any = orgs?.[0] || {};
+      const wdh = computeWorkDaysInMonth(Number(next.year), Number(next.month), computeWorkDaysSet(o.work_days));
+      const whp = Number(o.work_hours_per_day) || 0;
+      const absent_deduction = computeAbsentDeduction(gross, next.absent_days, next.absent_hours, wdh, whp);
+      const net_salary = computeNetFromAttendance(gross, next.absent_days, next.absent_hours, wdh, whp, next.bonus, next.overtime_amount, next.deductions, next.loan_installment);
+      const { prepared_by_name: _n, prepared_by_id: _i, id: _id, ...rest } = next;
+      void _n; void _i; void _id;
+      await base44.asServiceRole.entities.Payroll.update(id, { ...payload, gross_salary: gross, absent_deduction, net_salary });
+      return Response.json({ ok: true, row: { ...rest, ...payload, gross_salary: gross, absent_deduction, net_salary, prepared_by_name: p.prepared_by_name, prepared_by_id: p.prepared_by_id } });
+    }
+
+    if (action === "payroll_approve") {
+      if (!canPayroll) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const month = Number(body.month), year = Number(body.year);
+      if (!month || !year) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const pays: any[] = await base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000);
+      const prep = preparerIdentity();
+      const updates = (pays || [])
+        .filter((p) => p.status === "draft" && p.include_in_payroll !== false)
+        .map((p) => ({ id: p.id, status: "approved", prepared_by_name: prep.prepared_by_name, prepared_by_id: prep.prepared_by_id }));
+      if (updates.length) await base44.asServiceRole.entities.Payroll.bulkUpdate(updates);
+      return Response.json({ ok: true, approved: updates.length });
+    }
+
+    if (action === "payroll_pay") {
+      if (!canPayroll) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const month = Number(body.month), year = Number(body.year);
+      if (!month || !year) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const pays: any[] = await base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000);
+      const today = todayISO();
+      const updates = (pays || [])
+        .filter((p) => p.status === "approved" && p.include_in_payroll !== false)
+        .map((p) => ({ id: p.id, status: "paid", paid_date: today }));
+      if (updates.length) await base44.asServiceRole.entities.Payroll.bulkUpdate(updates);
+      return Response.json({ ok: true, paid: updates.length });
+    }
+
+    if (action === "payroll_reopen") {
+      if (!canPayroll) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const month = Number(body.month), year = Number(body.year);
+      if (!month || !year) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const pays: any[] = await base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000);
+      const updates = (pays || [])
+        .filter((p) => p.status === "paid")
+        .map((p) => ({ id: p.id, status: "approved", paid_date: null }));
+      if (updates.length) await base44.asServiceRole.entities.Payroll.bulkUpdate(updates);
+      return Response.json({ ok: true, reopened: updates.length });
     }
 
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
