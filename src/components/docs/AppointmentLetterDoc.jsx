@@ -5,7 +5,7 @@ const fmt = (d) => {
   try { return new Date(d).toLocaleDateString("ar-SA-u-ca-gregory", { year: "numeric", month: "long", day: "numeric" }); } catch { return String(d || ""); }
 };
 
-export default function AppointmentLetterDoc({ applicant, job, org }) {
+export default function AppointmentLetterDoc({ applicant, job, org, preparedBy }) {
   const today = fmt(new Date());
   const hireDate = applicant?.hired_date || today;
   const probEnd = new Date(new Date(hireDate).getTime() + 90 * 24 * 3600 * 1000);
@@ -37,7 +37,14 @@ export default function AppointmentLetterDoc({ applicant, job, org }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: "56px", fontSize: "13px" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ borderTop: "1px solid #94a3b8", paddingTop: "8px", width: "210px", color: "#334155" }}>إعداد وتدقيق الموارد البشرية</div>
+          {preparedBy ? (
+            <div style={{ borderTop: "1px solid #94a3b8", paddingTop: "8px", width: "210px", color: "#334155" }}>
+              <div style={{ fontWeight: 700 }}>{preparedBy.name || "إعداد الموارد البشرية"}</div>
+              <div style={{ fontSize: "11px", color: "#64748b", marginTop: 2 }}>أُعدّت بواسطة {preparedBy.name || "—"}{preparedBy.id ? ` — ${preparedBy.id}` : ""}</div>
+            </div>
+          ) : (
+            <div style={{ borderTop: "1px solid #94a3b8", paddingTop: "8px", width: "210px", color: "#334155" }}>إعداد وتدقيق الموارد البشرية</div>
+          )}
         </div>
         <div style={{ textAlign: "center" }}>
           <div style={{ borderTop: "1px solid #94a3b8", paddingTop: "8px", width: "210px", color: "#334155" }}>اعتماد صاحب العمل / المدير</div>

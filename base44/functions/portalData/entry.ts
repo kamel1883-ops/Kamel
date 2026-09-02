@@ -1050,6 +1050,55 @@ export default async function (req) {
       return Response.json({ ok: true, reopened: updates.length });
     }
 
+    // ====== التوظيف — بوابة الموظف (مُفوّض بصلاحية التوظيف) ======
+    const canRecruit = parsePerms(emp?.permissions).includes("recruitment");
+    const hirePreparer = () => ({
+      hired_by_name: emp?.full_name || "موظف الموارد البشرية",
+      hired_by_employee_id: String(emp?.id || ""),
+    });
+
+    if (action === "recruitment_hires_mine") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [hires, orgs] = await Promise.all([
+        base44.asServiceRole.entities.Employee.filter({ hired_by_employee_id: String(emp?.id || "") }, "-created_date", 200),
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+      ]);
+      return Response.json({ ok: true, hires: hires || [], org: orgs?.[0] || null, preparer: hirePreparer() });
+    }
+
+    if (action === "recruitment_create") {
+      if (!canRecruit) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const b = body || {};
+      const required = ["full_name", "department", "position", "hire_date", "base_salary"];
+      for (const f of required) if (!b[f] && b[f] !== 0) return Response.json({ ok: false, error: "missing: " + f }, { status: 400 });
+      const [orgs, allEmps] = await Promise.all([
+        base44.asServiceRole.entities.Organization.list("-created_date", 1),
+        base44.asServiceRole.entities.Employee.list("-created_date", 1),
+      ]);
+      const orgFresh: any = orgs?.[0] || {};
+      const empNumber = String(b.employee_number || "").trim() || `EMP-${String((allEmps?.length || 0) + 1).padStart(4, "0")}`;
+      const base = Number(b.base_salary) || 0;
+      const housing = Number(b.housing_allowance) || 0;
+      const transport = Number(b.transport_allowance) || 0;
+      const other = Number(b.other_allowances) || 0;
+      const prep = hirePreparer();
+      const created: any = await base44.asServiceRole.entities.Employee.create({
+        full_name: b.full_name, employee_number: empNumber, national_id: b.national_id || "",
+        email: b.email || "", nationality: b.nationality || "", is_saudi: !!b.is_saudi, gender: b.gender || "",
+        phone: b.phone || "", address: b.address || "",
+        department: b.department, branch_id: b.branch_id || "", branch_name: b.branch_name || "",
+        position: b.position, role_level: b.role_level || "employee",
+        hire_date: b.hire_date, contract_type: b.contract_type || "full_time",
+        contract_start_date: b.hire_date,
+        base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
+        salary_payment_method: b.salary_payment_method || "mudad",
+        status: "active", leave_balance: 0, annual_leave_entitlement: orgFresh.annual_leave_days || 21,
+        ticket_entitlement: orgFresh.ticket_policy || "yearly",
+        hired_by_name: prep.hired_by_name, hired_by_employee_id: prep.hired_by_employee_id,
+      });
+      return Response.json({ ok: true, employee: created, preparer: prep });
+    }
+
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
   } catch (error) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });

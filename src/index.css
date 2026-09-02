@@ -205,6 +205,10 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-payroll { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-payroll .no-print { display: none !important; }
 
+  .print-appointment, .print-appointment * { visibility: visible !important; }
+  .print-appointment { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 0; background: #fff; color: #111; }
+  .print-appointment .no-print { display: none !important; }
+
   /* تقارير المالك: تُحتوى كامل الأعمدة والصفوف والإجماليات داخل صفحة A4 دون قطع */
   .print-report, .print-report * { visibility: visible !important; }
   .print-report {

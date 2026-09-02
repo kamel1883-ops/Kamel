@@ -36,6 +36,7 @@ import { parsePermissions } from "@/lib/employeePermissions";
 import { portalSession } from "@/lib/portalSession";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import PortalPayrollManager from "@/components/portal/PortalPayrollManager";
+import PortalRecruitmentManager from "@/components/portal/PortalRecruitmentManager";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import PullToRefresh from "@/components/PullToRefresh";
 
@@ -517,6 +518,11 @@ export default function MyRequests() {
             {can("payroll") && (
               <div className="mt-6">
                 <PortalPayrollManager session={session} isAr={isAr} />
+              </div>
+            )}
+            {can("recruitment") && (
+              <div className="mt-6">
+                <PortalRecruitmentManager session={session} isAr={isAr} />
               </div>
             )}
             {can("end-of-service") && (
