@@ -6,18 +6,7 @@ import {
   AlertTriangle, ScrollText, Gift, BarChart3, FileBadge, Globe, ChevronLeft,
 } from "lucide-react";
 import { delegatedFor } from "./delegatedRegistry";
-import PortalDelegatedManager from "./PortalDelegatedManager";
-import PortalPayrollManager from "./PortalPayrollManager";
-import PortalRecruitmentManager from "./PortalRecruitmentManager";
-import PortalJobsManager from "./recruitment/PortalJobsManager";
-import PortalTrainingManager from "./PortalTrainingManager";
-import PortalIncentivesManager from "./PortalIncentivesManager";
-import PortalWarningsManager from "./PortalWarningsManager";
-import PortalEmployeesManager from "./PortalEmployeesManager";
-import PortalAnalyticsManager from "./PortalAnalyticsManager";
-import PortalImportAttendance from "./PortalImportAttendance";
-import ApprovalsPortal from "@/pages/ApprovalsPortal";
-import DelegatedAdminSection, { hasAdminPage } from "./DelegatedAdminSection";
+import DelegatedAdminSection from "./DelegatedAdminSection";
 
 const ICONS = {
   Users, UserPlus, Fingerprint, Upload, CheckCircle2, CalendarDays, Plane, Banknote,
@@ -25,41 +14,8 @@ const ICONS = {
   AlertTriangle, ScrollText, Gift, BarChart3, FileBadge, Globe,
 };
 
-// يعرض القسم الإداري المُفوّض كاملاً بكل مهامه — تُنقل صفحة القسم من لوحة الشركات كما هي.
-function SectionBody({ sectionKey, session, employee, isAr }) {
-  if (hasAdminPage(sectionKey))
-    return <DelegatedAdminSection sectionKey={sectionKey} session={session} employee={employee} />;
-  const p = { session, isAr };
-  switch (sectionKey) {
-    case "payroll": return <PortalPayrollManager {...p} />;
-    case "recruitment":
-      // القسم كامل: الوظائف والإعلان والمتقدمون والفرز والمقابلات والتعيين وتقييم التجربة،
-      // ثم إضافة موظف مباشرة (تعيين بدون إعلان وظيفة).
-      return (
-        <div className="space-y-6">
-          <PortalJobsManager {...p} />
-          <PortalRecruitmentManager {...p} />
-        </div>
-      );
-    case "training": return <PortalTrainingManager {...p} />;
-    case "incentives": return <PortalIncentivesManager {...p} />;
-    case "warnings": return <PortalWarningsManager {...p} />;
-    case "employees": return <PortalEmployeesManager {...p} />;
-    case "analytics": return <PortalAnalyticsManager {...p} />;
-    case "import-attendance": return <PortalImportAttendance {...p} />;
-    case "approvals": return <ApprovalsPortal portalSession={session} />;
-    case "fleet":
-      // القسم كامل: تسجيل المركبات أولاً ثم إصدار توكيلاتها
-      return (
-        <div className="space-y-6">
-          <PortalDelegatedManager section="vehicles" {...p} />
-          <PortalDelegatedManager section="fleet" {...p} />
-        </div>
-      );
-    default: return <PortalDelegatedManager section={sectionKey} {...p} />;
-  }
-}
-
+// أي قسم مُفوّض يُعرض للموظف بصفحته الأصلية من لوحة الشركات وبكامل صلاحياته،
+// وكل عملية ينفّذها تُوثّق تلقائياً بـ «أُعدّت بواسطة» (اسمه ورقم هويته) على الخادم.
 export default function DelegatedWorkspace({ perms, session, employee, isAr = true }) {
   const sections = delegatedFor(perms);
   const [active, setActive] = useState(null);
@@ -109,7 +65,12 @@ export default function DelegatedWorkspace({ perms, session, employee, isAr = tr
             <ChevronLeft size={16} className={cn(isAr && "rotate-180")} />
             {isAr ? "رجوع للأقسام" : "Back to departments"}
           </button>
-          <SectionBody sectionKey={current.key} session={session} employee={employee} isAr={isAr} />
+          <div className="mb-3 text-xs text-muted-foreground">
+            {isAr
+              ? "كل إجراء تنفّذه في هذا القسم يُسجَّل ويُطبع بعبارة «أُعدّت بواسطة» باسمك ورقم هويتك."
+              : "Every action here is recorded and stamped “Prepared by” with your name and ID."}
+          </div>
+          <DelegatedAdminSection sectionKey={current.key} session={session} employee={employee} />
         </div>
       )}
     </div>

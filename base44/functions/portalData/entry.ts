@@ -1399,18 +1399,18 @@ export default async function (req) {
     // فيُتحقق أولاً أن مصفوفة صلاحياته تشمل القسم المالك للكيان، ثم تُنفّذ عبر خدمة-الدور.
     // كيانات مساندة (المنشأة، الموظفون، الفروع...) تُقرأ لأي مُفوّض لأنها لازمة لكل شاشة.
     const ENTITY_PERMS: Record<string, string[]> = {
-      Employee: ["employees", "recruitment"],
+      Employee: ["employees", "recruitment", "analytics", "end-of-service", "payroll", "gosi", "performance", "training", "warnings", "decisions", "incentives", "leaves", "business-trips", "attendance", "org-structure", "workforce-planning", "succession", "exit-interviews", "fleet", "surveys"],
       Job: ["recruitment"], JobApplication: ["recruitment"], TrialEvaluation: ["recruitment"],
-      Attendance: ["attendance", "import-attendance"],
+      Attendance: ["attendance", "import-attendance", "analytics", "payroll"],
       LeaveRequest: ["leaves", "approvals"], LoanRequest: ["approvals"],
       BusinessTrip: ["business-trips", "approvals"],
-      Payroll: ["payroll"], GosiRecord: ["gosi"],
+      Payroll: ["payroll", "analytics"], GosiRecord: ["gosi"],
       Vehicle: ["fleet"], VehicleDelegation: ["fleet"],
       Settlement: ["end-of-service"], Performance: ["performance"],
       TrainingPlan: ["training"], SuccessionPlan: ["succession"],
       OrgUnit: ["org-structure"], WorkforcePlan: ["workforce-planning"],
       ExitInterview: ["exit-interviews"], Survey: ["surveys"], SurveyResponse: ["surveys"],
-      Warning: ["warnings"], AdminDecision: ["decisions"], Incentive: ["incentives"],
+      Warning: ["warnings", "analytics"], AdminDecision: ["decisions"], Incentive: ["incentives", "analytics"],
       License: ["licenses"], PlatformSubscription: ["platform-subscriptions"],
       CustomerSurvey: ["customer-surveys"], CustomerSurveyResponse: ["customer-surveys"],
       Branch: ["employees", "attendance"], Organization: ["employees"],
