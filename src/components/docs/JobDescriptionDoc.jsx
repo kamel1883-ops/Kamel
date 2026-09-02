@@ -1,15 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
 
 // مستند الوصف الوظيفي — يُستخدم للمشاهدة والطباعة PDF في ملف الموظف ونموذج الموظف
+// الترويسة: شعار المنشأة أعلى اليمين، وشعار جدارة أعلى اليسار.
 export default function JobDescriptionDoc({ employee, text, isAr = true }) {
   const body = text ?? employee?.job_description;
+  const [org, setOrg] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+    base44.entities.Organization.list("-created_date", 1)
+      .then((r) => { if (alive) setOrg(r?.[0] || null); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   return (
     <div style={{ fontFamily: "'Tajawal','IBM Plex Sans Arabic',sans-serif", color: "#0f172a", maxWidth: 800, margin: "0 auto" }}>
-      <div className="flex items-center gap-3 border-b-2 pb-3 mb-5" style={{ borderColor: "#0B2545" }}>
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-xl" style={{ background: "#0B2545", color: "#d4af37" }}>ج</div>
-        <div>
-          <div className="font-bold text-lg">جدارة</div>
-          <div className="text-xs text-slate-500">{isAr ? "منصة الموارد البشرية" : "HR Platform"}</div>
+      <div className="flex items-center justify-between gap-4 border-b-2 pb-3 mb-5" style={{ borderColor: "#0B2545" }}>
+        <div className="flex items-center gap-3">
+          {org?.logo_url
+            ? <img src={org.logo_url} alt="" style={{ height: 44, width: "auto", objectFit: "contain" }} />
+            : null}
+          <div>
+            <div className="font-bold text-base">{org?.name || ""}</div>
+            {org?.unified_number && <div className="text-xs text-slate-500">{isAr ? "الرقم الموحد: " : "Unified No: "}{org.unified_number}</div>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg" style={{ background: "#0B2545", color: "#d4af37" }}>ج</div>
+          <div>
+            <div className="font-bold text-sm">جدارة</div>
+            <div className="text-[10px] text-slate-500">{isAr ? "منصة الموارد البشرية" : "HR Platform"}</div>
+          </div>
         </div>
       </div>
       <h1 className="text-lg font-bold mb-2.5">{isAr ? "الوصف الوظيفي" : "Job Description"}</h1>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Eye, Printer } from "lucide-react";
 import JobDescriptionDoc from "@/components/docs/JobDescriptionDoc";
@@ -18,9 +19,12 @@ export default function JobDescPrintActions({ employee, text, isAr = true, size 
         <Button type="button" size={size} variant="outline" onClick={doPrint} className="h-7 px-2 text-xs gap-1.5"><Printer size={13} />{isAr ? "طباعة PDF" : "Print PDF"}</Button>
       </div>
 
-      <div className="print-jobdesc hidden print:block" aria-hidden>
-        <JobDescriptionDoc employee={employee} text={body} isAr={isAr} />
-      </div>
+      {createPortal(
+        <div className="print-jobdesc hidden print:block" aria-hidden>
+          <JobDescriptionDoc employee={employee} text={body} isAr={isAr} />
+        </div>,
+        document.body
+      )}
 
       {preview && (
         <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4 no-print" onClick={() => setPreview(false)}>

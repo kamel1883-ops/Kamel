@@ -198,7 +198,8 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-client .no-print { display: none !important; }
 
   .print-jobdesc, .print-jobdesc * { visibility: visible !important; }
-  .print-jobdesc { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
+  .print-jobdesc { position: static; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
+  .print-jobdesc, .print-jobdesc * { break-inside: auto; page-break-inside: auto; }
   .print-jobdesc .no-print { display: none !important; }
 
   .print-payroll, .print-payroll * { visibility: visible !important; }
