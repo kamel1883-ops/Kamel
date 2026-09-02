@@ -1122,6 +1122,7 @@ export default async function (req) {
       leaves: { entity: "LeaveRequest", perm: "leaves", nameField: "prepared_by_name", idField: "prepared_by_id" },
       "business-trips": { entity: "BusinessTrip", perm: "business-trips", nameField: "prepared_by_name", idField: "prepared_by_id" },
       employees: { entity: "Employee", perm: "employees", nameField: "hired_by_name", idField: "hired_by_employee_id" },
+      fleet: { entity: "VehicleDelegation", perm: "fleet", nameField: "created_by_name", idField: "created_by_id" },
     };
 
     if (action === "delegated_list") {
@@ -1230,6 +1231,13 @@ export default async function (req) {
       }
       if (toCreate.length) await base44.asServiceRole.entities.Attendance.bulkCreate(toCreate);
       return Response.json({ ok: true, imported: toCreate.length, total: records.length, skipped: records.length - toCreate.length });
+    }
+
+    // ====== قائمة المركبات (لمنتجب منتقي المركبة في قسم «fleet») ======
+    if (action === "delegated_vehicles") {
+      if (!parsePerms(emp?.permissions).includes("fleet")) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const vehicles = await base44.asServiceRole.entities.Vehicle.list("-created_date", 500);
+      return Response.json({ ok: true, vehicles: vehicles || [] });
     }
 
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });

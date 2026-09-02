@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Loader2, Plus, Trash2, CheckCircle2, ShieldCheck, Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // مكوّن عام للأقسام المُفوّضة في بوابة الموظف — إنشاء/تعديل حالة/حذف + عمود «أُعدّت بواسطة».
@@ -362,15 +362,36 @@ const SECTIONS = {
       { k: "status", ar: "الحالة", options: { pending_manager: "بانتظار المدير", manager_approved: "موافقة المدير", awaiting_finance: "بانتظار المالية", approved: "معتمدة", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة", rejected: "مرفوضة" } },
     ],
   },
+  fleet: {
+    icon: "Car", titleAr: "المركبات والتوكيلات", titleEn: "Fleet & delegations",
+    nameField: "created_by_name", idField: "created_by_id",
+    fields: [
+      { k: "vehicle_id", ar: "المركبة *", type: "vehicle", req: true, resolve: ["plate_number", "vehicle_label"], col: 1 },
+      { k: "employee_id", ar: "الموظف المُوكّل *", type: "employee", req: true, resolve: ["employee_name", "national_id", "position", "department"], col: 1 },
+      { k: "delegation_date", ar: "تاريخ التوكيل *", type: "date", req: true, col: 1 },
+      { k: "return_date", ar: "تاريخ إنهاء التوكيل", type: "date", col: 1 },
+      { k: "is_current", ar: "توكيل ساري", type: "boolean", default: true, col: 1 },
+      { k: "status", ar: "الحالة", type: "status", options: { active: "ساري", returned: "مُرجع" }, col: 1 },
+      { k: "notes", ar: "ملاحظات", type: "textarea", col: 2 },
+    ],
+    columns: [
+      { k: "delegation_number", ar: "رقم التوكيل" },
+      { k: "employee_name", ar: "الموظف" },
+      { k: "plate_number", ar: "اللوحة" },
+      { k: "delegation_date", ar: "التاريخ" },
+      { k: "status", ar: "الحالة", options: { active: "ساري", returned: "مُرجع" } },
+    ],
+  },
 };
 
-const ICONS = { ScrollText: ShieldCheck, Target: ShieldCheck, Network: ShieldCheck, MessageSquare: ShieldCheck, ClipboardList: ShieldCheck, FileBadge: ShieldCheck };
+const ICONS = { ScrollText: ShieldCheck, Target: ShieldCheck, Network: ShieldCheck, MessageSquare: ShieldCheck, ClipboardList: ShieldCheck, FileBadge: ShieldCheck, Car: Car };
 
 export default function PortalDelegatedManager({ section, session, isAr = true }) {
   const cfg = SECTIONS[section];
   const args = { token: session.token, employee_id: session.employee_id };
   const [records, setRecords] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const [preparer, setPreparer] = useState({ name: "", id: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -392,6 +413,11 @@ export default function PortalDelegatedManager({ section, session, isAr = true }
     finally { setLoading(false); }
   }, [cfg]);
   useEffect(() => { load(); }, [load]);
+  const hasVehicleField = (cfg?.fields || []).some((f) => f.type === "vehicle");
+  useEffect(() => {
+    if (!cfg || !hasVehicleField) return;
+    (async () => { try { const d = await invoke("delegated_vehicles", {}); if (d?.ok) setVehicles(d.vehicles || []); } catch {} })();
+  }, [cfg, hasVehicleField]);
 
   if (!cfg) return null;
   const Icon = ICONS[cfg.icon] || ShieldCheck;
@@ -412,6 +438,14 @@ export default function PortalDelegatedManager({ section, session, isAr = true }
           if (emp) f.resolve.forEach((rk) => {
             if (rk === "employee_name" || rk === "current_holder_name" || rk === "successor_name" || rk === "reviewer_name") payload[rk] = emp.full_name;
             else if (emp[rk] !== undefined) payload[rk] = emp[rk];
+          });
+        }
+        if (f.type === "vehicle" && f.resolve && form[f.k]) {
+          const v = vehicles.find((x) => x.id === form[f.k]);
+          if (v) f.resolve.forEach((rk) => {
+            if (rk === "vehicle_label") payload[rk] = [v.brand, v.model, v.year].filter(Boolean).join(" ");
+            else if (rk === "plate_number") payload[rk] = v.plate_number || "";
+            else if (v[rk] !== undefined) payload[rk] = v[rk];
           });
         }
       });
@@ -469,6 +503,9 @@ export default function PortalDelegatedManager({ section, session, isAr = true }
                   )}
                   {f.type === "employee" && (
                     <Select value={form[f.k] || ""} onValueChange={(v) => set(f.k, v)}><SelectTrigger className={cn(inp, "w-full")}><SelectValue placeholder="—" /></SelectTrigger><SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}</SelectContent></Select>
+                  )}
+                  {f.type === "vehicle" && (
+                    <Select value={form[f.k] || ""} onValueChange={(v) => set(f.k, v)}><SelectTrigger className={cn(inp, "w-full")}><SelectValue placeholder="—" /></SelectTrigger><SelectContent>{vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{[v.plate_number, v.brand, v.model, v.year].filter(Boolean).join(" — ")}</SelectItem>)}</SelectContent></Select>
                   )}
                 </div>
               );

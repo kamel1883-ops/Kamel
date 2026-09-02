@@ -566,6 +566,7 @@ export default function MyRequests() {
             {can("approvals") && <div className="mt-6"><ApprovalsPortal portalSession={session} /></div>}
             {can("analytics") && <div className="mt-6"><PortalAnalyticsManager session={session} isAr={isAr} /></div>}
             {can("import-attendance") && <div className="mt-6"><PortalImportAttendance session={session} isAr={isAr} /></div>}
+            {can("fleet") && <div className="mt-6"><PortalDelegatedManager section="fleet" session={session} isAr={isAr} /></div>}
             {can("end-of-service") && (
               <div className="mt-6">
                 <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>
