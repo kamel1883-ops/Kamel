@@ -154,6 +154,119 @@ const SECTIONS = {
       { k: "expiry_date", ar: "الانتهاء" },
     ],
   },
+  gosi: {
+    icon: "Shield", titleAr: "التأمينات الاجتماعية", titleEn: "GOSI",
+    nameField: "prepared_by_name", idField: "prepared_by_id",
+    fields: [
+      { k: "employee_id", ar: "الموظف *", type: "employee", req: true, resolve: ["employee_name", "employee_number", "national_id", "is_saudi", "department"], col: 1 },
+      { k: "month", ar: "الشهر", type: "number", default: new Date().getMonth() + 1, col: 1 },
+      { k: "year", ar: "السنة", type: "number", default: new Date().getFullYear(), col: 1 },
+      { k: "gross_wage", ar: "الأجر الخاضع", type: "number", col: 1 },
+      { k: "employee_rate", ar: "حصة الموظف %", type: "number", col: 1 },
+      { k: "employer_rate", ar: "حصة صاحب العمل %", type: "number", col: 1 },
+      { k: "gosi_employee", ar: "حصة الموظف (ريال)", type: "number", col: 1 },
+      { k: "gosi_employer", ar: "حصة صاحب العمل (ريال)", type: "number", col: 1 },
+      { k: "gosi_total", ar: "إجمالي الاشتراك", type: "number", col: 1 },
+      { k: "notes", ar: "ملاحظات", type: "textarea", col: 2 },
+    ],
+    columns: [
+      { k: "employee_name", ar: "الموظف" },
+      { k: "month", ar: "الشهر" },
+      { k: "year", ar: "السنة" },
+      { k: "gross_wage", ar: "الأجر" },
+      { k: "gosi_total", ar: "الإجمالي" },
+    ],
+  },
+  "org-structure": {
+    icon: "Network", titleAr: "الهيكل التنظيمي", titleEn: "Org structure",
+    nameField: "prepared_by_name", idField: "prepared_by_id",
+    fields: [
+      { k: "name", ar: "اسم الوحدة *", type: "text", req: true, col: 2 },
+      { k: "unit_type", ar: "النوع", type: "select", options: { general_management: "إدارة عامة", executive: "تنفيذي", department: "إدارة", division: "قسم", section: "شعبة", unit: "وحدة", supervisor: "إشرافي", role: "دور", other: "أخرى" }, col: 1 },
+      { k: "parent_name", ar: "الوحدة الأصل", type: "text", col: 1 },
+      { k: "manager_name", ar: "المسؤول", type: "text", col: 1 },
+      { k: "planned_headcount", ar: "العدد المخطط", type: "number", col: 1 },
+      { k: "current_headcount", ar: "العدد الفعلي", type: "number", col: 1 },
+      { k: "level", ar: "المستوى", type: "number", col: 1 },
+      { k: "order", ar: "الترتيب", type: "number", col: 1 },
+      { k: "notes", ar: "ملاحظات", type: "textarea", col: 2 },
+    ],
+    columns: [
+      { k: "name", ar: "الوحدة" },
+      { k: "unit_type", ar: "النوع", options: { general_management: "إدارة عامة", executive: "تنفيذي", department: "إدارة", division: "قسم", section: "شعبة", unit: "وحدة", supervisor: "إشرافي", role: "دور", other: "أخرى" } },
+      { k: "manager_name", ar: "المسؤول" },
+      { k: "planned_headcount", ar: "المخطط" },
+      { k: "current_headcount", ar: "الفعلي" },
+    ],
+  },
+  "workforce-planning": {
+    icon: "CalendarRange", titleAr: "تخطيط القوى العاملة", titleEn: "Workforce planning",
+    nameField: "prepared_by_name", idField: "prepared_by_id",
+    fields: [
+      { k: "title", ar: "عنوان الخطة *", type: "text", req: true, col: 2 },
+      { k: "plan_year", ar: "سنة الخطة", type: "number", default: new Date().getFullYear(), col: 1 },
+      { k: "planning_horizon", ar: "أفق التخطيط", type: "select", options: { annual: "سنوي", multi_year: "متعدد السنوات", rolling: "متدحرج" }, col: 1 },
+      { k: "department", ar: "الإدارة", type: "text", col: 1 },
+      { k: "objective", ar: "الهدف", type: "text", col: 2 },
+      { k: "current_headcount", ar: "العدد الحالي", type: "number", col: 1 },
+      { k: "target_headcount", ar: "العدد المستهدف", type: "number", col: 1 },
+      { k: "recruitment_count", ar: "التعيينات المطلوبة", type: "number", col: 1 },
+      { k: "training_count", ar: "برامج التدريب", type: "number", col: 1 },
+      { k: "budget", ar: "الميزانية", type: "number", col: 1 },
+      { k: "start_date", ar: "البداية", type: "date", col: 1 },
+      { k: "end_date", ar: "النهاية", type: "date", col: 1 },
+      { k: "owner_name", ar: "مالك الخطة", type: "text", col: 1 },
+      { k: "initiatives", ar: "المبادرات", type: "textarea", col: 2 },
+      { k: "kpis", ar: "مؤشرات الأداء", type: "textarea", col: 2 },
+      { k: "status", ar: "الحالة", type: "status", options: { draft: "مسودة", in_review: "قيد المراجعة", approved: "معتمدة", in_progress: "قيد التنفيذ", completed: "مكتملة" }, col: 1 },
+    ],
+    columns: [
+      { k: "title", ar: "الخطة" },
+      { k: "plan_year", ar: "السنة" },
+      { k: "department", ar: "الإدارة" },
+      { k: "target_headcount", ar: "المستهدف" },
+      { k: "status", ar: "الحالة", options: { draft: "مسودة", in_review: "قيد المراجعة", approved: "معتمدة", in_progress: "قيد التنفيذ", completed: "مكتملة" } },
+    ],
+  },
+  "platform-subscriptions": {
+    icon: "Globe", titleAr: "اشتراكات المنصات الحكومية", titleEn: "Platform subscriptions",
+    nameField: "prepared_by_name", idField: "prepared_by_id",
+    fields: [
+      { k: "platform_key", ar: "المنصة *", type: "select", req: true, options: { absher_business: "أبشر للأعمال", muqeem: "مقيم", ajeer: "أجير", qiwa: "قوى", mudad: "مدد", gosi: "التأمينات", tamm: "تم", wathq: "واثق", balady: "بلدي", maroof: "معروف", etimad: "إعتماد", zatca: "هيئة الزكاة", saudi_business_center: "المركز السعودي للأعمال", ejar: "إيجار", labor_office: "مكتب العمل", other: "أخرى" }, col: 1 },
+      { k: "custom_label", ar: "اسم مخصص", type: "text", col: 2 },
+      { k: "account_id", ar: "رقم الحساب", type: "text", col: 1 },
+      { k: "subscriber_name", ar: "الاسم المسجّل", type: "text", col: 1 },
+      { k: "start_date", ar: "بدء الاشتراك", type: "date", col: 1 },
+      { k: "expiry_date", ar: "انتهاء الاشتراك", type: "date", col: 1 },
+      { k: "duration_months", ar: "المدة (أشهر)", type: "number", default: 12, col: 1 },
+      { k: "annual_cost", ar: "التكلفة السنوية", type: "number", col: 1 },
+      { k: "auto_renewal", ar: "تجديد تلقائي", type: "boolean", col: 1 },
+      { k: "not_applicable", ar: "لا ينطبق", type: "boolean", col: 1 },
+      { k: "document_url", ar: "رابط المستند", type: "text", col: 2 },
+      { k: "notes", ar: "ملاحظات", type: "textarea", col: 2 },
+    ],
+    columns: [
+      { k: "_label", ar: "المنصة" },
+      { k: "account_id", ar: "رقم الحساب" },
+      { k: "expiry_date", ar: "الانتهاء" },
+      { k: "annual_cost", ar: "التكلفة" },
+    ],
+  },
+  "customer-surveys": {
+    icon: "ClipboardCheck", titleAr: "استبيانات تجربة العميل", titleEn: "Customer surveys",
+    nameField: "prepared_by_name", idField: "prepared_by_id",
+    fields: [
+      { k: "title", ar: "عنوان الاستبيان *", type: "text", req: true, col: 2 },
+      { k: "description", ar: "الوصف / المقدمة", type: "textarea", col: 3 },
+      { k: "questions", ar: "الأسئلة (JSON)", type: "textarea", col: 3, ph: '[{"text":"السؤال"}]' },
+      { k: "status", ar: "الحالة", type: "status", options: { draft: "مسودة", active: "نشط", closed: "مغلق" }, col: 1 },
+    ],
+    columns: [
+      { k: "title", ar: "العنوان" },
+      { k: "status", ar: "الحالة", options: { draft: "مسودة", active: "نشط", closed: "مغلق" } },
+      { k: "responses_count", ar: "الردود" },
+    ],
+  },
 };
 
 const ICONS = { ScrollText: ShieldCheck, Target: ShieldCheck, Network: ShieldCheck, MessageSquare: ShieldCheck, ClipboardList: ShieldCheck, FileBadge: ShieldCheck };
@@ -201,7 +314,10 @@ export default function PortalDelegatedManager({ section, session, isAr = true }
         if (f.type === "number") payload[f.k] = Number(form[f.k]) || 0;
         if (f.type === "employee" && f.resolve && form[f.k]) {
           const emp = employees.find((e) => e.id === form[f.k]);
-          if (emp) f.resolve.forEach((rk) => { if (rk === "employee_name") payload.employee_name = emp.full_name; else if (rk === "employee_user_id") payload.employee_user_id = emp.user_id || ""; else if (rk === "department") payload.department = emp.department || ""; else if (rk === "position") payload.position = emp.position || ""; else if (rk === "current_holder_name") payload.current_holder_name = emp.full_name; else if (rk === "successor_name") payload.successor_name = emp.full_name; });
+          if (emp) f.resolve.forEach((rk) => {
+            if (rk === "employee_name" || rk === "current_holder_name" || rk === "successor_name" || rk === "reviewer_name") payload[rk] = emp.full_name;
+            else if (emp[rk] !== undefined) payload[rk] = emp[rk];
+          });
         }
       });
       const d = await invoke("delegated_create", { section, payload });

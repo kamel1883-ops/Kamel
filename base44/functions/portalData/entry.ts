@@ -1112,6 +1112,11 @@ export default async function (req) {
       "exit-interviews": { entity: "ExitInterview", perm: "exit-interviews", nameField: "prepared_by_name", idField: "prepared_by_id" },
       surveys:    { entity: "Survey", perm: "surveys", nameField: "prepared_by_name", idField: "prepared_by_id" },
       licenses:   { entity: "License", perm: "licenses", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      gosi:       { entity: "GosiRecord", perm: "gosi", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "org-structure": { entity: "OrgUnit", perm: "org-structure", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "workforce-planning": { entity: "WorkforcePlan", perm: "workforce-planning", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "platform-subscriptions": { entity: "PlatformSubscription", perm: "platform-subscriptions", nameField: "prepared_by_name", idField: "prepared_by_id" },
+      "customer-surveys": { entity: "CustomerSurvey", perm: "customer-surveys", nameField: "prepared_by_name", idField: "prepared_by_id" },
     };
 
     if (action === "delegated_list") {

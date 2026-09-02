@@ -550,6 +550,11 @@ export default function MyRequests() {
             {can("exit-interviews") && <div className="mt-6"><PortalDelegatedManager section="exit-interviews" session={session} isAr={isAr} /></div>}
             {can("surveys") && <div className="mt-6"><PortalDelegatedManager section="surveys" session={session} isAr={isAr} /></div>}
             {can("licenses") && <div className="mt-6"><PortalDelegatedManager section="licenses" session={session} isAr={isAr} /></div>}
+            {can("gosi") && <div className="mt-6"><PortalDelegatedManager section="gosi" session={session} isAr={isAr} /></div>}
+            {can("org-structure") && <div className="mt-6"><PortalDelegatedManager section="org-structure" session={session} isAr={isAr} /></div>}
+            {can("workforce-planning") && <div className="mt-6"><PortalDelegatedManager section="workforce-planning" session={session} isAr={isAr} /></div>}
+            {can("platform-subscriptions") && <div className="mt-6"><PortalDelegatedManager section="platform-subscriptions" session={session} isAr={isAr} /></div>}
+            {can("customer-surveys") && <div className="mt-6"><PortalDelegatedManager section="customer-surveys" session={session} isAr={isAr} /></div>}
             {can("end-of-service") && (
               <div className="mt-6">
                 <SideCard title={isAr ? "تقدير نهاية الخدمة" : "End of service estimate"}>
