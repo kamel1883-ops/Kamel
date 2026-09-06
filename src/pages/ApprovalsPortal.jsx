@@ -545,9 +545,12 @@ export default function ApprovalsPortal({ portalSession }) {
                 <Input type="file" onChange={(e) => setProofFile(e.target.files?.[0])} />
               </div>
               <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">{acting.type === "settlements" ? t.payNoteSettle : t.payNote}</div>
+              {!proofFile && (
+                <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-2">{isAr ? "يجب إرفاق مستند السداد قبل التأكيد" : "Payment proof is required to confirm"}</div>
+              )}
               <DialogFooter>
                 <Button variant="outline" onClick={() => setActing(null)}>{t.cancel}</Button>
-                <Button onClick={confirmFinance} disabled={busy} className="gap-1 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={confirmFinance} disabled={busy || !proofFile} className="gap-1 bg-blue-600 hover:bg-blue-700">
                   {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t.confirmPay}
                 </Button>
               </DialogFooter>

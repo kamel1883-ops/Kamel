@@ -369,12 +369,6 @@ export default function EndOfService() {
                               <Button size="sm" variant="ghost" onClick={() => openEosReject(s)} className="h-7 text-rose-500">{t.reject}</Button>
                             </>
                           )}
-                          {s.status === "awaiting_finance" && (
-                            <>
-                              <Button size="sm" onClick={() => openEosFin(s)} className="gap-1 h-7 bg-blue-600 hover:bg-blue-700"><Wallet size={13} /> {t.pay}</Button>
-                              <Button size="sm" variant="ghost" onClick={() => openEosReject(s)} className="h-7 text-rose-500">{t.reject}</Button>
-                            </>
-                          )}
                         </div>
                       </div>
                     </div>
