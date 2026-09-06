@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Image as ImageIcon } from "lucide-react";
 import EnvPoster from "@/components/ads/EnvPoster";
 import BusinessCardSection from "@/components/ads/BusinessCardSection";
+import AdCampaignImages from "@/components/ads/AdCampaignImages";
 import { useI18n } from "@/lib/i18n";
 
 const IMG_TEAM = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5170278ee_generated_image.png";
@@ -196,6 +197,7 @@ export default function AdDesigns() {
       </div>
 
       <BusinessCardSection isAr={isAr} />
+      <AdCampaignImages />
     </div>
   );
 }
