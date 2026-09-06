@@ -177,7 +177,6 @@ export default function Decisions() {
                           <button onClick={() => setView(r)} className="p-1.5 rounded-md hover:bg-violet-50 text-violet-600" title={t.view}><Eye size={15} /></button>
                           <button onClick={() => printDecision(r)} className="p-1.5 rounded-md hover:bg-violet-50 text-violet-600" title={t.print}><Printer size={15} /></button>
                           {r.status !== "archived" && <button onClick={() => archive(r)} className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500" title={t.archive}><Archive size={15} /></button>}
-                          <button onClick={() => remove(r)} className="p-1.5 rounded-md hover:bg-rose-50 text-rose-600" title={t.del}><Trash2 size={15} /></button>
                         </div>
                       </td>
                     </tr>

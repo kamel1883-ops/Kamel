@@ -225,7 +225,6 @@ export default function Employees() {
                               <button onClick={() => { setTripsEmp(emp); setTripsOpen(true); }} title={t.tripsTitle} className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"><Plane size={16} /></button>
                               <button onClick={() => { setTermEmp(emp); setTermOpen(true); }} title={t.terminateTitle} className="p-2 rounded-lg hover:bg-rose-50 text-rose-600"><UserX size={16} /></button>
                               <Link to="/org-structure" title={isAr ? "عرض في الهيكل" : "Org chart"} className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Network size={16} /></Link>
-                              <button onClick={() => remove(emp)} title={isAr ? "حذف" : "Delete"} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
                             </div>
                           </td>
                         </tr>
@@ -310,7 +309,6 @@ export default function Employees() {
                                 <button onClick={() => { setProfileEmp(emp); setProfileOpen(true); }} title={t.profileTitle} className="p-2 rounded-lg hover:bg-amber-50 text-amber-600"><FileText size={16} /></button>
                                 <button onClick={() => { setTripsEmp(emp); setTripsOpen(true); }} title={t.tripsTitle} className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"><Plane size={16} /></button>
                                 <button onClick={() => { setEditTarget(emp); setFormOpen(true); }} title={isAr ? "تعديل" : "Edit"} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={16} /></button>
-                                <button onClick={() => remove(emp)} title={isAr ? "حذف" : "Delete"} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
                               </div>
                             </td>
                           </tr>

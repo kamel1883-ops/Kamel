@@ -182,7 +182,6 @@ export default function Performance() {
                           <button onClick={() => reopen(r)} title={t.reopen} className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-600" aria-label={t.reopen}><RotateCcw size={15} /></button>
                         )}
                         <button onClick={() => { setEditing(r); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>
-                        <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
                       </div>
                     </div>
                   </div>

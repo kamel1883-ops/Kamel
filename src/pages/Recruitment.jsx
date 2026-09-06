@@ -230,7 +230,6 @@ export default function Recruitment() {
                 <Button size="sm" variant="ghost" onClick={() => setShareJob(j)}><Share2 size={14} /> {t.share}</Button>
                 <Button size="icon" variant="ghost" onClick={() => printJob(j)} title={t.print}><Printer size={15} /></Button>
                 <Button size="icon" variant="ghost" onClick={() => openEdit(j)}><Pencil size={15} /></Button>
-                <Button size="icon" variant="ghost" onClick={() => del(j)}><Trash2 size={15} /></Button>
               </div>
             </Card>
           ))}

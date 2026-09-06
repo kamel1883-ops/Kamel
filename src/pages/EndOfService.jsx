@@ -369,7 +369,6 @@ export default function EndOfService() {
                               <Button size="sm" variant="ghost" onClick={() => openEosReject(s)} className="h-7 text-rose-500">{t.reject}</Button>
                             </>
                           )}
-                          <Button size="sm" variant="ghost" onClick={() => removeSettlement(s.id)} className="h-7 text-rose-500"><Trash2 size={14} /></Button>
                         </div>
                       </div>
                     </div>
