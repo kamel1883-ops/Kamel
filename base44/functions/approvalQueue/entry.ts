@@ -35,12 +35,24 @@ export default async function (req) {
       actorName = user.full_name;
     }
 
-    // خريطة موظف → رقمه الموحد لتحديد نطاق منشأة المعتمد (منع العبور بين المنشآت)
+    // خريطة موظف → رقمه الموحد لتحديد نطاق منشأة المعتمد (منع العبور بين المنشآت).
+    // متين: الموظفون المنشؤون عبر بوابة التفويض (service role) قد لا يحملون unified_number
+    // مباشرة، فنُورّطه من موظف شقيق أُنشئ بالمنشئ نفسه (نفس created_by_id) يملك الرقم.
     const allEmployees = await base44.asServiceRole.entities.Employee.list("-created_date", 2000);
     const idToUn = new Map();
+    const byCreator = new Map();
     for (const e of allEmployees || []) {
-      const un = String(e.unified_number || "").trim();
-      if (un && e.id) idToUn.set(e.id, un);
+      if (e.id) idToUn.set(e.id, String(e.unified_number || "").trim());
+      if (e.created_by_id) {
+        if (!byCreator.has(e.created_by_id)) byCreator.set(e.created_by_id, []);
+        byCreator.get(e.created_by_id).push(e);
+      }
+    }
+    for (const [, emps] of byCreator) {
+      const sample = (emps || []).find((e) => String(e.unified_number || "").trim());
+      if (!sample) continue;
+      const un = String(sample.unified_number || "").trim();
+      for (const e of emps) if (!idToUn.get(e.id)) idToUn.set(e.id, un);
     }
     const myUn = String(myEmp.unified_number || "").trim();
     const sameTenant = (rec) => !!myUn && idToUn.get(rec.employee_id) === myUn;
