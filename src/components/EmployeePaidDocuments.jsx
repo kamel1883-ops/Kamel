@@ -83,7 +83,7 @@ export default function EmployeePaidDocuments({ employee, org }) {
       ))}
 
       {printing && (
-        <div className="fixed -left-[9999px] top-0" aria-hidden="true">
+        <div className="print-mount" aria-hidden="true">
           <SettlementSheet record={printing} org={org} />
         </div>
       )}
