@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Download, FileText, Printer } from "lucide-react";
+import { Download, FileText, Printer, Plane, Wallet, CalendarCheck, FileCheck2 } from "lucide-react";
 import SettlementSheet from "@/components/SettlementSheet";
-import { leaveTypeLabel } from "@/lib/hr";
+import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 import { reasonMeta } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 
-// أرشيف المستندات المالية المصروفة للموظف (مخالصات إجازة مكتملة + مخالصات نهاية الخدمة)
+// أرشيف مستندات الموظف المالية — سلف، إجازات، انتدابات، مخالصات نهاية الخدمة
+// يظهر لجميع الموظفين (نشطين وغير نشطين) طالما توجد مستندات
 export default function EmployeePaidDocuments({ employee, org }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const [leaves, setLeaves] = useState([]);
   const [sets, setSets] = useState([]);
+  const [loans, setLoans] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [printing, setPrinting] = useState(null);
 
   useEffect(() => {
@@ -20,23 +23,28 @@ export default function EmployeePaidDocuments({ employee, org }) {
       .then(setLeaves).catch(() => setLeaves([]));
     base44.entities.Settlement.filter({ employee_id: employee.id }, "-created_date", 200)
       .then(setSets).catch(() => setSets([]));
+    base44.entities.LoanRequest.filter({ employee_id: employee.id }, "-created_date", 500)
+      .then(setLoans).catch(() => setLoans([]));
+    base44.entities.BusinessTrip.filter({ employee_id: employee.id }, "-created_date", 500)
+      .then(setTrips).catch(() => setTrips([]));
   }, [employee?.id]);
 
-  const paidLeaves = leaves.filter((l) =>
-    (l.status === "completed" || l.status === "paid") && l.settlement_pdf_url
-  );
-  const paidSets = sets.filter((s) => s.status === "completed");
+  // مستندات لها ملف مرفق أو إثبات صرف
+  const docLeaves = leaves.filter((l) => l.settlement_pdf_url || l.finance_proof_url);
+  const docSets = sets.filter((s) => s.status === "completed" || s.finance_proof_url);
+  const docLoans = loans.filter((l) => l.statement_pdf_url || l.finance_proof_url);
+  const docTrips = trips.filter((t) => t.approval_pdf_url || t.finance_proof_url || t.hr_document_url || t.employee_document_url);
 
   const t = isAr ? {
-    empty: "لا توجد مستندات مصروفة لهذا الموظف.",
-    leaveDoc: "مخالصة إجازة", eosDoc: "مخالصة نهاية الخدمة",
-    proof: "إثبات التحويل", print: "معاينة/طباعة المخالصة", settle: "المخالصة",
-    days: (n) => `${n} يوم`, lwd: "آخر يوم عمل", issued: "تاريخ الإصدار",
+    empty: "لا توجد مستندات لهذا الموظف بعد.",
+    loanDoc: "كشف سلفة", leaveDoc: "مخالصة إجازة", tripDoc: "موافقة انتداب", eosDoc: "مخالصة نهاية الخدمة",
+    proof: "إثبات التحويل", print: "معاينة/طباعة المخالصة", settle: "المستند", statement: "كشف السلفة", approval: "موافقة الانتداب",
+    days: (n) => `${n} يوم`, lwd: "آخر يوم عمل", issued: "تاريخ الإصدار", amount: "المبلغ", dest: "الوجهة",
   } : {
-    empty: "No paid documents for this employee.",
-    leaveDoc: "Leave settlement", eosDoc: "End-of-service settlement",
-    proof: "Transfer proof", print: "View/Print settlement", settle: "Settlement",
-    days: (n) => `${n} days`, lwd: "Last working day", issued: "Issued",
+    empty: "No documents for this employee yet.",
+    loanDoc: "Loan statement", leaveDoc: "Leave settlement", tripDoc: "Business trip approval", eosDoc: "End-of-service settlement",
+    proof: "Transfer proof", print: "View/Print settlement", settle: "Document", statement: "Loan statement", approval: "Trip approval",
+    days: (n) => `${n} days`, lwd: "Last working day", issued: "Issued", amount: "Amount", dest: "Destination",
   };
 
   const printSet = (rec) => {
@@ -44,28 +52,103 @@ export default function EmployeePaidDocuments({ employee, org }) {
     setTimeout(() => { window.print(); setPrinting(null); }, 150);
   };
 
-  const hasAny = paidLeaves.length > 0 || paidSets.length > 0;
+  const hasAny = docLeaves.length > 0 || docSets.length > 0 || docLoans.length > 0 || docTrips.length > 0;
   if (!hasAny) return <div className="text-sm text-muted-foreground py-2">{t.empty}</div>;
 
   return (
     <div className="space-y-2">
-      {paidLeaves.map((l) => (
-        <div key={"l" + l.id} className="rounded-lg border border-border bg-white p-3 flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <div className="text-sm font-medium">{t.leaveDoc} — {leaveTypeLabel(l.leave_type)}</div>
-            <div className="text-xs text-muted-foreground">{l.start_date} ← {l.end_date} · {t.days(l.days_count)}</div>
+      {docLoans.map((l) => (
+        <div key={"ln" + l.id} className="rounded-lg border border-border bg-white p-3 flex items-center justify-between gap-2 flex-wrap">
+          <div className="min-w-0 flex items-center gap-2">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-50 text-amber-600 shrink-0"><Wallet size={14} /></span>
+            <div>
+              <div className="text-sm font-medium">{t.loanDoc} — {t.amount}: {formatCurrency(l.amount)}</div>
+              <div className="text-xs text-muted-foreground">{l.request_date} · {l.reason}</div>
+            </div>
           </div>
-          <a href={l.settlement_pdf_url} target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium shrink-0">
-            <Download size={14} /> {t.settle}
-          </a>
+          <div className="flex gap-1 shrink-0">
+            {l.statement_pdf_url && (
+              <a href={l.statement_pdf_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium">
+                <Download size={14} /> {t.statement}
+              </a>
+            )}
+            {l.finance_proof_url && (
+              <a href={l.finance_proof_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-medium">
+                <FileText size={14} /> {t.proof}
+              </a>
+            )}
+          </div>
         </div>
       ))}
-      {paidSets.map((s) => (
+
+      {docLeaves.map((l) => (
+        <div key={"l" + l.id} className="rounded-lg border border-border bg-white p-3 flex items-center justify-between gap-2 flex-wrap">
+          <div className="min-w-0 flex items-center gap-2">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 shrink-0"><CalendarCheck size={14} /></span>
+            <div>
+              <div className="text-sm font-medium">{t.leaveDoc} — {leaveTypeLabel(l.leave_type)}</div>
+              <div className="text-xs text-muted-foreground">{l.start_date} ← {l.end_date} · {t.days(l.days_count)}</div>
+            </div>
+          </div>
+          <div className="flex gap-1 shrink-0">
+            {l.settlement_pdf_url && (
+              <a href={l.settlement_pdf_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium">
+                <Download size={14} /> {t.settle}
+              </a>
+            )}
+            {l.finance_proof_url && (
+              <a href={l.finance_proof_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-medium">
+                <FileText size={14} /> {t.proof}
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {docTrips.map((tr) => (
+        <div key={"tr" + tr.id} className="rounded-lg border border-border bg-white p-3 flex items-center justify-between gap-2 flex-wrap">
+          <div className="min-w-0 flex items-center gap-2">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-sky-50 text-sky-600 shrink-0"><Plane size={14} /></span>
+            <div>
+              <div className="text-sm font-medium">{t.tripDoc} — {t.dest}: {tr.destination}</div>
+              <div className="text-xs text-muted-foreground">{tr.start_date} ← {tr.end_date} · {t.days(tr.days_count)}</div>
+            </div>
+          </div>
+          <div className="flex gap-1 shrink-0">
+            {tr.approval_pdf_url && (
+              <a href={tr.approval_pdf_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium">
+                <Download size={14} /> {t.approval}
+              </a>
+            )}
+            {tr.hr_document_url && (
+              <a href={tr.hr_document_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-100 text-xs font-medium">
+                <FileCheck2 size={14} /> {isAr ? "مرفق الموارد" : "HR doc"}
+              </a>
+            )}
+            {tr.finance_proof_url && (
+              <a href={tr.finance_proof_url} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-medium">
+                <FileText size={14} /> {t.proof}
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {docSets.map((s) => (
         <div key={"s" + s.id} className="rounded-lg border border-border bg-white p-3 flex items-center justify-between gap-2 flex-wrap">
-          <div className="min-w-0">
-            <div className="text-sm font-medium">{t.eosDoc} — {reasonMeta(s.reason).label}</div>
-            <div className="text-xs text-muted-foreground">{t.lwd}: {s.last_working_date} · {t.issued}: {s.generated_date}</div>
+          <div className="min-w-0 flex items-center gap-2">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-rose-50 text-rose-600 shrink-0"><FileCheck2 size={14} /></span>
+            <div>
+              <div className="text-sm font-medium">{t.eosDoc} — {reasonMeta(s.reason).label}</div>
+              <div className="text-xs text-muted-foreground">{t.lwd}: {s.last_working_date} · {t.issued}: {s.generated_date}</div>
+            </div>
           </div>
           <div className="flex gap-1 shrink-0">
             {s.finance_proof_url && (

@@ -44,7 +44,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
     leaveCash: "تعويض الإجازات", ticket: "تعويض التذكرة", total: "إجمالي المخالصة",
     termination: "معلومات الإنهاء", none: "غير منتهٍ", openTrips: "فتح سجل الانتدابات",
     joinJourney: "رحلة العمل داخل المنشأة",
-    archive: "أرشيف المستندات المالية (مصروفة)",
+    archive: "أرشيف مستندات الموظف (سلف، إجازات، انتدابات، مخالصات)",
   } : {
     personal: "Personal", employment: "Employment", salary: "Salary & allowances",
     leave: "Leaves & tickets", eos: "End of service", trips: "Employee trips",
@@ -53,7 +53,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
     leaveCash: "Leave compensation", ticket: "Ticket compensation", total: "Total settlement",
     termination: "Termination info", none: "Active", openTrips: "Open trips log",
     joinJourney: "Employment journey",
-    archive: "Archived paid documents",
+    archive: "Employee documents archive (loans, leaves, trips, settlements)",
   };
   const [trips, setTrips] = useState([]);
   const [leaves, setLeaves] = useState([]);
@@ -187,11 +187,9 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
 
             <EmployeePortalPasswordAdmin employee={employee} />
 
-            {(employee?.status === "terminated" || employee?.status === "resigned") && (
-              <Block title={t.archive}>
-                <EmployeePaidDocuments employee={employee} org={org} />
-              </Block>
-            )}
+            <Block title={t.archive}>
+              <EmployeePaidDocuments employee={employee} org={org} />
+            </Block>
 
             {eos && (
               <Block title={t.eos}>
