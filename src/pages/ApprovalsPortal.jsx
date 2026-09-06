@@ -329,7 +329,7 @@ export default function ApprovalsPortal({ portalSession }) {
           <TabsTrigger value="leaves">{t.tabLeaves(leaves.length)}</TabsTrigger>
           <TabsTrigger value="loans">{t.tabLoans(loans.length)}</TabsTrigger>
           <TabsTrigger value="trips">{t.tabTrips(trips.length)}</TabsTrigger>
-          {settlements.length > 0 && <TabsTrigger value="settlements">{t.tabSettlements(settlements.length)}</TabsTrigger>}
+          <TabsTrigger value="settlements">{t.tabSettlements(settlements.length)}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="leaves">
