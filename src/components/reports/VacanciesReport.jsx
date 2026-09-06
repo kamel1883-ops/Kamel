@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { Briefcase, Building2, Wallet, Layers } from "lucide-react";
+import { Briefcase, Building2, Wallet, Layers, Printer } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { printSection } from "@/lib/sectionPrint";
 import { formatCurrency } from "@/lib/hr";
 
 export default function VacanciesReport() {
@@ -20,6 +22,7 @@ export default function VacanciesReport() {
     cost: "إجمالي التكلفة", na: "—",
     typeL: { full_time: "دوام كامل", part_time: "جزئي", contract: "عقد" },
     natL: { any: "الجميع", saudi: "سعودي", resident: "مقيم" },
+    exportPdf: "طباعة PDF",
   } : {
     title: "Vacant Positions Report",
     subtitle: "Open jobs with vacancy counts, salary per vacancy and total expected hiring cost.",
@@ -31,6 +34,7 @@ export default function VacanciesReport() {
     cost: "Total cost", na: "—",
     typeL: { full_time: "Full-time", part_time: "Part-time", contract: "Contract" },
     natL: { any: "Any", saudi: "Saudi", resident: "Resident" },
+    exportPdf: "Export PDF",
   };
 
   const [jobs, setJobs] = useState([]);
@@ -47,9 +51,38 @@ export default function VacanciesReport() {
   const totalVac = jobs.reduce((s, j) => s + (Number(j.vacancy_count) || 0), 0);
   const totalCost = jobs.reduce((s, j) => s + (Number(j.vacancy_count) || 0) * (Number(j.salary) || 0), 0);
 
+  const exportPdf = () => {
+    const columns = isAr ? [
+      { label: "المسمى الوظيفي" }, { label: "الإدارة" }, { label: "المهنة" }, { label: "الدرجة" },
+      { label: "نوع الوظيفة" }, { label: "المطلوب" }, { label: "عدد الشواغر", num: true },
+      { label: "الراتب للشاغر", num: true }, { label: "إجمالي التكلفة", num: true },
+    ] : [
+      { label: "Job title" }, { label: "Department" }, { label: "Profession" }, { label: "Grade" },
+      { label: "Type" }, { label: "Required" }, { label: "Vacancies", num: true },
+      { label: "Salary/vacancy", num: true }, { label: "Total cost", num: true },
+    ];
+    const rows = jobs.map((j) => {
+      const vac = Number(j.vacancy_count) || 0;
+      const sal = Number(j.salary) || 0;
+      return [
+        j.title, j.department || t.na, j.profession || t.na, j.grade || t.na,
+        t.typeL[j.job_type] || t.na, t.natL[j.nationality_req] || t.na,
+        vac, formatCurrency(sal), formatCurrency(vac * sal),
+      ];
+    });
+    printSection({
+      title: t.title, subtitle: t.subtitle, isAr, columns, rows,
+      summary: [
+        { label: t.openPos, value: jobs.length },
+        { label: t.totalVac, value: totalVac },
+        { label: t.totalCost, value: formatCurrency(totalCost) },
+      ],
+    });
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="mt-8">
-      <PageHeader title={t.title} subtitle={t.subtitle} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={jobs.length > 0 ? <Button variant="outline" onClick={exportPdf} className="gap-2"><Printer size={17} /> {t.exportPdf}</Button> : null} />
 
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>

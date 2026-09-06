@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { CreditCard, AlertTriangle, CalendarClock, XCircle } from "lucide-react";
+import { CreditCard, AlertTriangle, CalendarClock, XCircle, Printer } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { printSection } from "@/lib/sectionPrint";
 
 const DAY = 1000 * 60 * 60 * 24;
 // شرط التنبيه: الإقامة التي تنتهي خلال 38 يوماً أو أقل (تشمل المنتهية فعلاً كأكثر إلحاحاً).
@@ -23,6 +25,7 @@ export default function IqamaExpiryReport() {
     emp: "الموظف", natId: "الهوية/الإقامة", dept: "الإدارة", pos: "المسمى",
     expiry: "تاريخ انتهاء الإقامة", days: "المتبقي", status: "الحالة",
     expiredBadge: "منتهية", soonBadge: "قاربت", daysUnit: "يوم", na: "—",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Iqama Expiry Report",
     subtitle: "All iqamas expiring within 38 days or less — alert to renew before fines accumulate.",
@@ -32,6 +35,7 @@ export default function IqamaExpiryReport() {
     emp: "Employee", natId: "ID/Iqama", dept: "Department", pos: "Position",
     expiry: "Iqama expiry", days: "Days left", status: "Status",
     expiredBadge: "Expired", soonBadge: "Approaching", daysUnit: "days", na: "—",
+    exportPdf: "Export PDF",
   };
 
   const [items, setItems] = useState([]);
@@ -67,9 +71,28 @@ export default function IqamaExpiryReport() {
   const expiredCount = items.filter((i) => i.expired).length;
   const soonCount = items.length - expiredCount;
 
+  const exportPdf = () => {
+    const columns = isAr ? [
+      { label: "الموظف" }, { label: "الهوية/الإقامة", num: true }, { label: "الإدارة" },
+      { label: "المسمى" }, { label: "تاريخ الانتهاء" }, { label: "المتبقي", num: true }, { label: "الحالة" },
+    ] : [
+      { label: "Employee" }, { label: "ID/Iqama", num: true }, { label: "Department" },
+      { label: "Position" }, { label: "Expiry" }, { label: "Days left", num: true }, { label: "Status" },
+    ];
+    const rows = items.map((it) => [
+      it.name, it.national_id || t.na, it.department || t.na, it.position || t.na,
+      it.expiry, (it.expired ? Math.abs(it.days) : it.days) + " " + t.daysUnit,
+      it.expired ? t.expiredBadge : t.soonBadge,
+    ]);
+    printSection({
+      title: t.title, subtitle: t.subtitle, isAr, columns, rows,
+      summary: [{ label: t.total, value: items.length }, { label: t.expired, value: expiredCount }, { label: t.soon, value: soonCount }],
+    });
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="mt-8">
-      <PageHeader title={t.title} subtitle={t.subtitle} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={items.length > 0 ? <Button variant="outline" onClick={exportPdf} className="gap-2"><Printer size={17} /> {t.exportPdf}</Button> : null} />
 
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>

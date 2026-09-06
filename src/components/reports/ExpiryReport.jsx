@@ -3,9 +3,11 @@ import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
-  FileText, ShieldCheck, Car, CalendarClock, Heart, Building2, Clock, AlertTriangle, CreditCard,
+  FileText, ShieldCheck, Car, CalendarClock, Heart, Building2, Clock, AlertTriangle, CreditCard, Printer,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { printSection } from "@/lib/sectionPrint";
 
 const DAY = 1000 * 60 * 60 * 24;
 const HORIZON = 30 * DAY;
@@ -60,6 +62,7 @@ export default function ExpiryReport() {
     status: "الحالة",
     total: "إجمالي التنبيهات",
     soonCount: "تقترب",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Approaching Expirations Report",
     subtitle: "Everything expiring within the next 30 days — licenses, gov subscriptions, iqamas, contracts, medical insurance, vehicles, probation. (Already-expired items are excluded — fines apply after expiry)",
@@ -73,6 +76,7 @@ export default function ExpiryReport() {
     status: "Status",
     total: "Total alerts",
     soonCount: "Approaching",
+    exportPdf: "Export PDF",
   };
 
   const [items, setItems] = useState([]);
@@ -134,11 +138,29 @@ export default function ExpiryReport() {
   }, []);
 
   const soon = items;
+  const exportPdf = () => {
+    const columns = isAr ? [
+      { label: "النوع" }, { label: "البند" }, { label: "المرجع", num: true },
+      { label: "تاريخ الانتهاء" }, { label: "المتبقي", num: true }, { label: "الحالة" },
+    ] : [
+      { label: "Type" }, { label: "Item" }, { label: "Ref", num: true },
+      { label: "Expiry" }, { label: "Days left", num: true }, { label: "Status" },
+    ];
+    const rows = items.map((it) => [
+      (CATS[it.category]?.label) || it.category,
+      it.label, it.identifier || "—", it.expiry,
+      it.days + " " + t.days, t.soon,
+    ]);
+    printSection({
+      title: t.title, subtitle: t.subtitle, isAr, columns, rows,
+      summary: [{ label: t.total, value: items.length }, { label: t.soonCount, value: soon.length }],
+    });
+  };
   const tintCls = { blue: "bg-blue-50 text-blue-700 border-blue-200", indigo: "bg-indigo-50 text-indigo-700 border-indigo-200", violet: "bg-violet-50 text-violet-700 border-violet-200", slate: "bg-slate-50 text-slate-700 border-slate-200", rose: "bg-rose-50 text-rose-700 border-rose-200", amber: "bg-amber-50 text-amber-700 border-amber-200", cyan: "bg-cyan-50 text-cyan-700 border-cyan-200", emerald: "bg-emerald-50 text-emerald-700 border-emerald-200", orange: "bg-orange-50 text-orange-700 border-orange-200" };
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="mt-8">
-      <PageHeader title={t.title} subtitle={t.subtitle} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={items.length > 0 ? <Button variant="outline" onClick={exportPdf} className="gap-2"><Printer size={17} /> {t.exportPdf}</Button> : null} />
 
       {loading ? (
         <div className="p-10 text-center text-muted-foreground">{t.loading}</div>
