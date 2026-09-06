@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ClipboardCheck, Check, X, Loader2, Download, Plane } from "lucide-react";
+import { ClipboardCheck, Check, X, Loader2, Download, Plane, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import { usePortalI18n, usePortalT, portalDir } from "@/lib/portalI18n";
 import ManagerAttendanceSection from "@/components/portal/ManagerAttendanceSection";
+import SettlementSheet from "@/components/SettlementSheet";
 
 export default function ApprovalsPortal({ portalSession }) {
   const { lang } = usePortalI18n();
@@ -28,6 +30,20 @@ export default function ApprovalsPortal({ portalSession }) {
   const [busy, setBusy] = useState(false);
   const [histSearch, setHistSearch] = useState("");
   const [finHistSearch, setFinHistSearch] = useState("");
+  const [printing, setPrinting] = useState(null);
+
+  useEffect(() => {
+    const after = () => setPrinting(null);
+    window.addEventListener("afterprint", after);
+    return () => window.removeEventListener("afterprint", after);
+  }, []);
+
+  const printSet = (rec) => {
+    setPrinting(rec);
+    let done = false;
+    const run = () => { if (done) return; done = true; window.print(); };
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(run, 60)));
+  };
 
   const portalArgs = portalSession
     ? { portal_token: portalSession.token, portal_employee_id: portalSession.employee_id }
@@ -329,7 +345,8 @@ export default function ApprovalsPortal({ portalSession }) {
     return a;
   };
   const settlementActions = (r) => {
-    const a = [{ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("settlements", r) },
+    const a = [{ label: isAr ? "معاينة/طباعة المخالصة" : "View/Print settlement", cls: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100", onClick: () => printSet(r) },
+               { label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openFinance("settlements", r) },
                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("settlements", r) }];
     if (r.finance_proof_url) a.push({ label: t.finProof, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.finance_proof_url });
     return a;
@@ -432,6 +449,12 @@ export default function ApprovalsPortal({ portalSession }) {
             <Download size={13} /> {t.finProof}
           </a>
         ) : null;
+        const printBtn = (rec) => rec ? (
+          <button type="button" onClick={() => printSet(rec)}
+            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 whitespace-nowrap">
+            <Printer size={13} /> {isAr ? "المخالصة" : "Settlement"}
+          </button>
+        ) : null;
         const rows = [
           ...(data?.leaveHistory || []).map((r) => ({
             key: "L" + r.id, emp: r.employee_name, nat: r.national_id || "",
@@ -469,7 +492,7 @@ export default function ApprovalsPortal({ portalSession }) {
             kind: isAr ? "مخالصة نهاية خدمة" : "End-of-service",
             detail: formatCurrency(r.total_settlement), status: r.status,
             paidDate: r.finance_paid_date || "—",
-            doc: null, docLabel: "", proof: r.finance_proof_url,
+            doc: null, docLabel: "", proof: r.finance_proof_url, isSettle: true, rec: r,
           })),
         ].sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
         if (rows.length === 0) return null;
@@ -545,8 +568,9 @@ export default function ApprovalsPortal({ portalSession }) {
                             <td className="px-2 py-2.5 border-b border-slate-100 text-center">
                               <div className="flex flex-col items-center gap-1">
                                 {docBtn(r.doc, r.docLabel)}
+                                {r.isSettle && printBtn(r.rec)}
                                 {proofBtn(r.proof)}
-                                {!r.doc && !r.proof && <span className="text-muted-foreground">—</span>}
+                                {!r.doc && !r.proof && !r.isSettle && <span className="text-muted-foreground">—</span>}
                               </div>
                             </td>
                           </tr>
@@ -609,6 +633,13 @@ export default function ApprovalsPortal({ portalSession }) {
           )}
         </DialogContent>
       </Dialog>
+
+      {printing && createPortal(
+        <div className="print-mount" aria-hidden="true">
+          <SettlementSheet record={printing} org={null} />
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
