@@ -9,8 +9,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, ClipboardList, Target, Wallet, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, ClipboardList, Target, Wallet, Users, Printer } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { printSection } from "@/lib/sectionPrint";
 
 export default function WorkforcePlanning() {
   const { lang } = useI18n();
@@ -44,6 +45,7 @@ export default function WorkforcePlanning() {
     lCurrent: "العدد الحالي", lTarget: "العدد المستهدف", lRecruit: "عدد التعيينات المطلوبة", lTraining: "برامج التدريب", lBudget: "الميزانية (ر.س)",
     lStatus: "الحالة", lStart: "تاريخ البداية", lEnd: "تاريخ النهاية", lInit: "المبادرات", lKpis: "مؤشرات الأداء (KPIs)", lNotes: "ملاحظات",
     cancel: "إلغاء", save: "حفظ التعديلات", create: "إنشاء الخطة",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Workforce planning", subtitle: "Annual or multi-year workforce plans: objectives, current/target headcount, hiring gaps, budget, training, initiatives and KPIs.",
     add: "New plan", sTarget: "Target headcount", sCurrent: "Current headcount", sBudget: "Total budget (SAR)",
@@ -56,6 +58,7 @@ export default function WorkforcePlanning() {
     lCurrent: "Current headcount", lTarget: "Target headcount", lRecruit: "Required hires", lTraining: "Training programs", lBudget: "Budget (SAR)",
     lStatus: "Status", lStart: "Start date", lEnd: "End date", lInit: "Initiatives", lKpis: "KPIs", lNotes: "Notes",
     cancel: "Cancel", save: "Save changes", create: "Create plan",
+    exportPdf: "Export PDF",
   };
 
   const currentYear = new Date().getFullYear();
@@ -91,9 +94,41 @@ export default function WorkforcePlanning() {
   const totalCurrent = plans.reduce((s, p) => s + (p.current_headcount || 0), 0);
   const totalBudget = plans.reduce((s, p) => s + (p.budget || 0), 0);
 
+  const exportPdf = () => {
+    const columns = isAr ? [
+      { label: "العنوان" }, { label: "السنة", num: true }, { label: "الأفق" }, { label: "الإدارة" },
+      { label: "الحالي", num: true }, { label: "المستهدف", num: true }, { label: "الفجوة", num: true },
+      { label: "تعيينات", num: true }, { label: "تدريب", num: true }, { label: "الميزانية (ر.س)", num: true }, { label: "الحالة" },
+    ] : [
+      { label: "Title" }, { label: "Year", num: true }, { label: "Horizon" }, { label: "Department" },
+      { label: "Current", num: true }, { label: "Target", num: true }, { label: "Gap", num: true },
+      { label: "Hires", num: true }, { label: "Training", num: true }, { label: "Budget (SAR)", num: true }, { label: "Status" },
+    ];
+    const rows = plans.map((p) => {
+      const gap = (p.target_headcount || 0) - (p.current_headcount || 0);
+      return [
+        p.title || "—", p.plan_year || "—",
+        HORIZONS.find((h) => h.value === p.planning_horizon)?.label || p.planning_horizon || "—",
+        p.department || "—",
+        p.current_headcount || 0, p.target_headcount || 0, (gap > 0 ? "+" : "") + gap,
+        p.recruitment_count || 0, p.training_count || 0, p.budget || 0, statusLabel(p.status),
+      ];
+    });
+    const summary = [
+      { label: t.sTarget, value: totalTarget }, { label: t.sCurrent, value: totalCurrent },
+      { label: t.sBudget, value: totalBudget.toLocaleString() },
+    ];
+    printSection({ title: t.title, subtitle: t.subtitle, isAr, columns, rows, summary });
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
-      <PageHeader title={t.title} subtitle={t.subtitle} action={<Button onClick={openNew} className="gap-2"><Plus size={16} /> {t.add}</Button>} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={(
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportPdf} disabled={plans.length === 0} className="gap-2"><Printer size={16} /> {t.exportPdf}</Button>
+          <Button onClick={openNew} className="gap-2"><Plus size={16} /> {t.add}</Button>
+        </div>
+      )} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         <Stat label={t.sTarget} value={totalTarget} icon={Users} />

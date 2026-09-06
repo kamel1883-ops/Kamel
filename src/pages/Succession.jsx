@@ -3,10 +3,11 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import SuccessionForm from "@/components/SuccessionForm";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Crown, AlertTriangle, ShieldCheck, GitBranch } from "lucide-react";
+import { Plus, Pencil, Trash2, Crown, AlertTriangle, ShieldCheck, GitBranch, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { daysUntil } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
+import { printSection } from "@/lib/sectionPrint";
 
 export default function Succession() {
   const { lang } = useI18n();
@@ -41,12 +42,14 @@ export default function Succession() {
     loading: "جارٍ التحميل...", empty: "لا توجد خطط تعاقب — ابدأ بتحديد المناصب الحرجة",
     holder: (n) => `الشاغل: ${n || "—"}`, succ: "البدليل", risk: "خطر المغادرة", impact: "الأثر",
     succC: "المرشح البديل", noSucc: "لم يُحدد بعد", devPlan: "خطة التطوير", due: "الموعد", late: "متأخر",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Succession planning", subtitle: "Identify critical positions and prepare successors to ensure business continuity", add: "New plan",
     critical: "Critical / at-risk roles", readyNow: "Ready successors", vacant: "Vacant roles",
     loading: "Loading...", empty: "No succession plans — start by identifying critical positions",
     holder: (n) => `Holder: ${n || "—"}`, succ: "Successor", risk: "Risk of loss", impact: "Impact",
     succC: "Successor", noSucc: "Not set yet", devPlan: "Development plan", due: "Due", late: "Late",
+    exportPdf: "Export PDF",
   };
 
   const [plans, setPlans] = useState([]);
@@ -68,9 +71,37 @@ export default function Succession() {
   const readyNowCount = plans.filter((p) => p.readiness_level === "ready_now").length;
   const vacantCount = plans.filter((p) => p.position_status === "vacant").length;
 
+  const exportPdf = () => {
+    const columns = isAr ? [
+      { label: "المنصب" }, { label: "الإدارة" }, { label: "الشاغل" }, { label: "البدليل" },
+      { label: "الجاهزية" }, { label: "حالة المنصب" }, { label: "خطر المغادرة" }, { label: "الأثر" },
+    ] : [
+      { label: "Position" }, { label: "Department" }, { label: "Holder" }, { label: "Successor" },
+      { label: "Readiness" }, { label: "Position status" }, { label: "Risk of loss" }, { label: "Impact" },
+    ];
+    const rows = plans.map((p) => [
+      p.position_title || "—", p.department || "—",
+      p.current_holder_name || "—", p.successor_name || t.noSucc,
+      (readinessLabel[p.readiness_level] || readinessLabel.development_needed).label,
+      (posStatusLabel[p.position_status] || posStatusLabel.active).label,
+      riskLabel(p.risk_of_loss), riskLabel(p.impact_of_loss),
+    ]);
+    const summary = [
+      { label: t.critical, value: criticalCount },
+      { label: t.readyNow, value: readyNowCount },
+      { label: t.vacant, value: vacantCount },
+    ];
+    printSection({ title: t.title, subtitle: t.subtitle, isAr, columns, rows, summary });
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
-      <PageHeader title={t.title} subtitle={t.subtitle} action={<Button onClick={() => { setEditing(null); setShowForm(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={(
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportPdf} disabled={plans.length === 0} className="gap-2"><Printer size={17} /> {t.exportPdf}</Button>
+          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>
+        </div>
+      )} />
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
