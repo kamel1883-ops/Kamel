@@ -1106,6 +1106,7 @@ export default async function (req) {
         salary_payment_method: b.salary_payment_method || "mudad",
         status: "active", leave_balance: 0, annual_leave_entitlement: orgFresh.annual_leave_days || 21,
         ticket_entitlement: orgFresh.ticket_policy || "yearly",
+        unified_number: String(emp?.unified_number || ""),
         hired_by_name: prep.hired_by_name, hired_by_employee_id: prep.hired_by_employee_id,
       });
       return Response.json({ ok: true, employee: created, preparer: prep });
@@ -1213,6 +1214,7 @@ export default async function (req) {
         status: "active", leave_balance: 0,
         annual_leave_entitlement: orgFresh.annual_leave_days || 21,
         ticket_entitlement: orgFresh.ticket_policy || "yearly",
+        unified_number: String(emp?.unified_number || ""),
         hired_by_name: prep.hired_by_name, hired_by_employee_id: prep.hired_by_employee_id,
       });
       await base44.asServiceRole.entities.JobApplication.update(applicationId, {
@@ -1459,7 +1461,10 @@ export default async function (req) {
       const stampFields = (out: any, isCreate = false) => {
         if (entity === "Employee") {
           out.prepared_by_name = pName; out.prepared_by_id = pNid;
-          if (isCreate) { out.hired_by_name = pNid ? `${pName} — ${pNid}` : pName; out.hired_by_employee_id = String(emp?.id || ""); }
+          if (isCreate) {
+            out.hired_by_name = pNid ? `${pName} — ${pNid}` : pName; out.hired_by_employee_id = String(emp?.id || "");
+            if (!out.unified_number) out.unified_number = String(emp?.unified_number || "");
+          }
         } else if (entity === "Incentive" || entity === "AdminDecision" || entity === "VehicleDelegation") {
           out.created_by_name = pNid ? `${pName} — ${pNid}` : pName;
         } else {
