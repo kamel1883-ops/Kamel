@@ -1,13 +1,16 @@
-import { buildOrgTree, orgStats, roleLabel, employeeDisplayName } from "@/lib/orgTree";
+import { orgStats, roleLabel, employeeDisplayName } from "@/lib/orgTree";
 
 const ROLE_COLORS = {
-  owner: "#d97706",
+  owner: "#b45309",
   executive: "#7c3aed",
   manager: "#2563eb",
   supervisor: "#059669",
   employee: "#475569",
   worker: "#ea580c",
 };
+
+const DEPT_COLOR = "#7c3aed";
+const TITLE_COLOR = "#1d4ed8";
 
 // بناء كيانات HTML برمجياً لتجنّب كتابتها حرفياً في المصدر
 const AMP = String.fromCharCode(38);
@@ -40,41 +43,92 @@ function formatDate(lang) {
   }
 }
 
-function renderNode(node, lang, depth) {
-  const color = ROLE_COLORS[node.role_level] || ROLE_COLORS.employee;
-  const name = escapeHtml(employeeDisplayName(node));
-  const role = escapeHtml(roleLabel(node.role_level, lang));
-  const subParts = [];
-  if (node.position && node.position !== node.full_name) subParts.push(node.position);
-  if (node.department) subParts.push(node.department);
-  if (node.employee_number) subParts.push("#" + node.employee_number);
-  const sub = subParts.map(escapeHtml).join(" " + ENT.bull + " ");
-  const kids = node._children || [];
-  const pad = depth * 22;
-  const kidsHtml = kids.map(function (k) { return renderNode(k, lang, depth + 1); }).join("");
+// تجميع الموظفين حسب القسم، ثم داخل كل قسم حسب المسمى الوظيفي
+function buildDepartmentTree(employees, lang) {
+  const tops = employees.filter((e) => e.role_level === "owner" || e.role_level === "executive");
+  const rest = employees.filter((e) => e.role_level !== "owner" && e.role_level !== "executive");
+
+  const depts = [];
+  const byDept = new Map();
+  rest.forEach((e) => {
+    const d = e.department && String(e.department).trim() ? String(e.department).trim() : (lang === "ar" ? "غير مصنّف" : "Uncategorized");
+    if (!byDept.has(d)) { byDept.set(d, []); depts.push(d); }
+    byDept.get(d).push(e);
+  });
+  depts.sort((a, b) => a.localeCompare(b, lang === "ar" ? "ar" : "en"));
+
+  const deptNodes = depts.map((d) => {
+    const members = byDept.get(d);
+    const byTitle = new Map();
+    const titles = [];
+    members.forEach((e) => {
+      const t = e.position && String(e.position).trim() ? String(e.position).trim() : roleLabel(e.role_level, lang);
+      if (!byTitle.has(t)) { byTitle.set(t, []); titles.push(t); }
+      byTitle.get(t).push(e);
+    });
+    titles.sort((a, b) => a.localeCompare(b, lang === "ar" ? "ar" : "en"));
+    const titleNodes = titles.map((t) => ({ title: t, employees: byTitle.get(t) }));
+    // مدير القسم (إن وُجد) لعرضه في رأس صندوق القسم
+    const mgr = members.find((m) => ["manager", "supervisor"].includes(m.role_level)) || null;
+    return { department: d, count: members.length, manager: mgr, titles: titleNodes };
+  });
+
+  return { tops, deptNodes };
+}
+
+function renderNameList(emps) {
+  return emps.map((e) => {
+    const name = escapeHtml(employeeDisplayName(e));
+    const num = e.employee_number ? " <span class=\"num\">#" + escapeHtml(e.employee_number) + "</span>" : "";
+    return "<li>" + name + num + "</li>";
+  }).join("");
+}
+
+function renderTitleNode(tn) {
+  const names = renderNameList(tn.employees);
   return (
-    "<div style=\"margin:6px 0 6px " + pad + "px;padding:8px 10px;border-inline-start:3px solid " + color + ";background:#f8fafc;border-radius:6px;\">" +
-      "<div style=\"display:flex;align-items:center;gap:8px;flex-wrap:wrap;\">" +
-        "<span style=\"display:inline-block;width:9px;height:9px;border-radius:50%;background:" + color + ";\"></span>" +
-        "<span style=\"font-size:11px;color:" + color + ";font-weight:700;\">" + role + "</span>" +
-        "<span style=\"font-size:14px;font-weight:700;color:#0f172a;\">" + name + "</span>" +
+    "<li>" +
+      "<div class=\"node title\" style=\"border-color:" + TITLE_COLOR + ";\">" +
+        "<div class=\"node-title\">" + escapeHtml(tn.title) + "</div>" +
+        "<ul class=\"members\">" + names + "</ul>" +
       "</div>" +
-      (sub ? "<div style=\"font-size:11px;color:#64748b;margin-top:2px;margin-inline-start:17px;\">" + sub + "</div>" : "") +
-    "</div>" + kidsHtml
+    "</li>"
   );
 }
+
+function renderDeptNode(dn) {
+  const titleNodes = dn.titles.map(renderTitleNode).join("");
+  const mgrHtml = dn.manager
+    ? "<div class=\"dept-mgr\">" + escapeHtml(roleLabel(dn.manager.role_level, langRef)) + ": " + escapeHtml(employeeDisplayName(dn.manager)) + "</div>"
+    : "";
+  return (
+    "<li>" +
+      "<div class=\"node dept\" style=\"border-color:" + DEPT_COLOR + ";\">" +
+        "<div class=\"node-title\">" + escapeHtml(dn.department) + "</div>" +
+        "<div class=\"node-meta\">" + dn.count + "</div>" +
+      "</div>" +
+      (titleNodes ? "<ul>" + titleNodes + "</ul>" : "")
+    + "</li>"
+  );
+}
+
+// مرجع لغة يُحدّث عند بناء المستند (لتجنّب تمريره عبر دوال الرسم)
+let langRef = "ar";
 
 export function buildOrgHTML(_ref) {
   const employees = _ref.employees || [];
   const lang = _ref.lang || "ar";
+  langRef = lang;
   const orgName = _ref.orgName || "";
   const logoUrl = _ref.logoUrl || "";
   const isAr = lang === "ar";
-  const tree = buildOrgTree(employees);
   const stats = orgStats(employees);
-  const orphans = employees.filter(function (e) { return !e.manager_id && e.role_level !== "owner" && e.role_level !== "executive"; });
+  const orphans = employees.filter((e) => !e.manager_id && e.role_level !== "owner" && e.role_level !== "executive");
+  const { tops, deptNodes } = buildDepartmentTree(employees, lang);
+
   const title = isAr ? "الهيكل التنظيمي" : "Organizational Structure";
   const dateL = isAr ? "تاريخ الإصدار" : "Issue date";
+  const rootL = isAr ? "الإدارة العليا" : "Top Management";
   const statsRows = isAr
     ? [["إجمالي القوى العاملة", stats.total], ["عدد الإدارات", stats.departments.length],
        ["المدراء", stats.byLevel.manager + stats.byLevel.executive + stats.byLevel.owner],
@@ -84,20 +138,45 @@ export function buildOrgHTML(_ref) {
        ["Supervisors", stats.byLevel.supervisor]];
   const orphansL = isAr ? "موظفون بدون مدير مباشر" : "Employees without direct manager";
 
-  const statsCells = statsRows.map(function (r) {
-    return "<td style=\"border:1px solid #e2e8f0;padding:8px 12px;text-align:center;width:25%;\">" +
+  const statsCells = statsRows.map((r) =>
+    "<td style=\"border:1px solid #e2e8f0;padding:8px 12px;text-align:center;width:25%;\">" +
       "<div style=\"font-size:20px;font-weight:700;color:#7c3aed;\">" + r[1] + "</div>" +
       "<div style=\"font-size:11px;color:#64748b;margin-top:2px;\">" + escapeHtml(r[0]) + "</div>" +
-    "</td>";
-  }).join("");
+    "</td>"
+  ).join("");
 
-  const treeHtml = tree.map(function (n) { return renderNode(n, lang, 0); }).join("");
+  // صندوق الإدارة العليا — قائمة بأسماء كبار المسؤولين داخل الصندوق
+  const topsList = tops.length
+    ? "<ul class=\"members top\">" + tops.map((e) => {
+        const nm = escapeHtml(employeeDisplayName(e));
+        const rl = escapeHtml(roleLabel(e.role_level, lang));
+        const ps = e.position ? " <span class=\"dim\">(" + escapeHtml(e.position) + ")</span>" : "";
+        return "<li><span class=\"role-tag\">" + rl + "</span> " + nm + ps + "</li>";
+      }).join("") + "</ul>"
+    : "<div class=\"empty-top\">" + escapeHtml(isAr ? "—" : "—") + "</div>";
+
+  const deptHtml = deptNodes.map(renderDeptNode).join("");
+
+  const treeHtml = (
+    "<div class=\"org-chart\">" +
+      "<ul>" +
+        "<li>" +
+          "<div class=\"node root\" style=\"border-color:" + ROLE_COLORS.owner + ";\">" +
+            "<div class=\"node-title\">" + escapeHtml(rootL) + "</div>" +
+            topsList +
+          "</div>" +
+          (deptHtml ? "<ul>" + deptHtml + "</ul>" : "") +
+        "</li>" +
+      "</ul>" +
+    "</div>"
+  );
+
   const orphansHtml = orphans.length
-    ? ("<div style=\"margin-top:24px;\">" +
-         "<div style=\"font-size:13px;font-weight:700;color:#475569;margin-bottom:8px;\">" + orphansL + " (" + orphans.length + ")</div>" +
-         orphans.map(function (e) {
-           return "<span style=\"display:inline-block;font-size:11px;padding:4px 10px;margin:3px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;\">" + escapeHtml(employeeDisplayName(e)) + "</span>";
-         }).join(" ") +
+    ? ("<div class=\"orphans\">" +
+         "<div class=\"orphans-h\">" + escapeHtml(orphansL) + " (" + orphans.length + ")</div>" +
+         orphans.map((e) =>
+           "<span class=\"chip\">" + escapeHtml(employeeDisplayName(e)) + "</span>"
+         ).join("") +
        "</div>")
     : "";
 
@@ -107,21 +186,57 @@ export function buildOrgHTML(_ref) {
   const brand = isAr ? "جدارة" : "Jadara HR";
   const foot = isAr ? "تم إنشاء هذا المستند عبر نظام جدارة للموارد البشرية" : "Generated by Jadara HR System";
 
+  const style =
+    "@page { size: A4; margin: 12mm; }" +
+    "body { font-family: 'Tajawal','IBM Plex Sans Arabic','Arial',sans-serif; color:#0f172a; margin:0; }" +
+    ".doc { max-width:1000px; margin:0 auto; }" +
+    ".head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:14px; border-bottom:2px solid #7c3aed; margin-bottom:16px; }" +
+    ".head h1 { font-size:20px; margin:0; }" +
+    ".head .sub { font-size:11px; color:#64748b; margin-top:4px; }" +
+    ".brand { font-size:11px; color:#94a3b8; }" +
+    ".stats { width:100%; border-collapse:collapse; margin:14px 0 22px; }" +
+    ".foot { margin-top:28px; padding-top:10px; border-top:1px solid #e2e8f0; font-size:10px; color:#94a3b8; text-align:center; }" +
+    // === الشجرة الهرمية ===
+    ".org-chart { direction:" + (isAr ? "rtl" : "ltr") + "; text-align:center; padding:10px 0 0; }" +
+    ".org-chart ul { position:relative; padding-top:26px; display:flex; justify-content:center; flex-wrap:wrap; gap:6px; list-style:none; margin:0; }" +
+    ".org-chart li { position:relative; padding:0 6px; }" +
+    // خطوط الربط العمودية والأفقية
+    ".org-chart li::before, .org-chart li::after { content:''; position:absolute; top:0; width:50%; height:26px; border-top:2px solid #94a3b8; }" +
+    (isAr
+      ? ".org-chart li::before { right:50%; } .org-chart li::after { left:50%; border-right:2px solid #94a3b8; }"
+      : ".org-chart li::before { left:50%; } .org-chart li::after { right:50%; border-left:2px solid #94a3b8; }") +
+    ".org-chart li:only-child::before, .org-chart li:only-child::after { display:none; }" +
+    ".org-chart li:only-child { padding-top:0; }" +
+    ".org-chart li:first-child::before { border:0 none; }" +
+    ".org-chart li:last-child::" + (isAr ? "before" : "after") + " { border-" + (isAr ? "left" : "right") + ":2px solid #94a3b8; border-radius:0; }" +
+    ".org-chart ul ul::before { content:''; position:absolute; top:0; " + (isAr ? "right" : "left") + ":50%; width:0; height:26px; border-" + (isAr ? "right" : "left") + ":2px solid #94a3b8; }" +
+    // الصناديق
+    ".node { display:inline-block; min-width:150px; max-width:240px; background:#fff; border:2px solid #cbd5e1; border-radius:10px; padding:8px 12px; box-shadow:0 1px 3px rgba(16,24,40,.06); }" +
+    ".node.root { min-width:200px; background:#fffbeb; }" +
+    ".node.dept { background:#f5f3ff; }" +
+    ".node.title { background:#eff6ff; min-width:130px; max-width:200px; }" +
+    ".node-title { font-size:12.5px; font-weight:800; color:#0f172a; line-height:1.3; }" +
+    ".node.root .node-title { font-size:14px; color:" + ROLE_COLORS.owner + "; }" +
+    ".node.dept .node-title { color:" + DEPT_COLOR + "; }" +
+    ".node.title .node-title { color:" + TITLE_COLOR + "; font-size:12px; }" +
+    ".node-meta { font-size:10px; color:#64748b; margin-top:2px; }" +
+    // قوائم الأسماء داخل الصناديق
+    "ul.members { list-style:none; padding:0; margin:6px 0 0; text-align:" + (isAr ? "right" : "left") + "; }" +
+    "ul.members li { font-size:11px; color:#1e293b; padding:2px 0; line-height:1.4; display:block; }" +
+    "ul.members li .num { color:#94a3b8; font-size:10px; }" +
+    "ul.members li .dim { color:#64748b; font-size:10px; }" +
+    "ul.members.top li { padding:3px 0; font-weight:600; }" +
+    ".role-tag { display:inline-block; font-size:9.5px; font-weight:700; color:#fff; background:" + ROLE_COLORS.executive + "; padding:1px 6px; border-radius:6px; margin-inline-end:4px; }" +
+    ".empty-top { font-size:11px; color:#94a3b8; padding:6px 0; }" +
+    // الأيتام
+    ".orphans { margin-top:26px; }" +
+    ".orphans-h { font-size:12px; font-weight:700; color:#475569; margin-bottom:8px; }" +
+    ".chip { display:inline-block; font-size:11px; padding:4px 10px; margin:3px; border:1px solid #e2e8f0; border-radius:6px; background:#f8fafc; }" +
+    "@media print { body { print-color-adjust:exact; -webkit-print-color-adjust:exact; } .org-chart ul { flex-wrap:nowrap; } }";
+
   return "<!DOCTYPE html>" +
-    "<html xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns=\"http://www.w3.org/TR/REC-html40\" dir=\"rtl\" lang=\"" + (isAr ? "ar" : "en") + "\">" +
-    "<head><meta charset=\"utf-8\" /><title>" + escapeHtml(title) + "</title>" +
-    "<style>" +
-      "@page { size: A4; margin: 14mm; }" +
-      "body { font-family: 'Tajawal','IBM Plex Sans Arabic','Arial',sans-serif; color:#0f172a; margin:0; }" +
-      ".doc { max-width:780px; margin:0 auto; }" +
-      ".head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:14px; border-bottom:2px solid #7c3aed; margin-bottom:16px; }" +
-      ".head h1 { font-size:20px; margin:0; }" +
-      ".head .sub { font-size:11px; color:#64748b; margin-top:4px; }" +
-      ".brand { font-size:11px; color:#94a3b8; }" +
-      ".stats { width:100%; border-collapse:collapse; margin:14px 0 18px; }" +
-      ".foot { margin-top:28px; padding-top:10px; border-top:1px solid #e2e8f0; font-size:10px; color:#94a3b8; text-align:center; }" +
-      "@media print { body { print-color-adjust:exact; -webkit-print-color-adjust:exact; } }" +
-    "</style></head><body>" +
+    "<html xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns=\"http://www.w3.org/TR/REC-html40\" dir=\"" + (isAr ? "rtl" : "ltr") + "\" lang=\"" + (isAr ? "ar" : "en") + "\">" +
+    "<head><meta charset=\"utf-8\" /><title>" + escapeHtml(title) + "</title><style>" + style + "</style></head><body>" +
     "<div class=\"doc\">" +
       "<div class=\"head\">" +
         "<div>" +
