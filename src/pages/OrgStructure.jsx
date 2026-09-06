@@ -53,7 +53,7 @@ export default function OrgStructure() {
   };
   useEffect(() => { load(); }, []);
 
-  const exportOpts = { employees, lang, orgName: org?.name || "", logoUrl: org?.logo_url || "" };
+  const exportOpts = { employees, lang, orgName: org?.name || "", logoUrl: org?.logo_url || "", unifiedNumber: org?.unified_number || "" };
 
   const tree = buildOrgTree(employees);
   const stats = orgStats(employees);
