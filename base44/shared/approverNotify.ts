@@ -5,7 +5,7 @@
 //   - approvalAction (الانتقال بين المراحل بعد كل موافقة)
 //   - notifyApprover (تقديم الطلب من لوحة الإدارة)
 
-const TYPE_LABEL: Record<string, string> = { leave: "إجازة", loan: "سلفة", trip: "انتداب" };
+const TYPE_LABEL: Record<string, string> = { leave: "إجازة", loan: "سلفة", trip: "انتداب", settlement: "مخالصة نهاية خدمة" };
 
 export async function notifyApproverForStatus(
   base44: any,

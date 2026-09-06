@@ -199,6 +199,12 @@ export default function EndOfService() {
         total_settlement: total,
         status: "awaiting_finance", finance_status: "pending",
       });
+      // تنبيه المعتمد المالي ببريد + إشعار داخلي بوجود مخالصة نهاية خدمة بانتظار الصرف
+      try {
+        await base44.functions.invoke("notifyApprover", {
+          type: "settlement", employeeId: s.employee_id, employeeName: s.employee_name, status: "awaiting_finance",
+        });
+      } catch {}
     } catch (e) {}
     setBusy(false); setActing(null); setNote("");
     setDeductionAmount(""); setDeductionNote(""); setAdditionAmount(""); setAdditionNote("");
