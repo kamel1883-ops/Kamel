@@ -41,6 +41,9 @@ export default function EndOfService() {
     hrWarn: "عند الاعتماد تُحوّل المخالصة إلى المالية لإثبات السداد ثم الإقفال النهائي.",
     payWarn: "عند التأكيد يُسجّل إثبات التحويل ويُقفل الموظف نهائياً (حالته تُحدّث إلى منتهي/مستقيل).",
     deductionLabel: "مستحقات دائنة (تُخصم)", deductionPh: "بيان الخصم", additionLabel: "مستحقات إضافية (تُضاف للموظف)", additionPh: "بيان الإضافة", settleTotal: "الإجمالي بعد الخصم/الإضافة",
+    contractActiveWarn: "عقد هذا الموظف ساري ولم يُفسخ بعد. يمكنك احتساب المخالصة وطباعتها كمسودة فقط. لن يتاح الحفظ والإرسال للمالية إلا بعد فسخ العقد فعلياً في ملف الموظف.",
+    contractTerminatedOk: "تم فسخ عقد هذا الموظف. يمكنك حفظ المخالصة وإرسالها للمالية لاعتماد الصرف.",
+    draftOnly: "مسودة فقط",
   } : {
     title: "End of service", subtitle: "EOS award calculator per Saudi Labor Law (Art. 74 to 85) — all termination reasons and matching articles, with leave balance and ticket compensation",
     chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date",
@@ -60,6 +63,9 @@ export default function EndOfService() {
     hrWarn: "On approval the settlement moves to finance for payment proof and final closure.",
     payWarn: "On confirmation the transfer proof is recorded and the employee is closed permanently (status set to terminated/resigned).",
     deductionLabel: "Debit dues (deducted)", deductionPh: "Deduction note", additionLabel: "Additional dues (added)", additionPh: "Addition note", settleTotal: "Total after deduction/addition",
+    contractActiveWarn: "This employee's contract is still active. You may calculate and print the settlement as a draft only. Saving and sending to finance is locked until the contract is actually terminated in the employee file.",
+    contractTerminatedOk: "This employee's contract has been terminated. You can save the settlement and send it to finance for payout approval.",
+    draftOnly: "Draft only",
   };
 
   const [employees, setEmployees] = useState([]);
@@ -112,6 +118,13 @@ export default function EndOfService() {
   }, [empId]);
 
   const emp = employees.find((e) => e.id === empId);
+
+  // التحقق من فسخ العقد فعلياً: لا يُسمح بالحفظ أو الإرسال للمالية إلا إذا كان عقد الموظف منتهياً.
+  const contractTerminated = !!emp && (
+    emp.status === "terminated" || emp.status === "resigned" ||
+    (emp.termination_reason && emp.termination_reason !== "none") ||
+    !!emp.termination_date
+  );
 
   const liveBalance = emp ? (() => {
     const annualDays = getEmployeeAnnualDays(emp, org);
@@ -298,10 +311,25 @@ export default function EndOfService() {
               <div className="flex items-center justify-between mb-3 no-print">
                 <h3 className="text-sm font-semibold">{t.preview}</h3>
                 <div className="flex gap-2">
-                  <Button onClick={saveAndPrint} disabled={saving} className="gap-2"><Save size={16} /> {saving ? t.saving : t.savePrint}</Button>
+                  {contractTerminated ? (
+                    <Button onClick={saveAndPrint} disabled={saving} className="gap-2"><Save size={16} /> {saving ? t.saving : t.savePrint}</Button>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200"><AlertTriangle size={13} /> {t.draftOnly}</span>
+                  )}
                   <Button variant="outline" onClick={() => window.print()} className="gap-2"><Printer size={16} /> {t.printOnly}</Button>
                 </div>
               </div>
+              {contractTerminated ? (
+                <div className="mb-3 no-print text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex gap-2">
+                  <Check size={16} className="shrink-0" />
+                  <span>{t.contractTerminatedOk}</span>
+                </div>
+              ) : (
+                <div className="mb-3 no-print text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
+                  <AlertTriangle size={16} className="shrink-0" />
+                  <span>{t.contractActiveWarn}</span>
+                </div>
+              )}
               <div className="border border-border rounded-2xl p-6 bg-white"><SettlementSheet record={preview} org={org} /></div>
             </div>
           )}

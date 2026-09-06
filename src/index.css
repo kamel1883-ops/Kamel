@@ -174,10 +174,13 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
     top: 0;
     right: 0;
     left: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: #fff !important;
   }
+  .print-settlement > * { max-width: 100% !important; width: 100% !important; margin: 0 !important; }
   .print-settlement .no-print { display: none !important; }
 
   body * { visibility: hidden !important; }
