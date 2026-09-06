@@ -978,6 +978,7 @@ export default async function (req) {
             salary_payment_method: e.salary_payment_method || p.salary_payment_method || "mudad",
             absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
             net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
+            ...preparerIdentity(),
           });
           continue;
         }
@@ -989,6 +990,7 @@ export default async function (req) {
           overtime_hours: 0, overtime_amount: 0,
           absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
           net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, 0, 0, 0, 0), status: "draft",
+          ...preparerIdentity(),
         });
       }
       if (created.length) await base44.asServiceRole.entities.Payroll.bulkCreate(created);
@@ -1013,10 +1015,11 @@ export default async function (req) {
       const whp = Number(o.work_hours_per_day) || 0;
       const absent_deduction = computeAbsentDeduction(gross, next.absent_days, next.absent_hours, wdh, whp);
       const net_salary = computeNetFromAttendance(gross, next.absent_days, next.absent_hours, wdh, whp, next.bonus, next.overtime_amount, next.deductions, next.loan_installment);
-      const { prepared_by_name: _n, prepared_by_id: _i, id: _id, ...rest } = next;
-      void _n; void _i; void _id;
-      await base44.asServiceRole.entities.Payroll.update(id, { ...payload, gross_salary: gross, absent_deduction, net_salary });
-      return Response.json({ ok: true, row: { ...rest, ...payload, gross_salary: gross, absent_deduction, net_salary, prepared_by_name: p.prepared_by_name, prepared_by_id: p.prepared_by_id } });
+      const prepUpd = preparerIdentity();
+      const { id: _id, ...rest } = next;
+      void _id;
+      await base44.asServiceRole.entities.Payroll.update(id, { ...payload, gross_salary: gross, absent_deduction, net_salary, ...prepUpd });
+      return Response.json({ ok: true, row: { ...rest, ...payload, gross_salary: gross, absent_deduction, net_salary, ...prepUpd } });
     }
 
     if (action === "payroll_approve") {
@@ -1038,9 +1041,10 @@ export default async function (req) {
       if (!month || !year) return Response.json({ ok: false, error: "missing" }, { status: 400 });
       const pays: any[] = await base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000);
       const today = todayISO();
+      const prepPay = preparerIdentity();
       const updates = (pays || [])
         .filter((p) => p.status === "approved" && p.include_in_payroll !== false)
-        .map((p) => ({ id: p.id, status: "paid", paid_date: today }));
+        .map((p) => ({ id: p.id, status: "paid", paid_date: today, ...prepPay }));
       if (updates.length) await base44.asServiceRole.entities.Payroll.bulkUpdate(updates);
       return Response.json({ ok: true, paid: updates.length });
     }
@@ -1050,9 +1054,10 @@ export default async function (req) {
       const month = Number(body.month), year = Number(body.year);
       if (!month || !year) return Response.json({ ok: false, error: "missing" }, { status: 400 });
       const pays: any[] = await base44.asServiceRole.entities.Payroll.filter({ month, year }, "-created_date", 1000);
+      const prepRe = preparerIdentity();
       const updates = (pays || [])
         .filter((p) => p.status === "paid")
-        .map((p) => ({ id: p.id, status: "approved", paid_date: null }));
+        .map((p) => ({ id: p.id, status: "approved", paid_date: null, ...prepRe }));
       if (updates.length) await base44.asServiceRole.entities.Payroll.bulkUpdate(updates);
       return Response.json({ ok: true, reopened: updates.length });
     }
