@@ -209,7 +209,7 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
 
             <Block title={isAr ? "سجل الإجازات" : "Leave requests"}>
               {leaves.length === 0 ? (
-                <div className="text-sm text-muted-foreground">—</div>
+                <div className="text-sm text-muted-foreground py-1">{isAr ? "لا توجد طلبات إجازات مسجّلة لهذا الموظف." : "No leave requests recorded for this employee."}</div>
               ) : leaves.map((r) => {
                 const stages = [
                   { label: isAr ? "طلب الموظف" : "Employee request", who: r.employee_name, date: (r.created_date || "").slice(0, 10), note: r.reason, doc: r.medical_report_url, done: true },

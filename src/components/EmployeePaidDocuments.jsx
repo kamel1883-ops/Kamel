@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { Download, FileText, Printer, Plane, Wallet, CalendarCheck, FileCheck2 } from "lucide-react";
 import SettlementSheet from "@/components/SettlementSheet";
@@ -47,9 +48,18 @@ export default function EmployeePaidDocuments({ employee, org }) {
     days: (n) => `${n} days`, lwd: "Last working day", issued: "Issued", amount: "Amount", dest: "Destination",
   };
 
+  useEffect(() => {
+    const after = () => setPrinting(null);
+    window.addEventListener("afterprint", after);
+    return () => window.removeEventListener("afterprint", after);
+  }, []);
+
   const printSet = (rec) => {
     setPrinting(rec);
-    setTimeout(() => { window.print(); setPrinting(null); }, 150);
+    let done = false;
+    const run = () => { if (done) return; done = true; window.print(); };
+    // انتظر حتى يستقر تركيب المخالصة في DOM (بوابة body) قبل فتح الطباعة
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(run, 60)));
   };
 
   const hasAny = docLeaves.length > 0 || docSets.length > 0 || docLoans.length > 0 || docTrips.length > 0;
@@ -165,10 +175,11 @@ export default function EmployeePaidDocuments({ employee, org }) {
         </div>
       ))}
 
-      {printing && (
+      {printing && createPortal(
         <div className="print-mount" aria-hidden="true">
           <SettlementSheet record={printing} org={org} />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
