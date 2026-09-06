@@ -189,7 +189,7 @@ export function buildOrgHTML(_ref) {
   const style =
     "@page { size: A4; margin: 12mm; }" +
     "body { font-family: 'Tajawal','IBM Plex Sans Arabic','Arial',sans-serif; color:#0f172a; margin:0; }" +
-    ".doc { max-width:1000px; margin:0 auto; }" +
+    ".doc { width:100%; max-width:1000px; margin:0 auto; }" +
     ".head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:14px; border-bottom:2px solid #7c3aed; margin-bottom:16px; }" +
     ".head h1 { font-size:20px; margin:0; }" +
     ".head .sub { font-size:11px; color:#64748b; margin-top:4px; }" +
@@ -232,7 +232,7 @@ export function buildOrgHTML(_ref) {
     ".orphans { margin-top:26px; }" +
     ".orphans-h { font-size:12px; font-weight:700; color:#475569; margin-bottom:8px; }" +
     ".chip { display:inline-block; font-size:11px; padding:4px 10px; margin:3px; border:1px solid #e2e8f0; border-radius:6px; background:#f8fafc; }" +
-    "@media print { body { print-color-adjust:exact; -webkit-print-color-adjust:exact; } .org-chart ul { flex-wrap:nowrap; } }";
+    "@media print { body { print-color-adjust:exact; -webkit-print-color-adjust:exact; } .doc { max-width:none; width:100%; } .org-chart ul { flex-wrap:wrap; } }";
 
   return "<!DOCTYPE html>" +
     "<html xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns=\"http://www.w3.org/TR/REC-html40\" dir=\"" + (isAr ? "rtl" : "ltr") + "\" lang=\"" + (isAr ? "ar" : "en") + "\">" +
