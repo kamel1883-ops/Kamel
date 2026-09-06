@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,15 @@ import { Building2, Mail, Lock, Hash, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import AssistantAvatar from "@/components/AssistantAvatar";
+import { useNativeGate } from "@/components/NativeAppNotice";
 import { useI18n } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function CompanyLogin() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const navigate = useNavigate();
+  const { gate, notice } = useNativeGate();
   const t = isAr
     ? {
         title: "بوابة الشركات",
@@ -95,7 +98,7 @@ export default function CompanyLogin() {
       footer={
         <div className="flex flex-col items-center gap-1.5">
           <span>{t.noAccount}{" "}
-            <Link to="/company-register" className="text-primary font-medium hover:underline">{t.register}</Link>
+            <button type="button" onClick={() => gate(() => navigate("/company-register"))} className="text-primary font-medium hover:underline">{t.register}</button>
           </span>
           <Link to="/" className="text-xs text-muted-foreground hover:underline">{t.back}</Link>
         </div>
@@ -137,6 +140,7 @@ export default function CompanyLogin() {
         </Button>
       </form>
     </AuthLayout>
+    {notice}
     </>
   );
 }

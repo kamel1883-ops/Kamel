@@ -9,6 +9,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import AuthLayout from "@/components/AuthLayout";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { toast } from "@/components/ui/use-toast";
+import { isNativeApp, NativeAppBlocked } from "@/components/NativeAppNotice";
 import { useI18n } from "@/lib/i18n";
 
 export default function CompanyRegister() {
@@ -92,6 +93,15 @@ export default function CompanyRegister() {
   const [captcha, setCaptcha] = useState("");
   const [captchaKey, setCaptchaKey] = useState(0);
   const [pending, setPending] = useState(false);
+
+  if (isNativeApp()) {
+    return (
+      <NativeAppBlocked
+        title={isAr ? "إنشاء الحساب غير متاح داخل التطبيق" : "Account creation not available in-app"}
+        subtitle={isAr ? "لإنشاء حساب منشأتك، يرجى فتح المنصة من متصفح الكمبيوتر أو اللابتوب على العنوان jadara-hr.com" : "To create your company account, please open the platform from a desktop or laptop browser at jadara-hr.com"}
+      />
+    );
+  }
 
   const resetCaptcha = () => { setCaptcha(""); setCaptchaKey((k) => k + 1); };
 

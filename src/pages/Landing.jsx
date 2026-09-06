@@ -15,6 +15,7 @@ import SeasonalHero from "@/components/landing/SeasonalHero";
 import SeasonalDiscountBanner from "@/components/landing/SeasonalDiscountBanner";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
+import { useNativeGate } from "@/components/NativeAppNotice";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
   Calculator, Target, Car, BarChart3, Zap, Phone, Mail, Building2,
@@ -130,6 +131,7 @@ const fadeUp = {
 export default function Landing() {
   const { lang } = useI18n();
   const navigate = useNavigate();
+  const { gate, notice } = useNativeGate();
   const isAr = lang === "ar";
   const features = isAr ? featuresAr : featuresEn;
   const licenses = isAr ? licensesAr : licensesEn;
@@ -266,7 +268,7 @@ export default function Landing() {
             <LanguageToggle />
             <Link to="/portal" className="text-base text-foreground/70 hover:text-violet-700 px-4 py-2 rounded-lg hidden sm:block">{t.portal}</Link>
             <Link to="/company-login" className="text-base text-foreground/70 hover:text-violet-700 px-4 py-2 rounded-lg hidden sm:block">{t.login}</Link>
-            <button onClick={() => navigate("/quote")} className="text-base bg-violet-600 hover:bg-violet-700 px-5 py-2.5 rounded-xl font-semibold text-white shadow-lg shadow-violet-600/30 transition">{t.start}</button>
+            <button onClick={() => gate(() => navigate("/quote"))} className="text-base bg-violet-600 hover:bg-violet-700 px-5 py-2.5 rounded-xl font-semibold text-white shadow-lg shadow-violet-600/30 transition">{t.start}</button>
           </div>
         </div>
       </header>
@@ -293,7 +295,7 @@ export default function Landing() {
             <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-2xl text-center sm:text-start">
               <p className="text-foreground/70 text-base sm:text-lg leading-relaxed mb-5">{t.heroDesc}</p>
               <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-                <button onClick={() => navigate("/quote")} className="bg-white hover:bg-slate-100 border-2 border-black text-foreground px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-black/20 flex items-center gap-2 transition">
+                <button onClick={() => gate(() => navigate("/quote"))} className="bg-white hover:bg-slate-100 border-2 border-black text-foreground px-6 py-3.5 rounded-2xl font-semibold shadow-xl shadow-black/20 flex items-center gap-2 transition">
                   <Zap size={18} /> {t.cta1}
                 </button>
                 <button onClick={() => scrollTo("features")} className="bg-white hover:bg-slate-100 border-2 border-black text-foreground px-6 py-3.5 rounded-2xl font-medium shadow-xl shadow-black/20 flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
@@ -485,7 +487,7 @@ export default function Landing() {
       <HostingSpecs isAr={isAr} />
 
       {/* الباقات */}
-      <PricingColumns isAr={isAr} onStartTrial={() => navigate("/quote")} onBuyTier={(tier) => navigate(`/quote?tier=${tier.id}`)} />
+      <PricingColumns isAr={isAr} onStartTrial={() => gate(() => navigate("/quote"))} onBuyTier={(tier) => gate(() => navigate(`/quote?tier=${tier.id}`))} />
 
       {/* شارك جدارة */}
       <section id="share" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-12 text-center">
@@ -562,6 +564,7 @@ export default function Landing() {
         <div className="text-center text-muted-foreground/70 text-base pb-6">{t.copy}</div>
       </footer>
 
+      {notice}
     </div>
   );
 }

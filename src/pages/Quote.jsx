@@ -11,6 +11,7 @@ import { Image } from "@/components/ui/image";
 import { Printer, Loader2, ArrowLeft, Copy, Check, MessageCircle, ShieldCheck, AlertTriangle, Building2, Sparkles, UserPlus, Banknote } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { isNativeApp, NativeAppBlocked } from "@/components/NativeAppNotice";
 import { getReferral } from "@/lib/referral";
 import { PROVIDER_BANK, IBAN_CERT_URL } from "@/lib/providerIdentity";
 import ProviderStamp from "@/components/docs/ProviderStamp";
@@ -196,6 +197,15 @@ export default function Quote() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (isNativeApp()) {
+    return (
+      <NativeAppBlocked
+        title={isAr ? "هذه الخدمة غير متاحة داخل التطبيق" : "This service is not available in-app"}
+        subtitle={isAr ? "لطلب عرض سعر أو تفعيل التجربة أو الاشتراك، يرجى فتح المنصة من متصفح الكمبيوتر أو اللابتوب على العنوان jadara-hr.com" : "To request a quote, start a trial, or subscribe, please open the platform from a desktop or laptop browser at jadara-hr.com"}
+      />
+    );
+  }
 
   const submit = async (e) => {
     e.preventDefault();
