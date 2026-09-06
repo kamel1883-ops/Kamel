@@ -208,6 +208,22 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   .print-jobdesc .jd-header { break-inside: avoid; page-break-inside: avoid; }
   .print-jobdesc .jd-meta { break-inside: avoid; page-break-inside: avoid; }
 
+  .print-jobcard, .print-jobcard * { visibility: visible !important; }
+  .print-jobcard { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
+  .print-jobcard .no-print { display: none !important; }
+  .print-jobcard .jc-header, .print-jobcard .jc-title-block, .print-jobcard .jc-meta,
+  .print-jobcard .jc-section, .print-jobcard .jc-block { break-inside: avoid; page-break-inside: avoid; }
+  .print-jobcard h1, .print-jobcard h2, .print-jobcard h3, .print-jobcard h4 { break-after: avoid; page-break-after: avoid; }
+  /* تنسيق Markdown المُعرَض داخل البطاقة الوظيفية */
+  .print-jobcard .jc-md h1, .print-jobcard .jc-md h2, .print-jobcard .jc-md h3, .print-jobcard .jc-md h4 { font-weight: 800; color: #0f172a; margin: 0.6em 0 0.35em; }
+  .print-jobcard .jc-md h1 { font-size: 14px; } .print-jobcard .jc-md h2 { font-size: 13px; }
+  .print-jobcard .jc-md h3 { font-size: 12.5px; } .print-jobcard .jc-md h4 { font-size: 12px; }
+  .print-jobcard .jc-md p { margin: 0.4em 0; }
+  .print-jobcard .jc-md ul, .print-jobcard .jc-md ol { padding-inline-start: 1.4em; margin: 0.4em 0; }
+  .print-jobcard .jc-md li { margin: 0.25em 0; }
+  .print-jobcard .jc-md strong { font-weight: 800; color: #0f172a; }
+  .print-jobcard .jc-md hr { border: 0; border-top: 1px solid #e2e8f0; margin: 0.6em 0; }
+
   .print-payroll, .print-payroll * { visibility: visible !important; }
   .print-payroll { position: absolute; top: 0; right: 0; left: 0; width: 100%; margin: 0; padding: 24px; background: #fff; color: #111; }
   .print-payroll .no-print { display: none !important; }
