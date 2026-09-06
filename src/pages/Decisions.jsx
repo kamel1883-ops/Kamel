@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import DecisionFormDialog from "@/components/decisions/DecisionFormDialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollText, Plus, Eye, Trash2, Archive } from "lucide-react";
+import { ScrollText, Plus, Eye, Trash2, Archive, Printer } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -27,13 +27,13 @@ export default function Decisions() {
   const t = isAr ? {
     title: "القرارات الإدارية", sub: "إصدار القرارات وإرسالها لبوابة الموظف (7 لغات) — محفوظة بتاريخها وصيغتها للرجوع مستقبلاً.",
     issue: "إصدار قرار جديد", empty: "لا توجد قرارات بعد", num: "الرقم", type: "النوع", titleL: "العنوان", target: "النطاق", issued: "الإصدار", effective: "النفاذ", status: "الحالة", by: "أصدره", actions: "إجراءات",
-    view: "عرض الصيغة", del: "حذف", archive: "أرشفة", confirmDel: "حذف هذا القرار نهائياً؟",
+    view: "عرض الصيغة", del: "حذف", archive: "أرشفة", print: "طباعة", confirmDel: "حذف هذا القرار نهائياً؟",
     targetAll: "الجميع", targetDept: "قسم", targetEmp: "موظف", langAr: "العربية",
     issued2: "صدر", effL: "ينفذ", revoked: "مؤرشف", active: "ساري",
   } : {
     title: "Administrative Decisions", sub: "Issue decisions and publish them to the employee portal (7 languages) — preserved with date and wording for future reference.",
     issue: "New decision", empty: "No decisions yet", num: "Number", type: "Type", titleL: "Title", target: "Scope", issued: "Issued", effective: "Effective", status: "Status", by: "By", actions: "Actions",
-    view: "View wording", del: "Delete", archive: "Archive", confirmDel: "Delete this decision permanently?",
+    view: "View wording", del: "Delete", archive: "Archive", print: "Print", confirmDel: "Delete this decision permanently?",
     targetAll: "All", targetDept: "Department", targetEmp: "Employee", langAr: "Arabic",
     issued2: "Issued", effL: "Effective", revoked: "Archived", active: "Active",
   };
@@ -71,6 +71,55 @@ export default function Decisions() {
     load();
   };
 
+  const printDecision = (r) => {
+    const lc = localized(r, isAr ? "ar" : "en");
+    const typeLabel = (TYPE_LABEL[isAr ? "ar" : "en"])[r.decision_type] || r.decision_type;
+    const targetLabel = r.target === "all" ? t.targetAll : r.target === "department" ? `${t.targetDept}: ${r.department}` : `${t.targetEmp}: ${r.employee_name}`;
+    const orgName = (typeof window !== "undefined" && window.__jadaraOrgName) || (isAr ? "جدارة" : "Jadara");
+    const docTitle = isAr ? "قرار إداري" : "Administrative Decision";
+    const html = `<!DOCTYPE html><html dir="${isAr ? "rtl" : "ltr"}" lang="${isAr ? "ar" : "en"}"><head><meta charset="utf-8"><title>${(lc.title || r.title || "").replace(/"/g, "")}</title><style>
+      @page{size:A4;margin:18mm;}
+      body{font-family:'Tajawal','IBM Plex Sans Arabic',Arial,sans-serif;color:#0f172a;margin:0;}
+      .doc{max-width:780px;margin:0 auto;padding:8px 0;}
+      .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #7c3aed;padding-bottom:12px;margin-bottom:18px;}
+      .org{font-size:13px;font-weight:700;color:#7c3aed;}
+      .h1{font-size:20px;font-weight:800;margin:4px 0 2px;}
+      .meta{font-size:11px;color:#64748b;}
+      .brand{font-size:11px;color:#94a3b8;text-align:left;}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 20px;}
+      .chip{font-size:11px;padding:5px 12px;border-radius:9999px;background:#f5f3ff;border:1px solid #e9d8fd;color:#4c1d95;}
+      .num{font-family:monospace;background:#fffbeb;border-color:#fde68a;color:#92400e;}
+      .body-title{font-size:17px;font-weight:800;margin:10px 0 12px;color:#0f172a;}
+      .body{font-size:14px;line-height:2;white-space:pre-wrap;text-align:justify;}
+      .foot{margin-top:34px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center;}
+      @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}}
+    </style></head><body><div class="doc">
+      <div class="head">
+        <div>
+          <div class="org">${orgName.replace(/</g,"<")}</div>
+          <div class="h1">${docTitle}</div>
+          <div class="meta">${t.num}: ${r.decision_number || ""}</div>
+        </div>
+        <div class="brand">${isAr ? "جدارة — الموارد البشرية" : "Jadara HR"}</div>
+      </div>
+      <div class="chips">
+        <span class="chip num">${r.decision_number || ""}</span>
+        <span class="chip">${typeLabel}</span>
+        <span class="chip">${t.target}: ${targetLabel}</span>
+        <span class="chip">${t.issued2}: ${r.issued_date || "—"}</span>
+        ${r.effective_date ? `<span class="chip">${t.effL}: ${r.effective_date}</span>` : ""}
+        ${r.created_by_name ? `<span class="chip">${t.by}: ${r.created_by_name}</span>` : ""}
+      </div>
+      <div class="body-title">${(lc.title || r.title || "").replace(/</g,"<")}</div>
+      <div class="body">${(lc.body || r.body || "").replace(/</g,"<")}</div>
+      <div class="foot">${isAr ? "تم إنشاء هذا المستند عبر نظام جدارة للموارد البشرية" : "Generated by Jadara HR System"}</div>
+    </div></body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.open(); w.document.write(html); w.document.close(); w.focus();
+    setTimeout(() => { try { w.print(); } catch (e) {} }, 400);
+  };
+
   return (
     <div>
       <PageHeader title={t.title} subtitle={t.sub} action={<Button onClick={() => setOpen(true)} className="gap-2"><Plus size={18} /> {t.issue}</Button>} />
@@ -105,6 +154,7 @@ export default function Decisions() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
                           <button onClick={() => setView(r)} className="p-1.5 rounded-md hover:bg-violet-50 text-violet-600" title={t.view}><Eye size={15} /></button>
+                          <button onClick={() => printDecision(r)} className="p-1.5 rounded-md hover:bg-violet-50 text-violet-600" title={t.print}><Printer size={15} /></button>
                           {r.status !== "archived" && <button onClick={() => archive(r)} className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500" title={t.archive}><Archive size={15} /></button>}
                           <button onClick={() => remove(r)} className="p-1.5 rounded-md hover:bg-rose-50 text-rose-600" title={t.del}><Trash2 size={15} /></button>
                         </div>
