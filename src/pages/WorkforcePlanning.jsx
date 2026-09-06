@@ -172,7 +172,6 @@ export default function WorkforcePlanning() {
                 {p.kpis && (<div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-2"><span className="font-medium text-foreground">{t.kpis}: </span>{p.kpis}</div>)}
                 <div className="flex justify-end gap-1 mt-3">
                   <Button size="sm" variant="outline" onClick={() => openEdit(p)} className="h-8 gap-1"><Pencil size={14} /> {t.edit}</Button>
-                  <Button size="sm" variant="ghost" onClick={() => remove(p.id)} className="h-8 text-rose-500"><Trash2 size={14} /></Button>
                 </div>
               </div>
             );

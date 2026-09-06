@@ -125,7 +125,6 @@ export default function Surveys() {
                 <IconBtn onClick={() => startEdit(s)} icon={Pencil} label={t.editT} cls="text-slate-600" />
                 {s.status === "draft" && <IconBtn onClick={() => changeStatus(s, "active")} icon={Star} label={t.activeBtn} cls="text-emerald-600" />}
                 {s.status === "active" && <IconBtn onClick={() => changeStatus(s, "closed")} icon={Star} label={t.closeBtn} cls="text-amber-600" />}
-                <IconBtn onClick={() => remove(s)} icon={Trash2} label="" cls="text-red-500" />
               </div>
             </div>
           ))}

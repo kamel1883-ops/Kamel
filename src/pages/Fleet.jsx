@@ -93,7 +93,6 @@ export default function Fleet() {
                 <div className="flex gap-1">
                   <button onClick={() => setDelegVehicle(v)} title="توكيل ووثيقة" className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><ScrollText size={15} /></button>
                   <button onClick={() => startEdit(v)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={15} /></button>
-                  <button onClick={() => remove(v)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={15} /></button>
                 </div>
               </div>
               {v.assigned_to && (() => { const oe = employees.find((e) => e.id === v.assigned_to); return (

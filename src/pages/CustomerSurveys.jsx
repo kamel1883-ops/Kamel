@@ -150,7 +150,6 @@ export default function CustomerSurveys() {
                         <Button size="sm" variant="outline" onClick={() => toggleStatus(s)} disabled={busyId === s.id} className="h-8 gap-1.5">
                           {s.status === "active" ? <><Lock size={13} /> {t.close}</> : <><Unlock size={13} /> {t.reopen}</>}
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => del(s)} disabled={busyId === s.id} className="h-8 text-muted-foreground hover:text-destructive"><Trash2 size={13} /></Button>
                       </div>
                     </td>
                   </tr>

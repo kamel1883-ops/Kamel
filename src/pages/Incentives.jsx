@@ -97,7 +97,6 @@ export default function Incentives() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
                           <button onClick={() => setView(r)} className="p-1.5 rounded-md hover:bg-violet-50 text-violet-600" title={t.view}><Eye size={15} /></button>
-                          <button onClick={() => remove(r)} className="p-1.5 rounded-md hover:bg-rose-50 text-rose-600" title={t.del}><Trash2 size={15} /></button>
                         </div>
                       </td>
                     </tr>

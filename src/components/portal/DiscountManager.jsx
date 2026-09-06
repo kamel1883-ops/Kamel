@@ -161,9 +161,6 @@ export default function DiscountManager({ session }) {
                         <Button size="sm" variant="ghost" onClick={() => toggle(c)} disabled={busy === c.id} className="h-8 gap-1.5">
                           {busy === c.id ? <Loader2 size={13} className="animate-spin" /> : <Power size={13} />} {t.toggle}
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => del(c)} disabled={busy === c.id} className="h-8 text-rose-600 gap-1.5">
-                          {busy === c.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />} {t.del}
-                        </Button>
                       </div>
                     </td>
                   </tr>

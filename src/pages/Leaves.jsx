@@ -209,7 +209,7 @@ export default function Leaves() {
                           </button>
                         )
                       ) : (
-                        <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
                   </TableRow>

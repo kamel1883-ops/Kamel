@@ -202,7 +202,7 @@ export default function BusinessTrips() {
                             </button>
                           )
                         ) : (
-                          <button onClick={() => remove(tr.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
+                          <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </div>
                     </TableCell>

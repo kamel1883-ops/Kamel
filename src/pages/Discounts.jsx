@@ -117,7 +117,6 @@ export default function Discounts() {
                           {c.status === "active" ? <PowerOff size={14} /> : <Power size={14} />}
                           {c.status === "active" ? t.disabled : t.active}
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => remove(c)} className="h-8 text-rose-600 hover:bg-rose-50">{isAr ? "حذف" : "Delete"}</Button>
                       </div>
                     </td>
                   </tr>

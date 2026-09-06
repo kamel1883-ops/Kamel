@@ -210,7 +210,6 @@ export default function Training() {
                   <div className="flex gap-1">
                     <Button size="icon" variant="ghost" onClick={() => setViewing(p)} title={t.detailsBtn}><Eye size={15} /></Button>
                     <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil size={15} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => del(p)}><Trash2 size={15} /></Button>
                   </div>
                 </div>
               </Card>

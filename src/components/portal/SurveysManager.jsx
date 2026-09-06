@@ -157,7 +157,6 @@ export default function SurveysManager({ session }) {
                             ? <Button size="sm" variant="ghost" onClick={() => setStatus(s, "closed")} disabled={busyId === s.id} className="h-8 text-slate-500">{t.closeBtn}</Button>
                             : <Button size="sm" variant="ghost" onClick={() => setStatus(s, "active")} disabled={busyId === s.id} className="h-8 text-emerald-600">{t.openBtn}</Button>}
                           <Button size="sm" variant="ghost" onClick={() => waShare(s)} className="gap-1.5 h-8 text-emerald-600"><Send size={13} /> WA</Button>
-                          <Button size="sm" variant="ghost" onClick={() => del(s)} disabled={busyId === s.id} className="h-8 text-rose-600"><Trash2 size={13} /></Button>
                         </div>
                       </td>
                     </tr>

@@ -137,7 +137,6 @@ export default function Succession() {
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button onClick={() => { setEditing(p); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={15} /></button>
-                    <button onClick={() => remove(p.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"><Trash2 size={15} /></button>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-3">

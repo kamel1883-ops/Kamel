@@ -252,7 +252,6 @@ export default function BranchManager({ open, onClose, onSaved }) {
                   <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => editBranch(b)} title={t.edit} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={15} /></button>
                     {!b.is_main && <button onClick={() => setMain(b)} title={t.setMain} className="p-2 rounded-lg hover:bg-amber-50 text-amber-600"><Star size={15} /></button>}
-                    <button onClick={() => remove(b)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={15} /></button>
                   </div>
                 </div>
               );

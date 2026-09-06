@@ -203,8 +203,7 @@ export default function Attendance() {
                           <SelectItem value="leave">{t.leave}</SelectItem>
                         </SelectContent>
                       </Select>
-                      <button onClick={() => remove(r)} className="text-red-500 text-xs mr-2">{t.del}</button>
-                    </td>
+                      </td>
                   </tr>
                 ))}
               </tbody>

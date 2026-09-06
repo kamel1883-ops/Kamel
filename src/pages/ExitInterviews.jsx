@@ -97,7 +97,6 @@ export default function ExitInterviews() {
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button onClick={() => startEdit(x)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><Pencil size={15} /></button>
-                    <button onClick={() => remove(x)} className="p-2 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={15} /></button>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3 text-xs">
