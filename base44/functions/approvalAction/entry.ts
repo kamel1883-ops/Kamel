@@ -1,5 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyToken } from "../../shared/portalToken.ts";
+import { notifyApproverForStatus } from "../../shared/approverNotify.ts";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -69,6 +70,8 @@ export default async function (req) {
           manager_status: "approved", manager_id: actorId, manager_name: actorName,
           manager_date: today(), status: "manager_approved",
         });
+        // تنبيه الموارد البشرية بوجود طلب سلفة انتقل لمرحلة اعتمادها
+        try { await notifyApproverForStatus(base44, { type: "loan", employeeId: r.employee_id, employeeName: r.employee_name, status: "manager_approved" }); } catch {}
       } else {
         await base44.asServiceRole.entities.LoanRequest.update(id, {
           manager_status: "rejected", manager_id: actorId, manager_name: actorName,
@@ -90,6 +93,8 @@ export default async function (req) {
           manager_status: "approved", manager_id: actorId, manager_name: actorName,
           manager_date: today(), status: "manager_approved",
         });
+        // تنبيه الموارد البشرية بوجود انتداب انتقل لمرحلة اعتمادها
+        try { await notifyApproverForStatus(base44, { type: "trip", employeeId: r.employee_id, employeeName: r.employee_name, status: "manager_approved" }); } catch {}
       } else {
         await base44.asServiceRole.entities.BusinessTrip.update(id, {
           manager_status: "rejected", manager_id: actorId, manager_name: actorName,
@@ -120,6 +125,8 @@ export default async function (req) {
           patch.monthly_installment = Math.round((newAmount / inst) * 100) / 100;
         }
         await base44.asServiceRole.entities.LoanRequest.update(id, patch);
+        // تنبيه المالية بوجود سلفة بانتظار الصرف
+        try { await notifyApproverForStatus(base44, { type: "loan", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch {}
       } else {
         await base44.asServiceRole.entities.LoanRequest.update(id, {
           hr_status: "rejected", hr_id: actorId, hr_name: actorName, hr_date: today(), hr_note: note,
@@ -141,6 +148,8 @@ export default async function (req) {
           approver_id: actorId, approver_name: actorName, approved_date: today(),
           hr_note: note, status: "awaiting_finance",
         });
+        // تنبيه المالية بوجود انتداب بانتظار الصرف
+        try { await notifyApproverForStatus(base44, { type: "trip", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch {}
       } else {
         await base44.asServiceRole.entities.BusinessTrip.update(id, {
           hr_note: note, status: "rejected",
@@ -163,6 +172,8 @@ export default async function (req) {
           manager_status: "approved", manager_id: actorId, manager_name: actorName,
           manager_date: today(), status: "manager_approved",
         });
+        // تنبيه الموارد البشرية بوجود طلب إجازة انتقل لمرحلة تصفيتها واعتمادها
+        try { await notifyApproverForStatus(base44, { type: "leave", employeeId: leave.employee_id, employeeName: leave.employee_name, status: "manager_approved" }); } catch {}
       } else {
         await base44.asServiceRole.entities.LeaveRequest.update(id, {
           manager_status: "rejected", manager_id: actorId, manager_name: actorName,

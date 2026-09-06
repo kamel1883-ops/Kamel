@@ -4,6 +4,7 @@ import {
   PAID_STATUSES, computeWorkDaysSet, computeWorkDaysInMonth,
   computeAbsentDeduction, computeNetFromAttendance,
 } from "../../shared/payrollCompute.ts";
+import { notifyApproverForStatus } from "../../shared/approverNotify.ts";
 
 // وصلة بيانات بوابة المالك/الموظف: تتحقق من رمز الجلسة الموقّع ثم ترد/تنشئ
 // بيانات الموظف (طلباته، حضوره، إنذاراته) وإنشاء طلبات إجازة/سلفة/انتداب وبصمة الحضور،
@@ -825,6 +826,8 @@ export default async function (req) {
         manager_status: "pending", hr_status: "pending", finance_status: "pending",
         manager_id, manager_name,
       });
+      // تنبيه المدير المباشر ببريد + إشعار داخلي بوجود طلب إجازة ينتظر موافقته
+      try { await notifyApproverForStatus(base44, { type: "leave", employeeId, employeeName: empLabel, status: "pending_manager" }); } catch {}
       return Response.json({ ok: true, leave: created });
     }
 
@@ -845,6 +848,8 @@ export default async function (req) {
         manager_id, manager_name,
         paid_amount: 0,
       });
+      // تنبيه المدير المباشر ببريد + إشعار داخلي بوجود طلب سلفة ينتظر موافقته
+      try { await notifyApproverForStatus(base44, { type: "loan", employeeId, employeeName: empLabel, status: "pending_manager" }); } catch {}
       return Response.json({ ok: true, loan });
     }
 
@@ -864,6 +869,8 @@ export default async function (req) {
         status: "pending_manager",
         manager_status: "pending", manager_id, manager_name,
       });
+      // تنبيه المدير المباشر ببريد + إشعار داخلي بوجود طلب انتداب ينتظر موافقته
+      try { await notifyApproverForStatus(base44, { type: "trip", employeeId, employeeName: empLabel, status: "pending_manager" }); } catch {}
       return Response.json({ ok: true, trip: created });
     }
 

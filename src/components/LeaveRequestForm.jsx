@@ -78,7 +78,11 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
         manager_status: "pending", hr_status: "pending", finance_status: "pending",
       };
       if (portalCreate) await portalCreate(payload);
-      else await base44.entities.LeaveRequest.create(payload);
+      else {
+        await base44.entities.LeaveRequest.create(payload);
+        // تنبيه المدير المباشر ببريد بوجود طلب إجازة ينتظر موافقته
+        try { await base44.functions.invoke("notifyApprover", { type: "leave", employeeId: form.employee_id, employeeName: emp?.full_name, status: "pending_manager" }); } catch {}
+      }
       onSaved?.(); onClose?.();
     } catch (error) {
       setErr(error?.message || t.fail);

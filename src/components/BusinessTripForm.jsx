@@ -76,7 +76,11 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
       };
       if (editing) await base44.entities.BusinessTrip.update(editing.id, payload);
       else if (portalCreate) await portalCreate({ ...payload, status: "pending_manager", manager_status: "pending" });
-      else await base44.entities.BusinessTrip.create({ ...payload, status: "pending_manager", manager_status: "pending" });
+      else {
+        await base44.entities.BusinessTrip.create({ ...payload, status: "pending_manager", manager_status: "pending" });
+        // تنبيه المدير المباشر ببريد بوجود طلب انتداب ينتظر موافقته
+        try { await base44.functions.invoke("notifyApprover", { type: "trip", employeeId: form.employee_id, employeeName: emp?.full_name, status: "pending_manager" }); } catch {}
+      }
       onSaved?.(); onClose?.();
     } catch (error) {
       setErr(error?.message || t.fail);

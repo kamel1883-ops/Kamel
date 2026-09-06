@@ -41,7 +41,11 @@ export default function LoanRequestForm({ open, onClose, onSaved, employee, port
         status: "pending_manager", manager_status: "pending", hr_status: "pending", finance_status: "pending",
       };
       if (portalCreate) await portalCreate(payload);
-      else await base44.entities.LoanRequest.create(payload);
+      else {
+        await base44.entities.LoanRequest.create(payload);
+        // تنبيه المدير المباشر ببريد بوجود طلب سلفة ينتظر موافقته
+        try { await base44.functions.invoke("notifyApprover", { type: "loan", employeeId: employee.id, employeeName: employee.full_name, status: "pending_manager" }); } catch {}
+      }
       onSaved?.(); onClose?.();
     } finally {
       setSaving(false);
