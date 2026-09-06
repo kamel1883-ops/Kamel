@@ -407,7 +407,7 @@ export default function ApprovalsPortal({ portalSession }) {
       {(() => {
         const docBtn = (url, label) => url ? (
           <a href={url} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-violet-700 text-white hover:bg-violet-800 whitespace-nowrap">
             <Download size={13} /> {label}
           </a>
         ) : <span className="text-xs text-muted-foreground">—</span>;
@@ -474,35 +474,63 @@ export default function ApprovalsPortal({ portalSession }) {
             {filtered.length === 0 ? (
               <div className="p-10 text-center text-muted-foreground text-sm">{t.finHistoryEmpty}</div>
             ) : (
-              <div className="rounded-2xl bg-white/50 backdrop-blur-md border border-white/60 overflow-hidden">
+              <div className="rounded-2xl bg-white border border-violet-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                  <div className="grid grid-cols-12 gap-2 px-3 py-2.5 bg-violet-500/10 text-xs font-semibold text-muted-foreground">
-                    <div className="col-span-3">{isAr ? "الموظف" : "Employee"}</div>
-                    <div className="col-span-2">{isAr ? "التاريخ" : "Date"}</div>
-                    <div className="col-span-2">{isAr ? "النوع" : "Type"}</div>
-                    <div className="col-span-2">{isAr ? "التفاصيل" : "Details"}</div>
-                    <div className="col-span-1">{isAr ? "الحالة" : "Status"}</div>
-                    <div className="col-span-1">{t.finPaidDate}</div>
-                    <div className="col-span-1 text-center">{isAr ? "المستند" : "Document"}</div>
-                  </div>
-                  {filtered.map((r) => (
-                    <div key={r.key} className="grid grid-cols-12 gap-2 px-3 py-2.5 text-xs border-t border-white/40 items-center">
-                      <div className="col-span-3 font-medium truncate">
-                        {r.emp}
-                        {r.nat && <div className="text-muted-foreground tabular-nums" dir="ltr">{r.nat}</div>}
-                      </div>
-                      <div className="col-span-2 text-muted-foreground">{r.date || "—"}</div>
-                      <div className="col-span-2">{r.kind}</div>
-                      <div className="col-span-2 text-muted-foreground truncate">{r.detail}</div>
-                      <div className="col-span-1"><span className={cn("px-1.5 py-0.5 rounded-full", badge(r.status))}>{r.status}</span></div>
-                      <div className="col-span-1 text-muted-foreground">{r.paidDate}</div>
-                      <div className="col-span-1 text-center flex items-center justify-center gap-1">
-                        {r.doc && docBtn(r.doc, r.docLabel)}
-                        {r.proof && !r.doc && docBtn(r.proof, t.finProof)}
-                        {!r.doc && !r.proof && <span className="text-xs text-muted-foreground">—</span>}
-                      </div>
-                    </div>
-                  ))}
+                  <table className="w-full text-xs border-collapse" style={{ tableLayout: "fixed" }}>
+                    <colgroup>
+                      <col style={{ width: "22%" }} />
+                      <col style={{ width: "14%" }} />
+                      <col style={{ width: "13%" }} />
+                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "10%" }} />
+                      <col style={{ width: "11%" }} />
+                      <col style={{ width: "12%" }} />
+                    </colgroup>
+                    <thead>
+                      <tr className="bg-violet-50 text-muted-foreground">
+                        <th className="text-right font-semibold px-3 py-3 border-b border-violet-100">{isAr ? "الموظف" : "Employee"}</th>
+                        <th className="text-right font-semibold px-3 py-3 border-b border-violet-100">{isAr ? "التاريخ" : "Date"}</th>
+                        <th className="text-right font-semibold px-3 py-3 border-b border-violet-100">{isAr ? "النوع" : "Type"}</th>
+                        <th className="text-right font-semibold px-3 py-3 border-b border-violet-100">{isAr ? "التفاصيل" : "Details"}</th>
+                        <th className="text-center font-semibold px-2 py-3 border-b border-violet-100">{isAr ? "الحالة" : "Status"}</th>
+                        <th className="text-right font-semibold px-3 py-3 border-b border-violet-100">{t.finPaidDate}</th>
+                        <th className="text-center font-semibold px-2 py-3 border-b border-violet-100">{isAr ? "المستند" : "Document"}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((r, i) => {
+                        const b = badge(r.status);
+                        return (
+                          <tr key={r.key} className={cn("align-middle", i % 2 === 0 ? "bg-white" : "bg-slate-50/70")}>
+                            <td className="px-3 py-2.5 border-b border-slate-100">
+                              <div className="font-medium text-foreground truncate">{r.emp}</div>
+                              {r.nat && <div className="text-muted-foreground tabular-nums mt-0.5" dir="ltr">{r.nat}</div>}
+                            </td>
+                            <td className="px-3 py-2.5 border-b border-slate-100">
+                              <span className="text-muted-foreground whitespace-nowrap" dir="ltr">{r.date || "—"}</span>
+                            </td>
+                            <td className="px-3 py-2.5 border-b border-slate-100">
+                              <span className="text-foreground">{r.kind}</span>
+                            </td>
+                            <td className="px-3 py-2.5 border-b border-slate-100">
+                              <span className="text-muted-foreground block truncate" dir="auto">{r.detail}</span>
+                            </td>
+                            <td className="px-2 py-2.5 border-b border-slate-100 text-center">
+                              <span className={cn("inline-block px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap", b.cls)}>{b.label}</span>
+                            </td>
+                            <td className="px-3 py-2.5 border-b border-slate-100">
+                              <span className="text-muted-foreground whitespace-nowrap" dir="ltr">{r.paidDate}</span>
+                            </td>
+                            <td className="px-2 py-2.5 border-b border-slate-100 text-center">
+                              {r.doc && docBtn(r.doc, r.docLabel)}
+                              {r.proof && !r.doc && docBtn(r.proof, t.finProof)}
+                              {!r.doc && !r.proof && <span className="text-muted-foreground">—</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
