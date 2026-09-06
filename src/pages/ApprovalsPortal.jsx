@@ -636,7 +636,7 @@ export default function ApprovalsPortal({ portalSession }) {
 
       {printing && createPortal(
         <div className="print-mount" aria-hidden="true">
-          <SettlementSheet record={printing} org={null} />
+          <SettlementSheet record={printing} org={data?.org} />
         </div>,
         document.body
       )}

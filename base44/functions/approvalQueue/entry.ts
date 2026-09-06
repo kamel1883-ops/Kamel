@@ -57,6 +57,13 @@ export default async function (req) {
     const myUn = String(myEmp.unified_number || "").trim();
     const sameTenant = (rec) => !!myUn && idToUn.get(rec.employee_id) === myUn;
 
+    // المنشأة المرتبطة بالمنسّقة الموحدة للمعتمد — لإظهار الشعار والاسم على المستندات المطبوعة.
+    const allOrgs = await base44.asServiceRole.entities.Organization.list("-created_date", 200);
+    const myOrg = (allOrgs || []).find((o) => {
+      const u = String(o.unified_number || "").trim();
+      return !!u && u === myUn;
+    }) || (allOrgs || [])[0] || null;
+
     const idToNat = new Map();
     const idToName = new Map();
     for (const e of allEmployees || []) {
@@ -88,7 +95,7 @@ export default async function (req) {
       const attendance = withNat((allAttendance || []).filter((a) => subIds.has(a.employee_id)));
       return Response.json({
         role: "manager",
-        myEmp,
+        myEmp, org: myOrg,
         actorId, actorName,
         subordinates: subs.map((s) => ({ id: s.id, full_name: s.full_name, department: s.department, position: s.position, national_id: s.national_id || "" })),
         leaves: withNat(bySub(allLeaves)),
@@ -110,7 +117,7 @@ export default async function (req) {
       ]);
       const loans = (allLoans || []).filter((l) => l.status === "pending" && sameTenant(l));
       const trips = (allTrips || []).filter((t) => t.status === "pending" && sameTenant(t));
-      return Response.json({ role: "hr", myEmp, actorId, actorName, loans: withNat(loans), trips: withNat(trips) });
+      return Response.json({ role: "hr", myEmp, org: myOrg, actorId, actorName, loans: withNat(loans), trips: withNat(trips) });
     }
 
     if (myEmp.is_approver_finance) {
@@ -130,7 +137,7 @@ export default async function (req) {
         .filter((r) => sameTenant(r) && !finStatuses.includes(r.status) && r.status !== "awaiting_finance")
         .map((r) => ({ ...r, employee_name: r.employee_name || idToName.get(r.employee_id) || "" }));
       return Response.json({
-        role: "finance", myEmp, actorId, actorName,
+        role: "finance", myEmp, org: myOrg, actorId, actorName,
         leaves: withNat(leaves), loans: withNat(loans), trips: withNat(trips), settlements: withNat(settlements),
         leaveHistory: withNat(doneFin(allLeaves)),
         loanHistory: withNat(doneFin(allLoans)),
