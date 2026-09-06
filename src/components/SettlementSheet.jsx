@@ -3,6 +3,7 @@ import BrandHeader from "@/components/docs/BrandHeader";
 import { formatCurrency } from "@/lib/hr";
 import { reasonMeta } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
+import { genDateBoth } from "@/lib/printDate";
 
 export default function SettlementSheet({ record, org }) {
   const { lang } = useI18n();
@@ -93,6 +94,7 @@ export default function SettlementSheet({ record, org }) {
         <Sign label={t.adminSign} />
       </div>
 
+      <div className="text-center text-[11px] text-slate-500 mt-6">{L ? "تاريخ الطباعة" : "Print date"}: {genDateBoth(L)}</div>
       <div className="text-center text-xs text-slate-400 mt-8">{t.footer(r.generated_date)}</div>
     </div>
   );

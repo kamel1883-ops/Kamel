@@ -1,6 +1,7 @@
 import React from "react";
 import BrandHeader from "@/components/docs/BrandHeader";
 import { leaveTypeLabel, formatCurrency } from "@/lib/hr";
+import { genDateBoth } from "@/lib/printDate";
 
 export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore, balanceAfter, daysCash, dailyWage }) {
   const requestDate = leave?.request_date || (leave?.created_date || "").slice(0, 10) || "—";
@@ -99,7 +100,10 @@ export default function LeaveClearanceDoc({ employee, leave, org, balanceBefore,
         <div>تاريخ تقديم الطلب: {requestDate}</div>
         <div>توقيع الموارد البشرية: .................................</div>
       </div>
-      <div style={{ marginTop: 28, fontSize: 9, color: "#94a3b8", textAlign: "center" }}>
+      <div style={{ marginTop: 10, fontSize: 10, color: "#475569", textAlign: "center" }}>
+        تاريخ الطباعة: {genDateBoth(true)}
+      </div>
+      <div style={{ marginTop: 8, fontSize: 9, color: "#94a3b8", textAlign: "center" }}>
         تم إنشاء هذا المستند آلياً بواسطة نظام جدارة لإدارة الموارد البشرية
       </div>
     </div>

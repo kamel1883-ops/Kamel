@@ -3,6 +3,7 @@ import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
 import { roleLabel } from "@/lib/orgTree";
 import { reasonMeta } from "@/lib/eos";
 import { fetchOrg, brandHeaderHtml, brandHeaderCss } from "@/lib/printBrand";
+import { genDateBoth } from "@/lib/printDate";
 
 const AMP = String.fromCharCode(38);
 const SEMI = String.fromCharCode(59);
@@ -26,10 +27,7 @@ function cell(cls, html) { return "<td class=\"" + cls + "\">" + html + "</td>";
 export async function printEmployeeList({ list, title, subtitle, isAr, org, kind }) {
   const dir = isAr ? "rtl" : "ltr";
   const lang = isAr ? "ar" : "en";
-  const now = new Date();
-  const dateStr = isAr
-    ? now.toLocaleDateString("ar-SA-u-ca-islamic-umalqura", { year: "numeric", month: "long", day: "numeric" })
-    : now.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+  const dateStr = genDateBoth(isAr);
 
   const orgData = org || (await fetchOrg());
   const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");

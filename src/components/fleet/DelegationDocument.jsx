@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import BrandHeader from "@/components/docs/BrandHeader";
 import { useI18n } from "@/lib/i18n";
+import { genDateBoth } from "@/lib/printDate";
 
 export default function DelegationDocument({ delegation, onClose }) {
   const { lang } = useI18n();
@@ -32,7 +33,7 @@ export default function DelegationDocument({ delegation, onClose }) {
           <BrandHeader org={org} />
           <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
             <span>رقم التوكيل: <b className="text-slate-700">{delegation.delegation_number}</b></span>
-            <span>تاريخ الإصدار: {new Date().toLocaleDateString("en-GB")}</span>
+            <span>تاريخ الإصدار: {genDateBoth(isAr)}</span>
           </div>
 
           <h2 className="text-center font-bold text-xl my-6 text-[#0B2545]">

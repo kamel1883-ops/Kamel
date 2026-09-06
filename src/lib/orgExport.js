@@ -1,4 +1,5 @@
 import { orgStats, roleLabel, employeeDisplayName } from "@/lib/orgTree";
+import { genDateBoth } from "@/lib/printDate";
 
 const ROLE_COLORS = {
   owner: "#b45309",
@@ -34,13 +35,7 @@ function escapeHtml(s) {
 }
 
 function formatDate(lang) {
-  try {
-    return new Date().toLocaleDateString(lang === "ar" ? "ar-SA" : "en-GB", {
-      year: "numeric", month: "long", day: "numeric",
-    });
-  } catch {
-    return new Date().toISOString().slice(0, 10);
-  }
+  return genDateBoth(lang === "ar");
 }
 
 // تجميع الموظفين حسب القسم، ثم داخل كل قسم حسب المسمى الوظيفي

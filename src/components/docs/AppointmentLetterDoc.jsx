@@ -1,12 +1,13 @@
 import React from "react";
 import BrandHeader from "@/components/docs/BrandHeader";
+import { genDateBoth } from "@/lib/printDate";
 
 const fmt = (d) => {
   try { return new Date(d).toLocaleDateString("ar-SA-u-ca-gregory", { year: "numeric", month: "long", day: "numeric" }); } catch { return String(d || ""); }
 };
 
 export default function AppointmentLetterDoc({ applicant, job, org, preparedBy }) {
-  const today = fmt(new Date());
+  const today = genDateBoth(true);
   const hireDate = applicant?.hired_date || today;
   const probEnd = new Date(new Date(hireDate).getTime() + 90 * 24 * 3600 * 1000);
   return (

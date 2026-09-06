@@ -1,5 +1,6 @@
 // طباعة عامة لجدول بيانات كمستند PDF عبر طباعة المتصفح — تستخدمها أقسام الأداء/التدريب/تخطيط القوى العاملة/التعاقب.
 import { fetchOrg, brandHeaderHtml, brandHeaderCss } from "@/lib/printBrand";
+import { genDateBoth } from "@/lib/printDate";
 const AMP = String.fromCharCode(38);
 const SEMI = String.fromCharCode(59);
 const ENT = {
@@ -20,10 +21,7 @@ function fmtNum(n) {
 
 export async function printSection({ title, subtitle, isAr, org, columns, rows, summary }) {
   const dir = isAr ? "rtl" : "ltr";
-  const now = new Date();
-  const dateStr = isAr
-    ? now.toLocaleDateString("ar-SA-u-ca-islamic-umalqura", { year: "numeric", month: "long", day: "numeric" })
-    : now.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+  const dateStr = genDateBoth(isAr);
 
   const orgData = org || (await fetchOrg());
   const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
