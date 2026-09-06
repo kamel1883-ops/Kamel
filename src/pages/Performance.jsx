@@ -4,11 +4,12 @@ import PageHeader from "@/components/PageHeader";
 import PerformanceForm from "@/components/PerformanceForm";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Star, Target, TrendingUp, Award, ArrowUpRight, RotateCcw, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Target, TrendingUp, Award, ArrowUpRight, RotateCcw, Search, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
+import { printSection } from "@/lib/sectionPrint";
 
 export default function Performance() {
   const { lang } = useI18n();
@@ -39,6 +40,7 @@ export default function Performance() {
     promoH: "مرشحو الترقية", promoEmpty: "لا يوجد مرشحون للترقية حالياً",
     reopen: "إعادة التقييم", reopenAsk: "سيُعاد فتح هذا التقييم كمسودة لإعادة التقييم. متابعة؟",
     searchId: "بحث برقم الهوية...", noMatch: "لا توجد نتائج مطابقة لرقم الهوية",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Performance & career paths", subtitle: "Periodic performance reviews and career path management", add: "New review",
     tabReviews: "Performance reviews", tabPaths: "Career paths",
@@ -48,6 +50,7 @@ export default function Performance() {
     promoH: "Promotion candidates", promoEmpty: "No promotion candidates currently",
     reopen: "Re-evaluate", reopenAsk: "This review will be reopened as a draft for re-evaluation. Continue?",
     searchId: "Search by ID...", noMatch: "No results match this ID",
+    exportPdf: "Export PDF",
   };
 
   const [reviews, setReviews] = useState([]);
@@ -97,9 +100,38 @@ export default function Performance() {
   const filteredLadder = gradeLadder.map(({ grade, emps }) => ({ grade, emps: q ? emps.filter((e) => matchIds.has(e.id)) : emps })).filter((g) => g.emps.length > 0);
   const filteredPromos = q ? promotionCandidates.filter((r) => matchIds.has(r.employee_id)) : promotionCandidates;
 
+  const exportPdf = () => {
+    const empName = (id) => employees.find((e) => e.id === id)?.full_name || "—";
+    const empNat = (id) => employees.find((e) => e.id === id)?.national_id || "—";
+    const recL = (v) => (recLabel[v] || recLabel.none).label;
+    const stL = (v) => (statusLabel[v] || statusLabel.draft).label;
+    const columns = isAr ? [
+      { label: "الموظف" }, { label: "الهوية", num: true }, { label: "الإدارة" },
+      { label: "الفترة" }, { label: "التقييم", num: true }, { label: "التوصية" },
+      { label: "الحالة" }, { label: "الدرجة الحالية" }, { label: "الدرجة المستهدفة" },
+    ] : [
+      { label: "Employee" }, { label: "National ID", num: true }, { label: "Department" },
+      { label: "Period" }, { label: "Rating", num: true }, { label: "Recommendation" },
+      { label: "Status" }, { label: "Current grade" }, { label: "Target grade" },
+    ];
+    const rows = filteredReviews.map((r) => [
+      empName(r.employee_id), empNat(r.employee_id), r.department || "—",
+      t.perYear(r.period_year, r.review_period),
+      r.overall_rating > 0 ? (Math.round(r.overall_rating * 10) / 10) + " / 5" : "—",
+      recL(r.recommendation), stL(r.status),
+      r.current_grade || "—", r.target_grade || "—",
+    ]);
+    printSection({ title: t.title, subtitle: t.tabReviews, isAr, columns, rows });
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
-      <PageHeader title={t.title} subtitle={t.subtitle} action={<Button onClick={() => { setEditing(null); setShowForm(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>} />
+      <PageHeader title={t.title} subtitle={t.subtitle} action={(
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportPdf} className="gap-2" disabled={filteredReviews.length === 0}><Printer size={17} /> {t.exportPdf}</Button>
+          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="gap-2"><Plus size={18} /> {t.add}</Button>
+        </div>
+      )} />
 
       <div className="relative max-w-md mt-2 mb-3">
         <Search size={16} className="absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground pointer-events-none" />

@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, GraduationCap, Search, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, GraduationCap, Search, Eye, Printer } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
 import TrainingPlanFormDialog from "@/components/training/TrainingPlanFormDialog";
 import TrainingPlanDetailsDialog from "@/components/training/TrainingPlanDetailsDialog";
+import { printSection } from "@/lib/sectionPrint";
 
 const parseIds = (s) => {
   try { const v = JSON.parse(s || "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
@@ -38,6 +39,7 @@ export default function Training() {
     goal: "الهدف",
     sar: "ريال",
     detailsBtn: "استعلام/التفاصيل",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Training & Development",
     subtitle: "Manage training plans for employees and departments and track their goals and costs",
@@ -57,6 +59,7 @@ export default function Training() {
     goal: "Goal",
     sar: "SAR",
     detailsBtn: "View / details",
+    exportPdf: "Export PDF",
   };
 
   const statusMap = {
@@ -118,10 +121,39 @@ export default function Training() {
     return false;
   });
 
+  const exportPdf = () => {
+    const columns = isAr ? [
+      { label: "عنوان الخطة" }, { label: "النطاق" }, { label: "المشمولون", num: true },
+      { label: "الحالة" }, { label: "التكلفة (ر.س)", num: true }, { label: "البداية" }, { label: "النهاية" },
+    ] : [
+      { label: "Plan title" }, { label: "Scope" }, { label: "Participants", num: true },
+      { label: "Status" }, { label: "Cost (SAR)", num: true }, { label: "Start" }, { label: "End" },
+    ];
+    const rows = filtered.map((p) => {
+      const st = statusMap[p.status] || statusMap.draft;
+      const ids = parseIds(p.employee_ids);
+      const count = ids.length || (p.employee_names ? p.employee_names.split(isAr ? "،" : ",").length : 0);
+      return [
+        p.title || "—",
+        p.scope === "department" ? t.scopeDept + ": " + (p.department || "—") : t.scopeIndiv,
+        count, isAr ? st.ar : st.en,
+        p.cost || 0, p.start_date || "—", p.end_date || "—",
+      ];
+    });
+    const summary = [
+      { label: t.sar, value: filtered.reduce((s, p) => s + (Number(p.cost) || 0), 0).toLocaleString() },
+      { label: isAr ? "خطط" : "Plans", value: filtered.length },
+    ];
+    printSection({ title: t.title, subtitle: t.subtitle, isAr, columns, rows, summary });
+  };
+
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} action={
-        <Button onClick={openNew}><Plus size={16} /> {t.newPlan}</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportPdf} disabled={filtered.length === 0}><Printer size={16} /> {t.exportPdf}</Button>
+          <Button onClick={openNew}><Plus size={16} /> {t.newPlan}</Button>
+        </div>
       } />
 
       <div className="bg-white rounded-2xl border border-border p-3 mb-4 flex items-center gap-2">
