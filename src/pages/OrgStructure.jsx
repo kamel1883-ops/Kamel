@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Network, Users, Crown, Briefcase, ClipboardList, RefreshCw } from "lucide-react";
+import { Network, Users, Crown, Briefcase, ClipboardList, RefreshCw, FileText, FileType2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { buildOrgTree, orgStats, ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
 import OrgChart from "@/components/OrgChart";
+import { printOrgChartPDF, downloadOrgWord } from "@/lib/orgExport";
 
 export default function OrgStructure() {
   const { lang } = useI18n();
@@ -21,6 +22,7 @@ export default function OrgStructure() {
     reportsTo: "يرفع تقاريره إلى", deptMgr: "مدير الإدارة", noMgr: "غير محدد",
     members: "أعضاء", orphans: "بدون مدير مباشر",
     refresh: "تحديث", legend: "مفتاح المستويات",
+    exportPdf: "طباعة PDF", exportWord: "تصدير Word",
     roleCount: (label, n) => `${label}: ${n}`,
   } : {
     title: "Organizational structure", subtitle: "Auto-built from employee data: Owner → Executive → Department managers → Supervisors → Staff & workers.",
@@ -30,20 +32,28 @@ export default function OrgStructure() {
     reportsTo: "Reports to", deptMgr: "Department manager", noMgr: "Not set",
     members: "members", orphans: "No direct manager",
     refresh: "Refresh", legend: "Role legend",
+    exportPdf: "Print PDF", exportWord: "Export Word",
     roleCount: (label, n) => `${label}: ${n}`,
   };
 
   const [employees, setEmployees] = useState([]);
+  const [org, setOrg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("chart");
 
   const load = async () => {
     setLoading(true);
-    const list = await base44.entities.Employee.list("-created_date", 1000);
+    const [list, orgs] = await Promise.all([
+      base44.entities.Employee.list("-created_date", 1000),
+      base44.entities.Organization.list("-created_date", 5).catch(() => []),
+    ]);
     setEmployees(list);
+    setOrg((orgs && orgs[0]) || null);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+
+  const exportOpts = { employees, lang, orgName: org?.name || "", logoUrl: org?.logo_url || "" };
 
   const tree = buildOrgTree(employees);
   const stats = orgStats(employees);
@@ -93,7 +103,13 @@ export default function OrgStructure() {
       <PageHeader
         title={t.title}
         subtitle={t.subtitle}
-        action={<Button variant="outline" onClick={load} className="gap-2"><RefreshCw size={16} /> {t.refresh}</Button>}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => printOrgChartPDF(exportOpts)} disabled={loading || employees.length === 0} className="gap-2"><FileText size={16} /> {t.exportPdf}</Button>
+            <Button variant="outline" onClick={() => downloadOrgWord(exportOpts)} disabled={loading || employees.length === 0} className="gap-2"><FileType2 size={16} /> {t.exportWord}</Button>
+            <Button variant="outline" onClick={load} className="gap-2"><RefreshCw size={16} /> {t.refresh}</Button>
+          </div>
+        }
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
