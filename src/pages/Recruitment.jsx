@@ -219,6 +219,9 @@ export default function Recruitment() {
               </div>
               <div className="text-xs text-muted-foreground">{j.profession} · {j.job_type === "full_time" ? t.fullTime : j.job_type === "part_time" ? t.partTime : t.contract} {j.salary ? `· ${j.salary} ${t.sar}` : ""}</div>
               {j.hired_applicant_name && <div className="text-xs text-emerald-700">{t.hiredAs} {j.hired_applicant_name}</div>}
+              {(j.prepared_by_name || j.prepared_by_id) && (
+                <div className="text-[11px] text-muted-foreground">{isAr ? "أُعدّ بواسطة" : "Prepared by"}: {j.prepared_by_name}{j.prepared_by_id ? ` — ${j.prepared_by_id}` : ""}</div>
+              )}
               <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t">
                 <Button size="sm" variant="outline" onClick={() => setApplicantsJob(j)}><Users size={14} /> {t.applicants}</Button>
                 <Button size="sm" variant="ghost" onClick={() => setShareJob(j)}><Share2 size={14} /> {t.share}</Button>

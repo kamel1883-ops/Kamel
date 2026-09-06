@@ -1440,22 +1440,49 @@ export default async function (req) {
       const readOnlyPass = READ_OPS.has(op) && READ_ANY.has(entity);
       if (!hasPerm && !readOnlyPass) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
 
-      // توثيق «أُعدّت بواسطة»: يُحقن اسم ورقم هوية الموظف المُفوّض في كل سجل يُنشئه من البوابة.
+      // توثيق «أُعدّت بواسطة»: يُحقن اسم ورقم هوية الموظف المُفوّض في كل عملية كتابة (إنشاء/تعديل)
+      // من البوابة — يشمل التعيين، الفسخ، القرارات، التقييم، الرواتب، الوظائف... إلخ.
       const pName = emp?.full_name || "الموظف المُفوّض";
       const pNid = String(emp?.national_id || "");
-      const stamp = (rec: any) => {
-        if (!rec || typeof rec !== "object") return rec;
-        const out: any = { ...rec };
-        if (entity === "Employee") { out.hired_by_name = pName; out.hired_by_employee_id = String(emp?.id || ""); }
-        else if (entity === "Incentive" || entity === "AdminDecision" || entity === "VehicleDelegation") out.created_by_name = pNid ? `${pName} — ${pNid}` : pName;
-        else { out.prepared_by_name = pName; out.prepared_by_id = pNid; }
+      // الكيانات التي تملك حقول التوثيق (prepared_by / created_by / hired_by) — فقط هذه تُدمغ.
+      const STAMPED = new Set([
+        "Employee", "Job", "Payroll", "TrainingPlan", "Warning", "Performance", "SuccessionPlan",
+        "ExitInterview", "Survey", "License", "GosiRecord", "OrgUnit", "WorkforcePlan",
+        "PlatformSubscription", "CustomerSurvey", "Settlement", "Attendance", "LeaveRequest",
+        "BusinessTrip", "Vehicle", "Incentive", "AdminDecision", "VehicleDelegation",
+      ]);
+      const stampFields = (out: any, isCreate = false) => {
+        if (entity === "Employee") {
+          out.prepared_by_name = pName; out.prepared_by_id = pNid;
+          if (isCreate) { out.hired_by_name = pNid ? `${pName} — ${pNid}` : pName; out.hired_by_employee_id = String(emp?.id || ""); }
+        } else if (entity === "Incentive" || entity === "AdminDecision" || entity === "VehicleDelegation") {
+          out.created_by_name = pNid ? `${pName} — ${pNid}` : pName;
+        } else {
+          out.prepared_by_name = pName; out.prepared_by_id = pNid;
+        }
         return out;
+      };
+      const stamp = (rec: any, isCreate = false) => {
+        if (!rec || typeof rec !== "object") return rec;
+        return stampFields({ ...rec }, isCreate);
       };
       const target: any = (base44.asServiceRole.entities as any)[entity];
       if (!target) return Response.json({ ok: false, error: "unknown_entity" }, { status: 400 });
+      const canStamp = STAMPED.has(entity);
       let callArgs = args;
-      if (op === "create") callArgs = [stamp(args[0])];
-      if (op === "bulkCreate") callArgs = [(args[0] || []).map(stamp)];
+      if (canStamp) {
+        if (op === "create") callArgs = [stamp(args[0], true)];
+        else if (op === "bulkCreate") callArgs = [(args[0] || []).map((r: any) => stamp(r, true))];
+        else if (op === "update") callArgs = [args[0], stamp(args[1])];
+        else if (op === "bulkUpdate") callArgs = [(args[0] || []).map((r: any) => stamp(r))];
+        else if (op === "updateMany") {
+          const upd: any = { ...(args[1] || {}) };
+          const set: any = { ...(upd.$set || {}) };
+          stampFields(set);
+          upd.$set = set;
+          callArgs = [args[0], upd];
+        }
+      }
       const result = await target[op](...callArgs);
       return Response.json({ ok: true, result: result ?? null });
     }

@@ -121,6 +121,8 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
               <Row label={isAr ? "بداية العقد" : "Contract start"} value={employee.contract_start_date} />
               <Row label={isAr ? "نهاية العقد" : "Contract end"} value={employee.contract_end_date} />
               <Row label={isAr ? "المدير المباشر" : "Manager"} value={employee.manager_id} />
+              <Row label={isAr ? "أُعدّ بواسطة (الاسم)" : "Prepared by (name)"} value={employee.prepared_by_name || employee.hired_by_name} />
+              <Row label={isAr ? "أُعدّ بواسطة (الهوية/الإقامة)" : "Prepared by (ID)"} value={employee.prepared_by_id} />
             </Block>
 
             <Block title={t.salary}>
