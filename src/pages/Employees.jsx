@@ -12,13 +12,14 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch, Plane, FileText, UserX } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Network, Upload, GitBranch, Plane, FileText, UserX, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
 import { reasonMeta } from "@/lib/eos";
+import { printEmployeeList } from "@/lib/employeePrint";
 import PullToRefresh from "@/components/PullToRefresh";
 
 const isInactive = (e) => e.status === "terminated" || e.status === "resigned";
@@ -35,6 +36,7 @@ export default function Employees() {
     thTermReason: "سبب الإنهاء", thTermDate: "تاريخ الإنهاء",
     del: (n) => `حذف الموظف ${n}؟`, terminateTitle: "فسخ عقد", profileTitle: "ملف الموظف", tripsTitle: "انتدابات",
     yearFilter: "السنة", allYears: "كل السنوات", noInactive: "لا يوجد موظفون تركوا العمل",
+    exportPdf: "طباعة PDF",
   } : {
     title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee", importBtn: "Import from Excel", branchesBtn: "Branches",
     search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", allBranches: "All branches", loading: "Loading...",
@@ -44,6 +46,7 @@ export default function Employees() {
     thTermReason: "Termination reason", thTermDate: "Termination date",
     del: (n) => `Delete employee ${n}?`, terminateTitle: "Terminate", profileTitle: "Profile", tripsTitle: "Trips",
     yearFilter: "Year", allYears: "All years", noInactive: "No terminated employees",
+    exportPdf: "Export PDF",
   };
 
   const [employees, setEmployees] = useState([]);
@@ -159,9 +162,15 @@ export default function Employees() {
         <div className="space-y-6 mt-4">
           {/* Active */}
           <section>
-            <div className="flex items-center gap-2 mb-3">
-              <h2 className="text-lg font-bold text-foreground">{t.activeHead}</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{activeList.length}</span>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-foreground">{t.activeHead}</h2>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{activeList.length}</span>
+              </div>
+              <Button variant="outline" size="sm" className="gap-1.5" disabled={activeList.length === 0}
+                onClick={() => printEmployeeList({ list: activeList, title: t.activeHead, subtitle: t.subtitle, isAr, org, kind: "active" })}>
+                <Printer size={15} /> {t.exportPdf}
+              </Button>
             </div>
             <div className="bg-white rounded-2xl border border-border overflow-hidden">
               {activeList.length === 0 ? (
@@ -235,18 +244,24 @@ export default function Employees() {
                 <h2 className="text-lg font-bold text-foreground">{t.inactiveHead}</h2>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{inactiveList.length}</span>
               </div>
-              {years.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{t.yearFilter}:</span>
-                  <Select value={yearFilter} onValueChange={setYearFilter}>
-                    <SelectTrigger className="w-36 h-8 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t.allYears}</SelectItem>
-                      {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button variant="outline" size="sm" className="gap-1.5" disabled={inactiveList.length === 0}
+                  onClick={() => printEmployeeList({ list: inactiveList, title: t.inactiveHead, subtitle: t.subtitle, isAr, org, kind: "inactive" })}>
+                  <Printer size={15} /> {t.exportPdf}
+                </Button>
+                {years.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{t.yearFilter}:</span>
+                    <Select value={yearFilter} onValueChange={setYearFilter}>
+                      <SelectTrigger className="w-36 h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t.allYears}</SelectItem>
+                        {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="bg-white rounded-2xl border border-border overflow-hidden">
               {inactiveList.length === 0 ? (
