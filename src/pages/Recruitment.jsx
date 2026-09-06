@@ -85,17 +85,20 @@ export default function Recruitment() {
   const [evalMap, setEvalMap] = useState({});
   const [employees, setEmployees] = useState([]);
   const [printJobCard, setPrintJobCard] = useState(null);
+  const [org, setOrg] = useState(null);
   const load = async () => {
     setLoading(true);
     try {
-      const [j, apps, evals, emps] = await Promise.all([
+      const [j, apps, evals, emps, orgs] = await Promise.all([
         base44.entities.Job.list("-created_date", 200),
         base44.entities.JobApplication.filter({ status: "hired" }, "-hired_date", 500),
         base44.entities.TrialEvaluation.list("-created_date", 500),
         base44.entities.Employee.list("-created_date", 1000),
+        base44.entities.Organization.list("-created_date", 1),
       ]);
       setJobs(j || []);
       setEmployees(emps || []);
+      setOrg(orgs?.[0] || null);
       const em = {};
       (evals || []).forEach((tt) => {
         const k = tt.applicant_id;
@@ -234,7 +237,7 @@ export default function Recruitment() {
 
       {createPortal(
         <div className="print-jobcard hidden print:block" aria-hidden>
-          {printJobCard && <JobCardDoc job={printJobCard} isAr={isAr} />}
+          {printJobCard && <JobCardDoc job={printJobCard} isAr={isAr} org={org} />}
         </div>,
         document.body
       )}

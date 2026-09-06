@@ -6,16 +6,19 @@ import { Crown } from "lucide-react";
 // مستند البطاقة الوظيفية — يُستخدم للطباعة PDF لكل وظيفة (شاغرة / مغلقة / منتهية).
 // الترويسة: شعار المنشأة أعلى اليمين، وشعار جدارة أعلى اليسار.
 // المحتوى (المؤهلات / المهام / الوصف) يُعرض كـ Markdown مُنسّق بدلاً من نص خام.
-export default function JobCardDoc({ job, isAr = true }) {
-  const [org, setOrg] = useState(null);
+export default function JobCardDoc({ job, isAr = true, org: orgProp }) {
+  const [orgState, setOrgState] = useState(orgProp || null);
 
   useEffect(() => {
+    if (orgProp) { setOrgState(orgProp); return; }
     let alive = true;
     base44.entities.Organization.list("-created_date", 1)
-      .then((r) => { if (alive) setOrg(r?.[0] || null); })
+      .then((r) => { if (alive) setOrgState(r?.[0] || null); })
       .catch(() => {});
     return () => { alive = false; };
-  }, []);
+  }, [orgProp]);
+
+  const org = orgProp || orgState;
 
   const t = isAr ? {
     card: "البطاقة الوظيفية", status: "الحالة", prof: "المهنة", type: "نوع الوظيفة",
