@@ -9,6 +9,13 @@ function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => E
 
 let _orgCache = null;
 let _orgFetched = false;
+
+// يخزّن رابط الشعار مسبقًا في ذاكرة المتصفح ليظهر فورًا في المستندات المطبوعة.
+export function preloadLogo(url) {
+  if (!url) return;
+  try { const pre = new Image(); pre.crossOrigin = "anonymous"; pre.src = url; } catch (e) {}
+}
+
 export async function fetchOrg() {
   if (_orgFetched) return _orgCache;
   _orgFetched = true;
@@ -16,6 +23,10 @@ export async function fetchOrg() {
     const r = await base44.entities.Organization.list("-created_date", 1);
     _orgCache = (r && r[0]) || null;
   } catch (e) { _orgCache = null; }
+  // تخزين الشعار مسبقًا في ذاكرة المتصفح ليظهر فورًا في كل المستندات دون تأخير.
+  if (_orgCache && _orgCache.logo_url) {
+    try { const pre = new Image(); pre.crossOrigin = "anonymous"; pre.src = _orgCache.logo_url; } catch (e) {}
+  }
   return _orgCache;
 }
 

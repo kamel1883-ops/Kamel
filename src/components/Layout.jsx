@@ -61,6 +61,8 @@ export default function Layout() {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    // تسخين شعار المنشأة مسبقًا في ذاكرة المتصفح ليظهر فورًا في كل المستندات المطبوعة دون تأخير.
+    import("@/lib/printBrand").then((m) => m.fetchOrg().catch(() => {}));
   }, []);
 
   const restricted = user && user.role !== "admin";

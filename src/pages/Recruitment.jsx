@@ -14,6 +14,7 @@ import TrialEvaluationDialog from "@/components/recruitment/TrialEvaluationDialo
 import { safeHref } from "@/lib/utils";
 import ShareJobDialog from "@/components/recruitment/ShareJobDialog";
 import JobCardDoc from "@/components/docs/JobCardDoc";
+import { safePrint } from "@/lib/safePrint";
 
 const plus90 = (d) => d ? new Date(new Date(d).getTime() + 90 * 24 * 3600 * 1000).toISOString().slice(0, 10) : "";
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -98,7 +99,9 @@ export default function Recruitment() {
       ]);
       setJobs(j || []);
       setEmployees(emps || []);
-      setOrg(orgs?.[0] || null);
+      const orgObj = orgs?.[0] || null;
+      setOrg(orgObj);
+      if (orgObj?.logo_url) { try { const pre = new Image(); pre.crossOrigin = "anonymous"; pre.src = orgObj.logo_url; } catch (e) {} }
       const em = {};
       (evals || []).forEach((tt) => {
         const k = tt.applicant_id;
@@ -132,7 +135,7 @@ export default function Recruitment() {
 
   const printJob = (j) => {
     setPrintJobCard(j);
-    setTimeout(() => { window.print(); }, 80);
+    safePrint();
   };
 
   return (

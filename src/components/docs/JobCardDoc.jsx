@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import ReactMarkdown from "react-markdown";
 import { Crown } from "lucide-react";
+import { fetchOrg, preloadLogo } from "@/lib/printBrand";
 
 // مستند البطاقة الوظيفية — يُستخدم للطباعة PDF لكل وظيفة (شاغرة / مغلقة / منتهية).
 // الترويسة: شعار المنشأة أعلى اليمين، وشعار جدارة أعلى اليسار.
@@ -10,11 +11,9 @@ export default function JobCardDoc({ job, isAr = true, org: orgProp }) {
   const [orgState, setOrgState] = useState(orgProp || null);
 
   useEffect(() => {
-    if (orgProp) { setOrgState(orgProp); return; }
+    if (orgProp) { setOrgState(orgProp); preloadLogo(orgProp?.logo_url); return; }
     let alive = true;
-    base44.entities.Organization.list("-created_date", 1)
-      .then((r) => { if (alive) setOrgState(r?.[0] || null); })
-      .catch(() => {});
+    fetchOrg().then((o) => { if (alive) { setOrgState(o); preloadLogo(o?.logo_url); } }).catch(() => {});
     return () => { alive = false; };
   }, [orgProp]);
 

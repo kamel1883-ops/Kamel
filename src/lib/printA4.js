@@ -1,4 +1,5 @@
 // طباعة التقارير على مقاس A4 كامل (عرضي افتراضياً) بحيث تُحتوى كل الأعمدة والصفوف والإجماليات في الصفحة.
+import { whenImagesReady } from "@/lib/safePrint";
 export function printA4(landscape = true) {
   const style = document.createElement("style");
   style.id = "a4-print-style";
@@ -9,5 +10,6 @@ export function printA4(landscape = true) {
     window.removeEventListener("afterprint", cleanup);
   };
   window.addEventListener("afterprint", cleanup);
-  setTimeout(() => { window.print(); setTimeout(cleanup, 1500); }, 60);
+  // ننتظر اكتمال صور الشعارات أولًا حتى لا تتأخر في المعاينة، ثم نطلق الطباعة.
+  whenImagesReady().then(() => { window.print(); setTimeout(cleanup, 1500); });
 }
