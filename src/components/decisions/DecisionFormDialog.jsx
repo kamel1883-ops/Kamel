@@ -52,7 +52,14 @@ export default function DecisionFormDialog({ open, onClose, onSaved, employees, 
     try {
       const tr = await translateTo7(form.title, form.body);
       const emp = employees.find((e) => e.id === form.employee_id) || null;
-      const number = `DEC-${new Date().getFullYear()}-${String(Date.now()).slice(-5)}`;
+      // تسلسل رقمي يبدأ من 1 — يبحث عن أعلى رقم متسلسل موجود ويزيد عليه
+      const existing = await base44.entities.AdminDecision.list("-issued_date", 5000);
+      let maxSeq = 0;
+      (existing || []).forEach((d) => {
+        const m = String(d.decision_number || "").match(/^DEC-(\d+)$/);
+        if (m) maxSeq = Math.max(maxSeq, parseInt(m[1], 10));
+      });
+      const number = `DEC-${maxSeq + 1}`;
       const payload = {
         decision_number: number,
         decision_type: form.decision_type,
