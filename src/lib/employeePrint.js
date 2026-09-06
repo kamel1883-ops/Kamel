@@ -2,6 +2,7 @@
 import { formatCurrency, statusEmployeeLabel } from "@/lib/hr";
 import { roleLabel } from "@/lib/orgTree";
 import { reasonMeta } from "@/lib/eos";
+import { fetchOrg, brandHeaderHtml, brandHeaderCss } from "@/lib/printBrand";
 
 const AMP = String.fromCharCode(38);
 const SEMI = String.fromCharCode(59);
@@ -22,7 +23,7 @@ function fmtMoney(n) {
 
 function cell(cls, html) { return "<td class=\"" + cls + "\">" + html + "</td>"; }
 
-export function printEmployeeList({ list, title, subtitle, isAr, org, kind }) {
+export async function printEmployeeList({ list, title, subtitle, isAr, org, kind }) {
   const dir = isAr ? "rtl" : "ltr";
   const lang = isAr ? "ar" : "en";
   const now = new Date();
@@ -30,7 +31,9 @@ export function printEmployeeList({ list, title, subtitle, isAr, org, kind }) {
     ? now.toLocaleDateString("ar-SA-u-ca-islamic-umalqura", { year: "numeric", month: "long", day: "numeric" })
     : now.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 
-  const orgName = org && org.name ? org.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const orgData = org || (await fetchOrg());
+  const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const brandHtml = brandHeaderHtml(orgData, isAr);
   const NA = "—";
 
   const L = isAr ? {
@@ -87,7 +90,7 @@ export function printEmployeeList({ list, title, subtitle, isAr, org, kind }) {
 
   const styleBlock = [
     ".print-report{font-family:'IBM Plex Sans Arabic','Tajawal',ui-sans-serif,system-ui,sans-serif;padding:24px;color:#0f172a;}",
-    ".print-report .report-head{text-align:" + (isAr ? "right" : "left") + ";margin-bottom:14px;border-bottom:2px solid #0B2545;padding-bottom:10px;}",
+    ".print-report .report-head{text-align:" + (isAr ? "right" : "left") + ";margin-bottom:14px;}",
     ".print-report .org{font-size:12pt;font-weight:700;color:#0B2545;}",
     ".print-report .report-title{font-size:16pt;font-weight:800;margin-top:4px;}",
     ".print-report .report-sub{font-size:11pt;color:#475569;margin-top:2px;}",
@@ -104,11 +107,12 @@ export function printEmployeeList({ list, title, subtitle, isAr, org, kind }) {
 
   const html = "<div class=\"print-report\" dir=\"" + dir + "\">"
     + "<div class=\"report-head\">"
-    + "<div class=\"org\">" + esc(orgName) + "</div>"
+    + brandHtml
     + "<div class=\"report-title\">" + esc(title) + "</div>"
     + (subtitle ? "<div class=\"report-sub\">" + esc(subtitle) + "</div>" : "")
     + "<div class=\"report-meta\">" + esc(L.generated) + ": " + esc(dateStr) + " · " + esc(L.count) + ": " + list.length + "</div>"
     + "</div>"
+    + "<style>" + brandHeaderCss + "</style>"
     + "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody></table>"
     + "<style>" + styleBlock + "</style>"
     + "</div>";

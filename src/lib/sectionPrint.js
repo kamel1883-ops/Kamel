@@ -1,4 +1,5 @@
 // طباعة عامة لجدول بيانات كمستند PDF عبر طباعة المتصفح — تستخدمها أقسام الأداء/التدريب/تخطيط القوى العاملة/التعاقب.
+import { fetchOrg, brandHeaderHtml, brandHeaderCss } from "@/lib/printBrand";
 const AMP = String.fromCharCode(38);
 const SEMI = String.fromCharCode(59);
 const ENT = {
@@ -17,14 +18,16 @@ function fmtNum(n) {
   return x.toLocaleString("en-US");
 }
 
-export function printSection({ title, subtitle, isAr, org, columns, rows, summary }) {
+export async function printSection({ title, subtitle, isAr, org, columns, rows, summary }) {
   const dir = isAr ? "rtl" : "ltr";
   const now = new Date();
   const dateStr = isAr
     ? now.toLocaleDateString("ar-SA-u-ca-islamic-umalqura", { year: "numeric", month: "long", day: "numeric" })
     : now.toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 
-  const orgName = org && org.name ? org.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const orgData = org || (await fetchOrg());
+  const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const brandHtml = brandHeaderHtml(orgData, isAr);
   const L = isAr ? { generated: "تاريخ التوليد", count: "عدد السجلات" } : { generated: "Generated", count: "Records" };
 
   const head = columns.map((c) => "<th>" + esc(c.label) + "</th>").join("");
@@ -40,7 +43,7 @@ export function printSection({ title, subtitle, isAr, org, columns, rows, summar
 
   const styleBlock = [
     ".print-report{font-family:'IBM Plex Sans Arabic','Tajawal',ui-sans-serif,system-ui,sans-serif;padding:24px;color:#0f172a;}",
-    ".print-report .report-head{text-align:" + (isAr ? "right" : "left") + ";margin-bottom:14px;border-bottom:2px solid #0B2545;padding-bottom:10px;}",
+    ".print-report .report-head{text-align:" + (isAr ? "right" : "left") + ";margin-bottom:14px;}",
     ".print-report .org{font-size:12pt;font-weight:700;color:#0B2545;}",
     ".print-report .report-title{font-size:16pt;font-weight:800;margin-top:4px;}",
     ".print-report .report-sub{font-size:11pt;color:#475569;margin-top:2px;}",
@@ -60,11 +63,12 @@ export function printSection({ title, subtitle, isAr, org, columns, rows, summar
 
   const html = "<div class=\"print-report\" dir=\"" + dir + "\">"
     + "<div class=\"report-head\">"
-    + "<div class=\"org\">" + esc(orgName) + "</div>"
+    + brandHtml
     + "<div class=\"report-title\">" + esc(title) + "</div>"
     + (subtitle ? "<div class=\"report-sub\">" + esc(subtitle) + "</div>" : "")
     + "<div class=\"report-meta\">" + esc(L.generated) + ": " + esc(dateStr) + " · " + esc(L.count) + ": " + rows.length + "</div>"
     + "</div>"
+    + "<style>" + brandHeaderCss + "</style>"
     + summaryHtml
     + "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody></table>"
     + "<style>" + styleBlock + "</style>"
