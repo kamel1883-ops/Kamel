@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ClipboardList, FileCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, CalendarCheck, Share2, ClipboardList, FileCheck, Printer } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
 import JobFormDialog from "@/components/recruitment/JobFormDialog";
@@ -39,6 +39,11 @@ export default function Recruitment() {
     sar: "ريال", hiredAs: "تم التعيين",
     applicants: "المتقدمون", share: "مشاركة",
     confirmDel: "حذف هذه الوظيفة؟", delOk: "تم الحذف", delErr: "تعذر الحذف", loadErr: "تعذر التحميل",
+    print: "طباعة البطاقة",
+    pStatus: "الحالة", pProf: "المهنة", pType: "نوع الوظيفة", pGrade: "الدرجة", pSalary: "الراتب",
+    pVac: "عدد الشواغر", pDept: "الإدارة", pNatReq: "المطلوب", pQual: "المؤهلات المطلوبة",
+    pTasks: "المهام والمسؤوليات", pDesc: "الوصف الوظيفي", pPublished: "تاريخ النشر", pClosed: "تاريخ الإغلاق",
+    pHired: "الموظف المعيّن", pCardTitle: "البطاقة الوظيفية",
   } : {
     title: "Recruitment Management",
     subtitle: "Manage vacancies, job descriptions, applicants, hiring and probation evaluation",
@@ -58,6 +63,11 @@ export default function Recruitment() {
     sar: "SAR", hiredAs: "Hired:",
     applicants: "Applicants", share: "Share",
     confirmDel: "Delete this job?", delOk: "Deleted", delErr: "Could not delete", loadErr: "Could not load",
+    print: "Print card",
+    pStatus: "Status", pProf: "Profession", pType: "Type", pGrade: "Grade", pSalary: "Salary",
+    pVac: "Vacancies", pDept: "Department", pNatReq: "Required", pQual: "Qualifications",
+    pTasks: "Tasks & responsibilities", pDesc: "Job description", pPublished: "Published", pClosed: "Closed",
+    pHired: "Hired employee", pCardTitle: "Job Card",
   };
 
   const [jobs, setJobs] = useState([]);
@@ -112,6 +122,54 @@ export default function Recruitment() {
     const job = jobs.find((x) => x.id === app.job_id) || null;
     setEvalApplicant(app);
     setEvalJob(job);
+  };
+
+  const printJob = (j) => {
+    const typeLabel = j.job_type === "full_time" ? t.fullTime : j.job_type === "part_time" ? t.partTime : t.contract;
+    const natLabel = { any: isAr ? "الجميع" : "Any", saudi: isAr ? "سعودي" : "Saudi", resident: isAr ? "مقيم" : "Resident" }[j.nationality_req] || j.nationality_req || "—";
+    const statusLabel = j.status === "open" ? t.jobOpen : t.jobClosed;
+    const row = (k, v) => `<tr><td class="k">${k}</td><td class="v">${v}</td></tr>`;
+    const esc = (s) => String(s == null ? "" : s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");
+    const block = (label, content) => content ? `<div class="block"><div class="block-h">${label}</div><div class="block-b">${esc(content).replace(/\n/g,"<br>")}</div></div>` : "";
+    const html = `<!DOCTYPE html><html dir="${isAr?"rtl":"ltr"}" lang="${isAr?"ar":"en"}"><head><meta charset="utf-8"><title>${esc(j.title)}</title><style>
+      @page{size:A4;margin:16mm;}
+      body{font-family:'Tajawal','IBM Plex Sans Arabic',Arial,sans-serif;color:#0f172a;margin:0;}
+      .doc{max-width:760px;margin:0 auto;}
+      .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #7c3aed;padding-bottom:12px;margin-bottom:16px;}
+      .org{font-size:12px;font-weight:700;color:#7c3aed;}
+      .h1{font-size:19px;font-weight:800;margin:4px 0 2px;}
+      .badge{display:inline-block;font-size:11px;padding:4px 12px;border-radius:9999px;font-weight:700;margin-top:6px;background:${j.status==="open"?"#dcfce7":"#e5e7eb"};color:${j.status==="open"?"#166534":"#374151"};}
+      .brand{font-size:11px;color:#94a3b8;}
+      table{width:100%;border-collapse:collapse;margin:8px 0 4px;}
+      td.k{background:#f8fafc;font-weight:700;color:#475569;font-size:11px;padding:6px 10px;width:38%;border:1px solid #e2e8f0;}
+      td.v{font-size:12px;padding:6px 10px;border:1px solid #e2e8f0;}
+      .block{margin:14px 0;}
+      .block-h{font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:4px;border-inline-start:3px solid #7c3aed;padding-inline-start:8px;}
+      .block-b{font-size:12.5px;line-height:1.9;white-space:pre-wrap;}
+      .foot{margin-top:26px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center;}
+    </style></head><body><div class="doc">
+      <div class="head">
+        <div>
+          <div class="org">${isAr?"جدارة — الموارد البشرية":"Jadara HR"}</div>
+          <div class="h1">${t.pCardTitle}: ${esc(j.title)}</div>
+          <span class="badge">${statusLabel}</span>
+        </div>
+        <div class="brand">${isAr?"بطاقة وظيفية":"Job Card"}</div>
+      </div>
+      <table>
+        ${row(t.pStatus,statusLabel)}${row(t.pProf,esc(j.profession)||"—")}${row(t.pType,typeLabel)}${row(t.pGrade,esc(j.grade)||"—")}
+        ${row(t.pSalary,j.salary?`${j.salary} ${t.sar}`:"—")}${row(t.pVac,Number(j.vacancy_count)||1)}${row(t.pDept,esc(j.department)||"—")}${row(t.pNatReq,natLabel)}
+        ${j.published_date?row(t.pPublished,esc(j.published_date)):""}${j.closed_date?row(t.pClosed,esc(j.closed_date)):""}${j.hired_applicant_name?row(t.pHired,esc(j.hired_applicant_name)):""}
+      </table>
+      ${block(t.pQual,j.qualifications)}
+      ${block(t.pTasks,j.tasks)}
+      ${block(t.pDesc,j.description)}
+      <div class="foot">${isAr?"تم إنشاء هذه البطاقة عبر نظام جدارة للموارد البشرية":"Generated by Jadara HR System"}</div>
+    </div></body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.open(); w.document.write(html); w.document.close(); w.focus();
+    setTimeout(() => { try { w.print(); } catch (e) {} }, 400);
   };
 
   return (
@@ -201,6 +259,7 @@ export default function Recruitment() {
               <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t">
                 <Button size="sm" variant="outline" onClick={() => setApplicantsJob(j)}><Users size={14} /> {t.applicants}</Button>
                 <Button size="sm" variant="ghost" onClick={() => setShareJob(j)}><Share2 size={14} /> {t.share}</Button>
+                <Button size="icon" variant="ghost" onClick={() => printJob(j)} title={t.print}><Printer size={15} /></Button>
                 <Button size="icon" variant="ghost" onClick={() => openEdit(j)}><Pencil size={15} /></Button>
                 <Button size="icon" variant="ghost" onClick={() => del(j)}><Trash2 size={15} /></Button>
               </div>
