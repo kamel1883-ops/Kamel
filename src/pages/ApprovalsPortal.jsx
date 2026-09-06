@@ -202,26 +202,32 @@ export default function ApprovalsPortal({ portalSession }) {
         {(() => {
           const docBtn = (url, label) => url ? (
             <a href={url} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
+              className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-violet-700 text-white hover:bg-violet-800 whitespace-nowrap">
               <Download size={13} /> {label}
             </a>
-          ) : <span className="text-xs text-muted-foreground">—</span>;
+          ) : null;
+          const proofBtn = (url) => url ? (
+            <a href={url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 whitespace-nowrap">
+              <Download size={13} /> {isAr ? "إثبات التحويل" : "Transfer proof"}
+            </a>
+          ) : null;
           const rows = [
             ...(data?.leaveHistory || []).map((r) => ({
               key: "L" + r.id, emp: r.employee_name, nat: r.national_id || "", date: r.start_date, sort: r.start_date,
               kind: leaveTypeLabel(r.leave_type), detail: isAr ? `${r.start_date} → ${r.end_date}` : `${r.start_date} → ${r.end_date}`,
-              status: r.status, doc: r.settlement_pdf_url, docLabel: isAr ? "المخالصة" : "Settlement",
+              status: r.status, doc: r.settlement_pdf_url, docLabel: isAr ? "المخالصة" : "Settlement", proof: r.finance_proof_url,
             })),
             ...(data?.loanHistory || []).map((r) => ({
               key: "N" + r.id, emp: r.employee_name, nat: r.national_id || "", date: r.request_date || (r.created_date || "").slice(0, 10), sort: r.request_date || r.created_date,
               kind: t.loan || (isAr ? "سلفة" : "Loan"), detail: formatCurrency(r.amount), status: r.status,
-              doc: r.statement_pdf_url, docLabel: isAr ? "كشف السلفة" : "Loan statement",
+              doc: r.statement_pdf_url, docLabel: isAr ? "كشف السلفة" : "Loan statement", proof: r.finance_proof_url,
             })),
             ...(data?.tripHistory || []).map((r) => ({
               key: "T" + r.id, emp: r.employee_name, nat: r.national_id || "", date: r.start_date, sort: r.start_date,
               kind: r.trip_type === "external" ? (t.tripExt || (isAr ? "انتداب خارجي" : "External trip")) : (t.tripInt || (isAr ? "انتداب داخلي" : "Internal trip")),
               detail: r.destination || "", status: r.status,
-              doc: r.approval_pdf_url, docLabel: isAr ? "موافقة الانتداب" : "Trip approval",
+              doc: r.approval_pdf_url, docLabel: isAr ? "موافقة الانتداب" : "Trip approval", proof: r.finance_proof_url,
             })),
           ].sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
           if (rows.length === 0) return null;
@@ -254,16 +260,25 @@ export default function ApprovalsPortal({ portalSession }) {
                   <div className="col-span-1">{isAr ? "الحالة" : "Status"}</div>
                   <div className="col-span-2 text-center">{isAr ? "المستند" : "Document"}</div>
                 </div>
-                {filtered.map((r) => (
+                {filtered.map((r) => {
+                  const b = badge(r.status);
+                  return (
                   <div key={r.key} className="grid grid-cols-12 gap-2 px-3 py-2.5 text-xs border-t items-center">
                     <div className="col-span-3 font-medium truncate">{r.emp}</div>
                     <div className="col-span-2 text-muted-foreground">{r.date || "—"}</div>
                     <div className="col-span-2">{r.kind}</div>
                     <div className="col-span-2 text-muted-foreground truncate">{r.detail}</div>
-                    <div className="col-span-1"><span className={cn("px-1.5 py-0.5 rounded-full", badge(r.status))}>{r.status}</span></div>
-                    <div className="col-span-2 text-center">{docBtn(r.doc, r.docLabel)}</div>
+                    <div className="col-span-1"><span className={cn("px-1.5 py-0.5 rounded-full whitespace-nowrap", b.cls)}>{b.label}</span></div>
+                    <div className="col-span-2 text-center">
+                      <div className="flex flex-col items-center gap-1">
+                        {docBtn(r.doc, r.docLabel)}
+                        {proofBtn(r.proof)}
+                        {!r.doc && !r.proof && <span className="text-muted-foreground">—</span>}
+                      </div>
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           );
@@ -410,7 +425,13 @@ export default function ApprovalsPortal({ portalSession }) {
             className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-violet-700 text-white hover:bg-violet-800 whitespace-nowrap">
             <Download size={13} /> {label}
           </a>
-        ) : <span className="text-xs text-muted-foreground">—</span>;
+        ) : null;
+        const proofBtn = (url) => url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 whitespace-nowrap">
+            <Download size={13} /> {t.finProof}
+          </a>
+        ) : null;
         const rows = [
           ...(data?.leaveHistory || []).map((r) => ({
             key: "L" + r.id, emp: r.employee_name, nat: r.national_id || "",
@@ -522,9 +543,11 @@ export default function ApprovalsPortal({ portalSession }) {
                               <span className="text-muted-foreground whitespace-nowrap" dir="ltr">{r.paidDate}</span>
                             </td>
                             <td className="px-2 py-2.5 border-b border-slate-100 text-center">
-                              {r.doc && docBtn(r.doc, r.docLabel)}
-                              {r.proof && !r.doc && docBtn(r.proof, t.finProof)}
-                              {!r.doc && !r.proof && <span className="text-muted-foreground">—</span>}
+                              <div className="flex flex-col items-center gap-1">
+                                {docBtn(r.doc, r.docLabel)}
+                                {proofBtn(r.proof)}
+                                {!r.doc && !r.proof && <span className="text-muted-foreground">—</span>}
+                              </div>
                             </td>
                           </tr>
                         );
