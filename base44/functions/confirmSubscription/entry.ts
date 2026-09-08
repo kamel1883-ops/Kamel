@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
-import { EMAIL_FOOTER } from '../../shared/emailFooter.ts';
+import { wrapEmailContent } from '../../shared/emailFooter.ts';
 
 function addYears(date, years) {
   const d = new Date(date);
@@ -93,7 +93,7 @@ export default async function (req) {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: ownerEmail,
           subject: 'اشتراك سنوي جديد مدفوع — ' + name,
-          body:
+          ...wrapEmailContent(
             'تم اشتراك عميل جديد في الباقة السنوية ودفع 2,500 ريال عبر Tap (مدى/Visa/Apple Pay):\n\n' +
             'المنشأة: ' + name + '\n' +
             'السجل التجاري: ' + (cr || '-') + '\n' +
@@ -105,7 +105,8 @@ export default async function (req) {
             'تاريخ الاشتراك: ' + todayStr + '\n' +
             'تنتهي السنة الأولى في: ' + subEnd.toISOString().slice(0, 10) + '\n' +
             'تُجدد تلقائياً (تذكير) بـ 700 ريال سنوياً من العام الثاني.\n\n' +
-            'رقم عملية Tap: ' + tapId + EMAIL_FOOTER,
+            'رقم عملية Tap: ' + tapId
+          ),
         });
       } catch (_e) {
         // لا تعطّل العملية إن تعطل البريد
@@ -119,7 +120,7 @@ export default async function (req) {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: clientEmail,
           subject: 'تم تفعيل اشتراككم السنوي في منصة جدارة',
-          body:
+          ...wrapEmailContent(
             'السلام عليكم ورحمة الله وبركاته،\n\n' +
             'أهلاً بكم في منصة «جدارة لإدارة الموارد البشرية». تم بنجاح تفعيل اشتراككم السنوي وإطلاق حساب منشأتكم.\n\n' +
             'بيانات الاشتراك:\n' +
@@ -131,7 +132,8 @@ export default async function (req) {
             '1) ادخلوا بوابة الشركات في منصة جدارة.\n' +
             '2) سجّلوا الدخول بالبريد المرتبط بحسابكم + الرقم الموحد (الذي يبدأ بـ7).\n\n' +
             'للدعم والاستفسار — البريد: info@jadara-hr.com\n\n' +
-            'مع خالص التقدير،\nفريق دعم جدارة' + EMAIL_FOOTER,
+            'مع خالص التقدير،\nفريق دعم جدارة'
+          ),
           from_name: 'جدارة',
         });
       } catch (_e) {

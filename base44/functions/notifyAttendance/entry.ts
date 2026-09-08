@@ -1,5 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyCronSecret } from "../../shared/renewal.ts";
+import { wrapEmailContent } from "../../shared/emailFooter.ts";
 
 // يُستدعى تلقائياً عبر workflow عند إنشاء/تعديل سجل حضور بحالة "متأخر" أو "غياب".
 // ينشئ إشعاراً موجّهاً للموظف (بكل لغات البوابة) ويرسل بريداً للعنوان المسجل لديه.
@@ -112,7 +113,7 @@ export default async function (req: Request): Promise<Response> {
       const emailBody =
         `${i18n.ar.body}\n\n${i18n.en.body}\n\n— منصة جدارة | Jadara HR`;
       try {
-        await base44.asServiceRole.integrations.Core.SendEmail({ to: emp.email, subject, body: emailBody });
+        await base44.asServiceRole.integrations.Core.SendEmail({ to: emp.email, subject, ...wrapEmailContent(emailBody) });
       } catch {}
     }
 

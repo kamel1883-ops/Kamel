@@ -1,6 +1,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { secrets } from "base44:runtime";
 import { verifyCronSecret } from "../../shared/renewal.ts";
+import { wrapEmailContent } from "../../shared/emailFooter.ts";
 
 const DAY = 1000 * 60 * 60 * 24;
 const HORIZON = 30 * DAY;
@@ -139,7 +140,7 @@ export default async function (req) {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: ownerEmail,
           subject: title,
-          body: text,
+          ...wrapEmailContent(text),
         });
         emailed = true;
       } catch (_) {}

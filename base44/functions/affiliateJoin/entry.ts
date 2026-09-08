@@ -1,6 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { verifyTurnstile, createRateLimiter } from "../../shared/turnstile.ts";
-import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
+import { wrapEmailContent } from "../../shared/emailFooter.ts";
 import { escapeHtml } from "../../shared/escapeHtml.ts";
 
 // تسجيل شريك جديد في برنامج شركاء جدارة (عمولة 7% من أول اشتراك فقط).
@@ -63,7 +63,7 @@ export default async function (req) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: "info@jadara-hr.com",
         subject: "طلب انضمام جديد — برنامج شركاء جدارة",
-        body:
+        ...wrapEmailContent(
           "طلب انضمام جديد لبرنامج شركاء جدارة (عمولة 7% من أول اشتراك فقط):\n\n" +
           "الاسم: " + escapeHtml(full_name) + "\n" +
           "البريد: " + escapeHtml(email) + "\n" +
@@ -71,8 +71,8 @@ export default async function (req) {
           "قناة الترويج: " + escapeHtml(channel || "-") + "\n" +
           "نبذة: " + escapeHtml(about || "-") + "\n\n" +
           "الرمز المرجعي المُولَّد: " + ref_code + "\n" +
-          "اعتمد الشريك من بوابة المالك › برنامج الشركاء لتفعيل رابط الإحالة الخاص به." +
-          EMAIL_FOOTER,
+          "اعتمد الشريك من بوابة المالك › برنامج الشركاء لتفعيل رابط الإحالة الخاص به."
+        ),
       });
     } catch (_e) {}
 

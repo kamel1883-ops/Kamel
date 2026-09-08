@@ -1,7 +1,7 @@
 // توقيع بريدي موحّد يُلحق بنهاية كل رسالة تُرسلها منصة جدارة.
 // صيغة HTML احترافية (مطابقة لهوية جدارة: كحلي + ذهبي) + نسخة نصية احتياطية.
 
-const LOGO_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/376a4adfa_generated_image.png";
+const LOGO_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/90516d3dc_.jpeg";
 const SITE_URL = "https://jadara-hr.com";
 const EMAIL_ADDR = "info@jadara-hr.com";
 const LINKEDIN_URL = "https://www.linkedin.com/company/جدارة-لإدارة-الموارد-البشرية";
@@ -52,10 +52,14 @@ export const EMAIL_FOOTER =
 // يضع التذييل الموحّد في النسختين.
 export function wrapEmailContent(plainBody: string): { html: string; text: string } {
   const safeBody = String(plainBody || "");
-  // تحويل الأسطر الجديدة إلى فقرات HTML للعرض
+  // تهريب رموز HTML ثم تحويل الأسطر الجديدة إلى فقرات
+  const AMP = String.fromCharCode(38) + "amp;";
+  const LT = String.fromCharCode(38) + "lt;";
+  const GT = String.fromCharCode(38) + "gt;";
+  const esc = (s) => s.replace(/&/g, AMP).replace(/</g, LT).replace(/>/g, GT);
   const htmlBody = safeBody
     .split("\n")
-    .map((line) => line.trim() ? `<div style="line-height:1.8;color:#1A2332">${line.replace(/</g, "<")}</div>` : "<div>&nbsp;</div>")
+    .map((line) => line.trim() ? `<div style="line-height:1.8;color:#1A2332">${esc(line)}</div>` : `<div>${String.fromCharCode(38)}nbsp;</div>`)
     .join("");
   return {
     html: `<div dir="rtl" style="font-family:'IBM Plex Sans Arabic','Tajawal',Arial,sans-serif;font-size:14px">${htmlBody}${EMAIL_FOOTER_HTML}</div>`,

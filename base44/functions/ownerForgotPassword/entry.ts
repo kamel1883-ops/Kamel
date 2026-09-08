@@ -1,6 +1,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { createRateLimiter, verifyTurnstile } from "../../shared/turnstile.ts";
 import { generateResetCode, RESET_CODE_TTL_MS } from "../../shared/ownerAuth.ts";
+import { wrapEmailContent } from "../../shared/emailFooter.ts";
 
 // طلب استعادة كلمة مرور المالك: يطابق الإقامة + الميلاد + البريد،
 // ينشئ رمز 6 أرقام صالح 15 دقيقة ويرسله إلى بريد المالك عبر SendEmail.
@@ -50,7 +51,7 @@ export default async function (req) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: ownerEmail,
         subject: "رمز استعادة كلمة مرور بوابة المالك — جدارة",
-        body: `رمز التحقق الخاص بك هو: ${code}\nالرمز صالح لمدة 15 دقيقة.\nإن لم تطلب تغيير كلمة المرور فتجاهل هذه الرسالة.`,
+        ...wrapEmailContent(`رمز التحقق الخاص بك هو: ${code}\nالرمز صالح لمدة 15 دقيقة.\nإن لم تطلب تغيير كلمة المرور فتجاهل هذه الرسالة.`),
       });
       sent = true;
     } catch {}

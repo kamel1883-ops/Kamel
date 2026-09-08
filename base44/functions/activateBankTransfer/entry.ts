@@ -3,7 +3,7 @@ import { secrets } from 'base44:runtime';
 import { verifyProof } from '../../shared/contractProof.ts';
 import { createRateLimiter } from '../../shared/turnstile.ts';
 import { escapeHtml } from '../../shared/escapeHtml.ts';
-import { EMAIL_FOOTER } from '../../shared/emailFooter.ts';
+import { wrapEmailContent } from '../../shared/emailFooter.ts';
 
 const RL = createRateLimiter(10 * 60 * 1000, 20);
 const ALLOWED_HOSTS = ['media.base44.com', 'static.wixstatic.com'];
@@ -65,14 +65,15 @@ export default async function (req) {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: ownerEmail,
           subject: 'إثبات تحويل بنكي بانتظار التحقق — ' + name,
-          body:
+          ...wrapEmailContent(
             'رفع عميل إثبات تحويل بنكي لطلب اشتراك سنوي، يرجى التحقق وتأكيد تفعيل الاشتراك السنوي:\n\n' +
             'المنشأة: ' + escapeHtml(name) + '\n' +
             'الرقم الموحد: ' + escapeHtml(tenant.unified_number || '') + '\n' +
             'البريد: ' + escapeHtml(clientEmail) + '\n' +
             'الهاتف: ' + escapeHtml(tenant.contact_phone || '') + '\n' +
             'إثبات التحويل: ' + escapeHtml(proof_url) + '\n' +
-            'بدأت فترة تجربة 30 يوماً بانتظار تأكيد التحويل وتفعيل السنة.' + EMAIL_FOOTER,
+            'بدأت فترة تجربة 30 يوماً بانتظار تأكيد التحويل وتفعيل السنة.'
+          ),
         });
       }
     } catch (_) {}
@@ -83,11 +84,12 @@ export default async function (req) {
           to: clientEmail,
           from_name: 'جدارة',
           subject: 'استلمنا إثبات تحويلكم — جاري التحقق وتفعيل الحساب',
-          body:
+          ...wrapEmailContent(
             'السلام عليكم ورحمة الله وبركاته،\n\n' +
             'شكراً لكم. استلمنا إثبات تحويلكم البنكي للاشتراك السنوي في منصة «جدارة».\n\n' +
             'بدأت فترة تجربة 30 يوماً بانتظار تحقّق فريق المالك من التحويل وتفعيل اشتراككم السنوي. يمكنك الآن إنشاء حسابك في بوابة الشركات بنفس البريد والرقم الموحّد المُسجَّلَين.\n\n' +
-            'فريق دعم جدارة' + EMAIL_FOOTER,
+            'فريق دعم جدارة'
+          ),
         });
       }
     } catch (_) {}

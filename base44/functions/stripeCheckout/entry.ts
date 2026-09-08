@@ -3,7 +3,7 @@ import { secrets } from 'base44:runtime';
 import { tierForCount } from '../../shared/pricing.ts';
 import { verifyProof } from '../../shared/contractProof.ts';
 import { createRateLimiter } from '../../shared/turnstile.ts';
-import { EMAIL_FOOTER } from '../../shared/emailFooter.ts';
+import { wrapEmailContent } from '../../shared/emailFooter.ts';
 import { escapeHtml } from '../../shared/escapeHtml.ts';
 
 // بوابة دفع Stripe (Payment Intents v3): إعداد علني + إنشاء PaymentIntent + تأكيد الدفع وتفعيل الاشتراك.
@@ -165,7 +165,7 @@ export default async function (req) {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: ownerEmail,
             subject: 'اشتراك سنوي مدفوع عبر بطاقة (Stripe) — ' + name,
-            body:
+            ...wrapEmailContent(
               'تم تفعيل اشتراك عميل جديد ودفع ' + paid.toLocaleString() + ' ر.س عبر بطاقة (Stripe):\n\n' +
               'المنشأة: ' + escapeHtml(name) + '\n' +
               'الشريحة: ' + escapeHtml(tierLabel) + '\n' +
@@ -173,7 +173,8 @@ export default async function (req) {
               'البريد: ' + escapeHtml(clientEmail) + '\n' +
               'تاريخ الدفع: ' + todayStr + '\n' +
               'ينتهي الاشتراك في: ' + subEndStr + '\n' +
-              'رقم عملية Stripe: ' + escapeHtml(pi_id) + EMAIL_FOOTER,
+              'رقم عملية Stripe: ' + escapeHtml(pi_id)
+            ),
           });
         }
       } catch (_e) {}
@@ -184,7 +185,7 @@ export default async function (req) {
             to: clientEmail,
             from_name: 'جدارة',
             subject: 'تم تفعيل اشتراككم السنوي في منصة جدارة',
-            body:
+            ...wrapEmailContent(
               'السلام عليكم ورحمة الله وبركاته،\n\n' +
               'تم بنجاح تفعيل اشتراككم السنوي في منصة «جدارة» وإطلاق حساب منشأتكم.\n\n' +
               'المنشأة: ' + escapeHtml(name) + '\n' +
@@ -192,7 +193,8 @@ export default async function (req) {
               'المبلغ المدفوع: ' + paid.toLocaleString() + ' ر.س (عبر بطاقة)\n' +
               'ينتهي الاشتراك في: ' + subEndStr + '\n\n' +
               'للدخول إلى بوابة الشركات، سجّلوا الدخول بالبريد والرقم الموحّد للمنشآت.\n\n' +
-              'فريق دعم جدارة' + EMAIL_FOOTER,
+              'فريق دعم جدارة'
+            ),
           });
         }
       } catch (_e) {}

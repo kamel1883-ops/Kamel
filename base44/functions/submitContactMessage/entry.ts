@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { verifyTurnstile, createRateLimiter } from '../../shared/turnstile.ts';
 import { escapeHtml } from '../../shared/escapeHtml.ts';
+import { wrapEmailContent } from '../../shared/emailFooter.ts';
 
 const limiter = createRateLimiter(10 * 60 * 1000, 5); // 5 رسائل / 10 دقائق لكل IP
 
@@ -50,7 +51,7 @@ ${eMsg}
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: officialEmail,
         subject,
-        body: mailBody,
+        ...wrapEmailContent(mailBody),
         from_name: 'بوابة جدارة',
       });
     } catch (mailErr) {

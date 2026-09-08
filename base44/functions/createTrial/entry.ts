@@ -6,7 +6,7 @@ import { verifyTurnstile, createRateLimiter } from "../../shared/turnstile.ts";
 const RL = createRateLimiter(10 * 60 * 1000, 5); // 5 طلبات / 10 دقائق لكل IP
 import { tierForCount } from "../../shared/pricing.ts";
 import { signProof } from "../../shared/contractProof.ts";
-import { EMAIL_FOOTER } from "../../shared/emailFooter.ts";
+import { wrapEmailContent } from "../../shared/emailFooter.ts";
 import { escapeHtml } from "../../shared/escapeHtml.ts";
 
 export default async function (req) {
@@ -185,7 +185,7 @@ export default async function (req) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: officialEmail,
         subject: (isQuote ? 'طلب عرض سعر جديد — ' : 'اشتراك تجريبي جديد — ') + name,
-        body: emailBody + EMAIL_FOOTER,
+        ...wrapEmailContent(emailBody),
       });
     } catch (_e) {
       // رسالة تسجيل الإنشاء لا يجب أن تفشل كل العملية إذا تعطل البريد
