@@ -21,7 +21,7 @@ export default function AirportCombobox({ value, onChange, placeholder, lang = "
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const results = searchAirports(query, lang, 8);
+  const results = searchAirports(query, lang, 12);
 
   const display = selected ? airportLabel(selected, lang) : query;
 

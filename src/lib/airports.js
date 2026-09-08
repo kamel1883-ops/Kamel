@@ -44,6 +44,11 @@ const RAW = [
   ["BGW", "بغداد", "Baghdad", "العراق", "Iraq"],
   ["EBL", "أربيل", "Erbil", "العراق", "Iraq"],
   ["BSR", "البصرة", "Basra", "العراق", "Iraq"],
+  // اليمن
+  ["SAH", "صنعاء", "Sanaa", "اليمن", "Yemen"],
+  ["ADE", "عدن", "Aden", "اليمن", "Yemen"],
+  ["HOD", "الحديدة", "Hodeidah", "اليمن", "Yemen"],
+  ["RIY", "المكلا", "Mukalla", "اليمن", "Yemen"],
   ["IST", "إسطنبول", "Istanbul", "تركيا", "Turkey"],
   ["SAW", "إسطنبول (ساو)", "Istanbul SAW", "تركيا", "Turkey"],
   ["AYT", "أنطاليا", "Antalya", "تركيا", "Turkey"],
@@ -65,6 +70,21 @@ const RAW = [
   ["HYD", "حيدر أباد", "Hyderabad", "الهند", "India"],
   ["CCJ", "كاليكوت", "Calicut", "الهند", "India"],
   ["BLR", "بنغالور", "Bengaluru", "الهند", "India"],
+  ["COK", "كوتشين", "Kochi", "الهند", "India"],
+  ["TRV", "تريفاندرم", "Trivandrum", "الهند", "India"],
+  ["AMD", "أحمد آباد", "Ahmedabad", "الهند", "India"],
+  ["CCU", "كلكتا", "Kolkata", "الهند", "India"],
+  ["GOI", "غوا", "Goa", "الهند", "India"],
+  ["LKO", "لكنؤ", "Lucknow", "الهند", "India"],
+  ["JAI", "جايبور", "Jaipur", "الهند", "India"],
+  ["NAG", "ناغبور", "Nagpur", "الهند", "India"],
+  ["CJB", "كويمباتور", "Coimbatore", "الهند", "India"],
+  ["ATQ", "أمرتسار", "Amritsar", "الهند", "India"],
+  ["PAT", "بتنا", "Patna", "الهند", "India"],
+  ["VNS", "واراناسي", "Varanasi", "الهند", "India"],
+  ["GAU", "غواهاتي", "Guwahati", "الهند", "India"],
+  ["IXC", "شانديغار", "Chandigarh", "الهند", "India"],
+  ["IXM", "مادوراي", "Madurai", "الهند", "India"],
   ["DAC", "دكا", "Dhaka", "بنغلاديش", "Bangladesh"],
   ["CMB", "كولومبو", "Colombo", "سريلانكا", "Sri Lanka"],
   ["KTM", "كاتماندو", "Kathmandu", "نيبال", "Nepal"],
@@ -159,7 +179,7 @@ export function findAirport(iata) {
   return AIRPORTS.find((a) => a.iata === iata) || null;
 }
 
-export function searchAirports(query, lang = "ar", limit = 8) {
+export function searchAirports(query, lang = "ar", limit = 12) {
   const q = (query || "").trim().toLowerCase();
   if (!q) return AIRPORTS.slice(0, limit);
   return AIRPORTS.filter((a) => {
