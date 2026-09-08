@@ -10,6 +10,7 @@ import {
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_AR } from "@/lib/pricing";
 import ReportsAnalytics from "@/components/brochure/ReportsAnalytics";
+import StoreButtons from "@/components/StoreButtons";
 import { Image } from "@/components/ui/image";
 
 // بروفايل منصة جدارة — نسخة فاخرة موسّعة، عربي صافٍ، RTL، قابل للطباعة
@@ -107,9 +108,7 @@ function Cover() {
               الرقم الوطني الموحد للمنشآت: <span style={{ fontFamily: "ui-monospace, monospace", direction: "ltr", display: "inline-block" }}>{PROVIDER.unifiedNumber}</span>
             </div>
           </div>
-          <div style={{ color: "#9fb3c8", fontSize: 11, textAlign: "center" }}>
-            متاح الآن على متجر جوجل بلاي · قريباً على متجر آب ستور
-          </div>
+          <StoreButtons variant="glass" isAr={true} />
         </div>
       </div>
     </div>
@@ -841,9 +840,8 @@ function EmployeePortal() {
               <li key={k} className="flex items-start gap-2"><BadgeCheck size={16} style={{ color: CYAN, marginTop: 3, flexShrink: 0 }} /><span>{x}</span></li>
             ))}
           </ul>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}55` }}><BadgeCheck size={14} /> متاح الآن على متجر جوجل بلاي</span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}><Clock size={14} /> قريباً على متجر آب ستور</span>
+          <div className="mt-5">
+            <StoreButtons variant="glass" isAr={true} />
           </div>
         </div>
         <PhoneMock />
@@ -1015,6 +1013,9 @@ function Closing() {
             <Globe size={18} style={{ color: CYAN }} />
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">jadara-hr.com</span>
           </div>
+        </div>
+        <div className="flex justify-center mt-7">
+          <StoreButtons variant="glass" isAr={true} />
         </div>
         <div className="flex items-center justify-center gap-3 mt-6">
           <Social icon={Twitter} label="إكس · تويتر" />

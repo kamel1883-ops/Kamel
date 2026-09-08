@@ -15,6 +15,7 @@ import SeasonalHero from "@/components/landing/SeasonalHero";
 import SeasonalDiscountBanner from "@/components/landing/SeasonalDiscountBanner";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
+import StoreButtons from "@/components/StoreButtons";
 import { useNativeGate } from "@/components/NativeAppNotice";
 import {
   Sparkles, Check, ArrowLeft, ShieldCheck, Users, CalendarCheck, Wallet,
@@ -300,6 +301,7 @@ export default function Landing() {
                 </button>
                 <button onClick={() => scrollTo("features")} className="bg-white hover:bg-slate-100 border-2 border-black text-foreground px-6 py-3.5 rounded-2xl font-medium shadow-xl shadow-black/20 flex items-center gap-2 transition"><ArrowLeft size={16} style={{ transform: isAr ? "none" : "scaleX(-1)" }} /> {t.cta2}</button>
               </div>
+              <StoreButtons variant="light" isAr={isAr} className="mt-6 justify-center sm:justify-start" />
             </motion.div>
             <div className="flex gap-8 text-sm">
               {t.stats.map((s) => <Stat key={s.l} n={s.n} l={s.l} />)}
@@ -534,6 +536,9 @@ export default function Landing() {
                 className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
                 <Twitter size={17} className="text-violet-600" />
               </a>
+            </div>
+            <div className="mt-5">
+              <StoreButtons variant="light" isAr={isAr} className="!gap-2.5" />
             </div>
           </div>
           <div className="space-y-1.5">

@@ -1,8 +1,9 @@
 // Inspired by react-hot-toast library
 import { useState, useEffect } from "react";
 
-const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_LIMIT = 5;
+const TOAST_REMOVE_DELAY = 5000;
+const TOAST_DEFAULT_DURATION = 5000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -122,6 +123,7 @@ function toast({ ...props }) {
   const dismiss = () =>
     dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
 
+  const duration = props.duration ?? TOAST_DEFAULT_DURATION;
   dispatch({
     type: actionTypes.ADD_TOAST,
     toast: {
@@ -133,6 +135,11 @@ function toast({ ...props }) {
       },
     },
   });
+
+  // إخفاء آلي بعد المدة المحددة (5 ثوانٍ افتراضياً)؛ استخدم duration: Infinity أو 0 للإبقاء
+  if (duration !== Infinity && duration > 0) {
+    setTimeout(() => dismiss(), duration);
+  }
 
   return {
     id,
@@ -161,4 +168,4 @@ function useToast() {
   };
 }
 
-export { useToast, toast }; 
+export { useToast, toast };
