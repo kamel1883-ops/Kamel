@@ -27,6 +27,9 @@ function XIcon({ size = 18, className = "" }) {
   );
 }
 
+// ألوان الهوية المستخدمة في قسم السيرفر (بنفسجي + سماوي)
+const VIOLET = "#7C5CE6";
+
 export default function ShareBar({ isAr = true }) {
   const [copied, setCopied] = useState(false);
   const blurb = isAr ? BLURB_AR : BLURB_EN;
@@ -34,11 +37,11 @@ export default function ShareBar({ isAr = true }) {
   const url = encodeURIComponent(SITE_URL);
 
   const links = [
-    { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`, icon: Linkedin, hover: "hover:bg-[#0a66c2]/25 hover:border-[#0a66c2]/40" },
-    { label: "X", href: `https://twitter.com/intent/tweet?text=${text}`, icon: XIcon, hover: "hover:bg-white/20" },
-    { label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, icon: Facebook, hover: "hover:bg-[#1877f2]/25 hover:border-[#1877f2]/40" },
-    { label: "WhatsApp", href: `https://wa.me/?text=${text}`, icon: MessageCircle, hover: "hover:bg-emerald-500/25 hover:border-emerald-400/40" },
-    { label: "Telegram", href: `https://t.me/share/url?url=${url}&text=${text}`, icon: Send, hover: "hover:bg-sky-500/25 hover:border-sky-400/40" },
+    { label: "LinkedIn", href: `https://www.linkedin.com/sharing/shareoffsite/?url=${url}`, icon: Linkedin },
+    { label: "X", href: `https://twitter.com/intent/tweet?text=${text}`, icon: XIcon },
+    { label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, icon: Facebook },
+    { label: "WhatsApp", href: `https://wa.me/?text=${text}`, icon: MessageCircle },
+    { label: "Telegram", href: `https://t.me/share/url?url=${url}&text=${text}`, icon: Send },
   ];
 
   const copy = async () => {
@@ -52,32 +55,35 @@ export default function ShareBar({ isAr = true }) {
   return (
     <div className="flex flex-col items-center gap-5">
       <div className="flex flex-wrap items-center justify-center gap-3">
-        {links.map((l) => (
-          <a
-            key={l.label}
-            href={l.href}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={l.label}
-            title={l.label}
-            className={`w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center transition-colors ${l.hover}`}
-          >
-            <l.icon size={18} className="text-white/85" />
-          </a>
-        ))}
+        {links.map((l) => {
+          const I = l.icon;
+          return (
+            <a
+              key={l.label}
+              href={l.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={l.label}
+              title={l.label}
+              className="w-12 h-12 rounded-2xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 hover:-translate-y-0.5 transition-all"
+            >
+              <I size={20} style={{ color: VIOLET }} />
+            </a>
+          );
+        })}
         <button
           onClick={copy}
           aria-label={isAr ? "نسخ النبذة والرابط" : "Copy blurb & link"}
           title={isAr ? "نسخ النبذة والرابط" : "Copy blurb & link"}
-          className="w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center hover:bg-violet-500/25 hover:border-violet-400/40 transition-colors"
+          className="w-12 h-12 rounded-2xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 hover:-translate-y-0.5 transition-all"
         >
-          {copied ? <Check size={18} className="text-emerald-300" /> : <Link2 size={18} className="text-white/85" />}
+          {copied ? <Check size={20} className="text-emerald-600" /> : <Link2 size={20} style={{ color: VIOLET }} />}
         </button>
       </div>
-      <p className="text-xs text-white/45 max-w-xl text-center leading-relaxed">
+      <p className="text-xs text-muted-foreground max-w-xl text-center leading-relaxed">
         {isAr ? "للمتابعة والمشاركة عبر حساباتنا الرسمية:" : "Follow & share via our official accounts:"}{" "}
-        <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white underline underline-offset-2">LinkedIn</a>{" · "}
-        <a href={SOCIAL.x} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white underline underline-offset-2">X</a>
+        <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">LinkedIn</a>{" · "}
+        <a href={SOCIAL.x} target="_blank" rel="noreferrer" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">X</a>
       </p>
     </div>
   );
