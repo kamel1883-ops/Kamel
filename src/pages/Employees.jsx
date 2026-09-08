@@ -29,7 +29,7 @@ export default function Employees() {
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "الموظفون", subtitle: "إدارة بيانات وملفات الموظفين", add: "موظف جديد", importBtn: "استيراد من Excel", branchesBtn: "إدارة الفروع",
-    search: "بحث بالرقم أو المسمى...", allDepts: "كل الإدارات", allRoles: "كل المستويات", allBranches: "كل الفروع", loading: "جارٍ التحميل...",
+    search: "ابحث بالاسم أو الرقم الوظيفي أو الهوية... (يشمل النشطين وغير النشطين)", allDepts: "كل الإدارات", allRoles: "كل المستويات", allBranches: "كل الفروع", loading: "جارٍ التحميل...",
     empty: "لا يوجد موظفون مطابقون",
     activeHead: "الموظفون النشطون", inactiveHead: "الموظفون غير النشطون (الأرشيف)",
     thNum: "الرقم", thName: "الاسم", thNat: "الهوية/الإقامة", thPos: "المسمى", thDept: "الإدارة", thBranch: "الفرع", thRole: "المستوى", thStatus: "الحالة", thSalary: "الراتب", thActions: "إجراءات",
@@ -39,7 +39,7 @@ export default function Employees() {
     exportPdf: "طباعة PDF",
   } : {
     title: "Employees", subtitle: "Manage employee data and profiles", add: "New employee", importBtn: "Import from Excel", branchesBtn: "Branches",
-    search: "Search by number or title...", allDepts: "All departments", allRoles: "All levels", allBranches: "All branches", loading: "Loading...",
+    search: "Search by name, employee number or ID... (active & inactive)", allDepts: "All departments", allRoles: "All levels", allBranches: "All branches", loading: "Loading...",
     empty: "No matching employees",
     activeHead: "Active employees", inactiveHead: "Inactive employees (archive)",
     thNum: "Number", thName: "Name", thNat: "National ID", thPos: "Title", thDept: "Department", thBranch: "Branch", thRole: "Level", thStatus: "Status", thSalary: "Salary", thActions: "Actions",
@@ -86,8 +86,13 @@ export default function Employees() {
   const departments = Array.from(new Set(employees.map((e) => e.department).filter(Boolean)));
   const branchNames = Array.from(new Set(employees.map((e) => e.branch_name).filter(Boolean)));
   const matches = (e) => {
-    const q = search.trim();
-    const matchQ = !q || e.employee_number?.includes(q) || e.position?.includes(q) || e.department?.includes(q) || e.full_name?.includes(q);
+    const q = search.trim().toLowerCase();
+    const matchQ = !q ||
+      e.employee_number?.toLowerCase().includes(q) ||
+      e.full_name?.toLowerCase().includes(q) ||
+      e.national_id?.toLowerCase().includes(q) ||
+      e.position?.toLowerCase().includes(q) ||
+      e.department?.toLowerCase().includes(q);
     const matchD = deptFilter === "all" || e.department === deptFilter;
     const matchB = branchFilter === "all" || e.branch_name === branchFilter;
     const matchR = roleFilter === "all" || e.role_level === roleFilter;
