@@ -1,3 +1,5 @@
+import { wrapEmailContent } from "./emailFooter.ts";
+
 // منطق موحّد لإرسال تنبيه بريدي + إشعار داخلي للمعتمد المختص (المدير المباشر /
 // الموارد البشرية / المالية) عند تقديم طلب أو انتقاله لمرحلة موافقة جديدة.
 // يُستخدم من:
@@ -56,7 +58,8 @@ export async function notifyApproverForStatus(
   } catch {}
 
   try {
-    await base44.asServiceRole.integrations.Core.SendEmail({ to: approver.email, subject, body: bodyText });
+    const { html, text } = wrapEmailContent(bodyText);
+    await base44.asServiceRole.integrations.Core.SendEmail({ to: approver.email, subject, html, text });
     return { ok: true, sentTo: approver.email };
   } catch (e: any) {
     return { ok: true, skipped: true, reason: "send-failed", error: String(e?.message || e) };
