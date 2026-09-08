@@ -223,6 +223,8 @@ export default function Approvals() {
 
   const managerApprove = async (type, r) => {
     await update(type, r.id, { manager_status: "approved", manager_id: me?.id, manager_name: me?.full_name, manager_date: todayISO(), status: "manager_approved" });
+    // تنبيه الموارد البشرية بوجود طلب انتقل لمرحلة اعتمادها
+    try { await base44.functions.invoke("notifyApprover", { type: type === "leaves" ? "leave" : type === "trips" ? "trip" : "loan", employeeId: r.employee_id, employeeName: r.employee_name, status: "manager_approved" }); } catch (e) {}
     load();
   };
   const hrApprove = async (type, r) => {
@@ -245,10 +247,14 @@ export default function Approvals() {
         await base44.entities.Employee.update(emp.id, { leave_balance: Math.max(0, balance - deduct), status: "on_leave" });
       }
       if (!fin) { try { await generateLeaveSettlement(r, empOf(r.employee_id), org, leaves); } catch (e) {} }
+      // تنبيه المالية بوجود إجازة بانتظار الصرف
+      try { await base44.functions.invoke("notifyApprover", { type: "leave", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch (e) {}
     } else {
       const patchLoan = { hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), status: "awaiting_finance" };
       setLoans((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchLoan } : x)));
       await base44.entities.LoanRequest.update(r.id, patchLoan);
+      // تنبيه المالية بوجود سلفة بانتظار الصرف
+      try { await base44.functions.invoke("notifyApprover", { type: "loan", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch (e) {}
     }
     load();
   };
@@ -305,6 +311,8 @@ export default function Approvals() {
       const patchFin = { hr_status: "approved", status: "awaiting_finance", finance_status: "pending" };
       setLeaves((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchFin } : x)));
       await base44.entities.LeaveRequest.update(r.id, patchFin);
+      // تنبيه المالية بوجود إجازة بانتظار الصرف
+      try { await base44.functions.invoke("notifyApprover", { type: "leave", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch (e) {}
       if (emp) {
         await base44.entities.Employee.update(emp.id, {
           prior_used_leave: newUsed,
@@ -408,6 +416,8 @@ export default function Approvals() {
       setLoans((prev) => prev.map((x) => (x.id === req.id ? { ...x, ...patchLh } : x)));
       await base44.entities.LoanRequest.update(req.id, patchLh);
       try { await generateLoanStatement({ ...req, ...patchLh }, empOf(req.employee_id), org); } catch (e) {}
+      // تنبيه المالية بوجود سلفة بانتظار الصرف
+      try { await base44.functions.invoke("notifyApprover", { type: "loan", employeeId: req.employee_id, employeeName: req.employee_name, status: "awaiting_finance" }); } catch (e) {}
     } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); load();
   };
@@ -452,6 +462,8 @@ export default function Approvals() {
       setTrips((prev) => prev.map((t) => (t.id === r.id ? { ...t, ...patch } : t)));
       await base44.entities.BusinessTrip.update(r.id, patch);
       try { await generateBusinessTripApproval({ ...r, ...patch }, emp, org); } catch (e) {}
+      // تنبيه المالية بوجود انتداب بانتظار الصرف
+      try { await base44.functions.invoke("notifyApprover", { type: "trip", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch (e) {}
     } catch (e) { load(); }
     setBusy(false); setActing(null); setNote(""); setProofFile(null); load();
   };

@@ -18,6 +18,10 @@ export async function notifyApproverForStatus(
 
   const employees: any[] = await base44.asServiceRole.entities.Employee.list("-created_date", 5000);
   const requester = (employees || []).find((e) => e.id === employeeId);
+  // قصر اختيار المعتمد على نفس منشأة الموظف صاحب الطلب (عبر الرقم الموحد) لمنع
+  // وصول التنبيه لمعتمد في منشأة أخرى — مع رجوع لمعتمد عام إن لم يوجد مطابق.
+  const requesterUn = String(requester?.unified_number || "").trim();
+  const sameTenant = (e: any) => !requesterUn || String(e?.unified_number || "").trim() === requesterUn;
 
   // تحديد المعتمد المختص بناءً على المرحلة الحالية للطلب
   let approver: any = null;
@@ -26,10 +30,10 @@ export async function notifyApproverForStatus(
     approver = (employees || []).find((e) => e.id === requester?.manager_id) || null;
     stageLabel = "المدير المباشر";
   } else if (status === "manager_approved") {
-    approver = (employees || []).find((e) => e.is_approver_hr) || null;
+    approver = (employees || []).find((e) => e.is_approver_hr && sameTenant(e)) || (employees || []).find((e) => e.is_approver_hr) || null;
     stageLabel = "الموارد البشرية";
   } else if (["hr_approved", "hr_settled", "awaiting_finance"].includes(status)) {
-    approver = (employees || []).find((e) => e.is_approver_finance) || null;
+    approver = (employees || []).find((e) => e.is_approver_finance && sameTenant(e)) || (employees || []).find((e) => e.is_approver_finance) || null;
     stageLabel = "المالية";
   }
 
