@@ -1096,34 +1096,38 @@ function PhoneMock() {
 /* =================== Infrastructure =================== */
 function Infra() {
   return (
-    <Section tint="dark" heading={<Heading dark icon={<Server />} title="Premium Private Infrastructure" sub="A dedicated virtual private server — not shared hosting" />}>
+    <Section tint="dark" heading={<Heading dark icon={<Server />} title="Premium Saudi Infrastructure" sub="A dedicated Jadara server — inside the Kingdom, top specs" />}>
       <div className="grid md:grid-cols-[1.1fr,1fr] gap-6">
         <div className="rounded-3xl p-6 bg-gradient-to-br from-[#0e1f3a] to-[#0A1629] border border-white/10 shadow-2xl">
           <div className="flex items-center gap-2 text-white mb-4">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center"><Server size={20} style={{ color: CYAN }} /></div>
             <div>
-              <div className="font-extrabold text-lg">Dedicated Virtual Server</div>
-              <div className="text-xs text-white/60">Fully allocated to your organization — full performance</div>
+              <div className="font-extrabold text-lg">Jadara Dedicated Server</div>
+              <div className="text-xs text-white/60">A server dedicated to the Jadara platform — hosting all company and institution subscriptions</div>
             </div>
           </div>
+          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-emerald-500/10 border border-emerald-400/20 self-start mb-3">
+            <MapPin size={14} style={{ color: "#34d399" }} />
+            <span className="text-xs font-bold" style={{ color: "#6ee7b7" }}>Riyadh — Kingdom of Saudi Arabia</span>
+          </div>
           <div className="grid grid-cols-3 gap-3">
-            <Spec icon={Cpu} big="12 cores" small="Full virtual CPU" />
-            <Spec icon={MemoryStick} big="24 GB" small="High memory" />
-            <Spec icon={HardDrive} big="720 GB" small="Fast storage" />
+            <Spec icon={Cpu} big="12 vCores" small="AMD EPYC 4464P · 24 threads" />
+            <Spec icon={MemoryStick} big="48 GB" small="DDR5 ECC memory" />
+            <Spec icon={HardDrive} big="1 TB" small="Ultra-fast NVMe" />
           </div>
           <div className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
             <div className="text-xs text-white/60">Server capacity</div>
-            <div className="text-lg font-extrabold text-white flex items-center justify-center gap-1.5"><Users size={16} style={{ color: CYAN }} /> up to 25,000 employees</div>
-            <div className="text-[11px] text-white/50">in a single organization with no impact on speed</div>
+            <div className="text-lg font-extrabold text-white flex items-center justify-center gap-1.5"><Users size={16} style={{ color: CYAN }} /> up to 50,000 employees</div>
+            <div className="text-[11px] text-white/50">across different companies and institutions — with no impact on speed</div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <TrustChip dark icon={Globe} label="Private cloud" />
+          <TrustChip dark icon={MapPin} label="Saudi location (Riyadh)" />
+          <TrustChip dark icon={ShieldCheck} label="SDAIA compliant" />
           <TrustChip dark icon={Lock} label="Full encryption" />
           <TrustChip dark icon={ShieldCheck} label="Daily backups" />
-          <TrustChip dark icon={Zap} label="Fast storage" />
+          <TrustChip dark icon={Zap} label="Ultra-fast NVMe" />
           <TrustChip dark icon={BadgeCheck} label="99.9% uptime" />
-          <TrustChip dark icon={Cpu} label="Full isolation" />
         </div>
       </div>
     </Section>

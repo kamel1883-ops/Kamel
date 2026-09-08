@@ -1,8 +1,10 @@
 import React from "react";
-import { Server, Cpu, HardDrive, MemoryStick, Users, ShieldCheck, Zap, Globe, Lock } from "lucide-react";
+import { Server, Cpu, HardDrive, MemoryStick, Users, ShieldCheck, Zap, Globe, Lock, MapPin, Network } from "lucide-react";
 
-// قسم الاستضافة: يُبرز أن المنصة تعمل على سيرفر خاص (VPS) بأعلى المواصفات،
-// ويثبت سعة السيرفر لعدد كبير من الموظفين دون أي تأثير على الأداء.
+// قسم الاستضافة: يُبرز أن منصة «جدارة» تعمل على خادم خاص داخل المملكة العربية السعودية
+// (الرياض — SAIX) بما يتوافق مع الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع سدايا (SDAIA).
+// خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة حتى 50,000 موظف
+// من مجموعة شركات مختلفة — دون أي تأثير على الأداء.
 // يُدرج قبل قسم الباقات في صفحة الهبوط.
 // (أصناف cyan-* وteal-* وsky-* تُرسم ذهبياً تلقائياً عبر إعداد Tailwind — هوية كحلي+ذهبي.)
 const GOLD = "#7C5CE6";
@@ -10,61 +12,61 @@ const GOLD = "#7C5CE6";
 export default function HostingSpecs({ isAr = true }) {
   const L = isAr
     ? {
-        tag: "بنية تحتية خاصة",
-        title: "سيرفر خاص بأعلى المواصفات — لأداء لا يتأثر بحجم منشأتك",
-        desc: "تعمل منصة «جدارة» على خادم VPS خاص (غير مشترك) بمعمارية NVMe فائقة السرعة، وتقنيات عزل وتشفير كاملة. سعة هذا السيرفر تكفي لتشغيل النظام بسلاسة تامة حتى مع نمو عدد الموظفين — دون بطء أو توقف.",
+        tag: "بنية تحتية سعودية",
+        title: "سيرفر خاص بمنصة جدارة — داخل السعودية وبأعلى المواصفات",
+        desc: "تعمل منصة «جدارة» على خادم خاص داخل المملكة العربية السعودية (الرياض — SAIX)، بما يتوافق مع سياسة الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع متطلبات منصة سدايا (SDAIA). خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة تكفي حتى 50,000 موظف من مجموعة شركات مختلفة — دون بطء أو توقف.",
         badge: "أعلى المواصفات",
-        heading: "سيرفر VPS سحابي خاص",
-        savingTag: "بدونLimits",
-        strikethrough: "مشترك",
+        heading: "خادم جدارة الخاص",
+        savingTag: "أداء مخصّص",
+        strikethrough: "استضافة مشتركة",
         price: "100%",
         priceUnit: "أداء مخصّص",
-        subtext: "سيرفر خاص لمؤسستك بالكامل — ليس استضافة مشتركة",
+        subtext: "سيرفر خاص بمنصة جدارة — يستضيف اشتراكات جميع الشركات والمؤسسات",
         specs: [
-          { icon: Cpu, big: "12 vCores", small: "معالج افتراضي كامل" },
-          { icon: MemoryStick, big: "24 GB", small: "ذاكرة عشوائية فائقة" },
-          { icon: HardDrive, big: "720 GB", small: "تخزين NVMe فائق السرعة" },
+          { icon: Cpu, big: "12 vCores", small: "AMD EPYC 4464P · 24 مسار" },
+          { icon: MemoryStick, big: "48 GB", small: "ذاكرة DDR5 ECC" },
+          { icon: HardDrive, big: "1 TB", small: "تخزين NVMe فائق السرعة" },
         ],
         features: [
-          "سيرفر خاص (VPS) غير مشترك مع أي عميل آخر",
+          "خادم خاص بمنصة جدارة — يستضيف جميع اشتراكات الشركات والمؤسسات",
+          "موقع سعودي (الرياض — SAIX) — التزام كامل بالهيئة الوطنية للأمن السيبراني وسدايا (SDAIA)",
           "تخزين NVMe سريع — فتح الصفحات والتقارير في أجزاء من الثانية",
           "نسخ احتياطي يومي تلقائي وحماية كاملة من فقدان البيانات",
           "تشفير كامل للبيانات أثناء التخزين والنقل (TLS / Isolation)",
-          "أداء ثابت مهما كبر عدد المستخدمين أو عدد الموظفين",
-          "موقع سحابي متعدّد — استمرارية 99.9% وفقاً للاتفاقية SLA",
+          "أداء ثابت حتى مع نمو إجمالي الموظفين عبر المنشآت المختلفة",
         ],
-        capacityLabel: "سعة السيرفر",
-        capacityValue: "حتى 25,000 موظف",
-        capacityNote: "في منشأة واحدة دون أي تأثير على السرعة",
+        capacityLabel: "سعة الخادم",
+        capacityValue: "حتى 50,000 موظف",
+        capacityNote: "موزّعون على مجموعة شركات ومؤسسات مختلفة",
         cta: "ابدأ تجربتك المجانية",
       }
     : {
-        tag: "Private Infrastructure",
-        title: "A dedicated high-spec server — performance that grows with your headcount",
-        desc: "Jadara runs on a dedicated VPS (not shared) with blazing-fast NVMe architecture and full isolation and encryption. This server is sized to keep the platform perfectly smooth even as your headcount grows — no slowdowns, no downtime.",
+        tag: "Saudi-based infrastructure",
+        title: "A dedicated Jadara server — inside Saudi Arabia, top specs",
+        desc: "Jadara runs on a dedicated server inside the Kingdom of Saudi Arabia (Riyadh — SAIX), compliant with the National Cybersecurity Authority policy and fully aligned with SDAIA requirements. A single server hosts all company and institution subscriptions on the platform, sized for up to 50,000 employees across different company groups — no slowdowns, no downtime.",
         badge: "Top specs",
-        heading: "Dedicated cloud VPS",
-        savingTag: "No Limits",
-        strikethrough: "Shared",
+        heading: "Jadara dedicated server",
+        savingTag: "Dedicated power",
+        strikethrough: "Shared hosting",
         price: "100%",
         priceUnit: "Dedicated power",
-        subtext: "A private server for your organization — not shared hosting",
+        subtext: "A server dedicated to the Jadara platform — hosting all company and institution subscriptions",
         specs: [
-          { icon: Cpu, big: "12 vCores", small: "Full virtual CPU" },
-          { icon: MemoryStick, big: "24 GB", small: "High-speed memory" },
-          { icon: HardDrive, big: "720 GB", small: "Ultra-fast NVMe storage" },
+          { icon: Cpu, big: "12 vCores", small: "AMD EPYC 4464P · 24 threads" },
+          { icon: MemoryStick, big: "48 GB", small: "DDR5 ECC memory" },
+          { icon: HardDrive, big: "1 TB", small: "Ultra-fast NVMe storage" },
         ],
         features: [
-          "Dedicated VPS — not shared with any other client",
+          "A server dedicated to the Jadara platform — hosting all company and institution subscriptions",
+          "Saudi location (Riyadh — SAIX) — full compliance with the National Cybersecurity Authority and SDAIA",
           "NVMe storage — pages and reports open in fractions of a second",
           "Automatic daily backups with full data-loss protection",
           "Full encryption at rest and in transit (TLS / isolation)",
-          "Steady performance however large the user or employee count",
-          "Multi-zone cloud — 99.9% uptime per the SLA",
+          "Steady performance even as total employees grow across organizations",
         ],
         capacityLabel: "Server capacity",
-        capacityValue: "Up to 25,000 employees",
-        capacityNote: "In a single organization with no speed impact",
+        capacityValue: "Up to 50,000 employees",
+        capacityNote: "Across different companies and institutions",
         cta: "Start your free trial",
       };
 
@@ -78,7 +80,7 @@ export default function HostingSpecs({ isAr = true }) {
             {L.tag}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold mt-4 mb-2 text-[#5B3FD6]" style={{ fontFamily: "var(--font-display)" }}>
-            {isAr ? <>سيرفر خاص <span className="text-cyan-600">بأعلى المواصفات</span> — لأداء لا يتأثر بحجم منشأتك</> : <>A dedicated <span className="text-cyan-600">high-spec</span> server — performance that grows with you</>}
+            {isAr ? <>سيرفر خاص بمنصة <span className="text-cyan-600">جدارة</span> — داخل السعودية بأعلى المواصفات</> : <>A dedicated <span className="text-cyan-600">Jadara</span> server — inside Saudi Arabia, top specs</>}
           </h2>
           <p className="text-[#4b5563] text-base leading-relaxed max-w-2xl mx-auto">{L.desc}</p>
         </div>
@@ -96,6 +98,12 @@ export default function HostingSpecs({ isAr = true }) {
                 <Server size={20} className="text-cyan-600" />
               </div>
               <h3 className="text-xl font-extrabold text-[#5B3FD6]" style={{ fontFamily: "var(--font-display)" }}>{L.heading}</h3>
+            </div>
+
+            {/* موقع سعودي */}
+            <div className="mt-3 inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 bg-emerald-50 border border-emerald-100">
+              <MapPin size={14} className="text-emerald-600" />
+              <span className="text-xs font-bold text-emerald-700">{isAr ? "الرياض — المملكة العربية السعودية" : "Riyadh — Saudi Arabia"}</span>
             </div>
 
             {/* السعر */}
@@ -150,9 +158,9 @@ export default function HostingSpecs({ isAr = true }) {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
-              <TrustChip icon={Globe} label={isAr ? "سحابة خاصة" : "Private cloud"} />
+              <TrustChip icon={MapPin} label={isAr ? "موقع سعودي" : "Saudi location"} />
+              <TrustChip icon={ShieldCheck} label={isAr ? "التزام سدايا" : "SDAIA compliant"} />
               <TrustChip icon={Lock} label={isAr ? "تشفير كامل" : "Full encryption"} />
-              <TrustChip icon={ShieldCheck} label={isAr ? "نسخ احتياطي يومي" : "Daily backup"} />
               <TrustChip icon={Zap} label={isAr ? "NVMe فائق السرعة" : "Ultra-fast NVMe"} />
             </div>
           </div>
