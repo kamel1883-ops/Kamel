@@ -38,29 +38,22 @@ function Stepper({ value, onChange, min = 0, max = 9, label }) {
 
 function ProviderCard({ providerKey, onSelect, isAr }) {
   const p = FLIGHT_PROVIDERS[providerKey];
-  const isAlmatar = providerKey === "almatar";
   return (
     <button
       type="button"
       onClick={() => onSelect(providerKey)}
       className="group flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 transition-all hover:-translate-y-1 hover:shadow-xl"
-      style={{
-        borderColor: isAlmatar ? "#22c55e40" : "#f59e0b40",
-        background: isAlmatar
-          ? "linear-gradient(160deg,#f0fdf4,#dcfce7)"
-          : "linear-gradient(160deg,#fffbeb,#fef3c7)",
-      }}
+      style={{ borderColor: p.brand + "40", background: `linear-gradient(160deg, ${p.brand}0d, ${p.brand}1a)` }}
     >
-      <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white shadow-lg"
-        style={{ background: isAlmatar ? "#16a34a" : "#d97706" }}>
-        <Plane size={38} className="rotate-45" />
+      <div className="h-16 flex items-center justify-center px-6 rounded-xl bg-white shadow-sm border" style={{ borderColor: p.brand + "22" }}>
+        <img src={p.logo} alt={isAr ? p.name : p.nameEn} className="max-h-12 w-auto object-contain" />
       </div>
       <div className="text-center">
-        <div className="text-2xl font-extrabold" style={{ color: isAlmatar ? "#15803d" : "#b45309" }}>
+        <div className="text-2xl font-extrabold" style={{ color: p.brand }}>
           {isAr ? p.name : p.nameEn}
         </div>
         <div className="text-sm text-slate-500 mt-1">
-          {isAr ? "حجز الطيران عبر " + (isAr ? p.name : p.nameEn) : "Book via " + p.nameEn}
+          {isAr ? "حجز الطيران عبر " + p.name : "Book via " + p.nameEn}
         </div>
       </div>
       <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 group-hover:text-slate-900">
@@ -182,20 +175,27 @@ export default function FlightBookings() {
   }
 
   const p = FLIGHT_PROVIDERS[provider];
-  const isAlmatar = provider === "almatar";
-  const brand = isAlmatar ? "#16a34a" : "#d97706";
+  const brand = p.brand;
 
   return (
     <div className="relative">
-      {/* علامة مائية للمزوّد */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
-        <div className="flex flex-col items-center gap-3 opacity-[0.05]" style={{ transform: "rotate(-18deg)" }}>
-          <PlaneTakeoff size={260} style={{ color: brand }} strokeWidth={1.2} />
-          <span className="text-6xl font-black" style={{ color: brand }}>{isAr ? p.name : p.nameEn}</span>
-        </div>
+      {/* علامة مائية بشعار المزوّد تملأ الصفحة */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url(${p.logo})`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "300px",
+          opacity: 0.06,
+        }}
+        aria-hidden="true"
+      />
+      {/* نسخة كبيرة مركزية من الشعار */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden z-0" aria-hidden="true">
+        <img src={p.logo} alt="" className="w-[520px] max-w-[70%] opacity-[0.07]" style={{ transform: "rotate(-6deg)" }} />
       </div>
 
-      <div className="relative">
+      <div className="relative z-10">
         <PageHeader
           title={t.title}
           subtitle={t.subtitle}
@@ -207,9 +207,9 @@ export default function FlightBookings() {
         />
 
         {/* رأس المزوّد */}
-        <div className="flex items-center gap-3 mb-6 rounded-2xl p-4 border" style={{ borderColor: brand + "40", background: brand + "0d" }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0" style={{ background: brand }}>
-            <Plane size={24} className="rotate-45" />
+        <div className="flex items-center gap-3 mb-6 rounded-2xl p-4 border bg-white/90" style={{ borderColor: brand + "40" }}>
+          <div className="h-12 px-3 rounded-xl flex items-center justify-center bg-white border shrink-0" style={{ borderColor: brand + "22" }}>
+            <img src={p.logo} alt={isAr ? p.name : p.nameEn} className="max-h-9 w-auto object-contain" />
           </div>
           <div>
             <div className="text-lg font-bold" style={{ color: brand }}>{isAr ? p.name : p.nameEn}</div>

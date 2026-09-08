@@ -11,6 +11,8 @@ export const FLIGHT_PROVIDERS = {
     nameEn: "Almatar",
     flightsBase: "https://almatar.com/en/flights/",
     site: "https://almatar.com",
+    logo: "/logos/almatar.png",
+    brand: "#16a34a",
   },
   almosafer: {
     key: "almosafer",
@@ -18,6 +20,8 @@ export const FLIGHT_PROVIDERS = {
     nameEn: "Almosafer",
     flightsBase: "https://www.almosafer.com/en",
     site: "https://www.almosafer.com",
+    logo: "/logos/almosafer.svg",
+    brand: "#003143",
   },
 };
 
