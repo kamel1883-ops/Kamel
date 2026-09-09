@@ -6,6 +6,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import ShareBar from "@/components/ShareBar";
 import { Image } from "@/components/ui/image";
 import ClientMarquee from "@/components/ClientMarquee";
+import FlightProviders from "@/components/landing/FlightProviders";
 import PricingColumns from "@/components/landing/PricingColumns";
 import HostingSpecs from "@/components/landing/HostingSpecs";
 import HrKeywordField from "@/components/landing/HrKeywordField";
@@ -62,7 +63,7 @@ const featuresAr = [
   { icon: GraduationCap, title: "التدريب والتطوير", desc: "ضع خططاً تدريبية لموظف محدد أو لجهة/قسم كامل بمعايير موحّدة: حدّد مشاكل النقص لدى الموظف، الهدف بعد الخطة، آلية التنفيذ والتكلفة والتواريخ، مع صناديق شرح ووصف تفصيلية، وتتبّع حالة كل خطة حتى الاكتمال لرفع كفاءة الموارد البشرية وفق احتياج المنشأة." },
   { icon: Languages, title: "بوابة موظف متعددة اللغات", desc: "بوابة الموظف الذاتية تدعم 7 لغات: العربية، الإنجليزية، الهندية، البنغالية، النيبالية، الفلبينية (Tagalog)، والأردية (الباكستانية) — يستخدمها كل موظف بلغته الأم بضغطة زر. تُرفع الإجازات والسلف والانتدابات والتقييمات من الموظف نفسه، وتُحفظ مشتركة بينه وبين الإدارة، وتظهر للطرفين في أي لحظة مع كل التفاصيل والاعتمادات والوثائق." },
   { icon: Share2, title: "طلبات مشتركة وشفافة بين الموظف والإدارة", desc: "كل ما يرفعه الموظف (إجازات، سلف، رحلات عمل، مرفقات) يُحفظ في سجل موحّد مشترك بين الموظف والإدارة — يتابع الموظف حالته واعتماداته، وتطّلع الإدارة على أي لحظة، مع مستندات المخالصات وكشوف السلف والتصفية المتاحة في ملف الموظف فور اعتمادها وصرفها مالياً." },
-  { icon: Plane, title: "حجوزات الطيران", desc: "احجز رحلاتك داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أكبر مزوّدين للطيران في الخليج دون مغادرة تجربة جدارة." },
+  { icon: Plane, title: "حجوزات الطيران", desc: "احجز رحلاتك داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جدارة." },
   { icon: Headphones, title: "منتج عربي ودعم فني مستمر", desc: "منصة عربية سعودية بتصميم فاخر وواجهة عربية أصيلة مصمّمة لسوق 2027، مع دعم فني عربي على مدار الساعة عبر واتساب والبريد الإلكتروني — فريقنا جاهز لمساعدتك في كل خطوة، من التفعيل حتى الترحيل والتدريب." },
 ];
 
@@ -89,7 +90,7 @@ const featuresEn = [
   { icon: GraduationCap, title: "Training & Development", desc: "Build training plans for a specific employee or a whole department under unified criteria: define the employee's skill gaps, the post-plan goal, the execution mechanism, cost and dates, with detailed description fields, and track each plan to completion to raise workforce capability per the organization's needs." },
   { icon: Languages, title: "Multilingual Employee Portal", desc: "The self-service portal supports 7 languages: Arabic, English, Hindi, Bengali, Nepali, Tagalog (Filipino) and Urdu (Pakistani) — every employee uses it in their native language with one tap. Leaves, loans, business trips and performance reviews are submitted by the employee and saved shared between them and management, visible to both at any moment with all details, approvals and documents." },
   { icon: Share2, title: "Shared, Transparent Requests", desc: "Everything an employee submits (leaves, loans, business trips, attachments) is kept in one shared record between the employee and management — the employee tracks their status and approvals, while management can review any request at any moment, with settlement, loan-statement and clearance documents available in the employee file as soon as they are approved and paid." },
-  { icon: Plane, title: "Flight Bookings", desc: "Book your flights right inside Jadara — pick the destination, date, and passengers; after the search, the system redirects you automatically via Deep Links to Almosafer or Almatar to complete passport details and payment on their secure checkout page. An integration with the Gulf's largest flight providers without leaving the Jadara experience." },
+  { icon: Plane, title: "Flight Bookings", desc: "Book your flights right inside Jadara — pick the destination, date, and passengers; after the search, the system redirects you automatically via Deep Links to Almosafer, Almatar, Skyscanner, or Wingie to complete passport details and payment on their secure checkout page. An integration with four of the largest flight providers without leaving the Jadara experience." },
   { icon: Headphones, title: "Arabic Product & Continuous Support", desc: "A Saudi Arabic platform with a premium, authentic Arabic-first design built for the 2027 market, plus round-the-clock Arabic technical support via WhatsApp and email — our team is ready to help at every step, from activation to onboarding and training." },
 ];
 
@@ -373,6 +374,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* مزوّدو حجوزات الطيران */}
+      <FlightProviders isAr={isAr} />
 
       {/* عملاؤنا */}
       <ClientMarquee />

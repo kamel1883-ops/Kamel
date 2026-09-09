@@ -45,6 +45,7 @@ export default function Brochure() {
         <TwoPortals />
         <DashboardOverview />
         <ModuleShowcase />
+        <FlightProvidersSection />
         <ReportsAnalytics Section={Section} Heading={Heading} />
         <EmployeePortal />
         <Infra />
@@ -270,13 +271,13 @@ function ModuleShowcase() {
 function FlightBookingsModule() {
   return (
     <FeatureBlock
-      icon={Plane} kicker="حجوزات الطيران" title="احجز رحلتك من جدارة وتُحوَّل للمسافر أو المطار للدفع"
-      desc="احجز رحلاتك جواً من داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب ودرجة المقصورة، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أكبر مزوّدين للطيران في الخليج دون مغادرة تجربة جدارة."
+      icon={Plane} kicker="حجوزات الطيران" title="احجز رحلتك من جدارة وتُحوَّل لأحد أربعة مزوّدين للدفع"
+      desc="احجز رحلاتك جواً من داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب ودرجة المقصورة، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جدارة."
       points={[
         "بحث عن الرحلة داخل جدارة: الوجهة، التاريخ، الركاب، درجة المقصورة",
-        "تحويل تلقائي عبر الروابط العميقة إلى منصة المسافر أو المطار",
+        "تحويل تلقائي عبر الروابط العميقة إلى المسافر أو المطار أو Skyscanner أو Wingie",
         "إكمال بيانات الجواز والدفع في الصفحة الآمنة لمزوّد الطيران",
-        "تكامل مع أكبر مزوّدين للطيران في الخليج (المسافر والمطار)"
+        "تكامل مع أربعة من أكبر مزوّدي الطيران عالمياً وخليجياً"
       ]}
       mock={
         <MockFrame title="حجوزات الطيران — بحث عن رحلة">
@@ -311,17 +312,52 @@ function FlightBookingsModule() {
             <div className="mt-3 grid grid-cols-2 gap-2">
               <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
                 <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>MS</span>
-                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>المسافر</div><div className="text-[8px] text-slate-400">تحويل للدفع</div></div>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>المسافر</div><div className="text-[8px] text-slate-400">روابط عميقة</div></div>
               </div>
               <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
                 <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>MT</span>
-                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>المطار</div><div className="text-[8px] text-slate-400">تحويل للدفع</div></div>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>المطار</div><div className="text-[8px] text-slate-400">دخول يدوي</div></div>
+              </div>
+              <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>SS</span>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>Skyscanner</div><div className="text-[8px] text-slate-400">روابط عميقة</div></div>
+              </div>
+              <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>WG</span>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>Wingie</div><div className="text-[8px] text-slate-400">روابط عميقة</div></div>
               </div>
             </div>
           </div>
         </MockFrame>
       }
     />
+  );
+}
+
+/* =================== مزوّدو حجوزات الطيران =================== */
+function FlightProvidersSection() {
+  const providers = [
+    { logo: "/logos/almosafer.svg", name: "المسافر", brand: "#003143", deep: true },
+    { logo: "/logos/almatar.png", name: "المطار", brand: "#16a34a", deep: false },
+    { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/1dcb0cd9e_image.png", name: "Skyscanner", brand: "#0770e3", deep: true },
+    { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/0d35e8ef9_image.png", name: "Wingie", brand: "#e81932", deep: true },
+  ];
+  return (
+    <Section tint="light" heading={<Heading icon={<Plane />} title="مزوّدو حجوزات الطيران" sub="تكامل مباشر مع أربعة من أكبر مزوّدي الطيران — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع" />}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        {providers.map((p, k) => (
+          <div key={k} className="rounded-3xl p-6 flex flex-col items-center gap-3 shadow-sm" style={{ background: "#fff", border: `2px solid ${p.brand}30` }}>
+            <div className="h-20 w-full flex items-center justify-center rounded-2xl overflow-hidden">
+              <img src={p.logo} alt={p.name} className="max-h-full max-w-full object-contain" />
+            </div>
+            <div className="text-[15px] font-extrabold" style={{ color: p.brand, fontFamily: "var(--font-display)" }}>{p.name}</div>
+            <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: p.deep ? "#16a34a1a" : "#fbbf241a", color: p.deep ? "#16a34a" : "#b45309", border: `1px solid ${p.deep ? "#16a34a30" : "#fbbf2430"}` }}>
+              {p.deep ? "روابط عميقة" : "دخول يدوي"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Section>
   );
 }
 
@@ -1016,6 +1052,21 @@ function Partners() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="mt-6 pt-6 border-t border-slate-200">
+        <div className="text-center text-[13px] font-bold text-slate-600 mb-3">مزوّدو حجوزات الطيران المعتمدون</div>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {[
+            { logo: "/logos/almosafer.svg", name: "المسافر" },
+            { logo: "/logos/almatar.png", name: "المطار" },
+            { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/1dcb0cd9e_image.png", name: "Skyscanner" },
+            { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/0d35e8ef9_image.png", name: "Wingie" },
+          ].map((p, i) => (
+            <div key={i} className="h-12 w-28 flex items-center justify-center px-3 rounded-xl bg-white border border-slate-200">
+              <img src={p.logo} alt={p.name} className="max-h-full max-w-full object-contain" />
+            </div>
+          ))}
+        </div>
       </div>
       <p className="text-center text-xs text-slate-500 mt-4">
         شركاء أعمال حقيقيون — لكل منهم خدمات معتمدة واتفاقيات تعاون فعليّة
