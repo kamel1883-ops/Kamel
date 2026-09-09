@@ -1,7 +1,8 @@
 // مولّد روابط البحث العميقة لمزوّدي حجوزات الطيران.
 //
 // ✅ المسافر (Almosafer): يدعم الانتقال المباشر لصفحة نتائج البحث.
-//    https://www.almosafer.com/en/flights/search?origin=RUH&destination=CAI&departure_date=YYYY-MM-DD&...
+//    https://global.almosafer.com/en/flights/RUH-DXB/2026-09-10/Economy/1Adult
+//    (مسار وليس معاملات استعلام — الصيغة القديمة بـ ?origin= كانت تُرجع 0 نتائج)
 //
 // ✅ Skyscanner: يدعم الانتقال المباشر لصفحة نتائج البحث.
 //    https://www.skyscanner.com.sa/transport/flights/ruh/dxb/260915/?adultsv2=1&cabinclass=economy
@@ -29,8 +30,8 @@ export const FLIGHT_PROVIDERS = {
     key: "almosafer",
     name: "المسافر",
     nameEn: "Almosafer",
-    flightsBase: "https://www.almosafer.com/en/flights/search",
-    site: "https://www.almosafer.com",
+    flightsBase: "https://global.almosafer.com/en/flights",
+    site: "https://global.almosafer.com",
     logo: "/logos/almosafer.svg",
     brand: "#003143",
     deepLinkSupported: true,
@@ -91,16 +92,20 @@ export function buildFlightSearchUrl(providerKey, p) {
   if (!provider) return null;
 
   if (providerKey === "almosafer") {
-    const params = new URLSearchParams();
-    params.set("origin", p.origin);
-    params.set("destination", p.destination);
-    params.set("departure_date", p.departDate || "");
-    if (p.tripType === "round" && p.returnDate) params.set("return_date", p.returnDate);
-    params.set("cabin", CABIN_ALMOSAFER[p.cabin] || "Economy");
-    params.set("adults", String(p.adults ?? 1));
-    params.set("children", String(p.children ?? 0));
-    params.set("infants", String(p.infants ?? 0));
-    return `${provider.flightsBase}?${params.toString()}`;
+    // صيغة المسافر الصحيحة (مسار وليس معاملات):
+    // /en/flights/RUH-DXB/2026-09-10/Economy/1Adult
+    // /en/flights/RUH-DXB/2026-09-10/2026-09-15/Economy/1Adult (ذهاب وعودة)
+    const from = p.origin.toUpperCase();
+    const to = p.destination.toUpperCase();
+    const cabin = CABIN_ALMOSAFER[p.cabin] || "Economy";
+    const adultsCount = p.adults ?? 1;
+    const adultStr = adultsCount === 1 ? "1Adult" : `${adultsCount}Adults`;
+    let path = `${provider.flightsBase}/${from}-${to}/${p.departDate}`;
+    if (p.tripType === "round" && p.returnDate) {
+      path += `/${p.returnDate}`;
+    }
+    path += `/${cabin}/${adultStr}`;
+    return path;
   }
 
   if (providerKey === "skyscanner") {
