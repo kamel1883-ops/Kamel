@@ -341,7 +341,7 @@ function FlightProvidersSection() {
     { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/0d35e8ef9_image.png", name: "Wingie", brand: "#e81932", deep: true },
   ];
   return (
-    <Section tint="light" heading={<Heading icon={<Plane />} title="Flight Booking Providers" sub="Direct integration with four of the largest flight providers — search inside Jadara, then redirect to the provider to complete booking and payment" />}>
+    <Section tint="light" heading={<Heading icon={<Plane />} title="Flight Booking Providers" sub="Jadara brings you the four largest trusted flight providers — search inside Jadara, then redirect to the provider to complete booking and payment" />}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {providers.map((p, k) => (
           <div key={k} className="rounded-3xl p-6 flex flex-col items-center gap-3 shadow-sm" style={{ background: "#fff", border: `2px solid ${p.brand}30` }}>
@@ -1270,9 +1270,6 @@ function Partners() {
           ))}
         </div>
       </div>
-      <p className="text-center text-xs text-slate-500 mt-4">
-        Real business partners — each with approved services and active cooperation agreements
-      </p>
     </Section>
   );
 }

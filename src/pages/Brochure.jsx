@@ -343,7 +343,7 @@ function FlightProvidersSection() {
     { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/0d35e8ef9_image.png", name: "Wingie", brand: "#e81932", deep: true },
   ];
   return (
-    <Section tint="light" heading={<Heading icon={<Plane />} title="مزوّدو حجوزات الطيران" sub="تكامل مباشر مع أربعة من أكبر مزوّدي الطيران — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع" />}>
+    <Section tint="light" heading={<Heading icon={<Plane />} title="مزوّدو حجوزات الطيران" sub="منصة جدارة توفر لك أكبر أربعة من مزوّدي الطيران الموثوقين — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع" />}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {providers.map((p, k) => (
           <div key={k} className="rounded-3xl p-6 flex flex-col items-center gap-3 shadow-sm" style={{ background: "#fff", border: `2px solid ${p.brand}30` }}>
@@ -1068,9 +1068,6 @@ function Partners() {
           ))}
         </div>
       </div>
-      <p className="text-center text-xs text-slate-500 mt-4">
-        شركاء أعمال حقيقيون — لكل منهم خدمات معتمدة واتفاقيات تعاون فعليّة
-      </p>
     </Section>
   );
 }
