@@ -106,7 +106,7 @@ export default function FlightBookings() {
     errDepart: "اختر تاريخ المغادرة",
     errReturn: "اختر تاريخ العودة",
     noteTitle: "ملاحظة مهمة",
-    noteBody: "عند الضغط على «بحث» تُفتح نافذة جديدة لموقع المزوّد معتمرة ببيانات رحلتك. إن لم يُعبّئ المزوّد النموذج تلقائياً، أدخِل نفس هذه البيانات في صفحة البحث لديه، ثم أكمل الحجز والدفع هناك.",
+    noteBody: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة البحث لدى المزوّد مع تمرير بيانات رحلتك. نظراً لأن المواقع تعمل بتقنية صفحة واحدة (SPA)، قد لا تُعبّأ الحقول تلقائياً — راجِع «ملخص البحث» بجوارك وانسخ منه المطارات والتاريخ والركاب والدرجة، ثم أدخلها في نموذج المزوّد وأكمل الحجز والدفع هناك.",
     summary: "ملخص البحث",
     opened: "تم فتح موقع المزوّد في نافذة جديدة",
   } : {
@@ -137,7 +137,7 @@ export default function FlightBookings() {
     errDepart: "Select departure date",
     errReturn: "Select return date",
     noteTitle: "Important note",
-    noteBody: "Clicking 'Search' opens the provider's site in a new tab with your trip data. If the provider doesn't auto-fill, enter the same details on its search page, then complete booking and payment there.",
+    noteBody: "Clicking 'Search' opens the provider's search page in a new tab with your trip data. Since these sites are single-page apps, fields may not auto-fill — refer to the 'Search summary' next to you and copy the airports, date, passengers, and cabin into the provider's form, then complete booking and payment there.",
     summary: "Search summary",
     opened: "Provider site opened in a new tab",
   };
