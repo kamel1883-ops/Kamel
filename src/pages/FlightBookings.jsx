@@ -105,8 +105,10 @@ export default function FlightBookings() {
     errSame: "لا يمكن أن يكون المطاران متطابقين",
     errDepart: "اختر تاريخ المغادرة",
     errReturn: "اختر تاريخ العودة",
-    noteTitle: "ملاحظة مهمة",
-    noteBody: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة البحث لدى المزوّد مع تمرير بيانات رحلتك. نظراً لأن المواقع تعمل بتقنية صفحة واحدة (SPA)، قد لا تُعبّأ الحقول تلقائياً — راجِع «ملخص البحث» بجوارك وانسخ منه المطارات والتاريخ والركاب والدرجة، ثم أدخلها في نموذج المزوّد وأكمل الحجز والدفع هناك.",
+    noteTitleAuto: "نتائج فورية",
+    noteBodyAuto: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة نتائج الرحلات لدى المسافر مع تعبئة بياناتك تلقائياً — استعرض الرحلات وأكمل الحجز والدفع مباشرةً هناك.",
+    noteTitleManual: "ملاحظة مهمة",
+    noteBodyManual: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة البحث في المطار. نظراً لأن المطار لا يدعم التعبئة التلقائية عبر الرابط، راجِع «ملخص البحث» بجوارك وانسخ منه المطارات والتاريخ والركاب والدرجة، ثم أدخلها في نموذج المطار وابحث.",
     summary: "ملخص البحث",
     opened: "تم فتح موقع المزوّد في نافذة جديدة",
   } : {
@@ -136,8 +138,10 @@ export default function FlightBookings() {
     errSame: "Airports cannot be the same",
     errDepart: "Select departure date",
     errReturn: "Select return date",
-    noteTitle: "Important note",
-    noteBody: "Clicking 'Search' opens the provider's search page in a new tab with your trip data. Since these sites are single-page apps, fields may not auto-fill — refer to the 'Search summary' next to you and copy the airports, date, passengers, and cabin into the provider's form, then complete booking and payment there.",
+    noteTitleAuto: "Instant results",
+    noteBodyAuto: "Clicking 'Search' opens Almosafer's flight results page in a new tab with your data pre-filled — browse flights and complete booking and payment directly there.",
+    noteTitleManual: "Important note",
+    noteBodyManual: "Clicking 'Search' opens Almatar's search page in a new tab. Since Almatar doesn't support auto-fill via URL, refer to the 'Search summary' next to you and copy the airports, date, passengers, and cabin into Almatar's form, then search.",
     summary: "Search summary",
     opened: "Provider site opened in a new tab",
   };
@@ -337,11 +341,16 @@ export default function FlightBookings() {
               </dl>
             </div>
 
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 flex items-start gap-3">
-              <Info className="text-amber-600 shrink-0 mt-0.5" size={18} />
+            <div className={cn("rounded-2xl border p-4 flex items-start gap-3",
+              p.deepLinkSupported ? "border-emerald-200 bg-emerald-50/80" : "border-amber-200 bg-amber-50/80")}>
+              <Info className={cn("shrink-0 mt-0.5", p.deepLinkSupported ? "text-emerald-600" : "text-amber-600")} size={18} />
               <div>
-                <p className="text-sm font-bold text-amber-700">{t.noteTitle}</p>
-                <p className="text-xs text-amber-700/90 leading-relaxed mt-1">{t.noteBody}</p>
+                <p className={cn("text-sm font-bold", p.deepLinkSupported ? "text-emerald-700" : "text-amber-700")}>
+                  {p.deepLinkSupported ? t.noteTitleAuto : t.noteTitleManual}
+                </p>
+                <p className={cn("text-xs leading-relaxed mt-1", p.deepLinkSupported ? "text-emerald-700/90" : "text-amber-700/90")}>
+                  {p.deepLinkSupported ? t.noteBodyAuto : t.noteBodyManual}
+                </p>
               </div>
             </div>
           </div>
