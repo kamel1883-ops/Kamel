@@ -45,8 +45,8 @@ function ProviderCard({ providerKey, onSelect, isAr }) {
       className="group flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 transition-all hover:-translate-y-1 hover:shadow-xl"
       style={{ borderColor: p.brand + "40", background: `linear-gradient(160deg, ${p.brand}0d, ${p.brand}1a)` }}
     >
-      <div className="h-16 flex items-center justify-center px-6 rounded-xl bg-white shadow-sm border" style={{ borderColor: p.brand + "22" }}>
-        <img src={p.logo} alt={isAr ? p.name : p.nameEn} className="max-h-12 w-auto object-contain" />
+      <div className="h-28 flex items-center justify-center px-4 rounded-xl bg-white shadow-sm border" style={{ borderColor: p.brand + "22" }}>
+        <img src={p.logo} alt={isAr ? p.name : p.nameEn} className="max-h-24 max-w-[85%] w-auto object-contain" />
       </div>
       <div className="text-center">
         <div className="text-2xl font-extrabold" style={{ color: p.brand }}>
