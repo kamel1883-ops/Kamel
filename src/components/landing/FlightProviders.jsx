@@ -11,8 +11,8 @@ export default function FlightProviders({ isAr = true }) {
 
   const title = isAr ? "مزوّدو حجوزات الطيران" : "Flight Booking Providers";
   const sub = isAr
-    ? "تكامل مباشر مع أكبر مزوّدي حجوزات الطيران في الخليج والعالم — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع"
-    : "Direct integration with the Gulf and world's largest flight booking providers — search inside Jadara, then redirect to the provider to complete booking and payment";
+    ? "منصة جدارة توفر لك أكبر أربعة من مزوّدي الطيران الموثوقين — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع"
+    : "Jadara brings you the four largest trusted flight providers — search inside Jadara, then redirect to the provider to complete booking and payment";
 
   return (
     <section className="max-w-[1600px] mx-auto px-6 lg:px-14 py-10">
