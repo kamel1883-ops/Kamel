@@ -1084,7 +1084,7 @@ function Closing() {
           <StoreButtons variant="glass" isAr={true} />
         </div>
         <div className="flex items-center justify-center gap-3 mt-6">
-          <Social icon={Twitter} label="إكس · تويتر" href="https://x.com/jadarahr" />
+          <Social icon={Twitter} label="إكس · تويتر" href="https://x.com/jadaraHRM" />
           <Social icon={Linkedin} label="لينكدإن" href="https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9" />
           <Social icon={TiktokIcon} label="تيك توك" href="https://www.tiktok.com/@jadarahr?_r=1&_t=ZS-99aHcundyoi" />
           <Social icon={Facebook} label="فيسبوك" href="https://www.facebook.com/share/1CEdfx8jV7/?mibextid=wwXIfr" />

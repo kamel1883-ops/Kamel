@@ -33,7 +33,7 @@ const SALES_EMAIL = "info@jadara-hr.com";
 // روابط حسابات التواصل الرسمية
 const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9",
-  twitter: "https://x.com/jadarahr",
+  twitter: "https://x.com/jadaraHRM",
   tiktok: "https://www.tiktok.com/@jadarahr?_r=1&_t=ZS-99aHcundyoi",
   facebook: "https://www.facebook.com/share/1CEdfx8jV7/?mibextid=wwXIfr",
   snapchat: "https://snapchat.com/t/9UWDJAhl",
