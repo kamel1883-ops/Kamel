@@ -3,11 +3,12 @@ import {
   Crown, Download, Users, Fingerprint, Wallet, Calculator, ShieldCheck, BadgeCheck,
   GraduationCap, GitBranch, Car, FileBadge, Building2, Smartphone, MapPin,
   ClipboardList, Server, Cpu, HardDrive, MemoryStick, Zap, Lock, Globe,
-  CalendarClock, Mail, Phone, Linkedin, Twitter, Network, BarChart3, Plane, FileText,
+  CalendarClock, Mail, Phone, Linkedin, Twitter, Facebook, Network, BarChart3, Plane, FileText,
   Clock, Sparkles, LayoutDashboard, Bell, CheckCircle2,
-  Briefcase, UserCog, Boxes, Settings, ShieldAlert, TrendingDown, UserCheck,
+  Briefcase, UserCog, Boxes, Settings, ShieldAlert, Headphones, TrendingDown, UserCheck,
   CalendarCheck, FileSignature,
 } from "lucide-react";
+import { TiktokIcon, SnapchatIcon } from "@/components/SocialIcons";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_EN } from "@/lib/pricing";
 import StoreButtons from "@/components/StoreButtons";
@@ -257,8 +258,68 @@ function ModuleShowcase() {
       <SuccessionModule />
       <FleetModule />
       <GovernmentModule />
+      <FlightBookingsModule />
       <OtherModules />
     </>
+  );
+}
+
+/* --- Flight Bookings --- */
+function FlightBookingsModule() {
+  return (
+    <FeatureBlock
+      icon={Plane} kicker="Flight Bookings" title="Book your flight from Jadara, redirected to Almosafer or Almatar to pay"
+      desc="Book your flights right inside Jadara — pick the destination, date, number of passengers, and cabin class; after the search, the system redirects you automatically via Deep Links to Almosafer or Almatar to complete passport details and payment on their secure checkout page. An integration with the Gulf's largest flight providers without leaving the Jadara experience."
+      points={[
+        "Search for flights inside Jadara: destination, date, passengers, cabin class",
+        "Automatic redirect via Deep Links to Almosafer or Almatar",
+        "Complete passport details and payment on the provider's secure checkout page",
+        "Integration with the Gulf's largest flight providers (Almosafer and Almatar)"
+      ]}
+      mock={
+        <MockFrame title="Flight Bookings — Search a flight">
+          <div className="bg-white rounded-xl p-3 border border-slate-200">
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">From</div>
+                <div className="text-[11px] font-bold" style={{ color: NAVY }}>Riyadh (RUH)</div>
+              </div>
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">To</div>
+                <div className="text-[11px] font-bold" style={{ color: NAVY }}>Dubai (DXB)</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">Date</div>
+                <div className="text-[10px] font-bold" style={{ color: NAVY }}>Oct 15</div>
+              </div>
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">Passengers</div>
+                <div className="text-[10px] font-bold" style={{ color: NAVY }}>2 adults</div>
+              </div>
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">Cabin</div>
+                <div className="text-[10px] font-bold" style={{ color: NAVY }}>Economy</div>
+              </div>
+            </div>
+            <button className="w-full rounded-lg py-2 text-center font-bold text-[11px] text-white" style={{ background: `linear-gradient(135deg, ${CYAN}, #7C5CE6)` }}>
+              <Plane size={12} className="inline mr-1" /> Search flights
+            </button>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>MS</span>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>Almosafer</div><div className="text-[8px] text-slate-400">redirect to pay</div></div>
+              </div>
+              <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>MT</span>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>Almatar</div><div className="text-[8px] text-slate-400">redirect to pay</div></div>
+              </div>
+            </div>
+          </div>
+        </MockFrame>
+      }
+    />
   );
 }
 
@@ -783,6 +844,7 @@ function OtherModules() {
     { i: UserCog, t: "Exit Interviews", d: "A separate interview at end of service, analyze departure reasons, and propose workplace improvements to retain talent." },
     { i: BarChart3, t: "Analytics & Reports", d: "Attendance, payroll, leaves, and recruitment reports, with an analytics dashboard for decision-makers and performance levels." },
     { i: Settings, t: "Organization Settings", d: "GOSI rates, working hours and days, lateness grace period, check-in radius, and leave and ticket policies." },
+    { i: Headphones, t: "Arabic Product & Continuous Support", d: "A Saudi Arabic platform with a premium, authentic Arabic-first design, plus round-the-clock Arabic technical support via WhatsApp and email — our team is ready to help from activation to onboarding and training." },
   ];
   return (
     <Section tint="light" heading={<Heading icon={<ShieldAlert />} title="Additional Administrative Modules" sub="What completes an HR ecosystem — trips, structure, analytics, and policies" />}>
@@ -1224,9 +1286,12 @@ function Closing() {
           <StoreButtons variant="glass" isAr={false} />
         </div>
         <div className="flex items-center justify-center gap-3 mt-6">
-          <Social icon={Twitter} label="X · Twitter" />
-          <Social icon={Linkedin} label="LinkedIn" />
-          <Social icon={Globe} label="Website" />
+          <Social icon={Twitter} label="X · Twitter" href="https://x.com/jadarahr" />
+          <Social icon={Linkedin} label="LinkedIn" href="https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9" />
+          <Social icon={TiktokIcon} label="TikTok" href="https://www.tiktok.com/@jadarahr?_r=1&_t=ZS-99aHcundyoi" />
+          <Social icon={Facebook} label="Facebook" href="https://www.facebook.com/share/1CEdfx8jV7/?mibextid=wwXIfr" />
+          <Social icon={SnapchatIcon} label="Snapchat" href="https://snapchat.com/t/9UWDJAhl" />
+          <Social icon={Globe} label="Website" href="https://jadara-hr.com" />
         </div>
       </div>
       <div className="mt-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-white/50 text-xs">
@@ -1348,12 +1413,15 @@ function TrustChip({ icon: I, label, dark }) {
   );
 }
 
-function Social({ icon: I, label }) {
-  return (
+function Social({ icon: I, label, href }) {
+  const inner = (
     <span className="inline-flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", fontSize: 12, color: "#cdd9e6" }}>
       <I size={14} style={{ color: CYAN }} /> {label}
     </span>
   );
+  return href ? (
+    <a href={href} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>{inner}</a>
+  ) : inner;
 }
 
 function Th({ children }) {

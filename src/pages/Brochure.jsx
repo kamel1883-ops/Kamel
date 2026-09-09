@@ -3,10 +3,11 @@ import {
   Crown, Download, Users, Fingerprint, Wallet, Calculator, ShieldCheck, BadgeCheck,
   GraduationCap, GitBranch, Car, FileBadge, Building2, Smartphone, MapPin,
   ClipboardList, Server, Cpu, HardDrive, MemoryStick, Zap, Lock, Globe,
-  CalendarClock, Mail, Phone, Linkedin, Twitter, Network, BarChart3, Plane, FileText,
+  CalendarClock, Mail, Phone, Linkedin, Twitter, Facebook, Network, BarChart3, Plane, FileText,
   Clock, Sparkles, Layers, LayoutDashboard, Bell, CheckCircle2, MapPinned,
-  Briefcase, UserCog, Boxes, Settings, ShieldAlert, BadgeCheck as BadgeIcon
+  Briefcase, UserCog, Boxes, Settings, ShieldAlert, Headphones, BadgeCheck as BadgeIcon
 } from "lucide-react";
+import { TiktokIcon, SnapchatIcon } from "@/components/SocialIcons";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_AR } from "@/lib/pricing";
 import ReportsAnalytics from "@/components/brochure/ReportsAnalytics";
@@ -259,8 +260,68 @@ function ModuleShowcase() {
       <SuccessionModule />
       <FleetModule />
       <GovernmentModule />
+      <FlightBookingsModule />
       <OtherModules />
     </>
+  );
+}
+
+/* --- حجوزات الطيران --- */
+function FlightBookingsModule() {
+  return (
+    <FeatureBlock
+      icon={Plane} kicker="حجوزات الطيران" title="احجز رحلتك من جدارة وتُحوَّل للمسافر أو المطار للدفع"
+      desc="احجز رحلاتك جواً من داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب ودرجة المقصورة، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أكبر مزوّدين للطيران في الخليج دون مغادرة تجربة جدارة."
+      points={[
+        "بحث عن الرحلة داخل جدارة: الوجهة، التاريخ، الركاب، درجة المقصورة",
+        "تحويل تلقائي عبر الروابط العميقة إلى منصة المسافر أو المطار",
+        "إكمال بيانات الجواز والدفع في الصفحة الآمنة لمزوّد الطيران",
+        "تكامل مع أكبر مزوّدين للطيران في الخليج (المسافر والمطار)"
+      ]}
+      mock={
+        <MockFrame title="حجوزات الطيران — بحث عن رحلة">
+          <div className="bg-white rounded-xl p-3 border border-slate-200">
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">من</div>
+                <div className="text-[11px] font-bold" style={{ color: NAVY }}>الرياض (RUH)</div>
+              </div>
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">إلى</div>
+                <div className="text-[11px] font-bold" style={{ color: NAVY }}>دبي (DXB)</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">التاريخ</div>
+                <div className="text-[10px] font-bold" style={{ color: NAVY }}>15 أكتوبر</div>
+              </div>
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">الركاب</div>
+                <div className="text-[10px] font-bold" style={{ color: NAVY }}>2 بالغ</div>
+              </div>
+              <div className="rounded-lg p-2" style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                <div className="text-[9px] text-slate-400">الدرجة</div>
+                <div className="text-[10px] font-bold" style={{ color: NAVY }}>اقتصادية</div>
+              </div>
+            </div>
+            <button className="w-full rounded-lg py-2 text-center font-bold text-[11px] text-white" style={{ background: `linear-gradient(135deg, ${CYAN}, #7C5CE6)` }}>
+              <Plane size={12} className="inline ml-1" /> ابحث عن الرحلة
+            </button>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>MS</span>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>المسافر</div><div className="text-[8px] text-slate-400">تحويل للدفع</div></div>
+              </div>
+              <div className="rounded-lg p-2 flex items-center gap-1.5" style={{ background: "#f8fafc", border: `1px solid ${CYAN}40` }}>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white" style={{ background: CYAN }}>MT</span>
+                <div><div className="text-[10px] font-bold" style={{ color: NAVY }}>المطار</div><div className="text-[8px] text-slate-400">تحويل للدفع</div></div>
+              </div>
+            </div>
+          </div>
+        </MockFrame>
+      }
+    />
   );
 }
 
@@ -797,7 +858,8 @@ function OtherModules() {
     { i: FileText, t: "الإنذارات والسياسة", d: "إنذارات بثلاث درجات حسب نوع المخالفة، تسجيل الواقعة وإجراء الجلسة والتحقق ومرجع النظام والاعتماد." },
     { i: UserCog, t: "مقابلات إنهاء الخدمة", d: "مقابلة منفصلة عند نهاية الخدمة، تحليل أسباب المغادرة، مقترحات تحسين بيئة العمل والاحتفاظ بالكوادر." },
     { i: BarChart3, t: "التحليلات والتقارير", d: "تقارير البصمة والرواتب والإجازات والتوظيف، مع لوحة قيادة تحليلية لصانع القرار ومستويات الأداء." },
-    { i: Settings, t: "إعدادات المنشأة", d: "نسب التأمينات، ساعات وأيام العمل، فترة سماح التأخر، نطاق البصمة، سياسات الإجازة والتذكرة." }
+    { i: Settings, t: "إعدادات المنشأة", d: "نسب التأمينات، ساعات وأيام العمل، فترة سماح التأخر، نطاق البصمة، سياسات الإجازة والتذكرة." },
+    { i: Headphones, t: "منتج عربي ودعم فني مستمر", d: "منصة عربية سعودية بتصميم فاخر وواجهة عربية أصيلة، مع دعم فني عربي على مدار الساعة عبر واتساب والبريد — فريقنا جاهز لمساعدتك من التفعيل حتى الترحيل والتدريب." }
   ];
   return (
     <Section tint="light" heading={<Heading icon={<ShieldAlert />} title="وحدات إدارية إضافية" sub="ما يُكمل منظومة الموارد البشرية من رحلات وهيكل وتحليلات وسياسات" />}>
@@ -1022,9 +1084,12 @@ function Closing() {
           <StoreButtons variant="glass" isAr={true} />
         </div>
         <div className="flex items-center justify-center gap-3 mt-6">
-          <Social icon={Twitter} label="إكس · تويتر" />
-          <Social icon={Linkedin} label="لينكدإن" />
-          <Social icon={Globe} label="الموقع الإلكتروني" />
+          <Social icon={Twitter} label="إكس · تويتر" href="https://x.com/jadarahr" />
+          <Social icon={Linkedin} label="لينكدإن" href="https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9" />
+          <Social icon={TiktokIcon} label="تيك توك" href="https://www.tiktok.com/@jadarahr?_r=1&_t=ZS-99aHcundyoi" />
+          <Social icon={Facebook} label="فيسبوك" href="https://www.facebook.com/share/1CEdfx8jV7/?mibextid=wwXIfr" />
+          <Social icon={SnapchatIcon} label="سناب شات" href="https://snapchat.com/t/9UWDJAhl" />
+          <Social icon={Globe} label="الموقع الإلكتروني" href="https://jadara-hr.com" />
         </div>
       </div>
       <div className="mt-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-white/50 text-xs">
@@ -1146,12 +1211,15 @@ function TrustChip({ icon: I, label, dark }) {
   );
 }
 
-function Social({ icon: I, label }) {
-  return (
+function Social({ icon: I, label, href }) {
+  const inner = (
     <span className="inline-flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", fontSize: 12, color: "#cdd9e6" }}>
       <I size={14} style={{ color: CYAN }} /> {label}
     </span>
   );
+  return href ? (
+    <a href={href} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>{inner}</a>
+  ) : inner;
 }
 
 function Th({ children }) {

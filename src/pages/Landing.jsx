@@ -24,8 +24,9 @@ import {
   Briefcase, GraduationCap, Award, GitBranch, Landmark, FileSpreadsheet, Plug,
   Gavel, HeartPulse, Stethoscope, LineChart, MessageCircle, MapPin, Crown,
   Network, ClipboardList, Plane, CalendarPlus, Server, Linkedin, Facebook, Twitter,
-  Send, Music2, Languages, Share2,
+  Send, Music2, Languages, Share2, Headphones,
 } from "lucide-react";
+import { TiktokIcon, SnapchatIcon } from "@/components/SocialIcons";
 
 const WHATSAPP = "https://wa.me/966594700782";
 const SALES_EMAIL = "info@jadara-hr.com";
@@ -33,6 +34,9 @@ const SALES_EMAIL = "info@jadara-hr.com";
 const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9",
   twitter: "https://x.com/jadarahr",
+  tiktok: "https://www.tiktok.com/@jadarahr?_r=1&_t=ZS-99aHcundyoi",
+  facebook: "https://www.facebook.com/share/1CEdfx8jV7/?mibextid=wwXIfr",
+  snapchat: "https://snapchat.com/t/9UWDJAhl",
 };
 
 const featuresAr = [
@@ -58,6 +62,8 @@ const featuresAr = [
   { icon: GraduationCap, title: "التدريب والتطوير", desc: "ضع خططاً تدريبية لموظف محدد أو لجهة/قسم كامل بمعايير موحّدة: حدّد مشاكل النقص لدى الموظف، الهدف بعد الخطة، آلية التنفيذ والتكلفة والتواريخ، مع صناديق شرح ووصف تفصيلية، وتتبّع حالة كل خطة حتى الاكتمال لرفع كفاءة الموارد البشرية وفق احتياج المنشأة." },
   { icon: Languages, title: "بوابة موظف متعددة اللغات", desc: "بوابة الموظف الذاتية تدعم 7 لغات: العربية، الإنجليزية، الهندية، البنغالية، النيبالية، الفلبينية (Tagalog)، والأردية (الباكستانية) — يستخدمها كل موظف بلغته الأم بضغطة زر. تُرفع الإجازات والسلف والانتدابات والتقييمات من الموظف نفسه، وتُحفظ مشتركة بينه وبين الإدارة، وتظهر للطرفين في أي لحظة مع كل التفاصيل والاعتمادات والوثائق." },
   { icon: Share2, title: "طلبات مشتركة وشفافة بين الموظف والإدارة", desc: "كل ما يرفعه الموظف (إجازات، سلف، رحلات عمل، مرفقات) يُحفظ في سجل موحّد مشترك بين الموظف والإدارة — يتابع الموظف حالته واعتماداته، وتطّلع الإدارة على أي لحظة، مع مستندات المخالصات وكشوف السلف والتصفية المتاحة في ملف الموظف فور اعتمادها وصرفها مالياً." },
+  { icon: Plane, title: "حجوزات الطيران", desc: "احجز رحلاتك داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أكبر مزوّدين للطيران في الخليج دون مغادرة تجربة جدارة." },
+  { icon: Headphones, title: "منتج عربي ودعم فني مستمر", desc: "منصة عربية سعودية بتصميم فاخر وواجهة عربية أصيلة مصمّمة لسوق 2027، مع دعم فني عربي على مدار الساعة عبر واتساب والبريد الإلكتروني — فريقنا جاهز لمساعدتك في كل خطوة، من التفعيل حتى الترحيل والتدريب." },
 ];
 
 const featuresEn = [
@@ -83,6 +89,8 @@ const featuresEn = [
   { icon: GraduationCap, title: "Training & Development", desc: "Build training plans for a specific employee or a whole department under unified criteria: define the employee's skill gaps, the post-plan goal, the execution mechanism, cost and dates, with detailed description fields, and track each plan to completion to raise workforce capability per the organization's needs." },
   { icon: Languages, title: "Multilingual Employee Portal", desc: "The self-service portal supports 7 languages: Arabic, English, Hindi, Bengali, Nepali, Tagalog (Filipino) and Urdu (Pakistani) — every employee uses it in their native language with one tap. Leaves, loans, business trips and performance reviews are submitted by the employee and saved shared between them and management, visible to both at any moment with all details, approvals and documents." },
   { icon: Share2, title: "Shared, Transparent Requests", desc: "Everything an employee submits (leaves, loans, business trips, attachments) is kept in one shared record between the employee and management — the employee tracks their status and approvals, while management can review any request at any moment, with settlement, loan-statement and clearance documents available in the employee file as soon as they are approved and paid." },
+  { icon: Plane, title: "Flight Bookings", desc: "Book your flights right inside Jadara — pick the destination, date, and passengers; after the search, the system redirects you automatically via Deep Links to Almosafer or Almatar to complete passport details and payment on their secure checkout page. An integration with the Gulf's largest flight providers without leaving the Jadara experience." },
+  { icon: Headphones, title: "Arabic Product & Continuous Support", desc: "A Saudi Arabic platform with a premium, authentic Arabic-first design built for the 2027 market, plus round-the-clock Arabic technical support via WhatsApp and email — our team is ready to help at every step, from activation to onboarding and training." },
 ];
 
 const licensesAr = [
@@ -535,6 +543,18 @@ export default function Landing() {
               <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noreferrer" aria-label="X (Twitter)"
                 className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
                 <Twitter size={17} className="text-violet-600" />
+              </a>
+              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"
+                className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
+                <TiktokIcon size={17} className="text-violet-600" />
+              </a>
+              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" aria-label="Facebook"
+                className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
+                <Facebook size={17} className="text-violet-600" />
+              </a>
+              <a href={SOCIAL_LINKS.snapchat} target="_blank" rel="noreferrer" aria-label="Snapchat"
+                className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">
+                <SnapchatIcon size={17} className="text-violet-600" />
               </a>
             </div>
             <div className="mt-5">

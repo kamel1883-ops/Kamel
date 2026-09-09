@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Linkedin, Facebook, MessageCircle, Send, Link2, Check } from "lucide-react";
+import { TiktokIcon, SnapchatIcon } from "@/components/SocialIcons";
 
 // رابط موقع جدارة الرسمي
 const SITE_URL = "https://jadara-hr.com/";
@@ -7,6 +8,9 @@ const SITE_URL = "https://jadara-hr.com/";
 const SOCIAL = {
   linkedin: "https://www.linkedin.com/company/%D8%AC%D8%AF%D8%A7%D8%B1%D8%A9-%D9%84%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%88%D8%A7%D8%B1%D8%AF-%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D9%8A%D8%A9",
   x: "https://x.com/jadarahr",
+  tiktok: "https://www.tiktok.com/@jadarahr?_r=1&_t=ZS-99aHcundyoi",
+  facebook: "https://www.facebook.com/share/1CEdfx8jV7/?mibextid=wwXIfr",
+  snapchat: "https://snapchat.com/t/9UWDJAhl",
 };
 
 // نبذة موحّدة قوية (توليد نص جاهز للمشاركة) — عربي / إنجليزي
@@ -80,10 +84,15 @@ export default function ShareBar({ isAr = true }) {
           {copied ? <Check size={20} className="text-emerald-600" /> : <Link2 size={20} style={{ color: VIOLET }} />}
         </button>
       </div>
+      <div className="flex items-center justify-center gap-2 mt-1">
+        <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn" className="w-9 h-9 rounded-xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 transition-all"><Linkedin size={17} style={{ color: VIOLET }} /></a>
+        <a href={SOCIAL.x} target="_blank" rel="noreferrer" aria-label="X" title="X" className="w-9 h-9 rounded-xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 transition-all"><XIcon size={16} className="text-violet-600" /></a>
+        <a href={SOCIAL.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok" title="TikTok" className="w-9 h-9 rounded-xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 transition-all"><TiktokIcon size={17} className="text-violet-600" /></a>
+        <a href={SOCIAL.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" title="Facebook" className="w-9 h-9 rounded-xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 transition-all"><Facebook size={17} style={{ color: VIOLET }} /></a>
+        <a href={SOCIAL.snapchat} target="_blank" rel="noreferrer" aria-label="Snapchat" title="Snapchat" className="w-9 h-9 rounded-xl bg-white border border-violet-200 shadow-sm flex items-center justify-center hover:bg-violet-50 hover:border-violet-400 transition-all"><SnapchatIcon size={17} className="text-violet-600" /></a>
+      </div>
       <p className="text-xs text-muted-foreground max-w-xl text-center leading-relaxed">
-        {isAr ? "للمتابعة والمشاركة عبر حساباتنا الرسمية:" : "Follow & share via our official accounts:"}{" "}
-        <a href={SOCIAL.linkedin} target="_blank" rel="noreferrer" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">LinkedIn</a>{" · "}
-        <a href={SOCIAL.x} target="_blank" rel="noreferrer" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">X</a>
+        {isAr ? "تابع حساباتنا الرسمية على كل المنصات" : "Follow our official accounts on every platform"}
       </p>
     </div>
   );
