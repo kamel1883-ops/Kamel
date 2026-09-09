@@ -106,7 +106,7 @@ export default function FlightBookings() {
     errDepart: "اختر تاريخ المغادرة",
     errReturn: "اختر تاريخ العودة",
     noteTitleAuto: "نتائج فورية",
-    noteBodyAuto: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة نتائج الرحلات لدى المسافر مع تعبئة بياناتك تلقائياً — استعرض الرحلات وأكمل الحجز والدفع مباشرةً هناك.",
+    noteBodyAuto: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة نتائج الرحلات لدى المزوّد مع تعبئة بياناتك تلقائياً — استعرض الرحلات وأكمل الحجز والدفع مباشرةً هناك.",
     noteTitleManual: "ملاحظة مهمة",
     noteBodyManual: "عند الضغط على «بحث» تُفتح نافذة جديدة لصفحة البحث في المطار. نظراً لأن المطار لا يدعم التعبئة التلقائية عبر الرابط، راجِع «ملخص البحث» بجوارك وانسخ منه المطارات والتاريخ والركاب والدرجة، ثم أدخلها في نموذج المطار وابحث.",
     summary: "ملخص البحث",
@@ -139,7 +139,7 @@ export default function FlightBookings() {
     errDepart: "Select departure date",
     errReturn: "Select return date",
     noteTitleAuto: "Instant results",
-    noteBodyAuto: "Clicking 'Search' opens Almosafer's flight results page in a new tab with your data pre-filled — browse flights and complete booking and payment directly there.",
+    noteBodyAuto: "Clicking 'Search' opens the provider's flight results page in a new tab with your data pre-filled — browse flights and complete booking and payment directly there.",
     noteTitleManual: "Important note",
     noteBodyManual: "Clicking 'Search' opens Almatar's search page in a new tab. Since Almatar doesn't support auto-fill via URL, refer to the 'Search summary' next to you and copy the airports, date, passengers, and cabin into Almatar's form, then search.",
     summary: "Search summary",
@@ -173,6 +173,8 @@ export default function FlightBookings() {
         <div className="grid sm:grid-cols-2 gap-5 max-w-3xl">
           <ProviderCard providerKey="almatar" onSelect={setProvider} isAr={isAr} />
           <ProviderCard providerKey="almosafer" onSelect={setProvider} isAr={isAr} />
+          <ProviderCard providerKey="skyscanner" onSelect={setProvider} isAr={isAr} />
+          <ProviderCard providerKey="wingie" onSelect={setProvider} isAr={isAr} />
         </div>
       </div>
     );
