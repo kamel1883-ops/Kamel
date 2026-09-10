@@ -19,7 +19,7 @@ const BLURB_AR =
   SITE_URL;
 
 const BLURB_EN =
-  "Looking for an all-in-one HR platform? Jadara brings together employees, self check-in attendance, leaves & approvals, business trips, payroll, GOSI, end-of-service, performance, succession planning, org structure, HR analytics, fleet, and government licenses — in one premium Saudi-compliant platform with a modern 2027 design. Try it free for 30 days:\n" +
+  "Looking for an all-in-one HR platform? Jadara brings together employees, self check-in attendance, leaves & approvals, business trips, payroll, GOSI, end-of-service, performance, succession planning, org structure, HR analytics, fleet, and government licenses — in one premium Saudi-compliant platform with a modern design. Try it free for 30 days:\n" +
   SITE_URL;
 
 // أيقونة منصة X (تويتر سابقاً) الجديدة

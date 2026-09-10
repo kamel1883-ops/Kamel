@@ -64,7 +64,7 @@ const featuresAr = [
   { icon: Languages, title: "بوابة موظف متعددة اللغات", desc: "بوابة الموظف الذاتية تدعم 7 لغات: العربية، الإنجليزية، الهندية، البنغالية، النيبالية، الفلبينية (Tagalog)، والأردية (الباكستانية) — يستخدمها كل موظف بلغته الأم بضغطة زر. تُرفع الإجازات والسلف والانتدابات والتقييمات من الموظف نفسه، وتُحفظ مشتركة بينه وبين الإدارة، وتظهر للطرفين في أي لحظة مع كل التفاصيل والاعتمادات والوثائق." },
   { icon: Share2, title: "طلبات مشتركة وشفافة بين الموظف والإدارة", desc: "كل ما يرفعه الموظف (إجازات، سلف، رحلات عمل، مرفقات) يُحفظ في سجل موحّد مشترك بين الموظف والإدارة — يتابع الموظف حالته واعتماداته، وتطّلع الإدارة على أي لحظة، مع مستندات المخالصات وكشوف السلف والتصفية المتاحة في ملف الموظف فور اعتمادها وصرفها مالياً." },
   { icon: Plane, title: "حجوزات الطيران", desc: "احجز رحلاتك داخل نظام جداره نفسه — اختر الوجهة والتاريخ وعدد الركاب، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جداره." },
-  { icon: Headphones, title: "منتج عربي ودعم فني مستمر", desc: "منصة عربية سعودية بتصميم فاخر وواجهة عربية أصيلة مصمّمة لسوق 2027، مع دعم فني عربي على مدار الساعة عبر واتساب والبريد الإلكتروني — فريقنا جاهز لمساعدتك في كل خطوة، من التفعيل حتى الترحيل والتدريب." },
+  { icon: Headphones, title: "منتج عربي ودعم فني مستمر", desc: "منصة عربية سعودية بتصميم فاخر وواجهة عربية أصيلة، مع دعم فني عربي على مدار الساعة عبر واتساب والبريد الإلكتروني — فريقنا جاهز لمساعدتك في كل خطوة، من التفعيل حتى الترحيل والتدريب." },
 ];
 
 const featuresEn = [
@@ -91,7 +91,7 @@ const featuresEn = [
   { icon: Languages, title: "Multilingual Employee Portal", desc: "The self-service portal supports 7 languages: Arabic, English, Hindi, Bengali, Nepali, Tagalog (Filipino) and Urdu (Pakistani) — every employee uses it in their native language with one tap. Leaves, loans, business trips and performance reviews are submitted by the employee and saved shared between them and management, visible to both at any moment with all details, approvals and documents." },
   { icon: Share2, title: "Shared, Transparent Requests", desc: "Everything an employee submits (leaves, loans, business trips, attachments) is kept in one shared record between the employee and management — the employee tracks their status and approvals, while management can review any request at any moment, with settlement, loan-statement and clearance documents available in the employee file as soon as they are approved and paid." },
   { icon: Plane, title: "Flight Bookings", desc: "Book your flights right inside Jadara — pick the destination, date, and passengers; after the search, the system redirects you automatically via Deep Links to Almosafer, Almatar, Skyscanner, or Wingie to complete passport details and payment on their secure checkout page. An integration with four of the largest flight providers without leaving the Jadara experience." },
-  { icon: Headphones, title: "Arabic Product & Continuous Support", desc: "A Saudi Arabic platform with a premium, authentic Arabic-first design built for the 2027 market, plus round-the-clock Arabic technical support via WhatsApp and email — our team is ready to help at every step, from activation to onboarding and training." },
+  { icon: Headphones, title: "Arabic Product & Continuous Support", desc: "A Saudi Arabic platform with a premium, authentic Arabic-first design, plus round-the-clock Arabic technical support via WhatsApp and email — our team is ready to help at every step, from activation to onboarding and training." },
 ];
 
 const licensesAr = [
@@ -150,7 +150,7 @@ export default function Landing() {
   const t = isAr ? {
     nav: { features: "المميزات", licenses: "التراخيص", integrations: "التكاملات", about: "عن المؤسس", pricing: "الباقات", contact: "تواصل" },
     portal: "بوابة دخول الموظفين الذاتية", ownerPortal: "بوابة المالك الذاتية", login: "بوابة دخول الشركات", start: "ابدأ الآن",
-    badge: "منصة الموارد البشرية السعودية لعام 2027",
+    badge: "منصة الموارد البشرية السعودية",
     titlePre: "نظام الموارد البشرية",
     titleHi: "الأحدث والأكثر تكاملاً",
     heroDesc: "من «جداره» — منصة سعودية واحدة متكاملة تجمع كل جوانب إدارة رأس المال البشري في مكان واحد: ملفات الموظفين ووثائقهم، الحضور والبصمة الذاتية من الجوال، الإجازات والسلف ورحلات العمل المرفوعة من الموظف والمشتركة مع الإدارة لحظياً، الرواتب وحماية الأجور، التأمينات الاجتماعية، نهاية الخدمة وفق نظام العمل، إدارة الأداء والتدريب والتطوير، التخطيط التعاقبي والقوى العاملة، التحليلات اللحظية، الأسطول والمركبات، التراخيص الحكومية، والإنذارات الذكية المرتبطة بنظام العمل — مع بوابة موظف ذاتية تدعم 7 لغات، ومسار موافقات متعدد المراحل، وتكاملات حكومية ذكية، وتصميم فخم، وحسابات دقيقة وفق الأنظمة السعودية.",
@@ -199,7 +199,7 @@ export default function Landing() {
   } : {
     nav: { features: "Features", licenses: "Licenses", integrations: "Integrations", about: "Founder", pricing: "Pricing", contact: "Contact" },
     portal: "Employee Self‑Service Portal", ownerPortal: "Owner Portal", login: "Company Portal", start: "Get Started",
-    badge: "The Saudi HR Platform for 2027",
+    badge: "The Saudi HR Platform",
     titlePre: "The Latest & Most",
     titleHi: "Integrated HR System",
     heroDesc: "From “Jadara” — one integrated Saudi platform that brings together every aspect of human-capital management in one place: employee profiles and documents, mobile self-attendance, leaves, loans and business trips submitted by employees and shared live with management, payroll and wage protection, GOSI, end-of-service per labor law, performance, training and development, succession and workforce planning, live analytics, fleet and vehicles, government licenses, and smart labor-law warnings — with a 7-language employee self-service portal, a multi-stage approval flow, smart government integrations, a premium design, and accurate calculations per Saudi regulations.",
