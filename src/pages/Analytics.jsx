@@ -89,6 +89,13 @@ export default function Analytics() {
   const sat = exitSatisfaction(exits);
   const riskDepts = highRiskDepartments(employees, months);
   const tenureExit = avgTenureAtExit(employees);
+  // المغادرون ضمن نافذة الفترة المختارة — لتوضيح إدارة كل مغادر بالاسم
+  const periodThreshold = new Date(new Date().getFullYear(), new Date().getMonth() - (months - 1), 1);
+  const exitedInWindow = employees
+    .filter((e) => (e.status === "terminated" || e.status === "resigned") && e.termination_date && new Date(e.termination_date) >= periodThreshold)
+    .map((e) => ({ name: e.full_name, position: e.position, department: e.department || (isAr ? "غير محدد" : "Unassigned"), date: e.termination_date, reason: e.termination_reason }))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  const exitsByDept = exitedInWindow.reduce((acc, e) => { (acc[e.department] = acc[e.department] || []).push(e); return acc; }, {});
   const maxReason = Math.max(1, ...exitReasons.map((r) => r.value));
   const payrollCost = employees.filter((e) => e.status === "active" || e.status === "on_leave").reduce((s, e) => s + (Number(e.base_salary)||0)+(Number(e.housing_allowance)||0)+(Number(e.transport_allowance)||0)+(Number(e.other_allowances)||0), 0);
   const avgPerf = reviews.length ? Math.round((reviews.reduce((s, r) => s + (Number(r.overall_rating)||0), 0) / reviews.length) * 100) / 100 : 0;
@@ -167,6 +174,25 @@ export default function Analytics() {
               </BarChart>
             </ResponsiveContainer>
           ) : <EmptyChart />}
+          {exitedInWindow.length > 0 && (
+            <div className="mt-4 border-t border-border pt-3 space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><Building2 size={13} className="text-violet-600" /> {isAr ? "المغادرون حسب الإدارة" : "Exits by department"}</div>
+              {Object.entries(exitsByDept).map(([dept, list]) => (
+                <div key={dept} className="rounded-lg bg-slate-50 p-2.5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold flex items-center gap-1.5"><Building2 size={12} className="text-violet-600" /> {dept}</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700">{list.length} {isAr ? "مغادر" : "exits"}</span>
+                  </div>
+                  {list.map((e, i) => (
+                    <div key={i} className="flex items-center justify-between text-[11px] py-0.5 border-t border-slate-100/70 first:border-0">
+                      <span className="text-slate-700 truncate">{e.name} <span className="text-muted-foreground">· {e.position || "—"}</span></span>
+                      <span className="text-muted-foreground shrink-0" dir="ltr">{e.date}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
         </ChartCard>
 
         <ChartCard title={t.exitReasons}>
