@@ -206,6 +206,19 @@
     </script>
   </head>
   <body>
+    <!-- شاشة بدء مملوءة بالكامل — تظهر فور فتح التطبيق قبل تحميل React -->
+    <div id="app-splash" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0b1120 0%,#1a1333 100%);">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px;">
+        <div style="width:138px;height:138px;border-radius:28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1333,#2e2448);box-shadow:0 0 0 1px rgba(212,175,55,.30),0 24px 48px -12px rgba(0,0,0,.55);">
+          <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:32px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;font-family:'Tajawal','IBM Plex Sans Arabic',sans-serif;">جداره</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.55);margin-top:6px;font-family:'Tajawal','IBM Plex Sans Arabic',sans-serif;">لإدارة الموارد البشرية</div>
+        </div>
+      </div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

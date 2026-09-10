@@ -77,6 +77,7 @@ const PayrollSystemPage = lazy(() => import("@/pages/landings/PayrollSystemPage"
 const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSystemPage"));
 const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSystemPage"));
 import { PortalLangProvider } from "@/lib/portalI18n";
+import SplashScreen from "@/components/SplashScreen";
 
 const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/strategic-plan", "/ad-designs", "/app-store-screens", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program"];
 
@@ -87,11 +88,7 @@ const AuthenticatedApp = () => {
   const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog") || path.startsWith("/jobs") || path.startsWith("/c");
 
   if (!isPublicPage && (isLoadingPublicSettings || isLoadingAuth)) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
+    return <SplashScreen />;
   }
 
   if (authError && !isPublicPage) {
@@ -197,7 +194,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<SplashScreen />}>
             <AuthenticatedApp />
           </Suspense>
         </Router>
@@ -208,11 +205,5 @@ function App() {
     </ThemeProvider>
   )
 }
-
-const PageLoader = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-background">
-    <div className="w-8 h-8 border-4 border-slate-200 border-t-violet-600 rounded-full animate-spin"></div>
-  </div>
-);
 
 export default App
