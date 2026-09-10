@@ -45,11 +45,33 @@ export function getEmployeeAnnualDays(employee, org) {
   return orgV === 21 || orgV === 30 ? orgV : 21;
 }
 
-// مجموع الأيام المستخدمة من طلبات الإجازة المعتمدة/المكتملة (باستثناء المرفوضة المؤرشفة)
+// مجموع الأيام المستخدمة من طلبات الإجازة السنوية المعتمدة/المكتملة فقط —
+// الإجازات المرضية وبدون راتب والاضطرارية والإذن لا تُخصم من رصيد الإجازات السنوية.
 export function sumUsedDays(leaves) {
   if (!Array.isArray(leaves)) return 0;
   const consume = new Set(["completed", "paid", "approved", "hr_approved", "awaiting_finance", "manager_approved"]);
   return leaves
-    .filter((l) => l.status !== "rejected" && consume.has(l.status) && l.leave_type !== "unpaid")
+    .filter((l) => l.status !== "rejected" && consume.has(l.status) && l.leave_type === "annual")
     .reduce((s, l) => s + (Number(l.balance_deducted) || Number(l.days_count) || 0), 0);
+}
+
+// يُعيد الموظفين الذين انتهت إجازتهم السنوية الفعلية (سفر) إلى «على رأس العمل» تلقائياً
+// عند تجاوز تاريخ نهاية الإجازة. يُستدعى عند تحميل قائمة الموظفين.
+export async function revertExpiredLeaves(employees) {
+  const onLeave = (employees || []).filter((e) => e && e.status === "on_leave" && e.id);
+  if (onLeave.length === 0) return [];
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const reverted = [];
+  for (const emp of onLeave) {
+    const leaves = await base44.entities.LeaveRequest.filter({ employee_id: emp.id }, "-created_date", 50).catch(() => []);
+    const travelLeave = (leaves || []).find(
+      (l) => l.leave_type === "annual" && l.annual_leave_mode !== "encash_continue"
+        && ["completed", "paid"].includes(l.status)
+    );
+    if (travelLeave && travelLeave.end_date && String(travelLeave.end_date) < todayStr) {
+      await base44.entities.Employee.update(emp.id, { status: "active" }).catch(() => {});
+      reverted.push(emp.id);
+    }
+  }
+  return reverted;
 }

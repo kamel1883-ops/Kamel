@@ -53,7 +53,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
   const empSystem = Number(employee?.annual_leave_entitlement) === 30 ? 30 : 21;
   const prior = Number(employee?.prior_used_leave) || 0;
   const used = Math.round((sumUsedDays(leaves) + prior) * 10) / 10;
-  const remaining = Math.max(0, Math.round((entitlement - used) * 10) / 10);
+  const remaining = Math.round((entitlement - used) * 10) / 10;
 
   const doneLeaves = leaves.filter((l) => l.status === "completed" || l.status === "paid");
 
@@ -78,7 +78,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
         <div className="grid grid-cols-3 gap-2 text-center">
           <Stat label={t.entitled} value={`${entitlement} ${t.day}`} tone="slate" />
           <Stat label={t.used} value={`${used} ${t.day}`} tone="amber" />
-          <Stat label={t.remaining} value={`${remaining} ${t.day}`} tone="emerald" />
+          <Stat label={t.remaining} value={`${remaining} ${t.day}`} tone={remaining < 0 ? "rose" : "emerald"} />
         </div>
         <div className="text-[11px] text-muted-foreground mt-1">
           {t.systemNote(empSystem)}
@@ -171,6 +171,7 @@ function Stat({ label, value, tone }) {
     slate: "bg-slate-50 text-slate-700",
     amber: "bg-amber-50 text-amber-700",
     emerald: "bg-emerald-50 text-emerald-700",
+    rose: "bg-rose-50 text-rose-700",
   };
   return (
     <div className={cn("rounded-lg py-2 px-1", tones[tone])}>

@@ -20,6 +20,7 @@ import { useI18n } from "@/lib/i18n";
 import { ROLE_LABELS, ROLE_ORDER, ROLE_STYLES, roleLabel } from "@/lib/orgTree";
 import { reasonMeta } from "@/lib/eos";
 import { printEmployeeList } from "@/lib/employeePrint";
+import { revertExpiredLeaves } from "@/lib/leaveBalance";
 import PullToRefresh from "@/components/PullToRefresh";
 
 const isInactive = (e) => e.status === "terminated" || e.status === "resigned";
@@ -75,7 +76,8 @@ export default function Employees() {
       base44.entities.Organization.list("-created_date", 1),
       base44.functions.invoke("getMyTenant", {}).catch(() => null),
     ]);
-    setEmployees(data);
+    const reverted = await revertExpiredLeaves(data);
+    setEmployees(reverted.length ? data.map((e) => reverted.includes(e.id) ? { ...e, status: "active" } : e) : data);
     setOrg(orgs[0] || null);
     const td = tenantRes?.data || tenantRes;
     setMyUnified(String(td?.tenant?.unified_number || "").trim());
