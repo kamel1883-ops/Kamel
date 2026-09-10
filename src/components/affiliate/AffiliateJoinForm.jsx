@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { Send, CheckCircle2 } from "lucide-react";
 
-// نموذج الانضمام لبرنامج شركاء جدارة — يُرسل الطلب لبريد الفريق الرسمي
+// نموذج الانضمام لبرنامج شركاء جداره — يُرسل الطلب لبريد الفريق الرسمي
 export default function AffiliateJoinForm({ isAr }) {
   const [f, setF] = useState({ name: "", email: "", phone: "", channel: "", note: "" });
   const [status, setStatus] = useState("idle");
@@ -16,7 +16,7 @@ export default function AffiliateJoinForm({ isAr }) {
     if (status === "sending") return;
     setStatus("sending");
     const message = isAr
-      ? `طلب انضمام لبرنامج شركاء جدارة (عمولة 7% من أول اشتراك)\n\nالاسم: ${f.name}\nالبريد: ${f.email}\nالجوال: ${f.phone}\nقناة الترويج: ${f.channel}\n\nنبذة:\n${f.note}`
+      ? `طلب انضمام لبرنامج شركاء جداره (عمولة 7% من أول اشتراك)\n\nالاسم: ${f.name}\nالبريد: ${f.email}\nالجوال: ${f.phone}\nقناة الترويج: ${f.channel}\n\nنبذة:\n${f.note}`
       : `Jadara affiliate program application (7% of first subscription)\n\nName: ${f.name}\nEmail: ${f.email}\nPhone: ${f.phone}\nPromotion channel: ${f.channel}\n\nAbout:\n${f.note}`;
     try {
       await base44.functions.invoke("submitContactMessage", { name: f.name, email: f.email, message, captcha_token: captcha });
@@ -37,7 +37,7 @@ export default function AffiliateJoinForm({ isAr }) {
         {isAr ? "انضم لبرنامج الشركاء" : "Join the affiliate program"}
       </h2>
       <p className="text-muted-foreground text-sm">
-        {isAr ? "أرسل بياناتك وسيتواصل معك فريق جدارة لتزويدك برابط الإحالة الخاص بك واعتماد شراكتك." : "Send your details and the Jadara team will contact you with your referral link and approve your partnership."}
+        {isAr ? "أرسل بياناتك وسيتواصل معك فريق جداره لتزويدك برابط الإحالة الخاص بك واعتماد شراكتك." : "Send your details and the Jadara team will contact you with your referral link and approve your partnership."}
       </p>
 
       <div className="grid sm:grid-cols-2 gap-4">

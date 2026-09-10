@@ -10,7 +10,7 @@ export default function StampSeal({ size = 150, rotate = -7, opacity = 0.9 }) {
     <img
       src={STAMP_URL}
       crossOrigin="anonymous"
-      alt="ختم جدارة"
+      alt="ختم جداره"
       width={size}
       height={size}
       style={{

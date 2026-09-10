@@ -36,8 +36,8 @@ export default async function(req) {
     const eName = escapeHtml(name);
     const eEmail = escapeHtml(email);
     const eMsg = escapeHtml(message);
-    const subject = `رسالة جديدة من ${eName} عبر موقع جدارة`;
-    const mailBody = `لقد تلقيت رسالة جديدة عبر نموذج التواصل في موقع جدارة:
+    const subject = `رسالة جديدة من ${eName} عبر موقع جداره`;
+    const mailBody = `لقد تلقيت رسالة جديدة عبر نموذج التواصل في موقع جداره:
 
 الاسم: ${eName}
 البريد الإلكتروني: ${eEmail}
@@ -52,7 +52,7 @@ ${eMsg}
         to: officialEmail,
         subject,
         ...wrapEmailContent(mailBody),
-        from_name: 'بوابة جدارة',
+        from_name: 'بوابة جداره',
       });
     } catch (mailErr) {
       // البريد الرسمي قد لا يكون مستخدماً مسجّلاً — نعيد الخطأ للواجهة كي يُعالَج

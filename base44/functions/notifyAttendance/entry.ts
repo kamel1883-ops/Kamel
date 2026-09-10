@@ -111,7 +111,7 @@ export default async function (req: Request): Promise<Response> {
     if (emp?.email) {
       const subject = `${i18n.ar.title} — ${i18n.en.title}`;
       const emailBody =
-        `${i18n.ar.body}\n\n${i18n.en.body}\n\n— منصة جدارة | Jadara HR`;
+        `${i18n.ar.body}\n\n${i18n.en.body}\n\n— منصة جداره | Jadara HR`;
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({ to: emp.email, subject, ...wrapEmailContent(emailBody) });
       } catch {}

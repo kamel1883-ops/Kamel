@@ -119,7 +119,7 @@ export default function CustomerSurveyTake() {
         <div className="max-w-md text-center bg-white rounded-2xl border border-border p-8">
           <CheckCircle2 className="mx-auto text-emerald-500 mb-3" size={40} />
           <h1 className="text-lg font-bold mb-1">شكراً لمشاركتك!</h1>
-          <p className="text-sm text-muted-foreground mb-4">تم استلام تقييمك ووصوله لإدارة جدارة.</p>
+          <p className="text-sm text-muted-foreground mb-4">تم استلام تقييمك ووصوله لإدارة جداره.</p>
           <Link to="/"><Button variant="outline">العودة للرئيسية</Button></Link>
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function CustomerSurveyTake() {
             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center"><Building2 size={20} /></div>
             <div>
               <div className="font-bold text-lg">{survey?.title || "استبيان تجربة العميل"}</div>
-              <div className="text-xs text-white/70">جدارة — منصة الموارد البشرية</div>
+              <div className="text-xs text-white/70">جداره — منصة الموارد البشرية</div>
             </div>
           </div>
 

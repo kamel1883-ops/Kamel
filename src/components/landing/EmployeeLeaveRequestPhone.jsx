@@ -1,7 +1,7 @@
 import React from "react";
 import { Crown, CalendarDays, ChevronLeft, Send, Check } from "lucide-react";
 
-// شاشة جوال بوابة الموظف — نموذج تقديم طلب إجازة سنوية بواجهة جدارة الحقيقية
+// شاشة جوال بوابة الموظف — نموذج تقديم طلب إجازة سنوية بواجهة جداره الحقيقية
 export default function EmployeeLeaveRequestPhone({ employeeName = "أحمد العتيبي" }) {
   return (
     <div className="flex flex-col h-[36rem] bg-[#F4F6FB] text-right" dir="rtl">
@@ -13,7 +13,7 @@ export default function EmployeeLeaveRequestPhone({ employeeName = "أحمد ا�
               <Crown size={16} className="text-amber-300" />
             </div>
             <div className="leading-tight">
-              <div className="text-[11px] font-bold" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
+              <div className="text-[11px] font-bold" style={{ fontFamily: "var(--font-display)" }}>جداره</div>
               <div className="text-[8px] text-white/55">بوابة الموظف</div>
             </div>
           </div>

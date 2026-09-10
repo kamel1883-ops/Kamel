@@ -40,7 +40,7 @@ function buildBrandHeader(org) {
   left.appendChild(badge);
   const txt = document.createElement("div");
   Object.assign(txt.style, { display: "flex", flexDirection: "column" });
-  const jt = document.createElement("div"); jt.textContent = "جدارة";
+  const jt = document.createElement("div"); jt.textContent = "جداره";
   Object.assign(jt.style, { fontWeight: "800", fontSize: "15px", color: "#0b1120", fontFamily: "var(--font-display)" });
   const js = document.createElement("div"); js.textContent = "لإدارة الموارد البشرية";
   Object.assign(js.style, { fontSize: "10px", color: "#666", marginTop: "1px" });

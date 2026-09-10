@@ -73,9 +73,9 @@ export default function AccountDeletion({ org }) {
               ? `طلب إغلاق حساب — ${org?.name || ""}`.trim()
               : `Account closure request — ${org?.name || ""}`.trim(),
             body: isAr
-              ? `سلاماً،\n\nسُجّل طلب إغلاق حساب منشأتك (${org?.name || "—"}) على منصة جدارة.\nالسبب: ${reason || "غير محدد"}\nسيتواصل معك فريق الدعم خلال 48 ساعة لإتمام العملية.\n\n— جدارة | الدعم الفني`
+              ? `سلاماً،\n\nسُجّل طلب إغلاق حساب منشأتك (${org?.name || "—"}) على منصة جداره.\nالسبب: ${reason || "غير محدد"}\nسيتواصل معك فريق الدعم خلال 48 ساعة لإتمام العملية.\n\n— جداره | الدعم الفني`
               : `Hello,\n\nAn account closure request has been submitted for your organization (${org?.name || "—"}) on Jadara.\nReason: ${reason || "N/A"}\nOur support team will contact you within 48 hours to complete the process.\n\n— Jadara Support`,
-            from_name: "جدارة | الدعم",
+            from_name: "جداره | الدعم",
           });
         } catch (_) {}
       }

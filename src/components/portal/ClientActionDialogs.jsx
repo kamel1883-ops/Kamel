@@ -36,7 +36,7 @@ export function waLink(t, isAr) {
   const disc = Number(t.discount_percent) || 0;
   const lines = isAr ? [
     `السلام عليكم ${t.contact_name || ""}،`,
-    `نسعد بكم في منصة «جدارة» لإدارة الموارد البشرية.`,
+    `نسعد بكم في منصة «جداره» لإدارة الموارد البشرية.`,
     ``,
     `عرض السعر لمنشأتكم «${t.name}»:`,
     `• شريحة الاشتراك: ${t.pricing_tier || "—"}`,
@@ -50,7 +50,7 @@ export function waLink(t, isAr) {
     `رقم الحساب: ${PROVIDER_BANK.account}`,
     ``,
     `يرجى إجراء التحويل وإرسال إثباته هنا لتفعيل اشتراككم.`,
-    `شاكرين لكم، فريق جدارة.`,
+    `شاكرين لكم، فريق جداره.`,
   ] : [
     `Hello ${t.contact_name || ""},`,
     `Welcome to Jadara HR Management platform.`,
@@ -283,7 +283,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center"><Crown className="text-violet-700" size={22} /></div>
               <div>
-                <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جدارة لإدارة الموارد البشرية</div>
+                <div className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>جداره لإدارة الموارد البشرية</div>
                 <div className="text-xs text-slate-500">{isAr ? "بيانات العميل المسجّل" : "Registered client info"}</div>
               </div>
             </div>
@@ -298,7 +298,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
             ))}
           </div>
           <div className="pt-4 border-t border-slate-200 text-xs text-slate-400 text-center">
-            {isAr ? "تم استلام هذه البيانات عبر بوابة تسجيل التجربة أو طلب عرض سعر في منصة جدارة" : "Data received via Jadara trial sign-up or quote request portal"}
+            {isAr ? "تم استلام هذه البيانات عبر بوابة تسجيل التجربة أو طلب عرض سعر في منصة جداره" : "Data received via Jadara trial sign-up or quote request portal"}
           </div>
         </div>
         {!owner && (

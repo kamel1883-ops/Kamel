@@ -1,4 +1,4 @@
-// هوية الطباعة الموحّدة: شعار المنشأة + اسمها أعلى اليمين، وشعار جدارة (التاج الذهبي) أعلى اليسار.
+// هوية الطباعة الموحّدة: شعار المنشأة + اسمها أعلى اليمين، وشعار جداره (التاج الذهبي) أعلى اليسار.
 // تستخدمها جميع أدوات الطباعة (employeePrint / sectionPrint ...) لإدراج ترويسة هوية واحدة على كل مستند.
 import { base44 } from "@/api/base44Client";
 
@@ -30,7 +30,7 @@ export async function fetchOrg() {
   return _orgCache;
 }
 
-// تاج ذهبي داخل مربع كحلي — مطابق لهوية جدارة في باقي المستندات.
+// تاج ذهبي داخل مربع كحلي — مطابق لهوية جداره في باقي المستندات.
 const CROWN_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>';
 
 // أنماط CSS الخاصة بترويسة الهوية — تُضاف مرة واحدة لكل مستند.
@@ -47,7 +47,7 @@ export const brandHeaderCss = [
 ].join("");
 
 export function brandHeaderHtml(org, isAr) {
-  const name = org && org.name ? org.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const name = org && org.name ? org.name : (isAr ? "جداره — الموارد البشرية" : "Jadara HR");
   const logo = org && org.logo_url
     ? "<img src=\"" + esc(org.logo_url) + "\" crossOrigin=\"anonymous\" alt=\"\">"
     : "";
@@ -61,7 +61,7 @@ export function brandHeaderHtml(org, isAr) {
     + "</div>"
     + "<div class=\"brand-left\">"
     + "<div class=\"brand-badge\">" + CROWN_SVG + "</div>"
-    + "<div><div class=\"brand-jt\">جدارة</div><div class=\"brand-js\">لإدارة الموارد البشرية</div></div>"
+    + "<div><div class=\"brand-jt\">جداره</div><div class=\"brand-js\">لإدارة الموارد البشرية</div></div>"
     + "</div>"
     + "</div>";
 }

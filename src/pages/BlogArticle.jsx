@@ -42,7 +42,7 @@ export default function BlogArticle() {
 
   useEffect(() => {
     if (!article) return;
-    document.title = article.seo_title || `${article.title} | جدارة`;
+    document.title = article.seo_title || `${article.title} | جداره`;
     setMeta("description", article.meta_description || article.excerpt || "");
     if (article.meta_keywords) setMeta("keywords", article.meta_keywords);
     setMetaProp("og:title", article.seo_title || article.title);
@@ -54,7 +54,7 @@ export default function BlogArticle() {
   const cats = isAr ? CAT_AR : CAT_EN;
   const t = isAr ? {
     back: "العودة للمدونة", notFound: "المقال غير موجود",
-    ctaTitle: "أتمت هذه العملية مع جدارة", ctaDesc: "جرّب جدارة مجاناً 30 يوماً — كل مميزات إدارة الموارد البشرية في منصة واحدة.", ctaBtn: "ابدأ الآن مجاناً",
+    ctaTitle: "أتمت هذه العملية مع جداره", ctaDesc: "جرّب جداره مجاناً 30 يوماً — كل مميزات إدارة الموارد البشرية في منصة واحدة.", ctaBtn: "ابدأ الآن مجاناً",
     related: "مقالات ذات صلة", minutes: "د",
   } : {
     back: "Back to blog", notFound: "Article not found",

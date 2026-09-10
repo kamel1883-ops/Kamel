@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
 
-// قسم الباقات — بهوية جدارة اللونية: كحلي عميق #0B2545 + ذهبي راقٍ #CBA83A.
+// قسم الباقات — بهوية جداره اللونية: كحلي عميق #0B2545 + ذهبي راقٍ #CBA83A.
 // التخطيط: قائمة عمودية واحدة للشرائح الخمس (كل شريحة صف كامل) + بطاقة التجربة المجانية أسفلهم.
 // خطوط أكبر ومساحة عرض أوسع بدل six cramped columns.
 const GOLD = "#7C5CE6";

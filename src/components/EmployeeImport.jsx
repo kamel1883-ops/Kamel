@@ -117,7 +117,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = isAr ? "قالب_موظفي_جدارة.csv" : "jadara_employees_template.csv";
+    a.download = isAr ? "قالب_موظفي_جداره.csv" : "jadara_employees_template.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -7,7 +7,7 @@ export default function ApprovalPortalScreen() {
     <LaptopFrame>
       <div dir="rtl" className="text-slate-900">
         <div className="flex items-center justify-between bg-[#0B2545] px-4 py-3 text-white">
-          <div><p className="text-xs text-amber-300">جدارة | بوابة الشركات</p><p className="font-bold">الإجازات والموافقات</p></div>
+          <div><p className="text-xs text-amber-300">جداره | بوابة الشركات</p><p className="font-bold">الإجازات والموافقات</p></div>
           <CalendarCheck className="text-amber-300" />
         </div>
         <div className="p-4">

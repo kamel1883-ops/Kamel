@@ -18,7 +18,7 @@ export default function EnvPoster({
   const isAr = lang === "ar";
   const footerNote = isAr ? "بدون رسوم تأسيس · تفعيل فوري" : "No setup fees · instant activation";
   const defaultCta = isAr ? "ابدأ تجربتك المجانية 30 يوماً" : "Start your 30-day free trial";
-  const brand = isAr ? "جدارة" : "Jadara";
+  const brand = isAr ? "جداره" : "Jadara";
 
   return (
     <div

@@ -54,7 +54,7 @@ export default function JobApply() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 py-10 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6"><Logo size={44} /><span className="text-sm text-muted-foreground">منصة جدارة</span></div>
+        <div className="flex items-center justify-between mb-6"><Logo size={44} /><span className="text-sm text-muted-foreground">منصة جداره</span></div>
         <Card className="p-6">
           <div className="flex items-center gap-2 text-violet-700 font-semibold mb-1"><Briefcase size={18} /> {job.title}</div>
           <div className="text-sm text-muted-foreground mb-4">{job.profession} · {job.job_type === "full_time" ? "دوام كامل" : job.job_type === "part_time" ? "دوام جزئي" : "عقد"} {job.salary ? `· ${job.salary} ريال` : ""}</div>

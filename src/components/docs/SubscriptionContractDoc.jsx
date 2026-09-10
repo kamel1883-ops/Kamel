@@ -4,7 +4,7 @@ import StampSeal from "@/components/docs/StampSeal";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { computeBreakdown } from "@/lib/pricingBreakdown";
 
-// عقد اشتراك سنوي رسمي بين جدارة (الطرف الأول — موقّع ومختوم) والعميل (الطرف الثاني — خانات توقيع وختم فارغة)
+// عقد اشتراك سنوي رسمي بين جداره (الطرف الأول — موقّع ومختوم) والعميل (الطرف الثاني — خانات توقيع وختم فارغة)
 // يُولّد من بيانات عرض السعر، ويُطبع/يُصدّر PDF. RTL، عربي، ابتدائي.
 // هيكل صفحتين: الصفحة 1 = الترويسة + الأطراف + المواد 1-5. الصفحة 2 = المواد 6-12 + الإثبات والتوقيعات.
 export default function SubscriptionContractDoc({ company = {}, owner = { full_name: "كامل إسماعيل", national_id: "" }, quoteNo = "", date = "", tier = null, quotedAmount = 0, discountPercent = 0, discountCode = "", isRenewal = false }) {
@@ -31,7 +31,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
               <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
+              <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جداره</div>
               <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية</div>
               <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
               <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحّد: <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>
@@ -39,7 +39,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
           </div>
           <div style={{ textAlign: "left", fontSize: 12, lineHeight: 1.7 }}>
             <div style={{ fontWeight: 800, fontSize: 16, color: "#0b1120" }}>عقد اشتراك سنوي</div>
-            <div style={{ color: "#666" }}>منصة جدارة لإدارة الموارد البشرية</div>
+            <div style={{ color: "#666" }}>منصة جداره لإدارة الموارد البشرية</div>
             <div style={{ marginTop: 6 }}>رقم العقد: <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{quoteNo ? quoteNo.replace(/^JQ/, "JC") : "—"}</span></div>
             <div>التاريخ: {fmt(cDate)}</div>
           </div>
@@ -47,7 +47,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
 
         {/* عنوان */}
         <h2 style={{ textAlign: "center", fontSize: 17, fontWeight: 800, margin: "2px 0 12px", fontFamily: "var(--font-display)" }}>
-          عقد اشتراك سنوي في منصة «جدارة» لإدارة الموارد البشرية
+          عقد اشتراك سنوي في منصة «جداره» لإدارة الموارد البشرية
         </h2>
 
         {/* التمهيد */}
@@ -58,7 +58,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
         {/* الأطراف */}
         <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "12px 16px", marginBottom: 12 }}>
           <div style={{ marginBottom: 10 }}>
-            <b>الطرف الأول:</b> {PROVIDER.institutionName} - جدارة لإدارة الموارد البشرية، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لـ{PROVIDER.institutionName}، ممثلاً لمنصة جدارة لإدارة الموارد البشرية. ويُشار إليه فيما يلي بـ«الطرف الأول» أو «الشركة-جدارة».
+            <b>الطرف الأول:</b> {PROVIDER.institutionName} - جداره لإدارة الموارد البشرية، الرقم الموحّد للمنشآت: <b style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</b>، ويمثلها الأستاذ/ة <b>{PROVIDER.signerName}</b>، بصفته {PROVIDER.signerLabel} لـ{PROVIDER.institutionName}، ممثلاً لمنصة جداره لإدارة الموارد البشرية. ويُشار إليه فيما يلي بـ«الطرف الأول» أو «الشركة-جداره».
           </div>
           <div>
             <b>الطرف الثاني:</b> منشأة <b>{company?.name || "—"}</b>
@@ -87,11 +87,11 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
 
         {/* البنود */}
         <Clause n="1" title="موضوع العقد ومدته">
-          يلتزم الطرف الأول بتقديم اشتراك سنوي في منصة «جدارة» لإدارة الموارد البشرية للطرف الثاني، يشمل تفعيل النظام وتسجيل المنشأة فيه وتوفير كافة ميزات المنصة وفق الباقة السنوية المعتمدة، لقاء رسم الاشتراك السنوي المتفق عليه بين الطرفين. وتكون مدة هذا العقد سنة كاملة 12 شهراً تبدأ من تاريخ تعاقد الطرفين وإبرام هذا العقد وتوقيعه، وتنتهي بانقضاء هذه المدة ما لم يُجدَّد وفقاً للأحكام المنصوص عليها في هذا العقد.
+          يلتزم الطرف الأول بتقديم اشتراك سنوي في منصة «جداره» لإدارة الموارد البشرية للطرف الثاني، يشمل تفعيل النظام وتسجيل المنشأة فيه وتوفير كافة ميزات المنصة وفق الباقة السنوية المعتمدة، لقاء رسم الاشتراك السنوي المتفق عليه بين الطرفين. وتكون مدة هذا العقد سنة كاملة 12 شهراً تبدأ من تاريخ تعاقد الطرفين وإبرام هذا العقد وتوقيعه، وتنتهي بانقضاء هذه المدة ما لم يُجدَّد وفقاً للأحكام المنصوص عليها في هذا العقد.
         </Clause>
 
         <Clause n="2" title="تطوير الخدمات ومراجعة الرسوم السنوية">
-          تتطوّر منصة «جدارة» باستمرار بإضافة ميزات جديدة وتحسين الخدمات ورفع فئات الباقات، ونظراً لزيادة القيمة الفعلية للخدمة المُقدَّمة، يحق للطرف الأول مراجعة قيمة الاشتراك السنوي بما يتناسب مع حجم التطور المُضاف، على ألّا تُطبَّق أي زيادة على المدة الجارية من العقد الحالي، وإنما تُحتسب عند التجديد السنوي وفق أحكامه.
+          تتطوّر منصة «جداره» باستمرار بإضافة ميزات جديدة وتحسين الخدمات ورفع فئات الباقات، ونظراً لزيادة القيمة الفعلية للخدمة المُقدَّمة، يحق للطرف الأول مراجعة قيمة الاشتراك السنوي بما يتناسب مع حجم التطور المُضاف، على ألّا تُطبَّق أي زيادة على المدة الجارية من العقد الحالي، وإنما تُحتسب عند التجديد السنوي وفق أحكامه.
         </Clause>
 
         <Clause n="3" title="تسليم النظام وتفعيله وتدريب المستخدم">
@@ -114,7 +114,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
         </Clause>
 
         <Clause n="7" title="الالتزام بعدد الموظفين وترقية الباقة">
-          يلتزم الطرف الثاني بعدد الموظفين المتفق عليه وقدره <b>{company?.employee_count ? `${company.employee_count} موظفاً` : "……… موظفاً"}</b>، ويُسمح بزيادة لا تتجاوز عشرة (10) موظفين. فإن تجاوز العدد الفعلي نطاق باقة أعلى، يحق لجدارة إيقاف الاشتراك وترقية الطرف الثاني إليها مع سداد الفرق، فيُعاد تفعيل المنشأة عند سداده.
+          يلتزم الطرف الثاني بعدد الموظفين المتفق عليه وقدره <b>{company?.employee_count ? `${company.employee_count} موظفاً` : "……… موظفاً"}</b>، ويُسمح بزيادة لا تتجاوز عشرة (10) موظفين. فإن تجاوز العدد الفعلي نطاق باقة أعلى، يحق لجداره إيقاف الاشتراك وترقية الطرف الثاني إليها مع سداد الفرق، فيُعاد تفعيل المنشأة عند سداده.
         </Clause>
 
         <Clause n="8" title="الدعم الفني والصيانة">
@@ -122,7 +122,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
         </Clause>
 
         <Clause n="9" title="إطلاع العميل على المميزات وإقراره بها">
-          يُقرّ الطرف الثاني بأنه اطّلع استعراضاً كاملاً على كافة المميزات والوحدات المتوفّرة في منصة «جدارة» قبل إبرام هذا العقد، واقتنع بأنها تلبّي احتياجات منشأته. وبناءً على ذلك لا يحق له الاحتجاج لاحقاً بنقص ميزة أو وظيفة لم تُذكر صراحةً في ملحق بهذا العقد، ويُعدّ توقيعه إقراراً قاطعاً بقبول النظام كما هو وقت التعاقد، وبراءة ذمة الطرف الأول من أي مطالبة تستند إلى نقص مزعوم في المميزات.
+          يُقرّ الطرف الثاني بأنه اطّلع استعراضاً كاملاً على كافة المميزات والوحدات المتوفّرة في منصة «جداره» قبل إبرام هذا العقد، واقتنع بأنها تلبّي احتياجات منشأته. وبناءً على ذلك لا يحق له الاحتجاج لاحقاً بنقص ميزة أو وظيفة لم تُذكر صراحةً في ملحق بهذا العقد، ويُعدّ توقيعه إقراراً قاطعاً بقبول النظام كما هو وقت التعاقد، وبراءة ذمة الطرف الأول من أي مطالبة تستند إلى نقص مزعوم في المميزات.
         </Clause>
 
         <Clause n="10" title="نطاق الدعم الفني والطلبات الإضافية">
@@ -130,7 +130,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
         </Clause>
 
         <Clause n="11" title="الترخيص باستخدام شعار المنشأة لأغراض التحسين التعريفي">
-          يوافق الطرف الثاني على أن يحق للطرف الأول (منصة «جدارة») إدراج اسم منشأته وشعارها ضمن قائمة عملائها وفي ملفها التعريفي والمحتوى التسويقي الخاص بها، وذلك لأغراض التحسين من الملف التعريفي لمنصة «جدارة» فقط لا غير. ويُقرّ الطرف الثاني بأن هذا الإدراج لا يُنشئ أي التزام أو مسؤولية أو أثراً قانونياً على منصة «جدارة» من قِبَله، ولا يُعدّ شراكة قانونية أو توكيلاً، وعلى ألّا يشكّل ذلك أي خلل أو التزام أو تعدي قانوني على «جدارة» من قِبَل الطرف الثاني.
+          يوافق الطرف الثاني على أن يحق للطرف الأول (منصة «جداره») إدراج اسم منشأته وشعارها ضمن قائمة عملائها وفي ملفها التعريفي والمحتوى التسويقي الخاص بها، وذلك لأغراض التحسين من الملف التعريفي لمنصة «جداره» فقط لا غير. ويُقرّ الطرف الثاني بأن هذا الإدراج لا يُنشئ أي التزام أو مسؤولية أو أثراً قانونياً على منصة «جداره» من قِبَله، ولا يُعدّ شراكة قانونية أو توكيلاً، وعلى ألّا يشكّل ذلك أي خلل أو التزام أو تعدي قانوني على «جداره» من قِبَل الطرف الثاني.
         </Clause>
 
         {isAlMoied && (
@@ -158,7 +158,7 @@ export default function SubscriptionContractDoc({ company = {}, owner = { full_n
         <div style={{ display: "flex", justifyContent: "space-between", gap: 20, marginTop: 8 }}>
           {/* الطرف الأول — موقّع ومختوم */}
           <div style={{ flex: 1, maxWidth: 340 }}>
-            <div style={{ fontWeight: 800, marginBottom: 6, borderBottom: "1.5px solid #0b1120", paddingBottom: 3, fontSize: 12.5 }}>الطرف الأول - {PROVIDER.institutionName} - جدارة</div>
+            <div style={{ fontWeight: 800, marginBottom: 6, borderBottom: "1.5px solid #0b1120", paddingBottom: 3, fontSize: 12.5 }}>الطرف الأول - {PROVIDER.institutionName} - جداره</div>
             <div style={{ position: "relative", height: 58, marginBottom: 4 }}>
               <div style={{ height: 50, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#94a3b8" }}>مساحة التوقيع</div>
               <div style={{ position: "absolute", top: 0, left: 0, opacity: 0.85, transform: "rotate(-7deg)", transformOrigin: "top left" }}>

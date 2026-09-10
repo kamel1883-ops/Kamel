@@ -20,7 +20,7 @@ export default function SettlementSheet({ record, org }) {
     ticket: "تعويض التذكرة", ticketD: "لا يستحق", total: "إجمالي المخالصة",
     deductionLabel: "مستحقات دائنة (تُخصم)", additionLabel: "مستحقات إضافية (تُضاف للموظف)",
     empSign: "توقيع الموظف", hrSign: "مدير الموارد البشرية", adminSign: "المعتمد من الإدارة",
-    footer: (d) => `تم إصدار هذه المخالصة بواسطة منصة جدارة لإدارة الموارد البشرية — ${d || ""}`,
+    footer: (d) => `تم إصدار هذه المخالصة بواسطة منصة جداره لإدارة الموارد البشرية — ${d || ""}`,
   } : {
     orgNameFallback: "Organization name", cr: "CR", vat: "VAT no", title: "End-of-service settlement", no: "No.",
     emp: "Employee name", empNo: "Employee no", natId: "ID/Iqama", nationality: "Nationality", dept: "Department", position: "Job title",

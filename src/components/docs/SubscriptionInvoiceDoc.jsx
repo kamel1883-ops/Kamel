@@ -7,7 +7,7 @@ import { computeBreakdown } from "@/lib/pricingBreakdown";
 const SIGNATURE_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b430cd7cf_image.png";
 
 // فاتورة اشتراك سنوي (Simplified / Annual Subscription Invoice). تُولَّد من بوابة المالك بعد تأكيد الاشتراك.
-// تشمل بيانات العميل، نوع الخدمة (برمجيات اشتراك سنوي في منصة جدارة)، الباقة/الشريحة، فترة الاشتراك،
+// تشمل بيانات العميل، نوع الخدمة (برمجيات اشتراك سنوي في منصة جداره)، الباقة/الشريحة، فترة الاشتراك،
 // الباركود الرقمي، وقيمة الضريبة (0%) مع شرح حالة الضريبة الصفرية. لا تحتوي على توقيع أو ختم — باركود فقط.
 export default function SubscriptionInvoiceDoc({
   company = {},
@@ -38,7 +38,7 @@ export default function SubscriptionInvoiceDoc({
   const L = isAr
     ? {
         docTitle: "فاتورة اشتراك سنوي",
-        subtitle: "فاتورة اشتراك سنوي - منصة جدارة لإدارة الموارد البشرية",
+        subtitle: "فاتورة اشتراك سنوي - منصة جداره لإدارة الموارد البشرية",
         invNo: "رقم الفاتورة",
         date: "التاريخ",
         billedTo: "فاتورة إلى",
@@ -55,7 +55,7 @@ export default function SubscriptionInvoiceDoc({
         qty: "المدة",
         amt: "المبلغ",
         serviceType: "نوع الخدمة",
-        serviceTypeValue: "برمجيات اشتراك سنوي في منصة جدارة",
+        serviceTypeValue: "برمجيات اشتراك سنوي في منصة جداره",
         subPeriod: "فترة الاشتراك",
         subStartLabel: "بداية الاشتراك",
         subEndLabel: "نهاية الاشتراك",
@@ -69,7 +69,7 @@ export default function SubscriptionInvoiceDoc({
         byAgreement: "حسب الاتفاق",
         features: "تشمل الباقة جميع المميزات التالية",
         notTax: "فاتورة اشتراك سنوي - لا تخضع لضريبة القيمة المضافة. رسوم الضريبة: 0% صفر. المبلغ الإجمالي = المبلغ الصافي.",
-        subLine: "اشتراك سنوي - منصة جدارة لإدارة الموارد البشرية",
+        subLine: "اشتراك سنوي - منصة جداره لإدارة الموارد البشرية",
         perYear: "سنوياً",
         currency: "ر.س",
         sigName: "الإدارة المالية",
@@ -130,7 +130,7 @@ export default function SubscriptionInvoiceDoc({
             <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
+            <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جداره</div>
             <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية · jadara-hr.com</div>
             <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
           </div>

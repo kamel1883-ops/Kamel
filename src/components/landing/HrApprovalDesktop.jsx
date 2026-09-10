@@ -1,7 +1,7 @@
 import React from "react";
 import { Crown, Bell, Search, Check, X, Clock, CalendarDays, User2, FileText } from "lucide-react";
 
-// شاشة كمبيوتر بوابة الشركات — قائمة الموافقات، طلب إجازة بانتظار الموافقة (واجهة جدارة)
+// شاشة كمبيوتر بوابة الشركات — قائمة الموافقات، طلب إجازة بانتظار الموافقة (واجهة جداره)
 export default function HrApprovalDesktop() {
   return (
     <div className="flex h-[22rem] bg-[#F4F6FB] text-right" dir="rtl">
@@ -12,7 +12,7 @@ export default function HrApprovalDesktop() {
             <Crown size={14} className="text-amber-300" />
           </div>
           <div className="leading-tight">
-            <div className="text-[11px] font-bold" style={{ fontFamily: "var(--font-display)" }}>جدارة</div>
+            <div className="text-[11px] font-bold" style={{ fontFamily: "var(--font-display)" }}>جداره</div>
             <div className="text-[8px] text-white/50">بوابة الشركات</div>
           </div>
         </div>

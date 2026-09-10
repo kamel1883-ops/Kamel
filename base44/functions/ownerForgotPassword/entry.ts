@@ -50,7 +50,7 @@ export default async function (req) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: ownerEmail,
-        subject: "رمز استعادة كلمة مرور بوابة المالك — جدارة",
+        subject: "رمز استعادة كلمة مرور بوابة المالك — جداره",
         ...wrapEmailContent(`رمز التحقق الخاص بك هو: ${code}\nالرمز صالح لمدة 15 دقيقة.\nإن لم تطلب تغيير كلمة المرور فتجاهل هذه الرسالة.`),
       });
       sent = true;

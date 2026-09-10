@@ -31,7 +31,7 @@ function Side({ isAr, name, title, phone, email, website, social }) {
             <Crown size={18} color="#d4af37" strokeWidth={1.8} />
           </div>
           <div className="leading-tight">
-            <div className="text-white font-bold text-[17px]" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "جدارة" : "Jadara"}</div>
+            <div className="text-white font-bold text-[17px]" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "جداره" : "Jadara"}</div>
             <div className="text-[9px] tracking-wide text-white">
               {isAr ? "لإدارة الموارد البشرية" : "HUMAN RESOURCES MANAGEMENT"}
             </div>

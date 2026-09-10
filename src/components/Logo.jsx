@@ -17,7 +17,7 @@ export default function Logo({ variant = "full", tone = "light", size = 44, clas
       {variant === "full" && (
         <div className="leading-tight">
           <div className={cn("font-bold text-base sm:text-lg", textMain)} style={{ fontFamily: "var(--font-display)" }}>
-            جدارة
+            جداره
           </div>
           <div className={cn("text-[10px] sm:text-[11px] -mt-0.5", textSub)}>لإدارة الموارد البشرية</div>
         </div>

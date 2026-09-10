@@ -23,7 +23,7 @@ function Stamp() {
       <text fontSize="7" fill="#1d3a5f" letterSpacing="1.5">
         <textPath href="#stampArc" startOffset="3%">JADARA · HR PLATFORM · SAUDI ARABIA · </textPath>
       </text>
-      <text x="70" y="62" textAnchor="middle" fontSize="22" fontWeight="800" fill="#1d3a5f" fontFamily="var(--font-display)">جدارة</text>
+      <text x="70" y="62" textAnchor="middle" fontSize="22" fontWeight="800" fill="#1d3a5f" fontFamily="var(--font-display)">جداره</text>
       <text x="70" y="78" textAnchor="middle" fontSize="8" fill="#1d3a5f">لإدارة الموارد البشرية</text>
       <path d="M30 90 H 110" stroke="#1d3a5f" strokeWidth="0.8" />
       <text x="70" y="103" textAnchor="middle" fontSize="7" fill="#1d3a5f">وثيقة رسمية</text>
@@ -53,7 +53,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
       contact_email: tenant.contact_email || "",
       city: tenant.city || "",
       plan: sub?.plan === "monthly" ? (isAr ? "اشتراك شهري" : "Monthly subscription") : (isAr ? "اشتراك سنوي" : "Annual subscription"),
-      pricing_tier: tenant.pricing_tier || (isAr ? "باقة جدارة السنوية" : "Jadara annual plan"),
+      pricing_tier: tenant.pricing_tier || (isAr ? "باقة جداره السنوية" : "Jadara annual plan"),
       employee_count: tenant.employee_count || 0,
       period_start: sub?.period_start || todayISO(),
       period_end: sub?.period_end || "",
@@ -75,7 +75,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
     print: "طباعة / حفظ PDF", close: "إغلاق",
     docTitle: "فاتورة", billedTo: "فاتورة إلى", desc: "الوصف", period: "الفترة",
     amt: "المبلغ", total: "الإجمالي", subFrom: "من", subTo: "إلى",
-    contactFoot: "للاستفسار", subLine: "باقة جدارة السنوية للمنصة",
+    contactFoot: "للاستفسار", subLine: "باقة جداره السنوية للمنصة",
   } : {
     title: "Create invoice", pul: "Client data is pulled automatically — review, edit, then print",
     name: "Company name", unified: "National Unified Number", contact: "Contact",
@@ -124,7 +124,7 @@ export default function InvoiceDialog({ open, onClose, tenant, subs, isAr }) {
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-lg bg-[#1d3a5f] text-white flex items-center justify-center font-extrabold text-lg">ج</div>
                   <div>
-                    <div className="text-lg font-extrabold text-[#1d3a5f]">جدارة</div>
+                    <div className="text-lg font-extrabold text-[#1d3a5f]">جداره</div>
                     <div className="text-[10px] text-slate-500">{isAr ? "لإدارة الموارد البشرية" : "HR Platform"} · jadara-hr.com</div>
                   </div>
                 </div>

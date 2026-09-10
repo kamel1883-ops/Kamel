@@ -70,7 +70,7 @@ export default function DelegationDocument({ delegation, onClose }) {
           </div>
 
           <p className="text-[11px] text-slate-400 mt-8 border-t pt-2">
-            وثيقة آلية رقم {delegation.delegation_number} — صادر عن نظام جدارة لإدارة الموارد البشرية.
+            وثيقة آلية رقم {delegation.delegation_number} — صادر عن نظام جداره لإدارة الموارد البشرية.
           </p>
         </div>
       </div>

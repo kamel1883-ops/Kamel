@@ -7,7 +7,7 @@ export default function MarketingPlan({ isAr }) {
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         {isAr
-          ? "قنوات التسويق الموصى بها لمنصة جدارة — لكل قناة الفكرة التنفيذية ومؤشر النجاح الخاص بها."
+          ? "قنوات التسويق الموصى بها لمنصة جداره — لكل قناة الفكرة التنفيذية ومؤشر النجاح الخاص بها."
           : "Recommended marketing channels for Jadara — each with its execution idea and success metric."}
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

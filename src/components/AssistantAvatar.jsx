@@ -23,7 +23,7 @@ const LANG_PROFILE = {
 // رسائل الترحيب حسب البوابة واللغة
 const WELCOME = {
   public: {
-    ar: "أهلاً 👋 أنا «مساعد جدارة». اسألني عن المنصة والباقات وكيف تبدأ تجربتك أو تسجّل الدخول للشركات/الموظفين. أوجّهك للخطوات الصحيحة ولا أنفّذ شيئاً عنك. اكتب أو اضغط الميكروفون وتحدّث معي.",
+    ar: "أهلاً 👋 أنا «مساعد جداره». اسألني عن المنصة والباقات وكيف تبدأ تجربتك أو تسجّل الدخول للشركات/الموظفين. أوجّهك للخطوات الصحيحة ولا أنفّذ شيئاً عنك. اكتب أو اضغط الميكروفون وتحدّث معي.",
     en: "Hi 👋 I'm the Jadara Assistant. Ask me about the platform, plans, how to start your trial or sign in. I'll guide you to the right steps and won't do anything on your behalf. Type or tap the mic and talk to me.",
   },
   employee: {
@@ -39,7 +39,7 @@ const WELCOME = {
 
 // نصوص واجهة المساعد (الأزرار/الحالات) حسب اللغة
 const UI = {
-  ar: { label: "مساعد جدارة", title: "مساعد جدارة الذكي", subtitle: "مرشد إرشادي — صوتي وكتابي", listen: "استماع", ph: "اكتب رسالتك أو تحدّث معي…", writing: "يدوّن الرد…", listening: "أستمع الآن… تحدّث واتركني أردّ عليك", speaking: "أردّ عليك بالصوت…", idle: "اضغط الميكروفون لمحادثة صوتية حقيقية — أسأل وأردّ بالصوت تلقائياً", micOff: "تحدّث (محادثة صوتية)", micOn: "إيقاف الاستماع", btnTitle: "مساعد جدارة الذكي", hintTry: "💡 جرّب: اضغط الميكروفون وتحدّث، وسأرد عليك بالصوت ثم أستمع لسؤالك التالي تلقائياً." },
+  ar: { label: "مساعد جداره", title: "مساعد جداره الذكي", subtitle: "مرشد إرشادي — صوتي وكتابي", listen: "استماع", ph: "اكتب رسالتك أو تحدّث معي…", writing: "يدوّن الرد…", listening: "أستمع الآن… تحدّث واتركني أردّ عليك", speaking: "أردّ عليك بالصوت…", idle: "اضغط الميكروفون لمحادثة صوتية حقيقية — أسأل وأردّ بالصوت تلقائياً", micOff: "تحدّث (محادثة صوتية)", micOn: "إيقاف الاستماع", btnTitle: "مساعد جداره الذكي", hintTry: "💡 جرّب: اضغط الميكروفون وتحدّث، وسأرد عليك بالصوت ثم أستمع لسؤالك التالي تلقائياً." },
   en: { label: "Jadara Assistant", title: "Jadara Smart Assistant", subtitle: "Guidance only — voice & text", listen: "Listen", ph: "Type your message or talk to me…", writing: "typing…", listening: "Listening… talk and I'll reply", speaking: "Replying by voice…", idle: "Tap the mic for a real voice chat — ask and I'll reply aloud", micOff: "Talk (voice chat)", micOn: "Stop listening", btnTitle: "Jadara Smart Assistant", hintTry: "💡 Tip: tap the mic and speak — I'll reply aloud then listen for your next question." },
   hi: { label: "जदारा सहायक", title: "जदारा स्मार्ट सहायक", subtitle: "केवल मार्गदर्शन — आवाज़ और टेक्स्ट", listen: "सुनें", ph: "अपना संदेश लिखें या बोलें…", writing: "लिख रहा हूँ…", listening: "सुन रहा हूँ… बोलिए, मैं जवाब दूँगा", speaking: "आवाज़ से जवाब दे रहा हूँ…", idle: "माइक दबाकर बोलें — मैं आवाज़ से जवाब दूँगा फिर अगला सवाल सुनूँगा", micOff: "बोलें (आवाज़ चैट)", micOn: "सुनना बंद करें", btnTitle: "जदारा स्मार्ट सहायक", hintTry: "💡 टिप: माइक दबाकर बोलें — मैं आवाज़ से जवाब दूँगा और अगला प्रश्न सुनूँगा।" },
   ne: { label: "जदारा सहायक", title: "जदारा स्मार्ट सहायक", subtitle: "केवल मार्गदर्शन — आवाज़ र टेक्स्ट", listen: "सुन्नुहोस्", ph: "सन्देश टाइप गर्नुहोस् वा बोल्नुहोस्…", writing: "लेख्दै…", listening: "सुन्दै… बोल्नुहोस्, म जवाफ दिन्छु", speaking: "आवाज़ले जवाफ दिँदै…", idle: "माइक थिचेर बोल्नुहोस् — म आवाज़ले जवाफ दिन्छु र अर्को प्रश्न सुन्छु", micOff: "बोल्नुहोस् (आवाज़ च्याट)", micOn: "सुन्न बन्द गर्नुहोस्", btnTitle: "जदारा स्मार्ट सहायक", hintTry: "💡 टिप: माइक थिचेर बोल्नुहोस् — म आवाज़ले जवाफ दिन्छु र अर्को प्रश्न सुन्छु।" },

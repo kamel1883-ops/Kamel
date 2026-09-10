@@ -24,7 +24,7 @@ export async function printSection({ title, subtitle, isAr, org, columns, rows, 
   const dateStr = genDateBoth(isAr);
 
   const orgData = org || (await fetchOrg());
-  const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جداره — الموارد البشرية" : "Jadara HR");
   const brandHtml = brandHeaderHtml(orgData, isAr);
   const L = isAr ? { generated: "تاريخ التوليد", count: "عدد السجلات" } : { generated: "Generated", count: "Records" };
 

@@ -47,23 +47,23 @@ export default function Blog() {
   }, [cat]);
 
   useEffect(() => {
-    const arDesc = "مدونة جدارة للموارد البشرية والقانون العمالي السعودي 2026 — مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت: حماية الأجور (مدد/WPS)، نهاية الخدمة، الإجازات، التوطين ونطاقات، التأمينات الاجتماعية (GOSI)، ودعم المنشآت (هدف/Hadaf)، والعقود واللوائح، والامتثال لنظام العمل السعودي.";
+    const arDesc = "مدونة جداره للموارد البشرية والقانون العمالي السعودي 2026 — مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت: حماية الأجور (مدد/WPS)، نهاية الخدمة، الإجازات، التوطين ونطاقات، التأمينات الاجتماعية (GOSI)، ودعم المنشآت (هدف/Hadaf)، والعقود واللوائح، والامتثال لنظام العمل السعودي.";
     const enDesc = "Jadara blog on Saudi HR and labor law (2026): practical guides for HR managers and business owners — Wage Protection (Mudad/WPS), end of service, leave, Saudization (Nitaqat), GOSI, HRDF (Hadaf) subsidies, contracts, and Saudi Labor Law compliance.";
-    const arKeywords = "مدونة الموارد البشرية, القانون العمالي السعودي, نظام العمل السعودي, حماية الأجور, مدد, WPS, نهاية الخدمة, التوطين, نطاقات, التأمينات الاجتماعية, جوسي, GOSI, هدف, هدف, إدارة الموارد البشرية, الإجازات, الرواتب, العقود واللوائح, الامتثال, HR Saudi Arabia, Saudi labor law, HR blog, جدارة";
+    const arKeywords = "مدونة الموارد البشرية, القانون العمالي السعودي, نظام العمل السعودي, حماية الأجور, مدد, WPS, نهاية الخدمة, التوطين, نطاقات, التأمينات الاجتماعية, جوسي, GOSI, هدف, هدف, إدارة الموارد البشرية, الإجازات, الرواتب, العقود واللوائح, الامتثال, HR Saudi Arabia, Saudi labor law, HR blog, جداره";
     const enKeywords = "Saudi HR blog, Saudi labor law blog, HR Saudi Arabia, WPS, Mudad, end of service Saudi, Saudization, Nitaqat, GOSI Saudi, HRDF, Hadaf, HR compliance KSA, Jadara blog, HR articles Saudi Arabia, Saudi payroll";
     const url = "https://jadara-hr.com/blog";
     const img = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/4d935b232_generated_image.png";
 
-    document.title = isAr ? "مدونة الموارد البشرية والقانون العمالي السعودي 2026 | جدارة" : "Saudi HR & Labor Law Blog 2026 | Jadara";
+    document.title = isAr ? "مدونة الموارد البشرية والقانون العمالي السعودي 2026 | جداره" : "Saudi HR & Labor Law Blog 2026 | Jadara";
     setMeta("description", isAr ? arDesc : enDesc);
     setMeta("keywords", isAr ? arKeywords : enKeywords);
     setMeta("robots", "index, follow, max-image-preview:large");
-    setMeta("author", "جدارة لإدارة الموارد البشرية");
+    setMeta("author", "جداره لإدارة الموارد البشرية");
     setProp("og:title", document.title);
     setProp("og:description", isAr ? arDesc : enDesc);
     setProp("og:type", "website");
     setProp("og:locale", isAr ? "ar_SA" : "en_US");
-    setProp("og:site_name", "جدارة");
+    setProp("og:site_name", "جداره");
     setProp("og:url", url);
     setProp("og:image", img);
     setMeta("twitter:card", "summary_large_image");
@@ -74,17 +74,17 @@ export default function Blog() {
     setJsonLd("blog-schema", {
       "@context": "https://schema.org",
       "@type": "Blog",
-      name: isAr ? "مدونة جدارة للموارد البشرية" : "Jadara HR Blog",
+      name: isAr ? "مدونة جداره للموارد البشرية" : "Jadara HR Blog",
       description: isAr ? arDesc : enDesc,
       url,
       inLanguage: isAr ? "ar-SA" : "en-US",
-      publisher: { "@type": "Organization", name: "جدارة", logo: { "@type": "ImageObject", url: img } },
+      publisher: { "@type": "Organization", name: "جداره", logo: { "@type": "ImageObject", url: img } },
       blogPost: articles.slice(0, 12).map((a) => ({
         "@type": "BlogPosting",
         headline: a.title,
         description: a.excerpt || "",
         datePublished: a.published_date || undefined,
-        author: { "@type": "Organization", name: a.author_name || "جدارة" },
+        author: { "@type": "Organization", name: a.author_name || "جداره" },
         url: `https://jadara-hr.com/blog/${a.slug}`,
       })),
     });
@@ -92,11 +92,11 @@ export default function Blog() {
 
   const cats = isAr ? CAT_AR : CAT_EN;
   const t = isAr ? {
-    badge: "مدونة جدارة", title: "مدونة الموارد البشرية والقانون العمالي السعودي",
+    badge: "مدونة جداره", title: "مدونة الموارد البشرية والقانون العمالي السعودي",
     subtitle: "مقالات عملية لمدراء الموارد البشرية وأصحاب المنشآت — حماية الأجور (مدد)، نهاية الخدمة، الإجازات، والامتثال للأنظمة.",
     all: "كل التصنيفات", read: "اقرأ المقال", empty: "لا توجد مقالات بعد.",
     featured: "مقال مميّز",
-    ctaTitle: "حوّل معرفتك إلى أتمتة", ctaDesc: "ابدأ تجربتك المجانية على جدارة لمدة 30 يوماً — بدون بطاقة ائتمان.", ctaBtn: "جرّب مجاناً",
+    ctaTitle: "حوّل معرفتك إلى أتمتة", ctaDesc: "ابدأ تجربتك المجانية على جداره لمدة 30 يوماً — بدون بطاقة ائتمان.", ctaBtn: "جرّب مجاناً",
   } : {
     badge: "Jadara Blog", title: "Saudi HR & Labor Law Blog",
     subtitle: "Practical articles for HR managers and business owners — Wage Protection (Mudad), end of service, leave, and regulatory compliance.",

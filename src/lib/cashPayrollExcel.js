@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 
 // مولّد كشف رواتب الكاش (xlsx) — للموظفين الذين يُصرف راتبهم نقداً
-// ورقة عمل واحدة، ترويسة جدارة، أعمدة الرواتب، صف الإجمالي، عمود توقيع الاستلام.
+// ورقة عمل واحدة، ترويسة جداره، أعمدة الرواتب، صف الإجمالي، عمود توقيع الاستلام.
 
 const NAVY = "FF0B2545";
 const GOLD = "FFB6901F";
@@ -43,7 +43,7 @@ export async function downloadCashPayrollExcel({ payrolls = [], employees = [], 
   for (const e of employees) empMap[e.id] = e;
 
   const wb = new ExcelJS.Workbook();
-  wb.creator = "جدارة — Jadara HR";
+  wb.creator = "جداره — Jadara HR";
   wb.created = new Date();
 
   const ws = wb.addWorksheet("رواتب الكاش", {
@@ -55,11 +55,11 @@ export async function downloadCashPayrollExcel({ payrolls = [], employees = [], 
     ],
   });
 
-  // الترويسة — جدارة (يسار) + بيانات كشف الكاش (يمين)
+  // الترويسة — جداره (يسار) + بيانات كشف الكاش (يمين)
   ws.mergeCells("A1:E1");
   ws.mergeCells("F1:O1");
   const brand = ws.getCell("A1");
-  brand.value = "جدارة — Jadara HR";
+  brand.value = "جداره — Jadara HR";
   brand.font = { bold: true, size: 16, color: { argb: "FFFFFFFF" } };
   brand.fill = NAVY_FILL;
   brand.alignment = { horizontal: "center", vertical: "middle" };

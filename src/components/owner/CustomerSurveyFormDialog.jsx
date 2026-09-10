@@ -8,9 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
 const DEFAULT_QUESTIONS_AR = [
-  "ما مدى سهولة استخدام برنامج جدارة؟ (1 = صعب جدًا، 5 = سهل جدًا)",
+  "ما مدى سهولة استخدام برنامج جداره؟ (1 = صعب جدًا، 5 = سهل جدًا)",
   "هل يغطي البرنامج جميع المميزات التي تحتاجها منشأتك؟ (1 = لا يغطي، 5 = يغطي بالكامل)",
-  "كيف تقيم دعم الجدارة الفني في تذليل الصعوبات التي تواجهكم؟ (1 = ضعيف، 5 = ممتاز)",
+  "كيف تقيم دعم الجداره الفني في تذليل الصعوبات التي تواجهكم؟ (1 = ضعيف، 5 = ممتاز)",
 ];
 const DEFAULT_QUESTIONS_EN = [
   "How easy is Jadara to use? (1 = very hard, 5 = very easy)",
@@ -35,7 +35,7 @@ export default function CustomerSurveyFormDialog({ open, onClose, onSaved, surve
         try { qs = JSON.parse(survey.questions || "[]"); } catch { qs = []; }
         setQuestions(qs.map(q => q.text || ""));
       } else {
-        setTitle(isAr ? "تقييم تجربتك مع جدارة" : "Your experience with Jadara");
+        setTitle(isAr ? "تقييم تجربتك مع جداره" : "Your experience with Jadara");
         setDescription(isAr ? "نسعى لتطوير خدمتنا لكم. استبيان قصير - أقل من دقيقة." : "Help us improve. A quick survey - under a minute.");
         setQuestions(isAr ? [...DEFAULT_QUESTIONS_AR] : [...DEFAULT_QUESTIONS_EN]);
       }

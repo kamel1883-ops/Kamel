@@ -14,7 +14,7 @@ import ReportsAnalytics from "@/components/brochure/ReportsAnalytics";
 import StoreButtons from "@/components/StoreButtons";
 import { Image } from "@/components/ui/image";
 
-// بروفايل منصة جدارة — نسخة فاخرة موسّعة، عربي صافٍ، RTL، قابل للطباعة
+// بروفايل منصة جداره — نسخة فاخرة موسّعة، عربي صافٍ، RTL، قابل للطباعة
 const NAVY = "#0A1629";
 const NAVY2 = "#0e1f3a";
 const CYAN = "#8B5CF6";
@@ -27,7 +27,7 @@ export default function Brochure() {
         <div className="max-w-[1100px] mx-auto px-4 h-14 flex items-center justify-between text-white">
           <div className="flex items-center gap-2">
             <Crown size={18} style={{ color: GOLD }} />
-            <span className="text-sm font-semibold">بروفايل منصة جدارة</span>
+            <span className="text-sm font-semibold">بروفايل منصة جداره</span>
           </div>
           <div className="flex items-center gap-2">
             <a href="/brochure-en" className="inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">English</a>
@@ -69,7 +69,7 @@ function Cover() {
             <Crown size={28} style={{ color: GOLD }} strokeWidth={1.6} />
           </div>
           <div>
-            <div style={{ color: "#fff", fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)" }}>جدارة</div>
+            <div style={{ color: "#fff", fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)" }}>جداره</div>
             <div style={{ color: "#9fb3c8", fontSize: 12 }}>لإدارة الموارد البشرية</div>
           </div>
         </div>
@@ -79,7 +79,7 @@ function Cover() {
             بروفايل المنصة الرسمي
           </div>
           <h1 style={{ color: "#fff", fontSize: 50, fontWeight: 800, lineHeight: 1.12, fontFamily: "var(--font-display)", marginBottom: 14 }}>
-            منصة جدارة<br/>
+            منصة جداره<br/>
             <span style={{ color: CYAN, fontSize: 42 }}>لإدارة الموارد البشرية</span>
           </h1>
           <p style={{ color: "#cdd9e6", fontSize: 16, maxWidth: 700, margin: "0 auto", lineHeight: 1.9 }}>
@@ -129,7 +129,7 @@ function Vision() {
             <span style={{ color: CYAN }}>تتحكّم</span> في كل رأس مال بشري
           </h2>
           <p className="mt-5 text-slate-600 leading-loose text-[15px]">
-            «جدارة» منصة سحابية سعودية متكاملة، تجمع إدارة الموظفين والحضور والبصمة والرواتب والإجازات ونهاية الخدمة والأداء والتدريب والمركبات والتراخيص والاشتراكات الحكومية في منظومة واحدة آمنة — بدل جداول الإكسل والملفات الورقية متفرقة.
+            «جداره» منصة سحابية سعودية متكاملة، تجمع إدارة الموظفين والحضور والبصمة والرواتب والإجازات ونهاية الخدمة والأداء والتدريب والمركبات والتراخيص والاشتراكات الحكومية في منظومة واحدة آمنة — بدل جداول الإكسل والملفات الورقية متفرقة.
           </p>
           <p className="mt-3 text-slate-600 leading-loose text-[15px]">
             صُمّمت لتخدم المنشآت الصغيرة وحتى كبرى الشركات بأداء ثابت وسعة حتى <b style={{ color: NAVY }}>25,000 موظف</b> في منشأة واحدة.
@@ -164,12 +164,12 @@ function TwoPortals() {
 function DashboardOverview() {
   return (
     <Section tint="light" heading={<Heading icon={<LayoutDashboard />} title="لوحة التحكم الرئيسية" sub="مدخل واحد يجمع كل أدوات الإدارة في واجهة سريعة وواضحة" />}>
-      <MockFrame title="منصة جدارة — لوحة التحكم">
+      <MockFrame title="منصة جداره — لوحة التحكم">
         <div className="grid grid-cols-[170px,1fr] gap-0 h-[420px]">
           {/* الشريط الجانبي */}
           <div style={{ background: NAVY, color: "#cdd9e6", borderRadius: "10px 0 0 10px", padding: 14 }} className="flex flex-col gap-1 text-[11px]">
             <div className="flex items-center gap-2 text-white font-bold mb-2">
-              <Crown size={14} style={{ color: GOLD }} /> جدارة
+              <Crown size={14} style={{ color: GOLD }} /> جداره
             </div>
             {[
               { i: LayoutDashboard, t: "الرئيسية", a: true },
@@ -271,10 +271,10 @@ function ModuleShowcase() {
 function FlightBookingsModule() {
   return (
     <FeatureBlock
-      icon={Plane} kicker="حجوزات الطيران" title="احجز رحلتك من جدارة وتُحوَّل لأحد أربعة مزوّدين للدفع"
-      desc="احجز رحلاتك جواً من داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب ودرجة المقصورة، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جدارة."
+      icon={Plane} kicker="حجوزات الطيران" title="احجز رحلتك من جداره وتُحوَّل لأحد أربعة مزوّدين للدفع"
+      desc="احجز رحلاتك جواً من داخل نظام جداره نفسه — اختر الوجهة والتاريخ وعدد الركاب ودرجة المقصورة، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جداره."
       points={[
-        "بحث عن الرحلة داخل جدارة: الوجهة، التاريخ، الركاب، درجة المقصورة",
+        "بحث عن الرحلة داخل جداره: الوجهة، التاريخ، الركاب، درجة المقصورة",
         "تحويل تلقائي عبر الروابط العميقة إلى المسافر أو المطار أو Skyscanner أو Wingie",
         "إكمال بيانات الجواز والدفع في الصفحة الآمنة لمزوّد الطيران",
         "تكامل مع أربعة من أكبر مزوّدي الطيران عالمياً وخليجياً"
@@ -343,7 +343,7 @@ function FlightProvidersSection() {
     { logo: "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/0d35e8ef9_image.png", name: "Wingie", brand: "#e81932", deep: true },
   ];
   return (
-    <Section tint="light" heading={<Heading icon={<Plane />} title="مزوّدو حجوزات الطيران" sub="منصة جدارة توفر لك أكبر أربعة من مزوّدي الطيران الموثوقين — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع" />}>
+    <Section tint="light" heading={<Heading icon={<Plane />} title="مزوّدو حجوزات الطيران" sub="منصة جداره توفر لك أكبر أربعة من مزوّدي الطيران الموثوقين — ابحث داخل جداره وتُحوَّل للمزوّد لإكمال الحجز والدفع" />}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {providers.map((p, k) => (
           <div key={k} className="rounded-3xl p-6 flex flex-col items-center gap-3 shadow-sm" style={{ background: "#fff", border: `2px solid ${p.brand}30` }}>
@@ -925,7 +925,7 @@ function EmployeePortal() {
         <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)" }}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1F`, color: CYAN, border: `1px solid ${CYAN}40` }}><Smartphone size={20} /></div>
-            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19, color: "#fff" }}>تطبيق جدارة للموظف</h4>
+            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19, color: "#fff" }}>تطبيق جداره للموظف</h4>
           </div>
           <ul className="space-y-2.5 text-[14.5px] text-slate-200">
             {[
@@ -955,7 +955,7 @@ function PhoneMock() {
         <div style={{ background: `linear-gradient(160deg, ${NAVY2}, ${NAVY})`, borderRadius: 28, padding: 16, color: "#fff", minHeight: 360, display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="flex items-center gap-2">
             <Crown size={14} style={{ color: GOLD }} />
-            <span style={{ fontSize: 12, fontWeight: 700 }}>جدارة</span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>جداره</span>
             <span style={{ fontSize: 10, color: "#7d92a8", marginRight: "auto" }}>بوابة الموظف</span>
           </div>
           <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.10)" }}>
@@ -992,14 +992,14 @@ function PhoneMock() {
 /* =================== البنية التحتية =================== */
 function Infra() {
   return (
-    <Section tint="dark" heading={<Heading dark icon={<Server />} title="بنية تحتية سعودية فاخرة" sub="خادم خاص بمنصة جدارة — داخل المملكة وبأعلى المواصفات" />}>
+    <Section tint="dark" heading={<Heading dark icon={<Server />} title="بنية تحتية سعودية فاخرة" sub="خادم خاص بمنصة جداره — داخل المملكة وبأعلى المواصفات" />}>
       <div className="grid md:grid-cols-[1.1fr,1fr] gap-6">
         <div className="rounded-3xl p-6 bg-gradient-to-br from-[#0e1f3a] to-[#0A1629] border border-white/10 shadow-2xl">
           <div className="flex items-center gap-2 text-white mb-4">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center"><Server size={20} style={{ color: CYAN }} /></div>
             <div>
-              <div className="font-extrabold text-lg">خادم جدارة الخاص</div>
-              <div className="text-xs text-white/60">سيرفر خاص بمنصة جدارة — يستضيف اشتراكات جميع الشركات والمؤسسات</div>
+              <div className="font-extrabold text-lg">خادم جداره الخاص</div>
+              <div className="text-xs text-white/60">سيرفر خاص بمنصة جداره — يستضيف اشتراكات جميع الشركات والمؤسسات</div>
             </div>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-emerald-500/10 border border-emerald-400/20 self-start mb-3">
@@ -1109,7 +1109,7 @@ function Closing() {
       <div className="text-center max-w-2xl mx-auto">
         <Crown size={32} style={{ color: GOLD }} />
         <h2 style={{ fontSize: 30, fontWeight: 800, marginTop: 10, fontFamily: "var(--font-display)" }}>
-          لنبدأ رحلتك مع <span style={{ color: CYAN }}>جدارة</span>
+          لنبدأ رحلتك مع <span style={{ color: CYAN }}>جداره</span>
         </h2>
         <p style={{ fontSize: 14, color: "#a9bcd0", marginTop: 10, lineHeight: 1.9 }}>
           جرّب المنصة 30 يوماً مجاناً واكتشف كيف تتحوّل إدارة مواردك البشرية إلى منظومة رقمية موحّدة وفاخرة.

@@ -51,7 +51,7 @@ export default function Quote() {
     phone: "الهاتف *", email: "البريد الإلكتروني *", unified: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7) *", city: "المدينة",
     generate: "توليد عرض السعر", errForm: "الرجاء إدخال اسم المنشأة وبريد إلكتروني صحيح والرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7) وعدد موظفين متوقع",
     errGeneric: "تعذّر توليد العرض، حاول مرة أخرى", secure: "بياناتك آمنة ولن تُباع لأي طرف ثالث",
-    to: "إلى", quoteNo: "رقم العرض", date: "التاريخ", planTitle: "الاشتراك السنوي — منصة جدارة",
+    to: "إلى", quoteNo: "رقم العرض", date: "التاريخ", planTitle: "الاشتراك السنوي — منصة جداره",
     planDesc: "باقة واحدة متكاملة تشمل كل ميزات المنصة:", includes: "تشمل الباقة:",
     planTier: "شريحة الاشتراك", planTierRange: "نطاق الموظفين", planPrice: "السعر السنوي للباقة",
     renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك (حسب عدد الموظفين وقت التجديد).",
@@ -69,7 +69,7 @@ export default function Quote() {
     bankSection: "بيانات التحويل البنكي",
     amountDue: "المبلغ المستحق (سنوياً)",
     sigName: "المدير العام — وليد حسن القروص",
-    stamp: "جدارة لإدارة الموارد البشرية",
+    stamp: "جداره لإدارة الموارد البشرية",
     discCode: "كود الخصم (اختياري)",
     discBadge: "خصم", discApplied: "بعد تطبيق الكود",
     emailNotice: "تنويه مهم",
@@ -77,7 +77,7 @@ export default function Quote() {
     activateTitle: "أنشئ حسابك وكلمة مرورك للدخول لبوابة الشركات",
     activateNote: "تجربتك المجانية مفعّلة بالرقم الموحّد المسجّل وأنتقل المبلغ بانتظار تأكيد التحويل. أنشئ حسابك بنفس البريد والرقم الموحّد الآن لتدخل بوابة الشركات وتستفيد من كل المميزات — حتى يصلك تأكيد الاشتراك السنوي مع العقد والفاتورة من فريقنا.",
     activateBtn: "إنشاء الحساب والدخول للبوابة",
-    activateHint: "بوابة الشركات تتيح: إدارة الموظفين، الحضور والرواتب، الإجازات والسلف، نهاية الخدمة، التحليلات، وكل ميزات جدارة.",
+    activateHint: "بوابة الشركات تتيح: إدارة الموظفين، الحضور والرواتب، الإجازات والسلف، نهاية الخدمة، التحليلات، وكل ميزات جداره.",
     portalNote: "العميل يظهر تلقائياً في بوابة المالك، وعند وصول إيصال التحويل عبر واتساب يؤكد المالك الاشتراك ويولّد العقد والفاتورة ويُرسلهما لك.",
     trialFormSub: "أدخل بيانات منشأتك لإطلاق فترة التجربة المجانية 30 يوماً — بدون أي رسوم أو بطاقة ائتمان.",
     buyFormSub: "أدخل بيانات منشأتك لتوليد عرض سعر رسمي مع بيانات التحويل البنكي ورقم الدعم لتفعيل الاشتراك.",
@@ -310,7 +310,7 @@ export default function Quote() {
               <Label>{isAr ? "رمز الشريك المسوّق (اختياري)" : "Partner referral code (optional)"}</Label>
               <Input value={form.referral_code || ""} onChange={(e) => set("referral_code", e.target.value.toUpperCase())} placeholder="JD-XXXXXX" className="font-mono" />
               <p className="text-sm text-muted-foreground">
-                {isAr ? "إن وصلك رمز من أحد شركاء جدارة المسوّقين، اكتبه هنا ليُسجّل رسمياً أن اشتراكك جاء عن طريقه." : "If a Jadara marketing partner gave you a code, enter it so their referral is officially recorded."}
+                {isAr ? "إن وصلك رمز من أحد شركاء جداره المسوّقين، اكتبه هنا ليُسجّل رسمياً أن اشتراكك جاء عن طريقه." : "If a Jadara marketing partner gave you a code, enter it so their referral is officially recorded."}
               </p>
             </div>
             {/* إرفاق صورة السجل التجاري — إلزامي للتحقق من ملكية الرقم الموحّد */}
@@ -392,7 +392,7 @@ export default function Quote() {
               <Logo size={56} />
               <div>
                 <div className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>{t.pageTitle}</div>
-                <div className="text-sm text-muted-foreground">جدارة — منصة الموارد البشرية السعودية</div>
+                <div className="text-sm text-muted-foreground">جداره — منصة الموارد البشرية السعودية</div>
               </div>
             </div>
             <div className="text-left sm:text-right space-y-1 text-base">
@@ -595,7 +595,7 @@ function JadaraStamp({ ar, label }) {
         <text fill="#1A237E" fontSize="16" fontWeight="700" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif" style={{ letterSpacing: "1px" }}>
           <textPath href="#stampTop" startOffset="50%" textAnchor="middle">{label}</textPath>
         </text>
-        <text x="100" y="98" textAnchor="middle" fill="#1A237E" fontSize="22" fontWeight="800" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">جدارة</text>
+        <text x="100" y="98" textAnchor="middle" fill="#1A237E" fontSize="22" fontWeight="800" fontFamily="Tajawal, IBM Plex Sans Arabic, sans-serif">جداره</text>
         <text x="100" y="118" textAnchor="middle" fill="#1A237E" fontSize="9" fontWeight="600" fontFamily="sans-serif">JADARA HR</text>
         <text x="100" y="132" textAnchor="middle" fill="#1A237E" fontSize="14">✦</text>
       </svg>

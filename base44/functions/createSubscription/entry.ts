@@ -51,7 +51,7 @@ export default async function (req) {
         currency: 'SAR',
         threeDSecure: true,
         save_card: false,
-        description: 'اشتراك سنوي جدارة — السنة الأولى (2,500 ريال)',
+        description: 'اشتراك سنوي جداره — السنة الأولى (2,500 ريال)',
         statement_descriptor: 'JADARA',
         metadata,
         customer: { first_name: firstName, last_name: lastName, email },

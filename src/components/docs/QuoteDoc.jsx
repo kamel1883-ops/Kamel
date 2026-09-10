@@ -33,7 +33,7 @@ export default function QuoteDoc({
         company: "اسم المنشأة", industry: "القطاع - النشاط", city: "المدينة",
         contact: "الشخص المسؤول", phone: "الهاتف", email: "البريد الإلكتروني",
         unified: "الرقم الوطني الموحد للمنشآت", empCount: "عدد الموظفين",
-        planTitle: "الاشتراك السنوي - منصة جدارة",
+        planTitle: "الاشتراك السنوي - منصة جداره",
         planDesc: "باقة واحدة متكاملة تشمل كل ميزات المنصة:", includes: "تشمل الباقة:",
         planTier: "شريحة الاشتراك", annual: "ريال",
         renewNote: "يتجدد الاشتراك سنوياً بنفس قيمة شريحتك حسب عدد الموظفين وقت التجديد.",
@@ -90,7 +90,7 @@ export default function QuoteDoc({
           <Crown size={26} strokeWidth={1.8} style={{ color: "#fbbf24" }} />
         </div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جدارة</div>
+          <div style={{ fontWeight: 800, fontSize: 18, fontFamily: "var(--font-display)" }}>جداره</div>
           <div style={{ fontSize: 11, color: "#666" }}>لإدارة الموارد البشرية</div>
           <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0b1120", marginTop: 3 }}>{PROVIDER.institutionName}</div>
           <div style={{ fontSize: 10, color: "#666" }}>الرقم الموحّد: <span style={{ fontFamily: "ui-monospace, monospace" }}>{PROVIDER.unifiedNumber}</span></div>

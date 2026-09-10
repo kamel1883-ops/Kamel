@@ -13,7 +13,7 @@ export default function ClientMarquee() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const title = isAr ? "عملاؤنا" : "Our Clients";
-  const sub = isAr ? "منشآت تثق بجدارة لإدارة مواردها البشرية" : "Organizations trusting Jadara for their HR";
+  const sub = isAr ? "منشآت تثق بجداره لإدارة مواردها البشرية" : "Organizations trusting Jadara for their HR";
   const loop = [...CLIENTS, ...CLIENTS];
 
   return (

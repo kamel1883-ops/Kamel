@@ -261,7 +261,7 @@ export default function FeatureLanding({ content }) {
             <Link to="/contact" className="block hover:text-violet-700">{isAr ? "تواصل" : "Contact"}</Link>
           </div>
         </div>
-        <div className="text-center text-muted-foreground/70 text-sm pb-6">© 2027 {isAr ? "جدارة" : "Jadara"} — {isAr ? "جميع الحقوق محفوظة" : "All rights reserved"}</div>
+        <div className="text-center text-muted-foreground/70 text-sm pb-6">© 2027 {isAr ? "جداره" : "Jadara"} — {isAr ? "جميع الحقوق محفوظة" : "All rights reserved"}</div>
       </footer>
     </div>
   );

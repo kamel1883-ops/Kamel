@@ -161,7 +161,7 @@ export default function LoanStatementDoc({ employee, loan, org }) {
         تاريخ الطباعة: {genDateBoth(true)}
       </div>
       <div style={{ marginTop: 8, fontSize: 9, color: "#94a3b8", textAlign: "center" }}>
-        تم إنشاء هذا المستند آلياً بواسطة نظام جدارة لإدارة الموارد البشرية
+        تم إنشاء هذا المستند آلياً بواسطة نظام جداره لإدارة الموارد البشرية
       </div>
     </div>
   );

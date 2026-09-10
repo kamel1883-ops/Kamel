@@ -41,13 +41,13 @@ export async function notifyApproverForStatus(
 
   const label = TYPE_LABEL[type] || "طلب";
   const empName = employeeName || requester?.full_name || "—";
-  const subject = `لديك طلب ${label} بانتظار الموافقة — منصة جدارة`;
+  const subject = `لديك طلب ${label} بانتظار الموافقة — منصة جداره`;
   const bodyText =
     `السلام عليكم ${approver.full_name || ""}،\n\n` +
-    `لديك طلب ${label} بانتظار ${stageLabel} على بوابة الموظف في منصة جدارة.\n\n` +
+    `لديك طلب ${label} بانتظار ${stageLabel} على بوابة الموظف في منصة جداره.\n\n` +
     `الموظف: ${empName}\n\n` +
     `يرجى الدخول إلى بوابة الموظف لمراجعة الطلب واتخاذ الإجراء المناسب.\n\n` +
-    `مع التحية،\nمنصة جدارة للموارد البشرية`;
+    `مع التحية،\nمنصة جداره للموارد البشرية`;
 
   // إشعار داخلي موجّه للمعتمد (يظهر في جرس البوابة إن كان مستخدماً مسجلاً)
   try {

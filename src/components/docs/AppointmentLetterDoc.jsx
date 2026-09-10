@@ -52,7 +52,7 @@ export default function AppointmentLetterDoc({ applicant, job, org, preparedBy }
         </div>
       </div>
 
-      <div style={{ marginTop: "30px", fontSize: "11px", color: "#94a3b8", textAlign: "center" }}>تم إنشاء هذا المستند آلياً عبر منصة جدارة | {today}</div>
+      <div style={{ marginTop: "30px", fontSize: "11px", color: "#94a3b8", textAlign: "center" }}>تم إنشاء هذا المستند آلياً عبر منصة جداره | {today}</div>
     </div>
   );
 }

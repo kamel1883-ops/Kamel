@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 
 const DEFAULT_Q_AR = [
-  "ما مدى سهولة استخدام برنامج جدارة؟ (1 = صعب جدًا، 5 = سهل جدًا)",
+  "ما مدى سهولة استخدام برنامج جداره؟ (1 = صعب جدًا، 5 = سهل جدًا)",
   "هل يغطي البرنامج جميع المميزات التي تحتاجها منشأتك؟ (1 = لا يغطي، 5 = يغطي بالكامل)",
-  "كيف تقيم دعم الجدارة الفني في تذليل الصعوبات التي تواجهكم؟ (1 = ضعيف، 5 = ممتاز)",
+  "كيف تقيم دعم الجداره الفني في تذليل الصعوبات التي تواجهكم؟ (1 = ضعيف، 5 = ممتاز)",
 ];
 
 export default function SurveysManager({ session }) {
@@ -80,7 +80,7 @@ export default function SurveysManager({ session }) {
   const setStatus = async (s, newStatus) => { setBusyId(s.id); try { await call("owner_survey_save", { id: s.id, title: s.title, description: s.description, questions: s.questions, status: newStatus }); await load(); } catch (e) { alert(e?.message); } finally { setBusyId(null); } };
   const del = async (s) => { if (!confirm(isAr ? "حذف الاستبيان وكل ردوده؟" : "Delete survey and all responses?")) return; setBusyId(s.id); try { await call("owner_survey_delete", { id: s.id }); await load(); } catch (e) { alert(e?.message); } finally { setBusyId(null); } };
   const copyLink = (s) => { const link = `${window.location.origin}/c/${s.id}`; navigator.clipboard?.writeText(link); flash(t.copied); };
-  const waShare = (s) => { const link = `${window.location.origin}/c/${s.id}`; const msg = isAr ? `تقييم تجربتك مع جدارة — يستغرق أقل من دقيقة:\n${link}` : `Rate your experience with Jadara — under a minute:\n${link}`; window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank"); };
+  const waShare = (s) => { const link = `${window.location.origin}/c/${s.id}`; const msg = isAr ? `تقييم تجربتك مع جداره — يستغرق أقل من دقيقة:\n${link}` : `Rate your experience with Jadara — under a minute:\n${link}`; window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank"); };
 
   const surveys = data?.surveys || [];
   const rcount = data?.responses_count || {};
@@ -212,7 +212,7 @@ function SurveyFormDialog({ open, onClose, survey, isAr, saving, onSave }) {
       let qs = []; try { qs = JSON.parse(survey.questions || "[]"); } catch {}
       setQuestions(qs.map(q => q.text || ""));
     } else {
-      setTitle(isAr ? "تقييم تجربتك مع جدارة" : "Your experience with Jadara");
+      setTitle(isAr ? "تقييم تجربتك مع جداره" : "Your experience with Jadara");
       setDescription(isAr ? "نسعى لتطوير خدمتنا لكم. استبيان قصير - أقل من دقيقة." : "Help us improve. A quick survey - under a minute.");
       setQuestions(isAr ? [...DEFAULT_Q_AR] : DEFAULT_Q_AR.map((q) => q));
     }

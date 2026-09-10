@@ -1,6 +1,6 @@
-// هوية المنشأة المُوفِّرة لمنصة جدارة — موحّدة عبر عرض السعر والعقد والفاتورة والختم.
+// هوية المنشأة المُوفِّرة لمنصة جداره — موحّدة عبر عرض السعر والعقد والفاتورة والختم.
 export const PROVIDER = {
-  shortName: "جدارة",
+  shortName: "جداره",
   brandLine: "لإدارة الموارد البشرية",
   institutionName: "شركة مدى الإنجاز الحديث",
   institutionNameEn: "Mada Al-Injaz Al-Hadith Company",

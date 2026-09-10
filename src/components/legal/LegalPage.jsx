@@ -4,7 +4,7 @@ import Logo from "@/components/Logo";
 import LanguageToggle from "@/components/LanguageToggle";
 import { ArrowLeft } from "lucide-react";
 
-// قالب موحّد لصفحات السياسات العامة (الخصوصية / الاسترداد) بهوية جدارة اللبنية/البنفسجية
+// قالب موحّد لصفحات السياسات العامة (الخصوصية / الاسترداد) بهوية جداره اللبنية/البنفسجية
 export default function LegalPage({ isAr, title, updated, intro, sections = [] }) {
   return (
     <div className="min-h-screen bg-[#F6F3FC] text-foreground" dir={isAr ? "rtl" : "ltr"}>

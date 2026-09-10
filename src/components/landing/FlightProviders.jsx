@@ -11,7 +11,7 @@ export default function FlightProviders({ isAr = true }) {
 
   const title = isAr ? "مزوّدو حجوزات الطيران" : "Flight Booking Providers";
   const sub = isAr
-    ? "منصة جدارة توفر لك أكبر أربعة من مزوّدي الطيران الموثوقين — ابحث داخل جدارة وتُحوَّل للمزوّد لإكمال الحجز والدفع"
+    ? "منصة جداره توفر لك أكبر أربعة من مزوّدي الطيران الموثوقين — ابحث داخل جداره وتُحوَّل للمزوّد لإكمال الحجز والدفع"
     : "Jadara brings you the four largest trusted flight providers — search inside Jadara, then redirect to the provider to complete booking and payment";
 
   return (

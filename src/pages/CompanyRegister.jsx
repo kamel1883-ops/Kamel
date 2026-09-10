@@ -30,7 +30,7 @@ export default function CompanyRegister() {
         errExists: "هذا البريد مسجّل مسبقاً — استخدم الدخول أو استعادة كلمة المرور.",
         creating: "جارٍ إنشاء الحساب...",
         create: "إنشاء الحساب",
-        note: "التسجيل متاح فقط للمنشآت التي قدّمت طلب تجربة أو لديها اشتراك سنوي مفعّل من جدارة لإدارة الموارد البشرية. يجب تطابق البريد والرقم الموحد المستخدم في طلبك.",
+        note: "التسجيل متاح فقط للمنشآت التي قدّمت طلب تجربة أو لديها اشتراك سنوي مفعّل من جداره لإدارة الموارد البشرية. يجب تطابق البريد والرقم الموحد المستخدم في طلبك.",
         otpTitle: "تأكيد بريدك الإلكتروني",
         otpSub: "أرسلنا رمزاً إلى",
         verifying: "جارٍ التحقق وتفعيل الحساب...",
@@ -41,7 +41,7 @@ export default function CompanyRegister() {
         resendOkDesc: "تحقق من بريدك الإلكتروني للرمز الجديد.",
         resendFail: "تعذّرت إعادة إرسال الرمز",
         otpFail: "رمز التحقق غير صحيح",
-        promoteErr: "تم إنشاء الحساب لكن تعذّرت تفعيل صلاحية الإدارة. تواصل مع دعم جدارة لإتمام التفعيل.",
+        promoteErr: "تم إنشاء الحساب لكن تعذّرت تفعيل صلاحية الإدارة. تواصل مع دعم جداره لإتمام التفعيل.",
         haveAccount: "لديك حساب بالفعل؟",
         signin: "تسجيل الدخول",
         back: "العودة للرئيسية",
@@ -148,7 +148,7 @@ export default function CompanyRegister() {
         const em = String(e?.message || e || "");
         if (/unified_taken/i.test(em)) {
           setError(isAr
-            ? "هذا الرقم الموحّد مسجّل مسبقاً لمنشأة أخرى على جدارة — لا يمكن لشركتين أن تتشاركا نفس الرقم الموحّد، ولم يُنشأ حساب جديد. إن كان حسابك موجوداً سابقاً فاستخدم استعادة كلمة المرور من بوابة الشركة. لأي مساعدة لتفعيل حسابك، تواصل مع الدعم الفني عبر واتساب +966 59 470 0782 أو البريد info@jadara-hr.com."
+            ? "هذا الرقم الموحّد مسجّل مسبقاً لمنشأة أخرى على جداره — لا يمكن لشركتين أن تتشاركا نفس الرقم الموحّد، ولم يُنشأ حساب جديد. إن كان حسابك موجوداً سابقاً فاستخدم استعادة كلمة المرور من بوابة الشركة. لأي مساعدة لتفعيل حسابك، تواصل مع الدعم الفني عبر واتساب +966 59 470 0782 أو البريد info@jadara-hr.com."
             : "This unified number is already registered to another organization on Jadara — two companies cannot share the same unified number, and no new account was created. If your account already exists, use password recovery in the company portal. For help activating your account, contact support via WhatsApp +966 59 470 0782 or email info@jadara-hr.com.");
         } else {
           setError(t.promoteErr);

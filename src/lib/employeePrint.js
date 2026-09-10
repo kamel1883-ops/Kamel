@@ -30,7 +30,7 @@ export async function printEmployeeList({ list, title, subtitle, isAr, org, kind
   const dateStr = genDateBoth(isAr);
 
   const orgData = org || (await fetchOrg());
-  const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جدارة — الموارد البشرية" : "Jadara HR");
+  const orgName = orgData && orgData.name ? orgData.name : (isAr ? "جداره — الموارد البشرية" : "Jadara HR");
   const brandHtml = brandHeaderHtml(orgData, isAr);
   const NA = "—";
 

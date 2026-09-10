@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 
 // مستند الوصف الوظيفي — يُستخدم للمشاهدة والطباعة PDF في ملف الموظف ونموذج الموظف
-// الترويسة: شعار المنشأة أعلى اليمين، وشعار جدارة أعلى اليسار.
+// الترويسة: شعار المنشأة أعلى اليمين، وشعار جداره أعلى اليسار.
 export default function JobDescriptionDoc({ employee, text, isAr = true }) {
   const body = text ?? employee?.job_description;
   const [org, setOrg] = useState(null);
@@ -54,7 +54,7 @@ export default function JobDescriptionDoc({ employee, text, isAr = true }) {
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg" style={{ background: "#0B2545", color: "#d4af37" }}>ج</div>
           <div>
-            <div className="font-bold text-sm">جدارة</div>
+            <div className="font-bold text-sm">جداره</div>
             <div className="text-[10px] text-slate-500">{isAr ? "منصة الموارد البشرية" : "HR Platform"}</div>
           </div>
         </div>

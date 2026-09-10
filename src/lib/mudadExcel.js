@@ -98,7 +98,7 @@ export async function downloadMudadExcel({ payrolls = [], employees = [], org = 
   const saudiEmpRate = Number(org?.gosi_saudi_employee_rate) || 9.75;
 
   const wb = new ExcelJS.Workbook();
-  wb.creator = "جدارة — Jadara HR";
+  wb.creator = "جداره — Jadara HR";
   wb.created = new Date();
 
   const ws = wb.addWorksheet("ملف مسير الرواتب", {

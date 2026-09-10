@@ -63,7 +63,7 @@ const featuresAr = [
   { icon: GraduationCap, title: "التدريب والتطوير", desc: "ضع خططاً تدريبية لموظف محدد أو لجهة/قسم كامل بمعايير موحّدة: حدّد مشاكل النقص لدى الموظف، الهدف بعد الخطة، آلية التنفيذ والتكلفة والتواريخ، مع صناديق شرح ووصف تفصيلية، وتتبّع حالة كل خطة حتى الاكتمال لرفع كفاءة الموارد البشرية وفق احتياج المنشأة." },
   { icon: Languages, title: "بوابة موظف متعددة اللغات", desc: "بوابة الموظف الذاتية تدعم 7 لغات: العربية، الإنجليزية، الهندية، البنغالية، النيبالية، الفلبينية (Tagalog)، والأردية (الباكستانية) — يستخدمها كل موظف بلغته الأم بضغطة زر. تُرفع الإجازات والسلف والانتدابات والتقييمات من الموظف نفسه، وتُحفظ مشتركة بينه وبين الإدارة، وتظهر للطرفين في أي لحظة مع كل التفاصيل والاعتمادات والوثائق." },
   { icon: Share2, title: "طلبات مشتركة وشفافة بين الموظف والإدارة", desc: "كل ما يرفعه الموظف (إجازات، سلف، رحلات عمل، مرفقات) يُحفظ في سجل موحّد مشترك بين الموظف والإدارة — يتابع الموظف حالته واعتماداته، وتطّلع الإدارة على أي لحظة، مع مستندات المخالصات وكشوف السلف والتصفية المتاحة في ملف الموظف فور اعتمادها وصرفها مالياً." },
-  { icon: Plane, title: "حجوزات الطيران", desc: "احجز رحلاتك داخل نظام جدارة نفسه — اختر الوجهة والتاريخ وعدد الركاب، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جدارة." },
+  { icon: Plane, title: "حجوزات الطيران", desc: "احجز رحلاتك داخل نظام جداره نفسه — اختر الوجهة والتاريخ وعدد الركاب، وبعد البحث عن الرحلة يُحوّلك النظام تلقائياً عبر الروابط العميقة (Deep Links) إلى منصة المسافر أو المطار أو Skyscanner أو Wingie لإكمال بيانات الجواز والدفع في صفحتها الآمنة. تكامل مع أربعة من أكبر مزوّدي الطيران دون مغادرة تجربة جداره." },
   { icon: Headphones, title: "منتج عربي ودعم فني مستمر", desc: "منصة عربية سعودية بتصميم فاخر وواجهة عربية أصيلة مصمّمة لسوق 2027، مع دعم فني عربي على مدار الساعة عبر واتساب والبريد الإلكتروني — فريقنا جاهز لمساعدتك في كل خطوة، من التفعيل حتى الترحيل والتدريب." },
 ];
 
@@ -153,7 +153,7 @@ export default function Landing() {
     badge: "منصة الموارد البشرية السعودية لعام 2027",
     titlePre: "نظام الموارد البشرية",
     titleHi: "الأحدث والأكثر تكاملاً",
-    heroDesc: "من «جدارة» — منصة سعودية واحدة متكاملة تجمع كل جوانب إدارة رأس المال البشري في مكان واحد: ملفات الموظفين ووثائقهم، الحضور والبصمة الذاتية من الجوال، الإجازات والسلف ورحلات العمل المرفوعة من الموظف والمشتركة مع الإدارة لحظياً، الرواتب وحماية الأجور، التأمينات الاجتماعية، نهاية الخدمة وفق نظام العمل، إدارة الأداء والتدريب والتطوير، التخطيط التعاقبي والقوى العاملة، التحليلات اللحظية، الأسطول والمركبات، التراخيص الحكومية، والإنذارات الذكية المرتبطة بنظام العمل — مع بوابة موظف ذاتية تدعم 7 لغات، ومسار موافقات متعدد المراحل، وتكاملات حكومية ذكية، وتصميم فخم، وحسابات دقيقة وفق الأنظمة السعودية.",
+    heroDesc: "من «جداره» — منصة سعودية واحدة متكاملة تجمع كل جوانب إدارة رأس المال البشري في مكان واحد: ملفات الموظفين ووثائقهم، الحضور والبصمة الذاتية من الجوال، الإجازات والسلف ورحلات العمل المرفوعة من الموظف والمشتركة مع الإدارة لحظياً، الرواتب وحماية الأجور، التأمينات الاجتماعية، نهاية الخدمة وفق نظام العمل، إدارة الأداء والتدريب والتطوير، التخطيط التعاقبي والقوى العاملة، التحليلات اللحظية، الأسطول والمركبات، التراخيص الحكومية، والإنذارات الذكية المرتبطة بنظام العمل — مع بوابة موظف ذاتية تدعم 7 لغات، ومسار موافقات متعدد المراحل، وتكاملات حكومية ذكية، وتصميم فخم، وحسابات دقيقة وفق الأنظمة السعودية.",
     cta1: "جرّب مجاناً لمدة شهر", cta2: "استكشف المميزات",
     stats: [{ n: "+50", l: "عميل تابع" }, { n: "+15,000", l: "موظف مُدار" }, { n: "99.9%", l: "استمرارية" }],
     portalTitle: "بوابة الموظف الذاتية",
@@ -172,10 +172,10 @@ export default function Landing() {
     licBadge: "مزايا إدارة التراخيص",
     licLi: ["إرفاق نسخة إلكترونية لكل ترخيص.", "تنبيهات استباقية قبل انتهاء الترخيص.", "تسجيل عقود الصيانة وتواريخها.", "تصنيف مخصّص لأي ترخيص حكومي إضافي."],
     integTag: "تكاملات ذكية", integTitle: "تكاملات تربط نظامك بالواقع",
-    aboutTag: "الرؤية خلف جدارة", aboutTitle: "عن المؤسس",
-    aboutChip: "مولد فكرة «جدارة» ومصمم منهجها",
+    aboutTag: "الرؤية خلف جداره", aboutTitle: "عن المؤسس",
+    aboutChip: "مولد فكرة «جداره» ومصمم منهجها",
     aboutRole: "مدير رأس المال البشري",
-    aboutText1: "يقف خلف «جدارة» قائد في إدارة رأس المال البشري جمع بين العمق الأكاديمي والخبرة التطبيقية في تصميم حلول رقمية ترفع كفاءة المنشآت وتلتزم بالأنظمة السعودية. حاصل على درجة ", aboutTextBold1: "الماجستير في إدارة الموارد البشرية", aboutTextUniv: " من ", aboutTextUnivBold: "جامعة بورتسموث — المملكة المتحدة", aboutTextGrade: " بتقدير ", aboutTextGradeBold: "جيد جداً",
+    aboutText1: "يقف خلف «جداره» قائد في إدارة رأس المال البشري جمع بين العمق الأكاديمي والخبرة التطبيقية في تصميم حلول رقمية ترفع كفاءة المنشآت وتلتزم بالأنظمة السعودية. حاصل على درجة ", aboutTextBold1: "الماجستير في إدارة الموارد البشرية", aboutTextUniv: " من ", aboutTextUnivBold: "جامعة بورتسموث — المملكة المتحدة", aboutTextGrade: " بتقدير ", aboutTextGradeBold: "جيد جداً",
     aboutText2: "، إضافةً إلى شهادة ", certs: ["MA — University of Portsmouth", "SHRM-SCP", "OTHM", "CMI"],
     certAr: ["ماجستير — جامعة بورتسموث", "SHRM-SCP", "OTHM", "CMI"],
     pricingTag: "ابدأ الآن", pricingTitle: "باقات بسيطة وشريفة",
@@ -195,7 +195,7 @@ export default function Landing() {
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
     wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية - الرياض - المركز المالي KAFD",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
-    footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2027 جدارة — جميع الحقوق محفوظة",
+    footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2027 جداره — جميع الحقوق محفوظة",
   } : {
     nav: { features: "Features", licenses: "Licenses", integrations: "Integrations", about: "Founder", pricing: "Pricing", contact: "Contact" },
     portal: "Employee Self‑Service Portal", ownerPortal: "Owner Portal", login: "Company Portal", start: "Get Started",
@@ -248,7 +248,7 @@ export default function Landing() {
   };
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  // هوية موسمية لكل الصفحة داخل نطاق الموسم، وتعود هوية جدارة الكحلية تلقائياً بعده
+  // هوية موسمية لكل الصفحة داخل نطاق الموسم، وتعود هوية جداره الكحلية تلقائياً بعده
   const seasonal = !!getActiveSeason();
 
   return (
@@ -323,7 +323,7 @@ export default function Landing() {
       <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-6 grid lg:grid-cols-12 gap-6 items-stretch">
         {/* صورة الفريق السعودي — نُزلت هنا من الـ Hero لتظهر بجوار المميزات */}
         <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-100 min-h-[440px]">
-          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5814cf438_generated_image.png" alt={isAr ? "شباب سعوديون واقفون في بيئة عمل احترافية مع شعار جدارة" : "Young Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
+          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5814cf438_generated_image.png" alt={isAr ? "شباب سعوديون واقفون في بيئة عمل احترافية مع شعار جداره" : "Young Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <div className="absolute bottom-6 right-6 left-6">
             <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs text-white/90 mb-3 backdrop-blur-md">
@@ -503,11 +503,11 @@ export default function Landing() {
       {/* الباقات */}
       <PricingColumns isAr={isAr} onStartTrial={() => gate(() => navigate("/quote"))} onBuyTier={(tier) => gate(() => navigate(`/quote?tier=${tier.id}`))} />
 
-      {/* شارك جدارة */}
+      {/* شارك جداره */}
       <section id="share" className="max-w-[1200px] mx-auto px-6 lg:px-14 py-12 text-center">
         <div className="inline-flex items-center gap-2 bg-violet-100 border border-violet-200 rounded-full px-3 py-1 text-sm text-violet-700 mb-4">{isAr ? "انشُرها على كل المنصات" : "Share on every platform"}</div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جدارة مع فريقك" : "Share Jadara with your team"}</h2>
-        <p className="text-muted-foreground text-base mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جدارة مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
+        <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 text-foreground" style={{ fontFamily: "var(--font-display)" }}>{isAr ? "شارك جداره مع فريقك" : "Share Jadara with your team"}</h2>
+        <p className="text-muted-foreground text-base mb-6 max-w-xl mx-auto">{isAr ? "اضغط أي منصة لمشاركة رابط جداره مباشرة لأي شخص يبحث عن نظام لإدارة الموارد البشرية." : "Click any platform to share Jadara's link with anyone looking for an HR management system."}</p>
         <ShareBar isAr={isAr} />
       </section>
 

@@ -5,7 +5,7 @@ import { Crown } from "lucide-react";
 import { fetchOrg, preloadLogo } from "@/lib/printBrand";
 
 // مستند البطاقة الوظيفية — يُستخدم للطباعة PDF لكل وظيفة (شاغرة / مغلقة / منتهية).
-// الترويسة: شعار المنشأة أعلى اليمين، وشعار جدارة أعلى اليسار.
+// الترويسة: شعار المنشأة أعلى اليمين، وشعار جداره أعلى اليسار.
 // المحتوى (المؤهلات / المهام / الوصف) يُعرض كـ Markdown مُنسّق بدلاً من نص خام.
 export default function JobCardDoc({ job, isAr = true, org: orgProp }) {
   const [orgState, setOrgState] = useState(orgProp || null);
@@ -27,7 +27,7 @@ export default function JobCardDoc({ job, isAr = true, org: orgProp }) {
     hired: "الموظف المعيّن", open: "شاغرة", closedB: "مغلقة",
     fullTime: "دوام كامل", partTime: "دوام جزئي", contract: "عقد", sar: "ريال",
     natAny: "الجميع", natSaudi: "سعودي", natResident: "مقيم", na: "—",
-    platform: "منصة الموارد البشرية", footer: "تم إنشاء هذه البطاقة عبر نظام جدارة للموارد البشرية",
+    platform: "منصة الموارد البشرية", footer: "تم إنشاء هذه البطاقة عبر نظام جداره للموارد البشرية",
   } : {
     card: "Job Card", status: "Status", prof: "Profession", type: "Type",
     grade: "Grade", salary: "Salary", vac: "Vacancies", dept: "Department",
@@ -88,7 +88,7 @@ export default function JobCardDoc({ job, isAr = true, org: orgProp }) {
 
   return (
     <div style={{ fontFamily: "'Tajawal','IBM Plex Sans Arabic',sans-serif", color: "#0f172a", maxWidth: 800, margin: "0 auto" }} dir={isAr ? "rtl" : "ltr"}>
-      {/* الترويسة: شعار المنشأة يميناً + شعار جدارة يساراً */}
+      {/* الترويسة: شعار المنشأة يميناً + شعار جداره يساراً */}
       <div className="jc-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", borderBottom: "2px solid #0b1120", paddingBottom: 12, marginBottom: 16, breakInside: "avoid", pageBreakInside: "avoid" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: isAr ? "flex-end" : "flex-start", maxWidth: 260 }}>
           {org?.logo_url
@@ -102,7 +102,7 @@ export default function JobCardDoc({ job, isAr = true, org: orgProp }) {
             <Crown size={22} strokeWidth={1.8} style={{ color: "#c5a059" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>جدارة</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>جداره</div>
             <div style={{ fontSize: 10, color: "#1a1a2e", marginTop: 1, opacity: 0.75 }}>{t.platform}</div>
           </div>
         </div>

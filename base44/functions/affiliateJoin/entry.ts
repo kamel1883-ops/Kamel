@@ -3,7 +3,7 @@ import { verifyTurnstile, createRateLimiter } from "../../shared/turnstile.ts";
 import { wrapEmailContent } from "../../shared/emailFooter.ts";
 import { escapeHtml } from "../../shared/escapeHtml.ts";
 
-// تسجيل شريك جديد في برنامج شركاء جدارة (عمولة 7% من أول اشتراك فقط).
+// تسجيل شريك جديد في برنامج شركاء جداره (عمولة 7% من أول اشتراك فقط).
 // يُولّد رمزاً مرجعياً فريداً للشريك، ويُنشئ سجلاً بحالة "pending" لاعتماد المالك من بوابته.
 const RL = createRateLimiter(10 * 60 * 1000, 5);
 
@@ -62,9 +62,9 @@ export default async function (req) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: "info@jadara-hr.com",
-        subject: "طلب انضمام جديد — برنامج شركاء جدارة",
+        subject: "طلب انضمام جديد — برنامج شركاء جداره",
         ...wrapEmailContent(
-          "طلب انضمام جديد لبرنامج شركاء جدارة (عمولة 7% من أول اشتراك فقط):\n\n" +
+          "طلب انضمام جديد لبرنامج شركاء جداره (عمولة 7% من أول اشتراك فقط):\n\n" +
           "الاسم: " + escapeHtml(full_name) + "\n" +
           "البريد: " + escapeHtml(email) + "\n" +
           "الجوال: " + escapeHtml(phone) + "\n" +

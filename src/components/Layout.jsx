@@ -161,7 +161,7 @@ export default function Layout() {
         </header>
 
         <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b bg-[#F8F6FC]/80 backdrop-blur sticky top-0 z-20">
-          <div className="text-sm font-medium text-[#6B5E8C]">{isAr ? "منصة جدارة — الموارد البشرية" : "Jadara HR Platform"}</div>
+          <div className="text-sm font-medium text-[#6B5E8C]">{isAr ? "منصة جداره — الموارد البشرية" : "Jadara HR Platform"}</div>
           <NotificationsBell tone="dark" />
         </div>
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Image } from "@/components/ui/image";
 import { getHeroVideo, getActiveSeason } from "@/lib/seasonalVideo";
 
-// خلفية الواجهة: صور الهوية الموسمية تتبدّل تلقائياً داخل الموسم، وفيديو جدارة الأساسي خارجه.
+// خلفية الواجهة: صور الهوية الموسمية تتبدّل تلقائياً داخل الموسم، وفيديو جداره الأساسي خارجه.
 export default function SeasonalHero({ isAr }) {
   const season = getActiveSeason();
   const images = season?.heroImages || [];

@@ -63,7 +63,7 @@ export default function ContractSample() {
 
       <div className="max-w-5xl mx-auto px-5 py-8">
         <div className="no-print mb-4 text-sm text-muted-foreground flex items-center gap-2">
-          <ArrowRight size={14} /> هذه عيّنة العقد الرسمي الموقّع والمختوم من «جدارة» — الخانات المخصّصة لتوقيع وختم العميل تُترك فارغة.
+          <ArrowRight size={14} /> هذه عيّنة العقد الرسمي الموقّع والمختوم من «جداره» — الخانات المخصّصة لتوقيع وختم العميل تُترك فارغة.
         </div>
         <div className="print-contract bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex justify-center">
           <SubscriptionContractDoc company={SAMPLE_COMPANY} owner={owner || undefined} quoteNo={quoteNo} date={date} tier={tier} quotedAmount={tier.yearly} />

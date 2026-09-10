@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Download } from "lucide-react";
 import BusinessCard from "@/components/ads/BusinessCard";
 
-// قسم الكروت الشخصية: وجه عربي ووجه إنجليزي بشعار جدارة وبيانات التواصل
+// قسم الكروت الشخصية: وجه عربي ووجه إنجليزي بشعار جداره وبيانات التواصل
 export default function BusinessCardSection({ isAr }) {
   const [data, setData] = useState({
     nameAr: "",
