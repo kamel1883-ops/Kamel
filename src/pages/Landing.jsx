@@ -165,7 +165,7 @@ export default function Landing() {
     approversCta: "دخول المعتمدين",
     featuresTag: "كل ما تحتاجه في مكان واحد", featuresTitle: "منصة واحدة، حلول متكاملة",
     vmvTag: "هويتنا", vmvTitle: "رؤيتنا، رسالتنا، وأهدافنا",
-    visionLabel: "رؤيتنا", visionText: "أن نكون المنصة السعودية الرائدة والمفضّلة لإدارة الموارد البشرية بحلول 2027، نمكّن المنشآت من تحويل مواردها البشرية إلى ميزة تنافسية حقيقية عبر تقنية سحابية ذكية وإمتثال تام للأنظمة.",
+    visionLabel: "رؤيتنا", visionText: "أن نكون المنصة السعودية الرائدة والمفضّلة لإدارة الموارد البشرية بحلول 2030، نمكّن المنشآت من تحويل مواردها البشرية إلى ميزة تنافسية حقيقية عبر تقنية سحابية ذكية وإمتثال تام للأنظمة.",
     missionLabel: "رسالتنا", missionText: "تبسيط إدارة الموارد البشرية للمنشآت السعودية بمختلف أحجامها عبر منصة واحدة متكاملة، تجمع الموظفين والحضور والرواتب والإجازات ونهاية الخدمة والتراخيص والتحليلات، وتوفّر تجربة فاخرة وآمنة ودقيقة بلا تعقيد.",
     goalsLabel: "أهدافنا", goalsText: "نمكّن عملاءنا من الكفاءة والإمتثال والنمو، ونختصر الوقت والجهد، ونعزز التوطين وقرارات الموارد البشرية بالبيانات، ونبني شراكة طويلة الأمد قائمة على الثقة والشفافية.",
     licensesTag: "إمتثال تام", licensesTitle: "تراخيص حكومية شاملة تحت سقف واحد",
@@ -195,7 +195,7 @@ export default function Landing() {
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
     wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية - الرياض - المركز المالي KAFD",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
-    footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2027 جداره — جميع الحقوق محفوظة",
+    footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2030 جداره — جميع الحقوق محفوظة",
   } : {
     nav: { features: "Features", licenses: "Licenses", integrations: "Integrations", about: "Founder", pricing: "Pricing", contact: "Contact" },
     portal: "Employee Self‑Service Portal", ownerPortal: "Owner Portal", login: "Company Portal", start: "Get Started",
@@ -214,7 +214,7 @@ export default function Landing() {
     approversCta: "Approvers sign in",
     featuresTag: "Everything in one place", featuresTitle: "One platform, integrated solutions",
     vmvTag: "Our Identity", vmvTitle: "Our Vision, Mission & Goals",
-    visionLabel: "Our Vision", visionText: "To be the leading and preferred Saudi platform for human resource management by 2027, empowering organizations to turn their human capital into a genuine competitive advantage through smart cloud technology and full regulatory compliance.",
+    visionLabel: "Our Vision", visionText: "To be the leading and preferred Saudi platform for human resource management by 2030, empowering organizations to turn their human capital into a genuine competitive advantage through smart cloud technology and full regulatory compliance.",
     missionLabel: "Our Mission", missionText: "Simplify HR management for Saudi organizations of all sizes through one integrated platform that brings together employees, attendance, payroll, leaves, end-of-service, licenses, and analytics — delivering a premium, secure, and accurate experience without complexity.",
     goalsLabel: "Our Goals", goalsText: "Empower our clients' efficiency, compliance, and growth; cut time and effort; strengthen Saudization and data-driven HR decisions; and build a long-term partnership grounded in trust and transparency.",
     licensesTag: "Full compliance", licensesTitle: "All government licenses under one roof",
@@ -244,7 +244,7 @@ export default function Landing() {
     contactTag: "We’re here to help", contactTitle: "Contact us",
     wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia — Riyadh — KAFD Financial Center",
     footerDesc: "The integrated Saudi HR platform — one place bringing together everything you need to manage human capital.",
-    footContact: "Contact us", footPlatform: "Platform", copy: "© 2027 Jadara — All rights reserved",
+    footContact: "Contact us", footPlatform: "Platform", copy: "© 2030 Jadara — All rights reserved",
   };
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });

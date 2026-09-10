@@ -22,7 +22,7 @@ export default function Contact() {
     sending: "جارٍ الإرسال…", sent: "تم إرسال رسالتك بنجاح، سنرد عليك قريباً.", failed: "تعذّر الإرسال، حاول مرة أخرى أو راسلنا مباشرة عبر واتساب.",
     name: "الاسم", namePh: "اسمك الكامل", emailL: "البريد الإلكتروني", msg: "رسالتك", msgPh: "كيف يمكننا مساعدتك؟", send: "إرسال الرسالة",
     note: "ستصل رسالتك مباشرةً إلى فريق جداره وسيتم الرد عليك عبر بريدك الإلكتروني.",
-    home: "العودة للرئيسية", copy: "© 2027 جداره — جميع الحقوق محفوظة",
+    home: "العودة للرئيسية", copy: "© 2030 جداره — جميع الحقوق محفوظة",
     subject: (n) => `رسالة من ${n || "زائر"} عبر موقع جداره`, body: (f) => `${f.message}\n\nالاسم: ${f.name}\nالبريد: ${f.email}`,
   } : {
     dir: "ltr", navAbout: "About", navLogin: "Sign in",
@@ -32,7 +32,7 @@ export default function Contact() {
     sending: "Sending…", sent: "Your message was sent successfully. We'll reply soon.", failed: "Could not send. Please try again or reach us via WhatsApp.",
     name: "Name", namePh: "Your full name", emailL: "Email", msg: "Your message", msgPh: "How can we help?", send: "Send message",
     note: "Your message will go directly to the Jadara team and we'll reply by email.",
-    home: "Back home", copy: "© 2027 Jadara — All rights reserved",
+    home: "Back home", copy: "© 2030 Jadara — All rights reserved",
     subject: (n) => `Message from ${n || "a visitor"} via Jadara site`, body: (f) => `${f.message}\n\nName: ${f.name}\nEmail: ${f.email}`,
   };
 

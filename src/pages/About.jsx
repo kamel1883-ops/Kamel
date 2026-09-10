@@ -49,7 +49,7 @@ export default function About() {
     founderB: "الماجستير في إدارة الموارد البشرية", from: " من ", univ: "جامعة بورتسموث — المملكة المتحدة", grade: " بتقدير ", gradeV: "جيد جداً", add: "، إضافةً إلى شهادة ",
     certs: [{ i: GraduationCap, t: "ماجستير — جامعة بورتسموث" }, { i: Award, t: "SHRM-SCP" }, { i: Award, t: "OTHM" }, { i: Award, t: "CMI" }],
     readyT: "جاهز لتجربة جداره؟", readySub: "ابدأ تجربتك المجانية لمدة 30 يوماً بدون بطاقة ائتمان.", ctaContact: "تواصل معنا", ctaStart: "ابدأ الآن",
-    home: "الرئيسية", copy: "© 2027 جداره — جميع الحقوق محفوظة",
+    home: "الرئيسية", copy: "© 2030 جداره — جميع الحقوق محفوظة",
   } : {
     dir: "ltr", navContact: "Contact", navLogin: "Sign in",
     badge: "The vision behind Jadara", h1: "About Jadara",
@@ -65,7 +65,7 @@ export default function About() {
     founderB: "Master’s in HR Management", from: " from ", univ: "University of Portsmouth — UK", grade: " with merit ", gradeV: "Very Good", add: ", in addition to the ",
     certs: [{ i: GraduationCap, t: "MA — University of Portsmouth" }, { i: Award, t: "SHRM-SCP" }, { i: Award, t: "OTHM" }, { i: Award, t: "CMI" }],
     readyT: "Ready to try Jadara?", readySub: "Start your 30‑day free trial — no credit card.", ctaContact: "Contact us", ctaStart: "Get started",
-    home: "Home", copy: "© 2027 Jadara — All rights reserved",
+    home: "Home", copy: "© 2030 Jadara — All rights reserved",
   };
 
   return (
