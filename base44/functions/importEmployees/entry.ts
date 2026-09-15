@@ -29,12 +29,8 @@ function boolSaudi(v) {
 const lower = (s) => String(s ?? '').trim().toLowerCase();
 const GENDER = { 'ذكر':'male','male':'male','m':'male','أنثى':'female','انثى':'female','female':'female','f':'female' };
 const CONTRACT = { 'دوام كامل':'full_time','full_time':'full_time','full':'full_time','كامل':'full_time','جزئي':'part_time','part_time':'part_time','part':'part_time','عقد':'contract','contract':'contract' };
-// طريقة صرف الراتب: مدد (حماية الأجور) أو كاش (صرف نقدي)
 const PAYMENT = { 'مدد':'mudad','mudad':'mudad','كاش':'cash','cash':'cash','نقدي':'cash' };
-// استحقاق التذكرة: سنوي / كل سنتين / لا ينطبق
-// استحقاق التذكرة: سنوي / كل سنتين / لا ينطبق
 const TICKET = { 'سنوي':'yearly','yearly':'yearly','كل سنتين':'biennial','biennial':'biennial','سنتين':'biennial','لا':'none','none':'none','لا ينطبق':'none' };
-// لا يُسمح بتعيين "owner" عبر الاستيراد — المالك ليس موظف ويُدار ببوابة مستقلة
 const ROLE = { 'executive':'executive','تنفيذي':'executive','manager':'manager','مدير':'manager','supervisor':'supervisor','مشرف':'supervisor','employee':'employee','موظف':'employee','worker':'worker','عامل':'worker' };
 
 function monthDiff(fromISO, toISO) {
@@ -101,6 +97,15 @@ function normalizeRecord(r) {
   };
 }
 
+// الحقول الإلزامية للتحقق — مطابقة لمتطلبات كيان Employee
+const REQUIRED = [
+  { key: 'employee_number', label: 'الرقم الوظيفي' },
+  { key: 'department', label: 'الإدارة / القسم' },
+  { key: 'position', label: 'المسمى الوظيفي' },
+  { key: 'hire_date', label: 'تاريخ المباشرة' },
+  { key: 'base_salary', label: 'الراتب الأساسي' },
+];
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -108,7 +113,7 @@ export default async function (req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
-    // اجلب الرقم الموحد للمنشأة الحالية (ربط دائم للموظفين بالعميل) — عبر بريد المستخدم
+    // الرقم الموحد للمنشأة الحالية — ربط دائم للموظفين بالعميل
     const meEmail = String(user.email || '').trim().toLowerCase();
     const myTenants = await base44.asServiceRole.entities.Tenant.filter({}, undefined, 100);
     const myTenant = (myTenants || []).find(
@@ -118,74 +123,13 @@ export default async function (req) {
     const myUnified = String(myTenant?.unified_number || '').trim();
 
     const body = await req.json().catch(() => ({}));
-    const fileUrl = String(body.file_url || '').trim();
-    if (!fileUrl) return Response.json({ error: 'ملف مطلوب' }, { status: 400 });
+    const records = Array.isArray(body.records) ? body.records : null;
+    const confirm = !!body.confirm;
+    if (!records || records.length === 0) {
+      return Response.json({ error: 'لا توجد بيانات للاستيراد' }, { status: 400 });
+    }
 
-    const schema = {
-      type: 'object',
-      properties: {
-        records: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              full_name: { type: 'string', title: 'الاسم الكامل' },
-              employee_number: { type: 'string', title: 'الرقم الوظيفي' },
-              national_id: { type: 'string', title: 'الهوية الوطنية / رقم الإقامة' },
-              email: { type: 'string', title: 'البريد الإلكتروني' },
-              is_saudi: { type: 'string', title: 'سعودي (نعم/لا)' },
-              gender: { type: 'string', title: 'الجنس (ذكر/أنثى)' },
-              birth_date: { type: 'string', title: 'تاريخ الميلاد' },
-              phone: { type: 'string', title: 'رقم الجوال' },
-              department: { type: 'string', title: 'الإدارة / القسم' },
-              branch_name: { type: 'string', title: 'الفرع' },
-              position: { type: 'string', title: 'المسمى الوظيفي' },
-              job_grade: { type: 'string', title: 'الدرجة الوظيفية' },
-              role_level: { type: 'string', title: 'المستوى الوظيفي' },
-              hire_date: { type: 'string', title: 'تاريخ المباشرة' },
-              contract_type: { type: 'string', title: 'نوع العقد' },
-              contract_start_date: { type: 'string', title: 'تاريخ بدء العقد' },
-              contract_end_date: { type: 'string', title: 'تاريخ نهاية العقد' },
-              base_salary: { type: 'number', title: 'الراتب الأساسي' },
-              housing_allowance: { type: 'number', title: 'بدل السكن' },
-              transport_allowance: { type: 'number', title: 'بدل المواصلات' },
-              other_allowances: { type: 'number', title: 'بدلات أخرى' },
-              iqama_expiry: { type: 'string', title: 'تاريخ انتهاء الإقامة' },
-              passport_number: { type: 'string', title: 'رقم الجواز' },
-              passport_expiry: { type: 'string', title: 'تاريخ انتهاء الجواز' },
-              health_insurance_number: { type: 'string', title: 'رقم التأمين الطبي' },
-              health_insurance_expiry: { type: 'string', title: 'تاريخ انتهاء التأمين الطبي' },
-              bank_account: { type: 'string', title: 'الحساب البنكي' },
-              salary_payment_method: { type: 'string', title: 'طريقة صرف الراتب (مدد/كاش)' },
-              nationality: { type: 'string', title: 'الجنسية' },
-              address: { type: 'string', title: 'العنوان' },
-              emergency_contact: { type: 'string', title: 'جهة الاتصال الطارئ' },
-              annual_leave_entitlement: { type: 'number', title: 'الرصيد السنوي للإجازات (21/30)' },
-              ticket_entitlement: { type: 'string', title: 'استحقاق التذكرة (سنوي/كل سنتين/لا)' },
-              ticket_value: { type: 'number', title: 'قيمة التذكرة (ريال)' },
-              prior_used_leave: { type: 'number', title: 'أيام الإجازات المستخدمة سابقاً' },
-              leave_total_entitled: { type: 'number', title: 'إجمالي رصيد الإجازات المستحق' },
-              leave_used: { type: 'number', title: 'رصيد الإجازات المستخدم' },
-              leave_remaining: { type: 'number', title: 'رصيد الإجازات المتبقي (تلقائي)' },
-              manager_employee_number: { type: 'string', title: 'الرقم الوظيفي للمدير المباشر' },
-            },
-          },
-        },
-      },
-    };
-
-    const result = await base44.asServiceRole.integrations.Core.ExtractDataFromUploadedFile({
-      file_url: fileUrl,
-      json_schema: schema,
-    });
-
-    let raw = [];
-    if (Array.isArray(result)) raw = result;
-    else if (Array.isArray(result?.output)) raw = result.output;
-    else if (result?.output?.records) raw = result.output.records;
-    else if (result?.records) raw = result.records;
-
-    // === تجهيز الفروع: الفرع الرئيسي افتراضياً، وإنشاء أي فرع جديد مذكور ===
+    // تجهيز الفروع: الفرع الرئيسي افتراضياً، وإنشاء أي فرع جديد مذكور
     const branches = await base44.asServiceRole.entities.Branch.list('-created_date', 500);
     let mainBranch = branches.find((b) => b.is_main) || branches[0];
     if (!mainBranch) {
@@ -213,23 +157,26 @@ export default async function (req) {
     for (const e of existing) if (e.employee_number) byNumber.add(String(e.employee_number).trim());
 
     const toCreate = [];
-    let duplicate = 0, failed = 0;
-    const errors = [];
-    for (const rawRow of raw) {
+    const incomplete = [];
+    let duplicate = 0;
+    let detected = 0;
+    const validPreview = [];
+    const localSeen = new Set();
+
+    for (const rawRow of records) {
       const r = normalizeRecord(rawRow);
-      // تخطٍّ صامت للصفوف الفارغة (صفوف الصيغة الجاهزة في القالب بلا بيانات تعريفية)
+      // تخطٍّ الصفوف الفارغة (صفوف الصيغة الجاهزة بلا بيانات تعريفية)
       if (!r.employee_number && !r.full_name && !r.national_id) continue;
-      if (!r.employee_number || !r.department || !r.position || !r.hire_date || !r.base_salary) {
-        failed++;
-        errors.push(`صف ناقص حقول إلزامية: ${r.employee_number || r.full_name || '—'}`);
+      detected++;
+      const missing = REQUIRED.filter((f) => !r[f.key]);
+      if (missing.length) {
+        incomplete.push({ ref: r.employee_number || r.full_name || r.national_id || '—', missing: missing.map((m) => m.label) });
         continue;
       }
       const key = String(r.employee_number).trim();
-      if (byNumber.has(key)) { duplicate++; continue; }
-      byNumber.add(key);
-      // إن لم يُحدد تاريخ بداية العقد، نأخذه من تاريخ المباشرة
+      if (byNumber.has(key) || localSeen.has(key)) { duplicate++; continue; }
+      localSeen.add(key);
       if (!r.contract_start_date) r.contract_start_date = r.hire_date;
-      // إن لم يُحدد تاريخ نهاية العقد، نُحدد سنة واحدة من بدايته
       if (!r.contract_end_date && r.contract_start_date) {
         const d = new Date(r.contract_start_date);
         d.setFullYear(d.getFullYear() + 1);
@@ -238,50 +185,63 @@ export default async function (req) {
       const br = await resolveBranch(r.branch_name);
       r.branch_id = br.id;
       r.branch_name = br.name;
-      // رصيد الإجازات: إن قدّم العميل «إجمالي الرصيد المستحق» نعتمده، وإلا نحسبه من تاريخ المباشرة
       r.prior_used_leave = r.leave_used || r.prior_used_leave || 0;
       const ent = (r.leave_total_entitled && r.leave_total_entitled > 0)
         ? r.leave_total_entitled
         : computeEntitlement(r.hire_date, annualDays);
       r.leave_balance = Math.max(0, Math.round((ent - r.prior_used_leave) * 10) / 10);
-      // ربط دائم بالرقم الموحد للمنشأة — يبقى الموظفون وطلباتهم مربوطين بالعميل حتى لو حُذف الحساب
       r.unified_number = myUnified;
       toCreate.push(r);
+      validPreview.push({
+        full_name: r.full_name,
+        employee_number: r.employee_number,
+        department: r.department,
+        position: r.position,
+        branch_name: r.branch_name,
+      });
     }
 
-    if (toCreate.length) {
+    let saved = 0, managersLinked = 0, managersUnresolved = 0;
+    const errors = [];
+
+    // مرحلة التأكيد فقط: نُنشئ الموظفين فعلياً ونربط المديرين المباشرين
+    if (confirm && toCreate.length) {
       await base44.asServiceRole.entities.Employee.bulkCreate(toCreate);
-    }
+      saved = toCreate.length;
 
-    // === ربط المدير المباشر: نُنشئ الكل أولاً ثم نربط كل موظف بمديره عبر الرقم الوظيفي ===
-    let managersLinked = 0, managersUnresolved = 0;
-    const needLink = toCreate.filter((r) => r.manager_employee_number);
-    if (needLink.length) {
-      const allEmps = await base44.asServiceRole.entities.Employee.list('-created_date', 5000);
-      const numToId = new Map();
-      for (const e of allEmps) if (e.employee_number) numToId.set(String(e.employee_number).trim(), e.id);
-      const updates = [];
-      for (const r of needLink) {
-        const mid = numToId.get(String(r.manager_employee_number).trim());
-        const myId = numToId.get(String(r.employee_number).trim());
-        if (!mid) { managersUnresolved++; errors.push(`مدير مباشر غير معروف: ${r.manager_employee_number} (للموظف ${r.employee_number})`); continue; }
-        if (mid === myId) continue;
-        updates.push({ id: myId, manager_id: mid });
-      }
-      if (updates.length) {
-        await base44.asServiceRole.entities.Employee.bulkUpdate(updates);
-        managersLinked = updates.length;
+      const needLink = toCreate.filter((r) => r.manager_employee_number);
+      if (needLink.length) {
+        const allEmps = await base44.asServiceRole.entities.Employee.list('-created_date', 5000);
+        const numToId = new Map();
+        for (const e of allEmps) if (e.employee_number) numToId.set(String(e.employee_number).trim(), e.id);
+        const updates = [];
+        for (const r of needLink) {
+          const mid = numToId.get(String(r.manager_employee_number).trim());
+          const myId = numToId.get(String(r.employee_number).trim());
+          if (!mid) { managersUnresolved++; errors.push(`مدير مباشر غير معروف: ${r.manager_employee_number} (للموظف ${r.employee_number})`); continue; }
+          if (mid === myId) continue;
+          updates.push({ id: myId, manager_id: mid });
+        }
+        if (updates.length) {
+          await base44.asServiceRole.entities.Employee.bulkUpdate(updates);
+          managersLinked = updates.length;
+        }
       }
     }
 
     return Response.json({
-      total: raw.length,
-      created: toCreate.length,
+      total: records.length,
+      detected,
+      valid: toCreate.length,
       duplicate,
-      failed,
+      incomplete_count: incomplete.length,
+      incomplete: incomplete.slice(0, 50),
+      preview: confirm ? [] : validPreview.slice(0, 200),
+      confirm,
+      saved,
       managers_linked: managersLinked,
       managers_unresolved: managersUnresolved,
-      errors: errors.slice(0, 50),
+      errors,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
