@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
+import { PROVIDER } from "@/lib/providerIdentity";
 import LanguageToggle from "@/components/LanguageToggle";
 import ShareBar from "@/components/ShareBar";
 import { Image } from "@/components/ui/image";
@@ -542,6 +543,7 @@ export default function Landing() {
           <div>
             <div className="mb-2"><Logo tone="dark" size={48} /></div>
             <p>{t.footerDesc}</p>
+            <p className="mt-2 text-sm font-semibold text-foreground/80">{isAr ? `تطوير وتشغيل: ${PROVIDER.institutionName}` : `Developed & operated by: ${PROVIDER.institutionNameEn}`}</p>
             <div className="flex items-center gap-2 mt-4">
               <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"
                 className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center hover:bg-violet-100 transition-colors">

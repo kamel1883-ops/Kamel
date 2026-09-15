@@ -1139,6 +1139,12 @@ function Closing() {
           <Social icon={SnapchatIcon} label="سناب شات" href="https://snapchat.com/t/9UWDJAhl" />
           <Social icon={Globe} label="الموقع الإلكتروني" href="https://jadara-hr.com" />
         </div>
+        <div className="flex flex-col items-center gap-3 mt-8">
+          <div className="bg-white rounded-2xl px-5 py-3 flex items-center justify-center">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Saudi_Vision_2030_logo.svg/640px-Saudi_Vision_2030_logo.svg.png" alt="رؤية المملكة 2030" style={{ height: 46, width: "auto", objectFit: "contain" }} />
+          </div>
+          <div style={{ color: "#a9bcd0", fontSize: 13 }}>نتوافق مع رؤية المملكة العربية السعودية 2030</div>
+        </div>
       </div>
       <div className="mt-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-white/50 text-xs">
         <div>© {new Date().getFullYear()} {PROVIDER.institutionName} — جميع الحقوق محفوظة</div>

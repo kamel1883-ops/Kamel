@@ -1341,6 +1341,12 @@ function Closing() {
           <Social icon={SnapchatIcon} label="Snapchat" href="https://snapchat.com/t/9UWDJAhl" />
           <Social icon={Globe} label="Website" href="https://jadara-hr.com" />
         </div>
+        <div className="flex flex-col items-center gap-3 mt-8">
+          <div className="bg-white rounded-2xl px-5 py-3 flex items-center justify-center">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Saudi_Vision_2030_logo.svg/640px-Saudi_Vision_2030_logo.svg.png" alt="Saudi Vision 2030" style={{ height: 46, width: "auto", objectFit: "contain" }} />
+          </div>
+          <div style={{ color: "#a9bcd0", fontSize: 13 }}>In alignment with Saudi Vision 2030</div>
+        </div>
       </div>
       <div className="mt-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-white/50 text-xs">
         <div>© {new Date().getFullYear()} {PROVIDER.institutionNameEn} — All rights reserved</div>
