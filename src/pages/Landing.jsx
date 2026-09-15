@@ -324,16 +324,8 @@ export default function Landing() {
       <section className="max-w-[1600px] mx-auto px-6 lg:px-14 pt-10 pb-6 grid lg:grid-cols-12 gap-6 items-stretch">
         {/* صورة الفريق السعودي — نُزلت هنا من الـ Hero لتظهر بجوار المميزات */}
         <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-100 min-h-[440px]">
-          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/32e32ea4e_generated_image.png" alt={isAr ? "شباب سعوديون واقفون في بيئة عمل احترافية مع شعار جداره" : "Young Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
+          <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/b138a203c_IMG_0419.png" alt={isAr ? "شباب سعوديون واقفون في بيئة عمل احترافية مع شعار جداره" : "Young Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-          {/* شعار جداره لإدارة الموارد البشرية — منحوت على الجدار خلف الفريق */}
-          <div className="absolute top-7 inset-x-0 z-10 flex flex-col items-center pointer-events-none select-none text-center px-4" dir={isAr ? "rtl" : "ltr"} aria-label={isAr ? "جداره لإدارة الموارد البشرية" : "Jadara - Human Resources Management"}>
-            <div className="flex items-center gap-2.5">
-              <Crown size={28} strokeWidth={1.6} style={{ color: "#C5A059", filter: "drop-shadow(1px 2px 1px rgba(0,0,0,.45))" }} />
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(28px, 7.5vw, 46px)", color: "#0A1629", letterSpacing: "-0.02em", textShadow: "1px 1px 0 #1b2542, 2px 2px 0 #1b2542, 3px 3px 0 #1b2542, 4px 4px 0 #1b2542, 5px 5px 0 #1b2542, 6px 6px 10px rgba(0,0,0,.5)" }}>{isAr ? "جداره" : "Jadara"}</span>
-            </div>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "clamp(11px, 3.2vw, 17px)", color: "#1b2542", marginTop: 6, letterSpacing: "0.02em", textShadow: "0 -1px 0 rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.9), 1px 1px 2px rgba(0,0,0,.35)" }}>{isAr ? "لإدارة الموارد البشرية" : "Human Resources Management"}</span>
-          </div>
           <div className="absolute bottom-6 right-6 left-6">
             <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs text-white/90 mb-3 backdrop-blur-md">
               <Sparkles size={12} className="text-violet-200" /> {isAr ? "كل ما تحتاجه في مكان واحد" : "Everything in one place"}
