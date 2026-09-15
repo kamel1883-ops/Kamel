@@ -294,15 +294,19 @@ export default function ClientsManager({ session }) {
                             <div className="min-w-0 leading-tight">
                               <div className="font-medium truncate">{x.name}</div>
                               <div className="text-xs text-muted-foreground truncate">{x.industry || x.city || "—"}</div>
-                              {(x.employee_count > 0 || x.pricing_tier) && (
-                                <div className="text-[11px] text-violet-600 mt-0.5 flex items-center gap-1">
-                                  <Users size={11} /> {x.employee_count || 0} · {x.pricing_tier || "—"}
+                              {!owner && (
+                                <div className="text-[11px] text-violet-600 mt-0.5 flex items-center gap-1 flex-wrap">
+                                  <Users size={11} /> {isAr ? "عدد الموظفين" : "Employees"}: <b>{x.employees_active_count ?? 0}</b>
+                                  {x.employees_total_count > (x.employees_active_count ?? 0) && (
+                                    <span className="text-muted-foreground">({isAr ? "شامل المغادرين" : "incl. exited"}: {x.employees_total_count})</span>
+                                  )}
+                                  {x.pricing_tier && <span>· {x.pricing_tier}</span>}
                                   {x.quoted_amount > 0 && <span className="font-semibold">· {Number(x.quoted_amount).toLocaleString()} {isAr ? "ر.س" : "SAR"}</span>}
                                 </div>
                               )}
-                              {!owner && (
-                                <div className="text-[11px] text-emerald-600 mt-0.5 flex items-center gap-1">
-                                  <Users size={11} /> {t.lblActualActive}: {x.employees_active_count ?? 0}
+                              {owner && (x.employee_count > 0 || x.pricing_tier) && (
+                                <div className="text-[11px] text-violet-600 mt-0.5 flex items-center gap-1">
+                                  <Users size={11} /> {x.employee_count || 0} · {x.pricing_tier || "—"}
                                 </div>
                               )}
                               {!owner && (x.referral_affiliate_name || x.referral_code) && (

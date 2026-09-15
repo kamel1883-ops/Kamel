@@ -196,7 +196,7 @@ export default function Landing() {
     contactTag: "نحن هنا لمساعدتك", contactTitle: "تواصل معنا",
     wa: "واتساب مباشر", emailCard: "البريد الإلكتروني", loc: "الموقع", locVal: "المملكة العربية السعودية - الرياض - المركز المالي KAFD",
     footerDesc: "منصة الموارد البشرية السعودية المتكاملة — منصة واحدة تجمع كل ما تحتاجه لإدارة رأس المال البشري.",
-    footContact: "تواصل معنا", footPlatform: "المنصة", copy: "© 2030 جداره — جميع الحقوق محفوظة",
+    footContact: "تواصل معنا", footPlatform: "المنصة", copy: `© ${new Date().getFullYear()} جداره — جميع الحقوق محفوظة`,
   } : {
     nav: { features: "Features", licenses: "Licenses", integrations: "Integrations", about: "Founder", pricing: "Pricing", contact: "Contact" },
     portal: "Employee Self‑Service Portal", ownerPortal: "Owner Portal", login: "Company Portal", start: "Get Started",
@@ -245,7 +245,7 @@ export default function Landing() {
     contactTag: "We’re here to help", contactTitle: "Contact us",
     wa: "WhatsApp directly", emailCard: "Email", loc: "Location", locVal: "Saudi Arabia — Riyadh — KAFD Financial Center",
     footerDesc: "The integrated Saudi HR platform — one place bringing together everything you need to manage human capital.",
-    footContact: "Contact us", footPlatform: "Platform", copy: "© 2030 Jadara — All rights reserved",
+    footContact: "Contact us", footPlatform: "Platform", copy: `© ${new Date().getFullYear()} Jadara — All rights reserved`,
   };
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
