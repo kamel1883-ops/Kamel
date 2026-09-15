@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2, Loader2, Check, Upload, Send, Wallet, X, Scale, ExternalLink } from "lucide-react";
 import { computeSettlement, reasonMeta, terminationReasons, todayISO, isSaudiNationalId } from "@/lib/eos";
-import { getEmployeeAnnualDays, computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import { formatCurrency } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -27,7 +27,7 @@ export default function EndOfService() {
     chooseEmp: "اختر الموظف", choosePh: "— اختر موظفاً من القائمة —", reason: "سبب الإنهاء", lwd: "تاريخ آخر يوم عمل",
     ticketAmt: "قيمة التذكرة (ريال — اختيارية)", ticketHint: "اتركها فارغة: المخالصة = مكافأة نهاية الخدمة + تصفية الإجازات فقط. أدخل مبلغاً فقط إن رغبت الشركة بإضافة تعويض تذكرة.",
     calc: "احسب المخالصة",
-    empInfo: (e) => `الراتب الأساسي: ${formatCurrency(e.base_salary)} • بدل السكن: ${formatCurrency(e.housing_allowance)} • رصيد الإجازات: محسوب تلقائياً (${getEmployeeAnnualDays(e, org)} يوم/سنة) • استحقاق التذكرة: ${e.ticket_entitlement === "yearly" ? "سنوي" : e.ticket_entitlement === "biennial" ? "كل سنتين" : "لا يستحق"}`,
+    empInfo: (e) => `الراتب الأساسي: ${formatCurrency(e.base_salary)} • بدل السكن: ${formatCurrency(e.housing_allowance)} • رصيد الإجازات: محسوب تلقائياً (21 يوماً لأول 5 سنوات + 30 يوماً بعدها) • استحقاق التذكرة: ${e.ticket_entitlement === "yearly" ? "سنوي" : e.ticket_entitlement === "biennial" ? "كل سنتين" : "لا يستحق"}`,
     loading: "جارٍ التحميل...", preview: "معاينة المخالصة", savePrint: "حفظ وطباعة", saving: "جارٍ الحفظ...", printOnly: "طباعة فقط",
     savedH: "المخالصات المحفوظة", print: "طباعة",
     note: "نصف شهر عن كل سنة من أول 5 سنوات ثم شهر كامل عن كل سنة بعدها. الاستقالة تُخفض المكافأة حسب المدة (مادة 85). الفصل لأسباب مشروعة (مادة 80) لا يستحق مكافأة. المخالصة تحسب مكافأة نهاية الخدمة + تصفية رصيد الإجازات المتبقي، وقيمة التذكرة مفتوحة (اختيارية) يضيفها المسؤول يدوياً إن رغبت الشركة. تُطبع المخالصة بشعار المنشأة المُعرّف في الإعدادات.",
@@ -51,7 +51,7 @@ export default function EndOfService() {
     chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date",
     ticketAmt: "Ticket value (SAR — optional)", ticketHint: "Leave empty: settlement = EOS + leave balance only. Enter an amount only if the company wishes to add ticket compensation.",
     calc: "Calculate settlement",
-    empInfo: (e) => `Base: ${formatCurrency(e.base_salary)} • Housing: ${formatCurrency(e.housing_allowance)} • Leave balance: auto-calculated (${getEmployeeAnnualDays(e, org)} days/yr) • Ticket: ${e.ticket_entitlement === "yearly" ? "Yearly" : e.ticket_entitlement === "biennial" ? "Biennial" : "None"}`,
+    empInfo: (e) => `Base: ${formatCurrency(e.base_salary)} • Housing: ${formatCurrency(e.housing_allowance)} • Leave balance: auto-calculated (21 days first 5 years + 30 days after) • Ticket: ${e.ticket_entitlement === "yearly" ? "Yearly" : e.ticket_entitlement === "biennial" ? "Biennial" : "None"}`,
     loading: "Loading...", preview: "Settlement preview", savePrint: "Save & print", saving: "Saving...", printOnly: "Print only",
     savedH: "Saved settlements", print: "Print",
     note: "Half a month per year for the first 5 years, then a full month per year. Resignation reduces the award by tenure (Art. 85). Dismissal for cause (Art. 80) is not entitled. The settlement computes EOS + remaining leave balance; ticket value is open (optional) and added manually by the admin if the company wishes. Printed with the organization logo set in settings.",
@@ -131,9 +131,8 @@ export default function EndOfService() {
   );
 
   const liveBalance = emp ? (() => {
-    const annualDays = getEmployeeAnnualDays(emp, org);
     const asOf = lwd ? new Date(lwd) : new Date();
-    const ent = computeEntitlement(emp.hire_date, annualDays, asOf);
+    const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
     const used = Math.round((sumUsedDays(empLeaves) + (Number(emp.prior_used_leave) || 0)) * 10) / 10;
     return { ent, used, remaining: Math.max(0, Math.round((ent - used) * 10) / 10) };
   })() : null;
@@ -141,9 +140,8 @@ export default function EndOfService() {
   const compute = () => {
     if (!emp) return;
     // رصيد الإجازات المتبقي = المستحق (تناسبي حسب نظام الموظف 21/30) − الأيام المستخدمة
-    const annualDays = getEmployeeAnnualDays(emp, org);
     const asOf = lwd ? new Date(lwd) : new Date();
-    const ent = computeEntitlement(emp.hire_date, annualDays, asOf);
+    const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
     // رصيد الإجازات المتبقي من ملف الموظف: المستحق − المستخدم فعلياً (طلبات الإجازة) − المستخدم سابقاً
     const used = Math.round((sumUsedDays(empLeaves) + (Number(emp.prior_used_leave) || 0)) * 10) / 10;
     const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);

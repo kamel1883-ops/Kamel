@@ -21,6 +21,23 @@ export function computeEntitlement(hireDate, annualDays, asOf = new Date()) {
   return Math.round((months / 12) * days * 10) / 10;
 }
 
+// الرصيد المستحق (التراكمي) وفق نظام العمل السعودي: 21 يوماً عن كل سنة من أول
+// 5 سنوات، و30 يوماً عن كل سنة بعدها — تناسبياً شهرياً من تاريخ المباشرة.
+// استثناء: إذا منحت المنشأة 30 يوماً من أول سنة (annual_leave_days=30) تُطبّق 30 عن كامل المدة.
+// مثال: 6 سنوات خدمة = (5 × 21) + (1 × 30) = 135 يوماً (وليس 30 × 6 = 180).
+export function computeLeaveEntitlement(hireDate, org, asOf = new Date()) {
+  if (!hireDate) return 0;
+  const months = monthDiff(hireDate, asOf instanceof Date ? asOf.toISOString() : asOf);
+  if (months <= 0) return 0;
+  if (Number(org?.annual_leave_days) === 30) {
+    return Math.round((months / 12) * 30 * 10) / 10;
+  }
+  const first60 = Math.min(months, 60);
+  const beyond = Math.max(0, months - 60);
+  const val = (first60 / 12) * 21 + (beyond / 12) * 30;
+  return Math.round(val * 10) / 10;
+}
+
 export async function getOrgOnce() {
   try {
     const orgs = await base44.entities.Organization.list("-created_date", 1);

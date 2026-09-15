@@ -30,7 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
-import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import { computeSettlement } from "@/lib/eos";
 import { parsePermissions } from "@/lib/employeePermissions";
 import { portalSession } from "@/lib/portalSession";
@@ -270,8 +270,7 @@ export default function MyRequests() {
     const gross =
       (employee.base_salary || 0) + (employee.housing_allowance || 0) +
       (employee.transport_allowance || 0) + (employee.other_allowances || 0);
-    const annualDays = getEmployeeAnnualDays(employee, org);
-    const entitled = computeEntitlement(employee.hire_date, annualDays);
+    const entitled = computeLeaveEntitlement(employee.hire_date, org);
     const used = sumUsedDays(leaves);
     const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
     const ticketLabel = employee.ticket_entitlement === "yearly" ? t.ticketYearly : employee.ticket_entitlement === "biennial" ? t.ticketBiennial : t.ticketNone;

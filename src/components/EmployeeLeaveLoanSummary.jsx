@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { computeEntitlement, sumUsedDays, getOrgOnce, getEmployeeAnnualDays } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, sumUsedDays, getOrgOnce } from "@/lib/leaveBalance";
 import { generateLeaveSettlement, generateLoanStatement } from "@/lib/docGenerators";
 import { formatCurrency, leaveTypeLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
@@ -14,7 +14,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
   const t = isAr ? {
     leaveTitle: "رصيد الإجازات (محسوب تلقائياً من تاريخ المباشرة)",
     entitled: "المستحق", used: "المستخدم", remaining: "المتبقي", day: "يوم",
-    systemNote: (n) => `نظام الموظف: ${n} يوماً/سنة · تناسبي شهرياً من تاريخ المباشرة`,
+    systemNote: (g) => g ? "30 يوماً/سنة عن كامل المدة (سياسة المنشأة) · تناسبي شهرياً من تاريخ المباشرة" : "21 يوماً/سنة لأول 5 سنوات + 30 يوماً/سنة بعدها · تناسبي شهرياً من تاريخ المباشرة",
     settlementsTitle: "سجل التصفيات", noSettlements: "لا توجد تصفيات بعد",
     days: (n) => `${n} يوم`, settlement: "المخالصة", generate: "توليد",
     loansTitle: "السلف", noLoans: "لا توجد سلف",
@@ -22,7 +22,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
   } : {
     leaveTitle: "Leave balance (auto-calculated from hire date)",
     entitled: "Accrued", used: "Used", remaining: "Remaining", day: "days",
-    systemNote: (n) => `Employee scheme: ${n} days/yr · prorated monthly from hire date`,
+    systemNote: (g) => g ? "30 days/yr for full tenure (org policy) · prorated monthly from hire date" : "21 days/yr first 5 years + 30 days/yr after · prorated monthly from hire date",
     settlementsTitle: "Settlements log", noSettlements: "No settlements yet",
     days: (n) => `${n} d`, settlement: "Settlement", generate: "Generate",
     loansTitle: "Loans", noLoans: "No loans",
@@ -48,9 +48,8 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
 
   useEffect(() => { load(); }, [employee?.id]);
 
-  const annualDays = getEmployeeAnnualDays(employee, org);
-  const entitlement = computeEntitlement(employee?.hire_date, annualDays);
-  const empSystem = Number(employee?.annual_leave_entitlement) === 30 ? 30 : 21;
+  const generous30 = Number(org?.annual_leave_days) === 30;
+  const entitlement = computeLeaveEntitlement(employee?.hire_date, org);
   const prior = Number(employee?.prior_used_leave) || 0;
   const used = Math.round((sumUsedDays(leaves) + prior) * 10) / 10;
   const remaining = Math.round((entitlement - used) * 10) / 10;
@@ -81,7 +80,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
           <Stat label={t.remaining} value={`${remaining} ${t.day}`} tone={remaining < 0 ? "rose" : "emerald"} />
         </div>
         <div className="text-[11px] text-muted-foreground mt-1">
-          {t.systemNote(empSystem)}
+          {t.systemNote(generous30)}
         </div>
       </div>
 

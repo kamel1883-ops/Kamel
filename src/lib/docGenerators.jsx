@@ -1,17 +1,19 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
-import { computeEntitlement, sumUsedDays, getEmployeeAnnualDays } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import LeaveClearanceDoc from "@/components/docs/LeaveClearanceDoc";
 import LoanStatementDoc from "@/components/docs/LoanStatementDoc";
 import BusinessTripApprovalDoc from "@/components/docs/BusinessTripApprovalDoc";
 
 // مخالصة تصفية إجازة — تُولّد PDF، تُرفع، وتُخزّن على الطلب + تُرجع الرابط
 export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) {
-  const annualDays = getEmployeeAnnualDays(emp, org);
-  const usedBefore = Number(emp?.prior_used_leave) || 0;
-  const bBefore = Math.max(0, Math.round((annualDays - usedBefore) * 10) / 10);
+  const asOf = leave?.start_date ? new Date(leave.start_date) : new Date();
+  const entitled = computeLeaveEntitlement(emp?.hire_date, org, asOf);
   const granted = Number(leave?.balance_deducted) || 0;
+  const otherUsed = sumUsedDays((allLeavesForEmp || []).filter((l) => l.id !== leave?.id));
+  const usedBefore = otherUsed + (Number(emp?.prior_used_leave) || 0);
+  const bBefore = Math.max(0, Math.round((entitled - usedBefore) * 10) / 10);
   const bAfter = Math.max(0, Math.round((bBefore - granted) * 10) / 10);
   const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
   const dailyWage = mw / 30;
