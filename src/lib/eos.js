@@ -40,9 +40,17 @@ export function computeYearsOfService(hireDate, lastWorkingDate) {
   if (!hireDate || !lastWorkingDate) return 0;
   const start = new Date(hireDate);
   const end = new Date(lastWorkingDate);
-  const ms = end - start;
-  if (ms < 0) return 0;
-  return ms / (1000 * 60 * 60 * 24 * 365.25);
+  if (end < start) return 0;
+  // سنوات مكتملة فعلياً (تطابق إدخال «عدد سنوات الخدمة» في حاسبة مكتب العمل)
+  let years = end.getFullYear() - start.getFullYear();
+  if (end.getMonth() < start.getMonth() || (end.getMonth() === start.getMonth() && end.getDate() < start.getDate())) years--;
+  if (years < 0) years = 0;
+  // الجزء المتبقي (أشهر/أيام) بعد آخر ذكرى سنوية مكتملة → كسر سنة على أساس 365 يوماً
+  const anniv = new Date(start);
+  anniv.setFullYear(start.getFullYear() + years);
+  const remMs = end - anniv;
+  const remDays = remMs > 0 ? remMs / (1000 * 60 * 60 * 24) : 0;
+  return years + remDays / 365;
 }
 
 export function eosSalaryBasis(employee, basis = "gross") {

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2, Loader2, Check, Upload, Send, Wallet, X } from "lucide-react";
+import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2, Loader2, Check, Upload, Send, Wallet, X, Scale, ExternalLink } from "lucide-react";
 import { computeSettlement, reasonMeta, terminationReasons, todayISO, isSaudiNationalId } from "@/lib/eos";
 import { getEmployeeAnnualDays, computeEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import { formatCurrency } from "@/lib/hr";
@@ -44,6 +44,8 @@ export default function EndOfService() {
     contractActiveWarn: "عقد هذا الموظف ساري ولم يُفسخ بعد. يمكنك احتساب المخالصة وطباعتها كمسودة فقط. لن يتاح الحفظ والإرسال للمالية إلا بعد فسخ العقد فعلياً في ملف الموظف.",
     contractTerminatedOk: "تم فسخ عقد هذا الموظف. يمكنك حفظ المخالصة وإرسالها للمالية لاعتماد الصرف.",
     draftOnly: "مسودة فقط",
+    hrsdRef: "للمطابقة مع الحاسبة الرسمية لوزارة الموارد البشرية والتنمية الاجتماعية (مكتب العمل):",
+    hrsdLink: "حاسبة مكافأة نهاية الخدمة — HRSD",
   } : {
     title: "End of service", subtitle: "EOS award calculator per Saudi Labor Law (Art. 74 to 85) — all termination reasons and matching articles, with leave balance and ticket compensation",
     chooseEmp: "Select employee", choosePh: "— pick an employee —", reason: "Termination reason", lwd: "Last working date",
@@ -66,6 +68,8 @@ export default function EndOfService() {
     contractActiveWarn: "This employee's contract is still active. You may calculate and print the settlement as a draft only. Saving and sending to finance is locked until the contract is actually terminated in the employee file.",
     contractTerminatedOk: "This employee's contract has been terminated. You can save the settlement and send it to finance for payout approval.",
     draftOnly: "Draft only",
+    hrsdRef: "Verify against the official Ministry of HRSD (Labor Office) calculator:",
+    hrsdLink: "End-of-Service Benefit Calculator — HRSD",
   };
 
   const [employees, setEmployees] = useState([]);
@@ -252,6 +256,14 @@ export default function EndOfService() {
   return (
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
+
+      <div className="text-xs text-muted-foreground bg-slate-50 border border-border rounded-xl px-4 py-3 mb-4 flex items-center gap-2 no-print">
+        <Scale size={15} className="shrink-0 text-violet-600" />
+        <span>{t.hrsdRef}</span>
+        <a href="https://www.hrsd.gov.sa/ministry-services/services/end-service-benefit-calculator" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-violet-700 underline hover:text-violet-800 font-medium">
+          {t.hrsdLink} <ExternalLink size={12} />
+        </a>
+      </div>
 
       <div className="bg-white rounded-2xl border border-border p-5 mb-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
