@@ -28,9 +28,9 @@ function boolSaudi(v) {
 
 const lower = (s) => String(s ?? '').trim().toLowerCase();
 const GENDER = { 'ذكر':'male','male':'male','m':'male','أنثى':'female','انثى':'female','female':'female','f':'female' };
-const CONTRACT = { 'دوام كامل':'full_time','full_time':'full_time','full':'full_time','كامل':'full_time','جزئي':'part_time','part_time':'part_time','part':'part_time','عقد':'contract','contract':'contract' };
-const PAYMENT = { 'مدد':'mudad','mudad':'mudad','كاش':'cash','cash':'cash','نقدي':'cash' };
-const TICKET = { 'سنوي':'yearly','yearly':'yearly','كل سنتين':'biennial','biennial':'biennial','سنتين':'biennial','لا':'none','none':'none','لا ينطبق':'none' };
+const CONTRACT = { 'دوام كامل':'full_time','full_time':'full_time','full':'full_time','كامل':'full_time','full-time':'full_time','جزئي':'part_time','part_time':'part_time','part':'part_time','part-time':'part_time','عقد':'contract','contract':'contract' };
+const PAYMENT = { 'مدد':'mudad','mudad':'mudad','madad':'mudad','كاش':'cash','cash':'cash','نقدي':'cash' };
+const TICKET = { 'سنوي':'yearly','yearly':'yearly','annual':'yearly','كل سنتين':'biennial','biennial':'biennial','سنتين':'biennial','every 2 years':'biennial','every 2 year':'biennial','لا':'none','none':'none','لا ينطبق':'none','no':'none' };
 const ROLE = { 'executive':'executive','تنفيذي':'executive','manager':'manager','مدير':'manager','supervisor':'supervisor','مشرف':'supervisor','employee':'employee','موظف':'employee','worker':'worker','عامل':'worker' };
 
 function monthDiff(fromISO, toISO) {
