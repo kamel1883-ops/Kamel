@@ -592,8 +592,10 @@ export default function Landing() {
             <Link to="/refund-policy" className="block hover:text-violet-700">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center gap-2 pb-6 pt-2">
-          <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Saudi_Vision_2030_logo.svg/640px-Saudi_Vision_2030_logo.svg.png" alt={isAr ? "شعار رؤية المملكة العربية السعودية 2030" : "Saudi Vision 2030 logo"} className="h-12 sm:h-14 w-auto object-contain" loading="lazy" />
+        <div className="flex flex-col items-center justify-center gap-3 pb-6 pt-2">
+          <div className="rounded-2xl overflow-hidden shadow-md border border-violet-100 bg-black px-5 py-3">
+            <img src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/e133dacf0_IMG_0423.png" alt={isAr ? "شعار رؤية المملكة العربية السعودية 2030" : "Saudi Vision 2030 logo"} className="h-16 sm:h-20 w-auto object-contain" loading="lazy" />
+          </div>
           <span className="text-muted-foreground/70 text-sm text-center">{isAr ? "نتوافق مع رؤية المملكة العربية السعودية 2030" : "In alignment with Saudi Vision 2030"}</span>
         </div>
         <div className="text-center text-muted-foreground/70 text-base pb-6">{t.copy}</div>

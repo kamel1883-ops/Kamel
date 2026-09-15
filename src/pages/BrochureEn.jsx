@@ -1342,8 +1342,8 @@ function Closing() {
           <Social icon={Globe} label="Website" href="https://jadara-hr.com" />
         </div>
         <div className="flex flex-col items-center gap-3 mt-8">
-          <div className="bg-white rounded-2xl px-5 py-3 flex items-center justify-center">
-            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Saudi_Vision_2030_logo.svg/640px-Saudi_Vision_2030_logo.svg.png" alt="Saudi Vision 2030" style={{ height: 46, width: "auto", objectFit: "contain" }} />
+          <div className="rounded-2xl overflow-hidden bg-black px-5 py-3 flex items-center justify-center">
+            <img src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/e133dacf0_IMG_0423.png" alt="Saudi Vision 2030" style={{ height: 72, width: "auto", objectFit: "contain" }} />
           </div>
           <div style={{ color: "#a9bcd0", fontSize: 13 }}>In alignment with Saudi Vision 2030</div>
         </div>
