@@ -325,6 +325,9 @@ export default function Landing() {
         <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-100 min-h-[440px]">
           <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5814cf438_generated_image.png" alt={isAr ? "شباب سعوديون واقفون في بيئة عمل احترافية مع شعار جداره" : "Young Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+          <div className="absolute top-5 right-5 z-10 bg-black/35 backdrop-blur-md rounded-2xl px-3 py-2 ring-1 ring-white/15">
+            <Logo tone="light" size={40} />
+          </div>
           <div className="absolute bottom-6 right-6 left-6">
             <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs text-white/90 mb-3 backdrop-blur-md">
               <Sparkles size={12} className="text-violet-200" /> {isAr ? "كل ما تحتاجه في مكان واحد" : "Everything in one place"}
@@ -589,6 +592,10 @@ export default function Landing() {
             <Link to="/privacy" className="block hover:text-violet-700">{isAr ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
             <Link to="/refund-policy" className="block hover:text-violet-700">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>
           </div>
+        </div>
+        <div className="flex flex-col items-center justify-center gap-2 pb-6 pt-2">
+          <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Saudi_Vision_2030_logo.svg/640px-Saudi_Vision_2030_logo.svg.png" alt={isAr ? "شعار رؤية المملكة العربية السعودية 2030" : "Saudi Vision 2030 logo"} className="h-12 sm:h-14 w-auto object-contain" loading="lazy" />
+          <span className="text-muted-foreground/70 text-sm text-center">{isAr ? "نتوافق مع رؤية المملكة العربية السعودية 2030" : "In alignment with Saudi Vision 2030"}</span>
         </div>
         <div className="text-center text-muted-foreground/70 text-base pb-6">{t.copy}</div>
       </footer>
