@@ -16,6 +16,7 @@ import { useI18n } from "@/lib/i18n";
 import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
 import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
+import { yearsOfService } from "@/lib/leaveBalance";
 
 const empty = {
   full_name: "",
@@ -53,6 +54,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
     annualLeaveEnt: "رصيد الإجازات السنوي (يحدده الموارد البشرية)", d21: "21 يوم", d30: "30 يوم",
+    leaveLockNote: "أكمل الموظف 5 سنوات خدمة، فاستحقّت إجازته 30 يوماً سنوياً حسب نظام العمل السعودي — لا يمكن اختيار 21 يوماً.",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
     approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)", approverHr: "معتمد موارد بشرية (سلف وانتدابات)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
@@ -75,6 +77,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     passNo: "Passport number", passExp: "Passport expiry", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
     annualLeaveEnt: "Annual leave entitlement (set by HR)", d21: "21 days", d30: "30 days",
+    leaveLockNote: "Employee completed 5 years of service — entitled to 30 days annual leave per Saudi Labor Law; 21 days cannot be selected.",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
     approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)", approverHr: "HR approver (loans & trips)",
     deptHint: "Pick from existing departments or type a new one",
@@ -98,6 +101,14 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     base44.entities.Branch.list("-is_main", 500).then((list) => setBranches(list));
   }, [open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // قاعدة الخمس سنوات: إكمال 5 سنوات خدمة → إجازة 30 يوماً إجبارياً، ويُقفل خيار 21
+  const leaveLocked30 = yearsOfService(form.hire_date) >= 5;
+  useEffect(() => {
+    if (leaveLocked30 && Number(form.annual_leave_entitlement) !== 30) {
+      set("annual_leave_entitlement", 30);
+    }
+  }, [leaveLocked30, form.annual_leave_entitlement]);
 
   // توليد الوصف الوظيفي بالذكاء الاصطناعي من المسمى/الإدارة/المستوى، قابل للتعديل بعد التوليد
   const generateJobDesc = async () => {
@@ -183,13 +194,14 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" lang={isAr ? "ar" : "en"} value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
             <Field label={t.annualLeaveEnt}>
-              <Select value={String(form.annual_leave_entitlement === 30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
+              <Select value={String(leaveLocked30 ? 30 : (form.annual_leave_entitlement === 30 ? 30 : 21))} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="21">{t.d21}</SelectItem>
+                  <SelectItem value="21" disabled={leaveLocked30}>{t.d21}</SelectItem>
                   <SelectItem value="30">{t.d30}</SelectItem>
                 </SelectContent>
               </Select>
+              {leaveLocked30 && <p className="text-xs text-amber-600 mt-1.5 leading-relaxed">{t.leaveLockNote}</p>}
             </Field>
             <Field label={t.contractStart}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
             <Field label={t.contractEnd}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>

@@ -36,13 +36,28 @@ export async function getAnnualLeaveDays() {
   return v === 21 || v === 30 ? v : 21;
 }
 
+// سنوات الخدمة الكاملة من تاريخ المباشرة حتى تاريخ مرجعي (افتراضياً اليوم)
+export function yearsOfService(hireDate, asOf = new Date()) {
+  if (!hireDate) return 0;
+  const a = new Date(hireDate);
+  const b = asOf instanceof Date ? asOf : new Date(asOf);
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
+  let years = b.getFullYear() - a.getFullYear();
+  if (b.getMonth() < a.getMonth() || (b.getMonth() === a.getMonth() && b.getDate() < a.getDate())) years--;
+  return Math.max(0, years);
+}
+
 // رصيد الإجازات السنوي للموظف: أولوية لاختيار الموارد البشرية في ملف الموظف (21 أو 30)،
 // ثم إعداد المنشأة، ثم 21 افتراضياً. هذا المصدر الموحّد لكل حسابات الإجازات ومخالصتها ونهاية الخدمة.
+// حسب نظام العمل السعودي: الموظف الذي يكمل 5 سنوات خدمة تستحق إجازته 30 يوماً سنوياً —
+// تُفرض فوق اختيار 21 (يُقفل خيار 21 في ملف الموظف بعد إكمال الخمس سنوات).
 export function getEmployeeAnnualDays(employee, org) {
   const emp = Number(employee?.annual_leave_entitlement);
-  if (emp === 21 || emp === 30) return emp;
-  const orgV = Number(org?.annual_leave_days);
-  return orgV === 21 || orgV === 30 ? orgV : 21;
+  const configured = (emp === 21 || emp === 30)
+    ? emp
+    : (Number(org?.annual_leave_days) === 30 ? 30 : 21);
+  const yos = yearsOfService(employee?.hire_date);
+  return (configured === 30 || yos >= 5) ? 30 : 21;
 }
 
 // مجموع الأيام المستخدمة من طلبات الإجازة السنوية المعتمدة/المكتملة فقط —
