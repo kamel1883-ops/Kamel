@@ -326,6 +326,14 @@ export default function Landing() {
         <div className="lg:col-span-5 relative overflow-hidden rounded-[2rem] border border-violet-100 min-h-[440px]">
           <Image src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/5814cf438_generated_image.png" alt={isAr ? "شباب سعوديون واقفون في بيئة عمل احترافية مع شعار جداره" : "Young Saudi team standing in a professional environment with Jadara logo"} fittingType="fill" className="w-full h-full absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+          {/* شعار جداره لإدارة الموارد البشرية — منحوت على الجدار خلف الفريق */}
+          <div className="absolute top-6 inset-x-0 z-10 flex flex-col items-center pointer-events-none select-none text-center px-4" dir={isAr ? "rtl" : "ltr"} aria-label={isAr ? "جداره لإدارة الموارد البشرية" : "Jadara - Human Resources Management"}>
+            <div className="flex items-center gap-2" style={{ textShadow: "0 1px 0 rgba(255,255,255,.7), 0 -1px 1px rgba(10,22,41,.28)" }}>
+              <Crown size={22} strokeWidth={1.6} style={{ color: "#C5A059", filter: "drop-shadow(0 1px 1px rgba(0,0,0,.25))" }} />
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 6vw, 34px)", color: "#0A1629", letterSpacing: "-0.02em" }}>{isAr ? "جداره" : "Jadara"}</span>
+            </div>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "clamp(9px, 2.6vw, 14px)", color: "#3A3A4A", marginTop: 3, textShadow: "0 1px 0 rgba(255,255,255,.65)" }}>{isAr ? "لإدارة الموارد البشرية" : "Human Resources Management"}</span>
+          </div>
           <div className="absolute bottom-6 right-6 left-6">
             <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs text-white/90 mb-3 backdrop-blur-md">
               <Sparkles size={12} className="text-violet-200" /> {isAr ? "كل ما تحتاجه في مكان واحد" : "Everything in one place"}
