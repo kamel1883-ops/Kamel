@@ -237,7 +237,7 @@ export default function Complaints() {
 
       {printC && (
         <div className="print-mount">
-          <ComplaintResolutionDoc complaint={printC} org={org} isAr={isAr} />
+          <ComplaintResolutionDoc complaint={printC} org={org} employee={empOf(printC.employee_id)} isAr={isAr} />
         </div>
       )}
     </div>

@@ -11,7 +11,7 @@ const TYPE_AR = {
   other: "أخرى",
 };
 
-export default function ComplaintResolutionDoc({ complaint, org, isAr = true }) {
+export default function ComplaintResolutionDoc({ complaint, org, employee, isAr = true }) {
   if (!complaint) return null;
   const typeLabel = complaint.complaint_type === "other"
     ? (complaint.custom_type || (isAr ? "أخرى" : "Other"))
@@ -21,7 +21,11 @@ export default function ComplaintResolutionDoc({ complaint, org, isAr = true }) 
       <BrandHeader org={org} />
       <h2 className="text-lg font-bold text-slate-800 mb-4">{isAr ? "محضر شكوى وحلّها" : "Complaint & resolution record"}</h2>
       <div className="grid grid-cols-2 gap-4 text-sm mb-5">
-        <Field label={isAr ? "الموظف" : "Employee"} value={complaint.employee_name} />
+        <Field label={isAr ? "مُقدّم الشكوى" : "Complainant"} value={employee?.full_name || complaint.employee_name} />
+        <Field label={isAr ? "الهوية / الإقامة" : "National / Iqama ID"} value={employee?.national_id} />
+        <Field label={isAr ? "الرقم الوظيفي" : "Employee no."} value={employee?.employee_number} />
+        <Field label={isAr ? "المسمى الوظيفي" : "Position"} value={employee?.position} />
+        <Field label={isAr ? "الإدارة / القسم" : "Department"} value={employee?.department || complaint.department} />
         <Field label={isAr ? "تاريخ التقديم" : "Submitted"} value={complaint.submitted_date} />
         <Field label={isAr ? "نوع الشكوى" : "Type"} value={typeLabel} />
         <Field label={isAr ? "سرية" : "Confidential"} value={complaint.is_confidential ? (isAr ? "نعم" : "Yes") : (isAr ? "لا" : "No")} />
