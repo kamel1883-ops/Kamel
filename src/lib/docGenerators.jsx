@@ -12,7 +12,12 @@ export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) 
   const entitled = computeLeaveEntitlement(emp?.hire_date, org, asOf);
   const granted = Number(leave?.balance_deducted) || 0;
   // المستخدم الكلي قبل هذا الطلب = الرصيد الافتتاحي (prior_used_leave) + المعتمد داخل النظام عدا هذا الطلب.
-  const usedBefore = usedLeaveTotal(emp, (allLeavesForEmp || []).filter((l) => l.id !== leave?.id));
+  // مهم: تُحصر القائمة على إجازات هذا الموظف فقط — القائمة الممرّرة قد تكون لكل الموظفين.
+  const empId = emp?.id || leave?.employee_id;
+  const usedBefore = usedLeaveTotal(
+    emp,
+    (allLeavesForEmp || []).filter((l) => l.id !== leave?.id && l.employee_id === empId)
+  );
   const bBefore = Math.max(0, Math.round((entitled - usedBefore) * 10) / 10);
   const bAfter = Math.max(0, Math.round((bBefore - granted) * 10) / 10);
   const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { computeLeaveEntitlement, usedLeaveTotal, getOrgOnce } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, usedLeaveTotal, sumUsedDays, getOrgOnce } from "@/lib/leaveBalance";
 import { generateLeaveSettlement, generateLoanStatement } from "@/lib/docGenerators";
 import { formatCurrency, leaveTypeLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
@@ -17,6 +17,8 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
     systemNote: (g) => g ? "30 يوماً/سنة عن كامل المدة (سياسة المنشأة) · تناسبي شهرياً من تاريخ المباشرة" : "21 يوماً/سنة لأول 5 سنوات + 30 يوماً/سنة بعدها · تناسبي شهرياً من تاريخ المباشرة",
     settlementsTitle: "سجل التصفيات", noSettlements: "لا توجد تصفيات بعد",
     days: (n) => `${n} يوم`, settlement: "المخالصة", generate: "توليد",
+    usedBreak: (p, s) => `المستخدم = رصيد افتتاحي ${p} يوم (قبل النظام) + ${s} يوم معتمدة داخل النظام`,
+    approvedOf: (a, r) => `معتمدة ${a} يوم من ${r} مطلوبة`,
     loansTitle: "السلف", noLoans: "لا توجد سلف",
     paid: (v) => `تم سداد ${v}`, rem: (v) => `متبقي ${v}`, closed: "مغلقة", statement: "الكشف",
   } : {
@@ -25,6 +27,8 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
     systemNote: (g) => g ? "30 days/yr for full tenure (org policy) · prorated monthly from hire date" : "21 days/yr first 5 years + 30 days/yr after · prorated monthly from hire date",
     settlementsTitle: "Settlements log", noSettlements: "No settlements yet",
     days: (n) => `${n} d`, settlement: "Settlement", generate: "Generate",
+    usedBreak: (p, s) => `Used = ${p} d opening balance (pre-system) + ${s} d approved in-system`,
+    approvedOf: (a, r) => `${a} d approved of ${r} d requested`,
     loansTitle: "Loans", noLoans: "No loans",
     paid: (v) => `Paid ${v}`, rem: (v) => `Remaining ${v}`, closed: "Closed", statement: "Statement",
   };
@@ -53,6 +57,9 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
   // المستخدم الكلي = الرصيد الافتتاحي (prior_used_leave، ثابت) + المعتمد داخل النظام (sumUsedDays).
   const used = usedLeaveTotal(employee, leaves);
   const remaining = Math.round((entitlement - used) * 10) / 10;
+  // تفصيل «المستخدم» ليكون واضحاً أنه ليس أياماً أُخذت داخل النظام فقط
+  const priorUsed = Number(employee?.prior_used_leave) || 0;
+  const systemUsed = Math.round(sumUsedDays(leaves) * 10) / 10;
 
   const doneLeaves = leaves.filter((l) => l.status === "completed" || l.status === "paid");
 
@@ -82,6 +89,9 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
         <div className="text-[11px] text-muted-foreground mt-1">
           {t.systemNote(generous30)}
         </div>
+        {priorUsed > 0 && (
+          <div className="text-[11px] text-amber-600 mt-1">{t.usedBreak(priorUsed, systemUsed)}</div>
+        )}
       </div>
 
       {/* سجل الإجازات المصفاة */}
@@ -96,7 +106,9 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
                 <div className="min-w-0 flex-1">
                   <div className="font-medium truncate">{leaveTypeLabel(l.leave_type)} · {l.start_date} ← {l.end_date}</div>
                   <div className="text-muted-foreground">
-                    {t.days(l.days_count)} · <span className={cn("px-1.5 rounded-full", badge(l.status).cls)}>{badge(l.status).label}</span>
+                    {Number(l.balance_deducted) > 0 && Number(l.balance_deducted) !== Number(l.days_count)
+                      ? t.approvedOf(Number(l.balance_deducted), Number(l.days_count) || 0)
+                      : t.days(l.days_count)} · <span className={cn("px-1.5 rounded-full", badge(l.status).cls)}>{badge(l.status).label}</span>
                   </div>
                 </div>
                 <div className="shrink-0">
