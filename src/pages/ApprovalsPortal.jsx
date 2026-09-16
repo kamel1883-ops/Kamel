@@ -155,7 +155,9 @@ export default function ApprovalsPortal({ portalSession }) {
     const leaves = data?.leaves || [];
     const loans = data?.loans || [];
     const trips = data?.trips || [];
-    const total = leaves.length + loans.length + trips.length;
+    const equipment = data?.equipment || [];
+    const complaints = data?.complaints || [];
+    const total = leaves.length + loans.length + trips.length + equipment.length + complaints.length;
     return (
       <div dir={portalDir(lang)} className="animate-fade-in">
         <PageHeader title={t.mTitle} subtitle={t.mSub} />
@@ -209,6 +211,35 @@ export default function ApprovalsPortal({ portalSession }) {
                 { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("trips", r) },
               ]}>
               <span className="text-xs text-muted-foreground">{r.destination}</span>
+            </Card>
+          ))}
+        </div>
+
+        {equipment.length > 0 && <h3 className="text-sm font-semibold text-muted-foreground mt-5 mb-2">{isAr ? "طلبات العهد" : "Equipment requests"}</h3>}
+        <div className="space-y-3">
+          {equipment.map((r) => (
+            <Card key={r.id} r={r}
+              kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">{isAr ? "عهدة" : "Equipment"}</span>}
+              actions={[
+                { label: isAr ? "إحالة للموارد البشرية" : "Forward to HR", cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("equipment", r), busyKey: r.id },
+                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("equipment", r) },
+              ]}>
+              <span className="text-xs text-muted-foreground">{r.item_label || r.custom_type || r.item_type}</span>
+              {r.reason && <span className="text-xs text-muted-foreground">· {r.reason}</span>}
+            </Card>
+          ))}
+        </div>
+
+        {complaints.length > 0 && <h3 className="text-sm font-semibold text-muted-foreground mt-5 mb-2">{isAr ? "الشكاوى" : "Complaints"}</h3>}
+        <div className="space-y-3">
+          {complaints.map((r) => (
+            <Card key={r.id} r={r}
+              kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-rose-50 text-rose-600">{isAr ? "شكوى" : "Complaint"}</span>}
+              actions={[
+                { label: isAr ? "إحالة للموارد البشرية" : "Forward to HR", cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove("complaints", r), busyKey: r.id },
+                { label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("complaints", r) },
+              ]}>
+              <span className="text-xs text-muted-foreground whitespace-pre-wrap">{r.description}</span>
             </Card>
           ))}
         </div>

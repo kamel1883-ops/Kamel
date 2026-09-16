@@ -112,6 +112,21 @@ export default async function (req) {
       return Response.json({ ok: true });
     }
 
+    // ===== المدير المباشر — العهد والشكاوى: إحالة للموارد البشرية أو رفض (لا تمرّ بالمالية) =====
+    if (myEmp.is_approver_manager && (type === "equipment" || type === "complaints") && (action === "approve" || action === "reject")) {
+      const entity = type === "equipment" ? "EquipmentRequest" : "Complaint";
+      const r = await (base44.asServiceRole.entities as any)[entity].get(id);
+      const emp = (allEmployees || []).find((e) => e.id === r.employee_id);
+      if (!emp || emp.manager_id !== myEmp.id)
+        return Response.json({ error: "هذا الطلب خارج نطاق مرؤوسيك" }, { status: 403 });
+      if (r.status !== "pending_manager" && r.status !== "pending")
+        return Response.json({ error: "الطلب ليس في مرحلة المدير المباشر" }, { status: 400 });
+      await su(entity, id, action === "approve"
+        ? { manager_status: "approved", manager_id: actorId, manager_name: actorName, manager_date: today(), manager_note: note, status: "manager_approved" }
+        : { manager_status: "rejected", manager_id: actorId, manager_name: actorName, manager_date: today(), manager_note: note, status: "rejected" });
+      return Response.json({ ok: true });
+    }
+
     // ===== معتمد الموارد البشرية — سلف =====
     if (myEmp.is_approver_hr && type === "loans" && (action === "approve" || action === "reject")) {
       const r = await base44.asServiceRole.entities.LoanRequest.get(id);

@@ -75,8 +75,9 @@ export default function Complaints() {
   const myEmployee = employees.find((e) => e.user_id && e.user_id === me?.id) || null;
   const isAdmin = me?.role === "admin";
   const isHR = isAdmin || !!myEmployee?.is_approver_hr;
-  const isManager = isAdmin || !!myEmployee?.is_approver_manager;
-  const isManagerOf = (r) => isAdmin || (isManager && !!r.manager_id && r.manager_id === myEmployee?.id);
+  // مرحلة المدير المباشر حصراً له — الموارد البشرية/الأدمن لا يتجاوزانها.
+  const isManager = !!myEmployee?.is_approver_manager;
+  const isManagerOf = (r) => isManager && !!r.manager_id && r.manager_id === myEmployee?.id;
 
   const query = q.trim();
   const matchedIds = query ? new Set(employees.filter((e) => (e.national_id || "").replace(/\s/g, "").includes(query.replace(/\s/g, ""))).map((e) => e.id)) : null;
@@ -175,7 +176,7 @@ export default function Complaints() {
 
       {/* حلّ الشكوى — الموارد البشرية */}
       <Dialog open={acting?.action === "resolve"} onOpenChange={() => setActing(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>{t.resolveTitle}</DialogTitle></DialogHeader>
           {acting && (
             <div className="space-y-4">
@@ -183,7 +184,8 @@ export default function Complaints() {
               <div className="text-xs text-muted-foreground bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{acting.req.description}</div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t.resolution} <span className="text-rose-500">*</span></Label>
-                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} required />
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={14} required
+                  placeholder={isAr ? "اكتب ما تم التوصل إليه: نتائج الفحص، التوصيات، الإجراءات التصحيحية، النصائح والمخرجات..." : "Findings, recommendations, corrective actions, outcomes..."} />
               </div>
               <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">{t.resolveWarn}</div>
               <DialogFooter>

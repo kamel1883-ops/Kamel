@@ -95,8 +95,9 @@ export default function Equipment() {
   const myEmployee = employees.find((e) => e.user_id && e.user_id === me?.id) || null;
   const isAdmin = me?.role === "admin";
   const isHR = isAdmin || !!myEmployee?.is_approver_hr;
-  const isManager = isAdmin || !!myEmployee?.is_approver_manager;
-  const isManagerOf = (r) => isAdmin || (isManager && !!r.manager_id && r.manager_id === myEmployee?.id);
+  // مرحلة المدير المباشر حصراً له — الموارد البشرية/الأدمن لا يتجاوزانها.
+  const isManager = !!myEmployee?.is_approver_manager;
+  const isManagerOf = (r) => isManager && !!r.manager_id && r.manager_id === myEmployee?.id;
 
   const query = q.trim();
   const matchedIds = query ? new Set(employees.filter((e) => (e.national_id || "").replace(/\s/g, "").includes(query.replace(/\s/g, ""))).map((e) => e.id)) : null;

@@ -79,10 +79,12 @@ export default async function (req) {
       const subs = (allEmployees || []).filter((e) => e.manager_id === myEmp.id);
       const subIds = new Set(subs.map((s) => s.id));
       const mgrPending = ["pending_manager", "pending"];
-      const [allLeaves, allLoans, allTrips] = await Promise.all([
+      const [allLeaves, allLoans, allTrips, allEquip, allComplaints] = await Promise.all([
         base44.asServiceRole.entities.LeaveRequest.list("-created_date", 500),
         base44.asServiceRole.entities.LoanRequest.list("-created_date", 500),
         base44.asServiceRole.entities.BusinessTrip.list("-created_date", 500),
+        base44.asServiceRole.entities.EquipmentRequest.list("-created_date", 500),
+        base44.asServiceRole.entities.Complaint.list("-created_date", 500),
       ]);
       const bySub = (arr) => (arr || []).filter((r) => subIds.has(r.employee_id) && mgrPending.includes(r.status));
       // سجلّ معاملات المرؤوسين — كل ما تجاوز مرحلة المدير (إجازات + سلف + انتدابات) لتكون تواريخها وحالاتها ومستنداتها مرئية للمدير المباشر.
@@ -101,6 +103,9 @@ export default async function (req) {
         leaves: withNat(bySub(allLeaves)),
         loans: withNat(bySub(allLoans)),
         trips: withNat(bySub(allTrips)),
+        // العهد والشكاوى: تبدأ عند المدير المباشر ثم تُحال للموارد البشرية — لا تمرّ بالمالية.
+        equipment: withNat(bySub(allEquip)),
+        complaints: withNat(bySub(allComplaints)),
         leaveHistory: withNat(done(allLeaves)),
         loanHistory: withNat(done(allLoans)),
         tripHistory: withNat(done(allTrips)),
