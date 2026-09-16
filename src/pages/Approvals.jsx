@@ -142,8 +142,9 @@ export default function Approvals() {
   const isAdmin = me?.role === "admin";
   const isHR = isAdmin || !!myEmployee?.is_approver_hr;
   const isFinance = !!myEmployee?.is_approver_finance; // تأكيد الصرف حصري لمعتمد المالية فقط — الأدمن لا يكسر الفصل
-  const isManager = isAdmin || !!myEmployee?.is_approver_manager;
-  const isManagerOf = (r) => isAdmin || (isManager && !!r.manager_id && r.manager_id === myEmployee?.id);
+  // المدير المباشر حصراً: لا يُمنح الأدمن/الموارد البشرية صلاحية اعتماد مرحلة المدير المباشر.
+  const isManager = !!myEmployee?.is_approver_manager;
+  const isManagerOf = (r) => isManager && !!r.manager_id && r.manager_id === myEmployee?.id;
 
   // فلترة بالهوية الوطنية
   const query = q.trim();
