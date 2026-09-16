@@ -87,6 +87,21 @@ export function sumUsedDays(leaves) {
     .reduce((s, l) => s + (Number(l.balance_deducted) || Number(l.days_count) || 0), 0);
 }
 
+// «الرصيد المستخدم الكلي» = الرصيد الافتتاحي (prior_used_leave — لقطة ثابتة لما قبل النظام)
+// + مجموع الإجازات السنوية المعتمدة داخل النظام (sumUsedDays). عنصران منفصلان لا يتكرران.
+// المعادلة المعتمدة: المتبقي = المستحق التراكمي − المستخدم الكلي.
+export function usedLeaveTotal(employee, leaves) {
+  const prior = Number(employee?.prior_used_leave) || 0;
+  return Math.round((prior + sumUsedDays(leaves)) * 10) / 10;
+}
+
+// الرصيد المتبقي = المستحق التراكمي − المستخدم الكلي (قد يكون سالباً عند تقديم إجازة).
+export function remainingLeave(employee, leaves, org, asOf) {
+  const entitled = computeLeaveEntitlement(employee?.hire_date, org, asOf);
+  const used = usedLeaveTotal(employee, leaves);
+  return Math.round((entitled - used) * 10) / 10;
+}
+
 // يُعيد الموظفين الذين انتهت إجازتهم السنوية الفعلية (سفر) إلى «على رأس العمل» تلقائياً
 // عند تجاوز تاريخ نهاية الإجازة. يُستدعى عند تحميل قائمة الموظفين.
 export async function revertExpiredLeaves(employees) {

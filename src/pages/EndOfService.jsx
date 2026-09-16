@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calculator, AlertTriangle, Printer, Save, User, FileText, CalendarDays, Plane, Trash2, Loader2, Check, Upload, Send, Wallet, X, Scale, ExternalLink } from "lucide-react";
 import { computeSettlement, reasonMeta, terminationReasons, todayISO, isSaudiNationalId } from "@/lib/eos";
-import { computeLeaveEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, usedLeaveTotal } from "@/lib/leaveBalance";
 import { formatCurrency } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -133,19 +133,17 @@ export default function EndOfService() {
   const liveBalance = emp ? (() => {
     const asOf = lwd ? new Date(lwd) : new Date();
     const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
-    // sumUsedDays هو المصدر الموحّد — لا نضيف prior_used_leave لتجنب الحساب المزدوج.
-    const used = Math.round(sumUsedDays(empLeaves) * 10) / 10;
+    // المستخدم الكلي = الرصيد الافتتاحي (prior_used_leave) + المعتمد داخل النظام.
+    const used = usedLeaveTotal(emp, empLeaves);
     return { ent, used, remaining: Math.max(0, Math.round((ent - used) * 10) / 10) };
   })() : null;
 
   const compute = () => {
     if (!emp) return;
-    // رصيد الإجازات المتبقي = المستحق (تناسبي حسب نظام الموظف 21/30) − الأيام المستخدمة
+    // رصيد الإجازات المتبقي = المستحق (تناسبي 21/30) − المستخدم الكلي (الافتتاحي + المعتمد داخل النظام)
     const asOf = lwd ? new Date(lwd) : new Date();
     const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
-    // رصيد الإجازات المتبقي من ملف الموظف: المستحق − المستخدم فعلياً (طلبات الإجازة) − المستخدم سابقاً
-    // sumUsedDays هو المصدر الموحّد — لا نضيف prior_used_leave لتجنب الحساب المزدوج.
-    const used = Math.round(sumUsedDays(empLeaves) * 10) / 10;
+    const used = usedLeaveTotal(emp, empLeaves);
     const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
     const record = {

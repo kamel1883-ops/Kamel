@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { computeLeaveEntitlement, sumUsedDays, getOrgOnce } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, usedLeaveTotal, getOrgOnce } from "@/lib/leaveBalance";
 import { generateLeaveSettlement, generateLoanStatement } from "@/lib/docGenerators";
 import { formatCurrency, leaveTypeLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
@@ -50,9 +50,8 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
 
   const generous30 = Number(org?.annual_leave_days) === 30;
   const entitlement = computeLeaveEntitlement(employee?.hire_date, org);
-  // sumUsedDays هو المصدر الموحّد للأيام المستخدمة (من طلبات الإجازة المعتمدة/المكتملة).
-  // لا نضيف prior_used_leave لتجنب الحساب المزدوج — تلك الأيام محسوبة أصلاً ضمن الطلبات.
-  const used = Math.round(sumUsedDays(leaves) * 10) / 10;
+  // المستخدم الكلي = الرصيد الافتتاحي (prior_used_leave، ثابت) + المعتمد داخل النظام (sumUsedDays).
+  const used = usedLeaveTotal(employee, leaves);
   const remaining = Math.round((entitlement - used) * 10) / 10;
 
   const doneLeaves = leaves.filter((l) => l.status === "completed" || l.status === "paid");

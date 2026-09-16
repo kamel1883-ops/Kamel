@@ -13,7 +13,7 @@ import { ClipboardCheck, Check, X, Loader2, Search, Download, RefreshCw, Wallet,
 import { cn, safeHref } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, todayISO } from "@/lib/hr";
 import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
-import { getEmployeeAnnualDays, computeLeaveEntitlement, sumUsedDays } from "@/lib/leaveBalance";
+import { getEmployeeAnnualDays, computeLeaveEntitlement, usedLeaveTotal } from "@/lib/leaveBalance";
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -274,7 +274,8 @@ export default function Approvals() {
       // المعتمدة الأخرى — مطابق لما يعرضه ملف الموظف والمخالصة (بلا تضاعف عبر prior_used_leave).
       const asOf = r.start_date ? new Date(r.start_date) : new Date();
       const entitled = computeLeaveEntitlement(emp?.hire_date, org, asOf);
-      const otherUsed = sumUsedDays((leaves || []).filter((l) => l.id !== r.id && l.employee_id === r.employee_id));
+      // المستخدم الكلي (غير مشمول هذا الطلب) = الرصيد الافتتاحي + المعتمد داخل النظام.
+      const otherUsed = usedLeaveTotal(emp, (leaves || []).filter((l) => l.id !== r.id && l.employee_id === r.employee_id));
       const before = Math.max(0, Math.round((entitled - otherUsed) * 10) / 10);
       // الموارد البشرية قد تعتمد جزءاً من الأيام المطلوبة فقط — ما يُخصم من الرصيد هو ما اعتمدته.
       const requested = Math.max(0, Number(r.days_count) || 0);
@@ -310,8 +311,8 @@ export default function Approvals() {
       const emp = empOf(r.employee_id);
       const consume = (r.leave_type === "annual" || r.is_full_clearance);
       const granted = consume ? (Number(r.balance_deducted) || 0) : 0;
-      // مصدر واحد للحقيقة: المستخدم من طلبات الإجازة السنوية المعتمدة الأخرى (بلا تضاعف عبر prior_used_leave).
-      const otherUsed = sumUsedDays((leaves || []).filter((l) => l.id !== r.id && l.employee_id === r.employee_id));
+      // المستخدم الكلي (غير مشمول هذا الطلب) = الرصيد الافتتاحي + المعتمد داخل النظام.
+      const otherUsed = usedLeaveTotal(emp, (leaves || []).filter((l) => l.id !== r.id && l.employee_id === r.employee_id));
       const totalUsed = otherUsed + granted;
       const entitled = computeLeaveEntitlement(emp?.hire_date, org);
       // جميع الإجازات تنتقل لبانتظار المالية بعد اعتماد الموارد البشرية — لا تكتمل إلا باعتماد المالية.
@@ -696,7 +697,7 @@ export default function Approvals() {
               {(() => {
                 const emp = empOf(acting.req.employee_id);
                 const entitled = computeLeaveEntitlement(emp?.hire_date, org);
-                const used = sumUsedDays((leaves || []).filter((l) => l.id !== acting.req.id && l.employee_id === acting.req.employee_id));
+                const used = usedLeaveTotal(emp, (leaves || []).filter((l) => l.id !== acting.req.id && l.employee_id === acting.req.employee_id));
                 const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
                 const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
                 const dailyWage = mw / 30;
