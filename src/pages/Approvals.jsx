@@ -13,7 +13,7 @@ import { ClipboardCheck, Check, X, Loader2, Search, Download, RefreshCw, Wallet,
 import { cn, safeHref } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, todayISO } from "@/lib/hr";
 import { badge, leaveTicketAmount, needsFinance } from "@/lib/approvals";
-import { getEmployeeAnnualDays } from "@/lib/leaveBalance";
+import { getEmployeeAnnualDays, computeLeaveEntitlement, sumUsedDays } from "@/lib/leaveBalance";
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -267,14 +267,17 @@ export default function Approvals() {
     try {
       const r = acting.req;
       const emp = empOf(r.employee_id);
-      const annual = getEmployeeAnnualDays(emp, org);
-      const used = Number(emp?.prior_used_leave) || 0;
-      const before = Math.max(0, annual - used);
+      // مصدر واحد للحقيقة: الإجمالي المستحق تراكمياً + المستخدم من طلبات الإجازة السنوية
+      // المعتمدة الأخرى — مطابق لما يعرضه ملف الموظف والمخالصة (بلا تضاعف عبر prior_used_leave).
+      const asOf = r.start_date ? new Date(r.start_date) : new Date();
+      const entitled = computeLeaveEntitlement(emp?.hire_date, org, asOf);
+      const otherUsed = sumUsedDays((leaves || []).filter((l) => l.id !== r.id && l.employee_id === r.employee_id));
+      const before = Math.max(0, Math.round((entitled - otherUsed) * 10) / 10);
       // الموارد البشرية قد تعتمد جزءاً من الأيام المطلوبة فقط — ما يُخصم من الرصيد هو ما اعتمدته.
       const requested = Math.max(0, Number(r.days_count) || 0);
       const gr = Number(grantedDays);
       const granted = Math.max(0, Math.min(Number.isFinite(gr) && gr > 0 ? gr : requested, requested));
-      const after = Math.max(0, before - granted);
+      const after = Math.max(0, Math.round((before - granted) * 10) / 10);
       const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
       const dailyWage = mw / 30;
       const ticket = r.is_full_clearance ? leaveTicketAmount(emp, org) : 0;
@@ -314,9 +317,10 @@ export default function Approvals() {
       // تنبيه المالية بوجود إجازة بانتظار الصرف
       try { await base44.functions.invoke("notifyApprover", { type: "leave", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch (e) {}
       if (emp) {
+        // prior_used_leave يُجمَّد كقيمة لما قبل النظام — لا نزيده هنا كي لا نضاعف العدّ مع
+        // sumUsedDays التي تحصي طلبات الإجازة المعتمدة لحظياً (مصدر الحقيقة الموحّد).
         await base44.entities.Employee.update(emp.id, {
-          prior_used_leave: newUsed,
-          leave_balance: Math.max(0, annual - newUsed),
+          leave_balance: Math.max(0, annual - (used + granted)),
           status: "on_leave",
         });
       }
@@ -689,9 +693,9 @@ export default function Approvals() {
               {acting.req.medical_report_url && <a href={safeHref(acting.req.medical_report_url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
               {(() => {
                 const emp = empOf(acting.req.employee_id);
-                const annual = getEmployeeAnnualDays(emp, org);
-                const used = Number(emp?.prior_used_leave) || 0;
-                const remaining = Math.max(0, annual - used);
+                const entitled = computeLeaveEntitlement(emp?.hire_date, org);
+                const used = sumUsedDays((leaves || []).filter((l) => l.id !== acting.req.id && l.employee_id === acting.req.employee_id));
+                const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
                 const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);
                 const dailyWage = mw / 30;
                 const requested = Math.max(0, Number(acting.req.days_count) || 0);
@@ -703,7 +707,7 @@ export default function Approvals() {
                 return (
                   <>
                   <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="rounded-lg bg-slate-50 p-2.5"><div className="text-xs text-muted-foreground">{t.entitledLabel}</div><div className="font-bold">{annual}</div></div>
+                    <div className="rounded-lg bg-slate-50 p-2.5"><div className="text-xs text-muted-foreground">{t.entitledLabel}</div><div className="font-bold">{entitled}</div></div>
                     <div className="rounded-lg bg-amber-50 p-2.5"><div className="text-xs text-muted-foreground">{t.usedLabel}</div><div className="font-bold">{used}</div></div>
                     <div className="rounded-lg bg-emerald-50 p-2.5"><div className="text-xs text-muted-foreground">{t.remainingLabel}</div><div className="font-bold text-emerald-700">{remaining}</div></div>
                   </div>

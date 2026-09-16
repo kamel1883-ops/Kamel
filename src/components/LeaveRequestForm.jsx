@@ -74,8 +74,14 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
         employee_name: emp ? emp.full_name : "",
         days_count: isPermission ? 0 : days,
         medical_report_url: medical_url,
-        status: "pending_manager",
-        manager_status: "pending", hr_status: "pending", finance_status: "pending",
+        // إذا كان مُنشئ الطلب معتمد موارد بشرية، يُتجاوز المدير المباشر ويُحوّل مباشرة
+        // لاعتماد الموارد البشرية (لا انتظار لمدير لا دور له حين يرفع المعتمد الطلب بنفسه).
+        status: currentUserEmployee?.is_approver_hr ? "manager_approved" : "pending_manager",
+        manager_status: currentUserEmployee?.is_approver_hr ? "approved" : "pending",
+        manager_id: currentUserEmployee?.is_approver_hr ? (currentUserEmployee?.id || "") : "",
+        manager_name: currentUserEmployee?.is_approver_hr ? (currentUserEmployee?.full_name || "") : "",
+        manager_date: currentUserEmployee?.is_approver_hr ? new Date().toISOString().slice(0, 10) : "",
+        hr_status: "pending", finance_status: "pending",
       };
       if (portalCreate) await portalCreate(payload);
       else {

@@ -12,7 +12,9 @@ export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) 
   const entitled = computeLeaveEntitlement(emp?.hire_date, org, asOf);
   const granted = Number(leave?.balance_deducted) || 0;
   const otherUsed = sumUsedDays((allLeavesForEmp || []).filter((l) => l.id !== leave?.id));
-  const usedBefore = otherUsed + (Number(emp?.prior_used_leave) || 0);
+  // نعتمد sumUsedDays فقط كمصدر للحقيقة الموحّد لـ«المستخدم» — لا نضيف prior_used_leave
+  // كي لا يتضاعف العدّ (prior_used_leave يُجمَّد كقيمة لما قبل النظام ولا يتزايد مع كل اعتماد).
+  const usedBefore = otherUsed;
   const bBefore = Math.max(0, Math.round((entitled - usedBefore) * 10) / 10);
   const bAfter = Math.max(0, Math.round((bBefore - granted) * 10) / 10);
   const mw = (Number(emp?.base_salary) || 0) + (Number(emp?.housing_allowance) || 0) + (Number(emp?.transport_allowance) || 0) + (Number(emp?.other_allowances) || 0);

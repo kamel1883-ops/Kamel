@@ -817,17 +817,24 @@ export default async function (req) {
       ]);
       p.medical_report_url = safeUrl(p.medical_report_url);
       const { manager_id, manager_name } = await resolveManager();
+      // إذا كان مُنشئ الطلب معتمد موارد بشرية، يُتجاوز المدير المباشر ويُحوّل مباشرة
+      // لاعتماد الموارد البشرية (لا انتظار لمدير لا دور له حين يرفع المعتمد الطلب بنفسه).
+      const isHrCreator = !!emp.is_approver_hr;
+      const leaveStatus = isHrCreator ? "manager_approved" : "pending_manager";
+      const mgrStatus = isHrCreator ? "approved" : "pending";
       const created = await base44.asServiceRole.entities.LeaveRequest.create({
         ...p,
         employee_id: employeeId,
         employee_user_id: emp.user_id || null,
         employee_name: empLabel,
-        status: "pending_manager",
-        manager_status: "pending", hr_status: "pending", finance_status: "pending",
-        manager_id, manager_name,
+        status: leaveStatus,
+        manager_status: mgrStatus, hr_status: "pending", finance_status: "pending",
+        manager_id: isHrCreator ? null : manager_id,
+        manager_name: isHrCreator ? (emp.full_name || empLabel) : manager_name,
+        manager_date: isHrCreator ? todayISO() : null,
       });
-      // تنبيه المدير المباشر ببريد + إشعار داخلي بوجود طلب إجازة ينتظر موافقته
-      try { await notifyApproverForStatus(base44, { type: "leave", employeeId, employeeName: empLabel, status: "pending_manager" }); } catch {}
+      // تنبيه المعنيّ ببريد + إشعار داخلي بوجود طلب إجازة
+      try { await notifyApproverForStatus(base44, { type: "leave", employeeId, employeeName: empLabel, status: leaveStatus }); } catch {}
       return Response.json({ ok: true, leave: created });
     }
 
