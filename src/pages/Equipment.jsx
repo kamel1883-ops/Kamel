@@ -343,7 +343,7 @@ export default function Equipment() {
       {/* مستند قابل للطباعة — يُحتوى خارج الشاشة ويظهر عند الطباعة */}
       {printEq && (
         <div className="print-mount">
-          <EquipmentHandoverDoc equipment={printEq} org={org} isAr={isAr} />
+          <EquipmentHandoverDoc equipment={printEq} org={org} employee={empOf(printEq.employee_id)} isAr={isAr} />
         </div>
       )}
     </div>

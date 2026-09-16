@@ -6,7 +6,7 @@ const TYPE_AR = {
   clothing: "ملابس عمل", camera: "كاميرا", tool: "أداة/عدة", other: "أخرى",
 };
 
-export default function EquipmentHandoverDoc({ equipment, org, isAr = true }) {
+export default function EquipmentHandoverDoc({ equipment, org, employee, isAr = true }) {
   if (!equipment) return null;
   const typeLabel = equipment.item_type === "other"
     ? (equipment.custom_type || (isAr ? "أخرى" : "Other"))
@@ -16,7 +16,11 @@ export default function EquipmentHandoverDoc({ equipment, org, isAr = true }) {
       <BrandHeader org={org} />
       <h2 className="text-lg font-bold text-slate-800 mb-4">{isAr ? "سند تسليم عهدة" : "Equipment handover voucher"}</h2>
       <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-        <Field label={isAr ? "الموظف" : "Employee"} value={equipment.employee_name} />
+        <Field label={isAr ? "الموظف المستلم" : "Recipient employee"} value={employee?.full_name || equipment.employee_name} />
+        <Field label={isAr ? "الهوية / الإقامة" : "National / Iqama ID"} value={employee?.national_id} />
+        <Field label={isAr ? "الرقم الوظيفي" : "Employee no."} value={employee?.employee_number} />
+        <Field label={isAr ? "المسمى الوظيفي" : "Position"} value={employee?.position} />
+        <Field label={isAr ? "الإدارة / القسم" : "Department"} value={employee?.department || equipment.department} />
         <Field label={isAr ? "تاريخ التسليم" : "Assigned date"} value={equipment.assigned_date} />
         <Field label={isAr ? "نوع العهدة" : "Item type"} value={typeLabel} />
         <Field label={isAr ? "البيان" : "Description"} value={equipment.item_label} />
