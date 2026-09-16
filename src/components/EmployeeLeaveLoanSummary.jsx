@@ -50,8 +50,9 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
 
   const generous30 = Number(org?.annual_leave_days) === 30;
   const entitlement = computeLeaveEntitlement(employee?.hire_date, org);
-  const prior = Number(employee?.prior_used_leave) || 0;
-  const used = Math.round((sumUsedDays(leaves) + prior) * 10) / 10;
+  // sumUsedDays هو المصدر الموحّد للأيام المستخدمة (من طلبات الإجازة المعتمدة/المكتملة).
+  // لا نضيف prior_used_leave لتجنب الحساب المزدوج — تلك الأيام محسوبة أصلاً ضمن الطلبات.
+  const used = Math.round(sumUsedDays(leaves) * 10) / 10;
   const remaining = Math.round((entitlement - used) * 10) / 10;
 
   const doneLeaves = leaves.filter((l) => l.status === "completed" || l.status === "paid");
