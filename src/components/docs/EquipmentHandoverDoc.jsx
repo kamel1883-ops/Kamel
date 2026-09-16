@@ -29,6 +29,24 @@ export default function EquipmentHandoverDoc({ equipment, org, employee, isAr = 
         {equipment.return_date && <Field label={isAr ? "تاريخ الإرجاع" : "Return date"} value={equipment.return_date} />}
         {equipment.condition_note && <Field label={isAr ? "الحالة" : "Condition"} value={equipment.condition_note} />}
       </div>
+      {(equipment.return_note || Number(equipment.return_deduction) > 0 || equipment.return_date) && (
+        <div className="mb-6">
+          <div className="text-xs font-bold text-slate-500 mb-1">{isAr ? "إقرار استلام الإرجاع — الموارد البشرية" : "Return acknowledgment — HR"}</div>
+          <div className="text-sm leading-relaxed rounded-lg bg-slate-50 border border-slate-200 p-3 whitespace-pre-wrap">
+            {equipment.return_note || (isAr ? "أُعيدت العهدة بحالة سليمة." : "Returned in good condition.")}
+            {Number(equipment.return_deduction) > 0 && (
+              <div className="mt-2 font-bold text-rose-700">
+                {isAr ? `مبلغ الخصم على الموظف: ${equipment.return_deduction} ر.س` : `Deduction: ${equipment.return_deduction} SAR`}
+              </div>
+            )}
+            {equipment.return_received_by && (
+              <div className="text-xs text-slate-500 mt-2">
+                {isAr ? "استلم الإرجاع" : "Received by"}: {equipment.return_received_by}{equipment.return_date ? ` · ${equipment.return_date}` : ""}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <div className="text-sm leading-relaxed mb-8">
         {isAr
           ? "أقرّ باستلامي العهدة المذكورة أعلاه بحالة جيدة وأتعهّد بالمحافظة عليها واستخدامها في مجال العمل وإرجاعها عند طلبه أو عند انتهاء الخدمة."

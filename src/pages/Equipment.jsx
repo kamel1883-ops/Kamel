@@ -141,9 +141,24 @@ export default function Equipment() {
     await base44.entities.EquipmentRequest.update(r.id, { manager_status: "rejected", manager_note: note, status: "rejected" });
     setNote(""); load();
   };
-  const returnCustody = async (c) => {
-    await base44.entities.Equipment.update(c.id, { status: "returned", return_date: todayISO() });
-    load();
+  const [retForm, setRetForm] = useState({ status: "returned", return_note: "", return_deduction: 0, return_date: todayISO() });
+  const openReturn = (c) => {
+    setActing({ req: c, action: "return" });
+    setRetForm({ status: "returned", return_note: "", return_deduction: 0, return_date: todayISO() });
+  };
+  const confirmReturn = async () => {
+    if (!acting) return;
+    setBusy(true);
+    try {
+      const patch = {
+        status: retForm.status, return_date: retForm.return_date || todayISO(),
+        return_note: retForm.return_note, return_deduction: Number(retForm.return_deduction) || 0,
+        return_received_by: me?.full_name || "",
+        prepared_by_name: me?.full_name || "", prepared_by_id: myEmployee?.national_id || "",
+      };
+      await base44.entities.Equipment.update(acting.req.id, patch);
+      setPrintEq({ ...acting.req, ...patch });
+    } finally { setBusy(false); setActing(null); load(); }
   };
   const deleteCustody = async (c) => {
     await base44.entities.Equipment.delete(c.id); load();
@@ -231,7 +246,7 @@ export default function Equipment() {
                       <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                         <span className={cn("text-xs px-2.5 py-1 rounded-full font-medium", stBadge(c.status).cls)}>{stBadge(c.status).label}</span>
                         <Button size="sm" variant="outline" onClick={() => printHandover(c)} className="gap-1 h-8"><Printer size={14} /> {t.print}</Button>
-                        {c.status === "active" && <Button size="sm" variant="outline" onClick={() => returnCustody(c)} className="h-8">{t.retCust}</Button>}
+                        {c.status === "active" && isHR && <Button size="sm" variant="outline" onClick={() => openReturn(c)} className="h-8">{t.retCust}</Button>}
                         {isAdmin && <Button size="sm" variant="ghost" onClick={() => deleteCustody(c)} className="h-8 text-rose-500">{t.delCust}</Button>}
                       </div>
                     </div>
@@ -337,6 +352,55 @@ export default function Equipment() {
             <Button variant="outline" onClick={() => setCustOpen(false)}>{t.cancel}</Button>
             <Button onClick={saveCustody} disabled={!custForm.employee_id || !custForm.item_label} className="gap-1"><Check size={16} /> {t.save}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* إقرار استلام إرجاع العهدة — الموارد البشرية */}
+      <Dialog open={acting?.action === "return"} onOpenChange={() => setActing(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{isAr ? "إقرار استلام إرجاع العهدة — الموارد البشرية" : "Custody return acknowledgment — HR"}</DialogTitle></DialogHeader>
+          {acting && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                {empOf(acting.req.employee_id)?.full_name || acting.req.employee_name} · {typeLabel(acting.req.item_type)} — {acting.req.item_label}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{isAr ? "حالة العهدة عند الاستلام" : "Condition on return"}</Label>
+                  <Select value={retForm.status} onValueChange={(v) => setRetForm((f) => ({ ...f, status: v }))}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="returned">{isAr ? "مُعادة بحالة سليمة" : "Returned — good"}</SelectItem>
+                      <SelectItem value="damaged">{isAr ? "تالفة / بها كسر" : "Damaged"}</SelectItem>
+                      <SelectItem value="lost">{isAr ? "مفقودة" : "Lost"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{isAr ? "تاريخ الإرجاع" : "Return date"}</Label>
+                  <Input type="date" value={retForm.return_date} onChange={(e) => setRetForm((f) => ({ ...f, return_date: e.target.value }))} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">{isAr ? "مبلغ الخصم على الموظف (ر.س)" : "Deduction (SAR)"}</Label>
+                  <Input type="number" dir="ltr" value={retForm.return_deduction} onChange={(e) => setRetForm((f) => ({ ...f, return_deduction: Number(e.target.value) || 0 }))} />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">{isAr ? "ملاحظات الاستلام (كسر في الشاشة، تلف، نقص ملحقات...)" : "Return notes"}</Label>
+                <Textarea rows={7} value={retForm.return_note} onChange={(e) => setRetForm((f) => ({ ...f, return_note: e.target.value }))}
+                  placeholder={isAr ? "اكتب كامل الملاحظات وسبب الخصم إن وُجد — تظهر كاملة في مستند العهدة." : "Full notes and deduction reason — printed on the voucher."} />
+              </div>
+              <div className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-lg p-3">
+                {isAr ? "باعتماد الاستلام تُقفل العهدة وتُؤرشف الملاحظات والخصم في مستند العهدة بين الموظف والموارد البشرية." : "On confirmation the custody is closed and notes/deduction are archived on the voucher."}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setActing(null)} disabled={busy}>{t.cancel}</Button>
+                <Button onClick={confirmReturn} disabled={busy} className="gap-1 bg-violet-600 hover:bg-violet-700">
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {isAr ? "اعتماد الاستلام" : "Confirm receipt"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
