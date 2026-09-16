@@ -32,6 +32,8 @@ const Payroll = lazy(() => import("@/pages/Payroll"));
 const Gosi = lazy(() => import("@/pages/Gosi"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
 const Fleet = lazy(() => import("@/pages/Fleet"));
+const Equipment = lazy(() => import("@/pages/Equipment"));
+const Complaints = lazy(() => import("@/pages/Complaints"));
 const FlightBookings = lazy(() => import("@/pages/FlightBookings"));
 const EndOfService = lazy(() => import("@/pages/EndOfService"));
 const Performance = lazy(() => import("@/pages/Performance"));
@@ -161,6 +163,8 @@ const AuthenticatedApp = () => {
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/gosi" element={<Gosi />} />
         <Route path="/fleet" element={<Fleet />} />
+        <Route path="/equipment" element={<Equipment />} />
+        <Route path="/complaints" element={<Complaints />} />
         <Route path="/end-of-service" element={<EndOfService />} />
         <Route path="/performance" element={<Performance />} />
         <Route path="/training" element={<Training />} />

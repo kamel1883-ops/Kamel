@@ -48,7 +48,7 @@ export default async function (req) {
     const isOwner = isOwnerSession;
 
     if (action === "fetch") {
-      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications] = await Promise.all([
+      const [orgs, leaves, loans, attendance, trips, warnings, performances, allPlans, settlements, allDecisions, allIncentives, notifications, equipmentReqs, complaints] = await Promise.all([
         base44.asServiceRole.entities.Organization.list("-created_date", 1),
         base44.asServiceRole.entities.LeaveRequest.filter({ employee_id: employeeId }, "-created_date", 200),
         base44.asServiceRole.entities.LoanRequest.filter({ employee_id: employeeId }, "-created_date", 200),
@@ -62,6 +62,9 @@ export default async function (req) {
         base44.asServiceRole.entities.Incentive.list("-granted_date", 500),
         // إشعارات الموظف الموجّهة له (تبقى محفوظة دائماً — تُعرض بلغة البوابة المختارة)
         base44.asServiceRole.entities.Notification.filter({ employee_id: employeeId }, "-created_date", 500),
+        // طلبات العهد والشكاوى الخاصة بالموظف — تُعرض في بوابة الموظف ومسار الاعتماد.
+        base44.asServiceRole.entities.EquipmentRequest.filter({ employee_id: employeeId }, "-created_date", 200),
+        base44.asServiceRole.entities.Complaint.filter({ employee_id: employeeId }, "-created_date", 200),
       ]);
       // القرارات والحوار — تظهر للموظف وفق نطاق الإرسال (الكل / قسمه / سجل فرد خاص به)
       const matchesTarget = (rec: any) => {
@@ -103,6 +106,8 @@ export default async function (req) {
         settlements: paidSettlements,
         decisions, incentives,
         notifications: notifications || [],
+        equipmentRequests: equipmentReqs || [],
+        complaints: complaints || [],
       });
     }
 
@@ -854,6 +859,44 @@ export default async function (req) {
       // تنبيه المدير المباشر ببريد + إشعار داخلي بوجود طلب سلفة ينتظر موافقته
       try { await notifyApproverForStatus(base44, { type: "loan", employeeId, employeeName: empLabel, status: "pending_manager" }); } catch {}
       return Response.json({ ok: true, loan });
+    }
+
+    if (action === "create_equipment") {
+      const p = pick(body.payload || {}, ["item_type", "custom_type", "item_label", "reason"]);
+      p.request_date = todayISO();
+      const { manager_id, manager_name } = await resolveManager();
+      const created = await base44.asServiceRole.entities.EquipmentRequest.create({
+        ...p,
+        employee_id: employeeId,
+        employee_user_id: emp.user_id || null,
+        employee_name: empLabel,
+        status: "pending_manager", manager_status: "pending", hr_status: "pending",
+        manager_id, manager_name,
+      });
+      try { await notifyApproverForStatus(base44, { type: "equipment", employeeId, employeeName: empLabel, status: "pending_manager" }); } catch {}
+      return Response.json({ ok: true, equipment: created });
+    }
+
+    if (action === "create_complaint") {
+      const p = pick(body.payload || {}, ["complaint_type", "custom_type", "description", "is_confidential", "department"]);
+      p.submitted_date = todayISO();
+      const confidential = p.is_confidential === true || p.is_confidential === "true";
+      const { manager_id, manager_name } = await resolveManager();
+      // الشكوى السرية تُحال مباشرة للموارد البشرية دون المرور بالمدير المباشر.
+      const status = confidential ? "manager_approved" : "pending_manager";
+      const created = await base44.asServiceRole.entities.Complaint.create({
+        ...p,
+        employee_id: employeeId,
+        employee_user_id: emp.user_id || null,
+        employee_name: empLabel,
+        department: p.department || emp?.department || "",
+        is_confidential: confidential,
+        status,
+        manager_status: confidential ? "approved" : "pending", hr_status: "pending",
+        manager_id: confidential ? null : manager_id, manager_name: confidential ? "" : manager_name,
+      });
+      try { await notifyApproverForStatus(base44, { type: "complaint", employeeId, employeeName: empLabel, status }); } catch {}
+      return Response.json({ ok: true, complaint: created });
     }
 
     if (action === "create_trip") {

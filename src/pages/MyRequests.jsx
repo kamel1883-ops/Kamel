@@ -5,6 +5,8 @@ import PageHeader from "@/components/PageHeader";
 import LeaveRequestForm from "@/components/LeaveRequestForm";
 import LoanRequestForm from "@/components/LoanRequestForm";
 import BusinessTripForm from "@/components/BusinessTripForm";
+import EquipmentRequestForm from "@/components/EquipmentRequestForm";
+import ComplaintForm from "@/components/ComplaintForm";
 import EmployeeClock from "@/components/EmployeeClock";
 import EmployeeWarnings from "@/components/EmployeeWarnings";
 import EmployeeDecisions from "@/components/portal/EmployeeDecisions";
@@ -25,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  CalendarPlus, Wallet, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown, ArrowRight, ShieldCheck, Building2
+  CalendarPlus, Wallet, Loader2, BadgeCheck, Clock, Banknote, CalendarCheck, Plane, LogOut, Crown, ArrowRight, ShieldCheck, Building2, Package, MessageSquareWarning
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { leaveTypeLabel, formatCurrency, attendanceStatusLabel } from "@/lib/hr";
@@ -92,6 +94,10 @@ export default function MyRequests() {
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [loanOpen, setLoanOpen] = useState(false);
   const [tripOpen, setTripOpen] = useState(false);
+  const [eqOpen, setEqOpen] = useState(false);
+  const [compOpen, setCompOpen] = useState(false);
+  const [equipmentReqs, setEquipmentReqs] = useState([]);
+  const [complaints, setComplaints] = useState([]);
   const [view, setView] = useState("self");
   const didInitView = useRef(false);
   useEffect(() => {
@@ -126,6 +132,8 @@ export default function MyRequests() {
       setSettlements(data.settlements || []);
       setDecisions(data.decisions || []);
       setIncentives(data.incentives || []);
+      setEquipmentReqs(data.equipmentRequests || []);
+      setComplaints(data.complaints || []);
       setTodayAtt(data.attendance?.find((a) => a.date === localToday()) || null);
     } catch (e) {
       setSignInMsg({ type: "err", text: e?.message || t.loading });
@@ -151,7 +159,7 @@ export default function MyRequests() {
     setSession(null);
     setEmployee(null); setOrg(null); setBranch(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
-    setDecisions([]); setIncentives([]);
+    setDecisions([]); setIncentives([]); setEquipmentReqs([]); setComplaints([]);
     setView("self");
   };
 
@@ -188,6 +196,22 @@ export default function MyRequests() {
     const data = res?.data || res;
     if (!data?.ok) throw new Error(data?.error || "fail");
     return data.trip;
+  };
+  const portalCreateEquipment = async (payload) => {
+    const res = await base44.functions.invoke("portalData", {
+      ...portalArgs, action: "create_equipment", payload,
+    });
+    const data = res?.data || res;
+    if (!data?.ok) throw new Error(data?.error || "fail");
+    return data.equipment;
+  };
+  const portalCreateComplaint = async (payload) => {
+    const res = await base44.functions.invoke("portalData", {
+      ...portalArgs, action: "create_complaint", payload,
+    });
+    const data = res?.data || res;
+    if (!data?.ok) throw new Error(data?.error || "fail");
+    return data.complaint;
   };
 
   const clockApi = {
@@ -341,10 +365,12 @@ export default function MyRequests() {
               subtitle={`${employee.full_name || ""}`}
               action={
                 <div className="flex flex-wrap gap-2">
-                  {can("leaves") && <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>}
-                  <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> {t.loanBtn}</Button>
-                  {can("business-trips") && <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>}
-                </div>
+                   {can("leaves") && <Button onClick={() => setLeaveOpen(true)} variant="outline" className="gap-2"><CalendarPlus size={18} /> {t.leaveBtn}</Button>}
+                   <Button onClick={() => setLoanOpen(true)} variant="outline" className="gap-2"><Wallet size={18} /> {t.loanBtn}</Button>
+                   {can("business-trips") && <Button onClick={() => setTripOpen(true)} className="gap-2"><Plane size={18} /> {t.tripBtn}</Button>}
+                   <Button onClick={() => setEqOpen(true)} variant="outline" className="gap-2"><Package size={18} /> {isAr ? "طلب عهدة" : "Equipment"}</Button>
+                   <Button onClick={() => setCompOpen(true)} variant="outline" className="gap-2"><MessageSquareWarning size={18} /> {isAr ? "رفع شكوى" : "Complaint"}</Button>
+                 </div>
               }
             />
 
@@ -491,9 +517,55 @@ export default function MyRequests() {
               )}
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <Section title={isAr ? "طلبات العهد" : "Equipment requests"}>
+                {equipmentReqs.length === 0 ? <Empty text={isAr ? "لا توجد طلبات عهد" : "No equipment requests"} /> : equipmentReqs.map((r) => {
+                  const st = (s) => {
+                    const m = { pending_manager: { label: isAr ? "بانتظار المدير" : "Awaiting manager", cls: "bg-amber-50 text-amber-600" }, manager_approved: { label: isAr ? "بانتظار الموارد" : "Awaiting HR", cls: "bg-blue-50 text-blue-600" }, completed: { label: isAr ? "تم التسليم ✅" : "Delivered ✅", cls: "bg-emerald-100 text-emerald-700" }, rejected: { label: isAr ? "مرفوض" : "Rejected", cls: "bg-rose-50 text-rose-600" } };
+                    return m[s] || { label: s || "—", cls: "bg-slate-100 text-slate-600" };
+                  };
+                  const b = st(r.status);
+                  return (
+                    <Row key={r.id}>
+                      <div>
+                        <div className="font-medium text-sm">{r.item_label}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{r.reason}</div>
+                        <RequestDate r={r} isAr={isAr} />
+                        {r.status === "rejected" && <RejectedNote reason={{ who: isAr ? "الموارد البشرية" : "HR", text: r.hr_note || r.manager_note || "" }} t={t} />}
+                      </div>
+                      <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", b.cls)}>{b.label}</span>
+                    </Row>
+                  );
+                })}
+              </Section>
+              <Section title={isAr ? "الشكاوى" : "Complaints"}>
+                {complaints.length === 0 ? <Empty text={isAr ? "لا توجد شكاوى" : "No complaints"} /> : complaints.map((r) => {
+                  const st = (s) => {
+                    const m = { pending_manager: { label: isAr ? "بانتظار المدير" : "Awaiting manager", cls: "bg-amber-50 text-amber-600" }, manager_approved: { label: isAr ? "بانتظار الموارد" : "Awaiting HR", cls: "bg-blue-50 text-blue-600" }, resolved: { label: isAr ? "تم الحل ✅" : "Resolved ✅", cls: "bg-emerald-100 text-emerald-700" }, rejected: { label: isAr ? "مرفوضة" : "Rejected", cls: "bg-rose-50 text-rose-600" } };
+                    return m[s] || { label: s || "—", cls: "bg-slate-100 text-slate-600" };
+                  };
+                  const b = st(r.status);
+                  return (
+                    <Row key={r.id}>
+                      <div>
+                        <div className="font-medium text-sm">{r.custom_type || r.complaint_type}</div>
+                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.description}</div>
+                        <RequestDate r={{ ...r, request_date: r.submitted_date }} isAr={isAr} />
+                        {r.status === "resolved" && r.hr_resolution && <div className="text-[11px] text-emerald-700 mt-1">{isAr ? "الحل:" : "Resolution:"} {r.hr_resolution}</div>}
+                        {r.status === "rejected" && <RejectedNote reason={{ who: isAr ? "الموارد البشرية" : "HR", text: r.hr_resolution || r.manager_note || "" }} t={t} />}
+                      </div>
+                      <span className={cn("text-xs px-3 py-1.5 rounded-full font-medium", b.cls)}>{b.label}</span>
+                    </Row>
+                  );
+                })}
+              </Section>
+            </div>
+
             <LeaveRequestForm open={leaveOpen} onClose={() => setLeaveOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateLeave} />
             <LoanRequestForm open={loanOpen} onClose={() => setLoanOpen(false)} onSaved={() => load(session)} employee={employee} portalCreate={portalCreateLoan} />
             <BusinessTripForm open={tripOpen} onClose={() => setTripOpen(false)} onSaved={() => load(session)} employees={[employee]} currentUserEmployee={employee} portalCreate={portalCreateTrip} />
+            <EquipmentRequestForm open={eqOpen} onClose={() => setEqOpen(false)} onSaved={() => load(session)} employee={employee} portalCreate={portalCreateEquipment} />
+            <ComplaintForm open={compOpen} onClose={() => setCompOpen(false)} onSaved={() => load(session)} employee={employee} portalCreate={portalCreateComplaint} />
 
             {can("performance") && (
             <div className="mt-6">

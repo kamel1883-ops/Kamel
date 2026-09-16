@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, PlaneTakeoff, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe, ScrollText, Gift, Bell } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, PlaneTakeoff, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe, ScrollText, Gift, Bell, Package, MessageSquareWarning } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { Image } from "@/components/ui/image";
@@ -25,6 +25,8 @@ const appNav = [
   { to: "/flight-bookings", ar: "حجوزات الطيران", en: "Flight Bookings", icon: PlaneTakeoff },
   { to: "/payroll", ar: "إدارة الرواتب", en: "Payroll", icon: Wallet },
   { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield },
+  { to: "/equipment", ar: "العهد والمصروفات", en: "Custody & Expenses", icon: Package },
+  { to: "/complaints", ar: "الشكاوى", en: "Complaints", icon: MessageSquareWarning },
   { to: "/fleet", ar: "إدارة المركبات", en: "Fleet", icon: Car },
   { to: "/end-of-service", ar: "إدارة نهاية الخدمة", en: "End of Service", icon: FileText },
   { to: "/performance", ar: "إدارة الأداء", en: "Performance", icon: Target },
