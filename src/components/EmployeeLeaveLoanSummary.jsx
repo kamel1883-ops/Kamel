@@ -14,7 +14,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
   const t = isAr ? {
     leaveTitle: "رصيد الإجازات (محسوب تلقائياً من تاريخ المباشرة)",
     entitled: "المستحق", used: "المستخدم", remaining: "المتبقي", day: "يوم",
-    systemNote: (g) => g ? "30 يوماً/سنة عن كامل المدة (سياسة المنشأة) · تناسبي شهرياً من تاريخ المباشرة" : "21 يوماً/سنة لأول 5 سنوات + 30 يوماً/سنة بعدها · تناسبي شهرياً من تاريخ المباشرة",
+    systemNote: (g) => g ? "30 يوماً/سنة عن كامل المدة (سياسة المنشأة) · تراكم يومي فعلي من تاريخ المباشرة" : "21 يوماً/سنة لأول 5 سنوات + 30 يوماً/سنة بعدها · تراكم يومي فعلي من تاريخ المباشرة",
     settlementsTitle: "سجل التصفيات", noSettlements: "لا توجد تصفيات بعد",
     days: (n) => `${n} يوم`, settlement: "المخالصة", generate: "توليد",
     usedBreak: (p, s) => `المستخدم = رصيد افتتاحي ${p} يوم (قبل النظام) + ${s} يوم معتمدة داخل النظام`,
@@ -24,7 +24,7 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
   } : {
     leaveTitle: "Leave balance (auto-calculated from hire date)",
     entitled: "Accrued", used: "Used", remaining: "Remaining", day: "days",
-    systemNote: (g) => g ? "30 days/yr for full tenure (org policy) · prorated monthly from hire date" : "21 days/yr first 5 years + 30 days/yr after · prorated monthly from hire date",
+    systemNote: (g) => g ? "30 days/yr for full tenure (org policy) · accrued daily from hire date" : "21 days/yr first 5 years + 30 days/yr after · accrued daily from hire date",
     settlementsTitle: "Settlements log", noSettlements: "No settlements yet",
     days: (n) => `${n} d`, settlement: "Settlement", generate: "Generate",
     usedBreak: (p, s) => `Used = ${p} d opening balance (pre-system) + ${s} d approved in-system`,

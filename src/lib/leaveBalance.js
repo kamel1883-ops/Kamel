@@ -12,13 +12,22 @@ export function monthDiff(fromISO, toISO) {
   return Math.max(0, months);
 }
 
-// الرصيد المستحق تناسبياً شهرياً من تاريخ المباشرة
+// عدد أيام الخدمة الفعلية من تاريخ المباشرة حتى تاريخ مرجعي
+export function serviceDays(hireDate, asOf = new Date()) {
+  if (!hireDate) return 0;
+  const a = new Date(hireDate);
+  const b = asOf instanceof Date ? asOf : new Date(asOf);
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
+  return Math.max(0, Math.floor((b - a) / 86400000));
+}
+
+// الرصيد المستحق تناسبياً بالأيام الفعلية من تاريخ المباشرة (21 أو 30 يوماً عن كل 365 يوم خدمة)
 export function computeEntitlement(hireDate, annualDays, asOf = new Date()) {
   const days = Number(annualDays) || 21;
   if (!hireDate) return 0;
-  const months = monthDiff(hireDate, asOf instanceof Date ? asOf.toISOString() : asOf);
-  if (months <= 0) return 0;
-  return Math.round((months / 12) * days * 10) / 10;
+  const sd = serviceDays(hireDate, asOf);
+  if (sd <= 0) return 0;
+  return Math.round((sd / 365) * days * 100) / 100;
 }
 
 // الرصيد المستحق (التراكمي) وفق نظام العمل السعودي: 21 يوماً عن كل سنة من أول
@@ -27,15 +36,16 @@ export function computeEntitlement(hireDate, annualDays, asOf = new Date()) {
 // مثال: 6 سنوات خدمة = (5 × 21) + (1 × 30) = 135 يوماً (وليس 30 × 6 = 180).
 export function computeLeaveEntitlement(hireDate, org, asOf = new Date()) {
   if (!hireDate) return 0;
-  const months = monthDiff(hireDate, asOf instanceof Date ? asOf.toISOString() : asOf);
-  if (months <= 0) return 0;
+  // تراكم يومي فعلي: كل يوم خدمة يكتسب (21 أو 30) ÷ 365 من اليوم
+  const sd = serviceDays(hireDate, asOf);
+  if (sd <= 0) return 0;
   if (Number(org?.annual_leave_days) === 30) {
-    return Math.round((months / 12) * 30 * 10) / 10;
+    return Math.round((sd / 365) * 30 * 100) / 100;
   }
-  const first60 = Math.min(months, 60);
-  const beyond = Math.max(0, months - 60);
-  const val = (first60 / 12) * 21 + (beyond / 12) * 30;
-  return Math.round(val * 10) / 10;
+  const first5y = Math.min(sd, 1826); // 5 سنوات = 21 يوماً/سنة
+  const beyond = Math.max(0, sd - 1826); // بعدها 30 يوماً/سنة
+  const val = (first5y / 365) * 21 + (beyond / 365) * 30;
+  return Math.round(val * 100) / 100;
 }
 
 export async function getOrgOnce() {
