@@ -308,11 +308,12 @@ export default function Approvals() {
   const forwardToFinance = async (r) => {
     try {
       const emp = empOf(r.employee_id);
-      const annual = getEmployeeAnnualDays(emp, org);
-      const used = Number(emp?.prior_used_leave) || 0;
       const consume = (r.leave_type === "annual" || r.is_full_clearance);
       const granted = consume ? (Number(r.balance_deducted) || 0) : 0;
-      const newUsed = used + granted;
+      // مصدر واحد للحقيقة: المستخدم من طلبات الإجازة السنوية المعتمدة الأخرى (بلا تضاعف عبر prior_used_leave).
+      const otherUsed = sumUsedDays((leaves || []).filter((l) => l.id !== r.id && l.employee_id === r.employee_id));
+      const totalUsed = otherUsed + granted;
+      const entitled = computeLeaveEntitlement(emp?.hire_date, org);
       // جميع الإجازات تنتقل لبانتظار المالية بعد اعتماد الموارد البشرية — لا تكتمل إلا باعتماد المالية.
       const patchFin = { hr_status: "approved", status: "awaiting_finance", finance_status: "pending" };
       setLeaves((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...patchFin } : x)));
@@ -320,10 +321,8 @@ export default function Approvals() {
       // تنبيه المالية بوجود إجازة بانتظار الصرف
       try { await base44.functions.invoke("notifyApprover", { type: "leave", employeeId: r.employee_id, employeeName: r.employee_name, status: "awaiting_finance" }); } catch (e) {}
       if (emp) {
-        // prior_used_leave يُجمَّد كقيمة لما قبل النظام — لا نزيده هنا كي لا نضاعف العدّ مع
-        // sumUsedDays التي تحصي طلبات الإجازة المعتمدة لحظياً (مصدر الحقيقة الموحّد).
         await base44.entities.Employee.update(emp.id, {
-          leave_balance: Math.max(0, annual - (used + granted)),
+          leave_balance: Math.max(0, Math.round((entitled - totalUsed) * 10) / 10),
           status: "on_leave",
         });
       }

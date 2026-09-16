@@ -133,7 +133,8 @@ export default function EndOfService() {
   const liveBalance = emp ? (() => {
     const asOf = lwd ? new Date(lwd) : new Date();
     const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
-    const used = Math.round((sumUsedDays(empLeaves) + (Number(emp.prior_used_leave) || 0)) * 10) / 10;
+    // sumUsedDays هو المصدر الموحّد — لا نضيف prior_used_leave لتجنب الحساب المزدوج.
+    const used = Math.round(sumUsedDays(empLeaves) * 10) / 10;
     return { ent, used, remaining: Math.max(0, Math.round((ent - used) * 10) / 10) };
   })() : null;
 
@@ -143,7 +144,8 @@ export default function EndOfService() {
     const asOf = lwd ? new Date(lwd) : new Date();
     const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
     // رصيد الإجازات المتبقي من ملف الموظف: المستحق − المستخدم فعلياً (طلبات الإجازة) − المستخدم سابقاً
-    const used = Math.round((sumUsedDays(empLeaves) + (Number(emp.prior_used_leave) || 0)) * 10) / 10;
+    // sumUsedDays هو المصدر الموحّد — لا نضيف prior_used_leave لتجنب الحساب المزدوج.
+    const used = Math.round(sumUsedDays(empLeaves) * 10) / 10;
     const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
     const record = {
