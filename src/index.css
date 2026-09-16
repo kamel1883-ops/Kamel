@@ -328,7 +328,9 @@ body, p, span, article, li, td, th, input, textarea, label, h1, h2, h3, h4, h5, 
   user-select: text;
 }
 
+/* منع سحب الصفحة أفقياً فقط — مع السماح لعجلة الماوس بتمرير الصفحة رأسياً عند الوقوف فوق الجداول */
 [class*="overflow-auto"], [class*="overflow-y-auto"], [class*="overflow-x-auto"], .scrollable {
-  overscroll-behavior: none;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
