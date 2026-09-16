@@ -163,14 +163,40 @@ export default async function (req) {
     const validPreview = [];
     const localSeen = new Set();
 
+    // أرقام الموظفين الموجودة في الملف — للتحقق من المدير المباشر قبل الحفظ
+    const fileNumbers = new Set();
+    for (const rawRow of records) {
+      const n = String(rawRow?.employee_number ?? rawRow?.['الرقم الوظيفي'] ?? '').trim();
+      if (n) fileNumbers.add(n);
+    }
+    const issues = []; // { row, name, employee_number, problems: [] }
+    let rowNo = 0;
+
     for (const rawRow of records) {
       const r = normalizeRecord(rawRow);
       // تخطٍّ الصفوف الفارغة (صفوف الصيغة الجاهزة بلا بيانات تعريفية)
       if (!r.employee_number && !r.full_name && !r.national_id) continue;
       detected++;
+      rowNo++;
+      const mgr = String(r.manager_employee_number || '').trim();
+      if (mgr && !fileNumbers.has(mgr) && !byNumber.has(mgr)) {
+        issues.push({
+          row: rowNo, name: r.full_name || '—', employee_number: r.employee_number || '—',
+          problems: [`المدير المباشر غير معروف (الرقم الوظيفي: ${mgr})`],
+        });
+      }
       const missing = REQUIRED.filter((f) => !r[f.key]);
       if (missing.length) {
-        incomplete.push({ ref: r.employee_number || r.full_name || r.national_id || '—', missing: missing.map((m) => m.label) });
+        incomplete.push({
+          row: rowNo,
+          ref: r.employee_number || r.full_name || r.national_id || '—',
+          name: r.full_name || '—',
+          missing: missing.map((m) => m.label),
+        });
+        issues.push({
+          row: rowNo, name: r.full_name || '—', employee_number: r.employee_number || '—',
+          problems: missing.map((m) => `حقل إلزامي ناقص: ${m.label}`),
+        });
         continue;
       }
       const key = String(r.employee_number).trim();
@@ -235,7 +261,8 @@ export default async function (req) {
       valid: toCreate.length,
       duplicate,
       incomplete_count: incomplete.length,
-      incomplete: incomplete.slice(0, 50),
+      incomplete: incomplete.slice(0, 100),
+      issues: issues.slice(0, 200),
       preview: confirm ? [] : validPreview.slice(0, 200),
       confirm,
       saved,

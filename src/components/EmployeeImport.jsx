@@ -10,6 +10,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import { useI18n } from "@/lib/i18n";
 import { parseEmployeeFile } from "@/lib/employeeImport";
+import ExcelJS from "exceljs";
 
 const TEMPLATE_HEADERS = [
   "الاسم الكامل", "الرقم الوظيفي", "الهوية الوطنية / رقم الإقامة", "البريد الإلكتروني",
@@ -36,15 +37,17 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
   const t = isAr ? {
     title: "استيراد الموظفين عبر Excel",
     desc: "حمّل القالب، عبّئ بيانات موظفيك (مع تحديد الفرع لكل موظف)، ثم ارفع الملف. اضغط «استيراد الآن» للتحقق ومعاينة الموظفين المكتشَفين، ثم أكّد إضافتهم إلى المنشأة.",
-    download: "تحميل قالب Excel (CSV)",
+    download: "تحميل قالب Excel (XLSX)",
     upload: "اختر ملف Excel/CSV",
     importing: "جارٍ التحليل والتحقق…",
     import: "استيراد الآن",
     close: "إغلاق",
-    supported: "صيغ مدعومة: CSV / Excel (xlsx) — يجب أن تحتوي الأعمدة على نفس حقول القالب.",
+    supported: "صيغ مدعومة: Excel (xlsx) و CSV — يجب أن تحتوي الأعمدة على نفس حقول القالب.",
     result: "نتيجة التحقق",
     detected: "تم التعرف عليها", valid: "صالحة للاستيراد", duplicate: "مكرر (موجود)", incomplete: "ناقصة حقول",
     incompleteTitle: "صفوف ناقصة حقول إلزامية",
+    issuesTitle: "أخطاء مكتشفة في الملف",
+    issuesHint: "الترقيم يبدأ من أول موظف في الملف (وليس رقم صف الإكسل) — افتح الملف وصحّح الموظف المذكور برقمه.",
     validList: "الموظفون الصالحون",
     confirmQ: "هل ترغب بإضافة هؤلاء الموظفين إلى المنشأة؟ سيتم تثبيتهم في قائمة الموظفين النشطين.",
     confirmBtn: "إضافة الموظفين إلى المنشأة",
@@ -57,7 +60,7 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
   } : {
     title: "Import Employees via Excel",
     desc: "Download the template, fill your staff data (set the branch per employee), then upload. Click 'Import now' to verify and preview detected employees, then confirm adding them to the organization.",
-    download: "Download Excel template (CSV)",
+    download: "Download Excel template (XLSX)",
     upload: "Choose an Excel/CSV file",
     importing: "Analyzing & verifying…",
     import: "Import now",
@@ -66,6 +69,8 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
     result: "Verification result",
     detected: "Detected", valid: "Valid to import", duplicate: "Duplicate (exists)", incomplete: "Missing fields",
     incompleteTitle: "Rows missing required fields",
+    issuesTitle: "Issues found in the file",
+    issuesHint: "Numbering starts from the first employee in the file (not the Excel row number).",
     validList: "Valid employees",
     confirmQ: "Do you want to add these employees to the organization? They will be confirmed in the active employees list.",
     confirmBtn: "Add employees to organization",
@@ -130,13 +135,18 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
       rows.push(row);
     }
 
-    const bom = "\uFEFF";
-    const csv = bom + rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(isAr ? "الموظفون" : "Employees", { views: [{ rightToLeft: isAr }] });
+    rows.forEach((r) => ws.addRow(r.map((c) => (typeof c === "string" && c.startsWith("=") ? { formula: c.slice(1) } : c))));
+    ws.getRow(1).font = { bold: true };
+    ws.getRow(1).height = 28;
+    ws.columns = TEMPLATE_HEADERS.map((h) => ({ width: Math.min(38, Math.max(14, h.length + 4)) }));
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = isAr ? "قالب_موظفي_جداره.csv" : "jadara_employees_template.csv";
+    a.download = isAr ? "قالب_موظفي_جداره.xlsx" : "jadara_employees_template.xlsx";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -217,13 +227,21 @@ export default function EmployeeImport({ open, onClose, onSaved }) {
                   <Metric label={t.incomplete} value={preview.incomplete_count} tone="rose" />
                 </div>
 
-                {preview.incomplete_count > 0 && (
-                  <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 space-y-1.5">
-                    <div className="flex items-center gap-2 text-rose-700 text-sm font-medium"><AlertTriangle size={14} /> {t.incompleteTitle}</div>
-                    <div className="max-h-40 overflow-y-auto space-y-1 text-xs">
-                      {preview.incomplete.map((inc, i) => (
-                        <div key={i} className="text-rose-700">
-                          <span className="font-medium">{inc.ref}</span> — {isAr ? "ينقص:" : "missing:"} {inc.missing.join("، ")}
+                {(preview.issues?.length > 0) && (
+                  <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 space-y-2">
+                    <div className="flex items-center gap-2 text-rose-700 text-sm font-medium"><AlertTriangle size={14} /> {t.issuesTitle}</div>
+                    <p className="text-[11px] text-rose-600">{t.issuesHint}</p>
+                    <div className="max-h-52 overflow-y-auto space-y-1.5 text-xs">
+                      {preview.issues.map((iss, i) => (
+                        <div key={i} className="rounded-lg bg-white border border-rose-200 px-2.5 py-1.5">
+                          <div className="font-bold text-rose-700">
+                            {isAr ? `الموظف رقم ${iss.row}` : `Employee #${iss.row}`}
+                            {iss.name && iss.name !== "—" ? ` — ${iss.name}` : ""}
+                            {iss.employee_number && iss.employee_number !== "—" ? ` (${iss.employee_number})` : ""}
+                          </div>
+                          <ul className="list-disc ps-4 mt-0.5 text-rose-700">
+                            {iss.problems.map((p, j) => <li key={j}>{p}</li>)}
+                          </ul>
                         </div>
                       ))}
                     </div>
