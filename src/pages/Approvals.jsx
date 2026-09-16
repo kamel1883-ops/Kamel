@@ -158,11 +158,11 @@ export default function Approvals() {
     const s = r.status;
     if (type === "trips") {
       const tb = [];
-      // معتمد الموارد البشرية يستطيع اعتماد الانتداب حتى قبل أن يوافق المدير المباشر.
+      // الموارد البشرية لا تعتمد الانتداب إلا بعد موافقة المدير المباشر.
       if ((s === "pending_manager" || s === "pending" || s === "draft") && isManagerOf(r)) {
         tb.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
         tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
-      } else if (isHR && (s === "manager_approved" || s === "pending_manager" || s === "pending" || s === "draft")) {
+      } else if (s === "manager_approved" && isHR) {
         tb.push({ label: t.hrTripApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openTripApprove(r) });
         tb.push({ label: t.tripReject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openTripReject(r) });
       } else if (s === "awaiting_finance" && isFinance) {
@@ -174,13 +174,13 @@ export default function Approvals() {
     }
 
     // السلف: تمرّ بالمدير المباشر ← الموارد البشرية ← المالية
-    // معتمد الموارد البشرية يستطيع اعتماد السلفة حتى قبل أن يوافق المدير المباشر.
+    // الموارد البشرية لا تعتمد السلفة إلا بعد موافقة المدير المباشر.
     if (type === "loans") {
       const btns = [];
       if ((s === "pending_manager" || s === "pending") && isManagerOf(r)) {
         btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
         btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "manager") });
-      } else if (isHR && (s === "manager_approved" || s === "pending_manager" || s === "pending")) {
+      } else if (s === "manager_approved" && isHR) {
         btns.push({ label: t.hrApprove, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLoanHr(r) });
         btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject("loans", r, "hr") });
       } else if ((s === "awaiting_finance" || s === "hr_approved") && isFinance) {
@@ -197,15 +197,12 @@ export default function Approvals() {
     }
 
     // الإجازات: المدير المباشر ← الموارد البشرية ← المالية
-    // معتمد الموارد البشرية يستطيع التصرف على الطلب وإعتماده حتى وهو لا يزال
-    // في انتظار المدير المباشر (pending_manager) — يُدخل عليه من صفحة الموافقات
-    // ويعتمده مباشرة دون انتظار موافقة المدير.
+    // الموارد البشرية لا تتصرف على الطلب إلا بعد موافقة المدير المباشر (manager_approved).
     const btns = [];
-    const mgrCanApprove = (s === "pending_manager" || s === "pending") && isManagerOf(r);
-    if (mgrCanApprove) {
+    if ((s === "pending_manager" || s === "pending") && isManagerOf(r)) {
       btns.push({ label: t.mgrApprove, cls: "bg-emerald-600 hover:bg-emerald-700", onClick: () => managerApprove(type, r) });
       btns.push({ label: t.reject, cls: "bg-rose-50 text-rose-600 hover:bg-rose-100", onClick: () => openReject(type, r, "manager") });
-    } else if (isHR && (s === "manager_approved" || s === "pending_manager" || s === "pending")) {
+    } else if (s === "manager_approved" && isHR) {
       if (needsFinance(r, empOf(r.employee_id), org)) {
         btns.push({ label: t.leaveHrBtn, cls: "bg-violet-600 hover:bg-violet-700", onClick: () => openLeaveHr(r) });
       } else {
