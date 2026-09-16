@@ -16,7 +16,7 @@ import { useI18n } from "@/lib/i18n";
 import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
 import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
-import { yearsOfService } from "@/lib/leaveBalance";
+import { yearsOfService, getOrgOnce } from "@/lib/leaveBalance";
 
 const empty = {
   full_name: "",
@@ -53,8 +53,10 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     saudi: "سعودي؟", saudiY: "سعودي", saudiN: "مقيم", iqama: "انتهاء الإقامة/الهوية",
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
-    annualLeaveEnt: "رصيد الإجازات السنوي (يحدده الموارد البشرية)", d21: "21 يوم", d30: "30 يوم",
+    annualLeaveEnt: "رصيد الإجازات السنوي (مقفل وفق نظام العمل السعودي)", d21: "21 يوم", d30: "30 يوم",
     leaveLockNote: "أكمل الموظف 5 سنوات خدمة، فاستحقّت إجازته 30 يوماً سنوياً حسب نظام العمل السعودي — لا يمكن اختيار 21 يوماً.",
+    leaveLock21Note: "الموظف لم يكمل 5 سنوات خدمة بعد — يستحق 21 يوماً سنوياً حسب نظام العمل السعودي، ولا يتاح 30 يوماً حتى يكمل الخمس سنوات.",
+    leaveLockOrgNote: "سياسة المنشأة تمنح 30 يوماً إجازة سنوية للجميع — لا يمكن اختيار 21 يوماً.",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
     approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)", approverHr: "معتمد موارد بشرية (سلف وانتدابات)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
@@ -76,8 +78,10 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     saudi: "Saudi?", saudiY: "Saudi", saudiN: "Expat", iqama: "Iqama/ID expiry",
     passNo: "Passport number", passExp: "Passport expiry", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
-    annualLeaveEnt: "Annual leave entitlement (set by HR)", d21: "21 days", d30: "30 days",
+    annualLeaveEnt: "Annual leave entitlement (locked per Saudi Labor Law)", d21: "21 days", d30: "30 days",
     leaveLockNote: "Employee completed 5 years of service — entitled to 30 days annual leave per Saudi Labor Law; 21 days cannot be selected.",
+    leaveLock21Note: "Employee has not yet completed 5 years of service — entitled to 21 days annual leave per Saudi Labor Law; 30 days is unavailable until 5 years are completed.",
+    leaveLockOrgNote: "Company policy grants 30 days annual leave to everyone — 21 days cannot be selected.",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
     approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)", approverHr: "HR approver (loans & trips)",
     deptHint: "Pick from existing departments or type a new one",
@@ -94,19 +98,26 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
   const [generating, setGenerating] = useState(false);
   const [allEmployees, setAllEmployees] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [org, setOrg] = useState(null);
 
   useEffect(() => { setForm(employee ? { ...empty, ...employee } : empty); }, [employee, open]);
   useEffect(() => {
     base44.entities.Employee.list("-created_date", 500).then((list) => setAllEmployees(list));
     base44.entities.Branch.list("-is_main", 500).then((list) => setBranches(list));
+    getOrgOnce().then(setOrg);
   }, [open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  // قاعدة الخمس سنوات: إكمال 5 سنوات خدمة → إجازة 30 يوماً إجبارياً، ويُقفل خيار 21
-  const leaveLocked30 = yearsOfService(form.hire_date) >= 5;
+  // قاعدة الخمس سنوات + سياسة المنشأة: تحدد الخيار الوحيد المتاح للموارد البشرية.
+  // - orgPolicy30: المنشأة تمنح 30 يوماً للجميع → 30 فقط (يُقفل 21).
+  // - أكمل 5 سنوات خدمة → 30 يوماً إلزامياً (يُقفل 21).
+  // - أقل من 5 سنوات (دون سياسة 30) → 21 يوماً فقط (يُقفل 30).
+  const orgPolicy30 = Number(org?.annual_leave_days) === 30;
+  const leaveLocked30 = orgPolicy30 || yearsOfService(form.hire_date) >= 5;
   useEffect(() => {
-    if (leaveLocked30 && Number(form.annual_leave_entitlement) !== 30) {
-      set("annual_leave_entitlement", 30);
+    const want = leaveLocked30 ? 30 : 21;
+    if (Number(form.annual_leave_entitlement) !== want) {
+      set("annual_leave_entitlement", want);
     }
   }, [leaveLocked30, form.annual_leave_entitlement]);
 
@@ -194,14 +205,19 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" lang={isAr ? "ar" : "en"} value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
             <Field label={t.annualLeaveEnt}>
-              <Select value={String(leaveLocked30 ? 30 : (form.annual_leave_entitlement === 30 ? 30 : 21))} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
+              <Select value={String(leaveLocked30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="21" disabled={leaveLocked30}>{t.d21}</SelectItem>
-                  <SelectItem value="30">{t.d30}</SelectItem>
+                  <SelectItem value="30" disabled={!leaveLocked30}>{t.d30}</SelectItem>
                 </SelectContent>
               </Select>
-              {leaveLocked30 && <p className="text-xs text-amber-600 mt-1.5 leading-relaxed">{t.leaveLockNote}</p>}
+              {leaveLocked30 && (
+                <p className="text-xs text-amber-600 mt-1.5 leading-relaxed">{orgPolicy30 ? t.leaveLockOrgNote : t.leaveLockNote}</p>
+              )}
+              {!leaveLocked30 && (
+                <p className="text-xs text-violet-600 mt-1.5 leading-relaxed">{t.leaveLock21Note}</p>
+              )}
             </Field>
             <Field label={t.contractStart}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
             <Field label={t.contractEnd}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>
