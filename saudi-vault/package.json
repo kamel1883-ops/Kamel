@@ -1,0 +1,19 @@
+{
+  "name": "jadara-saudi-vault",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Saudi Data Vault for Jadara HR SaaS — stores sensitive identity, financial, and document data inside Saudi Arabia per SDAYA / NCA requirements.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "migrate": "node src/migrate.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.12.0"
+  }
+}

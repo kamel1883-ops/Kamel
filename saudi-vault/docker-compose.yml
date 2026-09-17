@@ -1,0 +1,34 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vault
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: jadara_vault
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vault -d jadara_vault"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vault:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      PGHOST: db
+    volumes:
+      - ./storage:/app/storage
+    ports:
+      # اربط بـ localhost فقط — يجب كشفه للخارج عبر reverse proxy مع TLS إلزامي
+      - "127.0.0.1:4000:4000"
+
+volumes:
+  db_data:
