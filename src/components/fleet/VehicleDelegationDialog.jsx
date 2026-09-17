@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollText, FileText, RotateCcw, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { enrichEmployeesBatch } from "@/lib/vaultSensitive";
 import DelegationDocument from "./DelegationDocument";
 
 export default function VehicleDelegationDialog({ vehicle, employees, onClose, onSaved }) {
@@ -45,6 +46,15 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
   const [busy, setBusy] = useState(false);
   const [print, setPrint] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [enrichedEmps, setEnrichedEmps] = useState(employees);
+
+  useEffect(() => {
+    let on = true;
+    enrichEmployeesBatch(employees).then((m) => {
+      if (on) setEnrichedEmps(employees.map((x) => (x.emp_ref ? { ...x, ...m[x.emp_ref] } : x)));
+    });
+    return () => { on = false; };
+  }, [employees]);
 
   const load = async () => {
     setLoading(true);
@@ -62,7 +72,7 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
       if (cur) {
         await base44.entities.VehicleDelegation.update(cur.id, { is_current: false, return_date: date, status: "returned" });
       }
-      const emp = employees.find((e) => e.id === empId);
+      const emp = enrichedEmps.find((e) => e.id === empId);
       const plate = vehicle.plate_number || "";
       const label = [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(" ");
       const rec = await base44.entities.VehicleDelegation.create({
@@ -72,7 +82,8 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
         vehicle_label: label,
         employee_id: empId,
         employee_name: emp?.full_name || "",
-        national_id: emp?.national_id || "",
+        national_id: emp?.emp_ref ? "" : (emp?.national_id || ""),
+        emp_ref: emp?.emp_ref || "",
         position: emp?.position || "",
         department: emp?.department || "",
         delegation_date: date,
@@ -106,7 +117,7 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
                 <div className="font-medium text-emerald-700 mb-1">{t.currentLabel}</div>
                 <div className="flex flex-wrap gap-x-6 gap-y-1">
                   <span><b>{cur.employee_name}</b></span>
-                  <span className="text-muted-foreground">{t.id}: {cur.national_id || "—"}</span>
+                  <span className="text-muted-foreground">{t.id}: {cur.national_id || enrichedEmps.find((e) => e.id === cur.employee_id)?.national_id || "—"}</span>
                   <span className="text-muted-foreground">{t.from}: {cur.delegation_date}</span>
                   {cur.created_by_name && <span className="text-[11px] text-violet-700">{isAr ? "أُعدّت بواسطة" : "Prepared by"}: {cur.created_by_name}</span>}
                 </div>
@@ -122,7 +133,7 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
                 <Select value={empId} onValueChange={setEmpId}>
                   <SelectTrigger><SelectValue placeholder={t.pickEmp} /></SelectTrigger>
                   <SelectContent>
-                    {employees.map((e) => (
+                    {enrichedEmps.map((e) => (
                       <SelectItem key={e.id} value={e.id}>{e.full_name} — {e.national_id || "—"} {e.position ? `· ${e.position}` : ""}</SelectItem>
                     ))}
                   </SelectContent>
