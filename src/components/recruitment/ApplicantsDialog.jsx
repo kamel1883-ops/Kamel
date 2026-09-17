@@ -9,6 +9,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
 import AppointmentLetterDoc from "@/components/docs/AppointmentLetterDoc";
+import VaultDocLink from "@/components/VaultDocLink";
+import { archiveBlobToVault } from "@/lib/vaultDocuments";
 import { CheckCircle2, XCircle, CalendarClock, UserCheck, ClipboardList, Loader2, FileCheck } from "lucide-react";
 
 export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onEvaluate }) {
@@ -106,7 +108,7 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
       let docUrl = "";
       try {
         const blob = await renderToPdfBlob(<AppointmentLetterDoc applicant={{ ...a, hired_date: today }} job={job} org={org} />);
-        docUrl = await uploadPdfBlob(blob, `appointment_${a.id}.pdf`);
+        docUrl = await archiveBlobToVault(blob, { fileName: `appointment_${a.id}.pdf`, docType: "appointment_letter" }) || "";
       } catch (e) { console.error(e); }
 
       const empNo = "JDR-" + Date.now().toString().slice(-6);
@@ -172,8 +174,8 @@ export default function ApplicantsDialog({ open, onOpenChange, job, onHired, onE
                   </div>
                   {a.qualifications && <div className="text-sm text-muted-foreground">{t.qual}: {a.qualifications}</div>}
                   <div className="flex flex-wrap items-center gap-2">
-                    {a.cv_url && /^https?:\/\//i.test(a.cv_url) && <a href={a.cv_url} target="_blank" rel="noreferrer" className="text-xs text-violet-700 underline">{t.cv}</a>}
-                    {a.appointment_doc_url && /^https?:\/\//i.test(a.appointment_doc_url) && <a href={a.appointment_doc_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 underline inline-flex items-center gap-1"><FileCheck size={12} /> {t.apptDoc}</a>}
+                    {a.cv_url && <VaultDocLink value={a.cv_url} label={t.cv} className="text-xs h-7 px-2 text-violet-700" />}
+                    {a.appointment_doc_url && <VaultDocLink value={a.appointment_doc_url} label={t.apptDoc} className="text-xs h-7 px-2 text-emerald-700" />}
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {a.status === "applied" && <Button size="sm" variant="outline" onClick={() => setStatus(a, "screened")}><UserCheck size={14} /> {t.screen}</Button>}

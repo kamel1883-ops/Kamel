@@ -1,6 +1,7 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
-import { renderToPdfBlob, uploadPdfBlob } from "@/lib/pdfDocs";
+import { renderToPdfBlob } from "@/lib/pdfDocs";
+import { archiveBlobToVault } from "@/lib/vaultDocuments";
 import { computeLeaveEntitlement, usedLeaveTotal } from "@/lib/leaveBalance";
 import LeaveClearanceDoc from "@/components/docs/LeaveClearanceDoc";
 import LoanStatementDoc from "@/components/docs/LoanStatementDoc";
@@ -27,7 +28,7 @@ export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) 
   const blob = await renderToPdfBlob(
     <LeaveClearanceDoc employee={emp} leave={leave} org={org} balanceBefore={bBefore} balanceAfter={bAfter} daysCash={daysCash} dailyWage={dailyWage} />
   );
-  const url = await uploadPdfBlob(blob, `leave-settlement-${leave.id}.pdf`);
+  const url = await archiveBlobToVault(blob, { fileName: `leave-settlement-${leave.id}.pdf`, empRef: emp?.emp_ref || null, docType: "leave_settlement" }) || "";
   await base44.entities.LeaveRequest.update(leave.id, {
     settlement_pdf_url: url,
     balance_before: bBefore,
@@ -39,7 +40,7 @@ export async function generateLeaveSettlement(leave, emp, org, allLeavesForEmp) 
 // كشف سلفة — تُولّد PDF محدّث بالمدفوع/المتبقي وتُخزّن على الطلب
 export async function generateLoanStatement(loan, emp, org) {
   const blob = await renderToPdfBlob(<LoanStatementDoc employee={emp} loan={loan} org={org} />);
-  const url = await uploadPdfBlob(blob, `loan-statement-${loan.id}.pdf`);
+  const url = await archiveBlobToVault(blob, { fileName: `loan-statement-${loan.id}.pdf`, empRef: emp?.emp_ref || null, docType: "loan_statement" }) || "";
   await base44.entities.LoanRequest.update(loan.id, { statement_pdf_url: url });
   return url;
 }
@@ -47,7 +48,7 @@ export async function generateLoanStatement(loan, emp, org) {
 // مستند موافقة الانتداب — يُولّد PDF بتفاصيل الرحلة والملاحظات ويُخزّن على الطلب، ويُرجع الرابط
 export async function generateBusinessTripApproval(trip, emp, org) {
   const blob = await renderToPdfBlob(<BusinessTripApprovalDoc employee={emp} trip={trip} org={org} />);
-  const url = await uploadPdfBlob(blob, `trip-approval-${trip.id}.pdf`);
+  const url = await archiveBlobToVault(blob, { fileName: `trip-approval-${trip.id}.pdf`, empRef: emp?.emp_ref || null, docType: "trip_approval" }) || "";
   await base44.entities.BusinessTrip.update(trip.id, { approval_pdf_url: url });
   return url;
 }

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Logo from "@/components/Logo";
 import { useToast } from "@/components/ui/use-toast";
 import { Briefcase } from "lucide-react";
+import { uploadFileToVault } from "@/lib/vaultDocuments";
 
 export default function JobApply() {
   const { id } = useParams();
@@ -33,8 +34,8 @@ export default function JobApply() {
     try {
       let cv_url = "";
       if (cvFile) {
-        try { const r = await base44.integrations.Core.UploadFile({ file: cvFile }); cv_url = r.file_url; }
-        catch (e) { toast({ title: "تعذر رفع السيرة الذاتية", variant: "destructive" }); setSubmitting(false); return; }
+        cv_url = await uploadFileToVault(cvFile, { docType: "applicant_cv" }) || "";
+        if (!cv_url) { toast({ title: "تعذر رفع السيرة الذاتية للخزنة", variant: "destructive" }); setSubmitting(false); return; }
       }
       await base44.entities.JobApplication.create({
         job_id: job.id, job_title: job.title, full_name: form.full_name, email: form.email,

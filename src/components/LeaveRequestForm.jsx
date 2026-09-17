@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { differenceInDays, parseISO } from "date-fns";
 import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
 import { leaveFullTypeLabel } from "@/lib/hr";
+import { uploadFileToVault } from "@/lib/vaultDocuments";
 
 export default function LeaveRequestForm({ open, onClose, onSaved, employees, currentUserEmployee, portalCreate }) {
   usePortalI18n();
@@ -58,8 +59,7 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
       const emp = employees?.find((x) => x.id === form.employee_id);
       let medical_url = "";
       if (isSick && medicalFile) {
-        const up = await base44.integrations.Core.UploadFile({ file: medicalFile });
-        medical_url = up.file_url;
+        medical_url = await uploadFileToVault(medicalFile, { empRef: emp?.emp_ref || null, docType: "medical_report" }) || "";
       }
       const payload = {
         employee_id: form.employee_id,

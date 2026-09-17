@@ -17,6 +17,8 @@ import { getEmployeeAnnualDays, computeLeaveEntitlement, usedLeaveTotal } from "
 import { useI18n } from "@/lib/i18n";
 import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApproval } from "@/lib/docGenerators";
 import PullToRefresh from "@/components/PullToRefresh";
+import VaultDocLink from "@/components/VaultDocLink";
+import { uploadFileToVault } from "@/lib/vaultDocuments";
 
 export default function Approvals() {
   const { lang } = useI18n();
@@ -169,8 +171,8 @@ export default function Approvals() {
       } else if (s === "awaiting_finance" && isFinance) {
         tb.push({ label: t.pay, cls: "bg-blue-600 hover:bg-blue-700", onClick: () => openTripFinance(r) });
       }
-      if (r.approval_pdf_url) tb.push({ label: t.tripDocBtn, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.approval_pdf_url, icon: "download" });
-      if (r.finance_proof_url) tb.push({ label: t.finProof, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.finance_proof_url, icon: "download" });
+      if (r.approval_pdf_url) tb.push({ label: t.tripDocBtn, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", docRef: r.approval_pdf_url, icon: "download" });
+      if (r.finance_proof_url) tb.push({ label: t.finProof, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", docRef: r.finance_proof_url, icon: "download" });
       return tb;
     }
 
@@ -190,7 +192,7 @@ export default function Approvals() {
       const closed = (Number(r.amount) || 0) > 0 && (Number(r.paid_amount) || 0) >= (Number(r.amount) || 0);
       if (s === "paid" && !closed && isHR) btns.push({ label: t.loanPayBtn, cls: "bg-amber-100 text-amber-700 hover:bg-amber-200", onClick: () => openLoanPay(r) });
       if (r.statement_pdf_url) {
-        btns.push({ label: t.statement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.statement_pdf_url, icon: "download" });
+        btns.push({ label: t.statement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", docRef: r.statement_pdf_url, icon: "download" });
       } else {
         btns.push({ label: t.genStatement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeLoanStatement(r), icon: "refresh", busyKey: "loan" + r.id });
       }
@@ -218,7 +220,7 @@ export default function Approvals() {
     }
 
     if (r.settlement_pdf_url) {
-      btns.push({ label: t.printSettle, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", href: r.settlement_pdf_url, icon: "download" });
+      btns.push({ label: t.printSettle, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", docRef: r.settlement_pdf_url, icon: "download" });
     } else if (s === "completed" || s === "paid") {
       btns.push({ label: t.genSettlement, cls: "bg-slate-100 text-slate-700 hover:bg-slate-200", onClick: () => makeSettlement(r), icon: "refresh", busyKey: "l" + r.id });
     }
@@ -267,7 +269,7 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     let url = "";
-    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    if (proofFile) { url = await uploadFileToVault(proofFile, { empRef: empOf(acting.req.employee_id)?.emp_ref || null, docType: "attachment" }) || ""; }
     try {
       const r = acting.req;
       const emp = empOf(r.employee_id);
@@ -364,7 +366,7 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     let url = "";
-    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    if (proofFile) { url = await uploadFileToVault(proofFile, { empRef: empOf(acting.req.employee_id)?.emp_ref || null, docType: "attachment" }) || ""; }
     const isLoan = acting.type === "loans";
     const patch = {
       finance_status: "paid", finance_paid_date: todayISO(), finance_proof_url: url,
@@ -458,7 +460,7 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     let url = "";
-    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    if (proofFile) { url = await uploadFileToVault(proofFile, { empRef: empOf(acting.req.employee_id)?.emp_ref || null, docType: "attachment" }) || ""; }
     try {
       const r = acting.req;
       const emp = empOf(r.employee_id);
@@ -490,7 +492,7 @@ export default function Approvals() {
     if (!acting) return;
     setBusy(true);
     let url = "";
-    if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
+    if (proofFile) { url = await uploadFileToVault(proofFile, { empRef: empOf(acting.req.employee_id)?.emp_ref || null, docType: "attachment" }) || ""; }
     try {
       const finPatch = {
         status: "completed", finance_status: "paid", finance_note: note,
@@ -535,8 +537,8 @@ export default function Approvals() {
                     {r.is_full_clearance && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{t.fullClear}</span>}
                     {r.ticket_amount > 0 && <span className="text-xs text-muted-foreground">{t.ticket(r.ticket_amount)}</span>}
                     {r.balance_deducted > 0 && <span className="text-xs text-muted-foreground">{t.deduct(r.balance_deducted)}</span>}
-                    {r.hr_document_url && <a href={safeHref(r.hr_document_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">تذاكر الموارد البشرية</a>}
-                    {r.finance_proof_url && <a href={safeHref(r.finance_proof_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">إثبات المالية</a>}
+                    {r.hr_document_url && <VaultDocLink value={r.hr_document_url} label="تذاكر الموارد البشرية" className="text-xs h-6 px-2 rounded-full bg-violet-50 text-violet-600 border-0" />}
+                    {r.finance_proof_url && <VaultDocLink value={r.finance_proof_url} label="إثبات المالية" className="text-xs h-6 px-2 rounded-full bg-blue-50 text-blue-600 border-0" />}
                   </RequestCard>
                 ))}
               </div>
@@ -571,8 +573,8 @@ export default function Approvals() {
                       kindBadge={<span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 flex items-center gap-1"><Plane size={11} /> {r.trip_type === "external" ? t.tripExt : t.tripInt}</span>}
                       extra={<div className="text-xs text-muted-foreground mt-1">{t.tripLine(r.destination, r.purpose)} · {t.days(r.start_date, r.end_date, r.days_count)}</div>}>
                       {r.total_cost > 0 && <span className="text-xs text-muted-foreground">{t.tripCost(r.total_cost)}</span>}
-                      {r.employee_document_url && <a href={safeHref(r.employee_document_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">مرفق الموظف</a>}
-                      {r.hr_document_url && <a href={safeHref(r.hr_document_url)} target="_blank" rel="noreferrer" className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">مرفق المالية</a>}
+                      {r.employee_document_url && <VaultDocLink value={r.employee_document_url} label="مرفق الموظف" className="text-xs h-6 px-2 rounded-full bg-blue-50 text-blue-600 border-0" />}
+                      {r.hr_document_url && <VaultDocLink value={r.hr_document_url} label="مرفق المالية" className="text-xs h-6 px-2 rounded-full bg-emerald-50 text-emerald-600 border-0" />}
                     </RequestCard>
                   );
                 })}
@@ -694,7 +696,7 @@ export default function Approvals() {
                 <div className="text-xs text-muted-foreground tabular-nums" dir="ltr">{empOf(acting.req.employee_id)?.national_id || "—"}</div>
               </div>
               <div className="text-sm text-muted-foreground">{leaveTypeLabel(acting.req.leave_type)} · {t.days(acting.req.start_date, acting.req.end_date, acting.req.days_count)}</div>
-              {acting.req.medical_report_url && <a href={safeHref(acting.req.medical_report_url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-600">تقرير طبي مرفق</a>}
+              {acting.req.medical_report_url && <VaultDocLink value={acting.req.medical_report_url} label="تقرير طبي مرفق" className="text-xs h-6 px-2 rounded-full bg-rose-50 text-rose-600 border-0" />}
               {(() => {
                 const emp = empOf(acting.req.employee_id);
                 const entitled = computeLeaveEntitlement(emp?.hire_date, org);
@@ -930,6 +932,9 @@ function RequestCard({ r, emp, actions, onReject, t, children, genBusy, extra, k
         </div>
         <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
           {actions.map((a, i) => {
+            if (a.docRef) {
+              return <VaultDocLink key={i} value={a.docRef} label={a.label} className={cn("inline-flex items-center h-8 px-3 rounded-md text-xs font-medium", a.cls)} />;
+            }
             if (a.href) {
               return (
                 <a key={i} href={a.href} target="_blank" rel="noreferrer"
