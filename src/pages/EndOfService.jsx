@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { enrichEmployee, fetchSensitiveByRef } from "@/lib/vaultSensitive";
 
 export default function EndOfService() {
   const { lang } = useI18n();
@@ -122,6 +123,14 @@ export default function EndOfService() {
   }, [empId]);
 
   const emp = employees.find((e) => e.id === empId);
+  // جلب الهوية من الخزنة السعودية للموظف المختار (وضع احتياطي للنمط القديم)
+  const [enrichedEmp, setEnrichedEmp] = useState(null);
+  useEffect(() => {
+    if (!emp) { setEnrichedEmp(null); return; }
+    let active = true;
+    enrichEmployee(emp).then((e) => { if (active) setEnrichedEmp(e); });
+    return () => { active = false; };
+  }, [emp?.id]);
 
   // التحقق من فسخ العقد فعلياً: لا يُسمح بالحفظ أو الإرسال للمالية إلا إذا كان عقد الموظف منتهياً.
   const contractTerminated = !!emp && (
@@ -146,11 +155,14 @@ export default function EndOfService() {
     const used = usedLeaveTotal(emp, empLeaves);
     const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
+    // الهوية من الخزنة السعودية عند تفعيلها (عبر emp_ref)، أو من الحقل المحلي (النمط القديم)
+    const idSrc = enrichedEmp || emp;
     const record = {
       employee_id: emp.id, employee_number: emp.employee_number,
       employee_name: emp.full_name,
-      nationality: emp.nationality || (isSaudiNationalId(emp.national_id) ? (isAr ? "سعودي" : "Saudi") : (isAr ? "مقيم" : "Expat")),
-      national_id: emp.national_id, department: emp.department, position: emp.position, hire_date: emp.hire_date,
+      emp_ref: emp.emp_ref || "",
+      nationality: emp.nationality || (isSaudiNationalId(idSrc.national_id) ? (isAr ? "سعودي" : "Saudi") : (isAr ? "مقيم" : "Expat")),
+      national_id: idSrc.national_id, department: emp.department, position: emp.position, hire_date: emp.hire_date,
       last_working_date: lwd, years_of_service: set.years, reason, reason_note: reasonMeta(reason).note,
       basis: set.basis, monthly_wage: set.monthlyWage, daily_wage: set.dailyWage, fraction_label: set.fractionLabel,
       eos_amount: set.amount, leave_balance_days: set.leaveBalance, leave_cash: set.leaveCash,
@@ -170,7 +182,15 @@ export default function EndOfService() {
       setTimeout(() => window.print(), 300);
     } finally { setSaving(false); }
   };
-  const reprint = (rec) => { setPreview({ ...rec, employee_name_full: rec.employee_name }); setTimeout(() => window.print(), 200); };
+  const reprint = async (rec) => {
+    let r = { ...rec };
+    // جلب الهوية من الخزنة للمخالصات المُنشأة بعد تفعيل الخزنة (emp_ref بلا لقطة national_id)
+    if (rec.emp_ref && !rec.national_id) {
+      try { const s = await fetchSensitiveByRef(rec.emp_ref); if (s?.national_id) r.national_id = s.national_id; } catch {}
+    }
+    setPreview({ ...r, employee_name_full: r.employee_name });
+    setTimeout(() => window.print(), 200);
+  };
   const removeSettlement = async (id) => { await base44.entities.Settlement.delete(id); load(); };
 
   const settBadge = (status) => {

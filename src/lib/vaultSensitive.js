@@ -39,6 +39,21 @@ export async function enrichEmployee(employee) {
 }
 
 /**
+ * يجلب البيانات الحساسة من الخزنة عبر رمز معتم (emp_ref) فقط —
+ * للمستندات والسجلات اللقطية (Settlement/Payroll) التي تخزّن emp_ref دون بيانات حساسة.
+ */
+export async function fetchSensitiveByRef(empRef) {
+  if (!empRef) return {};
+  try {
+    const res = await base44.functions.invoke("vaultProxy", { action: "getEmployee", empRef });
+    const data = res?.data?.data || res?.data || {};
+    return pickSensitive(data);
+  } catch (e) {
+    return {};
+  }
+}
+
+/**
  * يجلب البيانات الحساسة لمجموعة موظفين دفعة واحدة (للقوائم/المستندات).
  * يعيد خريطة emp_ref → قيم حساسة. يتجاهل من لا يملكون emp_ref.
  */
