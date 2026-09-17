@@ -14,6 +14,7 @@ import { formatCurrency } from "@/lib/hr";
 import { computeGOSI } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 import { printReport } from "@/lib/reportPrint";
+import { enrichEmployeesBatch } from "@/lib/vaultSensitive";
 
 export default function Gosi() {
   const { lang } = useI18n();
@@ -63,7 +64,8 @@ export default function Gosi() {
   const load = async () => {
     setLoading(true);
     const emps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
-    setEmployees(emps);
+    const sensMap = await enrichEmployeesBatch(emps);
+    setEmployees(emps.map((e) => (e.emp_ref ? { ...e, ...sensMap[e.emp_ref] } : e)));
     const orgs = await base44.entities.Organization.list("-created_date", 1);
     setOrg(orgs[0]);
     const recs = await base44.entities.GosiRecord.filter({ month, year }, "-created_date", 1000);
@@ -81,6 +83,7 @@ export default function Gosi() {
       employee_name: emp.full_name || "",
       employee_number: emp.employee_number || "",
       national_id: emp.national_id || "",
+      emp_ref: emp.emp_ref || "",
       is_saudi: gosi.isSaudi,
       department: emp.department || "",
       gross_wage: Number(gosi.gross.toFixed(2)),
@@ -102,7 +105,8 @@ export default function Gosi() {
     setSaving(true);
     try {
       if (records.length) await base44.entities.GosiRecord.deleteMany({ period_key: `${year}-${month}` });
-      const payload = rows.map((r) => ({ ...r, month, year, period_key: `${year}-${month}`, status: "saved" }));
+      // عزل الهوية في الخزنة: يُحفظ emp_ref فقط، وتُترك national_id فارغة في السجل اللقطي
+      const payload = rows.map((r) => ({ ...r, national_id: "", emp_ref: r.emp_ref || "", month, year, period_key: `${year}-${month}`, status: "saved" }));
       if (payload.length) await base44.entities.GosiRecord.bulkCreate(payload);
       await load();
     } finally { setSaving(false); }

@@ -18,6 +18,7 @@ import { printReport } from "@/lib/reportPrint";
 import { downloadMudadExcel } from "@/lib/mudadExcel";
 import { downloadCashPayrollExcel } from "@/lib/cashPayrollExcel";
 import PayrollPrintSheet from "@/components/reports/PayrollPrintSheet";
+import { enrichEmployeesBatch } from "@/lib/vaultSensitive";
 
 // === مساعدات احتساب الرواتب — مشتركة مع بوابة الموظف (المُفوّض بصلاحية الرواتب) ===
 import {
@@ -77,12 +78,17 @@ export default function Payroll() {
   const [exporting, setExporting] = useState(false);
   const sheetRef = React.useRef(null);
 
+  // إغناء بيانات الموظفين بالحقول الحساسة من الخزنة السعودية (وضع احتياطي للنمط القديم)
+  const enrichEmps = async (emps) => {
+    const map = await enrichEmployeesBatch(emps);
+    return emps.map((e) => (e.emp_ref ? { ...e, ...map[e.emp_ref] } : e));
+  };
   const load = async () => {
     setLoading(true);
     const data = await base44.entities.Payroll.filter({ month, year }, "-created_date", 500);
     setPayrolls(data);
     const emps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
-    setEmployees(emps);
+    setEmployees(await enrichEmps(emps));
     const orgs = await base44.entities.Organization.list("-created_date", 1);
     setOrg(orgs[0]);
     setLoading(false);
@@ -93,7 +99,7 @@ export default function Payroll() {
     setGenerating(true);
     // جلب الموظفين الفعليين النشطين لحظة التوليد (يستبني من ترك العمل تلقائياً، ويضم المنضمين الجدد)
     const activeEmps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
-    setEmployees(activeEmps);
+    setEmployees(await enrichEmps(activeEmps));
     const existing = new Set(payrolls.map((p) => p.employee_id));
     const mm = String(month).padStart(2, "0");
     const startDate = `${year}-${mm}-01`;
@@ -141,7 +147,7 @@ export default function Payroll() {
         if (p) updates.push({
           id: p.id,
           base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
-          gross_salary: gross, national_id: emp.national_id || p.national_id || "",
+          gross_salary: gross, national_id: emp.national_id || p.national_id || "", emp_ref: emp.emp_ref || p.emp_ref || "",
           employee_name: emp.full_name || p.employee_name || "",
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
           absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
@@ -150,7 +156,7 @@ export default function Payroll() {
         continue;
       }
       created.push({
-        employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "",
+        employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "", emp_ref: emp.emp_ref || "",
         month, year, salary_payment_method: emp.salary_payment_method || "mudad",
         base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: 0, loan_installment: 0,
@@ -170,7 +176,7 @@ export default function Payroll() {
     setGenerating(true);
     try {
       const activeEmps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
-      setEmployees(activeEmps);
+      setEmployees(await enrichEmps(activeEmps));
       const empById = {};
       for (const e of activeEmps) empById[e.id] = e;
       const workDaysInMonth = computeWorkDaysInMonth(year, month, computeWorkDaysSet(org?.work_days));
@@ -194,6 +200,7 @@ export default function Payroll() {
           net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
           national_id: emp.national_id || p.national_id || "",
+          emp_ref: emp.emp_ref || p.emp_ref || "",
           employee_name: emp.full_name || p.employee_name || "",
         });
       }
