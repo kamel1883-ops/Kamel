@@ -1,4 +1,5 @@
 import { elementToPdfBlob } from "@/lib/pdfDocs";
+import { archiveBlobToVault } from "@/lib/vaultDocuments";
 
 function buildBrandHeader(org) {
   const wrap = document.createElement("div");
@@ -72,10 +73,12 @@ function buildTitle(title, subtitle) {
   return c;
 }
 
-export async function printReport(node, { org, title, subtitle, stamp, landscape, draft, filterInclude, filterMethod } = {}) {
-  if (!node) return;
+/**
+ * يبني غلاف الطباعة الجاهز للتصدير (هوية المنشأة + العنوان + نسخة المحتوى).
+ * يُصدَّر ليُعاد استخدامه من قبل printReport وأي مؤرشف مستندات.
+ */
+export function buildPrintWrapper(node, { org, title, subtitle, landscape, filterInclude, filterMethod } = {}) {
   const useLandscape = !!landscape;
-  // عرض مطابق لنسب صفحة A4 ليملأ الصفحة كاملة دون هوامش جانبية كبيرة
   const width = useLandscape ? 1123 : 794;
   const wrapper = document.createElement("div");
   wrapper.dir = "rtl";
@@ -83,19 +86,14 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
     position: "fixed", top: "0", right: "-99999px", width: width + "px",
     background: "#ffffff", padding: "24px", zIndex: "-1",
   });
-  document.body.appendChild(wrapper);
-
   wrapper.appendChild(buildBrandHeader(org));
   if (title) wrapper.appendChild(buildTitle(title, subtitle));
-  // لافتة المسودة تم إزالتها بناءً على طلب المستخدم
 
   const clone = node.cloneNode(true);
   clone.style.width = "100%";
-  // استبعاد صفوف المستثناة من صرف هذا الشهر (data-include="false") عند الطباعة
   if (filterInclude) {
     clone.querySelectorAll('tr[data-include="false"]').forEach((el) => el.remove());
   }
-  // تصفية الصفوف حسب طريقة الصرف (مدد / كاش) لتوليد كشف مستقل لكل قناة
   if (filterMethod) {
     clone.querySelectorAll("tbody tr").forEach((el) => {
       if ((el.getAttribute("data-method") || "") !== filterMethod) el.remove();
@@ -105,16 +103,44 @@ export async function printReport(node, { org, title, subtitle, stamp, landscape
     el.style.overflow = "visible";
     el.style.maxWidth = "none";
   });
-  // تأكيد أن كل الجداول تملأ عرض الصفحة المطبوعة بالكامل
   clone.querySelectorAll("table").forEach((el) => { el.style.width = "100%"; el.style.minWidth = "100%"; });
   wrapper.appendChild(clone);
+  return { wrapper, useLandscape };
+}
 
+/**
+ * يولّد تقرير PDF ويفتحه للطباعة — ويؤرشفه تلقائياً على السيرفر السعودي
+ * لكل تقرير غير مسودة (ما لم يُمرّر noArchive). يعيد { docRef } ليُخزّنه
+ * caller على سجل الكيان إن أراد ربط المستند. عند عدم تهيئة الخزنة يبقى
+ * التقرير متاحاً للطباعة المحلية ويعيد docRef=null بهدوء.
+ */
+export async function printReport(node, opts = {}) {
+  if (!node) return { docRef: null };
+  const {
+    org, title, subtitle, stamp, landscape, draft,
+    filterInclude, filterMethod,
+    empRef = null, docType = "report",
+    fileName, noArchive = false,
+  } = opts;
+
+  const { wrapper, useLandscape } = buildPrintWrapper(node, { org, title, subtitle, landscape, filterInclude, filterMethod });
+  document.body.appendChild(wrapper);
+
+  let docRef = null;
   try {
     const blob = await elementToPdfBlob(wrapper, { stamp: !!stamp, landscape: useLandscape });
+
+    // أرشفة على السيرفر السعودي لكل مستند نهائي (غير مسودة) ما لم يُطلب خلاف ذلك
+    if (!draft && !noArchive) {
+      const fname = fileName || `${(title || "report").replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80)}.pdf`;
+      docRef = await archiveBlobToVault(blob, { fileName: fname, empRef, docType });
+    }
+
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } finally {
     wrapper.remove();
   }
+  return { docRef };
 }
