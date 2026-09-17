@@ -154,7 +154,7 @@ export default function EmployeeClock({ employee, org, branch, onChanged, clockA
           if (today) {
             await base44.entities.Attendance.update(today.id, { check_in: checkInTime, status: arrivalStatus, source: "portal", employee_user_id: employee.user_id, branch_id: bId, branch_name: bName });
           } else {
-            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, date: localToday(), check_in: checkInTime, status: arrivalStatus, source: "portal", work_hours: 0, branch_id: bId, branch_name: bName });
+            await base44.entities.Attendance.create({ employee_id: employee.id, employee_user_id: employee.user_id, employee_name: name, emp_ref: employee.emp_ref || "", date: localToday(), check_in: checkInTime, status: arrivalStatus, source: "portal", work_hours: 0, branch_id: bId, branch_name: bName });
           }
         }
         setMsg({ type: "ok", text: t.doneIn });

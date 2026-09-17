@@ -13,6 +13,7 @@ import { todayISO, attendanceStatusLabel, isOrgWeeklyOff, dayNameAr } from "@/li
 // dayNameAr يُستخدم فقط في الفرع العربي للإجازة الأسبوعية؛ الفرع الإنجليزي يستخدم toLocaleDateString داخل العنصر.
 import { useI18n } from "@/lib/i18n";
 import AttendanceReport from "@/components/reports/AttendanceReport";
+import { enrichEmployeesBatch } from "@/lib/vaultSensitive";
 import PullToRefresh from "@/components/PullToRefresh";
 
 export default function Attendance() {
@@ -57,7 +58,8 @@ export default function Attendance() {
     const data = await base44.entities.Attendance.filter({ date }, "-created_date", 500);
     setRecords(data);
     const emps = await base44.entities.Employee.filter({ status: "active" }, "-created_date", 500);
-    setEmployees(emps);
+    const sensMap = await enrichEmployeesBatch(emps);
+    setEmployees(emps.map((x) => (x.emp_ref ? { ...x, ...sensMap[x.emp_ref] } : x)));
     try { const brs = await base44.entities.Branch.list("-is_main", 500); setBranches(brs); } catch {}
     setLoading(false);
   };
@@ -76,7 +78,8 @@ export default function Attendance() {
     await base44.entities.Attendance.create({
       employee_id: newRec.employee_id,
       employee_name: emp ? emp.full_name : "",
-      national_id: emp ? (emp.national_id || "") : "",
+      national_id: emp?.emp_ref ? "" : (emp ? (emp.national_id || "") : ""),
+      emp_ref: emp?.emp_ref || "",
       date, check_in: newRec.check_in, check_out: newRec.check_out,
       status: newRec.status, work_hours: 8,
       branch_id: emp?.branch_id || null, branch_name: br?.name || emp?.branch_name || "",

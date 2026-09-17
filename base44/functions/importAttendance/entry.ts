@@ -134,6 +134,7 @@ export default async function (req) {
       const payload = {
         employee_id: emp.id,
         employee_name: `${emp.employee_number} - ${emp.position || ''}`.trim(),
+        emp_ref: emp.emp_ref || '',
         date: r.date,
         check_in: r.check_in || '',
         check_out: r.check_out || '',
