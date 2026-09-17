@@ -15,6 +15,7 @@ import EmployeePortalPasswordAdmin from "@/components/portal/EmployeePortalPassw
 import { useI18n } from "@/lib/i18n";
 import { PERMISSION_MODULES, parsePermissions } from "@/lib/employeePermissions";
 import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
+import { useEnrichedEmployee } from "@/lib/vaultSensitive";
 
 function Row({ label, value }) {
   return (
@@ -36,6 +37,8 @@ function Block({ title, children }) {
 export default function EmployeeProfileDialog({ open, onClose, employee, org, onOpenTrips }) {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  // جلب البيانات الحساسة من الخزنة السعودية عند توفر emp_ref (وضع احتياطي للنمط القديم)
+  const emp = useEnrichedEmployee(employee);
   const t = isAr ? {
     personal: "بيانات شخصية", employment: "بيانات التوظيف", salary: "الراتب والبدلات",
     leave: "الإجازات والتذاكر", eos: "نهاية الخدمة", trips: "انتدابات الموظف",
@@ -106,9 +109,9 @@ export default function EmployeeProfileDialog({ open, onClose, employee, org, on
           <div className="space-y-3">
             <div className="text-xs text-muted-foreground">{t.joinJourney}</div>
             <Block title={t.personal}>
-              <Row label={employee.is_saudi ? (isAr ? "الهوية الوطنية" : "National ID") : (isAr ? "رقم الإقامة" : "Iqama number")} value={employee.national_id} />
-              <Row label={isAr ? "تاريخ الميلاد" : "Birth date"} value={employee.birth_date} />
-              <Row label={isAr ? "الجوال" : "Phone"} value={employee.phone} />
+              <Row label={employee.is_saudi ? (isAr ? "الهوية الوطنية" : "National ID") : (isAr ? "رقم الإقامة" : "Iqama number")} value={emp.national_id} />
+              <Row label={isAr ? "تاريخ الميلاد" : "Birth date"} value={emp.birth_date} />
+              <Row label={isAr ? "الجوال" : "Phone"} value={emp.phone} />
               <Row label={isAr ? "البريد" : "Email"} value={employee.email} />
             </Block>
 
