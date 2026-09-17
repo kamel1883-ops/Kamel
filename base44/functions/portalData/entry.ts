@@ -712,7 +712,7 @@ export default async function (req) {
       }
       const created = await base44.asServiceRole.entities.Attendance.create({
         employee_id: employeeId, employee_user_id: emp.user_id || null, employee_name: empLabel,
-        date, check_in: checkIn, status: arrivalStatus, source: "portal", work_hours: 0,
+        emp_ref: emp.emp_ref || "", date, check_in: checkIn, status: arrivalStatus, source: "portal", work_hours: 0,
         branch_id: branchId, branch_name: branchName,
       });
       return Response.json({ ok: true, today: created });
@@ -814,13 +814,20 @@ export default async function (req) {
       const s = String(u || "").trim();
       return /^https?:\/\//i.test(s) ? s : "";
     };
+    // حقل مستند: يقبل رابط http قديم أو رمز خزنة سعودية (doc_ref) — يرفض javascript:/data:
+    const safeDocField = (u: any): string => {
+      const s = String(u || "").trim();
+      if (!s) return "";
+      if (/^javascript:/i.test(s) || /^data:/i.test(s)) return "";
+      return s;
+    };
 
     if (action === "create_leave") {
       const p = pick(body.payload || {}, [
         "leave_type", "start_date", "end_date", "days_count", "reason",
         "medical_report_url", "is_full_clearance", "description", "permission_minutes",
       ]);
-      p.medical_report_url = safeUrl(p.medical_report_url);
+      p.medical_report_url = safeDocField(p.medical_report_url);
       const { manager_id, manager_name } = await resolveManager();
       // كل الطلبات تذهب للمدير المباشر أولاً (pending_manager). لكن معتمد الموارد البشرية
       // يملك صلاحية التصرف على الطلب وإعتماده من صفحة الموافقات حتى لو لم يوافق المدير
@@ -904,7 +911,7 @@ export default async function (req) {
         "trip_type", "destination", "purpose", "start_date", "end_date", "days_count",
         "transport_mode", "employee_note", "employee_document_url", "description",
       ]);
-      p.employee_document_url = safeUrl(p.employee_document_url);
+      p.employee_document_url = safeDocField(p.employee_document_url);
       // كل الطلبات تمرّ بالمدير المباشر أولاً ثم الموارد البشرية ثم المالية.
       const { manager_id, manager_name } = await resolveManager();
       const created = await base44.asServiceRole.entities.BusinessTrip.create({
@@ -1019,7 +1026,7 @@ export default async function (req) {
           if (p) updates.push({
             id: p.id,
             base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
-            gross_salary: gross, national_id: e.national_id || p.national_id || "",
+            gross_salary: gross, national_id: e.emp_ref ? "" : (e.national_id || p.national_id || ""), emp_ref: e.emp_ref || p.emp_ref || "",
             employee_name: e.full_name || p.employee_name || "",
             salary_payment_method: e.salary_payment_method || p.salary_payment_method || "mudad",
             absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
@@ -1029,7 +1036,7 @@ export default async function (req) {
           continue;
         }
         created.push({
-          employee_id: e.id, employee_name: e.full_name || "", national_id: e.national_id || "",
+          employee_id: e.id, emp_ref: e.emp_ref || "", national_id: e.emp_ref ? "" : (e.national_id || ""),
           month, year, salary_payment_method: e.salary_payment_method || "mudad",
           base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
           gross_salary: gross, bonus: 0, deductions: 0, loan_installment: 0,
@@ -1438,7 +1445,7 @@ export default async function (req) {
         if (!empMatch || !r.date) continue;
         toCreate.push({
           employee_id: empMatch.id, employee_user_id: empMatch.user_id || "", employee_name: empMatch.full_name,
-          national_id: empMatch.national_id || "", branch_id: empMatch.branch_id || "", branch_name: empMatch.branch_name || "",
+          emp_ref: empMatch.emp_ref || "", national_id: empMatch.emp_ref ? "" : (empMatch.national_id || ""), branch_id: empMatch.branch_id || "", branch_name: empMatch.branch_name || "",
           date: String(r.date), check_in: r.check_in || "", check_out: r.check_out || "", status: "present", source: "import",
           prepared_by_name: pname, prepared_by_id: pid,
         });
