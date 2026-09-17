@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { storeEmployeesBulk } from '../../shared/vaultClient.ts';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -241,6 +242,38 @@ export default async function (req) {
 
     // مرحلة التأكيد فقط: نُنشئ الموظفين فعلياً ونربط المديرين المباشرين
     if (confirm && toCreate.length) {
+      // === عزل البيانات الحساسة في الخزنة السعودية ===
+      // الحقول الحساسة تُرسل للخزنة وتُستبدل برمز معتم (emp_ref) في Base44.
+      // إن لم تكن الخزنة مُهيّأة بعد، نستمر بالنمط القديم (تخزين محلي) حتى لا ينكسر الاستيراد.
+      const SENSITIVE_KEYS = [
+        'national_id', 'birth_date', 'phone', 'address', 'emergency_contact',
+        'passport_number', 'passport_expiry', 'bank_account', 'health_insurance_number',
+      ];
+      const vaultTenantId = myTenant?.id || user.id;
+      const vaultRows = toCreate.map((r) => {
+        const o = { employee_number: r.employee_number };
+        for (const k of SENSITIVE_KEYS) {
+          if (r[k]) o[k] = String(r[k]);
+        }
+        return o;
+      });
+      let vaultStored = 0;
+      try {
+        const vaultRes = await storeEmployeesBulk(vaultTenantId, vaultRows);
+        const refs = vaultRes?.refs || vaultRes?.data?.refs || null;
+        if (Array.isArray(refs) && refs.length === toCreate.length) {
+          toCreate.forEach((r, i) => {
+            r.emp_ref = refs[i];
+            // تعمية الحقول الحساسة في Base44 — المرجع المعتم (emp_ref) يكفي
+            for (const k of SENSITIVE_KEYS) r[k] = '';
+          });
+          vaultStored = refs.length;
+        }
+      } catch (e) {
+        // الخزنة غير مُهيّأة أو غير متاحة — الاستمرار بالنمط القديم
+        console.log('[importEmployees] vault unavailable, legacy mode:', e.message);
+      }
+
       await base44.asServiceRole.entities.Employee.bulkCreate(toCreate);
       saved = toCreate.length;
 

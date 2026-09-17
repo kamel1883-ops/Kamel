@@ -10,9 +10,11 @@
  */
 import { secrets } from "base44:runtime";
 
+// الحقول الحساسة المُعزولة في الخزنة — مُعرّفات قوية وأرقام خاصة، لا تُخزّن في Base44
 const SENSITIVE_FIELDS = [
-  "full_name", "national_id", "passport_number", "bank_account",
+  "national_id", "passport_number", "bank_account",
   "birth_date", "phone", "address", "emergency_contact",
+  "health_insurance_number",
 ];
 
 const PAYROLL_FIELDS = [
