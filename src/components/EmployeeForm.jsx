@@ -108,6 +108,17 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
   }, [open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  // قاعدة المملكة الموحّدة: رقم الهوية يبدأ بـ"1" → سعودي، بـ"2" → مقيم.
+  // تُشتق آلياً من رقم الهوية (مصدر الحقيقة) وتتجاوز أي إدخال يدوي — تُستخدم في التأمينات وكل ما يعتمد الجنسية.
+  const natIdStartsWith = String(form.national_id ?? '').trim();
+  const derivedSaudi = natIdStartsWith ? natIdStartsWith.startsWith('1') : form.is_saudi;
+  useEffect(() => {
+    const id = String(form.national_id ?? '').trim();
+    if (!id) return;
+    const want = id.startsWith('1');
+    if (form.is_saudi !== want) set("is_saudi", want);
+  }, [form.national_id, form.is_saudi]);
+
   // قاعدة الخمس سنوات + سياسة المنشأة: تحدد الخيار الوحيد المتاح للموارد البشرية.
   // - orgPolicy30: المنشأة تمنح 30 يوماً للجميع → 30 فقط (يُقفل 21).
   // - أكمل 5 سنوات خدمة → 30 يوماً إلزامياً (يُقفل 21).
@@ -265,10 +276,13 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
 
           <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
             <Field label={t.saudi}>
-              <Select value={form.is_saudi ? "true" : "false"} onValueChange={(v) => set("is_saudi", v === "true")}>
+              <Select value={derivedSaudi ? "true" : "false"} disabled={!!natIdStartsWith}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="true">{t.saudiY}</SelectItem><SelectItem value="false">{t.saudiN}</SelectItem></SelectContent>
               </Select>
+              {natIdStartsWith && (
+                <p className="text-xs text-violet-600 mt-1.5 leading-relaxed">{isAr ? "تُحدد آلياً من رقم الهوية (١ = سعودي، ٢ = مقيم)" : "Auto-derived from ID (1 = Saudi, 2 = resident)"}</p>
+              )}
             </Field>
             <Field label={t.iqama}><Input type="date" lang={isAr ? "ar" : "en"} value={form.iqama_expiry} onChange={(e) => set("iqama_expiry", e.target.value)} /></Field>
             <Field label={t.passNo}><Input value={form.passport_number} onChange={(e) => set("passport_number", e.target.value)} /></Field>

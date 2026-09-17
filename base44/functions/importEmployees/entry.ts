@@ -20,6 +20,15 @@ function num(v) {
   return isNaN(n) ? 0 : n;
 }
 
+// قاعدة المملكة الموحّدة لتمييز السعودي من المقيم:
+// الهوية الوطنية تبدأ بـ"1" → سعودي، وتبدأ بـ"2" → مقيم.
+// تُشتق من رقم الهوية حصراً (مصدر الحقيقة) وتتجاوز أي قيمة مدخلة يدوياً في الملف.
+function deriveSaudi(national_id) {
+  const s = String(national_id ?? '').trim();
+  if (!s) return false;
+  return s.startsWith('1');
+}
+
 function boolSaudi(v) {
   if (v == null) return false;
   const s = String(v).trim().toLowerCase();
@@ -59,7 +68,7 @@ function normalizeRecord(r) {
     employee_number: String(r.employee_number ?? '').trim(),
     national_id: String(r.national_id ?? '').trim(),
     email: String(r.email ?? '').trim(),
-    is_saudi: boolSaudi(r.is_saudi),
+    is_saudi: deriveSaudi(r.national_id),
     gender: GENDER[g] || '',
     birth_date: parseDate(r.birth_date),
     phone: String(r.phone ?? '').trim(),
