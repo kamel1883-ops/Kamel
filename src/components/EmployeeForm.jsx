@@ -17,6 +17,7 @@ import { managerCandidates, ROLE_LABELS, ROLE_ORDER } from "@/lib/orgTree";
 import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
 import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
 import { yearsOfService, getOrgOnce } from "@/lib/leaveBalance";
+import { enrichEmployee } from "@/lib/vaultSensitive";
 
 const empty = {
   full_name: "",
@@ -100,7 +101,13 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
   const [branches, setBranches] = useState([]);
   const [org, setOrg] = useState(null);
 
-  useEffect(() => { setForm(employee ? { ...empty, ...employee } : empty); }, [employee, open]);
+  // جلب الحقول الحساسة من الخزنة السعودية عند التحرير (وضع احتياطي للنمط القديم)
+  useEffect(() => {
+    if (!employee) { setForm(empty); return; }
+    let active = true;
+    enrichEmployee(employee).then((e) => { if (active) setForm({ ...empty, ...e }); });
+    return () => { active = false; };
+  }, [employee, open]);
   useEffect(() => {
     base44.entities.Employee.list("-created_date", 500).then((list) => setAllEmployees(list));
     base44.entities.Branch.list("-is_main", 500).then((list) => setBranches(list));
