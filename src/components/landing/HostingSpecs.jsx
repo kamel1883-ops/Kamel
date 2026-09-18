@@ -166,6 +166,20 @@ export default function HostingSpecs({ isAr = true }) {
             </div>
           </div>
         </div>
+
+        {/* مزوّد الاستضافة + الامتثال (NCA / SDAIA) + حماية البيانات (PDPL) */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="lg:w-[300px] shrink-0">
+            <ExaHostLockup isAr={isAr} />
+            <div className="text-[11px] text-slate-400 mt-1.5">{isAr ? "مزوّد الخادم والاستضافة" : "Server & hosting provider"}</div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <ComplianceNote isAr={isAr} />
+          </div>
+          <div className="lg:shrink-0">
+            <PdplBadge isAr={isAr} />
+          </div>
+        </div>
       </div>
     </section>
   );
