@@ -61,8 +61,9 @@ export function actualSnapshot({ subscriptions = [], expenses = [], tenants = []
   const revenueTotal = paid.reduce((s, r) => s + (Number(r.amount) || 0), 0);
   const arpu = clients ? revenueTotal / clients : 0;
 
-  // المصروف السنوي الفعلي = مصروفات السنة (من جدول الفترات) + عمولات الشركاء
-  const yearRow = yearly.rows[yearly.rows.length - 1] || { revenue: 0, expense: 0 };
+  // المصروف السنوي الفعلي = مصروفات السنة الحالية (من جدول الفترات، بدون التوقّع) + عمولات الشركاء
+  const actualYearRows = yearly.rows.filter((r) => !r.future);
+  const yearRow = actualYearRows[actualYearRows.length - 1] || { revenue: 0, expense: 0 };
   const yearRevenue = yearRow.revenue;
   const yearExpense = yearRow.expense + commissions.total;
   const yearNet = Number((yearRevenue - yearExpense).toFixed(2));

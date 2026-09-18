@@ -109,8 +109,9 @@ export function financeRows({ revenues = [], expenses = [], mode = "month", isAr
     }
   }
   for (const r of rows) r.net = Number((r.revenue - r.expense).toFixed(2));
+  // الإجمالي يحتسب الفترات الفعلية فقط (ماضية + حالية) دون فترات التوقّع المستقبلية
   const totals = rows.reduce(
-    (s, r) => ({ revenue: s.revenue + r.revenue, expense: s.expense + r.expense, net: s.net + r.net }),
+    (s, r) => r.future ? s : { revenue: s.revenue + r.revenue, expense: s.expense + r.expense, net: s.net + r.net },
     { revenue: 0, expense: 0, net: 0 }
   );
   return { rows, totals, from, to };
