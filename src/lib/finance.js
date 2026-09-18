@@ -6,13 +6,17 @@ export const PERIOD_COUNT = { day: 30, week: 12, month: 12, quarter: 8, year: 5 
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const parse = (s) => (s ? new Date(String(s).slice(0, 10) + "T00:00:00") : null);
 
+const FISCAL_START_MONTH = 7; // أغسطس (0-indexed) — السنة المالية تبدأ 1 أغسطس
+
 const startOf = (date, mode) => {
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   if (mode === "day") return d;
   if (mode === "week") { d.setDate(d.getDate() - d.getDay()); return d; }
   if (mode === "month") return new Date(d.getFullYear(), d.getMonth(), 1);
   if (mode === "quarter") return new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3, 1);
-  return new Date(d.getFullYear(), 0, 1);
+  // السنة المالية تبدأ 1 أغسطس
+  const y = d.getMonth() >= FISCAL_START_MONTH ? d.getFullYear() : d.getFullYear() - 1;
+  return new Date(y, FISCAL_START_MONTH, 1);
 };
 
 const shift = (d, mode, n) => {
@@ -34,7 +38,7 @@ const labelOf = (d, mode, isAr) => {
   if (mode === "week") return `${isAr ? "أسبوع" : "Week of"} ${iso(d)}`;
   if (mode === "month") return `${months[d.getMonth()]} ${d.getFullYear()}`;
   if (mode === "quarter") return `${isAr ? "الربع" : "Q"}${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}`;
-  return String(d.getFullYear());
+  return `${isAr ? "سنة مالية" : "FY"} ${d.getFullYear()}`;
 };
 
 // الفترات من الأقدم للأحدث، آخرها الفترة الحالية — و forecast يضيف فترات قادمة (توقّع)
