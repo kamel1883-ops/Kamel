@@ -1,5 +1,6 @@
 import React from "react";
 import { Server, Cpu, HardDrive, MemoryStick, Users, ShieldCheck, Zap, Globe, Lock, MapPin, Network } from "lucide-react";
+import { ExaHostLockup, ComplianceNote, PdplBadge } from "@/components/landing/HostingProvider";
 
 // قسم الاستضافة: يُبرز أن منصة «جداره» تعمل على خادم خاص داخل المملكة العربية السعودية
 // (الرياض — SAIX) بما يتوافق مع الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع سدايا (SDAIA).

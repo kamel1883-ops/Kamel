@@ -1,6 +1,7 @@
 import React from "react";
-import { Check, Sparkles, ChevronLeft } from "lucide-react";
+import { Check, Sparkles, ChevronLeft, MessageCircle } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
+import { SALES_WA_LINK, SALES_EMAIL } from "@/components/landing/HostingProvider";
 
 // بطاقات الباقات في صفحة الدفع — كل باقة تعرض نفس قائمة المميزات الكاملة (متوفرة في كل باقة بدون استثناء).
 // تختلف الباقات فقط في: اسم الشريحة، نطاق الموظفين، السعر السنوي، وزر الشراء.
@@ -46,18 +47,29 @@ export default function PricingTiers({ selectedId, onBuy, lang = "ar" }) {
               </div>
 
               <div className="mt-4 text-center">
-                <div className="flex items-end justify-center gap-1.5">
-                  <span className="text-3xl font-extrabold bg-gradient-to-l from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">{t.yearly.toLocaleString()}{t.custom ? "+" : ""}</span>
-                  <span className="text-sm font-medium text-muted-foreground mb-1">{currency}</span>
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">{isAr ? "/ سنوياً" : "/ year"}</div>
+                {t.contact ? (
+                  <>
+                    <div className="text-2xl font-extrabold bg-gradient-to-l from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                      {isAr ? "تواصل معنا" : "Contact us"}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{isAr ? "لعرض سعر مخصّص" : "for a custom quote"}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-end justify-center gap-1.5">
+                      <span className="text-3xl font-extrabold bg-gradient-to-l from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">{t.yearly.toLocaleString()}{t.custom ? "+" : ""}</span>
+                      <span className="text-sm font-medium text-muted-foreground mb-1">{currency}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{isAr ? "/ سنوياً" : "/ year"}</div>
+                  </>
+                )}
               </div>
 
               <div className="mt-3 rounded-xl bg-violet-50/70 border border-violet-100 px-3 py-2">
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="text-muted-foreground">{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
                   <span className="font-extrabold text-violet-700">
-                    {t.custom ? (isAr ? "تأثير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
+                    {t.contact ? (isAr ? "حسب التواصل" : "By contact") : t.custom ? (isAr ? "تأثير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
                   </span>
                 </div>
               </div>
@@ -84,14 +96,30 @@ export default function PricingTiers({ selectedId, onBuy, lang = "ar" }) {
                 </ul>
               </div>
 
-              <button
-                type="button"
-                onClick={() => onBuy?.(t)}
-                className={`mt-5 w-full rounded-2xl py-3.5 font-bold transition shadow-md inline-flex items-center justify-center gap-1 ${active ? "bg-gradient-to-l from-violet-700 to-fuchsia-700 text-white shadow-violet-500/30" : "bg-gradient-to-l from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 shadow-violet-500/20"}`}
-              >
-                {active ? (isAr ? "الباقة المختارة — أكمل البيانات" : "Selected — complete details") : (isAr ? "شراء هذه الباقة" : "Buy this plan")}
-                {!active && <ChevronLeft size={15} />}
-              </button>
+              {t.contact ? (
+                <a
+                  href={SALES_WA_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 w-full rounded-2xl py-3.5 font-bold transition shadow-md inline-flex items-center justify-center gap-1.5 bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-500/20"
+                >
+                  <MessageCircle size={16} /> {isAr ? "واتساب المبيعات" : "Sales WhatsApp"}
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onBuy?.(t)}
+                  className={`mt-5 w-full rounded-2xl py-3.5 font-bold transition shadow-md inline-flex items-center justify-center gap-1 ${active ? "bg-gradient-to-l from-violet-700 to-fuchsia-700 text-white shadow-violet-500/30" : "bg-gradient-to-l from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 shadow-violet-500/20"}`}
+                >
+                  {active ? (isAr ? "الباقة المختارة — أكمل البيانات" : "Selected — complete details") : (isAr ? "شراء هذه الباقة" : "Buy this plan")}
+                  {!active && <ChevronLeft size={15} />}
+                </button>
+              )}
+              {t.contact && (
+                <a href={`mailto:${SALES_EMAIL}`} className="block text-center text-xs font-semibold text-muted-foreground mt-2">
+                  {SALES_EMAIL}
+                </a>
+              )}
             </div>
           );
         })}

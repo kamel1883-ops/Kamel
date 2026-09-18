@@ -1,8 +1,9 @@
 import React from "react";
 import {
-  Sparkles, Gift, Check, Calendar, CreditCard, Users, Zap, Server, ShieldCheck,
+  Sparkles, Gift, Check, Calendar, CreditCard, Users, Zap, Server, ShieldCheck, MessageCircle,
 } from "lucide-react";
 import { PRICING_TIERS_AR, PRICING_TIERS_EN, FULL_FEATURES_AR, FULL_FEATURES_EN } from "@/lib/pricing";
+import { SALES_WA_LINK, SALES_EMAIL } from "@/components/landing/HostingProvider";
 
 // قسم الباقات — بهوية جداره اللونية: كحلي عميق #0B2545 + ذهبي راقٍ #CBA83A.
 // التخطيط: قائمة عمودية واحدة للشرائح الخمس (كل شريحة صف كامل) + بطاقة التجربة المجانية أسفلهم.
@@ -75,22 +76,39 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
 
                 {/* Zone 2: السعر */}
                 <div className="lg:w-[230px] lg:shrink-0 flex flex-col justify-center border-t lg:border-t-0 lg:border-r-0 pt-4 lg:pt-0" style={{ borderColor: BORDER }}>
-                  <div className="flex items-end gap-1.5">
-                    <span className="text-4xl font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>
-                      {t.yearly.toLocaleString()}{t.custom ? "+" : ""}
-                    </span>
-                    <span className="text-base font-semibold mb-1.5" style={{ color: GREY }}>{currency}</span>
-                  </div>
-                  <div className="text-sm font-medium mt-0.5" style={{ color: GREY }}>{perYear}</div>
+                  {t.contact ? (
+                    <>
+                      <div className="text-3xl font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>
+                        {isAr ? "تواصل معنا" : "Contact us"}
+                      </div>
+                      <div className="text-sm font-medium mt-1" style={{ color: GREY }}>{isAr ? "لعرض سعر مخصّص" : "for a custom quote"}</div>
+                      <div className="mt-3 rounded-xl p-2.5" style={{ background: "#fff", border: `1px solid ${BORDER}` }}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span style={{ color: GREY }}>{isAr ? "أكثر من 1,000 موظف" : "1,000+ employees"}</span>
+                          <span className="font-extrabold" style={{ color: GOLD_DARK }}>{isAr ? "سعر مخصّص" : "Custom"}</span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-end gap-1.5">
+                        <span className="text-4xl font-extrabold" style={{ color: NAVY, fontFamily: "var(--font-display)" }}>
+                          {t.yearly.toLocaleString()}{t.custom ? "+" : ""}
+                        </span>
+                        <span className="text-base font-semibold mb-1.5" style={{ color: GREY }}>{currency}</span>
+                      </div>
+                      <div className="text-sm font-medium mt-0.5" style={{ color: GREY }}>{perYear}</div>
 
-                  <div className="mt-3 rounded-xl p-2.5" style={{ background: "#fff", border: `1px solid ${BORDER}` }}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span style={{ color: GREY }}>{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
-                      <span className="font-extrabold" style={{ color: GOLD_DARK }}>
-                        {t.custom ? (isAr ? "تأثير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
-                      </span>
-                    </div>
-                  </div>
+                      <div className="mt-3 rounded-xl p-2.5" style={{ background: "#fff", border: `1px solid ${BORDER}` }}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span style={{ color: GREY }}>{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</span>
+                          <span className="font-extrabold" style={{ color: GOLD_DARK }}>
+                            {t.custom ? (isAr ? "تأثير خاص" : "Custom") : `${t.year1.toLocaleString()} ${currency}`}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Zone 3: المميزات */}
@@ -106,17 +124,35 @@ export default function PricingColumns({ isAr = true, onStartTrial, onBuyTier })
                   </ul>
                 </div>
 
-                {/* Zone 4: زر الشراء */}
+                {/* Zone 4: زر الشراء / التواصل */}
                 <div className="lg:w-[170px] lg:shrink-0 flex items-center justify-center border-t lg:border-t-0 pt-4 lg:pt-0" style={{ borderColor: BORDER }}>
-                  <button
-                    type="button"
-                    onClick={() => onBuyTier?.(t)}
-                    className="w-full rounded-xl py-3.5 text-base font-bold text-white inline-flex items-center justify-center gap-2 transition hover:brightness-110 shadow-md"
-                    style={{ background: NAVY, boxShadow: `0 8px 20px -8px ${NAVY}` }}
-                  >
-                    <Zap size={18} />
-                    {isAr ? "شراء الباقة" : "Buy plan"}
-                  </button>
+                  {t.contact ? (
+                    <div className="w-full flex flex-col gap-2">
+                      <a
+                        href={SALES_WA_LINK}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full rounded-xl py-3.5 text-base font-bold text-white inline-flex items-center justify-center gap-2 transition hover:brightness-110 shadow-md"
+                        style={{ background: "#16a34a", boxShadow: "0 8px 20px -8px #16a34a" }}
+                      >
+                        <MessageCircle size={18} />
+                        {isAr ? "واتساب المبيعات" : "Sales WhatsApp"}
+                      </a>
+                      <a href={`mailto:${SALES_EMAIL}`} className="text-center text-xs font-semibold" style={{ color: GREY }}>
+                        {SALES_EMAIL}
+                      </a>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onBuyTier?.(t)}
+                      className="w-full rounded-xl py-3.5 text-base font-bold text-white inline-flex items-center justify-center gap-2 transition hover:brightness-110 shadow-md"
+                      style={{ background: NAVY, boxShadow: `0 8px 20px -8px ${NAVY}` }}
+                    >
+                      <Zap size={18} />
+                      {isAr ? "شراء الباقة" : "Buy plan"}
+                    </button>
+                  )}
                 </div>
               </div>
             );
