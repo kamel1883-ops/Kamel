@@ -117,13 +117,27 @@ export function financeRows({ revenues = [], expenses = [], mode = "month", isAr
   return { rows, totals, from, to };
 }
 
-// إجمالي المصروف الشهري/السنوي الثابت (للعرض في البطاقات)
-export function recurringTotals(expenses = []) {
-  const active = expenses.filter((e) => e.status !== "stopped");
-  return {
-    monthly: active.filter((e) => e.recurrence === "monthly").reduce((s, e) => s + (Number(e.amount) || 0), 0),
-    yearly: active.filter((e) => e.recurrence === "yearly").reduce((s, e) => s + (Number(e.amount) || 0), 0),
-  };
+// نطاق السنة المالية الحالية [from, to)
+export function currentFiscalYearRange() {
+  const s = startOf(new Date(), "year");
+  return { from: iso(s), to: iso(shift(s, "year", 1)) };
+}
+
+// إجمالي المصروف الثابت: الشهري (قيمة شهرية) + السنوي (ما يقع فعلياً ضمن السنة المالية الحالية)
+export function recurringTotals(expenses = [], fromISO, toISO) {
+  const active = expenses.filter((e) => e.status !== "stopped" && e.is_fixed);
+  const monthly = active
+    .filter((e) => e.recurrence === "monthly")
+    .reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  let yearly;
+  if (fromISO && toISO) {
+    yearly = active
+      .filter((e) => e.recurrence === "yearly")
+      .reduce((s, e) => s + expenseOccurrences(e, fromISO, toISO).reduce((ss, o) => ss + o.amount, 0), 0);
+  } else {
+    yearly = active.filter((e) => e.recurrence === "yearly").reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  }
+  return { monthly, yearly };
 }
 
 export const EXPENSE_CATEGORIES = [

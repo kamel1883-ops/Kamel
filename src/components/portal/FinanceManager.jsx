@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Loader2, Pencil, Trash2, Printer, TrendingUp, TrendingDown, Wallet, Repeat } from "lucide-react";
 import { formatCurrency } from "@/lib/hr";
-import { financeRows, recurringTotals, EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
+import { financeRows, recurringTotals, currentFiscalYearRange, EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
 import ExpenseFormDialog from "@/components/portal/ExpenseFormDialog";
 import FinancePeriodTable from "@/components/portal/FinancePeriodTable";
 import FinancePrintReport from "@/components/portal/FinancePrintReport";
@@ -37,7 +37,8 @@ export default function FinanceManager({ session, isAr = true }) {
     () => financeRows({ revenues, expenses, mode, isAr, forecast: showForecast ? (mode === "year" ? 1 : 3) : 0 }),
     [revenues, expenses, mode, isAr, showForecast]
   );
-  const fixed = useMemo(() => recurringTotals(expenses), [expenses]);
+  const fy = useMemo(() => currentFiscalYearRange(), []);
+  const fixed = useMemo(() => recurringTotals(expenses, fy.from, fy.to), [expenses, fy]);
 
   const save = async (payload) => {
     await call("expense_save", { payload, id: dlg.expense?.id || "" });

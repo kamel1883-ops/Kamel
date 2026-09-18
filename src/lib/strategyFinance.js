@@ -1,6 +1,6 @@
 // تحليل الوضع المالي الفعلي لمنصة جداره — يُبنى على نفس بيانات بوابة المالك:
 // الإيرادات (اشتراكات مدفوعة) + المصروفات التشغيلية + عمولة الشركاء 7% من أول اشتراك للعميل المُحال.
-import { financeRows, recurringTotals, EXPENSE_CATEGORIES } from "@/lib/finance";
+import { financeRows, recurringTotals, currentFiscalYearRange, EXPENSE_CATEGORIES } from "@/lib/finance";
 
 export const AFFILIATE_RATE = 7;
 
@@ -54,7 +54,8 @@ export function actualSnapshot({ subscriptions = [], expenses = [], tenants = []
   const paid = subscriptions.filter((s) => s.status === "paid");
   const monthly = financeRows({ revenues: paid, expenses, mode: "month", isAr });
   const yearly = financeRows({ revenues: paid, expenses, mode: "year", isAr });
-  const fixed = recurringTotals(expenses);
+  const fy = currentFiscalYearRange();
+  const fixed = recurringTotals(expenses, fy.from, fy.to);
   const commissions = affiliateCommissions(subscriptions, tenants);
 
   const clients = new Set(paid.map((s) => s.tenant_id)).size;
