@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Printer, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { printReport } from "@/lib/reportPrint";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 
 export default function PayrollReport({ org, records, employees, t }) {
   const isAr = !!t.monthsList && t.monthsList[0] === "يناير";
@@ -58,15 +59,15 @@ export default function PayrollReport({ org, records, employees, t }) {
       <div className="flex flex-wrap items-end gap-3 mb-4">
         <div>
           <label className="block text-xs text-muted-foreground mb-1.5">{t.paySel}</label>
-          <select
+          <MobileSelect
             value={selKey}
-            onChange={(e) => setSelKey(e.target.value)}
-            className="h-9 rounded-md border border-input bg-white px-3 text-sm font-medium min-w-[220px]"
+            onValueChange={setSelKey}
+            className="min-w-[220px]"
           >
             {groups.map((g) => (
-              <option key={g.key} value={g.key}>{monthLabel(g.year, g.month)} — {g.rows.length} {t.payEmps}</option>
+              <MobileSelectItem key={g.key} value={g.key}>{monthLabel(g.year, g.month)} — {g.rows.length} {t.payEmps}</MobileSelectItem>
             ))}
-          </select>
+          </MobileSelect>
         </div>
         <Button onClick={onExport} disabled={exporting || !sel} className="gap-2">
           {exporting ? <Printer size={16} className="animate-spin" /> : <Printer size={16} />} {t.payExport}

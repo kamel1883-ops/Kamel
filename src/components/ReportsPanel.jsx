@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { printReport } from "@/lib/reportPrint";
 import PayrollReport from "@/components/reports/PayrollReport";
 import PlatformSubscriptionsReport from "@/components/reports/PlatformSubscriptionsReport";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 
 const daysUntil = (d) => { if (!d) return null; const t = new Date(d).getTime(); if (isNaN(t)) return null; return Math.ceil((t - Date.now()) / 86400000); };
 const addMonths = (n) => { const d = new Date(); d.setMonth(d.getMonth() + n); return d; };
@@ -339,10 +340,9 @@ function AttOneReport({ employees, attendance, empId, setEmpId, statusLabel, t }
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <select value={empId} onChange={(e) => setEmpId(e.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm">
-          <option value="">{t.selectEmp}</option>
-          {employees.map((e) => <option key={e.id} value={e.id}>{e.full_name}</option>)}
-        </select>
+        <MobileSelect value={empId} onValueChange={setEmpId} placeholder={t.selectEmp} className="min-w-[200px]">
+          {employees.map((e) => <MobileSelectItem key={e.id} value={e.id}>{e.full_name}</MobileSelectItem>)}
+        </MobileSelect>
         <div className="inline-flex rounded-lg border border-border bg-white overflow-hidden">
           {[[3,t.window3],[6,t.window6],[12,isAr?"12 شهر":"12 months"]].map(([v,l]) => (
             <button key={v} onClick={() => setRangeM(v)} className={cn("px-3 py-1.5 text-sm font-medium", rangeM === v ? "bg-slate-800 text-white" : "text-muted-foreground hover:bg-slate-50")}>{l}</button>
@@ -561,10 +561,9 @@ function WarningsReport({ records, employees, empId, setEmpId, t }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <select value={empId} onChange={(e) => setEmpId(e.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm">
-          <option value="">{t.selectEmp}</option>
-          {employees.map((e) => <option key={e.id} value={e.id}>{e.full_name}</option>)}
-        </select>
+        <MobileSelect value={empId} onValueChange={setEmpId} placeholder={t.selectEmp} className="min-w-[200px]">
+          {employees.map((e) => <MobileSelectItem key={e.id} value={e.id}>{e.full_name}</MobileSelectItem>)}
+        </MobileSelect>
         <div className="inline-flex rounded-lg border border-border bg-white overflow-hidden">
           {[[3,t.window3],[6,t.window6],[12,isAr?"12 شهر":"12 months"]].map(([v,l]) => (
             <button key={v} onClick={() => setRangeM(v)} className={cn("px-3 py-1.5 text-sm font-medium", rangeM === v ? "bg-slate-800 text-white" : "text-muted-foreground hover:bg-slate-50")}>{l}</button>

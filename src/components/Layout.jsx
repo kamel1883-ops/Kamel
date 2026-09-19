@@ -10,7 +10,10 @@ import NotificationsBell from "@/components/NotificationsBell";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import CompanyAssistant from "@/components/CompanyAssistant";
 import AnimatedOutlet from "@/components/AnimatedOutlet";
+import BottomTabBar from "@/components/BottomTabBar";
 import { useI18n } from "@/lib/i18n";
+
+const ROOT_TABS = ["/app", "/employees", "/approvals", "/settings"];
 
 const appNav = [
   { to: "/app", ar: "الرئيسية", en: "Dashboard", icon: LayoutDashboard },
@@ -82,6 +85,7 @@ export default function Layout() {
   };
 
   const isActive = (path) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+  const rootTab = ROOT_TABS.includes(location.pathname) ? bottomNav.find((i) => i.to === location.pathname) : null;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -150,12 +154,16 @@ export default function Layout() {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="lg:hidden h-16 bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8] text-[#2A2340] border-b border-[#E2D6F4] flex items-center justify-between px-4 sticky top-0 z-20" style={{ paddingTop: "max(env(safe-area-inset-top), 0px)" }}>
           <div className="flex items-center gap-2.5">
-            {location.pathname !== "/app" && location.pathname !== "/" && (
-              <button onClick={() => navigate(-1)} className="text-[#6B5E8C] active:scale-95 transition" aria-label="back">
-                <ArrowRight size={22} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
-              </button>
+            {rootTab ? (
+              <span className="font-extrabold text-[15px] text-[#2A2340]">{isAr ? rootTab.ar : rootTab.en}</span>
+            ) : (
+              <>
+                <button onClick={() => navigate(-1)} className="text-[#6B5E8C] active:scale-95 transition" aria-label="back">
+                  <ArrowRight size={22} style={{ transform: isAr ? "none" : "scaleX(-1)" }} />
+                </button>
+                <Logo tone="dark" size={36} />
+              </>
             )}
-            <Logo tone="dark" size={36} />
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell tone="dark" />
@@ -181,19 +189,7 @@ export default function Layout() {
           </div>
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#F6F3FC]/95 backdrop-blur border-t border-[#E2D6F4] flex items-stretch justify-around" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          {bottomNav.map((item) => {
-            const Icon = item.icon;
-            const active = item.to === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.to);
-            return (
-              <Link key={item.to} to={item.to} state={active ? { refreshKey: Date.now() } : undefined} onClick={() => setOpen(false)}
-                className={cn("flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-[11px] font-semibold transition-colors", active ? "text-[#7C5CE6]" : "text-[#8B7AB8]")}>
-                <Icon size={20} />
-                {isAr ? item.ar : item.en}
-              </Link>
-            );
-          })}
-        </nav>
+        <BottomTabBar onNavigate={() => setOpen(false)} />
       </div>
       <CompanyAssistant />
     </div>

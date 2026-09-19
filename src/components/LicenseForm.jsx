@@ -11,6 +11,7 @@ import { base44 } from "@/api/base44Client";
 import { LICENSE_TYPES, typeMeta } from "@/lib/licenses";
 import { differenceInMonths, parseISO } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 
 const empty = {
   license_type: "", custom_label: "", license_number: "",
@@ -105,11 +106,6 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
     }
   };
 
-  const onTypeChange = (e) => {
-    const k = e.target.value;
-    set("license_type", k);
-    set("issuing_authority", typeMeta(k).authority);
-  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -120,20 +116,19 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">{t.type}</Label>
-            <select
+            <MobileSelect
               value={form.license_type}
-              onChange={onTypeChange}
+              onValueChange={(v) => { set("license_type", v); set("issuing_authority", typeMeta(v).authority); }}
+              placeholder={t.choose}
               disabled={!!fixedType}
-              required
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+              className="w-full"
             >
-              <option value="">{t.choose}</option>
               {LICENSE_TYPES.map((tt) => (
-                <option key={tt.key} value={tt.key}>
+                <MobileSelectItem key={tt.key} value={tt.key}>
                   {typeMeta(tt.key).label}
-                </option>
+                </MobileSelectItem>
               ))}
-            </select>
+            </MobileSelect>
           </div>
 
           {form.license_type === "other" && (
