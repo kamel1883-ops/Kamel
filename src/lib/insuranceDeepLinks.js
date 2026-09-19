@@ -1,51 +1,43 @@
-// مولّد روابط التأمين العميقة لمزوّدي التأمين في السعودية.
+// مولّد روابط التأمين العميقة لمزوّدي التأمين في السعودية (تأميني وبي كير).
 //
-// ✅ تأميني (Tameeni) — التأمين الصحي للمنشآت الصغيرة والمتوسطة:
-//    https://health.tameeni.com/  (صفحة بدء التسعير — تتطلب تسجيل الدخول عبر نفاذ/منشآت)
+// ✅ تأميني (Tameeni) — التأمين الصحي للمنشآت + تأمين المركبات:
+//    صحي:   https://health.tameeni.com/
+//    مركبات: https://www.tameeni.com/motorapp/en
 //
-// ✅ بي كير (BCare) — تأمين المركبات (أفراد ومنشآت):
-//    https://www.bcare.com.sa/en  (صفحة بدء التسعير — تتطلب تسجيل الدخول)
+// ✅ بي كير (BCare) — التأمين الصحي للمنشآت + تأمين المركبات (أفراد ومنشآت):
+//    صحي:   https://medical.bcare.com.sa/en
+//    مركبات: https://www.bcare.com.sa/en
 //
 // ⚠️ ملاحظة: منصات التأمين تتطلب تسجيل الدخول ولا تدعم التعبئة التلقائية لبيانات التسعير
 //    عبر معاملات الرابط كحال حجوزات الطيران — لذا يُفتح رابط بدء التسعير ويكمل العميل
 //    إدخال البيانات ومقارنة العروض والشراء مباشرة على الموقع.
 
-export const HEALTH_INSURANCE_PROVIDERS = {
+export const INSURANCE_PROVIDERS = {
   tameeni: {
     key: "tameeni",
     name: "تأميني",
     nameEn: "Tameeni",
     site: "tameeni.com",
-    brand: "#0B8A4F",
-    quoteBase: "https://health.tameeni.com/",
-    info: "https://www.tameeni.com/en/health-sme",
-    deepLinkSupported: false,
+    brand: "#0088EB",
+    healthUrl: "https://health.tameeni.com/",
+    vehicleUrl: "https://www.tameeni.com/motorapp/en",
+    logoType: "tameeni",
   },
-};
-
-export const VEHICLE_INSURANCE_PROVIDERS = {
   bcare: {
     key: "bcare",
     name: "بي كير",
     nameEn: "BCare",
     site: "bcare.com.sa",
-    brand: "#E30613",
-    quoteBase: "https://www.bcare.com.sa/en",
-    corporateBase: "https://www.bcare.com.sa/en",
-    deepLinkSupported: false,
+    brand: "#146394",
+    healthUrl: "https://medical.bcare.com.sa/en",
+    vehicleUrl: "https://www.bcare.com.sa/en",
+    logoType: "bcare",
   },
 };
 
-/** يبني رابط بدء تسعير التأمين الصحي على منصة تأميني. */
-export function buildHealthInsuranceUrl(providerKey) {
-  const provider = HEALTH_INSURANCE_PROVIDERS[providerKey];
+/** يبني رابط بدء التسعير للمزوّد المختار حسب نوع التأمين (صحي/مركبات). */
+export function buildInsuranceUrl(providerKey, type) {
+  const provider = INSURANCE_PROVIDERS[providerKey];
   if (!provider) return null;
-  return provider.quoteBase;
-}
-
-/** يبني رابط بدء تسعير تأمين المركبات على منصة بي كير (أفراد أو منشآت). */
-export function buildVehicleInsuranceUrl(providerKey, p = {}) {
-  const provider = VEHICLE_INSURANCE_PROVIDERS[providerKey];
-  if (!provider) return null;
-  return p.ownership === "company" ? provider.corporateBase : provider.quoteBase;
+  return type === "health" ? provider.healthUrl : provider.vehicleUrl;
 }
