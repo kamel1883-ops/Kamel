@@ -8,8 +8,8 @@ import { Image } from "@/components/ui/image";
 // نافذة عرض اليوم الوطني السعودي 96 — تظهر مرة واحدة لكل جلسة على صفحات الموقع العامة.
 // تصميم مطابق للمرجع: أخضر داكن (#003323) بنقشة شبكية، رقم 96 كبير مع شعار النخلة والسيفين
 // داخل الـ 6، خلفية أبراج الرياض + جدار الدرعية ونقوش سدو، كود SAUDI96 ونسبة 50٪.
-const CODE = "SAUDI96";
-const DISCOUNT = "50%";
+const CODE = "JADARA-HR-96";
+const DISCOUNT = "30%";
 const PERSON_IMG =
   "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/35e1c7932_generated_image.png";
 const SESSION_KEY = "jadara_nd96_closed_v1";
