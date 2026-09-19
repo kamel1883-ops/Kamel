@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Loader2, Check, Upload, AlertTriangle, CalendarClock, BadgeCheck } from "lucide-react";
+import { PRICING_TIERS_AR, PRICING_TIERS_EN, tierForCount } from "@/lib/pricing";
 
 // التجديد السنوي — منفصل تماماً عن توليد العقود.
 // يحدد المالك الفترة والمبلغ ويرفع الإيصال → يُسجَّل إيراد واحد لهذه الفترة فقط (بلا تكرار).
@@ -27,7 +28,16 @@ export default function RenewYearDialog({ open, onClose, tenant, isAr, session, 
     const e = new Date(base); e.setFullYear(e.getFullYear() + 1);
     setStart(s.toISOString().slice(0, 10));
     setEnd(e.toISOString().slice(0, 10));
-    setAmount(String(tenant.quoted_amount || ""));
+    // التجديد (عميل فعّال له اشتراك جارٍ) لا يحمل خصم السنة الأولى — يُعبّأ بالسعر السنوي
+    // الكامل للشريحة (حسب عدد الموظفين). أما تسجيل إيراد السنة الأولى (تجربة/جديد) فيُعبّأ
+    // بالمبلغ المخصوم المعروض. الحقل يبقى قابلاً للتعديل ليدخّل المالك المبلغ المستلم فعلياً.
+    const tiers = isAr ? PRICING_TIERS_AR : PRICING_TIERS_EN;
+    const tier = tenant?.employee_count ? tierForCount(tenant.employee_count, tiers) : null;
+    const isRenewal = tenant?.status === "active" && !!tenant?.subscription_end;
+    const defaultAmount = isRenewal
+      ? (tier && !tier.contact ? tier.yearly : tenant?.quoted_amount)
+      : tenant?.quoted_amount;
+    setAmount(String(defaultAmount || ""));
     setFile(null); setErr(""); setDone(""); setBusy(false);
   }, [open, tenant]);
 

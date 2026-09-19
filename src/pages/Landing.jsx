@@ -14,7 +14,7 @@ import HrKeywordField from "@/components/landing/HrKeywordField";
 import { useI18n } from "@/lib/i18n";
 import { getActiveSeason } from "@/lib/seasonalVideo";
 import SeasonalHero from "@/components/landing/SeasonalHero";
-import SeasonalDiscountBanner from "@/components/landing/SeasonalDiscountBanner";
+
 import { PRICING_TIERS_AR, PRICING_TIERS_EN } from "@/lib/pricing";
 import AssistantAvatar from "@/components/AssistantAvatar";
 import StoreButtons from "@/components/StoreButtons";
@@ -283,8 +283,6 @@ export default function Landing() {
           </div>
         </div>
       </header>
-
-      <SeasonalDiscountBanner />
 
       {/* Hero — فيديو سينمائي يغطي الشاشة بالكامل بخلفية الكرة، مع عنوان وأزرار فوقه */}
       <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
