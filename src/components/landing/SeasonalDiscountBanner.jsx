@@ -29,8 +29,8 @@ export default function SeasonalDiscountBanner() {
           <span className="text-amber-200">🎉</span>
           <span>
             {isAr
-              ? "خصم 5٪ بمناسبة اليوم الوطني السعودي 96"
-              : "5% off for Saudi National Day 96"}
+              ? "خصم 30٪ بمناسبة اليوم الوطني السعودي 96"
+              : "30% off for Saudi National Day 96"}
           </span>
           <span className="opacity-60">·</span>
           <button
