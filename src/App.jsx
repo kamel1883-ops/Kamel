@@ -36,6 +36,8 @@ const Fleet = lazy(() => import("@/pages/Fleet"));
 const Equipment = lazy(() => import("@/pages/Equipment"));
 const Complaints = lazy(() => import("@/pages/Complaints"));
 const FlightBookings = lazy(() => import("@/pages/FlightBookings"));
+const HealthInsurance = lazy(() => import("@/pages/HealthInsurance"));
+const VehicleInsurance = lazy(() => import("@/pages/VehicleInsurance"));
 const EndOfService = lazy(() => import("@/pages/EndOfService"));
 const Performance = lazy(() => import("@/pages/Performance"));
 const Succession = lazy(() => import("@/pages/Succession"));
@@ -161,6 +163,8 @@ const AuthenticatedApp = () => {
         <Route path="/leaves" element={<Leaves />} />
         <Route path="/business-trips" element={<BusinessTrips />} />
         <Route path="/flight-bookings" element={<FlightBookings />} />
+        <Route path="/health-insurance" element={<HealthInsurance />} />
+        <Route path="/vehicle-insurance" element={<VehicleInsurance />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/gosi" element={<Gosi />} />
         <Route path="/fleet" element={<Fleet />} />
