@@ -37,17 +37,13 @@ export default function NationalDayModal() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY)) return;
     if (!getActiveSeason()) return;
     if (!isMarketingPath(location.pathname)) return;
     const t = setTimeout(() => setOpen(true), 650);
     return () => clearTimeout(t);
   }, [location.pathname]);
 
-  const close = () => {
-    setOpen(false);
-    try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (_) {}
-  };
+  const close = () => setOpen(false);
   const onBackdrop = (e) => { if (e.target === e.currentTarget) close(); };
 
   if (!open) return null;
