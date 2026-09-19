@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import LeaveRequestForm from "@/components/LeaveRequestForm";
@@ -98,13 +98,9 @@ export default function MyRequests() {
   const [compOpen, setCompOpen] = useState(false);
   const [equipmentReqs, setEquipmentReqs] = useState([]);
   const [complaints, setComplaints] = useState([]);
-  const [view, setView] = useState("self");
-  const didInitView = useRef(false);
-  useEffect(() => {
-    if (didInitView.current || !employee) return;
-    didInitView.current = true;
-    setView("self");
-  }, [employee]);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const view = location.pathname === "/portal/notifications" ? "notifications" : location.pathname === "/portal/approvals" ? "approvals" : "self";
 
   // رسالة الحالة (تُستخدم في load أيضاً)
   const [signInMsg, setSignInMsg] = useState({ type: "", text: "" });
@@ -160,7 +156,6 @@ export default function MyRequests() {
     setEmployee(null); setOrg(null); setBranch(null);
     setLeaves([]); setLoans([]); setAttendance([]); setTrips([]); setWarnings([]); setReviews([]); setTrainings([]); setSettlements([]);
     setDecisions([]); setIncentives([]); setEquipmentReqs([]); setComplaints([]);
-    setView("self");
   };
 
   const exitToLanding = () => {
@@ -349,10 +344,10 @@ export default function MyRequests() {
         </div>
 
         <div className="flex gap-2 mb-5 flex-wrap rounded-2xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-lg p-1.5">
-          <button type="button" onClick={() => setView("self")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "self" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{t.selfTab}</button>
-          <button type="button" onClick={() => setView("notifications")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "notifications" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{tN.tabNotifications}</button>
+          <button type="button" onClick={() => navigate("/portal")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "self" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{t.selfTab}</button>
+          <button type="button" onClick={() => navigate("/portal/notifications")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "notifications" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{tN.tabNotifications}</button>
           {hasApprovals && (
-            <button type="button" onClick={() => setView("approvals")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "approvals" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{t.approvalsTab}</button>
+            <button type="button" onClick={() => navigate("/portal/approvals")} className={cn("px-4 py-2.5 text-sm font-medium rounded-xl transition", view === "approvals" ? "bg-violet-500/15 text-violet-700" : "text-muted-foreground hover:text-foreground hover:bg-white/50")}>{t.approvalsTab}</button>
           )}
         </div>
         {hasApprovals && view === "approvals" ? (
@@ -661,7 +656,7 @@ export default function MyRequests() {
             <Link to="/" className="flex items-center gap-1.5 text-sm text-[#6B5E8C] hover:text-[#2A2340] px-3 py-2 rounded-lg hover:bg-white/60 transition">
               <ArrowRight size={16} style={{ transform: portalDir(lang) === "rtl" ? "none" : "scaleX(-1)" }} /> {t.backToSite}
             </Link>
-            <PortalNotificationsBell session={session} onViewAll={() => setView("notifications")} tone="dark" align={portalDir(lang) === "rtl" ? "left" : "right"} />
+            <PortalNotificationsBell session={session} onViewAll={() => navigate("/portal/notifications")} tone="dark" align={portalDir(lang) === "rtl" ? "left" : "right"} />
             <PortalLanguageSelector />
             {session && (
               <button onClick={exitToLanding} className="flex items-center gap-2 text-sm text-[#6B5E8C] hover:text-[#2A2340] px-3 py-2 rounded-lg hover:bg-white/60 transition">

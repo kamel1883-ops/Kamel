@@ -6,9 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Loader2, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PERMISSION_MODULES, parsePermissions, togglePermission, allPermissionKeys } from "@/lib/employeePermissions";
@@ -189,10 +187,10 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={form.is_saudi ? t.natIdSaudi : t.natIdExpat}><Input value={form.national_id} onChange={(e) => set("national_id", e.target.value)} /></Field>
             <Field label={t.email}><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder={isAr ? "name@company.sa" : "name@company.sa"} /></Field>
             <Field label={t.gender}>
-              <Select value={form.gender} onValueChange={(v) => set("gender", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="male">{t.male}</SelectItem><SelectItem value="female">{t.female}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.gender} onValueChange={(v) => set("gender", v)}>
+                
+                <MobileSelectItem value="male">{t.male}</MobileSelectItem><MobileSelectItem value="female">{t.female}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.birth}><Input type="date" lang={isAr ? "ar" : "en"} value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} /></Field>
             <Field label={t.phone}><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
@@ -201,35 +199,35 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
               <datalist id="dept-options">{departments.map((d) => <option key={d} value={d} />)}</datalist>
             </Field>
             <Field label={t.branch}>
-              <Select value={form.branch_id || "none"} onValueChange={(v) => {
+              <MobileSelect value={form.branch_id || "none"} onValueChange={(v) => {
                 const b = branches.find((x) => x.id === v);
                 set("branch_id", v === "none" ? "" : v);
                 set("branch_name", v === "none" ? "" : (b?.name || ""));
               }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t.noBranch}</SelectItem>
-                  {branches.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}{b.is_main ? ` (${isAr ? "رئيسي" : "main"})` : ""}</SelectItem>)}
-                </SelectContent>
-              </Select>
+                
+                
+                  <MobileSelectItem value="none">{t.noBranch}</MobileSelectItem>
+                  {branches.map((b) => <MobileSelectItem key={b.id} value={b.id}>{b.name}{b.is_main ? ` (${isAr ? "رئيسي" : "main"})` : ""}</MobileSelectItem>)}
+                
+              </MobileSelect>
             </Field>
             <Field label={t.position}><Input value={form.position} onChange={(e) => set("position", e.target.value)} required /></Field>
             <Field label={t.roleLevel}>
-              <Select value={form.role_level || "employee"} onValueChange={(v) => set("role_level", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{ROLE_ORDER.filter((r) => r !== "owner").map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[isAr ? "ar" : "en"][r]}</SelectItem>)}</SelectContent>
-              </Select>
+              <MobileSelect value={form.role_level || "employee"} onValueChange={(v) => set("role_level", v)}>
+                
+                {ROLE_ORDER.filter((r) => r !== "owner").map((r) => <MobileSelectItem key={r} value={r}>{ROLE_LABELS[isAr ? "ar" : "en"][r]}</MobileSelectItem>)}
+              </MobileSelect>
             </Field>
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" lang={isAr ? "ar" : "en"} value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
             <Field label={t.annualLeaveEnt}>
-              <Select value={String(leaveLocked30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="21" disabled={leaveLocked30}>{t.d21}</SelectItem>
-                  <SelectItem value="30" disabled={!leaveLocked30}>{t.d30}</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={String(leaveLocked30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
+                
+                
+                  <MobileSelectItem value="21" disabled={leaveLocked30}>{t.d21}</MobileSelectItem>
+                  <MobileSelectItem value="30" disabled={!leaveLocked30}>{t.d30}</MobileSelectItem>
+                
+              </MobileSelect>
               {leaveLocked30 && (
                 <p className="text-xs text-amber-600 mt-1.5 leading-relaxed">{orgPolicy30 ? t.leaveLockOrgNote : t.leaveLockNote}</p>
               )}
@@ -240,13 +238,13 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.contractStart}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>
             <Field label={t.contractEnd}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_end_date} onChange={(e) => set("contract_end_date", e.target.value)} /></Field>
             <Field label={t.directManager}>
-              <Select value={form.manager_id || "none"} onValueChange={(v) => set("manager_id", v === "none" ? "" : v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t.noManager}</SelectItem>
-                  {managers.map((m) => <SelectItem key={m.id} value={m.id}>{managerLabel(m)}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <MobileSelect value={form.manager_id || "none"} onValueChange={(v) => set("manager_id", v === "none" ? "" : v)}>
+                
+                
+                  <MobileSelectItem value="none">{t.noManager}</MobileSelectItem>
+                  {managers.map((m) => <MobileSelectItem key={m.id} value={m.id}>{managerLabel(m)}</MobileSelectItem>)}
+                
+              </MobileSelect>
             </Field>
             <Field label={t.approverManager}>
               <label className="flex items-center gap-2 h-9"><input type="checkbox" checked={!!form.is_approver_manager} onChange={(e) => set("is_approver_manager", e.target.checked)} className="w-4 h-4 accent-violet-600" /> <span className="text-sm">{isAr ? "تفعيل صلاحية اعتماد إجازات مرؤوسيه" : "Enable leave approval rights"}</span></label>
@@ -258,35 +256,35 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
               <label className="flex items-center gap-2 h-9"><input type="checkbox" checked={!!form.is_approver_hr} onChange={(e) => set("is_approver_hr", e.target.checked)} className="w-4 h-4 accent-violet-600" /> <span className="text-sm">{isAr ? "تفعيل صلاحية اعتماد الموارد البشرية (سلف وانتدابات)" : "Enable HR approval rights (loans & trips)"}</span></label>
             </Field>
             <Field label={t.contract}>
-              <Select value={form.contract_type} onValueChange={(v) => set("contract_type", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="full_time">{t.full}</SelectItem><SelectItem value="part_time">{t.part}</SelectItem><SelectItem value="contract">{t.cont}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.contract_type} onValueChange={(v) => set("contract_type", v)}>
+                
+                <MobileSelectItem value="full_time">{t.full}</MobileSelectItem><MobileSelectItem value="part_time">{t.part}</MobileSelectItem><MobileSelectItem value="contract">{t.cont}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.status}>
-              <Select value={form.status} onValueChange={(v) => set("status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="active">{t.active}</SelectItem><SelectItem value="on_leave">{t.onLeave}</SelectItem><SelectItem value="terminated">{t.terminated}</SelectItem><SelectItem value="resigned">{t.resigned}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.status} onValueChange={(v) => set("status", v)}>
+                
+                <MobileSelectItem value="active">{t.active}</MobileSelectItem><MobileSelectItem value="on_leave">{t.onLeave}</MobileSelectItem><MobileSelectItem value="terminated">{t.terminated}</MobileSelectItem><MobileSelectItem value="resigned">{t.resigned}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.base}><Input type="number" value={form.base_salary} onChange={(e) => set("base_salary", e.target.value)} required /></Field>
             <Field label={t.housing}><Input type="number" value={form.housing_allowance} onChange={(e) => set("housing_allowance", e.target.value)} /></Field>
             <Field label={t.transport}><Input type="number" value={form.transport_allowance} onChange={(e) => set("transport_allowance", e.target.value)} /></Field>
             <Field label={t.other}><Input type="number" value={form.other_allowances} onChange={(e) => set("other_allowances", e.target.value)} /></Field>
             <Field label={t.payMethod}>
-              <Select value={form.salary_payment_method || "mudad"} onValueChange={(v) => set("salary_payment_method", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="mudad">{t.payMudad}</SelectItem><SelectItem value="cash">{t.payCash}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.salary_payment_method || "mudad"} onValueChange={(v) => set("salary_payment_method", v)}>
+                
+                <MobileSelectItem value="mudad">{t.payMudad}</MobileSelectItem><MobileSelectItem value="cash">{t.payCash}</MobileSelectItem>
+              </MobileSelect>
             </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
             <Field label={t.saudi}>
-              <Select value={derivedSaudi ? "true" : "false"} disabled={!!natIdStartsWith}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="true">{t.saudiY}</SelectItem><SelectItem value="false">{t.saudiN}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={derivedSaudi ? "true" : "false"} disabled={!!natIdStartsWith}>
+                
+                <MobileSelectItem value="true">{t.saudiY}</MobileSelectItem><MobileSelectItem value="false">{t.saudiN}</MobileSelectItem>
+              </MobileSelect>
               {natIdStartsWith && (
                 <p className="text-xs text-violet-600 mt-1.5 leading-relaxed">{isAr ? "تُحدد آلياً من رقم الهوية (١ = سعودي، ٢ = مقيم)" : "Auto-derived from ID (1 = Saudi, 2 = resident)"}</p>
               )}
@@ -296,10 +294,10 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.passExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.passport_expiry} onChange={(e) => set("passport_expiry", e.target.value)} /></Field>
             <Field label={t.medExp}><Input type="date" lang={isAr ? "ar" : "en"} value={form.health_insurance_expiry} onChange={(e) => set("health_insurance_expiry", e.target.value)} /></Field>
             <Field label={t.ticket}>
-              <Select value={form.ticket_entitlement} onValueChange={(v) => set("ticket_entitlement", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="yearly">{t.yearly}</SelectItem><SelectItem value="biennial">{t.biennial}</SelectItem><SelectItem value="none">{t.none}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.ticket_entitlement} onValueChange={(v) => set("ticket_entitlement", v)}>
+                
+                <MobileSelectItem value="yearly">{t.yearly}</MobileSelectItem><MobileSelectItem value="biennial">{t.biennial}</MobileSelectItem><MobileSelectItem value="none">{t.none}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.ticketValue}><Input type="number" value={form.ticket_value} onChange={(e) => set("ticket_value", e.target.value)} placeholder="0" dir="ltr" /></Field>
             <Field label={t.bank}><Input value={form.bank_account} onChange={(e) => set("bank_account", e.target.value)} /></Field>

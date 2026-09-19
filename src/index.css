@@ -317,6 +317,17 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 }
 
+/* === تحسينات iOS/Android الأصلية: أهداف لمس ٤٤بكسل وطباعة أدنى على الجوال === */
+@media (max-width: 767px) {
+  /* ضمان هدف لمس لا يقل عن ٤٤بكسل لكل الأزرار وعناصر التبويب السفلية (إرشادات iOS HIG) */
+  button, a[role="button"], [data-touch-target] {
+    min-height: 44px;
+  }
+  /* حد أدنى لحجم الخط على الجوال: ١٤بكسل للنص الأساسي، ١٢بكسل للوسوم الدقيقة */
+  body { font-size: 14px; }
+  .text-\\[11px\\], .text-\\[10px\\] { font-size: 12px !important; }
+}
+
 button, a, [role="button"], nav, header, footer, svg, .lucide {
   -webkit-user-select: none;
   user-select: none;

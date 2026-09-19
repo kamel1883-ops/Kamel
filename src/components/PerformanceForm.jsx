@@ -7,9 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { base44 } from "@/api/base44Client";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
@@ -88,22 +86,22 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
         <form onSubmit={submit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Field label={t.emp}>
-              <Select value={form.employee_id} onValueChange={(v) => set("employee_id", v)}>
-                <SelectTrigger><SelectValue placeholder={t.chooseEmp} /></SelectTrigger>
-                <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</SelectItem>)}</SelectContent>
-              </Select>
+              <MobileSelect value={form.employee_id} onValueChange={(v) => set("employee_id", v)} placeholder={t.chooseEmp}>
+                
+                {employees.map((e) => <MobileSelectItem key={e.id} value={e.id}>{e.employee_number} - {e.position}</MobileSelectItem>)}
+              </MobileSelect>
             </Field>
             <Field label={t.revType}>
-              <Select value={form.review_type} onValueChange={(v) => set("review_type", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="annual">{t.annualT}</SelectItem><SelectItem value="midyear">{t.midyearT}</SelectItem><SelectItem value="probation">{t.probationT}</SelectItem><SelectItem value="goal_setting">{t.goalT}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.review_type} onValueChange={(v) => set("review_type", v)}>
+                
+                <MobileSelectItem value="annual">{t.annualT}</MobileSelectItem><MobileSelectItem value="midyear">{t.midyearT}</MobileSelectItem><MobileSelectItem value="probation">{t.probationT}</MobileSelectItem><MobileSelectItem value="goal_setting">{t.goalT}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.period}>
-              <Select value={form.review_period} onValueChange={(v) => set("review_period", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="annual">{t.annualP}</SelectItem><SelectItem value="midyear">{t.midyearP}</SelectItem><SelectItem value="probation">{t.probationP}</SelectItem><SelectItem value="Q1">{t.q1}</SelectItem><SelectItem value="Q2">{t.q2}</SelectItem><SelectItem value="Q3">{t.q3}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.review_period} onValueChange={(v) => set("review_period", v)}>
+                
+                <MobileSelectItem value="annual">{t.annualP}</MobileSelectItem><MobileSelectItem value="midyear">{t.midyearP}</MobileSelectItem><MobileSelectItem value="probation">{t.probationP}</MobileSelectItem><MobileSelectItem value="Q1">{t.q1}</MobileSelectItem><MobileSelectItem value="Q2">{t.q2}</MobileSelectItem><MobileSelectItem value="Q3">{t.q3}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.year}><Input type="number" value={form.period_year} onChange={(e) => set("period_year", e.target.value)} /></Field>
           </div>
@@ -132,10 +130,10 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
 
           <div className="grid grid-cols-2 gap-3">
             <Field label={t.rec}>
-              <Select value={form.recommendation} onValueChange={(v) => set("recommendation", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="none">{t.recNone}</SelectItem><SelectItem value="maintain">{t.recMaintain}</SelectItem><SelectItem value="promote">{t.recPromote}</SelectItem><SelectItem value="bonus">{t.recBonus}</SelectItem><SelectItem value="warn">{t.recWarn}</SelectItem><SelectItem value="terminate">{t.recTerminate}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.recommendation} onValueChange={(v) => set("recommendation", v)}>
+                
+                <MobileSelectItem value="none">{t.recNone}</MobileSelectItem><MobileSelectItem value="maintain">{t.recMaintain}</MobileSelectItem><MobileSelectItem value="promote">{t.recPromote}</MobileSelectItem><MobileSelectItem value="bonus">{t.recBonus}</MobileSelectItem><MobileSelectItem value="warn">{t.recWarn}</MobileSelectItem><MobileSelectItem value="terminate">{t.recTerminate}</MobileSelectItem>
+              </MobileSelect>
             </Field>
             <Field label={t.targetGrade}><Input value={form.target_grade} onChange={(e) => set("target_grade", e.target.value)} placeholder={t.targetPh} /></Field>
           </div>
@@ -144,10 +142,10 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
             <Field label={t.revDate}><Input type="date" value={form.review_date} onChange={(e) => set("review_date", e.target.value)} /></Field>
             <Field label={t.nextRev}><Input type="date" value={form.next_review_date} onChange={(e) => set("next_review_date", e.target.value)} /></Field>
             <Field label={t.status}>
-              <Select value={form.status} onValueChange={(v) => set("status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="draft">{t.sDraft}</SelectItem><SelectItem value="submitted">{t.sSubmitted}</SelectItem><SelectItem value="acknowledged">{t.sAcknowledged}</SelectItem><SelectItem value="completed">{t.sCompleted}</SelectItem></SelectContent>
-              </Select>
+              <MobileSelect value={form.status} onValueChange={(v) => set("status", v)}>
+                
+                <MobileSelectItem value="draft">{t.sDraft}</MobileSelectItem><MobileSelectItem value="submitted">{t.sSubmitted}</MobileSelectItem><MobileSelectItem value="acknowledged">{t.sAcknowledged}</MobileSelectItem><MobileSelectItem value="completed">{t.sCompleted}</MobileSelectItem>
+              </MobileSelect>
             </Field>
           </div>
 

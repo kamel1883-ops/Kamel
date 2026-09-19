@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
+import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Loader2 } from "lucide-react";
 import { differenceInDays, parseISO } from "date-fns";
 import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
@@ -100,29 +98,29 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">{t.emp}</Label>
-            <Select value={form.employee_id} onValueChange={(v) => set("employee_id", v)} disabled={!!currentUserEmployee}>
-              <SelectTrigger><SelectValue placeholder={t.choose} /></SelectTrigger>
-              <SelectContent>
+            <MobileSelect value={form.employee_id} onValueChange={(v) => set("employee_id", v)} placeholder={t.choose} disabled={!!currentUserEmployee}>
+              
+              
                 {(employees || []).map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>{emp.full_name} — {emp.national_id || "—"} {emp.department ? `· ${emp.department}` : ""}</SelectItem>
+                  <MobileSelectItem key={emp.id} value={emp.id}>{emp.full_name} — {emp.national_id || "—"} {emp.department ? `· ${emp.department}` : ""}</MobileSelectItem>
                 ))}
-              </SelectContent>
-            </Select>
+              
+            </MobileSelect>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">{t.type}</Label>
-              <Select value={form.leave_type} onValueChange={(v) => set("leave_type", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="annual">{leaveFullTypeLabel("annual")}</SelectItem>
-                  <SelectItem value="sick">{leaveFullTypeLabel("sick")}</SelectItem>
-                  <SelectItem value="emergency">{leaveFullTypeLabel("emergency")}</SelectItem>
-                  <SelectItem value="unpaid">{leaveFullTypeLabel("unpaid")}</SelectItem>
-                  <SelectItem value="maternity">{leaveFullTypeLabel("maternity")}</SelectItem>
-                  <SelectItem value="permission">{leaveFullTypeLabel("permission")}</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={form.leave_type} onValueChange={(v) => set("leave_type", v)}>
+                
+                
+                  <MobileSelectItem value="annual">{leaveFullTypeLabel("annual")}</MobileSelectItem>
+                  <MobileSelectItem value="sick">{leaveFullTypeLabel("sick")}</MobileSelectItem>
+                  <MobileSelectItem value="emergency">{leaveFullTypeLabel("emergency")}</MobileSelectItem>
+                  <MobileSelectItem value="unpaid">{leaveFullTypeLabel("unpaid")}</MobileSelectItem>
+                  <MobileSelectItem value="maternity">{leaveFullTypeLabel("maternity")}</MobileSelectItem>
+                  <MobileSelectItem value="permission">{leaveFullTypeLabel("permission")}</MobileSelectItem>
+                
+              </MobileSelect>
             </div>
             {!isPermission && (
               <div className="space-y-1.5">
@@ -150,14 +148,14 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
                   </div>
                   <div>
                     <Label className="text-[11px] text-muted-foreground">{(t.permissionMinutes) || "دقائق"}</Label>
-                    <Select value={String(form.permission_minutes)} onValueChange={(v) => set("permission_minutes", Number(v))}>
-                      <SelectTrigger><SelectValue placeholder="0" /></SelectTrigger>
-                      <SelectContent>
+                    <MobileSelect value={String(form.permission_minutes)} onValueChange={(v) => set("permission_minutes", Number(v))} placeholder="0">
+                      
+                      
                         {[0, 15, 20, 30, 40, 45, 50].map((m) => (
-                          <SelectItem key={m} value={String(m)}>{m}</SelectItem>
+                          <MobileSelectItem key={m} value={String(m)}>{m}</MobileSelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      
+                    </MobileSelect>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-2">
@@ -192,13 +190,13 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
               {isAnnual && (
                 <div className="space-y-1.5 rounded-lg border border-amber-200 bg-amber-50/60 p-3">
                   <Label className="text-xs font-semibold text-amber-800">{t.modeLabel}</Label>
-                  <Select value={form.annual_leave_mode} onValueChange={(v) => set("annual_leave_mode", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="actual_travel">{t.modeTravel}</SelectItem>
-                      <SelectItem value="encash_continue">{t.modeEncash}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <MobileSelect value={form.annual_leave_mode} onValueChange={(v) => set("annual_leave_mode", v)}>
+                    
+                    
+                      <MobileSelectItem value="actual_travel">{t.modeTravel}</MobileSelectItem>
+                      <MobileSelectItem value="encash_continue">{t.modeEncash}</MobileSelectItem>
+                    
+                  </MobileSelect>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {form.annual_leave_mode === "encash_continue" ? t.modeEncashHint : t.modeTravelHint}
                   </p>

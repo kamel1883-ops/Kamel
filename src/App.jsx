@@ -90,7 +90,7 @@ const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const path = window.location.pathname;
   const isRestricted = user && user.role !== "admin";
-  const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog") || path.startsWith("/jobs") || path.startsWith("/c");
+  const isPublicPage = PUBLIC_PATHS.includes(path) || path.startsWith("/blog") || path.startsWith("/jobs") || path.startsWith("/c") || path.startsWith("/portal");
 
   if (!isPublicPage && (isLoadingPublicSettings || isLoadingAuth)) {
     return <SplashScreen />;
@@ -142,6 +142,8 @@ const AuthenticatedApp = () => {
           <Route path="/jobs/:id" element={<JobApply />} />
           <Route path="/c/:surveyId" element={<CustomerSurveyTake />} />
           <Route path="/portal" element={<PortalLangProvider><MyRequests /></PortalLangProvider>} />
+          <Route path="/portal/notifications" element={<PortalLangProvider><MyRequests /></PortalLangProvider>} />
+          <Route path="/portal/approvals" element={<PortalLangProvider><MyRequests /></PortalLangProvider>} />
           <Route path="/owner-portal" element={<OwnerPortal />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
