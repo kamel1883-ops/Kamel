@@ -88,14 +88,26 @@ export default function NationalDayModal() {
             <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#003323]/30 md:to-[#003323]/60" />
           </div>
 
-          {/* اللوحة الإعلانية — صورة المرجع الحقيقية كخلفية */}
-          <div className="relative order-2 min-h-[300px] md:min-h-[560px] overflow-hidden">
-            <Image
-              src={BANNER_IMG}
-              alt={isAr ? "عرض اليوم الوطني السعودي 96" : "Saudi National Day 96 offer"}
-              fittingType="fill"
-              className="absolute inset-0 w-full h-full"
+          {/* اللوحة الإعلانية — خلفية تدرّجية بهوية اليوم الوطني (أخضر + ذهبي) */}
+          <div
+            className="relative order-2 min-h-[300px] md:min-h-[560px] overflow-hidden"
+            style={{ background: "linear-gradient(160deg, #0a4f34 0%, #063323 55%, #021a12 100%)" }}
+          >
+            {/* زخرفة زاوية: نقوش هندسية خفيفة */}
+            <div
+              className="absolute inset-0 opacity-[0.12] pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 18% 22%, #d4af37 0, transparent 28%), radial-gradient(circle at 82% 78%, #7ff0c0 0, transparent 32%)",
+              }}
             />
+            {/* رقم 96 كعنصر زخرفي خلفي */}
+            <div
+              className="absolute select-none font-black text-white/10 leading-none pointer-events-none"
+              style={{ fontSize: "min(46vw, 320px)", top: "4%", insetInlineEnd: "3%" }}
+            >
+              96
+            </div>
 
             {/* بطاقة سفلية: النسبة + الكود مع نسخ + الزر */}
             <div className="absolute inset-x-0 bottom-0 flex justify-center p-3 sm:p-5">
