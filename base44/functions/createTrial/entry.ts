@@ -72,8 +72,9 @@ export default async function (req) {
     const rawCode = String(body.discount_code || '').trim();
     if (rawCode) {
       const normalized = rawCode.toLowerCase();
-      const found = await base44.asServiceRole.entities.DiscountCode.filter({ code: normalized, status: 'active' });
-      const code = found && found[0];
+      // مطابقة غير حسّاسة لحالة الأحرف — الأكواد تُخزَّن عادةً بحروف كبيرة (مثل JADARA-HR-96)
+      const found = await base44.asServiceRole.entities.DiscountCode.filter({ status: 'active' }, undefined, 200);
+      const code = (found || []).find((c) => String(c.code || '').trim().toLowerCase() === normalized);
       if (!code) return Response.json({ error: 'كود الخصم غير صالح' }, { status: 400 });
       if (code.max_uses && (Number(code.used_count) || 0) >= code.max_uses)
         return Response.json({ error: 'كود الخصم مستهلك بالكامل' }, { status: 400 });
