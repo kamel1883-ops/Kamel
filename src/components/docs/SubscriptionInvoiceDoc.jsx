@@ -59,10 +59,11 @@ export default function SubscriptionInvoiceDoc({
         subPeriod: "فترة الاشتراك",
         subStartLabel: "بداية الاشتراك",
         subEndLabel: "نهاية الاشتراك",
-        subtotal: "المبلغ الصافي",
+        subtotal: "المبلغ بعد الخصم",
         taxRow: "رسوم الضريبة 0%",
         total: "الإجمالي المستحق",
-        discLabel: "خصم",
+        discLabel: "نسبة الخصم",
+        beforeDiscNote: "القيمة الإجمالية قبل الخصم",
         setupLabel: "رسوم التأسيس (لمرة واحدة)",
         once: "مرة واحدة",
         year1Label: "إجمالي السنة الأولى",
@@ -98,10 +99,11 @@ export default function SubscriptionInvoiceDoc({
         subPeriod: "Subscription period",
         subStartLabel: "Start",
         subEndLabel: "End",
-        subtotal: "Net amount",
+        subtotal: "Amount after discount",
         taxRow: "Tax 0%",
         total: "Total due",
-        discLabel: "Discount",
+        discLabel: "Discount rate",
+        beforeDiscNote: "Total before discount",
         setupLabel: "Setup fee (one-time)",
         once: "One-time",
         year1Label: "Year 1 total",
@@ -185,7 +187,10 @@ export default function SubscriptionInvoiceDoc({
           <tr>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", lineHeight: 1.7 }}>{L.serviceTypeValue} - {v(tier?.tier)} <span style={{ direction: "ltr", unicodeBidi: "embed" }}>{v(tier?.range)}</span></td>
             <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" }}>{L.perYear}</td>
-            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>{num(bd.baseAnnual)} {sar}</td>
+            <td style={{ padding: "8px 10px", borderBottom: "1px solid #e2e8f0", fontWeight: 700, whiteSpace: "nowrap" }}>
+              {num(bd.baseAnnual)} {sar}
+              {bd.hasDiscount && <div style={{ fontSize: 10, fontWeight: 500, color: "#64748b" }}>({L.beforeDiscNote})</div>}
+            </td>
           </tr>
           {bd.hasDiscount && (
             <tr>

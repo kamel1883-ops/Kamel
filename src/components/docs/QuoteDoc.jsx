@@ -44,8 +44,9 @@ export default function QuoteDoc({
         amountDue: "المبلغ المستحق للسنة الأولى",
         waSupport: "الدعم الفني - البريد الإلكتروني", sendReceipt: "أرسل إيصال التحويل إلى info@jadara-hr.com لتفعيل الحساب",
         openWhatsApp: "مراسلة عبر البريد",
-        discBadge: "خصم", discApplied: "بعد تطبيق الكود",
-        netAnnualLabel: "صافي الاشتراك السنوي", setupLabel: "رسوم التأسيس (لمرة واحدة)", year1Label: "إجمالي السنة الأولى", byAgreement: "حسب الاتفاق",
+        beforeDiscLabel: "القيمة الإجمالية قبل الخصم",
+        discBadge: "نسبة الخصم", discApplied: "قيمة الخصم المُخصومة",
+        netAnnualLabel: "المبلغ بعد الخصم", setupLabel: "رسوم التأسيس (لمرة واحدة)", year1Label: "إجمالي السنة الأولى", byAgreement: "حسب الاتفاق",
         sigName: `${PROVIDER.signerLabel} - ${PROVIDER.signerName}`,
       }
     : {
@@ -65,8 +66,9 @@ export default function QuoteDoc({
         amountDue: "Amount due for year 1",
         waSupport: "Support Email", sendReceipt: "Send the transfer receipt to info@jadara-hr.com to activate your account",
         openWhatsApp: "Email us",
-        discBadge: "OFF", discApplied: "After discount applied",
-        netAnnualLabel: "Net annual subscription", setupLabel: "Setup fee (one-time)", year1Label: "Year 1 total", byAgreement: "By agreement",
+        beforeDiscLabel: "Total before discount",
+        discBadge: "Discount rate", discApplied: "Deducted discount value",
+        netAnnualLabel: "Amount after discount", setupLabel: "Setup fee (one-time)", year1Label: "Year 1 total", byAgreement: "By agreement",
         sigName: `${PROVIDER.signerLabelEn} - ${PROVIDER.signerNameEn}`,
       };
 
@@ -130,31 +132,38 @@ export default function QuoteDoc({
       {/* الأسعار */}
       <div style={{ paddingTop: 22, paddingBottom: 22, borderTop: "1px solid #e2e8f0" }}>
         <div style={{ border: "1px solid #ddd6fe", background: "#faf5ff", borderRadius: 16, padding: 18 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+          {/* رأس الباقة */}
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, paddingBottom: 10, borderBottom: "1px solid #ddd6fe" }}>
             <div>
               <div style={{ fontWeight: 600, fontSize: 13 }}>{tier && tier.tier ? tier.tier : L.planTier}</div>
               {tier && tier.range ? <div style={{ fontSize: 11, color: "#64748b" }}>{tier.range}</div> : null}
             </div>
-            <div style={{ fontSize: hasDiscount ? 13 : 24, fontWeight: 800, color: "#7c3aed", textDecoration: hasDiscount ? "line-through" : "none" }}>
-              {num(basePrice)} {L.annual}
+            <div style={{ fontSize: 11, color: "#64748b" }}>{company?.employee_count ? `${company.employee_count} ${isAr ? "موظفاً" : "employees"}` : ""}</div>
+          </div>
+
+          {/* ١) القيمة الإجمالية قبل الخصم */}
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12 }}>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>{L.beforeDiscLabel}</div>
+            <div style={{ fontSize: hasDiscount ? 16 : 24, fontWeight: 800, color: "#7c3aed", textDecoration: hasDiscount ? "line-through" : "none" }}>
+              {num(bd.baseAnnual)} {L.annual}
             </div>
           </div>
+
+          {/* ٢) نسبة الخصم وقيمته */}
           {hasDiscount && (
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12, paddingTop: 12, borderTop: "1px solid #ddd6fe" }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 10, paddingTop: 10, borderTop: "1px solid #ddd6fe" }}>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>{L.discBadge} {discountPercent}% — {discountCode}</div>
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{L.discBadge} {bd.discountPercent}%{bd.discountCode ? ` — ${bd.discountCode}` : ""}</div>
                 <div style={{ fontSize: 11, color: "#64748b" }}>{L.discApplied}</div>
               </div>
               <div style={{ fontSize: 18, fontWeight: 800, color: "#dc2626" }}>- {num(bd.discountAmount)} {L.annual}</div>
             </div>
           )}
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12, paddingTop: 12, borderTop: "1px solid #ddd6fe" }}>
-            <div style={{ fontWeight: 600, fontSize: 13 }}>{L.netAnnualLabel}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: "#7c3aed" }}>{num(bd.finalAnnual)} {L.annual}</div>
-          </div>
+
+          {/* ٣) المبلغ بعد الخصم = المبلغ المطلوب للسنة الأولى */}
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 12, paddingTop: 12, borderTop: "1.5px solid #c4b5fd", background: "#ede9fe", borderRadius: 12, padding: "12px 16px" }}>
-            <div style={{ fontWeight: 800, fontSize: 15, color: "#5b21b6" }}>{L.year1Label}</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: "#5b21b6" }}>{num(bd.totalYear1)} {L.annual}</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#5b21b6" }}>{L.netAnnualLabel} ({L.year1Label})</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#5b21b6" }}>{num(bd.finalAnnual)} {L.annual}</div>
           </div>
           <div style={{ fontSize: 11, color: "#64748b", marginTop: 12, paddingTop: 10, borderTop: "1px solid #ddd6fe" }}>{L.renewNote}</div>
         </div>
