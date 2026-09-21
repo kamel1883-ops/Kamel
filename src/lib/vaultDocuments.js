@@ -54,6 +54,8 @@ export async function uploadFileToVault(file, { empRef = null, docType = "attach
       : { action: "storeDocument", fileBase64, fileName: file.name || "attachment", mimeType: file.type || "application/octet-stream", empRef, docType };
     const res = await base44.functions.invoke(fnName, payload);
     const data = res?.data?.data || res?.data || {};
+    // سير المرشحين: الدالة العامة تُرجع file_url مباشر من تخزين Base44
+    if (isApplicantCv) return data.file_url || null;
     return data.doc_ref || data.docRef || null;
   } catch (e) {
     return null;

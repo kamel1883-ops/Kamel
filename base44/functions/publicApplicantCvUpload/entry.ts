@@ -1,13 +1,12 @@
 /**
- * publicApplicantCvUpload — دالة عامة (بدون مصادقة) لرفع سيرة المرشحين إلى الخزنة السعودية.
+ * publicApplicantCvUpload — دالة عامة (بدون مصادقة) لرفع سيرة المرشحين.
  *
- * السبب: صفحة التقديم على الوظيفة (JobApply) عامة، والمرشح ليس له حساب.
- * vaultProxy يتطلب مستخدم مسجّل، لذا نحتاج نقطة عامة منفصلة لرفع السيرة فقط.
+ * تخزّن الملف في Base44 عبر UploadPublicFile وتُرجع رابطاً دائماً يُحفظ في حقل
+ * cv_url في سجل JobApplication. المرشح ليس له حساب، لذا الوظيفة عامة.
  *
  * التحقق الصارم: PDF/DOC/DOCX فقط، حجم ≤5MB، تطابق MIME مع الامتداد.
- * لا تُسجّل أي حمولة حساسة — فقط رسائل خطأ عامة.
  */
-import { storeDocument } from "../../shared/vaultClient.ts";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
@@ -26,8 +25,9 @@ function decodeBase64(b64: string): Uint8Array {
 
 export default async function (req: Request): Promise<Response> {
   try {
+    const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { fileBase64, fileName, mimeType, jobId } = body;
+    const { fileBase64, fileName, mimeType } = body;
 
     if (!fileBase64 || !fileName) {
       return Response.json({ error: "missing_file" }, { status: 400 });
@@ -52,26 +52,19 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: "file_too_large" }, { status: 413 });
     }
 
-    // tenant ثابت لمجمّع المرشحين — يُعزل عن بيانات المنشآت
-    const tenant = "applicant_pool";
+    // بناء File من البايتات الخام ورفعه إلى تخزين Base44 العام
+    const file = new File([bytes], fileName, { type: mimeType });
 
-    const result = await storeDocument(
-      tenant,
-      bytes,
-      fileName,
-      mimeType,
-      null, // empRef — لا يوجد موظف مرتبط
-      "applicant_cv",
-    );
+    const result = await base44.integrations.Core.UploadPublicFile({ file });
+    const fileUrl = result?.file_url;
 
-    const docRef = result?.doc_ref || result?.docRef;
-    if (!docRef) {
-      throw new Error("vault_returned_no_ref");
+    if (!fileUrl) {
+      throw new Error("upload_returned_no_url");
     }
 
-    return Response.json({ ok: true, data: { doc_ref: docRef } });
+    return Response.json({ ok: true, data: { file_url: fileUrl } });
   } catch (error) {
-    console.error("[publicApplicantCvUpload] error:", error.message);
+    console.error("[publicApplicantCvUpload] error:", error?.message || error);
     return Response.json({ error: "upload_failed" }, { status: 500 });
   }
 }
