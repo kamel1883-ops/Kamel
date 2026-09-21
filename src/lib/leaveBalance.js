@@ -30,22 +30,23 @@ export function computeEntitlement(hireDate, annualDays, asOf = new Date()) {
   return Math.round((sd / 365) * days * 100) / 100;
 }
 
-// الرصيد المستحق (التراكمي) وفق نظام العمل السعودي: 21 يوماً عن كل سنة من أول
-// 5 سنوات، و30 يوماً عن كل سنة بعدها — تناسبياً شهرياً من تاريخ المباشرة.
-// استثناء: إذا منحت المنشأة 30 يوماً من أول سنة (annual_leave_days=30) تُطبّق 30 عن كامل المدة.
-// مثال: 6 سنوات خدمة = (5 × 21) + (1 × 30) = 135 يوماً (وليس 30 × 6 = 180).
-export function computeLeaveEntitlement(hireDate, org, asOf = new Date()) {
+// الرصيد المستحق (التراكمي) وفق سياسة جدارة المعتمدة:
+// - أكمل 5 سنوات خدمة فأكثر → 30 يوماً/سنة إلزامياً (لا تملك الشركة خيار 21).
+// - أقل من 5 سنوات → خيار الشركة لكل موظف: 21 أو 30 يوماً (annual_leave_entitlement).
+//   تُحتسب بنفس المعدل المختار عن كامل مدة الخدمة تناسبياً من تاريخ المباشرة.
+// annualDaysOverride (اختياري) = اختيار الشركة من ملف الموظف؛ إن غاب يُستخدم افتراض المنشأة.
+export function computeLeaveEntitlement(hireDate, org, asOf = new Date(), annualDaysOverride) {
   if (!hireDate) return 0;
-  // تراكم يومي فعلي: كل يوم خدمة يكتسب (21 أو 30) ÷ 365 من اليوم
   const sd = serviceDays(hireDate, asOf);
   if (sd <= 0) return 0;
-  if (Number(org?.annual_leave_days) === 30) {
-    return Math.round((sd / 365) * 30 * 100) / 100;
+  let days;
+  if (yearsOfService(hireDate, asOf) >= 5) {
+    days = 30; // إلزامي بعد 5 سنوات
+  } else {
+    const choice = Number(annualDaysOverride);
+    days = choice === 30 ? 30 : (choice === 21 ? 21 : (Number(org?.annual_leave_days) === 30 ? 30 : 21));
   }
-  const first5y = Math.min(sd, 1826); // 5 سنوات = 21 يوماً/سنة
-  const beyond = Math.max(0, sd - 1826); // بعدها 30 يوماً/سنة
-  const val = (first5y / 365) * 21 + (beyond / 365) * 30;
-  return Math.round(val * 100) / 100;
+  return Math.round((sd / 365) * days * 100) / 100;
 }
 
 export async function getOrgOnce() {
@@ -74,15 +75,16 @@ export function yearsOfService(hireDate, asOf = new Date()) {
   return Math.max(0, years);
 }
 
-// رصيد الإجازات السنوي للموظف وفق نظام العمل السعودي:
-// - سياسة المنشأة الكريمة (annual_leave_days = 30) → 30 يوماً للجميع.
-// - وإلا: أقل من 5 سنوات خدمة → 21 يوماً، وإكمال 5 سنوات فأكثر → 30 يوماً إلزامياً.
-// خيار الـ 21/30 في ملف الموظف مقفل تلقائياً وفق هذه القاعدة (لا يملك الموارد البشرية
-// اختيار 30 لموظف تحت 5 سنوات، ولا 21 لموظف أكمل 5 سنوات) — انظر EmployeeForm.
+// أيام الإجازة السنوية الفعلية للموظف وفق سياسة جدارة:
+// - أكمل 5 سنوات → 30 إلزامياً (النظام يمنع 21).
+// - أقل من 5 سنوات → خيار الشركة لكل موظف (21 أو 30) من ملف الموظف،
+//   وإن لم يُحدّد يُستخدم افتراض المنشأة (annual_leave_days) ثم 21.
 export function getEmployeeAnnualDays(employee, org) {
-  if (Number(org?.annual_leave_days) === 30) return 30;
-  const yos = yearsOfService(employee?.hire_date);
-  return yos >= 5 ? 30 : 21;
+  if (yearsOfService(employee?.hire_date) >= 5) return 30;
+  const choice = Number(employee?.annual_leave_entitlement);
+  if (choice === 30) return 30;
+  if (choice === 21) return 21;
+  return Number(org?.annual_leave_days) === 30 ? 30 : 21;
 }
 
 // مجموع الأيام المستخدمة من طلبات الإجازة السنوية المعتمدة/المكتملة فقط —
@@ -105,7 +107,7 @@ export function usedLeaveTotal(employee, leaves) {
 
 // الرصيد المتبقي = المستحق التراكمي − المستخدم الكلي (قد يكون سالباً عند تقديم إجازة).
 export function remainingLeave(employee, leaves, org, asOf) {
-  const entitled = computeLeaveEntitlement(employee?.hire_date, org, asOf);
+  const entitled = computeLeaveEntitlement(employee?.hire_date, org, asOf, employee?.annual_leave_entitlement);
   const used = usedLeaveTotal(employee, leaves);
   return Math.round((entitled - used) * 10) / 10;
 }

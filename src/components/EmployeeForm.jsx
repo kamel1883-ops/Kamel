@@ -53,10 +53,9 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     saudi: "سعودي؟", saudiY: "سعودي", saudiN: "مقيم", iqama: "انتهاء الإقامة/الهوية",
     passNo: "رقم الجواز", passExp: "انتهاء الجواز", medExp: "انتهاء التأمين الطبي",
     ticket: "استحقاق التذاكر", ticketValue: "قيمة التذكرة (ريال — مفتوحة)", yearly: "سنوي", biennial: "كل سنتين", none: "بدون", bank: "الحساب البنكي",
-    annualLeaveEnt: "رصيد الإجازات السنوي (مقفل وفق نظام العمل السعودي)", d21: "21 يوم", d30: "30 يوم",
-    leaveLockNote: "أكمل الموظف 5 سنوات خدمة، فاستحقّت إجازته 30 يوماً سنوياً حسب نظام العمل السعودي — لا يمكن اختيار 21 يوماً.",
-    leaveLock21Note: "الموظف لم يكمل 5 سنوات خدمة بعد — يستحق 21 يوماً سنوياً حسب نظام العمل السعودي، ولا يتاح 30 يوماً حتى يكمل الخمس سنوات.",
-    leaveLockOrgNote: "سياسة المنشأة تمنح 30 يوماً إجازة سنوية للجميع — لا يمكن اختيار 21 يوماً.",
+    annualLeaveEnt: "رصيد الإجازات السنوي", d21: "21 يوم", d30: "30 يوم",
+    leaveLockNote: "أكمل الموظف 5 سنوات خدمة، فاستحقّ 30 يوماً سنوياً إلزامياً — لا يمكن اختيار 21 يوماً.",
+    leaveChoiceNote: "أقل من 5 سنوات خدمة — الشركة حرّة في اختيار 21 أو 30 يوماً لكل موظف حسب التقدير (ميزة تعويضية لمسؤول أو تنفيذي مثلاً).",
     roleLevel: "المستوى الوظيفي", directManager: "المدير المباشر", noManager: "بدون (قمة الهيكل)",
     approverManager: "معتمد إجازات (مدير مباشر)", approverFinance: "معتمد مالي (صرف)", approverHr: "معتمد موارد بشرية (سلف وانتدابات)",
     deptHint: "اختر من الإدارات الموجودة أو اكتب إدارة جديدة",
@@ -79,10 +78,9 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     saudi: "Saudi?", saudiY: "Saudi", saudiN: "Expat", iqama: "Iqama/ID expiry",
     passNo: "Passport number", passExp: "Passport expiry", medExp: "Insurance expiry",
     ticket: "Ticket entitlement", ticketValue: "Ticket value (SAR — open)", yearly: "Yearly", biennial: "Biennial", none: "None", bank: "Bank account",
-    annualLeaveEnt: "Annual leave entitlement (locked per Saudi Labor Law)", d21: "21 days", d30: "30 days",
-    leaveLockNote: "Employee completed 5 years of service — entitled to 30 days annual leave per Saudi Labor Law; 21 days cannot be selected.",
-    leaveLock21Note: "Employee has not yet completed 5 years of service — entitled to 21 days annual leave per Saudi Labor Law; 30 days is unavailable until 5 years are completed.",
-    leaveLockOrgNote: "Company policy grants 30 days annual leave to everyone — 21 days cannot be selected.",
+    annualLeaveEnt: "Annual leave entitlement", d21: "21 days", d30: "30 days",
+    leaveLockNote: "Employee completed 5 years of service — 30 days is now mandatory; 21 days cannot be selected.",
+    leaveChoiceNote: "Under 5 years of service — company is free to choose 21 or 30 days per employee (e.g. as a perk for a manager or executive).",
     roleLevel: "Role level", directManager: "Direct manager", noManager: "None (org top)",
     approverManager: "Leave approver (direct manager)", approverFinance: "Finance approver (payment)", approverHr: "HR approver (loans & trips)",
     deptHint: "Pick from existing departments or type a new one",
@@ -127,18 +125,15 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     if (form.is_saudi !== want) set("is_saudi", want);
   }, [form.national_id, form.is_saudi]);
 
-  // قاعدة الخمس سنوات + سياسة المنشأة: تحدد الخيار الوحيد المتاح للموارد البشرية.
-  // - orgPolicy30: المنشأة تمنح 30 يوماً للجميع → 30 فقط (يُقفل 21).
-  // - أكمل 5 سنوات خدمة → 30 يوماً إلزامياً (يُقفل 21).
-  // - أقل من 5 سنوات (دون سياسة 30) → 21 يوماً فقط (يُقفل 30).
-  const orgPolicy30 = Number(org?.annual_leave_days) === 30;
-  const leaveLocked30 = orgPolicy30 || yearsOfService(form.hire_date) >= 5;
+  // قاعدة الإجازات السنوية (سياسة جدارة):
+  // - أكمل 5 سنوات خدمة → 30 يوماً إلزامياً (يُقفل 21 — لا تملك الشركة 21).
+  // - أقل من 5 سنوات → خيار الشركة: 21 أو 30 يوماً لكل موظف (الخياران متاحان).
+  const mustBe30 = yearsOfService(form.hire_date) >= 5;
   useEffect(() => {
-    const want = leaveLocked30 ? 30 : 21;
-    if (Number(form.annual_leave_entitlement) !== want) {
-      set("annual_leave_entitlement", want);
+    if (mustBe30 && Number(form.annual_leave_entitlement) !== 30) {
+      set("annual_leave_entitlement", 30);
     }
-  }, [leaveLocked30, form.annual_leave_entitlement]);
+  }, [mustBe30, form.annual_leave_entitlement]);
 
   // توليد الوصف الوظيفي بالذكاء الاصطناعي من المسمى/الإدارة/المستوى، قابل للتعديل بعد التوليد
   const generateJobDesc = async () => {
@@ -229,18 +224,17 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
             <Field label={t.jobGrade}><Input value={form.job_grade} onChange={(e) => set("job_grade", e.target.value)} /></Field>
             <Field label={t.hireDate}><Input type="date" lang={isAr ? "ar" : "en"} value={form.hire_date} onChange={(e) => set("hire_date", e.target.value)} required /></Field>
             <Field label={t.annualLeaveEnt}>
-              <MobileSelect value={String(leaveLocked30 ? 30 : 21)} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
+              <MobileSelect value={String(mustBe30 ? 30 : (Number(form.annual_leave_entitlement) === 30 ? 30 : 21))} onValueChange={(v) => set("annual_leave_entitlement", Number(v))}>
                 
                 
-                  <MobileSelectItem value="21" disabled={leaveLocked30}>{t.d21}</MobileSelectItem>
-                  <MobileSelectItem value="30" disabled={!leaveLocked30}>{t.d30}</MobileSelectItem>
+                  <MobileSelectItem value="21" disabled={mustBe30}>{t.d21}</MobileSelectItem>
+                  <MobileSelectItem value="30">{t.d30}</MobileSelectItem>
                 
               </MobileSelect>
-              {leaveLocked30 && (
-                <p className="text-xs text-amber-600 mt-1.5 leading-relaxed">{orgPolicy30 ? t.leaveLockOrgNote : t.leaveLockNote}</p>
-              )}
-              {!leaveLocked30 && (
-                <p className="text-xs text-violet-600 mt-1.5 leading-relaxed">{t.leaveLock21Note}</p>
+              {mustBe30 ? (
+                <p className="text-xs text-amber-600 mt-1.5 leading-relaxed">{t.leaveLockNote}</p>
+              ) : (
+                <p className="text-xs text-violet-600 mt-1.5 leading-relaxed">{t.leaveChoiceNote}</p>
               )}
             </Field>
             <Field label={t.contractStart}><Input type="date" lang={isAr ? "ar" : "en"} value={form.contract_start_date} onChange={(e) => set("contract_start_date", e.target.value)} /></Field>

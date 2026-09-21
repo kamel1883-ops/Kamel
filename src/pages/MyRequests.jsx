@@ -289,7 +289,7 @@ export default function MyRequests() {
     const gross =
       (employee.base_salary || 0) + (employee.housing_allowance || 0) +
       (employee.transport_allowance || 0) + (employee.other_allowances || 0);
-    const entitled = computeLeaveEntitlement(employee.hire_date, org);
+    const entitled = computeLeaveEntitlement(employee.hire_date, org, undefined, employee.annual_leave_entitlement);
     // المستخدم الكلي = الرصيد الافتتاحي (prior_used_leave) + المعتمد داخل النظام.
     const used = usedLeaveTotal(employee, leaves);
     const remaining = Math.max(0, Math.round((entitled - used) * 10) / 10);
