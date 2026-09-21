@@ -1228,6 +1228,19 @@ function Infra() {
           <TrustChip dark icon={BadgeCheck} label="99.9% uptime" />
         </div>
       </div>
+      {/* Server & hosting provider */}
+      <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="text-xs text-white/60 shrink-0">Server & hosting provider</div>
+        <div className="flex items-center gap-2.5">
+          <div className="h-11 w-14 rounded-lg bg-white flex items-center justify-center p-1.5 shrink-0">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="Oracle Systems" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
+          </div>
+          <div className="leading-tight">
+            <div className="font-extrabold text-white text-base" style={{ fontFamily: "var(--font-display)" }}>Oracle Systems</div>
+            <div className="text-[11px] text-white/55">Oracle Systems Saudi Arabia — server & hosting provider</div>
+          </div>
+        </div>
+      </div>
     </Section>
   );
 }

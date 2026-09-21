@@ -1,9 +1,9 @@
 import React from "react";
 import { Server, Cpu, HardDrive, MemoryStick, Users, ShieldCheck, Zap, Globe, Lock, MapPin, Network } from "lucide-react";
-import { ExaHostLockup, ComplianceNote, PdplBadge } from "@/components/landing/HostingProvider";
+import { OracleLockup, ComplianceNote, PdplBadge } from "@/components/landing/HostingProvider";
 
 // قسم الاستضافة: يُبرز أن منصة «جداره» تعمل على خادم خاص داخل المملكة العربية السعودية
-// (الرياض — SAIX) بما يتوافق مع الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع سدايا (SDAIA).
+// (الرياض) عبر مزوّد الاستضافة Oracle Systems، بما يتوافق مع الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع سدايا (SDAIA).
 // خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة حتى 50,000 موظف
 // من مجموعة شركات مختلفة — دون أي تأثير على الأداء.
 // يُدرج قبل قسم الباقات في صفحة الهبوط.
@@ -15,7 +15,7 @@ export default function HostingSpecs({ isAr = true }) {
     ? {
         tag: "بنية تحتية سعودية",
         title: "سيرفر خاص بمنصة جداره — داخل السعودية وبأعلى المواصفات",
-        desc: "تعمل منصة «جداره» على خادم خاص داخل المملكة العربية السعودية (الرياض — SAIX)، بما يتوافق مع سياسة الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع متطلبات منصة سدايا (SDAIA). خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة تكفي حتى 50,000 موظف من مجموعة شركات مختلفة — دون بطء أو توقف.",
+        desc: "تعمل منصة «جداره» على خادم خاص داخل المملكة العربية السعودية (الرياض) عبر مزوّد الخادم والاستضافة شركة Oracle Systems، بما يتوافق مع سياسة الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع متطلبات منصة سدايا (SDAIA). خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة تكفي حتى 50,000 موظف من مجموعة شركات مختلفة — دون بطء أو توقف.",
         badge: "أعلى المواصفات",
         heading: "خادم جداره الخاص",
         savingTag: "أداء مخصّص",
@@ -30,7 +30,7 @@ export default function HostingSpecs({ isAr = true }) {
         ],
         features: [
           "خادم خاص بمنصة جداره — يستضيف جميع اشتراكات الشركات والمؤسسات",
-          "موقع سعودي (الرياض — SAIX) — التزام كامل بالهيئة الوطنية للأمن السيبراني وسدايا (SDAIA)",
+          "موقع سعودي (الرياض) عبر Oracle Systems — التزام كامل بالهيئة الوطنية للأمن السيبراني وسدايا (SDAIA)",
           "تخزين NVMe سريع — فتح الصفحات والتقارير في أجزاء من الثانية",
           "نسخ احتياطي يومي تلقائي وحماية كاملة من فقدان البيانات",
           "تشفير كامل للبيانات أثناء التخزين والنقل (TLS / Isolation)",
@@ -44,7 +44,7 @@ export default function HostingSpecs({ isAr = true }) {
     : {
         tag: "Saudi-based infrastructure",
         title: "A dedicated Jadara server — inside Saudi Arabia, top specs",
-        desc: "Jadara runs on a dedicated server inside the Kingdom of Saudi Arabia (Riyadh — SAIX), compliant with the National Cybersecurity Authority policy and fully aligned with SDAIA requirements. A single server hosts all company and institution subscriptions on the platform, sized for up to 50,000 employees across different company groups — no slowdowns, no downtime.",
+        desc: "Jadara runs on a dedicated server inside the Kingdom of Saudi Arabia (Riyadh) via the server & hosting provider Oracle Systems, compliant with the National Cybersecurity Authority policy and fully aligned with SDAIA requirements. A single server hosts all company and institution subscriptions on the platform, sized for up to 50,000 employees across different company groups — no slowdowns, no downtime.",
         badge: "Top specs",
         heading: "Jadara dedicated server",
         savingTag: "Dedicated power",
@@ -59,7 +59,7 @@ export default function HostingSpecs({ isAr = true }) {
         ],
         features: [
           "A server dedicated to the Jadara platform — hosting all company and institution subscriptions",
-          "Saudi location (Riyadh — SAIX) — full compliance with the National Cybersecurity Authority and SDAIA",
+          "Saudi location (Riyadh) via Oracle Systems — full compliance with the National Cybersecurity Authority and SDAIA",
           "NVMe storage — pages and reports open in fractions of a second",
           "Automatic daily backups with full data-loss protection",
           "Full encryption at rest and in transit (TLS / isolation)",
@@ -170,7 +170,7 @@ export default function HostingSpecs({ isAr = true }) {
         {/* مزوّد الاستضافة + الامتثال (NCA / SDAIA) + حماية البيانات (PDPL) */}
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="lg:w-[300px] shrink-0">
-            <ExaHostLockup isAr={isAr} />
+            <OracleLockup isAr={isAr} />
             <div className="text-[11px] text-slate-400 mt-1.5">{isAr ? "مزوّد الخادم والاستضافة" : "Server & hosting provider"}</div>
           </div>
           <div className="flex-1 min-w-0">

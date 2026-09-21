@@ -1,14 +1,14 @@
 import React from "react";
 import { Server, FileLock2, ShieldCheck, MessageCircle, Mail } from "lucide-react";
 
-// مزوّد الاستضافة والخادم لمنصة جداره — شركة إكساهوست السعودية.
-// الشعار معاد تكوينه بلون العلامة الرسمي (Havelock Blue #5EA4DE) لأن ملف الشعار الأصلي
-// غير متاح للربط المباشر؛ يمكن استبداله لاحقاً بملف الشعار الرسمي إن توفّر.
+// مزوّد الاستضافة والخادم لمنصة جداره — شركة Oracle Systems السعودية.
+// الشعار الرسمي لشركة Oracle Systems يُعرض مباشرة من رابطه الموثوق.
 export const HOSTING_PROVIDER = {
-  brandColor: "#5EA4DE",
-  nameAr: "إكساهوست",
-  nameEn: "ExaHost",
-  url: "https://exahost.com",
+  brandColor: "#C74634",
+  nameAr: "Oracle Systems",
+  nameEn: "Oracle Systems",
+  url: "https://www.oracle.com",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg",
 };
 
 // شعار هيئة الأمن السيبراني (NCA) — للمركز السيبراني السعودي
@@ -20,11 +20,11 @@ export const SALES_WHATSAPP = "966594700782";
 export const SALES_EMAIL = "info@jadara-hr.com";
 export const SALES_WA_LINK = "https://wa.me/966594700782";
 
-// شعار إكساهوست معاد التكوين — variant "light" على الخلفيات البيضاء، "dark" على الكحلي
-export function ExaHostLockup({ dark = false, isAr = true, compact = false }) {
-  const blue = HOSTING_PROVIDER.brandColor;
+// شعار Oracle Systems — variant "light" على الخلفيات البيضاء، "dark" على الكحلي
+export function OracleLockup({ dark = false, isAr = true, compact = false }) {
+  const red = HOSTING_PROVIDER.brandColor;
   const name = isAr ? HOSTING_PROVIDER.nameAr : HOSTING_PROVIDER.nameEn;
-  const sub = isAr ? "شركة سعودية لاستضافة وإدارة الخوادم" : "Saudi hosting & server management";
+  const sub = isAr ? "مزوّد الخادم والاستضافة" : "Server & hosting provider";
   const textColor = dark ? "#ffffff" : "#1f2d3a";
   const subColor = dark ? "rgba(255,255,255,.6)" : "#64748b";
   return (
@@ -36,29 +36,35 @@ export function ExaHostLockup({ dark = false, isAr = true, compact = false }) {
       style={{ textDecoration: "none" }}
     >
       <div
-        className="flex items-center justify-center rounded-xl shrink-0"
+        className="flex items-center justify-center rounded-xl shrink-0 overflow-hidden"
         style={{
-          width: compact ? 38 : 46,
-          height: compact ? 38 : 46,
-          background: dark ? "rgba(94,164,222,.16)" : blue,
-          border: `1px solid ${dark ? "rgba(94,164,222,.45)" : blue}`,
+          width: compact ? 40 : 50,
+          height: compact ? 40 : 50,
+          background: dark ? "rgba(255,255,255,.95)" : "#ffffff",
+          border: `1px solid ${dark ? "rgba(255,255,255,.25)" : "#e2e8f0"}`,
         }}
       >
-        <Server size={compact ? 19 : 23} style={{ color: dark ? blue : "#ffffff" }} strokeWidth={2} />
+        <img
+          src={HOSTING_PROVIDER.logo}
+          alt="Oracle Systems"
+          style={{ width: compact ? 30 : 38, height: "auto", objectFit: "contain" }}
+        />
       </div>
       <div className="leading-tight">
         <div
-          className="font-extrabold flex items-baseline gap-1.5"
-          style={{ fontFamily: "var(--font-display)", fontSize: compact ? 16 : 19, color: textColor, letterSpacing: "-0.01em" }}
+          className="font-extrabold"
+          style={{ fontFamily: "var(--font-display)", fontSize: compact ? 15 : 18, color: textColor, letterSpacing: "-0.01em" }}
         >
-          <span>{name}</span>
-          <span style={{ color: dark ? "#9fd0f0" : blue, fontSize: compact ? 12 : 13, fontWeight: 700 }}>ExaHost</span>
+          {name}
         </div>
         <div className="text-[11px]" style={{ color: subColor }}>{sub}</div>
       </div>
     </a>
   );
 }
+
+// اسم بديل للحفاظ على التوافق مع الاستيرادات القديمة
+export const ExaHostLockup = OracleLockup;
 
 // نص الامتثال: NCA + SDAIA + إقامة البيانات داخل السعودية
 export function ComplianceNote({ dark = false, isAr = true }) {
