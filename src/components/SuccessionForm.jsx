@@ -12,6 +12,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const empty = {
   position_title: "", department: "", current_holder_id: "", current_holder_name: "",
@@ -52,7 +53,20 @@ export default function SuccessionForm({ open, employees, editing, onClose, onSa
 
   const submit = async (e) => {
     e.preventDefault(); setSaving(true);
-    const payload = { ...form, current_holder_name: empName(form.current_holder_id) || form.current_holder_name, successor_name: empName(form.successor_id) || form.successor_name, last_updated: todayISO() };
+    // خطة التطوير + الملاحظات حسّاسة → تُخزّن في الخزنة السعودية
+    const vaultData = { development_plan: form.development_plan, notes: form.notes };
+    const successionRef = editing?.succession_ref
+      ? await writeRecordToVault(VAULT_MODULES.succession, editing.succession_ref, vaultData)
+      : await writeRecordToVault(VAULT_MODULES.succession, null, vaultData);
+    const payload = {
+      ...form,
+      succession_ref: successionRef || editing?.succession_ref || "",
+      development_plan: successionRef ? "" : form.development_plan,
+      notes: successionRef ? "" : form.notes,
+      current_holder_name: empName(form.current_holder_id) || form.current_holder_name,
+      successor_name: empName(form.successor_id) || form.successor_name,
+      last_updated: todayISO(),
+    };
     try {
       if (editing?.id) await base44.entities.SuccessionPlan.update(editing.id, payload);
       else await base44.entities.SuccessionPlan.create(payload);

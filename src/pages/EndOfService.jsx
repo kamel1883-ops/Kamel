@@ -19,6 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { enrichEmployee, fetchSensitiveByRef } from "@/lib/vaultSensitive";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function EndOfService() {
   const { lang } = useI18n();
@@ -176,9 +177,22 @@ export default function EndOfService() {
     if (!preview) return;
     setSaving(true);
     try {
+      // تفريغ تفاصيل المخالصة الحسّاسة (الأساس/الأجور/النصوص) إلى الخزنة السعودية
+      const vaultData = {
+        reason_note: preview.reason_note, basis: preview.basis,
+        monthly_wage: preview.monthly_wage, daily_wage: preview.daily_wage,
+        fraction_label: preview.fraction_label, description: preview.description,
+        eos_amount: preview.eos_amount, leave_cash: preview.leave_cash, ticket_amount: preview.ticket_amount,
+      };
+      const eosRef = await writeRecordToVault(VAULT_MODULES.eos, null, vaultData);
       // تعمية الهوية في Base44 — تُحفظ في الخزنة عبر emp_ref فقط
       const toSave = { ...preview };
       if (toSave.emp_ref) toSave.national_id = "";
+      toSave.eos_ref = eosRef || "";
+      toSave.basis = eosRef ? "" : preview.basis;
+      toSave.reason_note = eosRef ? "" : preview.reason_note;
+      toSave.fraction_label = eosRef ? "" : preview.fraction_label;
+      toSave.description = eosRef ? "" : preview.description;
       const saved = await base44.entities.Settlement.create(toSave);
       setSettlements((s) => [saved, ...s]);
       // preview يبقى محتوياً على الهوية للطباعة الفورية (من الذاكرة)
@@ -218,10 +232,18 @@ export default function EndOfService() {
       const add = Math.max(0, Number(additionAmount) || 0);
       const baseTotal = (Number(s.eos_amount) || 0) + (Number(s.leave_cash) || 0) + (Number(s.ticket_amount) || 0);
       const total = Math.max(0, baseTotal + add - ded);
+      // تحديث السجل الحساس في الخزنة بملاحظات الموارد البشرية والخصومات
+      if (s.eos_ref) {
+        await writeRecordToVault(VAULT_MODULES.eos, s.eos_ref, {
+          hr_note: note, deduction_note: deductionNote, addition_note: additionNote,
+          deduction_amount: ded, addition_amount: add, total_settlement: total,
+        });
+      }
       await base44.entities.Settlement.update(s.id, {
-        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(), hr_note: note,
-        deduction_amount: ded, deduction_note: deductionNote,
-        addition_amount: add, addition_note: additionNote,
+        hr_status: "approved", hr_id: me?.id, hr_name: me?.full_name, hr_date: todayISO(),
+        hr_note: s.eos_ref ? "" : note,
+        deduction_amount: ded, deduction_note: s.eos_ref ? "" : deductionNote,
+        addition_amount: add, addition_note: s.eos_ref ? "" : additionNote,
         total_settlement: total,
         status: "awaiting_finance", finance_status: "pending",
       });
@@ -245,9 +267,16 @@ export default function EndOfService() {
     if (proofFile) { const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile }); url = file_url; }
     try {
       const s = acting.req;
+      // تحديث السجل الحساس في الخزنة بملاحظات المالية وإثبات التحويل
+      if (s.eos_ref) {
+        await writeRecordToVault(VAULT_MODULES.eos, s.eos_ref, {
+          finance_note: note, finance_proof_url: url, finance_paid_date: todayISO(),
+        });
+      }
       await base44.entities.Settlement.update(s.id, {
         finance_status: "paid", finance_id: me?.id, finance_name: me?.full_name,
-        finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(), finance_note: note,
+        finance_paid_date: todayISO(), finance_proof_url: url, finance_proof_date: todayISO(),
+        finance_note: s.eos_ref ? "" : note,
         status: "completed",
       });
       if (s.employee_id) {

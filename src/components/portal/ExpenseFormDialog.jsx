@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
 import { formatCurrency } from "@/lib/hr";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const empty = {
   name: "", category: "other", amount: "", recurrence: "monthly",
@@ -32,8 +33,15 @@ export default function ExpenseFormDialog({ open, onClose, onSave, expense, reve
     e.preventDefault();
     setSaving(true);
     try {
+      // ملاحظات المصروف الحسّاسة (بيانات المزوّد/الشريك) → تُخزّن في الخزنة السعودية
+      const vaultData = { notes: form.notes, vendor: form.vendor, partner_name: form.partner_name };
+      const expenseRef = expense?.expense_ref
+        ? await writeRecordToVault(VAULT_MODULES.expenses, expense.expense_ref, vaultData)
+        : await writeRecordToVault(VAULT_MODULES.expenses, null, vaultData);
       await onSave({
         ...form,
+        expense_ref: expenseRef || expense?.expense_ref || "",
+        notes: expenseRef ? "" : form.notes,
         amount: isCommission ? commissionAmount : Number(form.amount) || 0,
         commission_percent: Number(form.commission_percent) || 0,
         base_amount: Number(form.base_amount) || 0,
