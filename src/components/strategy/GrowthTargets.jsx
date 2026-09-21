@@ -78,8 +78,10 @@ export default function GrowthTargets({ isAr }) {
             <div key={t.id} className="rounded-xl border border-border p-4">
               <div className="text-sm font-semibold">{t.tier}</div>
               <div className="text-[11px] text-muted-foreground">{t.range}</div>
-              <div className="mt-2 text-lg font-bold" dir="ltr">{t.yearly.toLocaleString("en-US")}</div>
-              <div className="text-[11px] text-muted-foreground">{isAr ? "ر.س سنوياً" : "SAR / year"}</div>
+              <div className="mt-2 text-lg font-bold" dir="ltr">
+                {t.yearly ? t.yearly.toLocaleString("en-US") : (isAr ? "حسب الطلب" : "Custom")}
+              </div>
+              <div className="text-[11px] text-muted-foreground">{t.yearly ? (isAr ? "ر.س سنوياً" : "SAR / year") : (isAr ? "تواصل مع المبيعات" : "Contact sales")}</div>
             </div>
           ))}
         </div>
