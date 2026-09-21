@@ -7,7 +7,7 @@ const router = Router();
 // الحقول الحساسة التي تُخزّن مشفّرة — لا تُرسل أبداً إلى Base44
 const SENSITIVE_FIELDS = [
   'full_name', 'national_id', 'passport_number', 'bank_account',
-  'birth_date', 'phone', 'address', 'emergency_contact',
+  'birth_date', 'phone', 'address', 'emergency_contact', 'health_insurance_number',
 ];
 
 /**
@@ -82,7 +82,10 @@ router.get('/:empRef', async (req, res, next) => {
     if (!rows.length) return res.status(404).json({ error: 'not_found' });
     const r = rows[0];
     const out = { emp_ref: r.emp_ref };
-    for (const f of SENSITIVE_FIELDS) out[f] = decrypt(r[`${f}_enc`]);
+    for (const f of SENSITIVE_FIELDS) {
+      const enc = r[`${f}_enc`];
+      if (enc !== null && enc !== undefined) out[f] = decrypt(enc);
+    }
     res.json(out);
   } catch (e) { next(e); }
 });
