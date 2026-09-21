@@ -71,7 +71,9 @@ export default function Quote() {
     sigName: "المدير العام — وليد حسن القروص",
     stamp: "جداره لإدارة الموارد البشرية",
     discCode: "كود الخصم (اختياري)",
-    discBadge: "خصم", discApplied: "بعد تطبيق الكود",
+    beforeDiscLabel: "القيمة الإجمالية قبل الخصم",
+    discBadge: "نسبة الخصم", discApplied: "قيمة الخصم المُخصومة",
+    netLabel: "المبلغ بعد الخصم",
     emailNotice: "تنويه مهم",
     emailNoticeBody: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7) هو معرّف منشأتكم الرسمي في المنصة. عند إتمام التحويل، سجّلوا في بوابة الشركات بهذا الرقم الوطني الموحّد وبنفس البريد المسجل هنا لتفعيل اشتراككم وإدارة حسابكم.",
     activateTitle: "أنشئ حسابك وكلمة مرورك للدخول لبوابة الشركات",
@@ -120,7 +122,9 @@ export default function Quote() {
     sigName: "General Manager — Walid Hassan Al-Qarous",
     stamp: "Jadara HR Management",
     discCode: "Discount code (optional)",
-    discBadge: "OFF", discApplied: "After discount applied",
+    beforeDiscLabel: "Total before discount",
+    discBadge: "Discount rate", discApplied: "Deducted discount value",
+    netLabel: "Amount after discount",
     emailNotice: "Important",
     emailNoticeBody: "The National Unified Number (10 digits starting with 7) is your organization's official identifier on the platform. After the transfer, register in the Companies portal with this National Unified Number and the same email entered here to activate your subscription and manage your account.",
     activateTitle: "Create your account & password to enter the company portal",
@@ -433,15 +437,24 @@ export default function Quote() {
           {/* الأسعار */}
           <div className="py-6 border-t border-border">
             <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-5 space-y-3">
-              <div className="flex items-baseline justify-between gap-3">
+              {/* رأس الباقة */}
+              <div className="flex items-baseline justify-between gap-3 pb-2 border-b border-violet-200/70">
                 <div>
                   <div className="font-medium">{matchedTier ? matchedTier.tier : t.planTier}</div>
                   <div className="text-sm text-muted-foreground">{matchedTier ? matchedTier.range : t.planTierRange}</div>
                 </div>
-                <div className={discount ? "text-base text-muted-foreground line-through" : "text-2xl font-extrabold text-violet-700"}>
-                  {(matchedTier ? matchedTier.yearly : 0).toLocaleString()} {isAr ? "ريال" : "SAR"}
+                <div className="text-sm text-muted-foreground">{company?.employee_count ? `${company.employee_count} ${isAr ? "موظفاً" : "employees"}` : ""}</div>
+              </div>
+
+              {/* ١) القيمة الإجمالية قبل الخصم */}
+              <div className="flex items-baseline justify-between gap-3">
+                <div className="font-medium">{t.beforeDiscLabel}</div>
+                <div className={discount ? "text-lg text-muted-foreground line-through" : "text-2xl font-extrabold text-violet-700"}>
+                  {baseAnnual.toLocaleString()} {isAr ? "ريال" : "SAR"}
                 </div>
               </div>
+
+              {/* ٢) نسبة الخصم وقيمته */}
               {discount && (
                 <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-violet-200/70">
                   <div>
@@ -451,15 +464,13 @@ export default function Quote() {
                   <div className="text-lg font-extrabold text-rose-600">- {discountAmount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
                 </div>
               )}
-              <div className="flex items-baseline justify-between gap-3 pt-3 border-t border-violet-200/70">
-                <div className="font-medium">{isAr ? "صافي الاشتراك السنوي" : "Net annual subscription"}</div>
-                <div className="text-xl font-extrabold text-violet-700">{amount.toLocaleString()} {isAr ? "ريال" : "SAR"}</div>
-              </div>
-              <div className="text-sm text-muted-foreground pt-3 border-t border-violet-200/70">{t.renewNote}</div>
-              <div className="flex items-baseline justify-between gap-3 mt-1 -mx-5 -mb-5 px-5 py-4 bg-violet-100/80 rounded-b-2xl border-t-2 border-violet-300">
-                <div className="font-extrabold text-violet-900 text-base">{isAr ? "إجمالي السنة الأولى" : "Year 1 total"}</div>
+
+              {/* ٣) المبلغ بعد الخصم = المبلغ المطلوب للسنة الأولى */}
+              <div className="flex items-baseline justify-between gap-3 -mx-5 -mb-5 px-5 py-4 bg-violet-100/80 rounded-b-2xl border-t-2 border-violet-300">
+                <div className="font-extrabold text-violet-900 text-base">{t.netLabel} ({isAr ? "إجمالي السنة الأولى" : "Year 1 total"})</div>
                 <div className="text-2xl font-extrabold text-violet-900">{isCustomT ? (isAr ? "تأثير خاص" : "Custom") : `${totalYear1.toLocaleString()} ${isAr ? "ريال" : "SAR"}`}</div>
               </div>
+              <div className="text-sm text-muted-foreground pt-3">{t.renewNote}</div>
             </div>
           </div>
 
