@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 import { LICENSE_TYPES, typeMeta } from "@/lib/licenses";
 import { differenceInMonths, parseISO } from "date-fns";
 import { useI18n } from "@/lib/i18n";
@@ -92,10 +93,34 @@ export default function LicenseForm({ open, onClose, onSaved, editing, fixedType
     if (!form.license_type) return;
     setSaving(true);
     try {
-      const payload = {
-        ...form,
+      // رقم الترخيص والجهة المانحة حسّاسان → يُخزّنان في الخزنة، Base44 يحتفظ بالنوع والحالة والتواريخ للفلترة
+      const vaultData = {
+        license_type: form.license_type,
+        custom_label: form.custom_label,
+        license_number: form.license_number,
+        issuing_authority: form.issuing_authority,
+        issue_date: form.issue_date,
+        expiry_date: form.expiry_date,
         duration_months: Number(form.duration_months) || computedDuration || 0,
+        notes: form.notes,
+        document_url: form.document_url,
+      };
+      const licenseRef = editing?.license_ref
+        ? await writeRecordToVault(VAULT_MODULES.licenses, editing.license_ref, vaultData)
+        : await writeRecordToVault(VAULT_MODULES.licenses, null, vaultData);
+      const payload = {
+        license_type: form.license_type,
+        custom_label: form.custom_label,
         not_applicable: !!form.not_applicable,
+        issue_date: form.issue_date,
+        expiry_date: form.expiry_date,
+        duration_months: Number(form.duration_months) || computedDuration || 0,
+        // إن نجحت الخزنة: لا نُخزّن الرقم/الجهة في Base44
+        license_number: licenseRef ? "" : form.license_number,
+        issuing_authority: licenseRef ? "" : form.issuing_authority,
+        notes: licenseRef ? "" : form.notes,
+        document_url: form.document_url,
+        license_ref: licenseRef || (editing?.license_ref || ""),
       };
       if (editing?.id) await base44.entities.License.update(editing.id, payload);
       else await base44.entities.License.create(payload); // includes renewing → new record

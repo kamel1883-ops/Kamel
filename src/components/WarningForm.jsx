@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,13 +71,8 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
     if (!form.employee_id) { setErr(t.needEmp); return; }
     setSaving(true);
     try {
-      const payload = {
-        employee_id: emp.id,
-        employee_user_id: emp.user_id || "",
-        employee_name: emp.full_name || "",
-        national_id: emp.emp_ref ? "" : (emp.national_id || ""),
-        emp_ref: emp.emp_ref || "",
-        department: emp.department || "",
+      // نص الإنذار وملخص التحقيق حسّاسان → يُخزّنان في الخزنة، Base44 يحتفظ بالبيانات الوصفية للفلترة
+      const vaultData = {
         violation_category: form.violation_category,
         article_reference: cat ? (isAr ? cat.articleAr : cat.articleEn) : "",
         warning_level: form.warning_level,
@@ -84,6 +80,24 @@ export default function WarningForm({ open, onClose, onSaved, employees }) {
         session_date: form.session_date || "",
         investigation_summary: form.investigation_summary || "",
         description: form.description || "",
+      };
+      const warningRef = await writeRecordToVault(VAULT_MODULES.warnings, null, vaultData);
+      const payload = {
+        employee_id: emp.id,
+        employee_user_id: emp.user_id || "",
+        employee_name: emp.full_name || "",
+        national_id: emp.emp_ref ? "" : (emp.national_id || ""),
+        emp_ref: emp.emp_ref || "",
+        warning_ref: warningRef || "",
+        department: emp.department || "",
+        violation_category: form.violation_category,
+        warning_level: form.warning_level,
+        // إن نجحت الخزنة: لا نُخزّن النص الحساس في Base44
+        article_reference: warningRef ? "" : (cat ? (isAr ? cat.articleAr : cat.articleEn) : ""),
+        investigation_summary: warningRef ? "" : (form.investigation_summary || ""),
+        description: warningRef ? "" : (form.description || ""),
+        incident_date: form.incident_date || "",
+        session_date: form.session_date || "",
         status: "sent",
       };
       await base44.entities.Warning.create(payload);

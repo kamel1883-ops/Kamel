@@ -8,6 +8,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { usePortalI18n } from "@/lib/portalI18n";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const TYPES = [
   { value: "ethical", ar: "أخلاقية", en: "Ethical" },
@@ -46,12 +47,23 @@ export default function ComplaintForm({ open, onClose, onSaved, employee, portal
     if (!form.description.trim()) return;
     setSaving(true);
     try {
+      // السجل الكامل (الوصف/النوع المخصص) يُخزّن في الخزنة السعودية، Base44 يحتفظ بالبيانات الوصفية للفلترة
+      const vaultData = {
+        complaint_type: form.complaint_type,
+        custom_type: form.complaint_type === "other" ? form.custom_type : "",
+        description: form.description,
+        is_confidential: !!form.is_confidential,
+      };
+      const complaintRef = await writeRecordToVault(VAULT_MODULES.complaints, null, vaultData);
       const payload = {
         employee_id: employee.id, employee_user_id: employee.user_id || "",
         employee_name: employee.full_name || "", department: employee.department || "",
         complaint_type: form.complaint_type,
-        custom_type: form.complaint_type === "other" ? form.custom_type : "",
-        description: form.description, is_confidential: !!form.is_confidential,
+        // إن نجحت الخزنة: لا نُخزّن الوصف في Base44. إن فشلت (وضع احتياطي): نُخزّنه محلياً
+        custom_type: complaintRef ? "" : (form.complaint_type === "other" ? form.custom_type : ""),
+        description: complaintRef ? "" : form.description,
+        is_confidential: !!form.is_confidential,
+        complaint_ref: complaintRef || "",
         submitted_date: new Date().toISOString().slice(0, 10),
         status: form.is_confidential ? "manager_approved" : "pending_manager",
         manager_status: form.is_confidential ? "approved" : "pending", hr_status: "pending",
