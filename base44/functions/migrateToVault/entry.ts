@@ -8,7 +8,7 @@
  */
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
 import {
-  storeRecord, updateRecord,
+  storeRecord, updateRecord, storeEmployee,
 } from "../../shared/vaultClient.ts";
 
 export default async function (req: Request): Promise<Response> {
@@ -23,10 +23,52 @@ export default async function (req: Request): Promise<Response> {
     const dryRun = !!body.dry_run;
 
     const report: Record<string, { scanned: number; migrated: number; failed: number }> = {
+      employees: { scanned: 0, migrated: 0, failed: 0 },
       complaints: { scanned: 0, migrated: 0, failed: 0 },
       warnings: { scanned: 0, migrated: 0, failed: 0 },
       licenses: { scanned: 0, migrated: 0, failed: 0 },
     };
+
+    // ---- الموظفون: الهوية/الجواز/البنك → vault_employees (يجب أن يُنفّذ أولاً لأن الرواتب تعتمد عليه) ----
+    try {
+      const employees = await base44.entities.Employee.list("-created_date", 1000);
+      report.employees.scanned = employees.length;
+      for (const e of employees) {
+        if (e.emp_ref) continue; // سبق تهجيره
+        const sensitive = {
+          national_id: e.national_id || "",
+          passport_number: e.passport_number || "",
+          bank_account: e.bank_account || "",
+          birth_date: e.birth_date || "",
+          phone: e.phone || "",
+          address: e.address || "",
+          emergency_contact: e.emergency_contact || "",
+          health_insurance_number: e.health_insurance_number || "",
+        };
+        // لا تُهاجر إن لم يكن هناك أي قيمة حساسة
+        const hasAny = Object.values(sensitive).some((v) => v);
+        if (!hasAny) { report.employees.migrated++; continue; }
+        if (dryRun) { report.employees.migrated++; continue; }
+        try {
+          const res = await storeEmployee(tenant, sensitive);
+          const ref = (res as any)?.emp_ref || (res as any)?.ref;
+          if (ref) {
+            await base44.entities.Employee.update(e.id, {
+              emp_ref: ref,
+              national_id: "",
+              passport_number: "",
+              bank_account: "",
+              birth_date: "",
+              phone: "",
+              address: "",
+              emergency_contact: "",
+              health_insurance_number: "",
+            });
+            report.employees.migrated++;
+          } else { report.employees.failed++; }
+        } catch { report.employees.failed++; }
+      }
+    } catch (e) { console.error("[migrate] employees:", e.message); }
 
     // ---- الشكاوى: الوصف الحساس → vault_complaints ----
     try {
