@@ -19,6 +19,7 @@ import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
 import {
   storeEmployee, storeEmployeesBulk, getEmployee, updateEmployee, deleteEmployee,
   storePayroll, getPayroll, storeDocument, getDocumentLink, buildDownloadUrl,
+  storeRecord, storeRecordsBulk, getRecord, updateRecord, deleteRecord,
 } from "../../shared/vaultClient.ts";
 
 export default async function (req: Request): Promise<Response> {
@@ -78,6 +79,27 @@ export default async function (req: Request): Promise<Response> {
           const link = await getDocumentLink(tenant, rest.docRef);
           result = { ...link, download_url: buildDownloadUrl(link.token) };
         }
+        break;
+      // الوحدات الحساسة الموسّعة — CRUD عام
+      case "storeRecord":
+        if (!rest.module) return Response.json({ error: "module_required" }, { status: 400 });
+        result = await storeRecord(tenant, rest.module, rest.data || {}, rest.empRef || null);
+        break;
+      case "storeRecordsBulk":
+        if (!rest.module || !Array.isArray(rest.rows)) return Response.json({ error: "module_and_rows_required" }, { status: 400 });
+        result = await storeRecordsBulk(tenant, rest.module, rest.rows);
+        break;
+      case "getRecord":
+        if (!rest.module || !rest.ref) return Response.json({ error: "module_and_ref_required" }, { status: 400 });
+        result = await getRecord(tenant, rest.module, rest.ref);
+        break;
+      case "updateRecord":
+        if (!rest.module || !rest.ref) return Response.json({ error: "module_and_ref_required" }, { status: 400 });
+        result = await updateRecord(tenant, rest.module, rest.ref, rest.data || {}, rest.empRef ?? null);
+        break;
+      case "deleteRecord":
+        if (!rest.module || !rest.ref) return Response.json({ error: "module_and_ref_required" }, { status: 400 });
+        result = await deleteRecord(tenant, rest.module, rest.ref);
         break;
       default:
         return Response.json({ error: "unknown_action", action }, { status: 400 });

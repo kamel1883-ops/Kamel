@@ -138,6 +138,45 @@ export async function getPayroll(tenantId, payrollRef) {
 }
 
 // ============================================================
+// الوحدات الحساسة الموسّعة — تخزين/قراءة/تحديث/حذف عام عبر /api/vault/modules
+// كل سجل يُخزّن كـ JSON مشفّر في عمود data_enc
+// ============================================================
+
+/** يخزّن سجلاً كاملاً لوحدة حساسة → { <refKey> } */
+export async function storeRecord(tenantId, module, data, empRef = null) {
+  return callVault(`/api/vault/modules/${module}`, tenantId, {
+    method: "POST",
+    body: JSON.stringify({ data, emp_ref: empRef }),
+  });
+}
+
+/** تخزين جماعي → { refs } */
+export async function storeRecordsBulk(tenantId, module, rows) {
+  return callVault(`/api/vault/modules/${module}/bulk`, tenantId, {
+    method: "POST",
+    body: JSON.stringify(rows),
+  });
+}
+
+/** يسترجع سجلاً مفكوك التشفير — للعرض في الواجهة */
+export async function getRecord(tenantId, module, ref) {
+  return callVault(`/api/vault/modules/${module}/${ref}`, tenantId, { method: "GET" });
+}
+
+/** يحدّث سجلاً موجوداً */
+export async function updateRecord(tenantId, module, ref, data, empRef = null) {
+  return callVault(`/api/vault/modules/${module}/${ref}`, tenantId, {
+    method: "PUT",
+    body: JSON.stringify({ data, emp_ref: empRef }),
+  });
+}
+
+/** يحذف سجلاً من وحدة حساسة */
+export async function deleteRecord(tenantId, module, ref) {
+  return callVault(`/api/vault/modules/${module}/${ref}`, tenantId, { method: "DELETE" });
+}
+
+// ============================================================
 // المستندات — رفع/تنزيل
 // ============================================================
 

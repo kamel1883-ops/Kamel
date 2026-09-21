@@ -5,6 +5,7 @@ import { requireApiKey, safeRequestLog, errorHandler } from './middleware/index.
 import employeesRouter from './routes/employees.js';
 import documentsRouter from './routes/documents.js';
 import payrollRouter from './routes/payroll.js';
+import modulesRouter from './routes/modules.js';
 
 fs.mkdirSync(config.storageDir, { recursive: true });
 
@@ -21,6 +22,8 @@ app.use('/api/vault/employees', requireApiKey, employeesRouter);
 app.use('/api/vault/payroll', requireApiKey, payrollRouter);
 // المسارات داخل documents router تحدد requireApiKey بنفسها (التنزيل عام بالرمز)
 app.use('/api/vault/documents', documentsRouter);
+// الوحدات الحساسة الموسّعة — CRUD عام لكل جدول عبر crudFactory
+app.use('/api/vault/modules', modulesRouter);
 
 app.use(errorHandler);
 
