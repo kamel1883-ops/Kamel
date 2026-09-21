@@ -121,7 +121,7 @@ export async function deleteEmployee(tenantId, empRef) {
 // ============================================================
 
 export async function storePayroll(tenantId, data) {
-  const payload = { emp_ref: data.emp_ref, period_key: data.period_key || null };
+  const payload = { emp_ref: data.empRef || data.emp_ref, period_key: data.period_key || null };
   for (const f of PAYROLL_FIELDS) {
     if (data[f] !== undefined && data[f] !== null && data[f] !== "") {
       payload[f] = String(data[f]);
