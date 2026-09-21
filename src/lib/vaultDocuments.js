@@ -41,19 +41,18 @@ export async function archiveBlobToVault(blob, { fileName = "document.pdf", mime
   }
 }
 
-/** يرفع ملف مرفق (File) إلى الخزنة ويعيد رمز المستند doc_ref */
+/** يرفع ملف مرفق (File) إلى الخزنة ويعيد رمز المستند doc_ref.
+ *  سير المرشحين (applicant_cv) تُرفع عبر دالة عامة منفصلة (لا تتطلب تسجيل دخول). */
 export async function uploadFileToVault(file, { empRef = null, docType = "attachment" } = {}) {
   if (!file) return null;
   try {
     const fileBase64 = await blobToBase64(file);
-    const res = await base44.functions.invoke("vaultProxy", {
-      action: "storeDocument",
-      fileBase64,
-      fileName: file.name || "attachment",
-      mimeType: file.type || "application/octet-stream",
-      empRef,
-      docType,
-    });
+    const isApplicantCv = docType === "applicant_cv";
+    const fnName = isApplicantCv ? "publicApplicantCvUpload" : "vaultProxy";
+    const payload = isApplicantCv
+      ? { fileBase64, fileName: file.name || "cv", mimeType: file.type || "application/octet-stream" }
+      : { action: "storeDocument", fileBase64, fileName: file.name || "attachment", mimeType: file.type || "application/octet-stream", empRef, docType };
+    const res = await base44.functions.invoke(fnName, payload);
     const data = res?.data?.data || res?.data || {};
     return data.doc_ref || data.docRef || null;
   } catch (e) {

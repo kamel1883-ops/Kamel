@@ -34,8 +34,18 @@ export default function JobApply() {
     try {
       let cv_url = "";
       if (cvFile) {
+        // تحقق مبدئي من النوع قبل الرفع — رسالة فورية أوضح للمستخدم
+        const ext = (cvFile.name.split(".").pop() || "").toLowerCase();
+        if (!["pdf", "doc", "docx"].includes(ext)) {
+          toast({ title: "صيغة غير مدعومة", description: "السيرة الذاتية يجب أن تكون PDF أو Word فقط", variant: "destructive" });
+          setSubmitting(false); return;
+        }
+        if (cvFile.size > 5 * 1024 * 1024) {
+          toast({ title: "حجم الملف كبير", description: "الحد الأقصى 5 ميجابايت", variant: "destructive" });
+          setSubmitting(false); return;
+        }
         cv_url = await uploadFileToVault(cvFile, { docType: "applicant_cv" }) || "";
-        if (!cv_url) { toast({ title: "تعذر رفع السيرة الذاتية للخزنة", variant: "destructive" }); setSubmitting(false); return; }
+        if (!cv_url) { toast({ title: "تعذر رفع السيرة الذاتية", description: "حاول مرة أخرى أو تواصل مع الدعم", variant: "destructive" }); setSubmitting(false); return; }
       }
       await base44.entities.JobApplication.create({
         job_id: job.id, job_title: job.title, full_name: form.full_name, email: form.email,
