@@ -13,6 +13,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { differenceInDays, parseISO } from "date-fns";
 import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const empty = {
   employee_id: "", trip_type: "internal", destination: "", purpose: "",
@@ -63,6 +64,19 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
     if (days <= 0) { setErr(t.errDates); return; }
     setSaving(true); setErr("");
     try {
+      // الغرض/ملاحظات الموظف/الملاحظات حسّاسة → تُخزّن في الخزنة السعودية
+      const vaultData = {
+        purpose: form.purpose, employee_note: form.employee_note, notes: form.notes,
+        destination: form.destination, trip_type: form.trip_type,
+        transport_cost: Number(form.transport_cost) || 0,
+        accommodation_cost: Number(form.accommodation_cost) || 0,
+        per_diem: Number(form.per_diem) || 0, per_diem_total: perDiemTotal,
+        other_costs: Number(form.other_costs) || 0, advance_amount: Number(form.advance_amount) || 0,
+        total_cost: total, days_count: days,
+      };
+      const tripRef = editing?.trip_ref
+        ? await writeRecordToVault(VAULT_MODULES.businessTrips, editing.trip_ref, vaultData)
+        : await writeRecordToVault(VAULT_MODULES.businessTrips, null, vaultData);
       const payload = {
         ...form,
         employee_name: emp ? emp.full_name : "",
@@ -73,6 +87,10 @@ export default function BusinessTripForm({ open, onClose, onSaved, employees, ed
         other_costs: Number(form.other_costs) || 0,
         advance_amount: Number(form.advance_amount) || 0,
         days_count: days, per_diem_total: perDiemTotal, total_cost: total,
+        trip_ref: tripRef || editing?.trip_ref || "",
+        purpose: tripRef ? "" : form.purpose,
+        employee_note: tripRef ? "" : form.employee_note,
+        notes: tripRef ? "" : form.notes,
       };
       if (editing) await base44.entities.BusinessTrip.update(editing.id, payload);
       else if (portalCreate) await portalCreate({ ...payload, status: "pending_manager", manager_status: "pending" });

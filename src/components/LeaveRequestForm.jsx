@@ -13,6 +13,7 @@ import { differenceInDays, parseISO } from "date-fns";
 import { usePortalI18n, usePortalT } from "@/lib/portalI18n";
 import { leaveFullTypeLabel } from "@/lib/hr";
 import { uploadFileToVault } from "@/lib/vaultDocuments";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function LeaveRequestForm({ open, onClose, onSaved, employees, currentUserEmployee, portalCreate }) {
   usePortalI18n();
@@ -59,13 +60,23 @@ export default function LeaveRequestForm({ open, onClose, onSaved, employees, cu
       if (isSick && medicalFile) {
         medical_url = await uploadFileToVault(medicalFile, { empRef: emp?.emp_ref || null, docType: "medical_report" }) || "";
       }
+      // نص السبب حسّاس → يُخزّن في الخزنة السعودية، Base44 يحتفظ بالبيانات الوصفية للفلترة
+      const leaveRef = await writeRecordToVault(VAULT_MODULES.leaves, null, {
+        reason: form.reason,
+        leave_type: form.leave_type,
+        start_date: form.start_date,
+        end_date: isPermission ? form.start_date : form.end_date,
+        days_count: isPermission ? 0 : days,
+        permission_minutes: isPermission ? totalPermissionMinutes : 0,
+      });
       const payload = {
         employee_id: form.employee_id,
         leave_type: form.leave_type,
         annual_leave_mode: isAnnual ? form.annual_leave_mode : "actual_travel",
         start_date: isPermission ? form.start_date : form.start_date,
         end_date: isPermission ? form.start_date : form.end_date,
-        reason: form.reason,
+        reason: leaveRef ? "" : form.reason,
+        leave_ref: leaveRef || "",
         is_full_clearance: isPermission ? false : form.is_full_clearance,
         permission_minutes: isPermission ? totalPermissionMinutes : 0,
         employee_user_id: emp?.user_id || "",

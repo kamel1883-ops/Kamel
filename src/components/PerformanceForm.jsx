@@ -11,6 +11,7 @@ import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { base44 } from "@/api/base44Client";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const empty = {
   employee_id: "", review_period: "annual", period_year: new Date().getFullYear(),
@@ -66,11 +67,31 @@ export default function PerformanceForm({ open, employees, editing, user, onClos
     e.preventDefault(); setSaving(true);
     const emp = employees.find((x) => x.id === form.employee_id) || {};
     const overall = form.overall_rating || Math.round(((Number(form.goals_rating) + Number(form.competencies_rating) + Number(form.values_rating)) / 3) * 100) / 100;
+    // نصوص التقييم الحسّاسة → تُخزّن في الخزنة السعودية، Base44 يحتفظ بالتقييمات الرقمية والبيانات الوصفية
+    const vaultData = {
+      goals: form.goals, personal_goals: form.personal_goals, behaviors: form.behaviors,
+      tasks_coverage: form.tasks_coverage, tasks_amendments: form.tasks_amendments,
+      strengths: form.strengths, improvements: form.improvements, notes: form.notes,
+      goals_rating: Number(form.goals_rating), competencies_rating: Number(form.competencies_rating),
+      values_rating: Number(form.values_rating), overall_rating: overall,
+    };
+    const perfRef = editing?.perf_ref
+      ? await writeRecordToVault(VAULT_MODULES.performance, editing.perf_ref, vaultData)
+      : await writeRecordToVault(VAULT_MODULES.performance, null, vaultData);
     const payload = {
       ...form, period_year: Number(form.period_year), goals_rating: Number(form.goals_rating), competencies_rating: Number(form.competencies_rating), values_rating: Number(form.values_rating), overall_rating: overall,
       employee_name: emp.employee_number ? `${emp.employee_number} - ${emp.position}` : emp.position,
       department: emp.department || "", current_grade: emp.job_grade || "",
       reviewer_id: user?.id || "", reviewer_name: user?.full_name || t.reviewerDefault,
+      perf_ref: perfRef || editing?.perf_ref || "",
+      goals: perfRef ? "" : form.goals,
+      personal_goals: perfRef ? "" : form.personal_goals,
+      behaviors: perfRef ? "" : form.behaviors,
+      tasks_coverage: perfRef ? "" : form.tasks_coverage,
+      tasks_amendments: perfRef ? "" : form.tasks_amendments,
+      strengths: perfRef ? "" : form.strengths,
+      improvements: perfRef ? "" : form.improvements,
+      notes: perfRef ? "" : form.notes,
     };
     try {
       if (editing?.id) await base44.entities.Performance.update(editing.id, payload);
