@@ -8,6 +8,7 @@ import { ScrollText, FileText, RotateCcw, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { enrichEmployeesBatch } from "@/lib/vaultSensitive";
 import DelegationDocument from "./DelegationDocument";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function VehicleDelegationDialog({ vehicle, employees, onClose, onSaved }) {
   const { lang } = useI18n();
@@ -75,8 +76,14 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
       const emp = enrichedEmps.find((e) => e.id === empId);
       const plate = vehicle.plate_number || "";
       const label = [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(" ");
+      const delNo = `TAW-${Date.now().toString().slice(-6)}`;
+      // ملاحظات التوكيل الحسّاسة → تُخزّن في الخزنة السعودية
+      const appointeeRef = await writeRecordToVault(VAULT_MODULES.appointees, null, {
+        notes, delegation_number: delNo, plate_number: plate, vehicle_label: label,
+        employee_name: emp?.full_name || "", delegation_date: date,
+      });
       const rec = await base44.entities.VehicleDelegation.create({
-        delegation_number: `TAW-${Date.now().toString().slice(-6)}`,
+        delegation_number: delNo,
         vehicle_id: vehicle.id,
         plate_number: plate,
         vehicle_label: label,
@@ -84,12 +91,13 @@ export default function VehicleDelegationDialog({ vehicle, employees, onClose, o
         employee_name: emp?.full_name || "",
         national_id: emp?.emp_ref ? "" : (emp?.national_id || ""),
         emp_ref: emp?.emp_ref || "",
+        appointee_ref: appointeeRef || "",
         position: emp?.position || "",
         department: emp?.department || "",
         delegation_date: date,
         is_current: true,
         status: "active",
-        notes,
+        notes: appointeeRef ? "" : notes,
       });
       await base44.entities.Vehicle.update(vehicle.id, { assigned_to: empId });
       await load();

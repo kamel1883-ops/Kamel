@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { Users } from "lucide-react";
 import EmployeePickerDialog from "./EmployeePickerDialog";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const parseIds = (s) => {
   try { const v = JSON.parse(s || "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
@@ -106,7 +107,22 @@ export default function TrainingPlanFormDialog({ open, onOpenChange, onSaved, pl
     const ids = parseIds(form.employee_ids);
     setSaving(true);
     try {
-      const payload = { ...form, cost: Number(form.cost) || 0, employee_ids: JSON.stringify(ids) };
+      // محتوى الخطة الحساس (النقص/الهدف/الآلية/الوصف) → يُخزّن في الخزنة السعودية
+      const vaultData = {
+        title: form.title, deficiency: form.deficiency, goal: form.goal,
+        mechanism: form.mechanism, description: form.description,
+      };
+      const trainingRef = isEdit && plan?.training_ref
+        ? await writeRecordToVault(VAULT_MODULES.training, plan.training_ref, vaultData)
+        : await writeRecordToVault(VAULT_MODULES.training, null, vaultData);
+      const payload = {
+        ...form, cost: Number(form.cost) || 0, employee_ids: JSON.stringify(ids),
+        training_ref: trainingRef || plan?.training_ref || "",
+        deficiency: trainingRef ? "" : form.deficiency,
+        goal: trainingRef ? "" : form.goal,
+        mechanism: trainingRef ? "" : form.mechanism,
+        description: trainingRef ? "" : form.description,
+      };
       if (form.scope !== "department") {
         payload.department = form.department || (employees || []).find((e) => e.id === ids[0])?.department || "";
       }

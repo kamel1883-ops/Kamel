@@ -15,6 +15,7 @@ import { todayISO } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import PullToRefresh from "@/components/PullToRefresh";
 import EquipmentHandoverDoc from "@/components/docs/EquipmentHandoverDoc";
+import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const ITEM_TYPES = [
   { value: "laptop", ar: "لابتوب" }, { value: "phone", ar: "جوال" }, { value: "work_phone", ar: "جوال عمل" },
@@ -115,12 +116,21 @@ export default function Equipment() {
     try {
       const r = acting.req;
       const emp = empOf(r.employee_id);
+      // بيانات العهدة الحسّاسة (البيان/النوع المخصص/ملاحظة الحالة) → تُخزّن في الخزنة السعودية
+      const vaultData = {
+        item_type: r.item_type, custom_type: r.custom_type,
+        item_label: r.item_label || r.custom_type || typeLabel(r.item_type),
+        condition_note: note || "",
+      };
+      const equipRef = await writeRecordToVault(VAULT_MODULES.equipment, null, vaultData);
       const eq = await base44.entities.Equipment.create({
         employee_id: r.employee_id, employee_user_id: r.employee_user_id || emp?.user_id || "",
         employee_name: r.employee_name || emp?.full_name || "", department: emp?.department || "",
-        item_type: r.item_type, custom_type: r.custom_type, item_label: r.item_label || r.custom_type || typeLabel(r.item_type),
+        item_type: r.item_type, custom_type: equipRef ? "" : r.custom_type,
+        item_label: equipRef ? "" : (r.item_label || r.custom_type || typeLabel(r.item_type)),
+        equip_ref: equipRef || "",
         assigned_date: todayISO(), status: "active", request_id: r.id,
-        condition_note: note || "", cost: 0,
+        condition_note: equipRef ? "" : (note || ""), cost: 0,
         prepared_by_name: me?.full_name || "", prepared_by_id: myEmployee?.national_id || "",
       });
       await base44.entities.EquipmentRequest.update(r.id, {
@@ -150,14 +160,22 @@ export default function Equipment() {
     if (!acting) return;
     setBusy(true);
     try {
+      // تحديث السجل الحساس في الخزنة بملاحظات الإرجاع إن وُجد ref
+      if (acting.req.equip_ref) {
+        await writeRecordToVault(VAULT_MODULES.equipment, acting.req.equip_ref, {
+          return_note: retForm.return_note, return_deduction: Number(retForm.return_deduction) || 0,
+          status: retForm.status, return_date: retForm.return_date || todayISO(),
+        });
+      }
       const patch = {
         status: retForm.status, return_date: retForm.return_date || todayISO(),
-        return_note: retForm.return_note, return_deduction: Number(retForm.return_deduction) || 0,
+        return_note: acting.req.equip_ref ? "" : retForm.return_note,
+        return_deduction: Number(retForm.return_deduction) || 0,
         return_received_by: me?.full_name || "",
         prepared_by_name: me?.full_name || "", prepared_by_id: myEmployee?.national_id || "",
       };
       await base44.entities.Equipment.update(acting.req.id, patch);
-      setPrintEq({ ...acting.req, ...patch });
+      setPrintEq({ ...acting.req, ...patch, return_note: retForm.return_note });
     } finally { setBusy(false); setActing(null); load(); }
   };
   const deleteCustody = async (c) => {
@@ -165,8 +183,19 @@ export default function Equipment() {
   };
   const saveCustody = async () => {
     const emp = empOf(custForm.employee_id);
+    const vaultData = {
+      item_type: custForm.item_type, custom_type: custForm.custom_type,
+      item_label: custForm.item_label, serial_number: custForm.serial_number,
+      condition_note: custForm.condition_note, notes: custForm.notes, cost: Number(custForm.cost) || 0,
+    };
+    const equipRef = await writeRecordToVault(VAULT_MODULES.equipment, null, vaultData);
     await base44.entities.Equipment.create({
       ...custForm,
+      item_label: equipRef ? "" : custForm.item_label,
+      serial_number: equipRef ? "" : custForm.serial_number,
+      condition_note: equipRef ? "" : custForm.condition_note,
+      notes: equipRef ? "" : custForm.notes,
+      equip_ref: equipRef || "",
       employee_name: emp?.full_name || "", employee_user_id: emp?.user_id || "", department: emp?.department || "",
       status: "active", prepared_by_name: me?.full_name || "", prepared_by_id: myEmployee?.national_id || "",
     });
