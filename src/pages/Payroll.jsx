@@ -147,7 +147,7 @@ export default function Payroll() {
         if (p) updates.push({
           id: p.id,
           base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
-          gross_salary: gross, national_id: emp.national_id || p.national_id || "", emp_ref: emp.emp_ref || p.emp_ref || "",
+          gross_salary: gross, national_id: emp.emp_ref ? "" : (emp.national_id || p.national_id || ""), emp_ref: emp.emp_ref || p.emp_ref || "",
           employee_name: emp.full_name || p.employee_name || "",
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
           absent_days: absentDays, absent_hours: absentHours, absent_deduction: absentDeduction,
@@ -156,7 +156,7 @@ export default function Payroll() {
         continue;
       }
       created.push({
-        employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.national_id || "", emp_ref: emp.emp_ref || "",
+        employee_id: emp.id, employee_name: emp.full_name || "", national_id: emp.emp_ref ? "" : (emp.national_id || ""), emp_ref: emp.emp_ref || "",
         month, year, salary_payment_method: emp.salary_payment_method || "mudad",
         base_salary: base, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         gross_salary: gross, bonus: 0, deductions: 0, loan_installment: 0,
@@ -199,7 +199,7 @@ export default function Payroll() {
           gross_salary: gross, absent_deduction: absentDeduction,
           net_salary: computeNetFromAttendance(gross, absentDays, absentHours, workDaysInMonth, workHoursPerDay, p.bonus, p.overtime_amount, p.deductions, p.loan_installment),
           salary_payment_method: emp.salary_payment_method || p.salary_payment_method || "mudad",
-          national_id: emp.national_id || p.national_id || "",
+          national_id: emp.emp_ref ? "" : (emp.national_id || p.national_id || ""),
           emp_ref: emp.emp_ref || p.emp_ref || "",
           employee_name: emp.full_name || p.employee_name || "",
         });

@@ -176,8 +176,12 @@ export default function EndOfService() {
     if (!preview) return;
     setSaving(true);
     try {
-      const saved = await base44.entities.Settlement.create(preview);
+      // تعمية الهوية في Base44 — تُحفظ في الخزنة عبر emp_ref فقط
+      const toSave = { ...preview };
+      if (toSave.emp_ref) toSave.national_id = "";
+      const saved = await base44.entities.Settlement.create(toSave);
       setSettlements((s) => [saved, ...s]);
+      // preview يبقى محتوياً على الهوية للطباعة الفورية (من الذاكرة)
       setPreview({ ...preview, id: saved.id });
       setTimeout(() => window.print(), 300);
     } finally { setSaving(false); }

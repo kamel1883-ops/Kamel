@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Shield } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PERMISSION_MODULES, parsePermissions, togglePermission, allPermissionKeys } from "@/lib/employeePermissions";
 import { useI18n } from "@/lib/i18n";
@@ -16,6 +16,7 @@ import EmployeeLeaveLoanSummary from "@/components/EmployeeLeaveLoanSummary";
 import JobDescPrintActions from "@/components/docs/JobDescPrintActions";
 import { yearsOfService, getOrgOnce } from "@/lib/leaveBalance";
 import { enrichEmployee } from "@/lib/vaultSensitive";
+import { writeEmployeeToVault, applyEmpRef } from "@/lib/vaultWrite";
 
 const empty = {
   full_name: "",
@@ -65,6 +66,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     genJobDesc: "توليد بالذكاء الاصطناعي", genJobDescing: "جارٍ التوليد...",
     perms: "مصفوفة الصلاحيات (وصول الوحدات)", permsHint: "توثيقية — تسجّل الوحدات التي يحق للموظف فتحها دون منع فعلي",
     permsAll: "تحديد الكل", permsNone: "إلغاء الكل", permsCount: (n) => `${n} وحدة مُفعّلة`,
+    vaultBadge: "البيانات الحساسة تُخزّن في الخزنة السعودية",
   } : {
     edit: "Edit employee", add: "Add new employee",
     fullName: "Full name", empNo: "Employee number",
@@ -90,6 +92,7 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
     genJobDesc: "Generate with AI", genJobDescing: "Generating...",
     perms: "Permissions matrix (module access)", permsHint: "Descriptive — records modules the employee may open, no actual enforcement",
     permsAll: "Select all", permsNone: "Clear all", permsCount: (n) => `${n} modules enabled`,
+    vaultBadge: "Sensitive data stored in Saudi vault",
   };
 
   const [form, setForm] = useState(empty);
@@ -165,8 +168,13 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
       const payload = { ...form, base_salary: Number(form.base_salary) || 0, housing_allowance: Number(form.housing_allowance) || 0, transport_allowance: Number(form.transport_allowance) || 0, other_allowances: Number(form.other_allowances) || 0, ticket_value: Number(form.ticket_value) || 0 };
       // ربط دائم بالرقم الموحّد للمنشأة — يبقى الموظف مربوطاً بالعميل حتى لو حُذف الحساب
       if (!employee && unifiedNumber && !payload.unified_number) payload.unified_number = String(unifiedNumber).trim();
-      if (employee) await base44.entities.Employee.update(employee.id, payload);
-      else await base44.entities.Employee.create(payload);
+      // === عزل البيانات الحساسة في الخزنة السعودية ===
+      // القيم الحساسة (هوية/جواز/بنك/هاتف/عنوان/ميلاد/اتصال طارئ/تأمين) تُرسل للخزنة
+      // وتُعاد برمز معتم (emp_ref). في Base44 يُحفظ الرمز فقط وتُفرّغ الحقول.
+      const empRef = await writeEmployeeToVault(employee?.emp_ref, payload);
+      const finalPayload = applyEmpRef(payload, empRef);
+      if (employee) await base44.entities.Employee.update(employee.id, finalPayload);
+      else await base44.entities.Employee.create(finalPayload);
       onSaved?.(); onClose?.();
     } finally { setSaving(false); }
   };
@@ -336,6 +344,9 @@ export default function EmployeeForm({ open, onClose, onSaved, employee, unified
           </div>
 
           <DialogFooter>
+            <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 inline-flex items-center gap-1 me-auto">
+              <Shield size={12} /> {t.vaultBadge}
+            </span>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>{t.cancel}</Button>
             <Button type="submit" disabled={saving}>{saving && <Loader2 size={16} className="animate-spin ml-2" />} {t.save}</Button>
           </DialogFooter>
