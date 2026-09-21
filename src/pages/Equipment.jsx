@@ -15,7 +15,7 @@ import { todayISO } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
 import PullToRefresh from "@/components/PullToRefresh";
 import EquipmentHandoverDoc from "@/components/docs/EquipmentHandoverDoc";
-import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
+import { writeRecordToVault, enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const ITEM_TYPES = [
   { value: "laptop", ar: "لابتوب" }, { value: "phone", ar: "جوال" }, { value: "work_phone", ar: "جوال عمل" },
@@ -86,7 +86,9 @@ export default function Equipment() {
       base44.entities.Employee.list("-created_date", 500),
       base44.entities.Organization.list("-created_date", 1),
     ]);
-    setReqs(r); setCustody(c); setEmployees(emps); setOrg(orgs[0]);
+    // جلب بيانات العهدة الحسّاسة (البيان/السريال/الحالة/ملاحظات الإرجاع) من الخزنة للعرض والطباعة
+    const enrichedC = await enrichRecordsWithVault(c, VAULT_MODULES.equipment, "equip_ref", ["item_label", "custom_type", "serial_number", "condition_note", "return_note", "notes", "cost"]);
+    setReqs(r); setCustody(enrichedC); setEmployees(emps); setOrg(orgs[0]);
     try { setMe(await base44.auth.me()); } catch {}
     setLoading(false);
   };
