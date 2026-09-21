@@ -49,11 +49,20 @@ function monthDiff(fromISO, toISO) {
   if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
   return Math.max(0, (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()));
 }
+function yearsOfServiceHire(hireDate, asOf = new Date()) {
+  if (!hireDate) return 0;
+  const a = new Date(hireDate); const b = asOf;
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return 0;
+  let y = b.getFullYear() - a.getFullYear();
+  if (b.getMonth() < a.getMonth() || (b.getMonth() === a.getMonth() && b.getDate() < a.getDate())) y--;
+  return Math.max(0, y);
+}
+// رصيد الإجازات وفق سياسة جدارة: 5+ سنوات → 30 إلزامياً؛ أقل → خيار الشركة (21/30).
 function computeEntitlement(hireDate, annualDays) {
-  const days = Number(annualDays) || 21;
   if (!hireDate) return 0;
   const months = monthDiff(hireDate, new Date().toISOString());
   if (months <= 0) return 0;
+  const days = yearsOfServiceHire(hireDate) >= 5 ? 30 : (Number(annualDays) || 21);
   return Math.round((months / 12) * days * 10) / 10;
 }
 
@@ -222,9 +231,10 @@ export default async function (req) {
       r.branch_id = br.id;
       r.branch_name = br.name;
       r.prior_used_leave = r.leave_used || r.prior_used_leave || 0;
+      const empChoice = r.annual_leave_entitlement === 30 ? 30 : 21;
       const ent = (r.leave_total_entitled && r.leave_total_entitled > 0)
         ? r.leave_total_entitled
-        : computeEntitlement(r.hire_date, annualDays);
+        : computeEntitlement(r.hire_date, empChoice);
       r.leave_balance = Math.max(0, Math.round((ent - r.prior_used_leave) * 10) / 10);
       r.unified_number = myUnified;
       toCreate.push(r);
@@ -249,7 +259,10 @@ export default async function (req) {
         'national_id', 'birth_date', 'phone', 'address', 'emergency_contact',
         'passport_number', 'passport_expiry', 'bank_account', 'health_insurance_number',
       ];
-      const vaultTenantId = myTenant?.id || user.id;
+      // يجب استخدام user.id كمفتاح مستأجر للخزنة — مطابقةً لما يستخدمه vaultProxy
+      // عند الاسترجاع (getEmployee عبر enrichEmployee في الواجهة). استخدام myTenant.id
+      // يُخزّن تحت مفتاح مختلف ويؤدي إلى 404 عند فتح ملف الموظف لاحقاً.
+      const vaultTenantId = user.id;
       const vaultRows = toCreate.map((r) => {
         const o = { employee_number: r.employee_number };
         for (const k of SENSITIVE_KEYS) {
