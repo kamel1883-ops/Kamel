@@ -16,6 +16,7 @@ import { useI18n } from "@/lib/i18n";
 import { generateBusinessTripApproval } from "@/lib/docGenerators";
 import { getOrgOnce } from "@/lib/leaveBalance";
 import PullToRefresh from "@/components/PullToRefresh";
+import { enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function BusinessTrips() {
   const { lang } = useI18n();
@@ -79,7 +80,9 @@ export default function BusinessTrips() {
       base44.entities.Employee.list("-created_date", 500),
       getOrgOnce(),
     ]);
-    setTrips(tr); setEmployees(e); setOrg(o); setLoading(false);
+    // جلب نصوص الرحلة الحسّاسة (الغرض/ملاحظات الموظف/الملاحظات) من الخزنة للعرض
+    const enrichedTr = await enrichRecordsWithVault(tr, VAULT_MODULES.businessTrips, "trip_ref", ["purpose", "employee_note", "notes"]);
+    setTrips(enrichedTr); setEmployees(e); setOrg(o); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 

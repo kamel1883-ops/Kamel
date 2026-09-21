@@ -101,3 +101,31 @@ export function applyVaultRef(payload, moduleKey, ref, sensitiveKeys) {
 export function isVaultRecordActive(ref) {
   return !!ref;
 }
+
+/**
+ * يُغني قائمة سجلات Base44 بالحقول الحساسة من الخزنة للعرض في الواجهة.
+ * - records: قائمة سجلات Base44
+ * - moduleKey: وحدة الخزنة (VAULT_MODULES.*)
+ * - refField: اسم حقل الـ ref في السجل (مثل leave_ref)
+ * - sensitiveKeys: الحقول الحساسة المطلوب جلبها من الخزنة ودمجها
+ * يعيد القائمة مدموجة؛ السجلات بلا ref أو الفاشلة تبقى كما هي (وضع احتياطي).
+ */
+export async function enrichRecordsWithVault(records, moduleKey, refField, sensitiveKeys) {
+  if (!records || !records.length) return records;
+  const withRef = records.filter((r) => r[refField]);
+  if (!withRef.length) return records;
+  const vaultMap = {};
+  await Promise.all(withRef.map(async (r) => {
+    const v = await readRecordFromVault(moduleKey, r[refField]);
+    if (v) vaultMap[r[refField]] = v;
+  }));
+  return records.map((r) => {
+    const v = vaultMap[r[refField]];
+    if (!v) return r;
+    const merged = { ...r };
+    for (const k of sensitiveKeys) {
+      if (v[k] !== undefined && v[k] !== null && v[k] !== "") merged[k] = v[k];
+    }
+    return merged;
+  });
+}

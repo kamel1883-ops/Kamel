@@ -12,6 +12,7 @@ import { useI18n } from "@/lib/i18n";
 import { todayISO } from "@/lib/hr";
 import PullToRefresh from "@/components/PullToRefresh";
 import ComplaintResolutionDoc from "@/components/docs/ComplaintResolutionDoc";
+import { enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const TYPES = {
   ethical: "شكوى أخلاقية", pressure: "ضغط من موظف/مسؤول", sexual_harassment: "شكوى تحرّش",
@@ -65,7 +66,9 @@ export default function Complaints() {
       base44.entities.Employee.list("-created_date", 500),
       base44.entities.Organization.list("-created_date", 1),
     ]);
-    setItems(list); setEmployees(emps); setOrg(orgs[0]);
+    // جلب النصوص الحسّاسة من الخزنة (الوصف/الحل/الملاحظات) ودمجها للعرض
+    const enriched = await enrichRecordsWithVault(list, VAULT_MODULES.complaints, "complaint_ref", ["description", "hr_resolution", "manager_note", "hr_note", "notes"]);
+    setItems(enriched); setEmployees(emps); setOrg(orgs[0]);
     try { setMe(await base44.auth.me()); } catch {}
     setLoading(false);
   };

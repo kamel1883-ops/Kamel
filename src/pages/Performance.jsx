@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { todayISO } from "@/lib/hr";
 import { useI18n } from "@/lib/i18n";
 import { printSection } from "@/lib/sectionPrint";
+import { enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function Performance() {
   const { lang } = useI18n();
@@ -67,7 +68,9 @@ export default function Performance() {
       base44.entities.Performance.list("-created_date", 500),
       base44.entities.Employee.list("-created_date", 500),
     ]);
-    setReviews(r); setEmployees(e);
+    // جلب نصوص التقييم الحسّاسة (الأهداف/النقاط/التحسين/الملاحظات) من الخزنة للعرض
+    const enrichedR = await enrichRecordsWithVault(r, VAULT_MODULES.performance, "perf_ref", ["goals", "personal_goals", "behaviors", "tasks_coverage", "tasks_amendments", "strengths", "improvements", "notes"]);
+    setReviews(enrichedR); setEmployees(e);
     try { setUser(await base44.auth.me()); } catch {}
     setLoading(false);
   };

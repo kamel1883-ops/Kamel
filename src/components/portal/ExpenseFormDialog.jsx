@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { EXPENSE_CATEGORIES, RECURRENCES } from "@/lib/finance";
 import { formatCurrency } from "@/lib/hr";
-import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
+import { writeRecordToVault, readRecordFromVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const empty = {
   name: "", category: "other", amount: "", recurrence: "monthly",
@@ -21,7 +21,16 @@ const empty = {
 export default function ExpenseFormDialog({ open, onClose, onSave, expense, revenues = [], isAr }) {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
-  useEffect(() => { setForm(expense ? { ...empty, ...expense } : empty); }, [expense, open]);
+  useEffect(() => {
+    if (expense && expense.expense_ref) {
+      // عند التحرير: جلب الملاحظات الحسّاسة من الخزنة (فارغة في Base44 للسجلات المحمية)
+      readRecordFromVault(VAULT_MODULES.expenses, expense.expense_ref).then((v) => {
+        setForm({ ...empty, ...expense, notes: v?.notes ?? expense.notes, vendor: v?.vendor ?? expense.vendor, partner_name: v?.partner_name ?? expense.partner_name });
+      }).catch(() => setForm({ ...empty, ...expense }));
+    } else {
+      setForm(expense ? { ...empty, ...expense } : empty);
+    }
+  }, [expense, open]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const isCommission = form.category === "commission" || form.category === "partner_share";

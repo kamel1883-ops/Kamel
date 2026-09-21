@@ -19,7 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { enrichEmployee, fetchSensitiveByRef } from "@/lib/vaultSensitive";
-import { writeRecordToVault, VAULT_MODULES } from "@/lib/vaultGeneric";
+import { writeRecordToVault, readRecordFromVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function EndOfService() {
   const { lang } = useI18n();
@@ -205,6 +205,17 @@ export default function EndOfService() {
     // جلب الهوية من الخزنة للمخالصات المُنشأة بعد تفعيل الخزنة (emp_ref بلا لقطة national_id)
     if (rec.emp_ref && !rec.national_id) {
       try { const s = await fetchSensitiveByRef(rec.emp_ref); if (s?.national_id) r.national_id = s.national_id; } catch {}
+    }
+    // جلب تفاصيل المخالصة الحسّاسة (الأساس/الأجور/النصوص) من الخزنة
+    if (rec.eos_ref) {
+      try {
+        const v = await readRecordFromVault(VAULT_MODULES.eos, rec.eos_ref);
+        if (v) {
+          for (const k of ["basis", "reason_note", "fraction_label", "description", "monthly_wage", "daily_wage", "eos_amount", "leave_cash", "ticket_amount", "hr_note", "finance_note", "deduction_note", "addition_note"]) {
+            if (v[k] !== undefined && v[k] !== null && v[k] !== "") r[k] = v[k];
+          }
+        }
+      } catch {}
     }
     setPreview({ ...r, employee_name_full: r.employee_name });
     setTimeout(() => window.print(), 200);

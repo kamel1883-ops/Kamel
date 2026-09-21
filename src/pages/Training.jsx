@@ -11,6 +11,7 @@ import { useI18n } from "@/lib/i18n";
 import TrainingPlanFormDialog from "@/components/training/TrainingPlanFormDialog";
 import TrainingPlanDetailsDialog from "@/components/training/TrainingPlanDetailsDialog";
 import { printSection } from "@/lib/sectionPrint";
+import { enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 const parseIds = (s) => {
   try { const v = JSON.parse(s || "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
@@ -84,7 +85,9 @@ export default function Training() {
         base44.entities.TrainingPlan.list("-created_date", 500),
         base44.entities.Employee.list("-created_date", 500).catch(() => []),
       ]);
-      setPlans(pl || []);
+      // جلب محتوى الخطة الحساس (النقص/الهدف/الآلية/الوصف) من الخزنة للعرض
+      const enrichedPlans = await enrichRecordsWithVault(pl || [], VAULT_MODULES.training, "training_ref", ["deficiency", "goal", "mechanism", "description"]);
+      setPlans(enrichedPlans);
       setEmployees(emps || []);
     } catch (e) { toast({ title: t.loadErr, description: e.message, variant: "destructive" }); }
     finally { setLoading(false); }

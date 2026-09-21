@@ -19,6 +19,7 @@ import { generateLeaveSettlement, generateLoanStatement, generateBusinessTripApp
 import PullToRefresh from "@/components/PullToRefresh";
 import VaultDocLink from "@/components/VaultDocLink";
 import { uploadFileToVault } from "@/lib/vaultDocuments";
+import { enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function Approvals() {
   const { lang } = useI18n();
@@ -133,7 +134,12 @@ export default function Approvals() {
       base44.entities.Employee.list("-created_date", 500),
       base44.entities.Organization.list("-created_date", 1),
     ]);
-    setLeaves(lv); setLoans(ln); setTrips(tr); setEmployees(emps); setOrg(orgs[0]);
+    // جلب النصوص الحسّاسة من الخزنة (سبب الإجازة / غرض الرحلة / الملاحظات) ودمجها للعرض
+    const [lvEnriched, trEnriched] = await Promise.all([
+      enrichRecordsWithVault(lv, VAULT_MODULES.leaves, "leave_ref", ["reason", "manager_note", "hr_note", "finance_note"]),
+      enrichRecordsWithVault(tr, VAULT_MODULES.businessTrips, "trip_ref", ["purpose", "employee_note", "notes", "hr_note", "finance_note"]),
+    ]);
+    setLeaves(lvEnriched); setLoans(ln); setTrips(trEnriched); setEmployees(emps); setOrg(orgs[0]);
     try { setMe(await base44.auth.me()); } catch {}
     setLoading(false);
   };

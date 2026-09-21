@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { daysUntil } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 import { printSection } from "@/lib/sectionPrint";
+import { enrichRecordsWithVault, VAULT_MODULES } from "@/lib/vaultGeneric";
 
 export default function Succession() {
   const { lang } = useI18n();
@@ -61,7 +62,9 @@ export default function Succession() {
   const load = async () => {
     setLoading(true);
     const [p, e] = await Promise.all([base44.entities.SuccessionPlan.list("-created_date", 500), base44.entities.Employee.list("-created_date", 500)]);
-    setPlans(p); setEmployees(e); setLoading(false);
+    // جلب خطة التطوير + الملاحظات الحسّاسة من الخزنة للعرض
+    const enrichedP = await enrichRecordsWithVault(p, VAULT_MODULES.succession, "succession_ref", ["development_plan", "notes"]);
+    setPlans(enrichedP); setEmployees(e); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
