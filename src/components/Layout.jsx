@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Menu, ArrowRight, Crown, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, PlaneTakeoff, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe, ScrollText, Gift, Bell, Package, MessageSquareWarning, ShieldCheck, HeartPulse } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
-import CompanyNav from "@/components/CompanyNav";
+import { Image } from "@/components/ui/image";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
@@ -14,6 +14,41 @@ import BottomTabBar from "@/components/BottomTabBar";
 import { useI18n } from "@/lib/i18n";
 
 const ROOT_TABS = ["/app", "/employees", "/approvals", "/settings"];
+
+const appNav = [
+  { to: "/app", ar: "الرئيسية", en: "Dashboard", icon: LayoutDashboard },
+  { to: "/notifications", ar: "الإشعارات", en: "Notifications", icon: Bell },
+  { to: "/recruitment", ar: "إدارة التوظيف", en: "Recruitment", icon: Briefcase },
+  { to: "/employees", ar: "إدارة الموظفين", en: "Employees", icon: Users },
+  { to: "/attendance", ar: "إدارة الحضور والانصراف", en: "Attendance", icon: Fingerprint },
+  { to: "/import-attendance", ar: "استيراد البصمات يدوياً", en: "Import Attendance", icon: ClipboardList },
+  { to: "/approvals", ar: "إدارة الموافقات", en: "Approvals", icon: CheckCircle2 },
+  { to: "/leaves", ar: "إدارة الإجازات", en: "Leaves", icon: CalendarDays },
+  { to: "/business-trips", ar: "إدارة رحلات العمل", en: "Business Trips", icon: Plane },
+  { to: "/flight-bookings", ar: "حجوزات الطيران", en: "Flight Bookings", icon: PlaneTakeoff },
+  { to: "/payroll", ar: "إدارة الرواتب", en: "Payroll", icon: Wallet },
+  { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield },
+  { to: "/equipment", ar: "العهد والمصروفات", en: "Custody & Expenses", icon: Package },
+  { to: "/complaints", ar: "الشكاوى", en: "Complaints", icon: MessageSquareWarning },
+  { to: "/fleet", ar: "إدارة المركبات", en: "Fleet", icon: Car },
+  { to: "/vehicle-insurance", ar: "تأمين المركبات", en: "Vehicle Insurance", icon: ShieldCheck },
+  { to: "/health-insurance", ar: "التأمين الصحي", en: "Health Insurance", icon: HeartPulse },
+  { to: "/end-of-service", ar: "إدارة نهاية الخدمة", en: "End of Service", icon: FileText },
+  { to: "/performance", ar: "إدارة الأداء", en: "Performance", icon: Target },
+  { to: "/training", ar: "إدارة التدريب والتطوير", en: "Training & Development", icon: GraduationCap },
+  { to: "/workforce-planning", ar: "تخطيط القوى العاملة", en: "Workforce Planning", icon: CalendarRange },
+  { to: "/succession", ar: "إدارة التعاقب الوظيفي", en: "Succession", icon: GitBranch },
+  { to: "/org-structure", ar: "إدارة الهيكل التنظيمي", en: "Org Structure", icon: Network },
+  { to: "/licenses", ar: "إدارة التراخيص", en: "Licenses", icon: FileBadge },
+  { to: "/platform-subscriptions", ar: "اشتراكات المنصات الحكومية", en: "Platform Subscriptions", icon: Globe },
+  { to: "/warnings", ar: "إدارة الإنذارات", en: "Warnings", icon: ShieldAlert },
+  { to: "/decisions", ar: "القرارات الإدارية", en: "Decisions", icon: ScrollText },
+  { to: "/incentives", ar: "إدارة الحوافز والمكافآت", en: "Incentives", icon: Gift },
+  { to: "/exit-interviews", ar: "إدارة مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare },
+  { to: "/surveys", ar: "إدارة الاستبيانات", en: "Surveys", icon: ClipboardList },
+  { to: "/analytics", ar: "إدارة التحليلات والتقارير", en: "Analytics & Reports", icon: BarChart3 },
+  { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
+];
 
 const bottomNav = [
   { to: "/app", ar: "الرئيسية", en: "Home", icon: LayoutDashboard },
@@ -25,6 +60,8 @@ const bottomNav = [
 export default function Layout() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const ui = isAr ? { logout: "تسجيل الخروج", manager: "المدير" } : { logout: "Sign out", manager: "Manager" };
+
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -47,6 +84,7 @@ export default function Layout() {
     window.location.href = "/";
   };
 
+  const isActive = (path) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
   const rootTab = ROOT_TABS.includes(location.pathname) ? bottomNav.find((i) => i.to === location.pathname) : null;
 
   return (
@@ -54,11 +92,61 @@ export default function Layout() {
       {user && <IdleSessionGuard onTimeout={handleLogout} />}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 right-0 h-screen w-72 bg-white border-l border-[#DDD5F2] z-40 transition-transform duration-300 flex flex-col",
+          "fixed lg:sticky top-0 right-0 h-screen w-72 bg-gradient-to-b from-[#F6F3FC] to-[#EFE9F8] text-[#2A2340] z-40 transition-transform duration-300 flex flex-col border-l border-[#E2D6F4]",
           open ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         )}
       >
-        <CompanyNav user={user} onLogout={handleLogout} onClose={() => setOpen(false)} />
+        <div className="h-20 flex items-center justify-between px-5 border-b border-[#E2D6F4]">
+          <Link to="/app"><Logo tone="dark" size={44} /></Link>
+          <button className="lg:hidden text-[#6B5E8C]" onClick={() => setOpen(false)}><X size={20} /></button>
+        </div>
+        <div className="h-px bg-gradient-to-l from-[#A78BFA]/60 to-[#C4B5FD]/40" />
+
+        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+          {appNav.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-[13.5px] font-semibold transition-all border",
+                  active
+                    ? "bg-gradient-to-l from-[#7C5CE6] to-[#A78BFA] border-transparent text-white shadow-sm shadow-violet-300/40"
+                    : "bg-white/70 border-[#E8DEF7] text-[#4A3F66] hover:bg-white hover:border-[#C9B8EE] hover:text-[#2A2340]"
+                )}
+              >
+                <Icon size={18} className={active ? "text-white" : "text-[#8B7AB8]"} />
+                {isAr ? item.ar : item.en}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-3 border-t border-[#E2D6F4]">
+          <div className="px-3 pb-2"><LanguageToggle /></div>
+          <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg bg-white/60 border border-[#E8DEF7]">
+            {user?.avatar_url ? (
+              <Image src={user.avatar_url} fittingType="fill" className="w-9 h-9 rounded-full shrink-0 border border-[#E8DEF7]" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-[#EDE4FB] flex items-center justify-center shrink-0">
+                <UserCircle size={22} className="text-[#7C5CE6]" />
+              </div>
+            )}
+            <div className="flex-1 leading-tight min-w-0">
+              <div className="text-sm font-semibold truncate text-[#2A2340]">{user?.full_name || ui.manager}</div>
+              <div className="text-xs text-[#8B7AB8] truncate">{user?.email || ""}</div>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-[#6B5E8C] bg-white/50 border border-[#E8DEF7] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
+          >
+            <LogOut size={19} /> {ui.logout}
+          </button>
+        </div>
       </aside>
 
       {open && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setOpen(false)} />}
