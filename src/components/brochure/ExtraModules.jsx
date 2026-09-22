@@ -46,7 +46,7 @@ const STR = {
       headingSub: "تكامل مع أكبر مزوّدي التأمين في المملكة — تأمين مركبات وتأمين صحي",
       vehicleLabel: "تأمين المركبات",
       healthLabel: "التأمين الصحي",
-      deepLink: "ربط مباشر", manual: "دخول يدوي"
+      deepLink: "روابط عميقة", manual: "دخول يدوي"
     }
   },
   en: {
@@ -81,7 +81,7 @@ const STR = {
       headingSub: "Integration with the Kingdom's largest insurance providers — vehicle and health",
       vehicleLabel: "Vehicle Insurance",
       healthLabel: "Health Insurance",
-      deepLink: "Direct link", manual: "Manual entry"
+      deepLink: "Deep links", manual: "Manual entry"
     }
   }
 };
