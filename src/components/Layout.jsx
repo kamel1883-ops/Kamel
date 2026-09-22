@@ -15,39 +15,40 @@ import { useI18n } from "@/lib/i18n";
 
 const ROOT_TABS = ["/app", "/employees", "/approvals", "/settings"];
 
+// كل قسم يحمل بلاطة متدرّجة فخمة ملونة — الأيقونة بيضاء داخل البلاطة لتعطي مظهراً حقيقياً وملوناً وفخماً
 const appNav = [
-  { to: "/app", ar: "الرئيسية", en: "Dashboard", icon: LayoutDashboard },
-  { to: "/notifications", ar: "الإشعارات", en: "Notifications", icon: Bell },
-  { to: "/recruitment", ar: "إدارة التوظيف", en: "Recruitment", icon: Briefcase },
-  { to: "/employees", ar: "إدارة الموظفين", en: "Employees", icon: Users },
-  { to: "/attendance", ar: "إدارة الحضور والانصراف", en: "Attendance", icon: Fingerprint },
-  { to: "/import-attendance", ar: "استيراد البصمات يدوياً", en: "Import Attendance", icon: ClipboardList },
-  { to: "/approvals", ar: "إدارة الموافقات", en: "Approvals", icon: CheckCircle2 },
-  { to: "/leaves", ar: "إدارة الإجازات", en: "Leaves", icon: CalendarDays },
-  { to: "/business-trips", ar: "إدارة رحلات العمل", en: "Business Trips", icon: Plane },
-  { to: "/flight-bookings", ar: "حجوزات الطيران", en: "Flight Bookings", icon: PlaneTakeoff },
-  { to: "/payroll", ar: "إدارة الرواتب", en: "Payroll", icon: Wallet },
-  { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield },
-  { to: "/equipment", ar: "العهد والمصروفات", en: "Custody & Expenses", icon: Package },
-  { to: "/complaints", ar: "الشكاوى", en: "Complaints", icon: MessageSquareWarning },
-  { to: "/fleet", ar: "إدارة المركبات", en: "Fleet", icon: Car },
-  { to: "/vehicle-insurance", ar: "تأمين المركبات", en: "Vehicle Insurance", icon: ShieldCheck },
-  { to: "/health-insurance", ar: "التأمين الصحي", en: "Health Insurance", icon: HeartPulse },
-  { to: "/end-of-service", ar: "إدارة نهاية الخدمة", en: "End of Service", icon: FileText },
-  { to: "/performance", ar: "إدارة الأداء", en: "Performance", icon: Target },
-  { to: "/training", ar: "إدارة التدريب والتطوير", en: "Training & Development", icon: GraduationCap },
-  { to: "/workforce-planning", ar: "تخطيط القوى العاملة", en: "Workforce Planning", icon: CalendarRange },
-  { to: "/succession", ar: "إدارة التعاقب الوظيفي", en: "Succession", icon: GitBranch },
-  { to: "/org-structure", ar: "إدارة الهيكل التنظيمي", en: "Org Structure", icon: Network },
-  { to: "/licenses", ar: "إدارة التراخيص", en: "Licenses", icon: FileBadge },
-  { to: "/platform-subscriptions", ar: "اشتراكات المنصات الحكومية", en: "Platform Subscriptions", icon: Globe },
-  { to: "/warnings", ar: "إدارة الإنذارات", en: "Warnings", icon: ShieldAlert },
-  { to: "/decisions", ar: "القرارات الإدارية", en: "Decisions", icon: ScrollText },
-  { to: "/incentives", ar: "إدارة الحوافز والمكافآت", en: "Incentives", icon: Gift },
-  { to: "/exit-interviews", ar: "إدارة مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare },
-  { to: "/surveys", ar: "إدارة الاستبيانات", en: "Surveys", icon: ClipboardList },
-  { to: "/analytics", ar: "إدارة التحليلات والتقارير", en: "Analytics & Reports", icon: BarChart3 },
-  { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon },
+  { to: "/app", ar: "الرئيسية", en: "Dashboard", icon: LayoutDashboard, tile: "from-indigo-500 to-blue-500" },
+  { to: "/notifications", ar: "الإشعارات", en: "Notifications", icon: Bell, tile: "from-amber-400 to-orange-500" },
+  { to: "/recruitment", ar: "إدارة التوظيف", en: "Recruitment", icon: Briefcase, tile: "from-rose-500 to-pink-500" },
+  { to: "/employees", ar: "إدارة الموظفين", en: "Employees", icon: Users, tile: "from-violet-500 to-purple-500" },
+  { to: "/attendance", ar: "إدارة الحضور والانصراف", en: "Attendance", icon: Fingerprint, tile: "from-sky-400 to-cyan-500" },
+  { to: "/import-attendance", ar: "استيراد البصمات يدوياً", en: "Import Attendance", icon: ClipboardList, tile: "from-teal-400 to-emerald-500" },
+  { to: "/approvals", ar: "إدارة الموافقات", en: "Approvals", icon: CheckCircle2, tile: "from-emerald-500 to-green-500" },
+  { to: "/leaves", ar: "إدارة الإجازات", en: "Leaves", icon: CalendarDays, tile: "from-green-500 to-lime-500" },
+  { to: "/business-trips", ar: "إدارة رحلات العمل", en: "Business Trips", icon: Plane, tile: "from-orange-500 to-red-500" },
+  { to: "/flight-bookings", ar: "حجوزات الطيران", en: "Flight Bookings", icon: PlaneTakeoff, tile: "from-blue-500 to-indigo-500" },
+  { to: "/payroll", ar: "إدارة الرواتب", en: "Payroll", icon: Wallet, tile: "from-amber-400 to-yellow-500" },
+  { to: "/gosi", ar: "التأمينات الاجتماعية", en: "Social Insurance (GOSI)", icon: Shield, tile: "from-cyan-500 to-blue-500" },
+  { to: "/equipment", ar: "العهد والمصروفات", en: "Custody & Expenses", icon: Package, tile: "from-stone-500 to-zinc-600" },
+  { to: "/complaints", ar: "الشكاوى", en: "Complaints", icon: MessageSquareWarning, tile: "from-rose-500 to-red-500" },
+  { to: "/fleet", ar: "إدارة المركبات", en: "Fleet", icon: Car, tile: "from-zinc-500 to-slate-600" },
+  { to: "/vehicle-insurance", ar: "تأمين المركبات", en: "Vehicle Insurance", icon: ShieldCheck, tile: "from-blue-400 to-cyan-500" },
+  { to: "/health-insurance", ar: "التأمين الصحي", en: "Health Insurance", icon: HeartPulse, tile: "from-red-500 to-rose-500" },
+  { to: "/end-of-service", ar: "إدارة نهاية الخدمة", en: "End of Service", icon: FileText, tile: "from-fuchsia-500 to-purple-600" },
+  { to: "/performance", ar: "إدارة الأداء", en: "Performance", icon: Target, tile: "from-orange-400 to-amber-500" },
+  { to: "/training", ar: "إدارة التدريب والتطوير", en: "Training & Development", icon: GraduationCap, tile: "from-blue-500 to-violet-500" },
+  { to: "/workforce-planning", ar: "تخطيط القوى العاملة", en: "Workforce Planning", icon: CalendarRange, tile: "from-indigo-500 to-sky-500" },
+  { to: "/succession", ar: "إدارة التعاقب الوظيفي", en: "Succession", icon: GitBranch, tile: "from-teal-500 to-cyan-500" },
+  { to: "/org-structure", ar: "إدارة الهيكل التنظيمي", en: "Org Structure", icon: Network, tile: "from-violet-500 to-fuchsia-500" },
+  { to: "/licenses", ar: "إدارة التراخيص", en: "Licenses", icon: FileBadge, tile: "from-yellow-400 to-amber-500" },
+  { to: "/platform-subscriptions", ar: "اشتراكات المنصات الحكومية", en: "Platform Subscriptions", icon: Globe, tile: "from-sky-500 to-blue-500" },
+  { to: "/warnings", ar: "إدارة الإنذارات", en: "Warnings", icon: ShieldAlert, tile: "from-red-500 to-orange-500" },
+  { to: "/decisions", ar: "القرارات الإدارية", en: "Decisions", icon: ScrollText, tile: "from-stone-500 to-amber-600" },
+  { to: "/incentives", ar: "إدارة الحوافز والمكافآت", en: "Incentives", icon: Gift, tile: "from-pink-500 to-rose-500" },
+  { to: "/exit-interviews", ar: "إدارة مقابلات المغادرة", en: "Exit Interviews", icon: MessageSquare, tile: "from-purple-500 to-violet-500" },
+  { to: "/surveys", ar: "إدارة الاستبيانات", en: "Surveys", icon: ClipboardList, tile: "from-emerald-500 to-teal-500" },
+  { to: "/analytics", ar: "إدارة التحليلات والتقارير", en: "Analytics & Reports", icon: BarChart3, tile: "from-blue-500 to-indigo-500" },
+  { to: "/settings", ar: "الإعدادات", en: "Settings", icon: SettingsIcon, tile: "from-zinc-500 to-slate-600" },
 ];
 
 const bottomNav = [
@@ -112,13 +113,15 @@ export default function Layout() {
                 to={item.to}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-[13.5px] font-semibold transition-all border",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-semibold transition-all border",
                   active
-                    ? "bg-gradient-to-l from-[#7C5CE6] to-[#A78BFA] border-transparent text-white shadow-sm shadow-violet-300/40"
+                    ? "bg-white border-[#C9B8EE] text-[#2A2340] ring-1 ring-violet-300 shadow-sm shadow-violet-200/50"
                     : "bg-white/70 border-[#E8DEF7] text-[#4A3F66] hover:bg-white hover:border-[#C9B8EE] hover:text-[#2A2340]"
                 )}
               >
-                <Icon size={18} className={active ? "text-white" : "text-[#8B7AB8]"} />
+                <span className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 shadow-sm", item.tile)}>
+                  <Icon size={18} className="text-white" strokeWidth={2.2} />
+                </span>
                 {isAr ? item.ar : item.en}
               </Link>
             );
