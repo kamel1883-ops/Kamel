@@ -81,6 +81,17 @@ export default function Employees() {
     setOrg(orgs[0] || null);
     const td = tenantRes?.data || tenantRes;
     setMyUnified(String(td?.tenant?.unified_number || "").trim());
+    // تعبئة رجعية آمنة: أي موظف أنشأه هذا المسؤول (created_by_id) ويفتقد الرقم الموحّد
+    // يُربط برقم منشأته الحالية — يضمن ظهوره في عداد بوابة المالك النشط.
+    const meId = (await base44.auth.me().catch(() => null))?.id;
+    const un = String(td?.tenant?.unified_number || "").trim();
+    const orphans = (data || []).filter((e) => !e.unified_number && e.created_by_id === meId);
+    if (orphans.length && un) {
+      try {
+        await base44.entities.Employee.bulkUpdate(orphans.map((e) => ({ id: e.id, unified_number: un })));
+        setEmployees((cur) => cur.map((e) => (orphans.find((o) => o.id === e.id) ? { ...e, unified_number: un } : e)));
+      } catch {}
+    }
     setLoading(false);
   };
   useEffect(() => { load(); }, [editTarget, formOpen, branchOpen]);
