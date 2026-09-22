@@ -163,26 +163,30 @@ export default async function (req) {
         const k = String(u.email || "").trim().toLowerCase();
         if (k && emailToTenantId.has(k)) userIdToTenantId.set(u.id, emailToTenantId.get(k)!);
       }
-      // عدّ الموظفين لكل منشأة عبر unified_number أولاً ثم fallback عبر user.id
-      // مع تعبئة رجعية لمن يفتقد unified_number (ربط دائم بالعميل)
+      // عدّ دقيق 100% بالرقم الموحد فقط — لا مسار بديل يختلط بين العملاء.
+      // الموظف يُحتسب للمنشأة iff unified_number يطابق رقمها الموحد.
+      // التعبئة الرجعية: من يفتقد unified_number ويُنشئه مسؤول مرتبط بمنشأة
+      // يُربط تلقائياً برقمها (يُحتسب في الاستدعاء التالي بعد الربط).
+      // ما لا يُربط تلقائياً (أنشأه المالك مثلاً) يربطه المالك يدوياً عبر owner_list_orphans.
       const byTenant: Record<string, { active: number; total: number }> = {};
       const backfill: { id: string; unified_number: string }[] = [];
       for (const e of employees || []) {
         const empUn = String(e.unified_number || "").trim();
-        let tid: string | undefined = empUn ? unifiedToTenantId.get(empUn) : undefined;
+        const tid = empUn ? unifiedToTenantId.get(empUn) : undefined;
         if (!tid) {
-          const uid = String(e.created_by_id || "");
-          tid = userIdToTenantId.get(uid) || idToTenantId.get(uid);
-          if (tid && !empUn) {
-            const tMatch = (tenants || []).find((tt: any) => String(tt.id) === tid);
-            const un2 = String(tMatch?.unified_number || "").trim();
-            if (un2 && e.id) backfill.push({ id: String(e.id), unified_number: un2 });
+          if (!empUn) {
+            const uid = String(e.created_by_id || "");
+            const btid = userIdToTenantId.get(uid) || idToTenantId.get(uid);
+            if (btid && e.id) {
+              const tMatch = (tenants || []).find((tt: any) => String(tt.id) === btid);
+              const un2 = String(tMatch?.unified_number || "").trim();
+              if (un2) backfill.push({ id: String(e.id), unified_number: un2 });
+            }
           }
+          continue;
         }
-        if (!tid) continue;
         if (!byTenant[tid]) byTenant[tid] = { active: 0, total: 0 };
         byTenant[tid].total++;
-        // الموظف «النشط» = كل موظف فعلي لا يزال على رأس العمل (يشمل كل أنواع الإجازات: سنوية/مرضية/طارئة...)
         if (e.status !== "terminated" && e.status !== "resigned") byTenant[tid].active++;
       }
       if (backfill.length) {
@@ -369,6 +373,45 @@ export default async function (req) {
         updated++;
       }
       return Response.json({ ok: true, updated, skipped: skipped.length });
+    }
+
+    // ====== ربط الموظفين الأيتام بالمنشأة — دقة 100% بالرقم الموحد ======
+    // «يتيم» = موظف unified_number فارغ أو لا يطابق أي منشأة مسجّلة.
+    // المالك يرى الأيتام ثم يحدّد منهم من يتبع لهذه المنشأة فيُربط برقمها الموحد.
+    if (action === "owner_list_orphans") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const [allTenants, employees] = await Promise.all([
+        base44.asServiceRole.entities.Tenant.list("-created_date", 500),
+        base44.asServiceRole.entities.Employee.list("-created_date", 2000),
+      ]);
+      const validUns = new Set(
+        (allTenants || [])
+          .filter((t: any) => t.status !== "pending_payment")
+          .map((t: any) => String(t.unified_number || "").trim())
+          .filter(Boolean)
+      );
+      const orphans = (employees || []).filter((e: any) => {
+        const un = String(e.unified_number || "").trim();
+        return !un || !validUns.has(un);
+      }).map((e: any) => ({
+        id: e.id, full_name: e.full_name, employee_number: e.employee_number,
+        national_id: e.national_id, department: e.department, position: e.position,
+        status: e.status, unified_number: String(e.unified_number || ""),
+      }));
+      return Response.json({ ok: true, orphans });
+    }
+    if (action === "owner_link_orphans") {
+      if (!isOwner) return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+      const tenant_id = String(body.tenant_id || "");
+      const ids: string[] = Array.isArray(body.employee_ids) ? body.employee_ids.map(String).filter(Boolean) : [];
+      if (!tenant_id || !ids.length) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
+      const un = String(t?.unified_number || "").trim();
+      if (!un) return Response.json({ ok: false, error: "no_unified_number" }, { status: 400 });
+      await base44.asServiceRole.entities.Employee.bulkUpdate(
+        ids.map((id) => ({ id, unified_number: un }))
+      );
+      return Response.json({ ok: true, linked: ids.length, unified_number: un });
     }
 
     if (action === "owner_cancel") {

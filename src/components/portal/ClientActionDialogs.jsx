@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Check, CalendarPlus, CalendarClock, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature, FileText } from "lucide-react";
+import { Loader2, Check, CalendarPlus, CalendarClock, Printer, X, Pause, Ban, Play, RotateCcw, BadgeCheck, Building2, Crown, FlaskConical, Download, Mail, FileSignature, FileText, Link2, Users } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { cn } from "@/lib/utils";
 import ConfirmSubscriptionDialog from "./ConfirmSubscriptionDialog";
 import RenewYearDialog from "./RenewYearDialog";
 import { renderToPdfBlob } from "@/lib/pdfDocs";
@@ -182,6 +184,33 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [renewOpen, setRenewOpen] = useState(false);
   const [quoteBusy, setQuoteBusy] = useState(false);
+  const [orphans, setOrphans] = useState(null);
+  const [picked, setPicked] = useState({});
+  const [orphLoading, setOrphLoading] = useState(false);
+  const [orphBusy, setOrphBusy] = useState(false);
+  const callPortal = useCallback(async (action, extra = {}) => {
+    const res = await base44.functions.invoke("portalData", { token: session.token, employee_id: session.employee_id, action, ...extra });
+    const d = res?.data || res;
+    if (!d?.ok) throw new Error(d?.error || "fail");
+    return d;
+  }, [session?.token, session?.employee_id]);
+  const loadOrphans = async () => {
+    setOrphLoading(true);
+    try { const d = await callPortal("owner_list_orphans"); setOrphans(d.orphans || []); setPicked({}); }
+    catch (e) { setOrphans([]); }
+    finally { setOrphLoading(false); }
+  };
+  const linkOrphans = async () => {
+    const ids = Object.keys(picked).filter((k) => picked[k]);
+    if (!ids.length) return;
+    setOrphBusy(true);
+    try {
+      await callPortal("owner_link_orphans", { tenant_id: tenant.id, employee_ids: ids });
+      setPicked({}); setOrphans(null);
+      if (onRefresh) await onRefresh();
+    } catch (e) { alert(e?.message || "fail"); }
+    finally { setOrphBusy(false); }
+  };
   useEffect(() => {
     if (open && tenant) {
       setDays("7");
@@ -191,6 +220,7 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
       setEnd(d.toISOString().slice(0, 10));
       setConfirmOpen(false);
       setRenewOpen(false);
+      setOrphans(null); setPicked({});
     }
   }, [open, tenant]);
   if (!open || !tenant) return null;
@@ -316,6 +346,42 @@ export function ClientInfoDialog({ open, onClose, tenant, isAr, t, onAction, bus
                 {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />} {isAr ? "ربط البريد الجديد" : "Re-link email"}
               </Button>
             </div>
+          </div>
+          {/* ربط الموظفين غير المرتبطين — دقة العدّ 100% بالرقم الموحد */}
+          <div className="space-y-2 rounded-xl border border-violet-200 bg-violet-50/40 p-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="text-sm font-medium flex items-center gap-1.5"><Link2 size={15} className="text-violet-600" /> {isAr ? "ربط الموظفين بالرقم الموحد" : "Link employees by unified number"}</div>
+              <div className="text-xs text-muted-foreground">{isAr ? "العدّ الحالي" : "Count"}: <b className="text-violet-700">{tenant.employees_active_count ?? 0}</b> / {tenant.employees_total_count ?? 0}</div>
+            </div>
+            <div className="text-xs text-muted-foreground leading-relaxed">{isAr ? "يعرض الموظفين غير المرتبطين بأي منشأة (بدون رقم موحد أو برقم غير مطابق) ليحدّد المالك من يتبع لهذه المنشأة فيُربط برقمها الموحد — يضمن دقة العدّ 100% دون اختلاط بين العملاء." : "Shows employees not linked to any tenant so the owner can assign them here — guarantees a 100% accurate count with no cross-client mixing."}</div>
+            {orphans === null ? (
+              <Button size="sm" variant="outline" onClick={loadOrphans} disabled={orphLoading} className="gap-1.5 border-violet-300 text-violet-700 hover:bg-violet-100">
+                {orphLoading ? <Loader2 size={14} className="animate-spin" /> : <Users size={14} />} {isAr ? "عرض الموظفين غير المرتبطين" : "Show unlinked employees"}
+              </Button>
+            ) : orphans.length === 0 ? (
+              <div className="text-xs text-emerald-700 flex items-center gap-1.5"><Check size={13} /> {isAr ? "لا يوجد موظفون غير مرتبطين — العدّ دقيق." : "No unlinked employees — count is accurate."}</div>
+            ) : (
+              <div className="space-y-2">
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-white divide-y divide-border">
+                  {orphans.map((o) => (
+                    <label key={o.id} className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-slate-50">
+                      <input type="checkbox" checked={!!picked[o.id]} onChange={(e) => setPicked((p) => ({ ...p, [o.id]: e.target.checked }))} className="h-4 w-4 accent-violet-600 shrink-0" />
+                      <div className="min-w-0 flex-1 leading-tight">
+                        <div className="text-sm font-medium truncate">{o.full_name || "—"}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">{o.employee_number || "—"} · {o.department || "—"} · {o.position || "—"}</div>
+                      </div>
+                      <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full border shrink-0", o.status === "active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200")}>{o.status === "active" ? (isAr ? "نشط" : "Active") : o.status}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs text-muted-foreground">{Object.values(picked).filter(Boolean).length} {isAr ? "محدّد" : "selected"}</div>
+                  <Button size="sm" onClick={linkOrphans} disabled={orphBusy || !Object.values(picked).some(Boolean)} className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white">
+                    {orphBusy ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />} {isAr ? "ربط المحدّدين بهذه المنشأة" : "Link selected"}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
           {status === "trial" && (
             <div className="space-y-2">

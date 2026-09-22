@@ -31,7 +31,12 @@ export default async function (req) {
       return Response.json({ ok: false, error: "captcha_failed" }, { status: 403 });
 
     const emps = await base44.asServiceRole.entities.Employee.filter({ national_id: nid });
-    const emp = (emps || [])[0];
+    const all = emps || [];
+    // عند تكرار رقم الإقامة عبر أكثر من سجل (موظف انتقل بين شركات): نُفضّل السجل
+    // النشط/المُجاز الذي أنشأ كلمة مرور للبوابة، ثم أي سجل نشط، وأخيراً الأول.
+    const emp = all.find((e: any) => (e.status === "active" || e.status === "on_leave") && e.portal_password_enabled)
+      || all.find((e: any) => e.status === "active" || e.status === "on_leave")
+      || all[0];
     if (!emp) return Response.json({ ok: false, error: "invalid_credentials" });
     if (emp.status && emp.status !== "active" && emp.status !== "on_leave")
       return Response.json({ ok: false, error: "inactive" });
