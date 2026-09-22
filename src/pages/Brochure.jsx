@@ -1101,8 +1101,8 @@ function Pricing() {
               <tr key={t.id} style={{ background: i % 2 ? "rgba(255,255,255,.04)" : "transparent" }}>
                 <td className="py-3 px-4 font-extrabold text-white">{t.tier}</td>
                 <td className="py-3 px-4 text-slate-300 text-[13px]">{t.range}</td>
-                <td className="py-3 px-4 font-bold" style={{ color: CYAN }}>{t.yearly.toLocaleString()}{t.custom ? "+" : ""} ر.س</td>
-                <td className="py-3 px-4 font-extrabold text-white">{t.custom ? "حسب الاتفاق" : `${t.year1.toLocaleString()} ر.س`}</td>
+                <td className="py-3 px-4 font-bold" style={{ color: CYAN }}>{t.custom ? "حسب الاتفاق" : `${(t.yearly ?? 0).toLocaleString()} ر.س`}</td>
+                <td className="py-3 px-4 font-extrabold text-white">{t.custom ? "حسب الاتفاق" : `${(t.year1 ?? 0).toLocaleString()} ر.س`}</td>
               </tr>
             ))}
           </tbody>
