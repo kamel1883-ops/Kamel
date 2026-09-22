@@ -142,19 +142,20 @@ export default function EndOfService() {
 
   const liveBalance = emp ? (() => {
     const asOf = lwd ? new Date(lwd) : new Date();
-    const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
+    // رصيد الإجازات يتبع اختيار المنشأة من ملف الموظف (21/30) ويُلزم بـ30 بعد 5 سنوات.
+    const ent = computeLeaveEntitlement(emp.hire_date, org, asOf, emp.annual_leave_entitlement);
     // المستخدم الكلي = الرصيد الافتتاحي (prior_used_leave) + المعتمد داخل النظام.
     const used = usedLeaveTotal(emp, empLeaves);
-    return { ent, used, remaining: Math.max(0, Math.round((ent - used) * 10) / 10) };
+    return { ent, used, remaining: Math.max(0, Math.round((ent - used) * 100) / 100) };
   })() : null;
 
   const compute = () => {
     if (!emp) return;
-    // رصيد الإجازات المتبقي = المستحق (تناسبي 21/30) − المستخدم الكلي (الافتتاحي + المعتمد داخل النظام)
+    // رصيد الإجازات المتبقي = المستحق (حسب اختيار المنشأة 21/30 من ملف الموظف) − المستخدم الكلي
     const asOf = lwd ? new Date(lwd) : new Date();
-    const ent = computeLeaveEntitlement(emp.hire_date, org, asOf);
+    const ent = computeLeaveEntitlement(emp.hire_date, org, asOf, emp.annual_leave_entitlement);
     const used = usedLeaveTotal(emp, empLeaves);
-    const remaining = Math.max(0, Math.round((ent - used) * 10) / 10);
+    const remaining = Math.max(0, Math.round((ent - used) * 100) / 100);
     const set = computeSettlement({ employee: emp, org, lastWorkingDate: lwd, reason, ticketAmount, leaveBalance: remaining });
     // الهوية من الخزنة السعودية عند تفعيلها (عبر emp_ref)، أو من الحقل المحلي (النمط القديم)
     const idSrc = enrichedEmp || emp;
