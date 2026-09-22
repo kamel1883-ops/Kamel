@@ -77,6 +77,7 @@ const ContractSample = lazy(() => import("@/pages/ContractSample"));
 const Samples = lazy(() => import("@/pages/Samples"));
 const Brochure = lazy(() => import("@/pages/Brochure"));
 const BrochureEn = lazy(() => import("@/pages/BrochureEn"));
+import BrochureErrorBoundary from "@/components/BrochureErrorBoundary";
 const HrSystemPage = lazy(() => import("@/pages/landings/HrSystemPage"));
 const PayrollSystemPage = lazy(() => import("@/pages/landings/PayrollSystemPage"));
 const AttendanceSystemPage = lazy(() => import("@/pages/landings/AttendanceSystemPage"));
@@ -117,8 +118,8 @@ const AuthenticatedApp = () => {
           <Route path="/quote" element={<Quote />} />
           <Route path="/contract-sample" element={<ContractSample />} />
           <Route path="/samples" element={<Samples />} />
-          <Route path="/brochure" element={<Brochure />} />
-          <Route path="/brochure-en" element={<BrochureEn />} />
+          <Route path="/brochure" element={<BrochureErrorBoundary><Brochure /></BrochureErrorBoundary>} />
+          <Route path="/brochure-en" element={<BrochureErrorBoundary><BrochureEn /></BrochureErrorBoundary>} />
           {/* مستندات خاصة بالمالك فقط — بروابط مباشرة غير مرتبطة بأي بوابة أو قائمة تنقّل */}
           <Route path="/strategic-plan" element={<StrategicPlan />} />
           <Route path="/ad-designs" element={<AdDesigns />} />
