@@ -12,6 +12,7 @@ import { TiktokIcon, SnapchatIcon } from "@/components/SocialIcons";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_EN } from "@/lib/pricing";
 import StoreButtons from "@/components/StoreButtons";
+import { EquipmentModule, ComplaintsModule, InsuranceProvidersSection } from "@/components/brochure/ExtraModules";
 import { Image } from "@/components/ui/image";
 
 // Jadara Platform — Profile / Brochure — English edition (LTR), fully translated, printable.
@@ -46,6 +47,7 @@ export default function BrochureEn() {
         <DashboardOverview />
         <ModuleShowcase />
         <FlightProvidersSection />
+        <InsuranceProvidersSection lang="en" Section={Section} Heading={Heading} CYAN={CYAN} NAVY={NAVY} />
         <ReportsAnalyticsEn />
         <EmployeePortal />
         <Infra />
@@ -92,8 +94,8 @@ function Cover() {
               "Leave Management", "Approval Workflow", "Loans & Advances", "Business Trips & Deputation",
               "Monthly Payroll", "Social Insurance (GOSI)", "End of Service", "Performance Management",
               "Performance Reviews", "Training & Development", "Succession Planning", "Org Structure",
-              "Workforce Planning", "Full Recruitment", "Vehicles & Fleet", "Government Licenses",
-              "Government Subscriptions", "Warnings & Labor Policy", "Exit Interviews", "Reports & Analytics",
+              "Workforce Planning", "Full Recruitment", "Vehicles & Fleet", "Vehicle Insurance (Tameeni)", "Government Licenses",
+              "Government Subscriptions", "Warnings & Labor Policy", "Equipment & Assets", "Confidential Complaints", "Exit Interviews", "Reports & Analytics",
               "Company Portal", "Employee Self-Service", "Mobile App", "AI Assistant",
               "Organization Settings", "License Alerts", "Settlement Statements", "Self Check-in Integration",
             ].map((b) => (
@@ -129,7 +131,7 @@ function Vision() {
             <span style={{ color: CYAN }}>commanding</span> all human capital
           </h2>
           <p className="mt-5 text-slate-600 leading-loose text-[15px]">
-            Jadara is an integrated Saudi cloud platform that brings together employees, attendance, check-in, payroll, leaves, end of service, performance, training, fleet, licenses, and government subscriptions into a single secure ecosystem — replacing scattered spreadsheets and paper files.
+            Jadara is an integrated Saudi cloud platform that brings together employees, attendance, check-in, payroll, leaves, end of service, performance, training, fleet, vehicle insurance, equipment & assets, complaints, licenses, and government subscriptions into a single secure ecosystem — replacing scattered spreadsheets and paper files.
           </p>
           <p className="mt-3 text-slate-600 leading-loose text-[15px]">
             Designed to serve small businesses all the way to large enterprises with consistent performance and a capacity of up to <b style={{ color: NAVY }}>25,000 employees</b> in a single organization.
@@ -258,8 +260,10 @@ function ModuleShowcase() {
       <TrainingModule />
       <SuccessionModule />
       <FleetModule />
+      <EquipmentModule lang="en" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
       <GovernmentModule />
       <FlightBookingsModule />
+      <ComplaintsModule lang="en" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
       <OtherModules />
     </>
   );
@@ -1222,11 +1226,23 @@ function Infra() {
         <div className="grid grid-cols-2 gap-3">
           <TrustChip dark icon={MapPin} label="Saudi location (Riyadh)" />
           <TrustChip dark icon={ShieldCheck} label="SDAIA compliant" />
+          <TrustChip dark icon={ShieldCheck} label="Cybersecurity Authority" />
+          <TrustChip dark icon={Lock} label="PDPL — Personal Data Protection" />
           <TrustChip dark icon={Lock} label="Full encryption" />
           <TrustChip dark icon={ShieldCheck} label="Daily backups" />
           <TrustChip dark icon={Zap} label="Ultra-fast NVMe" />
           <TrustChip dark icon={BadgeCheck} label="99.9% uptime" />
         </div>
+      </div>
+      <div className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 text-white/85 text-[13px] leading-relaxed">
+        <div className="flex items-center gap-2 mb-2 text-white">
+          <ShieldCheck size={16} style={{ color: "#34d399" }} />
+          <span className="font-extrabold text-sm">Saudi data sovereignty & full compliance</span>
+        </div>
+        <p>
+          Jadara is fully hosted inside the Kingdom of Saudi Arabia on <b>Oracle Systems</b> Saudi Arabia servers — your data stays inside the Kingdom and never leaves it.
+          The platform is fully compliant with the Personal Data Protection Law (PDPL), the National <b>Cybersecurity Authority</b> requirements, and <b>SDAIA</b> standards — with full encryption of sensitive data and an isolated cloud vault for identity, banking, and documents.
+        </p>
       </div>
       {/* Server & hosting provider */}
       <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">

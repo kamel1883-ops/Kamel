@@ -11,6 +11,7 @@ import { TiktokIcon, SnapchatIcon } from "@/components/SocialIcons";
 import { PROVIDER } from "@/lib/providerIdentity";
 import { PRICING_TIERS_AR } from "@/lib/pricing";
 import ReportsAnalytics from "@/components/brochure/ReportsAnalytics";
+import { EquipmentModule, ComplaintsModule, InsuranceProvidersSection } from "@/components/brochure/ExtraModules";
 import StoreButtons from "@/components/StoreButtons";
 import { Image } from "@/components/ui/image";
 
@@ -46,6 +47,7 @@ export default function Brochure() {
         <DashboardOverview />
         <ModuleShowcase />
         <FlightProvidersSection />
+        <InsuranceProvidersSection lang="ar" Section={Section} Heading={Heading} CYAN={CYAN} NAVY={NAVY} />
         <ReportsAnalytics Section={Section} Heading={Heading} />
         <EmployeePortal />
         <Infra />
@@ -92,8 +94,8 @@ function Cover() {
               "إدارة الإجازات", "مسار الموافقات", "السلف والقروض", "رحلات العمل والانتداب",
               "الرواتب الشهرية", "التأمينات الاجتماعية", "نهاية الخدمة", "إدارة الأداء",
               "تقييم الأداء", "التدريب والتطوير", "التخطيط التعاقبي", "الهيكل التنظيمي",
-              "تخطيط القوى العاملة", "التوظيف الكامل", "المركبات والأسطول", "الرخص الحكومية",
-              "الاشتراكات الحكومية", "الإنذارات والسياسة", "مقابلات نهاية الخدمة", "التقارير والتحليلات",
+              "تخطيط القوى العاملة", "التوظيف الكامل", "المركبات والأسطول", "تأمين المركبات (تأميني)", "الرخص الحكومية",
+              "الاشتراكات الحكومية", "الإنذارات والسياسة", "العهد والأصول", "الشكاوى السرّية", "مقابلات نهاية الخدمة", "التقارير والتحليلات",
               "بوابة المنشآت", "بوابة الموظف الذاتية", "تطبيق الجوال", "المساعد الذكي",
               "إعدادات المنشأة", "تنبيهات التراخيص", "كشوف المخالصات", "تكامل البصمة الذاتية"
             ].map((b) => (
@@ -129,7 +131,7 @@ function Vision() {
             <span style={{ color: CYAN }}>تتحكّم</span> في كل رأس مال بشري
           </h2>
           <p className="mt-5 text-slate-600 leading-loose text-[15px]">
-            «جداره» منصة سحابية سعودية متكاملة، تجمع إدارة الموظفين والحضور والبصمة والرواتب والإجازات ونهاية الخدمة والأداء والتدريب والمركبات والتراخيص والاشتراكات الحكومية في منظومة واحدة آمنة — بدل جداول الإكسل والملفات الورقية متفرقة.
+            «جداره» منصة سحابية سعودية متكاملة، تجمع إدارة الموظفين والحضور والبصمة والرواتب والإجازات ونهاية الخدمة والأداء والتدريب والمركبات وتأمينها والعهد والأصول والشكاوى والتراخيص والاشتراكات الحكومية في منظومة واحدة آمنة — بدل جداول الإكسل والملفات الورقية متفرقة.
           </p>
           <p className="mt-3 text-slate-600 leading-loose text-[15px]">
             صُمّمت لتخدم المنشآت الصغيرة وحتى كبرى الشركات بأداء ثابت وسعة حتى <b style={{ color: NAVY }}>25,000 موظف</b> في منشأة واحدة.
@@ -260,8 +262,10 @@ function ModuleShowcase() {
       <TrainingModule />
       <SuccessionModule />
       <FleetModule />
+      <EquipmentModule lang="ar" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
       <GovernmentModule />
       <FlightBookingsModule />
+      <ComplaintsModule lang="ar" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
       <OtherModules />
     </>
   );
@@ -1020,11 +1024,23 @@ function Infra() {
         <div className="grid grid-cols-2 gap-3">
           <TrustChip dark icon={MapPin} label="موقع سعودي (الرياض)" />
           <TrustChip dark icon={ShieldCheck} label="التزام سدايا (SDAIA)" />
+          <TrustChip dark icon={ShieldCheck} label="هيئة الأمن السيبراني" />
+          <TrustChip dark icon={Lock} label="حماية البيانات الشخصية (PDPL)" />
           <TrustChip dark icon={Lock} label="تشفير كامل" />
           <TrustChip dark icon={ShieldCheck} label="نسخ احتياطي يومي" />
           <TrustChip dark icon={Zap} label="تخزين فائق السرعة" />
           <TrustChip dark icon={BadgeCheck} label="جاهزية 99.9%" />
         </div>
+      </div>
+      <div className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 text-white/85 text-[13px] leading-relaxed">
+        <div className="flex items-center gap-2 mb-2 text-white">
+          <ShieldCheck size={16} style={{ color: "#34d399" }} />
+          <span className="font-extrabold text-sm">سيادة بيانات سعودية والزام تام</span>
+        </div>
+        <p>
+          تُستضاف منصة جداره بالكامل داخل المملكة العربية السعودية على خوادم شركة <b>Oracle Systems</b> السعودية — بياناتك تبقى داخل المملكة ولا تخرج منها.
+          النظام ملتزم التزاماً تاماً بنظام حماية البيانات الشخصية (PDPL)، ومتطلبات <b>هيئة الأمن السيبراني</b> الوطنية، ومعايير <b>سدايا (SDAIA)</b> — مع تشفير كامل للبيانات الحساسة وخزنة سحابية معزولة للهوية والبنك والوثائق.
+        </p>
       </div>
       {/* مزوّد الخادم والاستضافة */}
       <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
