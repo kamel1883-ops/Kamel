@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { computeLeaveEntitlement, usedLeaveTotal, sumUsedDays, getOrgOnce } from "@/lib/leaveBalance";
+import { computeLeaveEntitlement, usedLeaveTotal, sumUsedDays, getOrgOnce, getEmployeeAnnualDays } from "@/lib/leaveBalance";
 import { generateLeaveSettlement, generateLoanStatement } from "@/lib/docGenerators";
 import { formatCurrency, leaveTypeLabel } from "@/lib/hr";
 import { badge } from "@/lib/approvals";
@@ -52,11 +52,14 @@ export default function EmployeeLeaveLoanSummary({ employee }) {
 
   useEffect(() => { load(); }, [employee?.id]);
 
-  const generous30 = Number(org?.annual_leave_days) === 30;
-  const entitlement = computeLeaveEntitlement(employee?.hire_date, org);
+  // رصيد الإجازات يعتمد اختيار المنشأة لكل موظف (21 أو 30) من ملف الموظف،
+  // ويُلزم بـ30 بعد إكمال 5 سنوات خدمة. الخزنة أعلاه تتبع هذا الاختيار دائماً.
+  const annualDays = getEmployeeAnnualDays(employee, org);
+  const generous30 = annualDays === 30;
+  const entitlement = computeLeaveEntitlement(employee?.hire_date, org, undefined, employee?.annual_leave_entitlement);
   // المستخدم الكلي = الرصيد الافتتاحي (prior_used_leave، ثابت) + المعتمد داخل النظام (sumUsedDays).
   const used = usedLeaveTotal(employee, leaves);
-  const remaining = Math.round((entitlement - used) * 10) / 10;
+  const remaining = Math.round((entitlement - used) * 100) / 100;
   // تفصيل «المستخدم» ليكون واضحاً أنه ليس أياماً أُخذت داخل النظام فقط
   const priorUsed = Number(employee?.prior_used_leave) || 0;
   const systemUsed = Math.round(sumUsedDays(leaves) * 10) / 10;
