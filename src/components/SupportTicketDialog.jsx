@@ -11,7 +11,8 @@ import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { Headphones, Paperclip, X, Loader2, CheckCircle2, Upload, UserCircle, Mail, Phone } from "lucide-react";
+import SupportMyTickets from "@/components/SupportMyTickets";
+import { Headphones, Paperclip, X, Loader2, CheckCircle2, Upload, UserCircle, Mail, Phone, PlusCircle, ListChecks } from "lucide-react";
 
 // نافذة رفع تذكرة دعم فني داخل بوابة الشركات (للعملاء المسجّلين فقط).
 // تُعبّأ بيانات مقدّم الطلب تلقائياً من جلسته، ولا تتطلب كابتشا.
@@ -54,6 +55,7 @@ export default function SupportTicketDialog({ open, onClose, user }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [done, setDone] = useState(null);
+  const [tab, setTab] = useState("new");
   const fileRef = useRef(null);
 
   const cat = SUPPORT_CATEGORIES.find((c) => c.key === catKey) || null;
@@ -62,7 +64,7 @@ export default function SupportTicketDialog({ open, onClose, user }) {
   useEffect(() => {
     if (open) {
       setCatKey(""); setSubKey(""); setSubject(""); setDesc("");
-      setPhone(""); setAttachments([]); setErr(""); setDone(null);
+      setPhone(""); setAttachments([]); setErr(""); setDone(null); setTab("new");
     }
   }, [open]);
 
@@ -134,6 +136,19 @@ export default function SupportTicketDialog({ open, onClose, user }) {
               </div>
             </DialogHeader>
 
+            {/* تبويبات: تذكرة جديدة / تذاكري السابقة */}
+            <div className="flex gap-1 p-1 bg-muted rounded-xl mb-1">
+              <button type="button" onClick={() => setTab("new")} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition ${tab === "new" ? "bg-card text-violet-700 shadow-sm" : "text-muted-foreground"}`}>
+                <PlusCircle size={15} /> {isAr ? "تذكرة جديدة" : "New ticket"}
+              </button>
+              <button type="button" onClick={() => setTab("list")} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition ${tab === "list" ? "bg-card text-violet-700 shadow-sm" : "text-muted-foreground"}`}>
+                <ListChecks size={15} /> {isAr ? "تذاكري السابقة" : "My tickets"}
+              </button>
+            </div>
+
+            {tab === "list" ? (
+              <SupportMyTickets user={user} />
+            ) : (
             <form onSubmit={submit} className="space-y-4">
               {/* مقدّم الطلب — بيانات الجلسة (للقراءة فقط) */}
               <div className="rounded-xl border border-violet-200/70 bg-violet-50/50 p-3">
@@ -212,6 +227,7 @@ export default function SupportTicketDialog({ open, onClose, user }) {
                 {busy ? <Loader2 size={16} className="animate-spin" /> : <Headphones size={16} />} {busy ? t.sending : t.submit}
               </Button>
             </form>
+            )}
           </>
         )}
       </DialogContent>
