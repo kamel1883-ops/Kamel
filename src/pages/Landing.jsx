@@ -585,7 +585,6 @@ export default function Landing() {
             <button onClick={() => scrollTo("pricing")} className="block hover:text-violet-700">{t.nav.pricing}</button>
             <Link to="/about" className="block hover:text-violet-700">{isAr ? "من نحن" : "About"}</Link>
             <Link to="/contact" className="block hover:text-violet-700">{t.nav.contact}</Link>
-            <Link to="/support" className="block hover:text-violet-700">{isAr ? "الدعم الفني" : "Tech Support"}</Link>
             <Link to="/company-login?returnTo=/app" className="block hover:text-violet-700">{t.login}</Link>
             <Link to="/privacy" className="block hover:text-violet-700">{isAr ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
             <Link to="/refund-policy" className="block hover:text-violet-700">{isAr ? "شروط الاسترداد" : "Refund Terms"}</Link>

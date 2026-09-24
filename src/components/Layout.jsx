@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, PlaneTakeoff, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe, ScrollText, Gift, Bell, Package, MessageSquareWarning, ShieldCheck, HeartPulse } from "lucide-react";
+import { Building2, TicketPercent, LogOut, Menu, X, UserCircle, LayoutDashboard, Users, ClipboardCheck, Settings as SettingsIcon, ArrowRight, Fingerprint, CheckCircle2, CalendarDays, Plane, PlaneTakeoff, Wallet, Shield, Car, FileText, Target, GitBranch, Network, CalendarRange, MessageSquare, ClipboardList, ShieldAlert, BarChart3, FileBadge, Eye, Crown, Briefcase, GraduationCap, Globe, ScrollText, Gift, Bell, Package, MessageSquareWarning, ShieldCheck, HeartPulse, Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { Image } from "@/components/ui/image";
@@ -11,6 +11,7 @@ import IdleSessionGuard from "@/components/portal/IdleSessionGuard";
 import CompanyAssistant from "@/components/CompanyAssistant";
 import AnimatedOutlet from "@/components/AnimatedOutlet";
 import BottomTabBar from "@/components/BottomTabBar";
+import SupportTicketDialog from "@/components/SupportTicketDialog";
 import { useI18n } from "@/lib/i18n";
 
 const ROOT_TABS = ["/app", "/employees", "/approvals", "/settings"];
@@ -66,6 +67,7 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -169,6 +171,9 @@ export default function Layout() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={() => setSupportOpen(true)} className="relative w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-violet-300/50 active:scale-95 transition" aria-label={isAr ? "الدعم الفني" : "Support"}>
+              <Headphones size={18} />
+            </button>
             <NotificationsBell tone="dark" />
             <LanguageToggle />
             <button onClick={() => setOpen(true)} className="text-[#6B5E8C]"><Menu size={22} /></button>
@@ -177,7 +182,12 @@ export default function Layout() {
 
         <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b bg-[#F8F6FC]/80 backdrop-blur sticky top-0 z-20">
           <div className="text-sm font-medium text-[#6B5E8C]">{isAr ? "منصة جداره — الموارد البشرية" : "Jadara HR Platform"}</div>
-          <NotificationsBell tone="dark" />
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSupportOpen(true)} className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-l from-violet-600 to-indigo-600 text-white text-sm font-bold shadow-md shadow-violet-300/50 hover:shadow-lg hover:scale-[1.03] transition">
+              <Headphones size={16} /> {isAr ? "الدعم الفني" : "Support"}
+            </button>
+            <NotificationsBell tone="dark" />
+          </div>
         </div>
 
         <main className="relative flex-1 p-4 sm:p-6 lg:p-9 pb-24 lg:pb-9 animate-fade-in overflow-hidden">
@@ -195,6 +205,7 @@ export default function Layout() {
         <BottomTabBar onNavigate={() => setOpen(false)} />
       </div>
       <CompanyAssistant />
+      <SupportTicketDialog open={supportOpen} onClose={() => setSupportOpen(false)} user={user} />
     </div>
   );
 }
