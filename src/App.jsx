@@ -73,6 +73,7 @@ const Blog = lazy(() => import("@/pages/Blog"));
 const BlogArticle = lazy(() => import("@/pages/BlogArticle"));
 const CustomerSurveys = lazy(() => import("@/pages/CustomerSurveys"));
 const CustomerSurveyTake = lazy(() => import("@/pages/public/CustomerSurveyTake"));
+const Support = lazy(() => import("@/pages/Support"));
 const ContractSample = lazy(() => import("@/pages/ContractSample"));
 const Samples = lazy(() => import("@/pages/Samples"));
 const Brochure = lazy(() => import("@/pages/Brochure"));
@@ -85,7 +86,7 @@ const PerformanceSystemPage = lazy(() => import("@/pages/landings/PerformanceSys
 import { PortalLangProvider } from "@/lib/portalI18n";
 import SplashScreen from "@/components/SplashScreen";
 
-const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/strategic-plan", "/ad-designs", "/app-store-screens", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program"];
+const PUBLIC_PATHS = ["/", "/about", "/contact", "/quote", "/login", "/register", "/forgot-password", "/reset-password", "/company-login", "/company-forgot-password", "/company-register", "/portal", "/owner-portal", "/qiwa-mudad", "/wps-mudad", "/eos-calculator", "/contracts", "/contract-sample", "/samples", "/brochure", "/brochure-en", "/strategic-plan", "/ad-designs", "/app-store-screens", "/hr-system", "/payroll-system", "/attendance-system", "/performance-system", "/privacy", "/refund-policy", "/affiliate-program", "/support"];
 
 const AuthenticatedApp = () => {
   const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -136,6 +137,7 @@ const AuthenticatedApp = () => {
           <Route path="/eos-calculator" element={<EosCalculatorPage />} />
           <Route path="/contracts" element={<ContractsPage />} />
           <Route path="/affiliate-program" element={<AffiliateProgram />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/blog" element={<Blog />} />
