@@ -169,8 +169,8 @@ function DashboardOverview() {
       <MockFrame title="منصة جداره — لوحة التحكم">
         <div className="grid grid-cols-[170px,1fr] gap-0 h-[420px]">
           {/* الشريط الجانبي */}
-          <div style={{ background: NAVY, color: "#cdd9e6", borderRadius: "10px 0 0 10px", padding: 14 }} className="flex flex-col gap-1 text-[11px]">
-            <div className="flex items-center gap-2 text-white font-bold mb-2">
+          <div style={{ background: "#F8F6FD", color: "#475569", borderRadius: "10px 0 0 10px", padding: 14, borderLeft: "1px solid #e2e8f0" }} className="flex flex-col gap-1 text-[11px]">
+            <div className="flex items-center gap-2 font-bold mb-2" style={{ color: NAVY }}>
               <Crown size={14} style={{ color: GOLD }} /> جداره
             </div>
             {[
@@ -189,7 +189,7 @@ function DashboardOverview() {
             ].map((x, k) => {
               const I = x.i;
               return (
-                <div key={k} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: x.a ? "rgba(139,92,246,.18)" : "transparent", color: x.a ? "#fff" : "#9fb3c8" }}>
+                <div key={k} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: x.a ? "rgba(139,92,246,.15)" : "transparent", color: x.a ? NAVY : "#94a3b8" }}>
                   <I size={12} /> {x.t}
                 </div>
               );
@@ -926,12 +926,12 @@ function EmployeePortal() {
   return (
     <Section tint="dark" heading={<Heading dark icon={<Smartphone />} title="بوابة الموظف والتطبيق" sub="تطبيق حقيقي على الجوال — بوابة ذاتية خاصة بكل موظف" />}>
       <div className="grid md:grid-cols-2 gap-6 items-stretch">
-        <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)" }}>
+        <div className="rounded-2xl p-6 bg-white border border-slate-200">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1F`, color: CYAN, border: `1px solid ${CYAN}40` }}><Smartphone size={20} /></div>
-            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19, color: "#fff" }}>تطبيق جداره للموظف</h4>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}40` }}><Smartphone size={20} /></div>
+            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19, color: NAVY }}>تطبيق جداره للموظف</h4>
           </div>
-          <ul className="space-y-2.5 text-[14.5px] text-slate-200">
+          <ul className="space-y-2.5 text-[14.5px] text-slate-600">
             {[
               "بوابة ذاتية: الملف الوظيفي، الراتب، رصيد الإجازات، السلف ومراحل الموافقة",
               "بصمة الحضور والانصراف من التطبيق مع التحقق من الموقع",
@@ -998,27 +998,27 @@ function Infra() {
   return (
     <Section tint="dark" heading={<Heading dark icon={<Server />} title="بنية تحتية سعودية فاخرة" sub="خادم خاص بمنصة جداره — داخل المملكة وبأعلى المواصفات" />}>
       <div className="grid md:grid-cols-[1.1fr,1fr] gap-6">
-        <div className="rounded-3xl p-6 bg-gradient-to-br from-[#0e1f3a] to-[#0A1629] border border-white/10 shadow-2xl">
-          <div className="flex items-center gap-2 text-white mb-4">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center"><Server size={20} style={{ color: CYAN }} /></div>
+        <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-xl">
+          <div className="flex items-center gap-2 mb-4" style={{ color: NAVY }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1A`, border: `1px solid ${CYAN}40` }}><Server size={20} style={{ color: CYAN }} /></div>
             <div>
               <div className="font-extrabold text-lg">خادم جداره الخاص</div>
-              <div className="text-xs text-white/60">سيرفر خاص بمنصة جداره — يستضيف اشتراكات جميع الشركات والمؤسسات</div>
+              <div className="text-xs text-slate-500">سيرفر خاص بمنصة جداره — يستضيف اشتراكات جميع الشركات والمؤسسات</div>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-emerald-500/10 border border-emerald-400/20 self-start mb-3">
-            <MapPin size={14} style={{ color: "#34d399" }} />
-            <span className="text-xs font-bold" style={{ color: "#6ee7b7" }}>الرياض — المملكة العربية السعودية</span>
+          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 self-start mb-3" style={{ background: "#dcfce7", border: "1px solid #86efac" }}>
+            <MapPin size={14} style={{ color: "#16a34a" }} />
+            <span className="text-xs font-bold" style={{ color: "#15803d" }}>الرياض — المملكة العربية السعودية</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <Spec icon={Cpu} big="12 vCores" small="AMD EPYC 4464P · 24 مسار" />
             <Spec icon={MemoryStick} big="48 جيجا" small="ذاكرة DDR5 ECC" />
             <Spec icon={HardDrive} big="1 تيرا" small="تخزين NVMe فائق السرعة" />
           </div>
-          <div className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
-            <div className="text-xs text-white/60">سعة الخادم</div>
-            <div className="text-lg font-extrabold text-white flex items-center justify-center gap-1.5"><Users size={16} style={{ color: CYAN }} /> حتى 50,000 موظف</div>
-            <div className="text-[11px] text-white/50">موزّعون على مجموعة شركات ومؤسسات مختلفة — دون أي تأثير على السرعة</div>
+          <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-center">
+            <div className="text-xs text-slate-500">سعة الخادم</div>
+            <div className="text-lg font-extrabold flex items-center justify-center gap-1.5" style={{ color: NAVY }}><Users size={16} style={{ color: CYAN }} /> حتى 50,000 موظف</div>
+            <div className="text-[11px] text-slate-400">موزّعون على مجموعة شركات ومؤسسات مختلفة — دون أي تأثير على السرعة</div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -1032,26 +1032,26 @@ function Infra() {
           <TrustChip dark icon={BadgeCheck} label="جاهزية 99.9%" />
         </div>
       </div>
-      <div className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 text-white/85 text-[13px] leading-relaxed">
-        <div className="flex items-center gap-2 mb-2 text-white">
-          <ShieldCheck size={16} style={{ color: "#34d399" }} />
+      <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-slate-700 text-[13px] leading-relaxed">
+        <div className="flex items-center gap-2 mb-2" style={{ color: NAVY }}>
+          <ShieldCheck size={16} style={{ color: "#16a34a" }} />
           <span className="font-extrabold text-sm">سيادة بيانات سعودية والزام تام</span>
         </div>
-        <p>
+        <p style={{ color: "#475569" }}>
           تُستضاف منصة جداره بالكامل داخل المملكة العربية السعودية على خوادم شركة <b>Oracle Systems</b> السعودية — بياناتك تبقى داخل المملكة ولا تخرج منها.
           النظام ملتزم التزاماً تاماً بنظام حماية البيانات الشخصية (PDPL)، ومتطلبات <b>هيئة الأمن السيبراني</b> الوطنية، ومعايير <b>سدايا (SDAIA)</b> — مع تشفير كامل للبيانات الحساسة وخزنة سحابية معزولة للهوية والبنك والوثائق.
         </p>
       </div>
       {/* مزوّد الخادم والاستضافة */}
-      <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="text-xs text-white/60 shrink-0">مزوّد الخادم والاستضافة</div>
+      <div className="mt-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="text-xs text-slate-500 shrink-0">مزوّد الخادم والاستضافة</div>
         <div className="flex items-center gap-2.5">
-          <div className="h-11 w-14 rounded-lg bg-white flex items-center justify-center p-1.5 shrink-0">
+          <div className="h-11 w-14 rounded-lg bg-white flex items-center justify-center p-1.5 shrink-0 border border-slate-200">
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="Oracle Systems" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
           </div>
           <div className="leading-tight">
-            <div className="font-extrabold text-white text-base" style={{ fontFamily: "var(--font-display)" }}>Oracle Systems</div>
-            <div className="text-[11px] text-white/55">شركة Oracle Systems السعودية — مزوّد الخادم والاستضافة</div>
+            <div className="font-extrabold text-base" style={{ fontFamily: "var(--font-display)", color: NAVY }}>Oracle Systems</div>
+            <div className="text-[11px] text-slate-500">شركة Oracle Systems السعودية — مزوّد الخادم والاستضافة</div>
           </div>
         </div>
       </div>
@@ -1105,26 +1105,26 @@ function Partners() {
 function Pricing() {
   return (
     <Section tint="dark" heading={<Heading dark icon={<Sparkles />} title="الباقات والأسعار السنوية" sub="خمس شرائح تناسب كل أحجام المنشآت — كل الباقات بنفس المميزات" />}>
-      <div className="overflow-hidden rounded-2xl border border-white/10">
+      <div className="overflow-hidden rounded-2xl border border-slate-200">
         <table className="w-full text-right">
           <thead>
-            <tr style={{ background: "rgba(255,255,255,.06)", color: "#fff" }}>
+            <tr style={{ background: "#F5F2FC", color: NAVY }}>
               <Th>الباقة</Th><Th>عدد الموظفين</Th><Th>الاشتراك السنوي</Th><Th>إجمالي السنة الأولى</Th>
             </tr>
           </thead>
           <tbody>
             {PRICING_TIERS_AR.map((t, i) => (
-              <tr key={t.id} style={{ background: i % 2 ? "rgba(255,255,255,.04)" : "transparent" }}>
-                <td className="py-3 px-4 font-extrabold text-white">{t.tier}</td>
-                <td className="py-3 px-4 text-slate-300 text-[13px]">{t.range}</td>
+              <tr key={t.id} style={{ background: i % 2 ? "#F8F6FD" : "transparent" }}>
+                <td className="py-3 px-4 font-extrabold" style={{ color: NAVY }}>{t.tier}</td>
+                <td className="py-3 px-4 text-slate-600 text-[13px]">{t.range}</td>
                 <td className="py-3 px-4 font-bold" style={{ color: CYAN }}>{t.custom ? "حسب الاتفاق" : `${(t.yearly ?? 0).toLocaleString()} ر.س`}</td>
-                <td className="py-3 px-4 font-extrabold text-white">{t.custom ? "حسب الاتفاق" : `${(t.year1 ?? 0).toLocaleString()} ر.س`}</td>
+                <td className="py-3 px-4 font-extrabold" style={{ color: NAVY }}>{t.custom ? "حسب الاتفاق" : `${(t.year1 ?? 0).toLocaleString()} ر.س`}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="text-center text-xs text-slate-400 mt-3">
+      <p className="text-center text-xs text-slate-500 mt-3">
         جميع الباقات تشمل كامل المميزات دون استثناء · تجربة مجانية 30 يوماً قبل الالتزام
       </p>
     </Section>
@@ -1187,7 +1187,7 @@ function Closing() {
 function Section({ tint, heading, children }) {
   const dark = tint === "dark";
   return (
-    <div style={{ background: dark ? NAVY : "#fff", color: dark ? "#fff" : NAVY, padding: "44px 48px" }}>
+    <div style={{ background: dark ? "#F5F2FC" : "#ffffff", color: NAVY, padding: "44px 48px" }}>
       {heading && <div style={{ marginBottom: 28 }}>{heading}</div>}
       {children}
     </div>
@@ -1197,9 +1197,9 @@ function Section({ tint, heading, children }) {
 function Heading({ icon, title, sub, dark }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: dark ? "rgba(139,92,246,.12)" : "rgba(139,92,246,.10)", color: CYAN, border: `1px solid ${CYAN}44` }}>{icon}</div>
-      <h3 style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", color: dark ? "#fff" : NAVY, marginBottom: 6 }}>{title}</h3>
-      <p style={{ fontSize: 14, color: dark ? "#a9bcd0" : "#64748b", maxWidth: 680 }}>{sub}</p>
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: "rgba(139,92,246,.10)", color: CYAN, border: `1px solid ${CYAN}44` }}>{icon}</div>
+      <h3 style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", color: NAVY, marginBottom: 6 }}>{title}</h3>
+      <p style={{ fontSize: 14, color: "#64748b", maxWidth: 680 }}>{sub}</p>
       <div style={{ width: 56, height: 3, borderRadius: 999, background: CYAN, marginTop: 12 }} />
     </div>
   );
@@ -1207,18 +1207,18 @@ function Heading({ icon, title, sub, dark }) {
 
 function FeatureBlock({ icon: I, kicker, title, desc, points, mock, dark }) {
   return (
-    <div style={{ background: dark ? NAVY : "#fff", color: dark ? "#fff" : NAVY, padding: "44px 48px" }}>
+    <div style={{ background: dark ? "#F5F2FC" : "#ffffff", color: NAVY, padding: "44px 48px" }}>
       <div className="grid lg:grid-cols-[1fr,1.05fr] gap-8 items-center">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: dark ? `${CYAN}1F` : `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}40` }}><I size={20} /></div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: dark ? CYAN : CYAN }}>{kicker}</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}40` }}><I size={20} /></div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: CYAN }}>{kicker}</span>
           </div>
-          <h3 style={{ fontSize: 26, fontWeight: 800, fontFamily: "var(--font-display)", color: dark ? "#fff" : NAVY, marginBottom: 8 }}>{title}</h3>
-          <p style={{ fontSize: 14.5, color: dark ? "#c9d6e6" : "#475569", lineHeight: 1.9, marginBottom: 14 }}>{desc}</p>
+          <h3 style={{ fontSize: 26, fontWeight: 800, fontFamily: "var(--font-display)", color: NAVY, marginBottom: 8 }}>{title}</h3>
+          <p style={{ fontSize: 14.5, color: "#475569", lineHeight: 1.9, marginBottom: 14 }}>{desc}</p>
           <ul className="space-y-2">
             {points.map((p, k) => (
-              <li key={k} className="flex items-start gap-2 text-[13.5px]" style={{ color: dark ? "#dbe7f3" : "#475569" }}>
+              <li key={k} className="flex items-start gap-2 text-[13.5px]" style={{ color: "#475569" }}>
                 <CheckCircle2 size={15} style={{ color: CYAN, marginTop: 3, flexShrink: 0 }} />
                 <span>{p}</span>
               </li>
@@ -1245,15 +1245,15 @@ function MockFrame({ title, children }) {
 
 function PortalCard({ icon: I, title, tag, points }) {
   return (
-    <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)" }}>
+    <div className="rounded-2xl p-6 bg-white border border-slate-200">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1F`, color: CYAN, border: `1px solid ${CYAN}40` }}><I size={22} /></div>
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}40` }}><I size={22} /></div>
         <div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${GOLD}22`, color: GOLD }}>{tag}</span>
-          <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19, color: "#fff", marginTop: 2 }}>{title}</h4>
+          <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 19, color: NAVY, marginTop: 2 }}>{title}</h4>
         </div>
       </div>
-      <ul className="space-y-2 text-slate-200 text-[14px]">
+      <ul className="space-y-2 text-slate-600 text-[14px]">
         {points.map((p, k) => <li key={k} className="flex items-start gap-2"><BadgeCheck size={15} style={{ color: CYAN, marginTop: 3, flexShrink: 0 }} /><span>{p}</span></li>)}
       </ul>
     </div>
@@ -1277,19 +1277,19 @@ function KpiBox({ big, label, accent }) {
 
 function Spec({ icon: I, big, small }) {
   return (
-    <div className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>
+    <div className="rounded-xl p-3 text-center" style={{ background: "#fff", border: "1px solid #e2e8f0" }}>
       <I size={18} style={{ color: CYAN, margin: "0 auto 4px" }} />
-      <div style={{ fontWeight: 800, fontSize: 14, color: "#fff" }}>{big}</div>
-      <div style={{ fontSize: 10, color: "#9fb3c8", marginTop: 2 }}>{small}</div>
+      <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>{big}</div>
+      <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{small}</div>
     </div>
   );
 }
 
 function TrustChip({ icon: I, label, dark }) {
   return (
-    <div className="rounded-xl px-3 py-2.5 flex items-center gap-2" style={{ background: dark ? "rgba(255,255,255,.06)" : "#fff", border: `1px solid ${dark ? "rgba(255,255,255,.12)" : "#e7edf3"}` }}>
+    <div className="rounded-xl px-3 py-2.5 flex items-center gap-2 bg-white border border-slate-200">
       <I size={16} style={{ color: CYAN }} />
-      <span style={{ fontSize: 13, fontWeight: 600, color: dark ? "#fff" : NAVY }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: NAVY }}>{label}</span>
     </div>
   );
 }

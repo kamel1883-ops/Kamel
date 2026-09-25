@@ -3,7 +3,7 @@ import { BarChart3, TrendingDown, UserCheck, CalendarCheck, FileBadge, Building2
 
 const NAVY = "#0A1629";
 const NAVY2 = "#0e1f3a";
-const CYAN = "#00B8D4";
+const CYAN = "#8B5CF6";
 const GOLD = "#C9A961";
 
 export default function ReportsAnalytics({ Section, Heading }) {
