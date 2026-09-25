@@ -1221,10 +1221,10 @@ function Infra() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <TrustChip dark icon={MapPin} label="Saudi location (Riyadh)" />
-          <TrustChip dark icon={ShieldCheck} label="SDAIA compliant" />
-          <TrustChip dark icon={ShieldCheck} label="Cybersecurity Authority" />
-          <TrustChip dark icon={Lock} label="PDPL — Personal Data Protection" />
-          <TrustChip dark icon={Lock} label="Full encryption" />
+          <TrustChip dark icon={ShieldCheck} label="Access controls" />
+          <TrustChip dark icon={ShieldCheck} label="Tenant isolation" />
+          <TrustChip dark icon={Lock} label="Isolated cloud vault" />
+          <TrustChip dark icon={Lock} label="Data encryption" />
           <TrustChip dark icon={ShieldCheck} label="Daily backups" />
           <TrustChip dark icon={Zap} label="Ultra-fast NVMe" />
           <TrustChip dark icon={BadgeCheck} label="99.9% uptime" />
@@ -1233,11 +1233,11 @@ function Infra() {
       <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-slate-700 text-[13px] leading-relaxed">
         <div className="flex items-center gap-2 mb-2" style={{ color: NAVY }}>
           <ShieldCheck size={16} style={{ color: "#16a34a" }} />
-          <span className="font-extrabold text-sm">Saudi data sovereignty & full compliance</span>
+          <span className="font-extrabold text-sm">Saudi hosting & data protection controls</span>
         </div>
         <p style={{ color: "#475569" }}>
-          Jadara is fully hosted inside the Kingdom of Saudi Arabia on <b>Oracle Systems</b> Saudi Arabia servers — your data stays inside the Kingdom and never leaves it.
-          The platform is fully compliant with the Personal Data Protection Law (PDPL), the National <b>Cybersecurity Authority</b> requirements, and <b>SDAIA</b> standards — with full encryption of sensitive data and an isolated cloud vault for identity, banking, and documents.
+          Jadara is hosted inside the Kingdom of Saudi Arabia on <b>Oracle Systems</b> Saudi Arabia servers — under the current hosting setup, and your data stays inside the Kingdom.
+          We provide access controls, encryption, and backups for your data, plus an isolated cloud vault for identity, banking, and documents. We help you organize your requirements; the system does not replace legal review or the requirements of official authorities.
         </p>
       </div>
       {/* Server & hosting provider */}

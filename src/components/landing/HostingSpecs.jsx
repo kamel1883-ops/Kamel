@@ -15,7 +15,7 @@ export default function HostingSpecs({ isAr = true }) {
     ? {
         tag: "بنية تحتية سعودية",
         title: "سيرفر خاص بمنصة جداره — داخل السعودية وبأعلى المواصفات",
-        desc: "تعمل منصة «جداره» على خادم خاص داخل المملكة العربية السعودية (الرياض) عبر مزوّد الخادم والاستضافة شركة Oracle Systems، بما يتوافق مع سياسة الهيئة الوطنية للأمن السيبراني والتزاماً كاملاً مع متطلبات منصة سدايا (SDAIA). خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة تكفي حتى 50,000 موظف من مجموعة شركات مختلفة — دون بطء أو توقف.",
+        desc: "تعمل منصة «جداره» على خادم خاص داخل المملكة العربية السعودية (الرياض) عبر مزوّد الخادم والاستضافة شركة Oracle Systems — وفق إعداد الاستضافة الحالي. خادم واحد يستضيف اشتراكات جميع الشركات والمؤسسات على المنصة، بسعة تكفي حتى 50,000 موظف من مجموعة شركات مختلفة — دون بطء أو توقف.",
         badge: "أعلى المواصفات",
         heading: "خادم جداره الخاص",
         savingTag: "أداء مخصّص",
@@ -30,10 +30,10 @@ export default function HostingSpecs({ isAr = true }) {
         ],
         features: [
           "خادم خاص بمنصة جداره — يستضيف جميع اشتراكات الشركات والمؤسسات",
-          "موقع سعودي (الرياض) عبر Oracle Systems — التزام كامل بالهيئة الوطنية للأمن السيبراني وسدايا (SDAIA)",
+          "موقع سعودي (الرياض) عبر Oracle Systems — بيانات مستضافة داخل المملكة وفق إعداد الاستضافة الحالي",
           "تخزين NVMe سريع — فتح الصفحات والتقارير في أجزاء من الثانية",
-          "نسخ احتياطي يومي تلقائي وحماية كاملة من فقدان البيانات",
-          "تشفير كامل للبيانات أثناء التخزين والنقل (TLS / Isolation)",
+          "نسخ احتياطي يومي تلقائي للبيانات",
+          "ضوابط صلاحيات وتشفير البيانات أثناء التخزين والنقل وعزل المنشآت",
           "أداء ثابت حتى مع نمو إجمالي الموظفين عبر المنشآت المختلفة",
         ],
         capacityLabel: "سعة الخادم",
@@ -44,7 +44,7 @@ export default function HostingSpecs({ isAr = true }) {
     : {
         tag: "Saudi-based infrastructure",
         title: "A dedicated Jadara server — inside Saudi Arabia, top specs",
-        desc: "Jadara runs on a dedicated server inside the Kingdom of Saudi Arabia (Riyadh) via the server & hosting provider Oracle Systems, compliant with the National Cybersecurity Authority policy and fully aligned with SDAIA requirements. A single server hosts all company and institution subscriptions on the platform, sized for up to 50,000 employees across different company groups — no slowdowns, no downtime.",
+        desc: "Jadara runs on a dedicated server inside the Kingdom of Saudi Arabia (Riyadh) via the server & hosting provider Oracle Systems — under the current hosting setup. A single server hosts all company and institution subscriptions on the platform, sized for up to 50,000 employees across different company groups — no slowdowns, no downtime.",
         badge: "Top specs",
         heading: "Jadara dedicated server",
         savingTag: "Dedicated power",
@@ -59,10 +59,10 @@ export default function HostingSpecs({ isAr = true }) {
         ],
         features: [
           "A server dedicated to the Jadara platform — hosting all company and institution subscriptions",
-          "Saudi location (Riyadh) via Oracle Systems — full compliance with the National Cybersecurity Authority and SDAIA",
+          "Saudi location (Riyadh) via Oracle Systems — data hosted inside the Kingdom under the current hosting setup",
           "NVMe storage — pages and reports open in fractions of a second",
-          "Automatic daily backups with full data-loss protection",
-          "Full encryption at rest and in transit (TLS / isolation)",
+          "Automatic daily backups of your data",
+          "Access controls and data encryption at rest and in transit, with tenant isolation",
           "Steady performance even as total employees grow across organizations",
         ],
         capacityLabel: "Server capacity",
@@ -160,7 +160,7 @@ export default function HostingSpecs({ isAr = true }) {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
               <TrustChip icon={MapPin} label={isAr ? "موقع سعودي" : "Saudi location"} />
-              <TrustChip icon={ShieldCheck} label={isAr ? "التزام سدايا" : "SDAIA compliant"} />
+              <TrustChip icon={ShieldCheck} label={isAr ? "ضوابط صلاحيات" : "Access controls"} />
               <TrustChip icon={Lock} label={isAr ? "تشفير كامل" : "Full encryption"} />
               <TrustChip icon={Zap} label={isAr ? "NVMe فائق السرعة" : "Ultra-fast NVMe"} />
             </div>

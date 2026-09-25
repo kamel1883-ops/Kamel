@@ -69,8 +69,8 @@ export const ExaHostLockup = OracleLockup;
 // نص الامتثال: NCA + SDAIA + إقامة البيانات داخل السعودية
 export function ComplianceNote({ dark = false, isAr = true }) {
   const text = isAr
-    ? "مزوّد الخدمة ومركز البيانات حاصلان على التراخيص والاعتمادات الرسمية اللازمة، وهما متوافقان مع الأطر والمعايير ذات العلاقة بهيئة الأمن السيبراني (NCA) وسدايا (SDAIA). والبيانات مستضافة بالكامل داخل المملكة العربية السعودية (Data Residency)."
-    : "The service provider and data center hold the required official licenses and accreditations, and comply with the relevant frameworks and standards of the National Cybersecurity Authority (NCA) and SDAIA. All data is hosted entirely within the Kingdom of Saudi Arabia (Data Residency).";
+    ? "البيانات مستضافة داخل المملكة العربية السعودية وفق إعداد الاستضافة الحالي، مع ضوابط صلاحيات وتشفير ونسخ احتياطي. نساعدك على تنظيم متطلباتك؛ ولا يغني النظام عن المراجعة القانونية أو متطلبات الجهات الرسمية."
+    : "Data is hosted within the Kingdom of Saudi Arabia under the current hosting setup, with access controls, encryption, and backups. We help you organize your requirements; the system does not replace legal review or the requirements of official authorities.";
   const color = dark ? "rgba(255,255,255,.78)" : "#475569";
   return (
     <p className="text-[13px] leading-relaxed m-0" style={{ color }}>
@@ -104,8 +104,8 @@ export function PdplBadge({ isAr = true }) {
       <FileLock2 size={16} className="text-emerald-600 shrink-0" />
       <span className="text-xs font-semibold text-emerald-700 leading-snug">
         {isAr
-          ? "نظام حماية البيانات الشخصية (PDPL) — جداره تحمي بياناتك الشخصية وفق النظام السعودي"
-          : "Personal Data Protection Law (PDPL) — Jadara protects your personal data under Saudi law"}
+          ? "ضوابط صلاحيات وتشفير ونسخ احتياطي للبيانات — وفق إعداد الاستضافة داخل المملكة"
+          : "Access controls, encryption, and backups for your data — under the KSA hosting setup"}
       </span>
     </div>
   );

@@ -1019,10 +1019,10 @@ function Infra() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <TrustChip dark icon={MapPin} label="موقع سعودي (الرياض)" />
-          <TrustChip dark icon={ShieldCheck} label="التزام سدايا (SDAIA)" />
-          <TrustChip dark icon={ShieldCheck} label="هيئة الأمن السيبراني" />
-          <TrustChip dark icon={Lock} label="حماية البيانات الشخصية (PDPL)" />
-          <TrustChip dark icon={Lock} label="تشفير كامل" />
+          <TrustChip dark icon={ShieldCheck} label="ضوابط صلاحيات" />
+          <TrustChip dark icon={ShieldCheck} label="عزل المنشآت" />
+          <TrustChip dark icon={Lock} label="خزنة سحابية معزولة" />
+          <TrustChip dark icon={Lock} label="تشفير البيانات" />
           <TrustChip dark icon={ShieldCheck} label="نسخ احتياطي يومي" />
           <TrustChip dark icon={Zap} label="تخزين فائق السرعة" />
           <TrustChip dark icon={BadgeCheck} label="جاهزية 99.9%" />
@@ -1031,11 +1031,11 @@ function Infra() {
       <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-slate-700 text-[13px] leading-relaxed">
         <div className="flex items-center gap-2 mb-2" style={{ color: NAVY }}>
           <ShieldCheck size={16} style={{ color: "#16a34a" }} />
-          <span className="font-extrabold text-sm">سيادة بيانات سعودية والزام تام</span>
+          <span className="font-extrabold text-sm">استضافة سعودية وضوابط حماية</span>
         </div>
         <p style={{ color: "#475569" }}>
-          تُستضاف منصة جداره بالكامل داخل المملكة العربية السعودية على خوادم شركة <b>Oracle Systems</b> السعودية — بياناتك تبقى داخل المملكة ولا تخرج منها.
-          النظام ملتزم التزاماً تاماً بنظام حماية البيانات الشخصية (PDPL)، ومتطلبات <b>هيئة الأمن السيبراني</b> الوطنية، ومعايير <b>سدايا (SDAIA)</b> — مع تشفير كامل للبيانات الحساسة وخزنة سحابية معزولة للهوية والبنك والوثائق.
+          تُستضاف منصة جداره داخل المملكة العربية السعودية على خوادم شركة <b>Oracle Systems</b> السعودية — وفق إعداد الاستضافة الحالي، وبياناتك تبقى داخل المملكة.
+          نوفر ضوابط صلاحيات وتشفير ونسخ احتياطي للبيانات، وخزنة سحابية معزولة للهوية والبنك والوثائق. نساعدك على تنظيم متطلباتك؛ ولا يغني النظام عن المراجعة القانونية أو متطلبات الجهات الرسمية.
         </p>
       </div>
       {/* مزوّد الخادم والاستضافة */}
