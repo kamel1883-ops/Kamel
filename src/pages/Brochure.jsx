@@ -67,7 +67,9 @@ function Cover() {
       <div style={{ position: "absolute", bottom: -100, left: -60, width: 320, height: 320, borderRadius: "50%", background: `radial-gradient(circle, ${GOLD}18 0%, transparent 70%)` }} />
       <div style={{ position: "relative", minHeight: 880, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div className="flex items-center gap-3">
-          <img src={LOGO_URL} alt="جداره" style={{ height: 68, width: "auto", objectFit: "contain" }} />
+          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 14px", borderRadius: 14, background: "#ffffff", border: "1px solid rgba(212,175,55,.35)", boxShadow: "0 10px 26px -12px rgba(10,22,41,.28)" }}>
+            <img src={LOGO_URL} alt="جداره" style={{ height: 60, width: "auto", objectFit: "contain" }} />
+          </div>
         </div>
 
         <div className="text-center" style={{ margin: "24px 0" }}>
@@ -1130,7 +1132,9 @@ function Closing() {
   return (
     <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 100%)", color: NAVY, padding: "48px" }}>
       <div className="text-center max-w-2xl mx-auto">
-        <img src={LOGO_URL} alt="جداره" style={{ height: 72, width: "auto", objectFit: "contain", margin: "0 auto" }} />
+        <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "12px 20px", borderRadius: 18, background: "#ffffff", border: "1px solid rgba(212,175,55,.35)", boxShadow: "0 14px 32px -14px rgba(10,22,41,.30)" }}>
+          <img src={LOGO_URL} alt="جداره" style={{ height: 72, width: "auto", objectFit: "contain" }} />
+        </div>
         <h2 style={{ fontSize: 30, fontWeight: 800, marginTop: 10, fontFamily: "var(--font-display)", color: NAVY }}>
           لنبدأ رحلتك مع <span style={{ color: CYAN }}>جداره</span>
         </h2>
