@@ -20,20 +20,20 @@ const NAVY = "#0A1629";
 const NAVY2 = "#0e1f3a";
 const CYAN = "#8B5CF6";
 const GOLD = "#C9A961";
+const LOGO_URL = "https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/f7b65511d_Gemini_Generated_Image_bc8r52bc8r52bc8r.jpg";
 
 export default function BrochureEn() {
   return (
     <div dir="ltr" lang="en" className="bg-slate-100 min-h-screen">
-      <div className="no-print sticky top-0 z-50 bg-[#0A1629]/95 backdrop-blur border-b border-white/10">
-        <div className="max-w-[1100px] mx-auto px-4 h-14 flex items-center justify-between text-white">
+      <div className="no-print sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+        <div className="max-w-[1100px] mx-auto px-4 h-14 flex items-center justify-between text-slate-900">
           <div className="flex items-center gap-2">
-            <Crown size={18} style={{ color: GOLD }} />
-            <span className="text-sm font-semibold">Jadara — Platform Profile</span>
+            <img src={LOGO_URL} alt="Jadara" style={{ height: 30, width: "auto", objectFit: "contain" }} />
           </div>
           <div className="flex items-center gap-2">
-            <a href="/brochure" className="inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-white/10 hover:bg-white/15 text-white text-sm font-semibold">العربية</a>
+            <a href="/brochure" className="inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 text-sm font-semibold">العربية</a>
             <button onClick={() => window.print()}
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#8B5CF6] hover:bg-[#7C5CE6] text-white text-sm font-semibold shadow-lg shadow-cyan-500/30">
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#8B5CF6] hover:bg-[#7C5CE6] text-white text-sm font-semibold shadow-md shadow-violet-300/50">
               <Download size={16} /> Export PDF
             </button>
           </div>
@@ -62,29 +62,23 @@ export default function BrochureEn() {
 /* =================== Cover =================== */
 function Cover() {
   return (
-    <div style={{ background: `linear-gradient(160deg, ${NAVY} 0%, ${NAVY2} 55%, #07101f 100%)`, padding: "56px 48px", position: "relative", overflow: "hidden" }}>
+    <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 55%, #EFE7F9 100%)", padding: "56px 48px", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: -80, left: -80, width: 280, height: 280, borderRadius: "50%", background: `radial-gradient(circle, ${CYAN}22 0%, transparent 70%)` }} />
       <div style={{ position: "absolute", bottom: -100, right: -60, width: 320, height: 320, borderRadius: "50%", background: `radial-gradient(circle, ${GOLD}18 0%, transparent 70%)` }} />
       <div style={{ position: "relative", minHeight: 880, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div className="flex items-center gap-3">
-          <div style={{ width: 56, height: 56, borderRadius: 18, background: `linear-gradient(135deg, #000, ${NAVY2})`, boxShadow: `0 0 0 1px ${GOLD}55`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Crown size={28} style={{ color: GOLD }} strokeWidth={1.6} />
-          </div>
-          <div>
-            <div style={{ color: "#fff", fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)" }}>Jadara</div>
-            <div style={{ color: "#9fb3c8", fontSize: 12 }}>Human Resources Management</div>
-          </div>
+          <img src={LOGO_URL} alt="Jadara" style={{ height: 68, width: "auto", objectFit: "contain" }} />
         </div>
 
         <div className="text-center" style={{ margin: "24px 0" }}>
           <div style={{ display: "inline-block", padding: "6px 18px", borderRadius: 999, background: `${CYAN}1A`, border: `1px solid ${CYAN}55`, color: CYAN, fontSize: 12, fontWeight: 700, marginBottom: 18 }}>
             Official Platform Profile
           </div>
-          <h1 style={{ color: "#fff", fontSize: 50, fontWeight: 800, lineHeight: 1.12, fontFamily: "var(--font-display)", marginBottom: 14 }}>
+          <h1 style={{ color: NAVY, fontSize: 50, fontWeight: 800, lineHeight: 1.12, fontFamily: "var(--font-display)", marginBottom: 14 }}>
             Jadara<br/>
             <span style={{ color: CYAN, fontSize: 42 }}>Human Resources Platform</span>
           </h1>
-          <p style={{ color: "#cdd9e6", fontSize: 16, maxWidth: 700, margin: "0 auto", lineHeight: 1.9 }}>
+          <p style={{ color: "#475569", fontSize: 16, maxWidth: 700, margin: "0 auto", lineHeight: 1.9 }}>
             An integrated Saudi system that manages your organization's human capital<br/>
             from check-in to payroll, from onboarding to end of service — in one secure place.
           </p>
@@ -99,20 +93,20 @@ function Cover() {
               "Company Portal", "Employee Self-Service", "Mobile App", "AI Assistant",
               "Organization Settings", "License Alerts", "Settlement Statements", "Self Check-in Integration",
             ].map((b) => (
-              <span key={b} style={{ fontSize: 10.5, fontWeight: 600, color: "#e8eef5", padding: "5px 11px", borderRadius: 999, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>{b}</span>
+              <span key={b} style={{ fontSize: 10.5, fontWeight: 600, color: "#334155", padding: "5px 11px", borderRadius: 999, background: "#ffffff", border: "1px solid #e2e8f0" }}>{b}</span>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10">
-          <div style={{ color: "#fff" }}>
-            <div style={{ fontSize: 12, color: "#9fb3c8", marginBottom: 4 }}>Provided by</div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200">
+          <div style={{ color: NAVY }}>
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Provided by</div>
             <div style={{ fontSize: 16, fontWeight: 800 }}>{PROVIDER.institutionNameEn}</div>
-            <div style={{ fontSize: 11, color: "#9fb3c8", marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
               National Unified Number: <span style={{ fontFamily: "ui-monospace, monospace", direction: "ltr", display: "inline-block" }}>{PROVIDER.unifiedNumber}</span>
             </div>
           </div>
-          <StoreButtons variant="glass" isAr={false} />
+          <StoreButtons variant="light" isAr={false} />
         </div>
       </div>
     </div>
@@ -1336,31 +1330,31 @@ function Pricing() {
 /* =================== Closing =================== */
 function Closing() {
   return (
-    <div style={{ background: `linear-gradient(160deg, ${NAVY}, #07101f)`, color: "#fff", padding: "48px" }}>
+    <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 100%)", color: NAVY, padding: "48px" }}>
       <div className="text-center max-w-2xl mx-auto">
-        <Crown size={32} style={{ color: GOLD }} />
-        <h2 style={{ fontSize: 30, fontWeight: 800, marginTop: 10, fontFamily: "var(--font-display)" }}>
+        <img src={LOGO_URL} alt="Jadara" style={{ height: 72, width: "auto", objectFit: "contain", margin: "0 auto" }} />
+        <h2 style={{ fontSize: 30, fontWeight: 800, marginTop: 10, fontFamily: "var(--font-display)", color: NAVY }}>
           Start your journey with <span style={{ color: CYAN }}>Jadara</span>
         </h2>
-        <p style={{ fontSize: 14, color: "#a9bcd0", marginTop: 10, lineHeight: 1.9 }}>
+        <p style={{ fontSize: 14, color: "#475569", marginTop: 10, lineHeight: 1.9 }}>
           Try the platform free for 30 days and discover how your HR management transforms into one unified, premium digital ecosystem.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-7">
-          <a href="https://wa.me/966594700782" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(139,92,246,.10)", border: "1px solid rgba(139,92,246,.35)" }}>
-            <Phone size={18} style={{ color: CYAN }} />
+          <a href="https://wa.me/966594700782" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: CYAN, border: "1px solid #7C5CE6" }}>
+            <Phone size={18} style={{ color: "#fff" }} />
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">+966 59 470 0782</span>
           </a>
-          <div className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>
+          <div className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 bg-white" style={{ border: "1px solid #e2e8f0" }}>
             <Mail size={18} style={{ color: CYAN }} />
-            <a href="mailto:info@jadara-hr.com" style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">info@jadara-hr.com</a>
+            <a href="mailto:info@jadara-hr.com" style={{ color: NAVY, fontWeight: 700, fontSize: 15 }} dir="ltr">info@jadara-hr.com</a>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-2xl px-5 py-3" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)" }}>
+          <div className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 bg-white" style={{ border: "1px solid #e2e8f0" }}>
             <Globe size={18} style={{ color: CYAN }} />
-            <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }} dir="ltr">jadara-hr.com</span>
+            <span style={{ color: NAVY, fontWeight: 700, fontSize: 15 }} dir="ltr">jadara-hr.com</span>
           </div>
         </div>
         <div className="flex justify-center mt-7">
-          <StoreButtons variant="glass" isAr={false} />
+          <StoreButtons variant="light" isAr={false} />
         </div>
         <div className="flex items-center justify-center gap-3 mt-6">
           <Social icon={Twitter} label="X · Twitter" href="https://x.com/jadaraHRM" />
@@ -1371,13 +1365,13 @@ function Closing() {
           <Social icon={Globe} label="Website" href="https://jadara-hr.com" />
         </div>
         <div className="flex flex-col items-center gap-3 mt-8">
-          <div className="rounded-2xl overflow-hidden bg-black px-5 py-3 flex items-center justify-center">
+          <div className="rounded-2xl overflow-hidden bg-white px-5 py-3 flex items-center justify-center border border-slate-200">
             <img src="https://media.base44.com/images/public/6a74edc8f347046365c2e1a4/e133dacf0_IMG_0423.png" alt="Saudi Vision 2030" style={{ height: 72, width: "auto", objectFit: "contain" }} />
           </div>
-          <div style={{ color: "#a9bcd0", fontSize: 13 }}>In alignment with Saudi Vision 2030</div>
+          <div style={{ color: "#64748b", fontSize: 13 }}>In alignment with Saudi Vision 2030</div>
         </div>
       </div>
-      <div className="mt-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-white/50 text-xs">
+      <div className="mt-10 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-500 text-xs">
         <div>© {new Date().getFullYear()} {PROVIDER.institutionNameEn} — All rights reserved</div>
         <div>National Unified Number: <span style={{ fontFamily: "ui-monospace, monospace", direction: "ltr" }}>{PROVIDER.unifiedNumber}</span></div>
       </div>
@@ -1498,7 +1492,7 @@ function TrustChip({ icon: I, label, dark }) {
 
 function Social({ icon: I, label, href }) {
   const inner = (
-    <span className="inline-flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", fontSize: 12, color: "#cdd9e6" }}>
+    <span className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-white" style={{ border: "1px solid #e2e8f0", fontSize: 12, color: "#475569" }}>
       <I size={14} style={{ color: CYAN }} /> {label}
     </span>
   );
