@@ -8,30 +8,30 @@ import { Button } from "@/components/ui/button";
 import { printSection } from "@/lib/sectionPrint";
 
 const DAY = 1000 * 60 * 60 * 24;
-// شرط التنبيه: الإقامة التي تنتهي خلال 38 يوماً أو أقل (تشمل المنتهية فعلاً كأكثر إلحاحاً).
-const HORIZON = 38 * DAY;
+// شرط التنبيه: الإقامة التي تنتهي خلال 90 يوماً أو أقل (تشمل المنتهية فعلاً كأكثر إلحاحاً) — موحّدة مع نافذة تنبيهات لوحة التحكم.
+const HORIZON = 90 * DAY;
 
 export default function IqamaExpiryReport() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const t = isAr ? {
     title: "تقرير الإقامات القاربت على الانتهاء",
-    subtitle: "حصر كل الإقامات التي تنتهي خلال 38 يوماً أو أقل — للتنبيه وتجديد الإقامة قبل تراكم الغرامات.",
+    subtitle: "حصر كل الإقامات التي تنتهي خلال 90 يوماً أو أقل — للتنبيه وتجديد الإقامة قبل تراكم الغرامات.",
     loading: "جارٍ التحميل...",
-    empty: "لا توجد إقامات موشكة على الانتهاء خلال 38 يوماً ✅",
+    empty: "لا توجد إقامات موشكة على الانتهاء خلال 90 يوماً ✅",
     total: "إجمالي التنبيهات",
     expired: "منتهية فعلاً",
-    soon: "خلال 38 يوماً",
+    soon: "خلال 90 يوماً",
     emp: "الموظف", natId: "الهوية/الإقامة", dept: "الإدارة", pos: "المسمى",
     expiry: "تاريخ انتهاء الإقامة", days: "المتبقي", status: "الحالة",
     expiredBadge: "منتهية", soonBadge: "قاربت", daysUnit: "يوم", na: "—",
     exportPdf: "طباعة PDF",
   } : {
     title: "Iqama Expiry Report",
-    subtitle: "All iqamas expiring within 38 days or less — alert to renew before fines accumulate.",
+    subtitle: "All iqamas expiring within 90 days or less — alert to renew before fines accumulate.",
     loading: "Loading...",
-    empty: "No iqamas expiring within 38 days ✅",
-    total: "Total alerts", expired: "Already expired", soon: "Within 38 days",
+    empty: "No iqamas expiring within 90 days ✅",
+    total: "Total alerts", expired: "Already expired",     soon: "Within 90 days",
     emp: "Employee", natId: "ID/Iqama", dept: "Department", pos: "Position",
     expiry: "Iqama expiry", days: "Days left", status: "Status",
     expiredBadge: "Expired", soonBadge: "Approaching", daysUnit: "days", na: "—",
@@ -53,7 +53,7 @@ export default function IqamaExpiryReport() {
         if (isNaN(d.getTime())) continue;
         const diff = d.getTime() - today.getTime();
         const days = Math.round(diff / DAY);
-        // 38 يوماً أو أقل (يشمل المنتهية فعلاً — قيمة سالبة)
+        // 90 يوماً أو أقل (يشمل المنتهية فعلاً — قيمة سالبة)
         if (diff <= HORIZON) {
           out.push({
             id: e.id, name: e.full_name || "", national_id: e.national_id || "",

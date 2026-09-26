@@ -54,7 +54,7 @@ export default function Dashboard() {
     ]);
     const activePay = await base44.entities.Payroll.filter({ status: "paid" }, "-created_date", 100);
     setStats({
-      employees: emps.length,
+      employees: emps.filter((e) => e.status !== "terminated" && e.status !== "resigned").length,
       onLeave: emps.filter((e) => e.status === "on_leave").length,
       pending: leaves.filter((l) => l.status === "pending").length,
       payroll: activePay.reduce((s, p) => s + (p.net_salary || 0), 0),
