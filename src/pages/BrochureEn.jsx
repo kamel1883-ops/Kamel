@@ -240,7 +240,7 @@ function DashboardOverview() {
 /* =================== Module Showcase =================== */
 function ModuleShowcase() {
   return (
-    <div className="print-group">
+    <div className="print-group grid md:grid-cols-2 gap-4">
       <EmployeesModule />
       <AttendanceModule />
       <PayrollModule />
@@ -256,7 +256,7 @@ function ModuleShowcase() {
       <GovernmentModule />
       <FlightBookingsModule />
       <ComplaintsModule lang="en" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
-      <OtherModules />
+      <div className="md:col-span-2"><OtherModules /></div>
     </div>
   );
 }
