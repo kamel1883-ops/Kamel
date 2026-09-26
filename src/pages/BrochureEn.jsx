@@ -42,18 +42,14 @@ export default function BrochureEn() {
 
       <div className="print-brochure mx-auto" style={{ width: "100%", maxWidth: 1100 }}>
         <Cover />
-        <Vision />
-        <TwoPortals />
+        <div className="print-group"><Vision /><TwoPortals /></div>
         <DashboardOverview />
         <ModuleShowcase />
-        <FlightProvidersSection />
-        <InsuranceProvidersSection lang="en" Section={Section} Heading={Heading} CYAN={CYAN} NAVY={NAVY} />
+        <div className="print-group"><FlightProvidersSection /><InsuranceProvidersSection lang="en" Section={Section} Heading={Heading} CYAN={CYAN} NAVY={NAVY} /></div>
         <ReportsAnalyticsEn />
         <EmployeePortal />
-        <Infra />
-        <Partners />
-        <Pricing />
-        <Closing />
+        <div className="print-group"><Infra /><Partners /></div>
+        <div className="print-group"><Pricing /><Closing /></div>
       </div>
     </div>
   );
@@ -62,10 +58,10 @@ export default function BrochureEn() {
 /* =================== Cover =================== */
 function Cover() {
   return (
-    <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 55%, #EFE7F9 100%)", padding: "56px 48px", position: "relative", overflow: "hidden" }}>
+    <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 55%, #EFE7F9 100%)", padding: "40px 36px", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: -80, left: -80, width: 280, height: 280, borderRadius: "50%", background: `radial-gradient(circle, ${CYAN}22 0%, transparent 70%)` }} />
       <div style={{ position: "absolute", bottom: -100, right: -60, width: 320, height: 320, borderRadius: "50%", background: `radial-gradient(circle, ${GOLD}18 0%, transparent 70%)` }} />
-      <div style={{ position: "relative", minHeight: 880, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div style={{ position: "relative", minHeight: 760, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div className="flex items-center gap-3">
           <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 14px", borderRadius: 14, background: "#ffffff", border: "1px solid rgba(212,175,55,.35)", boxShadow: "0 10px 26px -12px rgba(10,22,41,.28)" }}>
             <img src={LOGO_URL} alt="Jadara" style={{ height: 60, width: "auto", objectFit: "contain" }} />
@@ -244,7 +240,7 @@ function DashboardOverview() {
 /* =================== Module Showcase =================== */
 function ModuleShowcase() {
   return (
-    <>
+    <div className="print-group">
       <EmployeesModule />
       <AttendanceModule />
       <PayrollModule />
@@ -261,7 +257,7 @@ function ModuleShowcase() {
       <FlightBookingsModule />
       <ComplaintsModule lang="en" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
       <OtherModules />
-    </>
+    </div>
   );
 }
 
@@ -1332,7 +1328,7 @@ function Pricing() {
 /* =================== Closing =================== */
 function Closing() {
   return (
-    <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 100%)", color: NAVY, padding: "48px" }}>
+    <div style={{ background: "linear-gradient(160deg, #ffffff 0%, #F5F2FC 100%)", color: NAVY, padding: "34px" }}>
       <div className="text-center max-w-2xl mx-auto">
         <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "12px 20px", borderRadius: 18, background: "#ffffff", border: "1px solid rgba(212,175,55,.35)", boxShadow: "0 14px 32px -14px rgba(10,22,41,.30)" }}>
           <img src={LOGO_URL} alt="Jadara" style={{ height: 72, width: "auto", objectFit: "contain" }} />
@@ -1387,8 +1383,8 @@ function Closing() {
 function Section({ tint, heading, children }) {
   const dark = tint === "dark";
   return (
-    <div style={{ background: dark ? "#F5F2FC" : "#ffffff", color: NAVY, padding: "44px 48px" }}>
-      {heading && <div style={{ marginBottom: 28 }}>{heading}</div>}
+    <div style={{ background: dark ? "#F5F2FC" : "#ffffff", color: NAVY, padding: "28px 36px" }}>
+      {heading && <div style={{ marginBottom: 16 }}>{heading}</div>}
       {children}
     </div>
   );
@@ -1397,29 +1393,29 @@ function Section({ tint, heading, children }) {
 function Heading({ icon, title, sub, dark }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: "rgba(139,92,246,.10)", color: CYAN, border: `1px solid ${CYAN}44` }}>{icon}</div>
-      <h3 style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", color: NAVY, marginBottom: 6 }}>{title}</h3>
-      <p style={{ fontSize: 14, color: "#64748b", maxWidth: 680 }}>{sub}</p>
-      <div style={{ width: 56, height: 3, borderRadius: 999, background: CYAN, marginTop: 12 }} />
+      <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl mb-2" style={{ background: "rgba(139,92,246,.10)", color: CYAN, border: `1px solid ${CYAN}44` }}>{icon}</div>
+      <h3 style={{ fontSize: 24, fontWeight: 800, fontFamily: "var(--font-display)", color: NAVY, marginBottom: 4 }}>{title}</h3>
+      <p style={{ fontSize: 13, color: "#64748b", maxWidth: 680 }}>{sub}</p>
+      <div style={{ width: 48, height: 3, borderRadius: 999, background: CYAN, marginTop: 10 }} />
     </div>
   );
 }
 
 function FeatureBlock({ icon: I, kicker, title, desc, points, mock, dark }) {
   return (
-    <div style={{ background: dark ? "#F5F2FC" : "#ffffff", color: NAVY, padding: "44px 48px" }}>
-      <div className="grid lg:grid-cols-[1fr,1.05fr] gap-8 items-center">
+    <div style={{ background: dark ? "#F5F2FC" : "#ffffff", color: NAVY, padding: "20px 32px" }}>
+      <div className="grid lg:grid-cols-[1fr,1.05fr] gap-5 items-center">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}40` }}><I size={20} /></div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: CYAN }}>{kicker}</span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${CYAN}1A`, color: CYAN, border: `1px solid ${CYAN}40` }}><I size={18} /></div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: CYAN }}>{kicker}</span>
           </div>
-          <h3 style={{ fontSize: 26, fontWeight: 800, fontFamily: "var(--font-display)", color: NAVY, marginBottom: 8 }}>{title}</h3>
-          <p style={{ fontSize: 14.5, color: "#475569", lineHeight: 1.9, marginBottom: 14 }}>{desc}</p>
-          <ul className="space-y-2">
+          <h3 style={{ fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)", color: NAVY, marginBottom: 5 }}>{title}</h3>
+          <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.7, marginBottom: 8 }}>{desc}</p>
+          <ul className="space-y-1">
             {points.map((p, k) => (
-              <li key={k} className="flex items-start gap-2 text-[13.5px]" style={{ color: "#475569" }}>
-                <CheckCircle2 size={15} style={{ color: CYAN, marginTop: 3, flexShrink: 0 }} />
+              <li key={k} className="flex items-start gap-2 text-[12.5px]" style={{ color: "#475569" }}>
+                <CheckCircle2 size={14} style={{ color: CYAN, marginTop: 3, flexShrink: 0 }} />
                 <span>{p}</span>
               </li>
             ))}

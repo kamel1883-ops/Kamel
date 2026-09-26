@@ -314,6 +314,9 @@ main .hover\:bg-slate-100:hover { background-color: hsl(var(--muted)); }
   /* Every brochure section (cover, vision, each module, reports, partners, pricing …) starts on a fresh page and is kept whole — no description bleeds into the next page. */
   .print-brochure > * { break-before: page; break-inside: avoid; page-break-before: always; page-break-inside: avoid; }
   .print-brochure > *:first-child { break-before: avoid; page-break-before: avoid; }
+  /* مجموعات تتدفّق عبر الصفحات: كل عنصر داخلها يبقى سليماً ليشارك عدة عناصر الصفحة نفسها */
+  .print-brochure > .print-group { break-inside: auto; page-break-inside: auto; }
+  .print-brochure > .print-group > * { break-inside: avoid; page-break-inside: avoid; }
   .print-brochure .bg-white { background-color: #ffffff !important; }
   .print-brochure .bg-slate-50 { background-color: #ffffff !important; }
   .no-print { display: none !important; }
