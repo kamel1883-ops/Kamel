@@ -242,7 +242,7 @@ function DashboardOverview() {
 /* =================== استعراض الوحدات بالتفصيل =================== */
 function ModuleShowcase() {
   return (
-    <div className="print-group grid md:grid-cols-2 gap-4">
+    <div className="print-group">
       <EmployeesModule />
       <AttendanceModule />
       <PayrollModule />
@@ -258,7 +258,7 @@ function ModuleShowcase() {
       <GovernmentModule />
       <FlightBookingsModule />
       <ComplaintsModule lang="ar" FeatureBlock={FeatureBlock} MockFrame={MockFrame} CYAN={CYAN} NAVY={NAVY} />
-      <div className="md:col-span-2"><OtherModules /></div>
+      <OtherModules />
     </div>
   );
 }
