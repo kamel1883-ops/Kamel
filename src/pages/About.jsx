@@ -39,7 +39,7 @@ export default function About() {
     badge: "الرؤية خلف جداره", h1: "عن جداره",
     intro: "«جداره» هي منصة سحابية متكاملة لإدارة الموارد البشرية، صُممت خصيصاً للسوق السعودي لتضع بين يدي المنشآت في مكان واحد كل ما تحتاجه لإدارة رأس المال البشري بكفاءة وشمولية والتزام كامل بالأنظمة المحلية.",
     what: "ماذا تقدم المنصة؟",
-    whatBody: "تجمع المنصة إدارة موظفين شاملة من الملفات والوثائق والإقامات والجوازات والتأمين الطبي والحسابات البنكية، إلى نظام حضور وانصراف بالبصمة الذاتية من الجوال (50 متراً) مع استيراد بصمات Excel وCSV، مروراً بإدارة رواتب متكاملة مع احتساب التأمينات الاجتماعية GOSI للسعوديين والمقيمين، وحاسبة نهاية الخدمة وفق نظام العمل السعودي (المواد 74-85)، إضافةً إلى إدارة الأداء والمراجعات والتخطيط التعاقبي، والتحليلات اللحظية، وإدارة أسطول المركبات، ومتابعة كل تراخيص المنشأة الحكومية مع خيار «لا ينطبق»، فضلاً عن تكاملات ذكية مع الجهات الحكومية وأنظمة المحاسبة مثل Odoo وERP.",
+    whatBody: "تجمع المنصة إدارة موظفين شاملة من الملفات والوثائق والإقامات والجوازات والتأمين الطبي والحسابات البنكية، إلى نظام حضور وانصراف بالبصمة الذاتية من الجوال (50 متراً) مع استيراد بصمات Excel وCSV، مروراً بإدارة رواتب متكاملة مع احتساب التأمينات الاجتماعية GOSI للسعوديين والمقيمين، وحاسبة نهاية الخدمة وفق نظام العمل السعودي (المواد 74-85)، إضافةً إلى إدارة الأداء والمراجعات والتخطيط التعاقبي، والتحليلات اللحظية، وإدارة أسطول المركبات، ومتابعة كل تراخيص المنشأة الحكومية مع خيار «لا ينطبق»، فضلاً عن تكاملات ذكية مع أنظمة المحاسبة مثل Odoo وERP، وتوقّع مستقبلي للتكامل مع الجهات ذات الصلة (مقيم، تم).",
     eosH: "نهاية الخدمة وفق نظام العمل السعودي",
     eosBody: "تحتسب المنصة مكافأة نهاية الخدمة بدقة وفق أحكام نظام العمل السعودي، مع تصنيف جميع أسباب الإنهاء وربط كل سبب بمادته النظامية المناسبة لضمان امتثال كامل — من انتهاء العقد وعدم التجديد، إلى الفصل المشروع والاستقالة وترك العمل لأسباب جائزة والقوة القاهرة.",
     whoH: "لمن صُممت جداره؟",
@@ -49,13 +49,13 @@ export default function About() {
     founderB: "الماجستير في إدارة الموارد البشرية", from: " من ", univ: "جامعة بورتسموث — المملكة المتحدة", grade: " بتقدير ", gradeV: "جيد جداً", add: "، إضافةً إلى شهادة ",
     certs: [{ i: GraduationCap, t: "ماجستير — جامعة بورتسموث" }, { i: Award, t: "SHRM-SCP" }, { i: Award, t: "OTHM" }, { i: Award, t: "CMI" }],
     readyT: "جاهز لتجربة جداره؟", readySub: "ابدأ تجربتك المجانية لمدة 30 يوماً بدون بطاقة ائتمان.", ctaContact: "تواصل معنا", ctaStart: "ابدأ الآن",
-    home: "الرئيسية", copy: "© 2030 جداره — جميع الحقوق محفوظة",
+    home: "الرئيسية", copy: "© 2026 جداره — جميع الحقوق محفوظة",
   } : {
     dir: "ltr", navContact: "Contact", navLogin: "Sign in",
     badge: "The vision behind Jadara", h1: "About Jadara",
     intro: "Jadara is an integrated cloud HR platform, designed specifically for the Saudi market to put in one place everything organizations need to manage human capital efficiently, comprehensively, and in full compliance with local regulations.",
     what: "What does the platform offer?",
-    whatBody: "The platform combines comprehensive employee management — profiles, documents, Iqama, passports, health insurance, and bank accounts — with a self‑attendance system (phone check‑in within 50m) plus Excel/CSV punch import, an integrated payroll with GOSI calculation for Saudis and expats, an end‑of‑service calculator per Saudi Labor Law (Articles 74–85), performance and reviews, succession planning, live analytics, fleet management, and tracking of all government licenses with a “not applicable” option — alongside smart integrations with government authorities and accounting systems like Odoo and ERP.",
+    whatBody: "The platform combines comprehensive employee management — profiles, documents, Iqama, passports, health insurance, and bank accounts — with a self‑attendance system (phone check‑in within 50m) plus Excel/CSV punch import, an integrated payroll with GOSI calculation for Saudis and expats, an end‑of‑service calculator per Saudi Labor Law (Articles 74–85), performance and reviews, succession planning, live analytics, fleet management, and tracking of all government licenses with a “not applicable” option — alongside smart integrations with accounting systems like Odoo and ERP, with a future outlook for integration with relevant authorities (Muqeem, Tam).",
     eosH: "End of service per Saudi Labor Law",
     eosBody: "The platform calculates end‑of‑service awards accurately per the Saudi Labor Law, classifying all termination reasons and linking each to its appropriate article for full compliance — from contract expiry and non‑renewal, to lawful dismissal, resignation, leaving for permitted reasons, and force majeure.",
     whoH: "Who is Jadara for?",
@@ -65,7 +65,7 @@ export default function About() {
     founderB: "Master’s in HR Management", from: " from ", univ: "University of Portsmouth — UK", grade: " with merit ", gradeV: "Very Good", add: ", in addition to the ",
     certs: [{ i: GraduationCap, t: "MA — University of Portsmouth" }, { i: Award, t: "SHRM-SCP" }, { i: Award, t: "OTHM" }, { i: Award, t: "CMI" }],
     readyT: "Ready to try Jadara?", readySub: "Start your 30‑day free trial — no credit card.", ctaContact: "Contact us", ctaStart: "Get started",
-    home: "Home", copy: "© 2030 Jadara — All rights reserved",
+    home: "Home", copy: "© 2026 Jadara — All rights reserved",
   };
 
   return (

@@ -13,15 +13,15 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
         pre: "منصة موارد بشرية",
         hi: "ذكية ومتكاملة",
         desc: "موظفون، حضور، رواتب، نهاية خدمة، تأمينات، أداء، تخطيط تعاقبي، تراخيص حكومية، وأنظمة محاسبة — كل ذلك في منصة واحدة فاخرة.",
-        li: ["امتثال كامل للأنظمة السعودية", "تصميم عصري فاخر", "تكاملات حكومية ذكية ومحاسبية"],
-        copy: "© 2030 جداره — جميع الحقوق محفوظة",
+        li: ["امتثال كامل للأنظمة السعودية", "تصميم عصري فاخر", "تكاملات ذكية ومحاسبية (قريباً)"],
+        copy: "© 2026 جداره — جميع الحقوق محفوظة",
       }
     : {
         pre: "A Super, Integrated",
         hi: "HR Platform",
         desc: "Employees, attendance, payroll, end of service, GOSI, performance, succession, government licenses, and accounting — all in one premium platform.",
-        li: ["Full compliance with Saudi regulations", "Premium modern design", "Smart government & accounting integrations"],
-        copy: "© 2030 Jadara — All rights reserved",
+        li: ["Full compliance with Saudi regulations", "Premium modern design", "Smart accounting integrations (soon)"],
+        copy: "© 2026 Jadara — All rights reserved",
       };
 
   return (
