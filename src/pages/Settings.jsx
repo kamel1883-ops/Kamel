@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { MobileSelect, MobileSelectItem } from "@/components/ui/mobile-select";
 import { Image } from "@/components/ui/image";
 import Time24Input from "@/components/ui/time24";
-import { Loader2, Building2, Save, Crosshair, Wallet, Upload, UserCircle } from "lucide-react";
+import { Loader2, Building2, Save, Crosshair, Wallet, Upload, UserCircle, Info } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import WorkplaceMapPicker from "@/components/settings/WorkplaceMapPicker";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ const DAY_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
 const DEFAULT_WORK_DAYS = "0,1,2,3,4,6"; // السبت–الخميس (الجمعة فقط إجازة)
 
 const empty = {
-  name: "", industry: "", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
+  name: "", industry: "", nitaqat_activity: "other", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
   vat_number: "", city: "", country: "المملكة العربية السعودية",
   logo_url: "",
   annual_leave_days: 21, ticket_policy: "yearly",
@@ -40,6 +40,14 @@ export default function SettingsPage() {
     secOrg: "بيانات المنشأة", secOrgNote: "مجلوبة من طلب عرض السعر / التفعيل — يمكنك تعديلها وستُحفظ لمنشأتك.",
     secSub: "بيانات الاشتراك", subCount: "عدد الموظفين", subTier: "الشريحة", subPrice: "السعر السنوي للباقة (ر.س)", subStatus: "الحالة",
     name: "اسم المنشأة", industry: "القطاع / النشاط", responsible: "اسم الشخص المسؤول",
+    nitaqatActivity: "النشاط لحساب نطاقات التوطين",
+    nitaqatNote: "تحديد النشاط الصحيح يعطيك نتائج حقيقية لنطاق منشأتك في «النطاقات» — لذلك اختر النشاط الأدق لمنشأتك.",
+    nitaqatHint: "يُحتسب النطاق من العمالة النشطة فقط (سعوديين ومقيمين)",
+    nitaqatLink: "عرض النطاقات",
+    nitaqatGeneral: "أنشطة عامة", nitaqatIndustrial: "صناعية", nitaqatContracting: "مقاولات",
+    nitaqatServices: "خدمات", nitaqatRetail: "تجزئة", nitaqatTransport: "نقل ومواصلات",
+    nitaqatFood: "خدمات تغذية / تموين", nitaqatRealestate: "عقار", nitaqatAgriculture: "زراعة",
+    nitaqatOther: "أخرى / لا ينطبق",
     phone: "الهاتف", unified: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7)", email: "البريد الإلكتروني",
     vat: "الرقم الضريبي", city: "المدينة",
     secLeave: "سياسات الإجازات والتذاكر", annualDays: "أيام الإجازة السنوية", ticketPolicy: "سياسة التذاكر",
@@ -66,6 +74,14 @@ export default function SettingsPage() {
     secOrg: "Organization data", secOrgNote: "Pulled from your quote / activation request — edit to save them to your organization.",
     secSub: "Subscription data", subCount: "Employees count", subTier: "Tier", subPrice: "Annual package price (SAR)", subStatus: "Status",
     name: "Organization name", industry: "Sector / Activity", responsible: "Responsible person",
+    nitaqatActivity: "Activity for Nitaqat calculation",
+    nitaqatNote: "Selecting the correct activity gives you real results for your Nitaqat band — so pick the most accurate activity for your organization.",
+    nitaqatHint: "The band is computed from active workforce only (Saudis & expats)",
+    nitaqatLink: "View Nitaqat",
+    nitaqatGeneral: "General activities", nitaqatIndustrial: "Industrial", nitaqatContracting: "Contracting",
+    nitaqatServices: "Services", nitaqatRetail: "Retail", nitaqatTransport: "Transport",
+    nitaqatFood: "Food supply", nitaqatRealestate: "Real estate", nitaqatAgriculture: "Agriculture",
+    nitaqatOther: "Other / N/A",
     phone: "Phone", unified: "National Unified Number (10 digits, starts with 7)", email: "Email",
     vat: "VAT number", city: "City",
     secLeave: "Leave & ticket policies", annualDays: "Annual leave days", ticketPolicy: "Ticket policy",
@@ -216,12 +232,33 @@ export default function SettingsPage() {
           <div className="grid grid-cols-2 gap-4">
             <Field label={t.name}><Input value={org.name} onChange={(e) => set("name", e.target.value)} /></Field>
             <Field label={t.industry}><Input value={org.industry} onChange={(e) => set("industry", e.target.value)} /></Field>
+            <Field label={t.nitaqatActivity}>
+              <MobileSelect value={org.nitaqat_activity || "other"} onValueChange={(v) => set("nitaqat_activity", v)} placeholder={t.nitaqatActivity}>
+                <MobileSelectItem value="general">{t.nitaqatGeneral}</MobileSelectItem>
+                <MobileSelectItem value="industrial">{t.nitaqatIndustrial}</MobileSelectItem>
+                <MobileSelectItem value="contracting">{t.nitaqatContracting}</MobileSelectItem>
+                <MobileSelectItem value="services">{t.nitaqatServices}</MobileSelectItem>
+                <MobileSelectItem value="retail">{t.nitaqatRetail}</MobileSelectItem>
+                <MobileSelectItem value="transport">{t.nitaqatTransport}</MobileSelectItem>
+                <MobileSelectItem value="food">{t.nitaqatFood}</MobileSelectItem>
+                <MobileSelectItem value="realestate">{t.nitaqatRealestate}</MobileSelectItem>
+                <MobileSelectItem value="agriculture">{t.nitaqatAgriculture}</MobileSelectItem>
+                <MobileSelectItem value="other">{t.nitaqatOther}</MobileSelectItem>
+              </MobileSelect>
+            </Field>
             <Field label={t.city}><Input value={org.city} onChange={(e) => set("city", e.target.value)} /></Field>
             <Field label={t.responsible}><Input value={org.contact_name} onChange={(e) => set("contact_name", e.target.value)} /></Field>
             <Field label={t.phone}><Input value={org.contact_phone} onChange={(e) => set("contact_phone", e.target.value)} dir="ltr" /></Field>
             <Field label={t.unified}><Input value={org.unified_number} onChange={(e) => set("unified_number", e.target.value.replace(/\D/g, ""))} dir="ltr" /></Field>
             <Field label={t.email}><Input type="email" value={org.contact_email} onChange={(e) => set("contact_email", e.target.value)} dir="ltr" /></Field>
             <Field label={t.vat}><Input value={org.vat_number} onChange={(e) => set("vat_number", e.target.value)} dir="ltr" /></Field>
+          </div>
+          <div className="flex items-start gap-2 -mt-1 rounded-xl bg-violet-50 border border-violet-200 p-3">
+            <Info size={16} className="text-violet-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-violet-800 leading-relaxed">
+              <span className="font-semibold">{t.nitaqatActivity}: </span>{t.nitaqatNote}
+              <span className="block text-violet-600 mt-1">{t.nitaqatHint}</span>
+            </div>
           </div>
           <div className="flex items-center gap-4 pt-2">
             <div className="w-20 h-20 rounded-xl border border-input bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">

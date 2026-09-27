@@ -5,13 +5,15 @@ import StatCard from "@/components/StatCard";
 import PageHeader from "@/components/PageHeader";
 import {
   Users, CalendarCheck, ClipboardList, Wallet, Clock, CheckCircle2, AlertCircle,
-  Bell, IdCard, Shield, Car, FileText, Wrench
+  Bell, IdCard, Shield, Car, FileText, Wrench, Gauge
 } from "lucide-react";
 import { formatCurrency, leaveTypeLabel, statusColors, todayISO } from "@/lib/hr";
 import { cn } from "@/lib/utils";
 import { expirySeverity, daysUntil } from "@/lib/eos";
 import { useI18n } from "@/lib/i18n";
 import PullToRefresh from "@/components/PullToRefresh";
+import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from "recharts";
+import { computeNitaqat } from "@/lib/nitaqat";
 
 export default function Dashboard() {
   const { lang } = useI18n();
@@ -43,6 +45,7 @@ export default function Dashboard() {
   const [todayAttendance, setTodayAttendance] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [org, setOrg] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -52,6 +55,10 @@ export default function Dashboard() {
       base44.entities.Attendance.filter({ date: todayISO() }, "-created_date", 100),
       base44.entities.Vehicle.list("-created_date", 500),
     ]);
+    try {
+      const olist = await base44.entities.Organization.list("-created_date", 1);
+      if (olist && olist[0]) setOrg(olist[0]);
+    } catch (_) {}
     const activePay = await base44.entities.Payroll.filter({ status: "paid" }, "-created_date", 100);
     setStats({
       employees: emps.filter((e) => e.status !== "terminated" && e.status !== "resigned").length,
@@ -106,6 +113,8 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <NitaqatWidget employees={employees} org={org} isAr={isAr} t={t} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl border border-border p-5">
@@ -189,6 +198,52 @@ function MiniStat({ icon: Icon, label, value, tint }) {
   );
 }
 function EmptyRow({ text }) { return <div className="text-center text-sm text-muted-foreground py-6">{text}</div>; }
+
+function NitaqatWidget({ employees, org, isAr, t }) {
+  const active = employees.filter((e) => e.status !== "terminated" && e.status !== "resigned");
+  const saudis = active.filter((e) => e.is_saudi).length;
+  const expats = active.filter((e) => !e.is_saudi).length;
+  const result = computeNitaqat(saudis, expats, org?.nitaqat_activity || "other");
+  const labels = isAr
+    ? { h: "النطاقات (نسبة التوطين)", view: "عرض النطاقات", set: "حدّد النشاط من الإعدادات لنتائج أدق", band: "النطاق الحالي", saudis: "سعوديون", expats: "مقيمون" }
+    : { h: "Nitaqat (Saudization)", view: "View Nitaqat", set: "Set activity in settings for accuracy", band: "Current band", saudis: "Saudis", expats: "Expat" };
+  const gaugeData = [{ name: labels.h, value: result.saudizationPct, fill: result.band.color }];
+  return (
+    <div className="bg-white rounded-2xl border border-border p-5 mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold flex items-center gap-2"><Gauge size={18} className="text-violet-600" /> {labels.h}</h3>
+        <Link to="/nitaqat" className="text-sm text-violet-600 hover:underline">{labels.view} ←</Link>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+        <div className="flex justify-center">
+          <div className="relative w-40 h-24">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadialBarChart innerRadius="68%" outerRadius="100%" data={gaugeData} startAngle={180} endAngle={0}>
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                <RadialBar background={{ fill: "#f1f5f9" }} dataKey="value" cornerRadius={16} />
+              </RadialBarChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
+              <div className="text-2xl font-extrabold tabular-nums" style={{ color: result.band.color }}>{result.saudizationPct}%</div>
+            </div>
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-xs text-muted-foreground mb-1">{labels.band}</div>
+          <div className="inline-flex items-center justify-center px-6 py-2 rounded-2xl border-2 font-extrabold text-lg"
+            style={{ borderColor: result.band.ring, background: result.band.bg, color: result.band.color }}>
+            {isAr ? result.band.ar : result.band.en}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-center">
+          <div className="rounded-xl bg-emerald-50 py-2"><div className="text-xl font-bold text-emerald-700 tabular-nums">{saudis}</div><div className="text-[11px] text-muted-foreground">{labels.saudis}</div></div>
+          <div className="rounded-xl bg-sky-50 py-2"><div className="text-xl font-bold text-sky-700 tabular-nums">{expats}</div><div className="text-[11px] text-muted-foreground">{labels.expats}</div></div>
+        </div>
+      </div>
+      {!org?.nitaqat_activity && <p className="text-[11px] text-amber-600 text-center mt-3">⚠ {labels.set}</p>}
+    </div>
+  );
+}
 function DashboardSkeleton() {
   return (
     <div className="animate-pulse">
