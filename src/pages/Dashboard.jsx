@@ -203,7 +203,7 @@ function NitaqatWidget({ employees, org, isAr, t }) {
   const active = employees.filter((e) => e.status !== "terminated" && e.status !== "resigned");
   const saudis = active.filter((e) => e.is_saudi).length;
   const expats = active.filter((e) => !e.is_saudi).length;
-  const result = computeNitaqat(saudis, expats, org?.nitaqat_activity || "other");
+  const result = computeNitaqat(saudis, expats, org?.nitaqat_activity || "10");
   const labels = isAr
     ? { h: "النطاقات (نسبة التوطين)", view: "عرض النطاقات", set: "حدّد النشاط من الإعدادات لنتائج أدق", band: "النطاق الحالي", saudis: "سعوديون", expats: "مقيمون" }
     : { h: "Nitaqat (Saudization)", view: "View Nitaqat", set: "Set activity in settings for accuracy", band: "Current band", saudis: "Saudis", expats: "Expat" };

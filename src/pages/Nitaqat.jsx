@@ -1,54 +1,65 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, Globe2, Settings2, TrendingUp, AlertTriangle, ShieldCheck, Gauge as GaugeIcon } from "lucide-react";
+import { Users, UserCheck, Globe2, Settings2, TrendingUp, AlertTriangle, ShieldCheck, Info, UserX } from "lucide-react";
 import {
   ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis,
   BarChart, Bar, XAxis, YAxis, ReferenceLine, Tooltip, CartesianGrid, Cell,
 } from "recharts";
-import { BAND_META, computeNitaqat, saudisNeededForSafe, activityByKey } from "@/lib/nitaqat";
+import { BAND_META, computeNitaqat, saudisNeededForSafe } from "@/lib/nitaqat";
+import NitaqatActivitySelect from "@/components/NitaqatActivitySelect";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-
-const EMPTY = { saudis: 0, expats: 0, pct: 0, band: null, activity: null };
 
 export default function Nitaqat() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const { toast } = useToast();
   const t = isAr ? {
-    title: "النطاقات (نسبة التوطين)", subtitle: "تقدير تقريبي لنطاق منشأتك في برنامج نطاقات بناءً على النشاط والعمالة النشطة",
-    setActivity: "حدّد النشاط أولاً", setActivityNote: "لتحصل على نتائج حقيقية لنطاق منشأتك، اختر النشاط الصحيح من الإعدادات في ملف المنشأة.",
-    goSettings: "فتح الإعدادات",
+    title: "النطاقات (نسبة التوطين)", subtitle: "حساب نطاق كيانك وفق معادلة «نطاقات المطور» المعتمدة في الدليل الإجرائي 2026 لوزارة الموارد البشرية",
+    activityLabel: "النشاط المعتمد (رمز النشاط)",
+    activityHint: "ابحث برمز النشاط أو باسمه — من قائمة الأنشاط الـ41 المعتمدة لدى مكتب العمل.",
     saudis: "سعوديون نشطون", expats: "مقيمون نشطون", total: "إجمالي العمالة النشطة", pct: "نسبة التوطين",
-    currentBand: "النطاق الحالي", approximate: "تقدير تقريبي — استرشاد فقط وليس قراراً نهائياً",
-    bandsH: "نسب النطاقات لنشاطك", saudNeeded: "السعوديون المطلوبون للخروج من النطاق الخطر",
+    currentBand: "النطاق الحالي",
+    formulaNote: "تُحتسب حدود النطاقات بمعادلة «نطاقات المطور»: الحد = م × لوغ(إجمالي العمالة) + ث — حيث يختلف (م، ث) حسب النشاط. النتيجة الرسمية المعتمدة تظهر على منصة قوى.",
+    provNote: "الثوابت الموثّقة رسمياً متاحة لنشاط البيع بالجملة والتجزئة العامة؛ باقي الأنشطة تستخدم ثوابت تقديرية حتى استكمال جدول المرفق الأول. النتيجة استرشادية.",
+    microNote: "الكيان متناهي الصغر (أقل من 6 عاملين): يكفي توظيف سعودي واحد (ولو كان المالك) للبقاء في النطاق الأخضر.",
+    bandsH: "نسب النطاقات لنشاطك عند حجم عمالتك الحالي",
+    saudNeeded: "السعوديون المطلوبون للخروج من النطاق الأحمر",
     benefits: "المزايا المتاحة في هذا النطاق", risks: "الإشكاليات والمخاطر",
-    noBenefits: "لا توجد مزايا في هذا النطاق", noRisks: "لا توجد مخاطر تذكر في هذا النطاق",
-    target: "نسبتك", greenLine: "حد الأخضر المنخفض",
+    noBenefits: "لا توجد مزايا في هذا النطاق", noRisks: "لا توجد إشكاليات في هذا النطاق",
+    saved: "تم تحديث النشاط", saving: "جارٍ الحفظ...",
+    tierSafe: "آمن", tierWarn: "تحذير", tierDanger: "خطر",
   } : {
-    title: "Nitaqat (Saudization)", subtitle: "An approximate estimate of your Nitaqat band based on activity and active workforce",
-    setActivity: "Set the activity first", setActivityNote: "To get real Nitaqat results, pick the correct activity from your organization profile settings.",
-    goSettings: "Open settings",
+    title: "Nitaqat (Saudization)", subtitle: "Compute your band using the official Developed-Nitaqat formula from the 2026 MHRSD procedural guide",
+    activityLabel: "Official activity (code)",
+    activityHint: "Search by code or name — from the 41 activities approved by the Ministry of Labor.",
     saudis: "Active Saudis", expats: "Active expats", total: "Total active workforce", pct: "Saudization %",
-    currentBand: "Current band", approximate: "Approximate estimate — guidance only, not a final decision",
-    bandsH: "Nitaqat thresholds for your activity", saudNeeded: "Saudis needed to leave the danger band",
+    currentBand: "Current band",
+    formulaNote: "Band limits use the Developed-Nitaqat formula: Limit = m × ln(total headcount) + c — where (m, c) vary by activity. The official result appears on the Qiwa platform.",
+    provNote: "Officially verified coefficients are available for Wholesale & General Retail; other activities use provisional coefficients pending Annex 1. Result is indicative.",
+    microNote: "Micro entity (under 6 workers): one Saudi hire (even the owner) keeps you in Green.",
+    bandsH: "Nitaqat thresholds for your activity at your current headcount",
+    saudNeeded: "Saudis needed to leave the Red band",
     benefits: "Benefits available in this band", risks: "Issues & risks",
-    noBenefits: "No benefits in this band", noRisks: "No notable risks in this band",
-    target: "Your rate", greenLine: "Low-green threshold",
+    noBenefits: "No benefits in this band", noRisks: "No issues in this band",
+    saved: "Activity updated", saving: "Saving...",
+    tierSafe: "Safe", tierWarn: "Warning", tierDanger: "Danger",
   };
 
   const [org, setOrg] = useState(null);
   const [counts, setCounts] = useState({ saudis: 0, expats: 0 });
   const [loading, setLoading] = useState(true);
+  const [savingActivity, setSavingActivity] = useState(false);
 
   useEffect(() => {
     (async () => {
-      let activityKey = "other";
+      let activityCode = "10";
       try {
         const list = await base44.entities.Organization.list("-created_date", 1);
-        if (list && list[0]) { setOrg(list[0]); activityKey = list[0].nitaqat_activity || "other"; }
+        if (list && list[0]) { setOrg(list[0]); activityCode = list[0].nitaqat_activity || "10"; }
       } catch (_) {}
       try {
         const emps = await base44.entities.Employee.list("-created_date", 1000);
@@ -58,25 +69,35 @@ export default function Nitaqat() {
           expats: active.filter((e) => !e.is_saudi).length,
         });
       } catch (_) {}
+      void activityCode;
       setLoading(false);
     })();
   }, []);
 
   if (loading) return <div className="p-10 text-center text-muted-foreground">{t.subtitle}</div>;
 
-  const activityKey = org?.nitaqat_activity || "other";
-  const result = computeNitaqat(counts.saudis, counts.expats, activityKey);
-  const noActivity = !org?.nitaqat_activity;
+  const activityCode = org?.nitaqat_activity || "10";
+  const result = computeNitaqat(counts.saudis, counts.expats, activityCode);
   const need = saudisNeededForSafe(result);
 
+  const onActivityChange = async (code) => {
+    if (!org?.id) return;
+    setSavingActivity(true);
+    try {
+      const updated = await base44.entities.Organization.update(org.id, { nitaqat_activity: code });
+      setOrg({ ...org, ...updated, nitaqat_activity: code });
+      toast({ title: t.saved });
+    } catch (_) {} finally { setSavingActivity(false); }
+  };
+
+  const th = result.thresholds;
   const bandBars = [
-    { name: isAr ? "أحمر" : "Red", from: 0, to: result.thresholds.red, color: BAND_META.red.color },
-    { name: isAr ? "أصفر" : "Yellow", from: result.thresholds.red, to: result.thresholds.yellow, color: BAND_META.yellow.color },
-    { name: isAr ? "أخضر منخفض" : "Low green", from: result.thresholds.yellow, to: result.thresholds.greenLow, color: BAND_META.green_low.color },
-    { name: isAr ? "أخضر متوسط" : "Med green", from: result.thresholds.greenLow, to: result.thresholds.greenMed, color: BAND_META.green_medium.color },
-    { name: isAr ? "أخضر مرتفع" : "High green", from: result.thresholds.greenMed, to: result.thresholds.greenHigh, color: BAND_META.green_high.color },
-    { name: isAr ? "بلاتيني" : "Platinum", from: result.thresholds.greenHigh, to: 100, color: BAND_META.platinum.color },
-  ].map((b) => ({ ...b, width: b.to - b.from }));
+    { name: isAr ? "أحمر" : "Red", from: 0, to: th.green_low, color: BAND_META.red.color },
+    { name: isAr ? "أخضر منخفض" : "Low green", from: th.green_low, to: th.green_medium, color: BAND_META.green_low.color },
+    { name: isAr ? "أخضر متوسط" : "Medium green", from: th.green_medium, to: th.green_high, color: BAND_META.green_medium.color },
+    { name: isAr ? "أخضر مرتفع" : "High green", from: th.green_high, to: th.platinum, color: BAND_META.green_high.color },
+    { name: isAr ? "بلاتيني" : "Platinum", from: th.platinum, to: 100, color: BAND_META.platinum.color },
+  ].map((b) => ({ ...b, width: Math.max(0, b.to - b.from) }));
 
   const gaugeData = [{ name: t.pct, value: result.saudizationPct, fill: result.band.color }];
 
@@ -84,21 +105,27 @@ export default function Nitaqat() {
     <div dir={isAr ? "rtl" : "ltr"}>
       <PageHeader title={t.title} subtitle={t.subtitle} />
 
-      {noActivity && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 flex items-start gap-3">
-          <Settings2 size={22} className="text-amber-600 shrink-0 mt-0.5" />
+      {/* Activity selector */}
+      <div className="bg-white rounded-2xl border border-border p-5 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex-1">
-            <div className="font-semibold text-amber-800">{t.setActivity}</div>
-            <div className="text-sm text-amber-700 mt-1">{t.setActivityNote}</div>
+            <div className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+              <Settings2 size={14} /> {t.activityLabel}
+            </div>
+            <NitaqatActivitySelect value={activityCode} onChange={onActivityChange} placeholder={t.activityHint} />
           </div>
-          <Link to="/settings"><Button size="sm" variant="outline">{t.goSettings}</Button></Link>
+          <div className="text-xs text-muted-foreground sm:max-w-xs leading-relaxed">
+            {t.activityHint}
+          </div>
         </div>
-      )}
+        <div className="flex items-start gap-2 mt-3 rounded-xl bg-violet-50 border border-violet-200 p-3">
+          <Info size={16} className="text-violet-600 shrink-0 mt-0.5" />
+          <div className="text-xs text-violet-800 leading-relaxed">{t.formulaNote}</div>
+        </div>
+        <p className="text-[11px] text-amber-700 mt-2 leading-relaxed">⚠ {t.provNote}</p>
+      </div>
 
       <div className="bg-white rounded-2xl border border-border p-5 mb-6">
-        <div className="flex items-center gap-2 mb-1 text-xs text-muted-foreground">
-          <GaugeIcon size={14} /> {isAr ? "النشاط المعتمد" : "Selected activity"}: <b className="text-foreground">{isAr ? activityByKey(activityKey).ar : activityByKey(activityKey).en}</b>
-        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           {/* Gauge */}
           <div className="flex flex-col items-center">
@@ -127,9 +154,10 @@ export default function Nitaqat() {
                 {isAr ? result.band.ar : result.band.en}
               </span>
               <span className="text-[11px] mt-1 px-3 py-0.5 rounded-full font-semibold text-white" style={{ background: result.band.color }}>
-                {result.band.tier === "safe" ? (isAr ? "آمن" : "Safe") : result.band.tier === "warning" ? (isAr ? "تحذير" : "Warning") : (isAr ? "خطر" : "Danger")}
+                {result.band.tier === "safe" ? t.tierSafe : result.band.tier === "warning" ? t.tierWarn : t.tierDanger}
               </span>
             </div>
+            {savingActivity && <div className="text-[11px] text-muted-foreground mt-2">{t.saving}</div>}
           </div>
 
           {/* Stats */}
@@ -140,18 +168,26 @@ export default function Nitaqat() {
             <StatBox icon={TrendingUp} label={t.pct} value={`${result.saudizationPct}%`} tint="text-amber-700 bg-amber-50" />
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground text-center mt-4">⚠️ {t.approximate}</p>
+        {result.micro && (
+          <div className="flex items-start gap-2 mt-4 rounded-xl bg-sky-50 border border-sky-200 p-3">
+            <UserX size={16} className="text-sky-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-sky-800 leading-relaxed">{t.microNote}</div>
+          </div>
+        )}
       </div>
 
       {/* Thresholds bar */}
       <div className="bg-white rounded-2xl border border-border p-5 mb-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp size={18} className="text-violet-600" /> {t.bandsH}</h3>
+        <h3 className="font-semibold mb-1 flex items-center gap-2"><TrendingUp size={18} className="text-violet-600" /> {t.bandsH}</h3>
+        <p className="text-[11px] text-muted-foreground mb-4">
+          {isAr ? "الأخضر المنخفض" : "Low Green"}: {th.green_low}% · {isAr ? "المتوسط" : "Medium"}: {th.green_medium}% · {isAr ? "المرتفع" : "High"}: {th.green_high}% · {isAr ? "بلاتيني" : "Platinum"}: {th.platinum}%
+        </p>
         <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={bandBars} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
               <CartesianGrid horizontal={false} stroke="#f1f5f9" />
               <XAxis type="number" domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" width={isAr ? 90 : 110} tick={{ fontSize: 12 }} />
+              <YAxis type="category" dataKey="name" width={isAr ? 90 : 100} tick={{ fontSize: 12 }} />
               <Tooltip
                 formatter={(v, n, p) => [`${p.payload.from}% — ${p.payload.to}%`, isAr ? "النسبة" : "Range"]}
                 contentStyle={{ fontSize: 12 }}

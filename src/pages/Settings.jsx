@@ -10,7 +10,12 @@ import Time24Input from "@/components/ui/time24";
 import { Loader2, Building2, Save, Crosshair, Wallet, Upload, UserCircle, Info } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import WorkplaceMapPicker from "@/components/settings/WorkplaceMapPicker";
+import NitaqatActivitySelect from "@/components/NitaqatActivitySelect";
+import { NITAQAT_ACTIVITIES } from "@/lib/nitaqat";
 import { cn } from "@/lib/utils";
+
+const VALID_CODES = new Set(NITAQAT_ACTIVITIES.map((a) => a.code));
+const normalizeActivity = (v) => (v && VALID_CODES.has(String(v)) ? String(v) : "10");
 
 // ترتيب الأسبوع السعودي: السبت → الجمعة (أرقام getDay: 6=السبت ... 5=الجمعة)
 const WEEK_ORDER = [6, 0, 1, 2, 3, 4, 5];
@@ -19,7 +24,7 @@ const DAY_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
 const DEFAULT_WORK_DAYS = "0,1,2,3,4,6"; // السبت–الخميس (الجمعة فقط إجازة)
 
 const empty = {
-  name: "", industry: "", nitaqat_activity: "other", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
+  name: "", industry: "", nitaqat_activity: "10", contact_name: "", contact_phone: "", unified_number: "", contact_email: "",
   vat_number: "", city: "", country: "المملكة العربية السعودية",
   logo_url: "",
   annual_leave_days: 21, ticket_policy: "yearly",
@@ -41,13 +46,9 @@ export default function SettingsPage() {
     secSub: "بيانات الاشتراك", subCount: "عدد الموظفين", subTier: "الشريحة", subPrice: "السعر السنوي للباقة (ر.س)", subStatus: "الحالة",
     name: "اسم المنشأة", industry: "القطاع / النشاط", responsible: "اسم الشخص المسؤول",
     nitaqatActivity: "النشاط لحساب نطاقات التوطين",
-    nitaqatNote: "تحديد النشاط الصحيح يعطيك نتائج حقيقية لنطاق منشأتك في «النطاقات» — لذلك اختر النشاط الأدق لمنشأتك.",
-    nitaqatHint: "يُحتسب النطاق من العمالة النشطة فقط (سعوديين ومقيمين)",
+    nitaqatNote: "اختر النشاط المعتمد لدى مكتب العمل (من قائمة نطاقات المطور الـ41) بالبحث برمز النشاط أو باسمه، لتُحتسب نسبة التوطين وفق معادلة نطاقات المطور الرسمية.",
+    nitaqatHint: "يُحتسب النطاق من العمالة النشطة فقط (سعوديين ومقيمين)، والنتيجة الرسمية على منصة قوى.",
     nitaqatLink: "عرض النطاقات",
-    nitaqatGeneral: "أنشطة عامة", nitaqatIndustrial: "صناعية", nitaqatContracting: "مقاولات",
-    nitaqatServices: "خدمات", nitaqatRetail: "تجزئة", nitaqatTransport: "نقل ومواصلات",
-    nitaqatFood: "خدمات تغذية / تموين", nitaqatRealestate: "عقار", nitaqatAgriculture: "زراعة",
-    nitaqatOther: "أخرى / لا ينطبق",
     phone: "الهاتف", unified: "الرقم الوطني الموحد للمنشآت (10 خانات تبدأ بـ7)", email: "البريد الإلكتروني",
     vat: "الرقم الضريبي", city: "المدينة",
     secLeave: "سياسات الإجازات والتذاكر", annualDays: "أيام الإجازة السنوية", ticketPolicy: "سياسة التذاكر",
@@ -75,13 +76,9 @@ export default function SettingsPage() {
     secSub: "Subscription data", subCount: "Employees count", subTier: "Tier", subPrice: "Annual package price (SAR)", subStatus: "Status",
     name: "Organization name", industry: "Sector / Activity", responsible: "Responsible person",
     nitaqatActivity: "Activity for Nitaqat calculation",
-    nitaqatNote: "Selecting the correct activity gives you real results for your Nitaqat band — so pick the most accurate activity for your organization.",
-    nitaqatHint: "The band is computed from active workforce only (Saudis & expats)",
+    nitaqatNote: "Pick the official MHRSD activity (one of the 41 Developed-Nitaqat activities) by searching its code or name, so Saudization is computed with the official Nitaqat Mutawar formula.",
+    nitaqatHint: "The band is computed from active workforce only (Saudis & expats); the official result is on the Qiwa platform.",
     nitaqatLink: "View Nitaqat",
-    nitaqatGeneral: "General activities", nitaqatIndustrial: "Industrial", nitaqatContracting: "Contracting",
-    nitaqatServices: "Services", nitaqatRetail: "Retail", nitaqatTransport: "Transport",
-    nitaqatFood: "Food supply", nitaqatRealestate: "Real estate", nitaqatAgriculture: "Agriculture",
-    nitaqatOther: "Other / N/A",
     phone: "Phone", unified: "National Unified Number (10 digits, starts with 7)", email: "Email",
     vat: "VAT number", city: "City",
     secLeave: "Leave & ticket policies", annualDays: "Annual leave days", ticketPolicy: "Ticket policy",
@@ -122,7 +119,7 @@ export default function SettingsPage() {
       let orgData = empty;
       try {
         const list = await base44.entities.Organization.list("-created_date", 1);
-        if (list && list[0]) orgData = { ...empty, ...list[0] };
+        if (list && list[0]) orgData = { ...empty, ...list[0], nitaqat_activity: normalizeActivity(list[0].nitaqat_activity) };
       } catch (_) {}
       // بيانات الاشتراك تُجلب دائماً من المنشأة (Tenant) — تُعرض للعميل للقراءة فقط
       try {
@@ -203,7 +200,7 @@ export default function SettingsPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const payload = { ...org };
+      const payload = { ...org, nitaqat_activity: normalizeActivity(org.nitaqat_activity) };
       payload.workplace_lat = payload.workplace_lat === "" || payload.workplace_lat === null ? null : Number(payload.workplace_lat);
       payload.workplace_lng = payload.workplace_lng === "" || payload.workplace_lng === null ? null : Number(payload.workplace_lng);
       if (org.id) { await base44.entities.Organization.update(org.id, payload); }
@@ -233,18 +230,7 @@ export default function SettingsPage() {
             <Field label={t.name}><Input value={org.name} onChange={(e) => set("name", e.target.value)} /></Field>
             <Field label={t.industry}><Input value={org.industry} onChange={(e) => set("industry", e.target.value)} /></Field>
             <Field label={t.nitaqatActivity}>
-              <MobileSelect value={org.nitaqat_activity || "other"} onValueChange={(v) => set("nitaqat_activity", v)} placeholder={t.nitaqatActivity}>
-                <MobileSelectItem value="general">{t.nitaqatGeneral}</MobileSelectItem>
-                <MobileSelectItem value="industrial">{t.nitaqatIndustrial}</MobileSelectItem>
-                <MobileSelectItem value="contracting">{t.nitaqatContracting}</MobileSelectItem>
-                <MobileSelectItem value="services">{t.nitaqatServices}</MobileSelectItem>
-                <MobileSelectItem value="retail">{t.nitaqatRetail}</MobileSelectItem>
-                <MobileSelectItem value="transport">{t.nitaqatTransport}</MobileSelectItem>
-                <MobileSelectItem value="food">{t.nitaqatFood}</MobileSelectItem>
-                <MobileSelectItem value="realestate">{t.nitaqatRealestate}</MobileSelectItem>
-                <MobileSelectItem value="agriculture">{t.nitaqatAgriculture}</MobileSelectItem>
-                <MobileSelectItem value="other">{t.nitaqatOther}</MobileSelectItem>
-              </MobileSelect>
+              <NitaqatActivitySelect value={org.nitaqat_activity || "10"} onChange={(v) => set("nitaqat_activity", v)} placeholder={t.nitaqatActivity} />
             </Field>
             <Field label={t.city}><Input value={org.city} onChange={(e) => set("city", e.target.value)} /></Field>
             <Field label={t.responsible}><Input value={org.contact_name} onChange={(e) => set("contact_name", e.target.value)} /></Field>
